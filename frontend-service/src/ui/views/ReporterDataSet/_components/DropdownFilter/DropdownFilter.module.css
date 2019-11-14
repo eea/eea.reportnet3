@@ -4,8 +4,7 @@
   font-size: 0.8rem;
   border: 1px solid var(--c-black-200);
   background-color: var(--white);
-  max-height: 40vh;
-  /* min-width: 250px; */
+  min-width: 170px;
   border-radius: 2%;
   z-index: 1000;
   padding: 0 0.8rem;
@@ -15,13 +14,10 @@
   font-size: 0.9rem;
   opacity: 0;
   user-select: none;
-  overflow: auto;
 }
 .dropdownFilter ul {
   list-style: none;
   padding: 0px;
-  margin-right: 4rem;
-  width: max-content;
 }
 
 .dropdownFilter ul li a {

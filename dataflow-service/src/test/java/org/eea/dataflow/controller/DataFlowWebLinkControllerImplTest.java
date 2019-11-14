@@ -167,6 +167,6 @@ public class DataFlowWebLinkControllerImplTest {
     dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
 
     Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(weblink.getId(),
-        weblink.getUrl(), weblink.getDescription());
+        weblink.getDescription(), weblink.getUrl());
   }
 }

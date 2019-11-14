@@ -1,21 +1,30 @@
 package org.eea.dataset.service.impl;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +58,18 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The statistics repository. */
+  @Autowired
+  private StatisticsRepository statisticsRepository;
+
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Gets the data set id by dataflow id.
@@ -176,4 +195,138 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
     return false;
   }
+
+
+
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  @Override
+  public StatisticsVO getStatistics(final Long datasetId)
+      throws EEAException, InstantiationException, IllegalAccessException {
+
+    List<Statistics> statistics = statisticsRepository.findStatisticsByIdDataset(datasetId);
+    return processStatistics(statistics);
+  }
+
+
+  /**
+   * Sets the entity property.
+   *
+   * @param object the object
+   * @param fieldName the field name
+   * @param fieldValue the field value
+   *
+   * @return the boolean
+   */
+  public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
+    Class<?> clazz = object.getClass();
+    while (clazz != null) {
+      try {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+
+        if (field.getType().equals(Long.class)) {
+          field.set(object, Long.valueOf(fieldValue));
+        } else if (field.getType().equals(Boolean.class)) {
+          field.set(object, Boolean.valueOf(fieldValue));
+        } else {
+          field.set(object, fieldValue);
+        }
+
+        return true;
+      } catch (NoSuchFieldException e) {
+        clazz = clazz.getSuperclass();
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    return false;
+  }
+
+
+  /**
+   * Process statistics.
+   *
+   * @param statistics the statistics
+   * @return the statistics VO
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  private StatisticsVO processStatistics(List<Statistics> statistics)
+      throws InstantiationException, IllegalAccessException {
+
+    StatisticsVO stats = new StatisticsVO();
+
+    List<Statistics> statisticsTables = statistics.stream()
+        .filter(s -> StringUtils.isNotBlank(s.getIdTableSchema())).collect(Collectors.toList());
+    List<Statistics> statisticsDataset = statistics.stream()
+        .filter(s -> StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
+
+    Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
+        .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
+
+    // Dataset level stats
+    Class<?> clazzStats = stats.getClass();
+    Object instance = clazzStats.newInstance();
+    statisticsDataset.stream().forEach(s -> {
+      setEntityProperty(instance, s.getStatName(), s.getValue());
+    });
+    stats = (StatisticsVO) instance;
+
+    // Table statistics
+    stats.setTables(new ArrayList<>());
+    for (List<Statistics> listStats : tablesMap.values()) {
+      Class<?> clazzTable = TableStatisticsVO.class;
+      Object instanceTable = clazzTable.newInstance();
+      listStats.stream().forEach(s -> {
+        setEntityProperty(instanceTable, s.getStatName(), s.getValue());
+      });
+      stats.getTables().add((TableStatisticsVO) instanceTable);
+    }
+
+    return stats;
+
+
+  }
+
+
+
+  /**
+   * Gets the global statistics.
+   *
+   * @param dataschemaId the dataschema id
+   * @return the global statistics
+   * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  @Override
+  public List<StatisticsVO> getGlobalStatistics(String dataschemaId)
+      throws EEAException, InstantiationException, IllegalAccessException {
+
+    List<StatisticsVO> statistics = new ArrayList<>();
+
+    List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasetSchema(dataschemaId);
+
+    Map<ReportingDataset, List<Statistics>> statsMap =
+        stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
+
+    statsMap.values().stream().forEach(s -> {
+      try {
+        statistics.add(processStatistics(s));
+      } catch (InstantiationException | IllegalAccessException e) {
+        LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
+      }
+    });
+
+    return statistics;
+  }
+
 }

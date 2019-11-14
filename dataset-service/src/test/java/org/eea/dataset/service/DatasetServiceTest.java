@@ -19,21 +19,18 @@ import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.mapper.TableValueMapper;
-import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.DatasetValidationRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
-import org.eea.dataset.persistence.data.repository.StatisticsRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
@@ -44,6 +41,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -726,154 +724,6 @@ public class DatasetServiceTest {
   }
 
 
-  @Test
-  public void testGetStatisticsSuccess() throws Exception {
-
-    DataSetSchema schema = new DataSetSchema();
-    schema.setTableSchemas(new ArrayList<>());
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-
-    datasetService.getStatistics(1L);
-    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
-  }
-
-
-  @Test
-  public void testGetStatisticsSuccess2() throws Exception {
-    List<DatasetValidation> datasetValidations = new ArrayList<>();
-    List<RecordValidation> recordValidations = new ArrayList<>();
-    List<FieldValidation> fieldValidations = new ArrayList<>();
-    Validation validation = new Validation();
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    Validation validation2 = new Validation();
-    validation2.setLevelError(TypeErrorEnum.WARNING);
-    RecordValidation recordV = new RecordValidation();
-    RecordValidation recordV2 = new RecordValidation();
-    recordV.setValidation(validation);
-    recordV2.setValidation(validation2);
-    DatasetValidation datasetV = new DatasetValidation();
-    datasetV.setValidation(validation);
-    DatasetValidation datasetV2 = new DatasetValidation();
-    datasetV2.setValidation(validation2);
-    FieldValidation fieldV = new FieldValidation();
-    FieldValidation fieldV2 = new FieldValidation();
-    fieldV.setValidation(validation);
-    fieldV2.setValidation(validation2);
-    fieldValidations.add(fieldV);
-    fieldValidations.add(fieldV2);
-    datasetValidations.add(datasetV);
-    datasetValidations.add(datasetV2);
-    recordValidations.add(recordV);
-    recordValidations.add(recordV2);
-
-    datasetValue.setDatasetValidations(datasetValidations);
-    datasetValue.setId(1L);
-    datasetValue.setIdDatasetSchema(new ObjectId().toString());
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
-    table.setNameTableSchema("");
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(table);
-    schema.setTableSchemas(tableSchemas);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-
-    datasetService.getStatistics(1L);
-    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
-  }
-
-  @Test
-  public void testGetStatisticsSuccessSanitizeElse() throws Exception {
-    List<DatasetValidation> datasetValidations = new ArrayList<>();
-    List<RecordValidation> recordValidations = new ArrayList<>();
-    List<FieldValidation> fieldValidations = new ArrayList<>();
-    Validation validation = new Validation();
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    Validation validation2 = new Validation();
-    validation2.setLevelError(TypeErrorEnum.WARNING);
-    RecordValidation recordV = new RecordValidation();
-    recordV.setValidation(validation);
-    DatasetValidation datasetV = new DatasetValidation();
-    datasetV.setValidation(validation);
-    DatasetValidation datasetV2 = new DatasetValidation();
-    datasetV2.setValidation(validation2);
-    FieldValidation fieldV = new FieldValidation();
-    FieldValidation fieldV2 = new FieldValidation();
-    fieldV.setValidation(validation);
-    fieldV2.setValidation(validation2);
-    fieldValidations.add(fieldV);
-    fieldValidations.add(fieldV2);
-    datasetValidations.add(datasetV);
-    datasetValidations.add(datasetV2);
-    recordValidations.add(recordV);
-    tableValue.setIdTableSchema("");
-    tableValue.setRecords(new ArrayList<>());
-    datasetValue.setDatasetValidations(datasetValidations);
-    datasetValue.getTableValues().add(tableValue);
-    datasetValue.getTableValues().add(tableValue);
-    datasetValue.setDatasetValidations(datasetValidations);
-    datasetValue.setId(1L);
-    datasetValue.setIdDatasetSchema(new ObjectId().toString());
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
-    table.setNameTableSchema("");
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(table);
-    schema.setTableSchemas(tableSchemas);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    when(statisticsRepository.findAllStatistics()).thenReturn(new ArrayList<>());
-
-    datasetService.getStatistics(1L);
-    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
-  }
-
-  @Test
-  public void testGetStatisticsSuccess3() throws Exception {
-    List<DatasetValidation> datasetValidations = new ArrayList<>();
-    List<RecordValidation> recordValidations = new ArrayList<>();
-    List<FieldValidation> fieldValidations = new ArrayList<>();
-    Validation validation = new Validation();
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    Validation validation2 = new Validation();
-    validation2.setLevelError(TypeErrorEnum.WARNING);
-    RecordValidation recordV = new RecordValidation();
-    recordV.setValidation(validation);
-    DatasetValidation datasetV = new DatasetValidation();
-    datasetV.setValidation(validation);
-    DatasetValidation datasetV2 = new DatasetValidation();
-    datasetV2.setValidation(validation2);
-    FieldValidation fieldV = new FieldValidation();
-    FieldValidation fieldV2 = new FieldValidation();
-    fieldV.setValidation(validation);
-    fieldV2.setValidation(validation2);
-    fieldValidations.add(fieldV);
-    fieldValidations.add(fieldV2);
-    datasetValidations.add(datasetV);
-    datasetValidations.add(datasetV2);
-    recordValidations.add(recordV);
-    tableValue.setIdTableSchema("");
-    tableValue.setRecords(new ArrayList<>());
-    datasetValue.setDatasetValidations(datasetValidations);
-    datasetValue.getTableValues().add(tableValue);
-    datasetValue.getTableValues().add(tableValue);
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
-    table.setNameTableSchema("");
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(table);
-    schema.setTableSchemas(tableSchemas);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-
-    datasetService.getStatistics(1L);
-    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
-  }
-
 
   @Test
   public void testGetTableFromAnyObjectId() throws Exception {
@@ -1131,5 +981,11 @@ public class DatasetServiceTest {
     Mockito.doNothing().when(fieldRepository).deleteByFieldSchemaId(Mockito.any());
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
     Assert.assertEquals("<id>", datasetService.deleteFieldValues(1L, "<id>"));
+  }
+
+  @Test
+  public void testdeleteAllTableValues() {
+    datasetService.deleteAllTableValues(1L);
+    Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
   }
 }

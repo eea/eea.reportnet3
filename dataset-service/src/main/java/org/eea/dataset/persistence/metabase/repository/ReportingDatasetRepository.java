@@ -19,6 +19,12 @@ public interface ReportingDatasetRepository extends CrudRepository<ReportingData
    */
   List<ReportingDataset> findByDataflowId(Long dataflowId);
 
+  /**
+   * Find by dataset schema.
+   *
+   * @param schemaId the schema id
+   * @return the list
+   */
   List<ReportingDataset> findByDatasetSchema(String schemaId);
 
 }

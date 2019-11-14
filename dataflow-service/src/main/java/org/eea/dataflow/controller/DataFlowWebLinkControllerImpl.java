@@ -141,8 +141,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
     try {
-      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getUrl(),
-          weblink.getDescription());
+      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getDescription(),
+          weblink.getUrl());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
