@@ -501,7 +501,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // Table with out values
     if (null == result.getRecords() || result.getRecords().isEmpty()) {
-      result.setTotalRecords(0L);
+      result.setTotalRecords(totalRecords);
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
