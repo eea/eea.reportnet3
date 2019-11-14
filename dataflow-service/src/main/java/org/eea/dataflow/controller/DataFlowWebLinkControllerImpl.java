@@ -1,8 +1,7 @@
 package org.eea.dataflow.controller;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
 import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.service.DataflowWebLinkService;
@@ -81,9 +80,12 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
-    try {
-      new URL(weblink.getUrl()).toURI();
-    } catch (MalformedURLException | URISyntaxException exception) {
+    Pattern patN = Pattern.compile(
+        "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
+
+    Matcher matN = patN.matcher(weblink.getUrl());
+
+    if (!matN.find()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
@@ -127,9 +129,12 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
-    try {
-      new URL(weblink.getUrl()).toURI();
-    } catch (MalformedURLException | URISyntaxException exception) {
+    Pattern patN = Pattern.compile(
+        "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
+
+    Matcher matN = patN.matcher(weblink.getUrl());
+
+    if (!matN.find()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
