@@ -17,7 +17,7 @@ import { WebLinkService } from 'core/services/WebLink';
 export const WebLinks = ({ isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
-  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
+  const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
@@ -28,7 +28,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
-      .url()
+      .matches(
+        /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
+        resources.messages['urlEror']
+      )
       .required()
   });
 
@@ -52,7 +55,8 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onHideAddEditDialog = () => {
     form.current.resetForm();
-    setIsAddEditDialogVisible(false);
+    setIsAddOrEditWeblinkDialogVisible(false);
+    setWeblinkItem({ id: undefined, description: '', url: '' });
   };
 
   const addRowFooter = (
@@ -62,7 +66,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         label={resources.messages['add']}
         icon="add"
         onClick={() => {
-          setIsAddEditDialogVisible(true);
+          setIsAddOrEditWeblinkDialogVisible(true);
         }}
       />
     </div>
@@ -127,7 +131,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
           onClick={e => {
-            setIsAddEditDialogVisible(true);
+            setIsAddOrEditWeblinkDialogVisible(true);
           }}
         />
         <Button
@@ -204,9 +208,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         modal={true}
         onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
-        visible={isAddEditDialogVisible}>
+        visible={isAddOrEditWeblinkDialogVisible}>
         <Formik
-          enableReinitialize
+          enableReinitialize={true}
           ref={form}
           initialValues={weblinkItem}
           validationSchema={addWeblinkSchema}
@@ -226,7 +230,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                   <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
+                  <Field name="url" type="url" placeholder={resources.messages['url']} value={values.url} />
                   <ErrorMessage name="url" component="div" />
                 </div>
               </fieldset>
