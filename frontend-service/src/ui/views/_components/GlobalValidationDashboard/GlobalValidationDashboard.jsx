@@ -18,8 +18,10 @@ import { DataflowService } from 'core/services/DataFlow';
 
 const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
+  INFO: colors.dashboardInfo,
   WARNING: colors.dashboardWarning,
-  ERROR: colors.dashboardError
+  ERROR: colors.dashboardError,
+  BLOCKER: colors.dashboardBlocker
 };
 
 const GlobalValidationDashboard = ({ datasetSchemaId }) => {
@@ -33,8 +35,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   };
   const [dashboardColors, setDashboardColors] = useState({
     CORRECT: colors.dashboardCorrect,
+    INFO: colors.dashboardInfo,
     WARNING: colors.dashboardWarning,
-    ERROR: colors.dashboardError
+    ERROR: colors.dashboardError,
+    BLOCKER: colors.dashboardBlocker
   });
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);

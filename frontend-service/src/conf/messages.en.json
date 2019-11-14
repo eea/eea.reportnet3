@@ -217,6 +217,7 @@
 		"upload": "Upload",
 		"uploadDataset": "Import data in table ",
 		"url": "Url",
+		"urlEror": "Please enter a valid URL.",
 		"validate": "Validate",
 		"validations": "Validations",
 		"validateDataset": "Validate dataset",
