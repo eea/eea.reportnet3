@@ -92,6 +92,7 @@
 		"documentUploadingGrowlErrorDetail": "Error",
 		"documentUploadingGrowlErrorSummary": "Document upload",
 		"duplicate": "Duplicate",
+		"duplicateSchemaError": "The schema name already exists. Please, choose another one",
 		"duplicateTabHeader": "Duplicate table name",
 		"duplicateTabHeaderError": "The table name already exists in the schema. Please, select another one",
 		"ds": "DS",
@@ -128,6 +129,7 @@
 		"importFromFile": "Import from file",
 		"invalidCharacter": "Invalid character",
 		"info": "Info",
+		"informationPoint": "Information Point",
 		"language": "Language",
 		"levelError": "Level error",
 		"loading": "Loading...",
@@ -204,6 +206,7 @@
 		"subscribeButtonTitle": "Active open dataflows",
 		"subscribeDataflow": "No open dataflow to show",
 		"subscribeThisButton": "Subscribe to this dataflow",
+		"supportingDocuments": "Supporting documents",
 		"title": "Title",
 		"titleHeader": "Reportnet",
 		"titleDashboard": "Error/Warning dashboard",
@@ -225,7 +228,7 @@
 		"validationFilter":"Validation filter",
 		"visibility": "Visibility",
 		"warning": "Warning",
-		"webLinks": "Web Links",
+		"webLinks": "Web links",
 		"webForm": "Webform",
 		"yes": "Yes"
 	}
