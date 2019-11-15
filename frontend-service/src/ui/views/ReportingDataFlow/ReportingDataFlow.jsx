@@ -41,9 +41,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataflowData, setDataflowData] = useState(undefined);
+  const [dataflowData, setDataflowData] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
-  const [datasetSchemaNames, setDatasetSchemaNames] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -54,6 +53,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isDatasetSchemaUpdated, setIsDatasetSchemaUpdated] = useState();
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
@@ -117,7 +117,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         dataflow.designDatasets.map(schema => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
-        setDatasetSchemaNames(datasetSchemaInfo);
+        setIsDatasetSchemaUpdated(datasetSchemaInfo);
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -177,7 +177,12 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     </div>
   );
 
-  const onCreateDataset = () => {
+  const getDeleteSchemaIndex = index => {
+    setDeleteSchemaIndex(index);
+    setDeleteDialogVisible(true);
+  };
+
+  const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
   };
 
@@ -200,11 +205,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const getDeleteSchemaIndex = index => {
-    setDeleteSchemaIndex(index);
-    setDeleteDialogVisible(true);
-  };
-
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -220,10 +220,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
-    const titles = [...datasetSchemaNames];
-    const indexFind = titles.findIndex(e => e.schemaIndex === index);
-    titles[indexFind].schemaName = value;
-    setDatasetSchemaNames(titles);
+    const titles = [...isDatasetSchemaUpdated];
+    titles[index].schemaName = value;
+    setIsDatasetSchemaUpdated(titles);
   };
 
   const showContributorsDialog = () => {
@@ -347,8 +346,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     <BigButton
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
-                      datasetSchemaNames={datasetSchemaNames}
-                      designDatasetSchemas={designDatasetSchemas}
+                      datasetSchemaInfo={isDatasetSchemaUpdated}
                       handleRedirect={() => {
                         handleRedirect(
                           getUrl(
@@ -505,10 +503,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
           <NewDatasetSchemaForm
             dataflowId={match.params.dataflowId}
+            datasetSchemaInfo={isDatasetSchemaUpdated}
             isFormReset={isFormReset}
-            onCreate={onCreateDataset}
+            onCreate={onCreateDatasetSchema}
             onUpdateData={onUpdateData}
-            schema={datasetSchemaNames}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>

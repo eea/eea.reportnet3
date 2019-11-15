@@ -15,7 +15,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 export const BigButton = ({
   caption,
-  datasetSchemaNames,
+  datasetSchemaInfo,
   handleRedirect,
   index,
   isReleased,
@@ -39,8 +39,8 @@ export const BigButton = ({
   }
 
   const checkDuplicates = (header, idx) => {
-    const inmTitles = [...datasetSchemaNames];
-    const repeat = inmTitles.filter(title => title.schemaName.toLowerCase() === header.toLowerCase());
+    const schemas = [...datasetSchemaInfo];
+    const repeat = schemas.filter(title => title.schemaName.toLowerCase() === header.toLowerCase());
     return repeat.length > 0 && idx !== repeat[0].schemaIndex;
   };
 

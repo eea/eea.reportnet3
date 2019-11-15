@@ -14,10 +14,10 @@ import { DataflowService } from 'core/services/DataFlow';
 
 export const NewDatasetSchemaForm = ({
   dataflowId,
+  datasetSchemaInfo,
   isFormReset,
   onCreate,
   onUpdateData,
-  schema,
   setNewDatasetDialog
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -30,10 +30,10 @@ export const NewDatasetSchemaForm = ({
     datasetSchemaName: Yup.string()
       .required(resources.messages['emptyDatasetSchema'])
       .test('', resources.messages['duplicateSchemaError'], value => {
-        if (!isEmpty(schema)) {
-          const inmTitles = [...schema];
-          const isRepeat = inmTitles.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
-          return isRepeat.length === inmTitles.length;
+        if (!isEmpty(datasetSchemaInfo)) {
+          const schemas = [...datasetSchemaInfo];
+          const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
+          return isRepeat.length === schemas.length;
         } else {
           return true;
         }
