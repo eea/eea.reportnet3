@@ -133,7 +133,7 @@ public interface DatasetSchemaController {
    */
   @PutMapping("/{datasetId}/tableSchema/position/{position}")
   void orderTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody TableSchemaVO tableSchemaVO, @PathVariable("position") Integer position);
+      @RequestBody String tableSchemaId, @PathVariable("position") Integer position);
 
   /**
    * Creates the field schema.
