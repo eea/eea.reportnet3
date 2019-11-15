@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -11,30 +11,43 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const BigButton = ({
   caption,
+  datasetSchemaInfo,
   handleRedirect,
-  isNameEditable,
+  index,
   isReleased,
   layout,
   model,
-  onNameEdit,
+  onDuplicateName,
   onSaveError,
   onSaveName,
   placeholder
 }) => {
+  const resources = useContext(ResourcesContext);
+
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
+  const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const newDatasetRef = useRef();
 
-  const onEditorKeyChange = event => {
+  if (isEditEnabled && document.getElementsByClassName('p-inputtext p-component').length > 0) {
+    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+  }
+
+  const checkDuplicates = (header, idx) => {
+    const schemas = [...datasetSchemaInfo];
+    const repeat = schemas.filter(title => title.schemaName.toLowerCase() === header.toLowerCase());
+    return repeat.length > 0 && idx !== repeat[0].schemaIndex;
+  };
+
+  const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
-      if (!isEmpty(buttonsTitle)) {
-        initialValue !== event.target.value
-          ? onSaveName(event.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
-          : onNameEdit();
+      if (buttonsTitle !== '') {
+        onInputSave(event.target.value, index);
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
@@ -45,7 +58,7 @@ export const BigButton = ({
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
-        onNameEdit();
+        setIsEditEnabled(false);
       }
     }
   };
@@ -54,9 +67,48 @@ export const BigButton = ({
     setInitialValue(!isEmpty(value) ? value : initialValue);
   };
 
-  const onUpdateNameValidation = value => {
-    if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
-      setButtonsTitle(value);
+  const onEnableSchemaNameEdit = () => {
+    setIsEditEnabled(true);
+  };
+
+  const designModel =
+    !isUndefined(model) &&
+    model.map(button => {
+      if (button.label === resources.messages['rename']) {
+        button.command = onEnableSchemaNameEdit;
+      }
+      return button;
+    });
+
+  const onInputSave = (value, index) => {
+    const changeTitle = onUpdateName(value, index);
+    if (!isUndefined(changeTitle)) {
+      setInitialValue(changeTitle.originalSchemaName);
+      if (changeTitle.correct) {
+        setIsEditEnabled(false);
+        setInitialValue(changeTitle.originalSchemaName);
+      }
+    }
+  };
+
+  const onUpdateName = (title, index) => {
+    if (!isEmpty(buttonsTitle)) {
+      if (initialValue !== title) {
+        if (checkDuplicates(title, index)) {
+          onDuplicateName();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          return { correct: false, originalSchemaName: initialValue, wrongName: title };
+        } else {
+          onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
+        }
+      } else {
+        setIsEditEnabled(false);
+      }
+    } else {
+      if (!isUndefined(onSaveError)) {
+        onSaveError();
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      }
     }
   };
 
@@ -101,7 +153,7 @@ export const BigButton = ({
       <p className={styles.caption}>{caption}</p>
     </>
   );
-  const designDatasetSchema = model ? (
+  const designDatasetSchema = designModel ? (
     <>
       <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
         <a
@@ -114,38 +166,30 @@ export const BigButton = ({
         </a>
         <DropdownButton
           icon="caretDown"
-          model={model}
+          model={designModel}
           buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
           iconStyle={{ fontSize: '1.8rem' }}
         />
       </div>
-      {!isUndefined(isNameEditable) && isNameEditable ? (
+      {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
+          key={index}
           autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
-            if (!isEmpty(buttonsTitle)) {
-              initialValue !== e.target.value
-                ? onSaveName(e.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
-                : onNameEdit();
-            } else {
-              if (!isUndefined(onSaveError)) {
-                document.getElementsByClassName('p-inputtext p-component')[0].focus();
-                onSaveError();
-              }
-            }
+            onInputSave(e.target.value, index);
           }}
-          onChange={e => onUpdateNameValidation(e.target.value)}
+          onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
             e.preventDefault();
             onEditorValueFocus(e.target.value);
           }}
-          onKeyDown={e => onEditorKeyChange(e)}
+          onKeyDown={e => onEditorKeyChange(e, index)}
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p className={styles.caption} onDoubleClick={onNameEdit}>
+        <p className={styles.caption} onDoubleClick={onEnableSchemaNameEdit}>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
@@ -162,7 +206,7 @@ export const BigButton = ({
             e.preventDefault();
             handleRedirect();
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('file')} />
+          <FontAwesomeIcon icon={AwesomeIcons('info')} />
         </a>
       </div>
       <p className={styles.caption}>{caption}</p>
