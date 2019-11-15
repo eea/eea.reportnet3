@@ -160,7 +160,11 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
 
       {
         <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-          <Column className={isCustodian ? styles.crudColumn : styles.hideColumn} body={documentsEditButtons} />
+          {isCustodian ? (
+            <Column className={styles.crudColumn} body={documentsEditButtons} />
+          ) : (
+            <Column className={styles.hideColumn} />
+          )}
           <Column
             columnResizeMode="expand"
             field="title"
