@@ -171,29 +171,15 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['title']}
-            sortable={true}
           />
           <Column
             field="description"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['description']}
-            sortable={true}
           />
-          <Column
-            field="category"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['category']}
-            sortable={true}
-          />
-          <Column
-            field="language"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['language']}
-            sortable={true}
-          />
+          <Column field="category" filter={false} filterMatchMode="contains" header={resources.messages['category']} />
+          <Column field="language" filter={false} filterMatchMode="contains" header={resources.messages['language']} />
           <Column
             body={downloadTemplate}
             field="url"
