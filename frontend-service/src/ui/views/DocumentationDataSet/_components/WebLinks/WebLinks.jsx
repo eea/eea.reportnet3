@@ -72,6 +72,20 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     </div>
   );
 
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
+
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    }
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    }
+
+    return newUrl;
+  };
+
   const fieldsArray = [
     { field: 'description', header: resources.messages['description'] },
     { field: 'url', header: resources.messages['url'] }
@@ -177,7 +191,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const linkTemplate = rowData => {
     return (
-      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
+      <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
         {rowData.url}
       </a>
     );
