@@ -87,16 +87,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     );
   };
 
-  const DataflowTitle = () => {
-    return (
-      <div className="rep-row">
-        <h1>
-          {resources.messages['dataflow']}: {dataflowName}
-        </h1>
-      </div>
-    );
-  };
-
   return layout(
     <>
       <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />

@@ -17,7 +17,7 @@ import { WebLinkService } from 'core/services/WebLink';
 export const WebLinks = ({ isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
-  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
+  const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
@@ -28,7 +28,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
-      .url()
+      .matches(
+        /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
+        resources.messages['urlEror']
+      )
       .required()
   });
 
@@ -52,7 +55,8 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onHideAddEditDialog = () => {
     form.current.resetForm();
-    setIsAddEditDialogVisible(false);
+    setIsAddOrEditWeblinkDialogVisible(false);
+    setWeblinkItem({ id: undefined, description: '', url: '' });
   };
 
   const addRowFooter = (
@@ -62,11 +66,25 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         label={resources.messages['add']}
         icon="add"
         onClick={() => {
-          setIsAddEditDialogVisible(true);
+          setIsAddOrEditWeblinkDialogVisible(true);
         }}
       />
     </div>
   );
+
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
+
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    }
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    }
+
+    return newUrl;
+  };
 
   const fieldsArray = [
     { field: 'description', header: resources.messages['description'] },
@@ -127,7 +145,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
           onClick={e => {
-            setIsAddEditDialogVisible(true);
+            setIsAddOrEditWeblinkDialogVisible(true);
           }}
         />
         <Button
@@ -173,7 +191,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const linkTemplate = rowData => {
     return (
-      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
+      <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
         {rowData.url}
       </a>
     );
@@ -204,9 +222,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         modal={true}
         onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
-        visible={isAddEditDialogVisible}>
+        visible={isAddOrEditWeblinkDialogVisible}>
         <Formik
-          enableReinitialize
+          enableReinitialize={true}
           ref={form}
           initialValues={weblinkItem}
           validationSchema={addWeblinkSchema}
