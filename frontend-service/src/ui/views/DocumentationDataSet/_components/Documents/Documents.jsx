@@ -120,13 +120,17 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       <Growl ref={growlRef} />
       <Toolbar>
         <div className="p-toolbar-group-left">
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={false}
-            icon={'export'}
-            label={resources.messages['upload']}
-            onClick={() => setIsUploadDialogVisible(true)}
-          />
+          {isCustodian ? (
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'export'}
+              label={resources.messages['upload']}
+              onClick={() => setIsUploadDialogVisible(true)}
+            />
+          ) : (
+            <></>
+          )}
         </div>
         <div className="p-toolbar-group-right">
           <Button
