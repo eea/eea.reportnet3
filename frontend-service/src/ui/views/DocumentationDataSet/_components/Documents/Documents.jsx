@@ -118,47 +118,31 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
   return (
     <>
       <Growl ref={growlRef} />
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={false}
-            icon={'export'}
-            label={resources.messages['upload']}
-            onClick={() => setIsUploadDialogVisible(true)}
-          />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'eye'}
-            label={resources.messages['visibility']}
-            onClick={null}
-          />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'filter'}
-            label={resources.messages['filter']}
-            onClick={null}
-          />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'import'}
-            label={resources.messages['export']}
-            onClick={null}
-          />
-        </div>
-        <div className="p-toolbar-group-right">
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={false}
-            icon={'refresh'}
-            label={resources.messages['refresh']}
-            onClick={() => onLoadDocumentsAndWebLinks()}
-          />
-        </div>
-      </Toolbar>
+      {isCustodian ? (
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'export'}
+              label={resources.messages['upload']}
+              onClick={() => setIsUploadDialogVisible(true)}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onLoadDocumentsAndWebLinks()}
+            />
+          </div>
+        </Toolbar>
+      ) : (
+        <></>
+      )}
+
       <Dialog
         header={resources.messages['upload']}
         className={styles.dialog}
@@ -176,36 +160,26 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
 
       {
         <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-          <Column className={styles.crudColumn} body={documentsEditButtons} />
+          {isCustodian ? (
+            <Column className={styles.crudColumn} body={documentsEditButtons} />
+          ) : (
+            <Column className={styles.hideColumn} />
+          )}
           <Column
             columnResizeMode="expand"
             field="title"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['title']}
-            sortable={true}
           />
           <Column
             field="description"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['description']}
-            sortable={true}
           />
-          <Column
-            field="category"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['category']}
-            sortable={true}
-          />
-          <Column
-            field="language"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['language']}
-            sortable={true}
-          />
+          <Column field="category" filter={false} filterMatchMode="contains" header={resources.messages['category']} />
+          <Column field="language" filter={false} filterMatchMode="contains" header={resources.messages['language']} />
           <Column
             body={downloadTemplate}
             field="url"

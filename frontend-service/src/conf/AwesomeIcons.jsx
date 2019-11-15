@@ -31,7 +31,9 @@ import {
   faPaperclip,
   faAlignJustify,
   faList,
-  faShareAlt
+  faShareAlt,
+  faInfo,
+  faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -184,6 +186,10 @@ export const AwesomeIcons = icon => {
       return faShareAlt;
     case 'comments':
       return faComments;
+    case 'info':
+      return faInfo;
+    case 'infoCircle':
+      return faInfoCircle;
     default:
       return faFileAlt;
   }
