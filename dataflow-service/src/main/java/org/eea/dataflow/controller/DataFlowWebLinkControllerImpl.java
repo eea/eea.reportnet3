@@ -37,6 +37,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+
+  private static final String REGEX_URL =
+      "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$";
   /**
    * The dataflow web link service.
    */
@@ -80,8 +83,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
-    Pattern patN = Pattern.compile(
-        "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
+    Pattern patN = Pattern.compile(REGEX_URL);
 
     Matcher matN = patN.matcher(weblink.getUrl());
 
@@ -129,8 +131,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
-    Pattern patN = Pattern.compile(
-        "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
+    Pattern patN = Pattern.compile(REGEX_URL);
 
     Matcher matN = patN.matcher(weblink.getUrl());
 

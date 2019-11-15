@@ -19,22 +19,35 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class DataFlowWebLinkControllerImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DataFlowWebLinkControllerImplTest {
 
+  /** The data flow web link controller impl. */
   @InjectMocks
   private DataFlowWebLinkControllerImpl dataFlowWebLinkControllerImpl;
 
+  /** The dataflow web link service. */
   @Mock
   private DataflowWebLinkService dataflowWebLinkService;
 
+  /** The weblink VO. */
   private WeblinkVO weblinkVO;
 
+  /** The weblink. */
   private Weblink weblink;
+
+  /** The weblink bad. */
   private Weblink weblinkBad;
 
+  /** The dataflow. */
   private Dataflow dataflow;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     weblinkVO = new WeblinkVO();
@@ -53,15 +66,22 @@ public class DataFlowWebLinkControllerImplTest {
 
     weblinkBad = new Weblink();
     weblinkBad.setDataflow(dataflow);
-    weblinkBad.setUrl("javadesdecero.es");
+    weblinkBad.setUrl("javadesdecero");
     weblinkBad.setDescription("test");
 
     MockitoAnnotations.initMocks(this);
   }
 
+  /** The dataflow web link mapper. */
   @Mock
   private DataflowWebLinkMapper dataflowWebLinkMapper;
 
+  /**
+   * Gets the link exception.
+   *
+   * @return the link exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void getLinkException() throws EEAException {
     doThrow(new EEAException()).when(dataflowWebLinkService).getWebLink(Mockito.anyLong());
@@ -70,6 +90,11 @@ public class DataFlowWebLinkControllerImplTest {
 
 
 
+  /**
+   * Gets the link.
+   *
+   * @return the link
+   */
   @Test
   public void getLink() {
     dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
@@ -88,6 +113,19 @@ public class DataFlowWebLinkControllerImplTest {
         Mockito.any(), Mockito.any());
     dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
   }
+
+
+  /**
+   * Save link bad URL throws EEA exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void saveLinkBadURLThrowsEEAException() throws EEAException {
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+  }
+
 
   /**
    * Save link.
@@ -136,6 +174,19 @@ public class DataFlowWebLinkControllerImplTest {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     doThrow(EEAException.class).when(dataflowWebLinkService).updateWebLink(Mockito.any(),
         Mockito.any(), Mockito.any());
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+  }
+
+
+
+  /**
+   * Update link bad URL throws EEA exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateLinkBadURLThrowsEEAException() throws EEAException {
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
     dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
   }
 
