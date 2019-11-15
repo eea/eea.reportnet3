@@ -118,9 +118,9 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
   return (
     <>
       <Growl ref={growlRef} />
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          {isCustodian ? (
+      {isCustodian ? (
+        <Toolbar>
+          <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
@@ -128,20 +128,21 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
               label={resources.messages['upload']}
               onClick={() => setIsUploadDialogVisible(true)}
             />
-          ) : (
-            <></>
-          )}
-        </div>
-        <div className="p-toolbar-group-right">
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={false}
-            icon={'refresh'}
-            label={resources.messages['refresh']}
-            onClick={() => onLoadDocumentsAndWebLinks()}
-          />
-        </div>
-      </Toolbar>
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onLoadDocumentsAndWebLinks()}
+            />
+          </div>
+        </Toolbar>
+      ) : (
+        <></>
+      )}
+
       <Dialog
         header={resources.messages['upload']}
         className={styles.dialog}
