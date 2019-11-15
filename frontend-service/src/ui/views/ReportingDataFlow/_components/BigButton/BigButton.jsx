@@ -1,7 +1,7 @@
 import React, { useRef, useState, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined, uniqBy } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 

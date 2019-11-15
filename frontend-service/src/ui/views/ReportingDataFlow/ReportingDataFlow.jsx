@@ -53,7 +53,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
-  const [isDatasetSchemaUpdated, setIsDatasetSchemaUpdated] = useState();
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
@@ -61,6 +60,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
+  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   let growlRef = useRef();
 
@@ -117,7 +117,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         dataflow.designDatasets.map(schema => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
-        setIsDatasetSchemaUpdated(datasetSchemaInfo);
+        setUpdatedDatasetSchema(datasetSchemaInfo);
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -220,9 +220,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
-    const titles = [...isDatasetSchemaUpdated];
+    const titles = [...updatedDatasetSchema];
     titles[index].schemaName = value;
-    setIsDatasetSchemaUpdated(titles);
+    setUpdatedDatasetSchema(titles);
   };
 
   const showContributorsDialog = () => {
@@ -346,7 +346,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     <BigButton
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
-                      datasetSchemaInfo={isDatasetSchemaUpdated}
+                      datasetSchemaInfo={updatedDatasetSchema}
                       handleRedirect={() => {
                         handleRedirect(
                           getUrl(
@@ -503,7 +503,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
           <NewDatasetSchemaForm
             dataflowId={match.params.dataflowId}
-            datasetSchemaInfo={isDatasetSchemaUpdated}
+            datasetSchemaInfo={updatedDatasetSchema}
             isFormReset={isFormReset}
             onCreate={onCreateDatasetSchema}
             onUpdateData={onUpdateData}
