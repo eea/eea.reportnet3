@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowWebLinkService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -24,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -132,13 +135,18 @@ public class DataFlowWebLinkControllerImplTest {
    * @return the link exception
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void getLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(resources);
     doThrow(new EEAException()).when(dataflowWebLinkService).getWebLink(Mockito.anyLong());
-    dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
+    try {
+      dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
 
@@ -147,13 +155,15 @@ public class DataFlowWebLinkControllerImplTest {
    * Gets the link.
    *
    * @return the link
+   * @throws EEAException
    */
   @Test
-  public void getLink() {
+  public void getLink() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(resources);
     dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
+    Mockito.verify(dataflowWebLinkService, times(1)).getWebLink(Mockito.anyLong());
   }
 
 
@@ -162,12 +172,17 @@ public class DataFlowWebLinkControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void saveLinkThrowsEEAException() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     doThrow(EEAException.class).when(dataflowWebLinkService).saveWebLink(Mockito.any(),
         Mockito.any(), Mockito.any());
-    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    try {
+      dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
 
@@ -176,10 +191,15 @@ public class DataFlowWebLinkControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void saveLinkBadURLThrowsEEAException() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
-    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    try {
+      dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.URL_FORMAT_INCORRECT, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
 
@@ -201,13 +221,18 @@ public class DataFlowWebLinkControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void removeLinkthrows() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(resources);
     doThrow(new EEAException()).when(dataflowWebLinkService).removeWebLink(Mockito.anyLong());
-    dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+    try {
+      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
 
@@ -231,7 +256,7 @@ public class DataFlowWebLinkControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateLinkThrowsEEAException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
@@ -239,7 +264,12 @@ public class DataFlowWebLinkControllerImplTest {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     doThrow(EEAException.class).when(dataflowWebLinkService).updateWebLink(Mockito.any(),
         Mockito.any(), Mockito.any());
-    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+    try {
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
 
@@ -249,7 +279,7 @@ public class DataFlowWebLinkControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateLinkBadURLThrowsEEAException() throws EEAException {
     Dataflow dataflow = new Dataflow();
     dataflow.setId(1L);
@@ -257,7 +287,12 @@ public class DataFlowWebLinkControllerImplTest {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(resources);
-    dataFlowWebLinkControllerImpl.updateLink(weblinkVOBad);
+    try {
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVOBad);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.URL_FORMAT_INCORRECT, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 
   /**
