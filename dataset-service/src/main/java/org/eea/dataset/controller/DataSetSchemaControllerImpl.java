@@ -279,7 +279,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PutMapping("/{datasetId}/tableSchema/position/{position}")
+  @PutMapping("/{datasetId}/tableSchema/order")
   public void orderTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody OrderVO orderVO) {
     try {
