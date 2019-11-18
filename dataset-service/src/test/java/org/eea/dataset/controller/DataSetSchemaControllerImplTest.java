@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -35,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -407,6 +409,7 @@ public class DataSetSchemaControllerImplTest {
       dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
   }
 
