@@ -400,7 +400,7 @@ public class DataSetSchemaControllerImplTest {
       dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
-      assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
   }
 
