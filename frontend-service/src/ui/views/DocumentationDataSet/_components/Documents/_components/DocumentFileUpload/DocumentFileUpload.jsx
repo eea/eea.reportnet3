@@ -97,7 +97,10 @@ const DocumentFileUpload = ({
                 />
               </div>
               <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
-                <Field name="lang" component="select" value={values.language}>
+                <Field
+                  name="lang"
+                  component="select"
+                  value={config.languages.filter(language => language.name == values.language).map(code => code.code)}>
                   <option value="">{resources.messages.selectLang}</option>
                   {sortBy(config.languages, ['name']).map(language => (
                     <option key={language.code} value={language.code}>
