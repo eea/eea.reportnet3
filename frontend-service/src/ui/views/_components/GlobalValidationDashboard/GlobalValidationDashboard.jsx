@@ -166,7 +166,6 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       labels: labels,
       datasets: datasets
     };
-    console.log(datasetDataObject);
     return datasetDataObject;
   };
 

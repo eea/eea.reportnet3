@@ -1,22 +1,20 @@
 import { isEmpty } from 'lodash';
 
-function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
-  // console.log(tablesData);
-  // console.log(labelsPositionsInFilteredLabelsArray);
+const cleanOutFilteredTableData = (tablesData, labelsPositionsInFilteredLabelsArray) => {
   return tablesData.map(table => ({
     ...table,
     data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),
     totalData: table.totalData.filter((td, i) => !labelsPositionsInFilteredLabelsArray.includes(i))
   }));
-}
+};
 
-function getLabelIndex(originalData, label) {
+const getLabelIndex = (originalData, label) => {
   return originalData.labels.indexOf(label);
-}
+};
 
-function showArrayItem(array, item) {
-  return !array.includes(item);
-}
+const showArrayItem = (array, item) => {
+  return !array.includes(item.toString().toLowerCase());
+};
 
 const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
   if (isEmpty(originalData)) {
@@ -24,21 +22,15 @@ const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgSt
   }
 
   let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
-
-  // console.log(reportersLabelsArr);
-  // console.log(originalData.labels);
   const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
-  // console.log(originalData.labels);
   const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-
-  tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
+  tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr.toString().toLowerCase(), table.label));
   return { labels: labels, datasets: tablesData };
 };
 
 export const filterReducer = (state, { type, payload }) => {
-  console.log(type, payload);
   let reportersLabelsArr = [];
   let tablesIdsArray = [];
   let msgStatusTypesArray = [];
@@ -52,7 +44,6 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'TABLE_CHECKBOX_ON':
       tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
-      console.log(state);
       filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.reporterFilter, state.statusFilter);
 
       return {
@@ -104,7 +95,6 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'STATUS_FILTER_ON':
       msgStatusTypesArray = state.statusFilter.filter(status => status !== payload.msg);
-      console.log('ON: ', msgStatusTypesArray);
 
       filteredTableData = onFilteringData(
         state.originalData,
@@ -120,14 +110,12 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'STATUS_FILTER_OFF':
       msgStatusTypesArray = [...state.statusFilter, payload.msg];
-      console.log('OFF: ', msgStatusTypesArray);
       filteredTableData = onFilteringData(
         state.originalData,
         state.tableFilter,
         state.reporterFilter,
         msgStatusTypesArray
       );
-      console.log(filteredTableData);
       return {
         ...state,
         statusFilter: msgStatusTypesArray,
