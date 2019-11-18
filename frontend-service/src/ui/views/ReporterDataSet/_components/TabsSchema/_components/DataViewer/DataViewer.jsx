@@ -987,7 +987,6 @@ const DataViewer = withRouter(
       filteredColumns.map(column => {
         if (!isUndefined(record.dataRow)) {
           const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          console.log(field);
           initialValues.push([column.field, field.fieldData[column.field]]);
         }
       });
@@ -1216,14 +1215,13 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => {
       if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
-        if (totalFilteredRecords == 0) {
+        if (totalFilteredRecords == 0 && !isFilterValidationsActive) {
           return totalCount();
         } else {
           return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
       }
     };
-
     return (
       <SnapshotContext.Provider>
         <Toolbar className={styles.dataViewerToolbar}>
@@ -1387,7 +1385,7 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+            totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
             value={fetchedData}
             //scrollable={true}
             //frozenWidth="100px"
