@@ -80,6 +80,7 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
+      setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
       if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
         setValidationDashboardData(
           buildDatasetDashboardObject(datasetsValidationStatistics, datasetsValidationStatistics.levelErrors)
@@ -214,6 +215,7 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   }
 
   if (!isEmpty(filterState.data)) {
+    console.log(filterState.data);
     return (
       <div className={`rep-row ${styles.chart_released}`}>
         <FilterList

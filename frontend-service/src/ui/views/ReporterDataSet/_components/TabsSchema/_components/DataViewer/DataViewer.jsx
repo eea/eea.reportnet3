@@ -897,9 +897,9 @@ const DataViewer = withRouter(
       } else {
         validations.forEach(validation => {
           if (validation.levelError === 'INFO') {
-            const xNum = 1;
-            if (xNum > lvlFlag) {
-              lvlFlag = xNum;
+            const iNum = 1;
+            if (iNum > lvlFlag) {
+              lvlFlag = iNum;
               levelError = 'INFO';
             }
           } else if (validation.levelError === 'WARNING') {
@@ -987,6 +987,7 @@ const DataViewer = withRouter(
       filteredColumns.map(column => {
         if (!isUndefined(record.dataRow)) {
           const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+          console.log(field);
           initialValues.push([column.field, field.fieldData[column.field]]);
         }
       });

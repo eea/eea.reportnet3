@@ -338,7 +338,6 @@ const schemaById = async datasetId => {
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
   dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
-
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
