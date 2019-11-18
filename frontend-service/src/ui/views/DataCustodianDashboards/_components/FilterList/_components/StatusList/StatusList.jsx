@@ -7,9 +7,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 const StatusList = ({ color, levelErrors, filterDispatch }) => {
   const resources = useContext(ResourcesContext);
-  console.log(levelErrors);
   let errorListFilters = levelErrors.map(errorLevel => {
-    console.log(errorLevel);
     return (
       <li className={styles.listItem}>
         <input

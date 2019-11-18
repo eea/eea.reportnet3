@@ -215,7 +215,6 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   }
 
   if (!isEmpty(filterState.data)) {
-    console.log(filterState.data);
     return (
       <div className={`rep-row ${styles.chart_released}`}>
         <FilterList
