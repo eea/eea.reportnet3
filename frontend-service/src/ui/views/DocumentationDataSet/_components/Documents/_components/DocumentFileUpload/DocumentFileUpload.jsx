@@ -20,7 +20,7 @@ const DocumentFileUpload = ({
   onGrowlAlert,
   isFormReset,
   setIsUploadDialogVisible,
-  isEditForm
+  isEditForm = false
 }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
@@ -29,8 +29,6 @@ const DocumentFileUpload = ({
     lang: Yup.string().required(),
     uploadFile: Yup.mixed()
       .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
-        const result = isEditForm ? value : !isPlainObject(value);
-        console.log('value', value);
         return !isPlainObject(value);
       })
       .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
@@ -42,18 +40,26 @@ const DocumentFileUpload = ({
     form.current.resetForm();
   }
 
-  const langField = {
-    lang: config.languages
-      .filter(language => language.name == documentInitialValues.language)
-      .map(country => country.code)
+  const buildInitialValue = documentInitialValues => {
+    let initiaValues = { description: '', lang: '', uploadFile: {} };
+    if (isEditForm) {
+      const langField = {
+        lang: config.languages
+          .filter(language => language.name == documentInitialValues.language)
+          .map(country => country.code)
+      };
+      initiaValues = Object.assign({}, documentInitialValues, langField);
+      initiaValues.uploadFile = {};
+    }
+    return initiaValues;
   };
 
-  const initiaValueslWithLangField = Object.assign({}, documentInitialValues, langField);
+  const initiaValueslWithLangField = buildInitialValue(documentInitialValues);
 
   return (
     <Formik
       ref={form}
-      enableReinitialize
+      enableReinitialize={true}
       initialValues={initiaValueslWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {

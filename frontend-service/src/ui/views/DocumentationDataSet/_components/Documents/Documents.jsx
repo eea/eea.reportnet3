@@ -31,6 +31,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isDownloading, setIsDownloading] = useState('');
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isEditForm, setIsEditForm] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
@@ -71,6 +72,11 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
     setDeleteDialogVisible(false);
   };
 
+  const onEditDocument = () => {
+    setIsEditForm(true);
+    setIsUploadDialogVisible(true);
+  };
+
   const documentsEditButtons = rowData => {
     return (
       <div className={styles.documentsEditButtons}>
@@ -79,7 +85,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
           onClick={e => {
-            setIsUploadDialogVisible(true);
+            onEditDocument();
           }}
         />
         <Button
@@ -136,7 +142,10 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
               disabled={false}
               icon={'export'}
               label={resources.messages['upload']}
-              onClick={() => setIsUploadDialogVisible(true)}
+              onClick={() => {
+                setIsEditForm(false);
+                setIsUploadDialogVisible(true);
+              }}
             />
           </div>
           <div className="p-toolbar-group-right">
@@ -163,7 +172,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
           dataflowId={match.params.dataflowId}
           onUpload={onUploadDocument}
           onGrowlAlert={onGrowlAlert}
-          isEditForm={true}
+          isEditForm={isEditForm}
           isFormReset={isFormReset}
           documentInitialValues={documentInitialValues}
           setIsUploadDialogVisible={setIsUploadDialogVisible}
