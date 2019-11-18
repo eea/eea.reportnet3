@@ -5,43 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Gets the id.
- *
- * @return the id
- */
-
-/**
- * Gets the id.
- *
- * @return the id
- */
 @Getter
-
-/**
- * Sets the id.
- *
- * @param id the new id
- */
-
-/**
- * Sets the id.
- *
- * @param id the new id
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class OrderVO implements Serializable {
 

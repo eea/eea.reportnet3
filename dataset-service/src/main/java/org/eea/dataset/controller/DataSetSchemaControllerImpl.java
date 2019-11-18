@@ -223,7 +223,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -244,7 +244,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           tableSchemaVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -289,7 +289,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND, e);
     }
   }
 
@@ -313,7 +313,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       }
       return (response);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
+          e);
     }
   }
 
@@ -339,7 +340,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
     }
   }
 
@@ -364,7 +365,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Delete the fieldSchema from the dataset
       datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
+          e);
     }
   }
 
@@ -387,7 +389,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+          e);
     }
   }
 }

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -438,6 +437,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
         Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
   }
 
   /**
@@ -451,6 +451,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
   }
 
   /**
@@ -478,6 +479,7 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(true);
     Mockito.doNothing().when(datasetService).deleteFieldValues(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.deleteFieldSchema(1L, "");
+    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
   }
 
   /**
@@ -517,6 +519,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.orderFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
     dataSchemaControllerImpl.orderFieldSchema(1L, new OrderVO());
+    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
   }
 
   /**
