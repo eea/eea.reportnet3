@@ -14,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -356,25 +357,44 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+
   /**
    * Restore data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
    * @param datasetType the dataset type
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
-  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot,
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       TypeDatasetEnum datasetType) throws SQLException, IOException {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
+    Statement stmt = null;
     try {
       con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
           conexion.getPassword());
+      con.setAutoCommit(false);
+      String sql = "";
+
+      switch (datasetType) {
+        case REPORTING:
+          sql = "DELETE FROM dataset_" + idReportingDataset
+              + ".record_value WHERE dataset_partition_id=" + partitionId;
+          break;
+        case DESIGN:
+          sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
+          break;
+      }
+      stmt = con.createStatement();
+      LOG.info("Deleting previous data");
+      stmt.executeUpdate(sql);
+
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
@@ -385,9 +405,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
               idReportingDataset, "_table_TableValue.snap");
 
-          String copyTableRecord = "COPY dataset_" + idReportingDataset
+          String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-          copyFromFile(copyTableRecord, nameFileTableValue, cm);
+          copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
       }
       // Record value
@@ -406,12 +426,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
 
+
     } catch (Exception e) {
       if (null != con) {
+        LOG_ERROR.error("Error restoring the snapshot data. Rollback");
         con.rollback();
       }
     } finally {
+      if (null != stmt) {
+        stmt.close();
+      }
       if (null != con) {
+        con.commit();
         con.close();
       }
     }
@@ -445,8 +471,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyManager.copyIn(query, inputStream);
 
     } catch (PSQLException e) {
-      LOG.error("Error restoring the file {} executing query {}. Restoring snapshot continues",
-          fileName, query, e);
+      LOG_ERROR.error(
+          "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
+          query, e);
     } finally {
       inputStream.close();
     }
