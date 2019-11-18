@@ -122,12 +122,12 @@ public interface DatasetSchemaService {
    * Order table schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaVO the table schema VO
+   * @param tableSchemaId the table schema id
    * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception
    */
-  Boolean orderTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO, Integer position)
+  Boolean orderTableSchema(String datasetSchemaId, String tableSchemaId, Integer position)
       throws EEAException;
 
   /**
