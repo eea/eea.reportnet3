@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import com.google.common.collect.Lists;
 
 /**
@@ -566,7 +565,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param idSnapshot the id snapshot
    */
   @Override
-  @org.springframework.transaction.annotation.Transactional(propagation = Propagation.NESTED)
+  @Transactional
   public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset,
       Long idSnapshot) {
     schemasRepository.deleteDatasetSchemaById(idSchema);
