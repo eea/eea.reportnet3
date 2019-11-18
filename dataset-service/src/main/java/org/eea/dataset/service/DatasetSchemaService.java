@@ -42,7 +42,7 @@ public interface DatasetSchemaService {
 
   /**
    * Gets the data schema by id dataset.
-   * 
+   *
    * @param addRules the add rules
    * @param datasetId the dataset id
    * @return the data schema by id flow
@@ -141,8 +141,7 @@ public interface DatasetSchemaService {
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
-      throws EEAException;
+  String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
 
   /**
    * Update field schema.

@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -390,12 +392,16 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createFieldSchemaTest2() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(false);
-    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any())).thenReturn("");
+    try {
+      dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
   }
 
   /**
@@ -407,8 +413,8 @@ public class DataSetSchemaControllerImplTest {
   public void createFieldSchemaTest3() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(true);
-    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+        .thenReturn("FieldId");
+    assertEquals("FieldId", dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO()));
   }
 
   /**
