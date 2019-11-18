@@ -302,7 +302,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PostMapping(value = "/{datasetId}/fieldSchema/", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
@@ -326,7 +326,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PutMapping("/{datasetId}/fieldSchema/")
+  @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
@@ -383,8 +383,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody FieldSchemaVO fieldSchemaVO, @PathVariable("position") Integer position) {
     try {
       // Update the fieldSchema from the datasetSchema
-      if (!dataschemaService.orderFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          fieldSchemaVO, position)) {
+      if (Boolean.FALSE.equals(dataschemaService.orderFieldSchema(
+          dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO, position))) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {

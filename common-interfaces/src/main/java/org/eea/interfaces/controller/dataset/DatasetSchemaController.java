@@ -142,7 +142,7 @@ public interface DatasetSchemaController {
    * @param fieldSchemaVO the field schema VO
    * @return
    */
-  @PostMapping(value = "/{datasetId}/fieldSchema/", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
@@ -152,7 +152,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
    */
-  @PutMapping("/{datasetId}/fieldSchema/")
+  @PutMapping("/{datasetId}/fieldSchema")
   void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
