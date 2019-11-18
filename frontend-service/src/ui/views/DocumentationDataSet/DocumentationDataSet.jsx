@@ -74,7 +74,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['informationPoint'] }
+      { label: resources.messages['dataflowHelp'] }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
@@ -107,7 +107,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   if (documents) {
     return layout(
       <React.Fragment>
-        <Title title={resources.messages['informationPoint']} icon="info" />
+        <Title title={resources.messages['dataflowHelp']} icon="questionCircle" />
         <TabView>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents

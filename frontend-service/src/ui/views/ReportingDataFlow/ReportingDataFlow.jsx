@@ -329,7 +329,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                caption={resources.messages['informationPoint']}
+                caption={resources.messages['dataflowHelp']}
                 handleRedirect={() =>
                   handleRedirect(
                     getUrl(

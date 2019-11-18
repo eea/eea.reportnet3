@@ -32,13 +32,15 @@ import {
   faAlignJustify,
   faList,
   faInfo,
-  faInfoCircle
+  faInfoCircle,
+  faQuestion
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
   faSquare as farSquareRegular,
   faCheckSquare as faCheckSquareRegular,
-  faCalendarAlt
+  faCalendarAlt,
+  faQuestionCircle as farQuestionCircle
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -181,6 +183,10 @@ export const AwesomeIcons = icon => {
       return faInfo;
     case 'infoCircle':
       return faInfoCircle;
+    case 'question':
+      return faQuestion;
+    case 'questionCircle':
+      return farQuestionCircle;
     default:
       return faFileAlt;
   }
