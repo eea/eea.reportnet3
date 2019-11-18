@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -40,23 +41,33 @@ import org.springframework.web.server.ResponseStatusException;
 public class DataSetSchemaControllerImplTest {
 
 
-  /** The data schema controller impl. */
+  /**
+   * The data schema controller impl.
+   */
   @InjectMocks
   private DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Mock
   private DataschemaServiceImpl dataschemaService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Mock
   private DatasetService datasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
@@ -93,6 +104,7 @@ public class DataSetSchemaControllerImplTest {
    * Gets the dataset schema id test.
    *
    * @return the dataset schema id test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -106,6 +118,7 @@ public class DataSetSchemaControllerImplTest {
    * Gets the dataset schema id exception test.
    *
    * @return the dataset schema id exception test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
@@ -343,7 +356,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
-    dataSchemaControllerImpl.orderTableSchema(1L, new TableSchemaVO(), 1);
+    dataSchemaControllerImpl.orderTableSchema(1L, "", 1);
   }
 
   /**
@@ -356,7 +369,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
-    dataSchemaControllerImpl.orderTableSchema(1L, new TableSchemaVO(), 1);
+    dataSchemaControllerImpl.orderTableSchema(1L, "", 1);
   }
 
   /**
