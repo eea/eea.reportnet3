@@ -18,6 +18,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 import { WebLinks } from './_components/WebLinks';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -28,6 +29,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
+  const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,10 +51,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       );
     }
   }, [user]);
-
-  useEffect(() => {
-    onLoadDocumentsAndWebLinks();
-  }, []);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -77,6 +75,20 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       { label: resources.messages['dataflowHelp'] }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
+
+  useEffect(() => {
+    try {
+      getDataflowName();
+      onLoadDocumentsAndWebLinks();
+    } catch (error) {
+      console.error(error.response);
+    }
+  }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
 
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
@@ -107,7 +119,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   if (documents) {
     return layout(
       <React.Fragment>
-        <Title title={resources.messages['dataflowHelp']} icon="questionCircle" />
+        <Title
+          title={`${resources.messages['dataflowHelp']} - ${resources.messages['dataflow']}: ${dataflowName}`}
+          icon="questionCircle"
+        />
         <TabView>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
