@@ -1,6 +1,7 @@
-package org.eea.security.jwt.expression;
+package org.eea.security.jwt.configuration;
 
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.security.jwt.expression.EeaMethodSecurityExpressionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
