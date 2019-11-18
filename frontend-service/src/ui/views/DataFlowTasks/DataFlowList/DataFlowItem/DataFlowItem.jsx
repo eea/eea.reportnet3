@@ -15,9 +15,16 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataflowService } from 'core/services/DataFlow';
 import { random } from 'node-forge';
 
-export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
+export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => {
   const resources = useContext(ResourcesContext);
-  const status = ['notStarted', 'delivered', 'drafted'][Math.floor(Math.random() * 3)];
+  //position must be removed in def implementation
+  const statusArray = ['notStarted', 'delivered', 'drafted'];
+  let status = 1;
+  if (position < 4) {
+    status = statusArray[position - 1];
+  } else {
+    status = statusArray[0];
+  }
 
   const onAccept = async () => {
     try {
