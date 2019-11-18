@@ -29,7 +29,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     description: Yup.string().required(),
     url: Yup.string()
       .matches(
-        /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
+        /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
         resources.messages['urlEror']
       )
       .required()
@@ -71,6 +71,20 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       />
     </div>
   );
+
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
+
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    }
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    }
+
+    return newUrl;
+  };
 
   const fieldsArray = [
     { field: 'description', header: resources.messages['description'] },
@@ -177,7 +191,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const linkTemplate = rowData => {
     return (
-      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
+      <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
         {rowData.url}
       </a>
     );

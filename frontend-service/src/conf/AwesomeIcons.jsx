@@ -30,7 +30,9 @@ import {
   faAt,
   faPaperclip,
   faAlignJustify,
-  faList
+  faList,
+  faInfo,
+  faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -175,6 +177,10 @@ export const AwesomeIcons = icon => {
       return faAlignJustify;
     case 'url':
       return faGlobeEurope;
+    case 'info':
+      return faInfo;
+    case 'infoCircle':
+      return faInfoCircle;
     default:
       return faFileAlt;
   }
