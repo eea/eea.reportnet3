@@ -26,6 +26,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [documentInitialValues, setDocumentInitialValues] = useState({});
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isDownloading, setIsDownloading] = useState('');
@@ -78,7 +79,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
           onClick={e => {
-            //setIsAddOrEditWeblinkDialogVisible(true);
+            setIsUploadDialogVisible(true);
           }}
         />
         <Button
@@ -162,13 +163,24 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
           dataflowId={match.params.dataflowId}
           onUpload={onUploadDocument}
           onGrowlAlert={onGrowlAlert}
+          isEditForm={true}
           isFormReset={isFormReset}
+          documentInitialValues={documentInitialValues}
           setIsUploadDialogVisible={setIsUploadDialogVisible}
         />
       </Dialog>
 
       {
-        <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
+        <DataTable
+          value={documents}
+          autoLayout={true}
+          paginator={true}
+          rowsPerPageOptions={[5, 10, 100]}
+          rows={10}
+          selectionMode="single"
+          onRowSelect={e => {
+            setDocumentInitialValues(Object.assign({}, e.data));
+          }}>
           {isCustodian ? (
             <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
           ) : (
