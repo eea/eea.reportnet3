@@ -168,7 +168,6 @@ const errorStatisticsById = async datasetId => {
     );
   });
   levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
-  console.log(levelErrors);
   dataset.levelErrorTypes = levelErrors;
 
   let transposedValues = transposeMatrix(tableStatisticValues);
