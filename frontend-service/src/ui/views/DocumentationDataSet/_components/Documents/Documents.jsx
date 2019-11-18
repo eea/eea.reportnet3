@@ -72,16 +72,25 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
 
   const documentsEditButtons = rowData => {
     return (
-      <>
-        <span
-          className={styles.delete}
+      <div className={styles.documentsEditButtons}>
+        <Button
+          type="button"
+          icon="edit"
+          className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+          onClick={e => {
+            //setIsAddOrEditWeblinkDialogVisible(true);
+          }}
+        />
+        <Button
+          type="button"
+          icon="trash"
+          className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
           onClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        </span>
-      </>
+          }}
+        />
+      </div>
     );
   };
 
@@ -161,7 +170,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       {
         <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
           {isCustodian ? (
-            <Column className={styles.crudColumn} body={documentsEditButtons} />
+            <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
           ) : (
             <Column className={styles.hideColumn} />
           )}
