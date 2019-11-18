@@ -31,6 +31,7 @@ import {
   faPaperclip,
   faAlignJustify,
   faList,
+  faShareAlt,
   faInfo,
   faInfoCircle,
   faQuestion
@@ -40,6 +41,8 @@ import {
   faSquare as farSquareRegular,
   faCheckSquare as faCheckSquareRegular,
   faCalendarAlt,
+  faClone,
+  faComments,
   faQuestionCircle as farQuestionCircle
 } from '@fortawesome/free-regular-svg-icons';
 
@@ -179,6 +182,12 @@ export const AwesomeIcons = icon => {
       return faAlignJustify;
     case 'url':
       return faGlobeEurope;
+    case 'clone':
+      return faClone;
+    case 'share':
+      return faShareAlt;
+    case 'comments':
+      return faComments;
     case 'info':
       return faInfo;
     case 'infoCircle':
