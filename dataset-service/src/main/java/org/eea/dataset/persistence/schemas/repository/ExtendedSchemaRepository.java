@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.schemas.repository;
 
+import org.bson.Document;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -95,6 +96,15 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult insertTableInPosition(String idDatasetSchema, TableSchema tableSchema, int position)
+  UpdateResult insertTableInPosition(String idDatasetSchema, Document tableSchema, int position)
       throws EEAException;
+
+  /**
+   * Find table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the document
+   */
+  Document findTableSchema(String datasetSchemaId, String tableSchemaId);
 }

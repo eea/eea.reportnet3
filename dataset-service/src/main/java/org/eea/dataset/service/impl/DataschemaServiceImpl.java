@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
@@ -631,11 +632,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public Boolean orderTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO,
-      Integer position) throws EEAException {
-    schemasRepository.deleteTableSchemaById(tableSchemaVO.getIdTableSchema());
-    return schemasRepository.insertTableInPosition(datasetSchemaId,
-        tableSchemaMapper.classToEntity(tableSchemaVO), position).getModifiedCount() == 1;
+  public Boolean orderTableSchema(String datasetSchemaId, String tableSchemaId, Integer position)
+      throws EEAException {
+    Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+    if (tableSchema != null) {
+      schemasRepository.deleteTableSchemaById(tableSchemaId);
+      return schemasRepository.insertTableInPosition(datasetSchemaId, tableSchema, position)
+          .getModifiedCount() == 1;
+    }
+    return false;
   }
 
   /**
@@ -647,13 +652,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     try {
       fieldSchemaVO.setId(new ObjectId().toString());
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
-          .getModifiedCount() == 1;
+          .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }

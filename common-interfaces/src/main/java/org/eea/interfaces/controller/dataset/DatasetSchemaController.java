@@ -133,16 +133,17 @@ public interface DatasetSchemaController {
    */
   @PutMapping("/{datasetId}/tableSchema/position/{position}")
   void orderTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody TableSchemaVO tableSchemaVO, @PathVariable("position") Integer position);
+      @RequestBody String tableSchemaId, @PathVariable("position") Integer position);
 
   /**
    * Creates the field schema.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   * @return
    */
-  @PostMapping("/{datasetId}/fieldSchema/")
-  void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
   /**
@@ -151,7 +152,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
    */
-  @PutMapping("/{datasetId}/fieldSchema/")
+  @PutMapping("/{datasetId}/fieldSchema")
   void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 

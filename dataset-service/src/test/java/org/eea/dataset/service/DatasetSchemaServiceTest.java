@@ -1,12 +1,14 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
@@ -91,19 +93,27 @@ public class DatasetSchemaServiceTest {
   @Mock
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
-  /** The table mapper. */
+  /**
+   * The table mapper.
+   */
   @Mock
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The field schema no rules mapper. */
+  /**
+   * The field schema no rules mapper.
+   */
   @Mock
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -507,7 +517,7 @@ public class DatasetSchemaServiceTest {
   public void createFieldSchemaTest1() throws EEAException {
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
+    Assert.assertNotNull(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
   }
 
   /**
@@ -519,7 +529,7 @@ public class DatasetSchemaServiceTest {
   public void createFieldSchemaTest2() throws EEAException {
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
+    Assert.assertEquals("", dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
   }
 
   /**
@@ -726,14 +736,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderTableSchemaTest1() throws EEAException {
-    Mockito.doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
-        .thenReturn(new TableSchema());
-    Mockito
-        .when(
-            schemasRepository.insertTableInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.orderTableSchema("", new TableSchemaVO(), 1));
+    when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertFalse(dataSchemaServiceImpl.orderTableSchema("", "", 1));
   }
 
   /**
@@ -743,14 +747,27 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderTableSchemaTest2() throws EEAException {
-    Mockito.doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
-        .thenReturn(new TableSchema());
-    Mockito
-        .when(
-            schemasRepository.insertTableInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.orderTableSchema("", new TableSchemaVO(), 1));
+    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
+    when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
+    when(schemasRepository.insertTableInPosition(Mockito.anyString(), Mockito.any(),
+        Mockito.anyInt())).thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(dataSchemaServiceImpl.orderTableSchema("", "", 1));
+  }
+
+  /**
+   * Order table schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderTableSchemaTest3() throws EEAException {
+    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
+    when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
+    when(schemasRepository.insertTableInPosition(Mockito.anyString(), Mockito.any(),
+        Mockito.anyInt())).thenReturn(UpdateResult.acknowledged(2L, 0L, null));
+    Assert.assertFalse(dataSchemaServiceImpl.orderTableSchema("", "", 1));
   }
 
   /**
@@ -787,5 +804,32 @@ public class DatasetSchemaServiceTest {
             schemasRepository.insertFieldInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Assert.assertTrue(dataSchemaServiceImpl.orderFieldSchema("", new FieldSchemaVO(), 1));
+  }
+
+  /**
+   * Gets the dataset schema id test.
+   *
+   * @return the dataset schema id test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getDatasetSchemaIdTest() throws EEAException {
+    when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    dataSchemaServiceImpl.getDatasetSchemaId(1L);
+  }
+
+  /**
+   * Gets the dataset schema id success test.
+   *
+   * @return the dataset schema id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getDatasetSchemaIdSuccessTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setDatasetSchema("schema");
+    when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(datasetMetabase));
+    assertEquals("schema", dataSchemaServiceImpl.getDatasetSchemaId(1L));
   }
 }

@@ -187,11 +187,11 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @throws EEAException the EEA exception
    */
   @Override
-  public UpdateResult insertTableInPosition(String idDatasetSchema, TableSchema tableSchema,
+  public UpdateResult insertTableInPosition(String idDatasetSchema, Document tableSchema,
       int position) throws EEAException {
     try {
       List<Document> list = new ArrayList<>();
-      list.add(Document.parse(tableSchema.toJSON()));
+      list.add(tableSchema);
       return mongoDatabase.getCollection("DataSetSchema").updateOne(
           new Document("_id", new ObjectId(idDatasetSchema)),
           new Document("$push", new Document("tableSchemas",
@@ -226,5 +226,33 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       LOG_ERROR.error("error inserting field: ", e);
       throw new EEAException(e);
     }
+  }
+
+  /**
+   * Find table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the document
+   */
+  @Override
+  public Document findTableSchema(String datasetSchemaId, String tableSchemaId) {
+
+    Document document = mongoDatabase.getCollection("DataSetSchema")
+        .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+            new ObjectId(tableSchemaId)))
+        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+
+    if (document != null) {
+      Object tableSchemas = document.get("tableSchemas");
+      if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
+        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
+          return (Document) tableSchema;
+        }
+      }
+    }
+
+    return null;
   }
 }
