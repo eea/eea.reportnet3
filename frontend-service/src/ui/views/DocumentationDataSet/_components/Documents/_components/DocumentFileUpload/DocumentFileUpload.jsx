@@ -30,7 +30,8 @@ const DocumentFileUpload = ({
     uploadFile: Yup.mixed()
       .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
         const result = isEditForm ? value : !isPlainObject(value);
-        return result;
+        console.log('value', value);
+        return !isPlainObject(value);
       })
       .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
         return value.size <= config.MAX_FILE_SIZE;
@@ -41,17 +42,19 @@ const DocumentFileUpload = ({
     form.current.resetForm();
   }
 
-  let lang = {
-    lang: config.languages.filter(language => language.name == documentInitialValues.language).map(code => code.code)
+  const langField = {
+    lang: config.languages
+      .filter(language => language.name == documentInitialValues.language)
+      .map(country => country.code)
   };
 
-  const initialWithLang = Object.assign({}, documentInitialValues, lang);
+  const initiaValueslWithLangField = Object.assign({}, documentInitialValues, langField);
 
   return (
     <Formik
       ref={form}
       enableReinitialize
-      initialValues={initialWithLang}
+      initialValues={initiaValueslWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
