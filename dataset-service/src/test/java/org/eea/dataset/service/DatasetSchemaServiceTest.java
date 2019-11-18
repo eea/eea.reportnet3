@@ -517,7 +517,7 @@ public class DatasetSchemaServiceTest {
   public void createFieldSchemaTest1() throws EEAException {
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
+    Assert.assertNotNull(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
   }
 
   /**
@@ -529,7 +529,7 @@ public class DatasetSchemaServiceTest {
   public void createFieldSchemaTest2() throws EEAException {
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
+    Assert.assertNull(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
   }
 
   /**

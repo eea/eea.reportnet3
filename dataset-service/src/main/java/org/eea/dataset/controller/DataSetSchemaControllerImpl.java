@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -301,14 +302,16 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PostMapping("/{datasetId}/fieldSchema/")
-  public void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping(value = "/{datasetId}/fieldSchema/", produces = MediaType.APPLICATION_JSON_VALUE)
+  public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
-      if (!dataschemaService.createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          fieldSchemaVO)) {
+      String response;
+      if (StringUtils.isBlank(response = dataschemaService
+          .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
     }
