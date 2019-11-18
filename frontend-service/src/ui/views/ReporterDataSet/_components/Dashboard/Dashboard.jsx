@@ -45,11 +45,11 @@ const Dashboard = withRouter(
 
       useEffect(() => {
         setDashboardColors({
-          CORRECT: colors.dashboardCorrect,
-          INFO: colors.dashboardInfo,
-          WARNING: colors.dashboardWarning,
-          ERROR: colors.dashboardError,
-          BLOCKER: colors.dashboardBlocker
+          CORRECT: colors.correct,
+          INFO: colors.info,
+          WARNING: colors.warning,
+          ERROR: colors.error,
+          BLOCKER: colors.blocker
         });
       }, []);
 

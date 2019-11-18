@@ -476,7 +476,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
-        isReleaseVisible={true}
       />
     </SnapshotContext.Provider>
   );
