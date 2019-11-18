@@ -652,13 +652,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     try {
       fieldSchemaVO.setId(new ObjectId().toString());
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
-          .getModifiedCount() == 1;
+          .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
