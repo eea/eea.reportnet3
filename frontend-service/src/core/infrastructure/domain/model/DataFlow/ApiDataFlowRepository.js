@@ -135,7 +135,6 @@ const completed = async () => {
 
 const datasetsValidationStatistics = async datasetSchemaId => {
   const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
-  console.log(datasetsDashboardsDataDTO);
   datasetsDashboardsDataDTO.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -235,10 +234,16 @@ const datasetsValidationStatistics = async datasetSchemaId => {
         tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
 
         tableById.tableStatisticValues[0].push(
-          table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)
+          table.totalRecords -
+            (table.totalRecordsWithBlockers +
+              table.totalRecordsWithErrors +
+              table.totalRecordsWithWarnings +
+              table.totalRecordsWithInfos)
         );
-        tableById.tableStatisticValues[1].push(table.totalRecordsWithWarnings);
-        tableById.tableStatisticValues[2].push(table.totalRecordsWithErrors);
+        tableById.tableStatisticValues[1].push(table.totalRecordsWithInfos);
+        tableById.tableStatisticValues[2].push(table.totalRecordsWithWarnings);
+        tableById.tableStatisticValues[3].push(table.totalRecordsWithErrors);
+        tableById.tableStatisticValues[4].push(table.totalRecordsWithBlockers);
         tables[index] = tableById;
       }
     });
@@ -248,7 +253,6 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
-
   return datasetsDashboardsData;
 };
 

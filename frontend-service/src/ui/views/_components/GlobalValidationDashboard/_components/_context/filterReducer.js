@@ -13,7 +13,7 @@ const getLabelIndex = (originalData, label) => {
 };
 
 const showArrayItem = (array, item) => {
-  return !array.includes(item.toString().toLowerCase());
+  return !array.includes(item);
 };
 
 const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
@@ -26,7 +26,7 @@ const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgSt
   const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-  tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr.toString().toLowerCase(), table.label));
+  tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
   return { labels: labels, datasets: tablesData };
 };
 

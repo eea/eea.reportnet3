@@ -90,7 +90,6 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
       setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
       if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
-        console.log(datasetsValidationStatistics);
         setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
         setValidationDashboardData(
           buildDatasetDashboardObject(datasetsValidationStatistics, datasetsValidationStatistics.levelErrors)
@@ -104,7 +103,6 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   };
 
   const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
-    console.log(tablesDashboardData);
     let allDatasets = [];
     tablesDashboardData.forEach(table => {
       allDatasets.push(getBarsByErrorAndStatistics(table, levelErrors));
@@ -113,56 +111,20 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   };
 
   const getBarsByErrorAndStatistics = (table, levelErrors) => {
-    const levelErrorBars = levelErrors.map(function(error, i) {
-      // console.log(table.tableStatisticValues);
+    const levelErrorBars = levelErrors.map(function(type, i) {
       const errorBar = {
-        label: error,
+        label: type,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[error] : colors.error,
+        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[type] : colors.type,
         data: table.tableStatisticPercentages[i],
-        totalData: table.tableStatisticValues[LEVELS.error],
+        totalData: table.tableStatisticValues[i],
         stack: table.tableName
       };
-      // console.log(errorBar);
       return errorBar;
     });
     return levelErrorBars;
   };
-
-  // const getDatasetsByErrorAndStatistics2 = dashboardDataTables => {
-  //   return dashboardDataTables
-  //     .map(table => [
-  //       {
-  //         label: `CORRECT`,
-  //         tableName: table.tableName,
-  //         tableId: table.tableId,
-  //         backgroundColor: dashboardColors.CORRECT,
-  //         data: table.tableStatisticPercentages[0],
-  //         totalData: table.tableStatisticValues[0],
-  //         stack: table.tableName
-  //       },
-  //       {
-  //         label: `WARNING`,
-  //         tableName: table.tableName,
-  //         tableId: table.tableId,
-  //         backgroundColor: dashboardColors.WARNING,
-  //         data: table.tableStatisticPercentages[1],
-  //         totalData: table.tableStatisticValues[1],
-  //         stack: table.tableName
-  //       },
-  //       {
-  //         label: `ERROR`,
-  //         tableName: table.tableName,
-  //         tableId: table.tableId,
-  //         backgroundColor: dashboardColors.ERROR,
-  //         data: table.tableStatisticPercentages[2],
-  //         totalData: table.tableStatisticValues[2],
-  //         stack: table.tableName
-  //       }
-  //     ])
-  //     .flat();
-  // };
 
   const buildDatasetDashboardObject = (datasetsDashboardsData, levelErrors) => {
     let datasets = [];
@@ -187,7 +149,9 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
-          `${data.datasets[tooltipItems.datasetIndex].tableName}: ${data.datasets[tooltipItems.datasetIndex].totalData} (${tooltipItems.yLabel}%)`
+          `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
+            data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
+          } (${tooltipItems.yLabel}%)`
       }
     },
 
