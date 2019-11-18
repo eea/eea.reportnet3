@@ -5,7 +5,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.eea.lock.LockConfiguration;
+import org.eea.lock.configuration.LockConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**

@@ -1,4 +1,4 @@
-package org.eea.lock;
+package org.eea.lock.configuration;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

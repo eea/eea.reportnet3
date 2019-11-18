@@ -82,11 +82,13 @@ public interface RecordStoreController {
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
    * @param datasetType the dataset type
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "partitionId", required = true) Long partitionId,
       @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType);
 
   /**

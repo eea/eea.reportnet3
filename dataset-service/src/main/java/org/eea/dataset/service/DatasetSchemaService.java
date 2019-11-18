@@ -73,13 +73,16 @@ public interface DatasetSchemaService {
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
+
   /**
    * Replace schema.
    *
    * @param idSchema the id schema
    * @param schema the schema
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
    */
-  void replaceSchema(String idSchema, DataSetSchema schema);
+  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot);
 
 
   /**

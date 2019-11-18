@@ -9,11 +9,22 @@ import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { random } from 'node-forge';
 
-export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
+export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => {
   const resources = useContext(ResourcesContext);
+  //position must be removed in def implementation
+  const statusArray = ['notStarted', 'delivered', 'drafted'];
+  let status = 1;
+  if (position < 4) {
+    status = statusArray[position - 1];
+  } else {
+    status = statusArray[0];
+  }
 
   const onAccept = async () => {
     try {
@@ -45,12 +56,12 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
       <div
         className={
           listType === 'accepted' || listType === 'completed'
-            ? `${styles.container} ${styles.accepted}`
-            : `${styles.container}`
+            ? `${styles.container} ${styles.accepted} ${styles[status]}`
+            : `${styles.container} ${styles[status]}`
         }>
         {listType === 'accepted' ? (
           <Link
-            className={styles.containerLink}
+            className={`${styles.containerLink}`}
             to={getUrl(
               routes.DATAFLOW,
               {
@@ -69,22 +80,26 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
 
   return layout(
     <>
-      <div className={`${styles.card_component_icon}`}>
-        <Icon icon="clone" className={`${styles.card_component_icon_i}`} />
+      <div className={`${styles.icon}`}>
+        <FontAwesomeIcon icon={AwesomeIcons('clone')} />
       </div>
 
-      <div className={`${styles.card_component_content} `}>
-        <div className={`${styles.card_component_content_date}`}>
-          <span>
-            {resources.messages['deadline']}: {itemContent.deadlineDate}
-          </span>
-        </div>
-        <h3 className={`${styles.card_component_content_title}`}>{itemContent.name}</h3>
+      <div className={`${styles.deliveryDate}`}>
+        <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
+      </div>
+
+      <div className={styles.text}>
+        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
 
         <p>{itemContent.description}</p>
       </div>
+      <div className={styles.status}>
+        <p>
+          <span>{`${resources.messages['state']}:`}</span> {resources.messages[status]}
+        </p>
+      </div>
 
-      <div className={`${styles.card_component_btn}`}>
+      <div className={`${styles.toolbar}`}>
         {listType === 'pending' ? (
           <>
             <Button
@@ -101,12 +116,22 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
           </>
         ) : (
           <>
-            {/* <a className={styles.btn} href="#"> */}
-            <Icon icon="comment" />
-            {/* </a> */}
-            {/* <a className={styles.btn} href="http://"> */}
-            <Icon icon="share" />
-            {/* </a> */}
+            <a
+              className={styles.btn}
+              href="#"
+              onClick={e => {
+                e.preventDefault();
+              }}>
+              <FontAwesomeIcon icon={AwesomeIcons('comments')} />
+            </a>
+            <a
+              className={styles.btn}
+              href="http://"
+              onClick={e => {
+                e.preventDefault();
+              }}>
+              <FontAwesomeIcon icon={AwesomeIcons('share')} />
+            </a>
           </>
         )}
       </div>

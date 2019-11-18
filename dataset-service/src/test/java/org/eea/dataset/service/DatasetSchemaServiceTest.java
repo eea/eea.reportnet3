@@ -27,6 +27,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -116,6 +117,10 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
+
+  /** The record store controller zull. */
+  @Mock
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * Inits the mocks.
@@ -503,8 +508,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchema schema = new DataSetSchema();
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
+    doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
 
-    dataSchemaServiceImpl.replaceSchema("1L", schema);
+    dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
   }
 

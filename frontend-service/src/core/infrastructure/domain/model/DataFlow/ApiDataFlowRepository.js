@@ -148,6 +148,8 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   const tables = [];
   let tablePercentages = [];
   let tableValues = [];
+  let levelErrors = [];
+  const tableLevelErrors = [];
 
   datasetsDashboardsDataDTO.map(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
@@ -156,24 +158,39 @@ const datasetsValidationStatistics = async datasetSchemaId => {
     });
 
     dataset.tables.map((table, i) => {
+      tableLevelErrors.push(getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
         tablePercentages.push(
           [
             getPercentageOfValue(
-              table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+              table.totalRecords -
+                (table.totalRecordsWithBlockers +
+                  table.totalRecordsWithErrors +
+                  table.totalRecordsWithWarnings +
+                  table.totalRecordsWithInfos),
               table.totalRecords
             )
           ],
+          [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
           [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)]
+          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
+          [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
         );
 
         tableValues.push(
-          [table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)],
+          [
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos)
+          ],
+          [table.totalRecordsWithInfos],
           [table.totalRecordsWithWarnings],
-          [table.totalRecordsWithErrors]
+          [table.totalRecordsWithErrors],
+          [table.totalRecordsWithBlockers]
         );
 
         tables.push({
@@ -189,33 +206,99 @@ const datasetsValidationStatistics = async datasetSchemaId => {
 
         tableById.tableStatisticPercentages[0].push(
           getPercentageOfValue(
-            table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos),
             table.totalRecords
           )
         );
+
         tableById.tableStatisticPercentages[1].push(
+          getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages[2].push(
           getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
         );
-        tableById.tableStatisticPercentages[2].push(
+
+        tableById.tableStatisticPercentages[3].push(
           getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages[4].push(
+          getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
         );
 
         tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
 
         tableById.tableStatisticValues[0].push(
-          table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)
+          table.totalRecords -
+            (table.totalRecordsWithBlockers +
+              table.totalRecordsWithErrors +
+              table.totalRecordsWithWarnings +
+              table.totalRecordsWithInfos)
         );
-        tableById.tableStatisticValues[1].push(table.totalRecordsWithWarnings);
-        tableById.tableStatisticValues[2].push(table.totalRecordsWithErrors);
+        tableById.tableStatisticValues[1].push(table.totalRecordsWithInfos);
+        tableById.tableStatisticValues[2].push(table.totalRecordsWithWarnings);
+        tableById.tableStatisticValues[3].push(table.totalRecordsWithErrors);
+        tableById.tableStatisticValues[4].push(table.totalRecordsWithBlockers);
         tables[index] = tableById;
       }
     });
   });
+  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
 
   datasetsDashboardsData.datasetReporters = datasetReporters;
+  datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
-
   return datasetsDashboardsData;
+};
+
+const orderLevelErrors = levelErrors => {
+  const levelErrorsWithPriority = [
+    { id: 'CORRECT', index: 0 },
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
+  ];
+
+  return levelErrors
+    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
+    .flat()
+    .sort((a, b) => a.index - b.index)
+    .map(orderedError => orderedError.id);
+};
+
+const getDashboardLevelErrors = datasetTableDTO => {
+  let levelErrors = [];
+  if (datasetTableDTO.totalErrors > 0) {
+    let corrects =
+      datasetTableDTO.totalRecords -
+      (datasetTableDTO.totalRecordsWithBlockers +
+        datasetTableDTO.totalRecordsWithErrors +
+        datasetTableDTO.totalRecordsWithWarnings +
+        datasetTableDTO.totalRecordsWithInfos);
+
+    if (corrects > 0) {
+      levelErrors.push('CORRECT');
+    }
+    if (datasetTableDTO.totalRecordsWithInfos > 0) {
+      levelErrors.push('INFO');
+    }
+    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+      levelErrors.push('WARNING');
+    }
+    if (datasetTableDTO.totalRecordsWithErrors > 0) {
+      levelErrors.push('ERROR');
+    }
+    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+      levelErrors.push('BLOCKER');
+    }
+  }
+  return levelErrors;
 };
 
 const datasetsReleasedStatus = async dataflowId => {

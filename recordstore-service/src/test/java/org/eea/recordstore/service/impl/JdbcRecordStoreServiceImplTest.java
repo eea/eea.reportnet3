@@ -178,7 +178,7 @@ public class JdbcRecordStoreServiceImplTest {
 
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
 
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, TypeDatasetEnum.DESIGN);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN);
     Mockito.verify(kafkaSender, Mockito.times(2))
         .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
   }
