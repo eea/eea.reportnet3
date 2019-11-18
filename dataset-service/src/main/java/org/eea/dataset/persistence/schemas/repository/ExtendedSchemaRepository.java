@@ -84,7 +84,7 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult insertFieldInPosition(String idDatasetSchema, FieldSchema fieldSchema, int position)
+  UpdateResult insertFieldInPosition(String idDatasetSchema, Document fieldSchema, int position)
       throws EEAException;
 
   /**
@@ -107,4 +107,14 @@ public interface ExtendedSchemaRepository {
    * @return the document
    */
   Document findTableSchema(String datasetSchemaId, String tableSchemaId);
+
+
+  /**
+   * Find field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return the document
+   */
+  Document findFieldSchema(String datasetSchemaId, String fieldSchemaId);
 }
