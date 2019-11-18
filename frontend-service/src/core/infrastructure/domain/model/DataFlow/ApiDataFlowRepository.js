@@ -135,6 +135,7 @@ const completed = async () => {
 
 const datasetsValidationStatistics = async datasetSchemaId => {
   const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
+  console.log(datasetsDashboardsDataDTO);
   datasetsDashboardsDataDTO.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -165,18 +166,32 @@ const datasetsValidationStatistics = async datasetSchemaId => {
         tablePercentages.push(
           [
             getPercentageOfValue(
-              table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+              table.totalRecords -
+                (table.totalRecordsWithBlockers +
+                  table.totalRecordsWithErrors +
+                  table.totalRecordsWithWarnings +
+                  table.totalRecordsWithInfos),
               table.totalRecords
             )
           ],
+          [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
           [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)]
+          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
+          [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
         );
 
         tableValues.push(
-          [table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)],
+          [
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos)
+          ],
+          [table.totalRecordsWithInfos],
           [table.totalRecordsWithWarnings],
-          [table.totalRecordsWithErrors]
+          [table.totalRecordsWithErrors],
+          [table.totalRecordsWithBlockers]
         );
 
         tables.push({
@@ -192,15 +207,29 @@ const datasetsValidationStatistics = async datasetSchemaId => {
 
         tableById.tableStatisticPercentages[0].push(
           getPercentageOfValue(
-            table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos),
             table.totalRecords
           )
         );
+
         tableById.tableStatisticPercentages[1].push(
+          getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages[2].push(
           getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
         );
-        tableById.tableStatisticPercentages[2].push(
+
+        tableById.tableStatisticPercentages[3].push(
           getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages[4].push(
+          getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
         );
 
         tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
