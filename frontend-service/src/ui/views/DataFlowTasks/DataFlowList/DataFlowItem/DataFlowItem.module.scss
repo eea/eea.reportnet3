@@ -8,7 +8,6 @@
   margin-bottom: 1.5rem;
   // min-height: 225px;
   border-radius: 5px;
-
   &.accepted {
     .containerLink {
       width: 100%;
@@ -16,7 +15,7 @@
       flex: auto;
       display: grid;
       grid-template-columns: 4% 50% 1fr;
-      grid-template-rows: 1fr 80% 1fr;
+      grid-template-rows: 1fr 50% 1fr;
       row-gap: 1rem;
       column-gap: 1.5rem;
       color: var(--gray-110);
@@ -35,12 +34,21 @@
     }
     &.delivered {
       background-color: var(--c-orange-300);
+      &:hover {
+        background-color: #d9a220;
+      }
     }
     &.notStarted {
       background-color: var(--c-lilac-100);
+      &:hover {
+        background-color: #c2c8cf;
+      }
     }
     &.drafted {
       background-color: var(--c-lilac-300);
+      &:hover {
+        background-color: #6565a8;
+      }
       .containerLink {
         color: var(--white);
         background-image: url('/assets/img/logo-blanco.png');
