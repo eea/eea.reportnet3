@@ -1842,10 +1842,26 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.p-highli
   border-width: 2px 2px 1px 2px;*/
   color: #404040;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close {
+body
+  .p-tabview.p-tabview-top
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-close,
+body
+  .p-tabview.p-tabview-bottom
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-close,
+body
+  .p-tabview.p-tabview-left
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-close,
+body
+  .p-tabview.p-tabview-right
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-close {
   color: #404040;
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight a,
@@ -1890,7 +1906,6 @@ body .p-tabview.p-tabview-top .p-tabview-nav {
   margin-bottom: -1px;
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a {
-
   -moz-border-radius-topleft: 3px;
   -webkit-border-top-left-radius: 3px;
   border-top-left-radius: 3px;
@@ -1903,13 +1918,13 @@ body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(:last-child
   margin-right: 2px;
 }
 
-.p-tabview .p-tabview-nav li { 
-  list-style: none; 
-  float: left; 
-  position: relative; 
-  margin: 0 0 1px 0;  
-  padding: 0; 
-  white-space: nowrap; 
+.p-tabview .p-tabview-nav li {
+  list-style: none;
+  float: left;
+  position: relative;
+  margin: 0 0 1px 0;
+  padding: 0;
+  white-space: nowrap;
 }
 
 body .p-tabview.p-tabview-bottom .p-tabview-nav {
@@ -1924,9 +1939,8 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
   border-bottom-right-radius: 3px;
 }
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
-  margin-right: 2px; 
+  margin-right: 2px;
 }
-
 
 body .p-tabview.p-tabview-left .p-tabview-nav {
   margin-right: -1px;
@@ -1957,7 +1971,6 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(:last-child) a {
   margin-bottom: 2px;
 }
-
 
 body .p-tabview .p-tabview-panels {
   background-color: #ffffff;
@@ -2222,12 +2235,20 @@ body .p-datatable .p-datatable-tbody > tr > td .p-row-toggler {
 body .p-datatable .p-datatable-tbody > tr > td .p-row-toggler:hover {
   color: #404040;
 }
-body .p-datatable .p-datatable-tbody > tr.p-highlight {
-  background-color: #004494;
-  color: #ffffff;
+
+body .p-datatable .p-datatable-tbody > tr {
+  transition: border-width 1s linear;
+  border: 1px solid rgba(0, 0, 0, 0);
 }
+
+body .p-datatable .p-datatable-tbody > tr.p-highlight {
+  background-color: rgba(240,233,145,0.3);
+  color: #404040;
+  font-weight: bold;
+}
+
 body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler {
-  color: #ffffff;
+  color: #004494;
 }
 body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler:hover {
   color: #ffffff;
@@ -2243,8 +2264,9 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight {
-  background-color: #004494;
-  color: #ffffff;
+  background-color: rgba(240,233,145,0.3);
+  color: #404040;
+  font-weight: bold;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight .p-row-toggler {
   color: #ffffff;
@@ -3327,7 +3349,7 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
 }
-.p-component-overlay.p-dialog-mask{
+.p-component-overlay.p-dialog-mask {
   display: none !important;
 }
 
@@ -3702,10 +3724,10 @@ body .p-contextmenu .p-submenu-list {
 body .p-contextmenu .p-menuitem {
   margin: 0;
 }
-body .p-contextmenu .p-menuitem{
+body .p-contextmenu .p-menuitem {
   width: 100%;
 }
-body .p-menuitem .p-menuitem-link{
+body .p-menuitem .p-menuitem-link {
   width: 100%;
 }
 
