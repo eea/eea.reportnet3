@@ -163,7 +163,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       )}
 
       <Dialog
-        header={resources.messages['upload']}
+        header={isEditForm ? resources.messages['edit'] : resources.messages['upload']}
         className={styles.dialog}
         visible={isUploadDialogVisible}
         dismissableMask={false}

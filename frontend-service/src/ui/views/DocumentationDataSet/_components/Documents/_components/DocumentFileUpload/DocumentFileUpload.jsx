@@ -27,13 +27,17 @@ const DocumentFileUpload = ({
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
     lang: Yup.string().required(),
-    uploadFile: Yup.mixed()
-      .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
-        return !isPlainObject(value);
-      })
-      .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
-        return value.size <= config.MAX_FILE_SIZE;
-      })
+    uploadFile: isEditForm
+      ? Yup.mixed().test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
+          return value.size <= config.MAX_FILE_SIZE;
+        })
+      : Yup.mixed()
+          .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
+            return !isPlainObject(value);
+          })
+          .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
+            return value.size <= config.MAX_FILE_SIZE;
+          })
   });
 
   if (!isNull(form.current) && !isFormReset) {
@@ -66,8 +70,8 @@ const DocumentFileUpload = ({
         setSubmitting(true);
         onGrowlAlert({
           severity: 'info',
-          summary: resources.messages.documentUploadingGrowlUploadingSummary,
-          detail: resources.messages.documentUploadingGrowlUploadingDetail,
+          summary: resources.messages['documentUploadingGrowlUploadingSummary'],
+          detail: resources.messages['documentUploadingGrowlUploadingDetail'],
           life: '5000'
         });
 
@@ -81,8 +85,8 @@ const DocumentFileUpload = ({
         if (response === 200) {
           onGrowlAlert({
             severity: 'success',
-            summary: resources.messages.documentUploadingGrowlSuccessSummary,
-            detail: resources.messages.documentUploadingGrowlSuccessDetail,
+            summary: resources.messages['documentUploadingGrowlSuccessSummary'],
+            detail: resources.messages['documentUploadingGrowlSuccessDetail'],
             life: '5000'
           });
           setSubmitting(false);
@@ -90,8 +94,8 @@ const DocumentFileUpload = ({
         } else {
           onGrowlAlert({
             severity: 'error',
-            summary: resources.messages.documentUploadingGrowlErrorSummary,
-            detail: resources.messages.documentUploadingGrowlErrorDetail,
+            summary: resources.messages['documentUploadingGrowlErrorSummary'],
+            detail: resources.messages['documentUploadingGrowlErrorDetail'],
             life: '5000'
           });
           setSubmitting(false);
@@ -146,9 +150,9 @@ const DocumentFileUpload = ({
                       : styles.disabledButton
                     : styles.disabledButton
                 }
-                label={resources.messages['upload']}
+                label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 disabled={isSubmitting}
-                icon="add"
+                icon={isEditForm ? 'save' : 'add'}
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
