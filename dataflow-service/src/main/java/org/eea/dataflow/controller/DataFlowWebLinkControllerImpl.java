@@ -1,20 +1,12 @@
 package org.eea.dataflow.controller;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
-import org.eea.dataflow.persistence.domain.Dataflow;
-import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowWebLinkService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
 import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
-import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,30 +61,23 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param idLink the id link
    *
    * @return the link
+   * @throws EEAException
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
   public WeblinkVO getLink(@RequestParam("idLink") Long idLink) {
 
-    Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(idLink);
-    Long dataFlowId = dataFlow.getId();
-
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    WeblinkVO weblink = new WeblinkVO();
 
     try {
-      // get idDataflow
-      resources.stream().filter(resourceAccessVO -> {
-        return resourceAccessVO.getId() == dataFlowId
-            && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-      }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
-
-      return dataflowWebLinkService.getWebLink(idLink);
+      weblink = dataflowWebLinkService.getWebLink(idLink);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      e.printStackTrace();
     }
+
+    return weblink;
+
   }
 
   /**
@@ -105,22 +90,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @PostMapping
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
-  public void saveLink(Long dataflowId, WeblinkVO weblinkVO) {
-
-
-    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
-
-    Pattern patN = Pattern.compile(REGEX_URL);
-
-    Matcher matN = patN.matcher(weblink.getUrl());
-
-    if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    }
+  public void saveLink(@RequestParam(value = "dataflowId") Long dataflowId, WeblinkVO weblinkVO) {
 
     try {
-      dataflowWebLinkService.saveWebLink(dataflowId, weblink.getUrl(), weblink.getDescription());
+      dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
@@ -138,19 +111,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @DeleteMapping(value = "{idLink}")
   public void removeLink(@RequestParam(value = "idLink") Long idLink) {
 
-    Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(idLink);
-    Long dataFlowId = dataFlow.getId();
-
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-
     try {
-      // get idDataflow
-      resources.stream().filter(resourceAccessVO -> {
-        return resourceAccessVO.getId() == dataFlowId
-            && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-      }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
-
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
@@ -168,34 +129,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @PutMapping
   public void updateLink(WeblinkVO weblinkVO) {
-
-    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
-
-    Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(weblink.getId());
-    Long dataFlowId = dataFlow.getId();
-
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-
-
-    Pattern patN = Pattern.compile(REGEX_URL);
-
-    Matcher matN = patN.matcher(weblink.getUrl());
-
-    if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    }
-
     try {
-      // get idDataflow
-      resources.stream().filter(resourceAccessVO -> {
-        return resourceAccessVO.getId() == dataFlowId
-            && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-      }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
-
-      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getDescription(),
-          weblink.getUrl());
+      dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
