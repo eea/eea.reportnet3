@@ -34,7 +34,7 @@ public interface DataFlowWebLinkController {
    * @throws EEAException
    */
   @GetMapping(value = "{idLink}")
-  WeblinkVO getLink(@RequestParam("idLink") Long idLink);
+  WeblinkVO getLink(@PathVariable("idLink") Long idLink);
 
   /**
    * Save link.

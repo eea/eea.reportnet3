@@ -39,9 +39,6 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
-  private static final String REGEX_URL =
-      "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,63}(:[0-9]{1,5})?(\\/.*)?$";
   /**
    * The dataflow web link service.
    */
@@ -68,7 +65,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
-  public WeblinkVO getLink(@RequestParam("idLink") Long idLink) {
+  public WeblinkVO getLink(@PathVariable("idLink") Long idLink) {
 
     WeblinkVO weblink = new WeblinkVO();
 

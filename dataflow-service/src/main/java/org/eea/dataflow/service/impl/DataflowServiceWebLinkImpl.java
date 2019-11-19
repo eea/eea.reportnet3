@@ -79,7 +79,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId() == dataFlowId
+      return resourceAccessVO.getId().equals(dataFlowId)
           && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
     }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
@@ -143,7 +143,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId() == dataFlowId
+      return resourceAccessVO.getId().equals(dataFlowId)
           && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
     }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
@@ -183,7 +183,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     }
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId() == dataFlowId
+      return resourceAccessVO.getId().equals(dataFlowId)
           && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
     }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
