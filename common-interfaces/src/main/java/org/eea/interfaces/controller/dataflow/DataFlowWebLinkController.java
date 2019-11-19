@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataflow;
 
+
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,9 +31,10 @@ public interface DataFlowWebLinkController {
    * @param idLink the id link
    *
    * @return the link
+   * @throws EEAException
    */
   @GetMapping(value = "{idLink}")
-  WeblinkVO getLink(@RequestParam("idLink") Long idLink);
+  WeblinkVO getLink(@PathVariable("idLink") Long idLink);
 
   /**
    * Save link.
