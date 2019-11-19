@@ -17,9 +17,16 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
     <li className={styles.listItem}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
-            {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-          </h5>
+          <div>
+            <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
+              {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            </h5>
+            {itemData.isReleased ? (
+              <h5 className={styles.is_released_snapshot}>{resources.messages['snapshotIsReleased']}</h5>
+            ) : (
+              ''
+            )}
+          </div>
           <div className={styles.listActions}>
             <Button
               tooltip={resources.messages.restoreSnapshotTooltip}
@@ -57,11 +64,12 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
             ) : (
               <></>
             )}
+
             <Button
               tooltip={resources.messages.deleteSnapshotTooltip}
               tooltipOptions={{ position: 'left' }}
               icon="trash"
-              disabled={false}
+              disabled={itemData.isReleased}
               className={`${styles.btn} rp-btn warning`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
@@ -73,7 +81,7 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
           </div>
         </div>
       </div>
-      <p>{itemData.description}</p>
+      <p className={itemData.isReleased ? `${styles.released_mt}` : null}>{itemData.description}</p>
     </li>
   );
 }

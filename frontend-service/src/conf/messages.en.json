@@ -206,6 +206,7 @@
 		"snapshotDescriptionValidationRequired": "Description is required",
 		"snapshotItemRestoreProcessDetail": "Restoring...",
 		"snapshotItemRestoreProcessSummary": "Restoring copy",
+		"snapshotIsReleased": "RELEASED",
 		"snapshotsDontExist": "There are not any existing copies to display",
 		"sort": "Sort",
 		"subscribeButton": "Subscribe to a dataflow",
