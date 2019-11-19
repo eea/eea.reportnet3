@@ -32,7 +32,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
         resources.messages['urlEror']
       )
-      .required()
+      .required(' ')
   });
 
   const onLoadWebLinks = async () => {
@@ -218,7 +218,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        header={isUndefined(weblinkItem.id) ? resources.messages['addNewRow'] : resources.messages['editRow']}
+        header={
+          isUndefined(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
+        }
         modal={true}
         onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
@@ -241,7 +243,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                     placeholder={resources.messages['description']}
                     value={values.description}
                   />
-                  <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
                   <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
