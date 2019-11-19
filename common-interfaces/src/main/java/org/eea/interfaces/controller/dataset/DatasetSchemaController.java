@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -128,12 +129,10 @@ public interface DatasetSchemaController {
    * Order table schema.
    *
    * @param datasetId the dataset id
-   * @param tableSchemaVO the table schema VO
-   * @param position the position
+   * @param orderVO the order VO
    */
-  @PutMapping("/{datasetId}/tableSchema/position/{position}")
-  void orderTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody String tableSchemaId, @PathVariable("position") Integer position);
+  @PutMapping("/{datasetId}/tableSchema/order")
+  void orderTableSchema(@PathVariable("datasetId") Long datasetId, @RequestBody OrderVO orderVO);
 
   /**
    * Creates the field schema.
@@ -170,10 +169,8 @@ public interface DatasetSchemaController {
    * Order field schema.
    *
    * @param datasetId the dataset id
-   * @param fieldSchemaVO the field schema VO
-   * @param position the position
+   * @param orderVO the order VO
    */
-  @PutMapping("/{datasetId}/fieldSchema/position/{position}")
-  void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody FieldSchemaVO fieldSchemaVO, @PathVariable("position") Integer position);
+  @PutMapping("/{datasetId}/fieldSchema/order")
+  void orderFieldSchema(@PathVariable("datasetId") Long datasetId, @RequestBody OrderVO orderVO);
 }

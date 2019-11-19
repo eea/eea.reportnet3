@@ -65,10 +65,10 @@
   "c-aquamarine": "#007a86",
   "c-green": "#637e22",
   "c-tile": "#ba3c0d",
-  "dashboardBlocker": "#000000",
-  "dashboardCorrect": "#99CC33",
-  "dashboardError": "#CC3300",
-  "dashboardInfo": "#7fa1c9",
-  "dashboardWarning": "#ffCC00",
+  "blocker": "#000000",
+  "correct": "#99CC33",
+  "error": "#CC3300",
+  "info": "#7fa1c9",
+  "warning": "#ffCC00",
   "green400":"#339900"
 }

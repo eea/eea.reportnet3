@@ -27,6 +27,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -116,6 +117,10 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
+
+  /** The record store controller zull. */
+  @Mock
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * Inits the mocks.
@@ -503,8 +508,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchema schema = new DataSetSchema();
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
+    doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
 
-    dataSchemaServiceImpl.replaceSchema("1L", schema);
+    dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
@@ -777,15 +784,15 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderFieldSchemaTest1() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Mockito.when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any()))
-        .thenReturn(new FieldSchema());
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Mockito
         .when(
             schemasRepository.insertFieldInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", new FieldSchemaVO(), 1));
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
   }
 
   /**
@@ -795,15 +802,26 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderFieldSchemaTest2() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Mockito.when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any()))
-        .thenReturn(new FieldSchema());
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Mockito
         .when(
             schemasRepository.insertFieldInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.orderFieldSchema("", new FieldSchemaVO(), 1));
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
+  }
+
+  /**
+   * Order field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderFieldSchemaTest3() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
   }
 
   /**

@@ -95,9 +95,11 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private SchemasRepository schemaRepository;
 
+  /** The document controller zuul. */
   @Mock
   private DocumentControllerZuul documentControllerZuul;
 
+  /** The schema service. */
   @Mock
   private DatasetSchemaService schemaService;
 
@@ -181,8 +183,8 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     datasetSnapshotService.restoreSnapshot(1L, 1L);
-    Mockito.verify(datasetService, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any(),
-        Mockito.any());
+    Mockito.verify(partitionDataSetMetabaseRepository, times(1))
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any());
   }
 
 
@@ -233,15 +235,6 @@ public class DatasetSnapshotServiceTest {
   @Test
   public void testRestoreSchemaSnapshots() throws Exception {
 
-
-    // doNothing().when(schemaRepository).deleteDatasetSchemaById(Mockito.any());
-    // when(schemaRepository.save(Mockito.any())).thenReturn(new DataSetSchema());
-    doNothing().when(datasetService).deleteAllTableValues(Mockito.any());
-    doNothing().when(schemaService).replaceSchema(Mockito.any(), Mockito.any());
-
-    doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any());
-
     DataSetSchema schema = new DataSetSchema();
     schema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
     ObjectMapper objectMapper = new ObjectMapper();
@@ -249,9 +242,9 @@ public class DatasetSnapshotServiceTest {
     when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
         .thenReturn(objectMapper.writeValueAsBytes(schema));
 
-
     datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
-    Mockito.verify(datasetService, times(1)).deleteAllTableValues(Mockito.any());
+    Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @After

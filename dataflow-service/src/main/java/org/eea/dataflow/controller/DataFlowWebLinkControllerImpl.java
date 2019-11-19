@@ -15,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,8 +110,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{idLink}")
-  public void removeLink(@RequestParam(value = "idLink") Long idLink) {
+  @DeleteMapping(value = "/{idLink}")
+  public void removeLink(@PathVariable(value = "idLink") Long idLink) {
 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
@@ -128,12 +130,12 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PutMapping
-  public void updateLink(WeblinkVO weblinkVO) {
+  public void updateLink(@RequestBody WeblinkVO weblinkVO) {
     try {
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
 

@@ -129,7 +129,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.all(datasetId));
+    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
   };
 
   useEffect(() => {
@@ -240,7 +240,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setIsActiveReleaseSnapshotDialog(true);
   };
   const onReleaseSnapshot = async snapshotId => {
-    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapshotId);
+    const snapshotToRelease = await SnapshotService.releaseByIdReporter(
+      match.params.dataflowId,
+      datasetIdToProps,
+      snapshotId
+    );
 
     if (snapshotToRelease.isReleased) {
       onLoadSnapshotList(datasetIdToProps);

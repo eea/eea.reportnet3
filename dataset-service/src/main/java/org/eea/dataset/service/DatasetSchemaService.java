@@ -73,13 +73,16 @@ public interface DatasetSchemaService {
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
+
   /**
    * Replace schema.
    *
    * @param idSchema the id schema
    * @param schema the schema
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
    */
-  void replaceSchema(String idSchema, DataSetSchema schema);
+  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot);
 
 
   /**
@@ -164,11 +167,11 @@ public interface DatasetSchemaService {
    * Order field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchemaId the field schema id
    * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception
    */
-  Boolean orderFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Integer position)
+  Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
 }
