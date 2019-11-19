@@ -1265,7 +1265,7 @@ const DataViewer = withRouter(
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
               icon={visibilityColumnIcon}
-              label={resources.messages['visibility']}
+              label={resources.messages['showHideColumns']}
               onClick={event => {
                 dropdownFilterRef.current.show(event);
               }}
