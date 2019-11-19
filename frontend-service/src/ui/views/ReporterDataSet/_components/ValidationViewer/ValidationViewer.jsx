@@ -18,7 +18,15 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DatasetService } from 'core/services/DataSet';
 
 const ValidationViewer = React.memo(
-  ({ visible, datasetId, datasetName, buttonsList = undefined, hasWritePermissions, tableSchemaNames }) => {
+  ({
+    visible,
+    datasetId,
+    datasetName,
+    buttonsList = undefined,
+    levelErrorTypes,
+    hasWritePermissions,
+    tableSchemaNames
+  }) => {
     const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
@@ -125,7 +133,17 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadLevelErrorsFilter = () => {
-      const allLevelErrorsFilterList = [{ label: 'Error', key: 'Error_Id' }, { label: 'Warning', key: 'Warning_Id' }];
+      const allLevelErrorsFilterList = [];
+      levelErrorTypes.map(filter => {
+        allLevelErrorsFilterList.push({
+          label:
+            filter
+              .toString()
+              .charAt(0)
+              .toUpperCase() + filter.slice(1).toLowerCase(),
+          key: `${filter.toString()}_Id`
+        });
+      });
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
     };
 
@@ -314,7 +332,7 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return areActiveFilters ? filteredCountSameValue() : totalCount();
+        return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
       }

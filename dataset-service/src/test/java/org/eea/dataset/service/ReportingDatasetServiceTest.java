@@ -85,4 +85,28 @@ public class ReportingDatasetServiceTest {
         reportingDatasetService.getDataSetIdByDataflowId(Mockito.anyLong()));
   }
 
+
+  /**
+   * Test get data set id by id dataschema.
+   */
+  @Test
+  public void testGetDataSetIdByIdDataschema() {
+
+    List<ReportingDatasetVO> datasets = new ArrayList<>();
+    ReportingDatasetVO dataset = new ReportingDatasetVO();
+    dataset.setId(1L);
+    datasets.add(dataset);
+    List<Long> result = new ArrayList<>();
+    result.add(1L);
+    when(reportingDatasetRepository.findByDatasetSchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
+
+    reportingDatasetService.getDataSetIdBySchemaId("5ce524fad31fc52540abae73");
+
+
+    assertEquals("failed assertion", datasets,
+        reportingDatasetService.getDataSetIdBySchemaId(Mockito.any()));
+  }
+
 }

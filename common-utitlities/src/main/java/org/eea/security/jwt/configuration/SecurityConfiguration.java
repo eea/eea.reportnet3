@@ -3,7 +3,6 @@ package org.eea.security.jwt.configuration;
 
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eea.security.jwt.expression.EeaExpressionConfiguration;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;

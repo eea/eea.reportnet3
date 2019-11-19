@@ -1,6 +1,7 @@
 package org.eea.kafka.io;
 
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +24,15 @@ import org.springframework.kafka.core.KafkaTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaSenderTest {
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @InjectMocks
   private KafkaSender kafkaSender;
 
-  /** The kafka template. */
+  /**
+   * The kafka template.
+   */
   @Mock
   private KafkaTemplate<String, EEAEventVO> kafkaTemplate;
 
@@ -49,7 +54,7 @@ public class KafkaSenderTest {
   @Test(expected = Exception.class)
   public void testFullTest() throws Exception {
     EEAEventVO event = new EEAEventVO();
-    List<PartitionInfo> infoList = new ArrayList<PartitionInfo>();
+    List<PartitionInfo> infoList = new ArrayList<>();
     PartitionInfo partition = new PartitionInfo("1", 1, null, null, null);
     infoList.add(partition);
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);

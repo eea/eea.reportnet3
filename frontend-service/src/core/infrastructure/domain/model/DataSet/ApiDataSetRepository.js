@@ -146,31 +146,66 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
 
   const tableStatisticValues = [];
-
+  let levelErrors = [];
+  const tableLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
-        (datasetTableDTO.totalRecordsWithErrors + datasetTableDTO.totalRecordsWithWarnings),
+        (datasetTableDTO.totalRecordsWithBlockers +
+          datasetTableDTO.totalRecordsWithErrors +
+          datasetTableDTO.totalRecordsWithWarnings +
+          datasetTableDTO.totalRecordsWithInfos),
+      datasetTableDTO.totalRecordsWithInfos,
       datasetTableDTO.totalRecordsWithWarnings,
-      datasetTableDTO.totalRecordsWithErrors
+      datasetTableDTO.totalRecordsWithErrors,
+      datasetTableDTO.totalRecordsWithBlockers
     ]);
-
+    tableLevelErrors.push(getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
       datasetTableDTO.nameTableSchema
     );
   });
+  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
+  dataset.levelErrorTypes = levelErrors;
 
-  //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
   dataset.tableStatisticValues = tableStatisticValues;
   dataset.tableStatisticPercentages = getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
-
   return dataset;
+};
+
+const getDashboardLevelErrors = datasetTableDTO => {
+  let levelErrors = [];
+  if (datasetTableDTO.totalErrors > 0) {
+    let corrects =
+      datasetTableDTO.totalRecords -
+      (datasetTableDTO.totalRecordsWithBlockers +
+        datasetTableDTO.totalRecordsWithErrors +
+        datasetTableDTO.totalRecordsWithWarnings +
+        datasetTableDTO.totalRecordsWithInfos);
+
+    if (corrects > 0) {
+      levelErrors.push('CORRECT');
+    }
+    if (datasetTableDTO.totalRecordsWithInfos > 0) {
+      levelErrors.push('INFO');
+    }
+    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+      levelErrors.push('WARNING');
+    }
+    if (datasetTableDTO.totalRecordsWithErrors > 0) {
+      levelErrors.push('ERROR');
+    }
+    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+      levelErrors.push('BLOCKER');
+    }
+  }
+  return levelErrors;
 };
 
 const exportDataById = async (datasetId, fileType) => {
@@ -190,6 +225,101 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
+const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
+  const datasetSchemaObject = [datasetSchemaDTO];
+  const allLevelErrorsFromRules = [];
+  findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
+  let levelErrorsRepeated = [];
+  allLevelErrorsFromRules.map(rule => {
+    if (!isUndefined(rule.thenCondition)) {
+      levelErrorsRepeated.push(rule.thenCondition[1]);
+    }
+  });
+  let levelErrors = [...new Set(levelErrorsRepeated)];
+  levelErrors = orderLevelErrors(levelErrors);
+  return levelErrors;
+};
+
+const orderLevelErrors = levelErrors => {
+  const levelErrorsWithPriority = [
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
+  ];
+
+  return levelErrors
+    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
+    .flat()
+    .sort((a, b) => a.index - b.index)
+    .map(orderedError => orderedError.id);
+};
+
+const findObjects = (obj, targetProp, finalResults) => {
+  const getObject = theObject => {
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            finalResults.push(theObject);
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  };
+  getObject(obj);
+};
+
+function findObjects2(obj, targetProp, finalResults) {
+  function getObject(theObject) {
+    let result = null;
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            if (!isUndefined(theObject.thenCondition)) {
+              finalResults.push(theObject);
+            } else {
+              if (!isUndefined(theObject.ruleField)) {
+                theObject.ruleField.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleRecord)) {
+                theObject.ruleRecord.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleTable)) {
+                theObject.ruleTable.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleDataSet)) {
+                theObject.ruleDataSet.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              }
+            }
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  }
+  getObject(obj);
+}
+
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   //reorder tables alphabetically
@@ -206,7 +336,7 @@ const schemaById = async datasetId => {
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
-
+  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
@@ -235,6 +365,7 @@ const schemaById = async datasetId => {
   });
 
   dataset.tables = tables;
+
   return dataset;
 };
 

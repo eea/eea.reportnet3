@@ -20,6 +20,7 @@ import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -35,14 +36,16 @@ import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const ReportingDataflow = withRouter(({ history, match }) => {
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataflowData, setDataflowData] = useState(undefined);
+  const [dataflowData, setDataflowData] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
-  const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -51,12 +54,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
+  const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
-  const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
+  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   let growlRef = useRef();
 
@@ -105,9 +109,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       if (!isEmpty(dataflow.designDatasets)) {
-        const { designDatasets } = dataflow;
-        const [designDataset] = designDatasets;
-        setDesignDatasetSchemaId(designDataset.datasetId);
+        dataflow.designDatasets.forEach((schema, idx) => {
+          schema.index = idx;
+        });
+        setDesignDatasetSchemas(dataflow.designDatasets);
+        const datasetSchemaInfo = [];
+        dataflow.designDatasets.map(schema => {
+          datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
+        });
+        setUpdatedDatasetSchema(datasetSchemaInfo);
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -119,7 +129,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.all(datasetId));
+    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
   };
 
   useEffect(() => {
@@ -161,15 +171,18 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
-          if (isNameEditable) {
-            document.getElementsByClassName('p-inputtext p-component')[0].focus();
-          }
+          setIsDuplicated(false);
         }}
       />
     </div>
   );
 
-  const onCreateDataset = () => {
+  const getDeleteSchemaIndex = index => {
+    setDeleteSchemaIndex(index);
+    setDeleteDialogVisible(true);
+  };
+
+  const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
   };
 
@@ -177,35 +190,39 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setErrorDialogVisible(true);
   };
 
-  const onDeleteDatasetSchema = async schemaId => {
+  const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
+    showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(schemaId);
+      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
       }
     } catch (error) {
       console.error(error.response);
+    } finally {
+      hideLoading();
     }
+  };
+
+  const onDuplicateName = () => {
+    setIsDuplicated(true);
   };
 
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
-    if (isNameEditable) {
-      document.getElementsByClassName('p-inputtext p-component')[0].focus();
-    }
-  };
-
-  const onNameEdit = () => {
-    setIsNameEditable(!isNameEditable);
+    setIsDuplicated(false);
   };
 
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
   };
 
-  const onSaveName = async value => {
-    await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
+  const onSaveName = async (value, index) => {
+    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
+    const titles = [...updatedDatasetSchema];
+    titles[index].schemaName = value;
+    setUpdatedDatasetSchema(titles);
   };
 
   const showContributorsDialog = () => {
@@ -223,7 +240,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setIsActiveReleaseSnapshotDialog(true);
   };
   const onReleaseSnapshot = async snapshotId => {
-    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapshotId);
+    const snapshotToRelease = await SnapshotService.releaseByIdReporter(
+      match.params.dataflowId,
+      datasetIdToProps,
+      snapshotId
+    );
 
     if (snapshotToRelease.isReleased) {
       onLoadSnapshotList(datasetIdToProps);
@@ -294,8 +315,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
-                      command: () => showNewDatasetDialog(),
-                      disabled: !isEmpty(dataflowData.designDatasets) || !isEmpty(dataflowData.datasets)
+                      command: () => showNewDatasetDialog()
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
@@ -309,7 +329,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                caption={resources.messages['documents']}
+                caption={resources.messages['informationPoint']}
                 handleRedirect={() =>
                   handleRedirect(
                     getUrl(
@@ -330,6 +350,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     <BigButton
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
+                      datasetSchemaInfo={updatedDatasetSchema}
                       handleRedirect={() => {
                         handleRedirect(
                           getUrl(
@@ -342,8 +363,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           )
                         );
                       }}
-                      isNameEditable={isNameEditable}
-                      onNameEdit={onNameEdit}
+                      index={newDatasetSchema.index}
+                      onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
@@ -366,8 +387,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         },
                         {
                           label: resources.messages['rename'],
-                          icon: 'pencil',
-                          command: () => onNameEdit()
+                          icon: 'pencil'
                         },
                         {
                           label: resources.messages['duplicate'],
@@ -377,7 +397,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
-                          command: () => setDeleteDialogVisible(true)
+                          command: () => getDeleteSchemaIndex(newDatasetSchema.index)
                         },
                         {
                           label: resources.messages['properties'],
@@ -487,13 +507,20 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
           <NewDatasetSchemaForm
             dataflowId={match.params.dataflowId}
+            datasetSchemaInfo={updatedDatasetSchema}
             isFormReset={isFormReset}
-            onCreate={onCreateDataset}
+            onCreate={onCreateDatasetSchema}
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
-
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={onHideErrorDialog}
+          visible={isDuplicated}>
+          <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
+        </Dialog>
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
@@ -505,7 +532,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteDatasetSchema(designDatasetSchemaId)}
+          onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
           onHide={() => setDeleteDialogVisible(false)}
           visible={deleteDialogVisible}>
           {resources.messages['deleteDatasetSchema']}

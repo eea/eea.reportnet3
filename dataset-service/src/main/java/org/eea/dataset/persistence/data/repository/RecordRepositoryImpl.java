@@ -208,6 +208,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           break;
       }
     }
+    result.setTotalFilteredRecords(0L);
     // we put that condition because we wont to do any query if the filter is empty and return a new
     // result object
     if (levelErrorList.size() != 0) {

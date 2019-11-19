@@ -35,9 +35,12 @@ import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
+    buttonsList = undefined,
+    correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isWebFormMMR,
-    buttonsList = undefined,
+    levelErrorTypes,
+    allLevelErrors = correctLevelError.concat(levelErrorTypes),
     recordPositionId,
     selectedRecordErrorId,
     tableHasErrors,
@@ -63,7 +66,7 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
+    const [filterLevelError, setFilterLevelError] = useState(allLevelErrors);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -74,6 +77,7 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
+    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypes);
     const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numCopiedRecords, setNumCopiedRecords] = useState();
@@ -106,11 +110,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
-        setValidationDropdownFilter([
-          { label: resources.messages['error'], key: 'ERROR' },
-          { label: resources.messages['warning'], key: 'WARNING' },
-          { label: resources.messages['correct'], key: 'CORRECT' }
-        ]);
+        setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
         contextReporterDataset.setIsValidationSelected(false);
       }
@@ -133,12 +133,7 @@ const DataViewer = withRouter(
       }
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
-
-      setValidationDropdownFilter([
-        { label: resources.messages['error'], key: 'ERROR' },
-        { label: resources.messages['warning'], key: 'WARNING' },
-        { label: resources.messages['correct'], key: 'CORRECT' }
-      ]);
+      setValidationDropdownFilter(getLevelErrorFilters());
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -182,11 +177,7 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
-        'ERROR',
-        'WARNING',
-        'CORRECT'
-      ]);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -216,13 +207,12 @@ const DataViewer = withRouter(
           style={{ width: '100px', height: '45px' }}
         />
       );
-
       let validationCol = (
         <Column
           className={styles.validationCol}
           body={validationsTemplate}
           field="validations"
-          header=""
+          header={resources.messages['validations']}
           key="recordValidation"
           sortable={false}
         />
@@ -258,8 +248,29 @@ const DataViewer = withRouter(
       }
     };
 
+    const getLevelErrorFilters = () => {
+      let filters = [];
+      allLevelErrors.map(function(value) {
+        let filter = {
+          label:
+            value
+              .toString()
+              .charAt(0)
+              .toUpperCase() + value.slice(1).toLowerCase(),
+          key:
+            value
+              .toString()
+              .charAt(0)
+              .toUpperCase() + value.slice(1).toLowerCase()
+        };
+        filters.push(filter);
+      });
+      return filters;
+    };
+
     const showValidationFilter = filteredKeys => {
-      setIsFilterValidationsActive(filteredKeys.length !== 3);
+      // length of errors in data schema rules of validation
+      setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypes.length + 1); // +1 -> corrects
       setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
@@ -732,15 +743,36 @@ const DataViewer = withRouter(
       return `${tableName}.${fileType}`;
     };
 
+    const getLevelErrorString = levelError => {
+      if (levelError.toString().toUpperCase() === 'BLOCKER') {
+        return 'Blocker';
+      } else if (levelError.toString().toUpperCase() === 'ERROR') {
+        return 'Error';
+      } else if (levelError.toString().toUpperCase() === 'WARNING') {
+        return 'Warning';
+      } else if (levelError.toString().toUpperCase() === 'INFO') {
+        return 'Info';
+      } else return '';
+    };
+
     //Template for Field validation
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
         const validations = [...field.fieldValidations];
         let message = [];
-        validations.forEach(validation =>
-          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
-        );
+
+        validations.sort((a, b) => {
+          let levelError = a.levelError;
+          let levelError2 = b.levelError;
+          return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
+        });
+
+        validations.forEach(validation => {
+          let error = getLevelErrorString(validation.levelError);
+          message += '- ' + error + ': ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
+        });
+
         const levelError = getLevelError(validations);
 
         return (
@@ -854,27 +886,43 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-      validations.forEach(validation => {
-        if (validation.levelError === 'WARNING') {
-          const wNum = 1;
-          if (wNum > lvlFlag) {
-            lvlFlag = wNum;
-            levelError = 'WARNING';
-          }
-        } else if (validation.levelError === 'ERROR') {
-          const eNum = 2;
-          if (eNum > lvlFlag) {
-            lvlFlag = eNum;
-            levelError = 'ERROR';
-          }
-        } else if (validation.levelError === 'BLOCKER') {
-          const bNum = 2;
-          if (bNum > lvlFlag) {
-            lvlFlag = bNum;
-            levelError = 'BLOCKER';
-          }
-        }
+      const errors = [];
+      validations.map(validation => {
+        errors.push(validation.levelError);
       });
+      let differentErrors = [...new Set(errors)];
+
+      if (differentErrors.length > 1) {
+        return 'MULTI';
+      } else {
+        validations.forEach(validation => {
+          if (validation.levelError === 'INFO') {
+            const iNum = 1;
+            if (iNum > lvlFlag) {
+              lvlFlag = iNum;
+              levelError = 'INFO';
+            }
+          } else if (validation.levelError === 'WARNING') {
+            const wNum = 2;
+            if (wNum > lvlFlag) {
+              lvlFlag = wNum;
+              levelError = 'WARNING';
+            }
+          } else if (validation.levelError === 'ERROR') {
+            const eNum = 3;
+            if (eNum > lvlFlag) {
+              lvlFlag = eNum;
+              levelError = 'ERROR';
+            }
+          } else if (validation.levelError === 'BLOCKER') {
+            const bNum = 4;
+            if (bNum > lvlFlag) {
+              lvlFlag = bNum;
+              levelError = 'BLOCKER';
+            }
+          }
+        });
+      }
       return levelError;
     };
 
@@ -992,6 +1040,10 @@ const DataViewer = withRouter(
       return value && value.length > 0;
     };
 
+    const getRecordValidationByErrorAndMessage = (levelError, message) => {
+      return DatasetService.createValidation('RECORD', 0, levelError, message);
+    };
+
     //Template for Record validation
     const validationsTemplate = recordData => {
       let validations = [];
@@ -999,32 +1051,61 @@ const DataViewer = withRouter(
         validations = [...recordData.recordValidations];
       }
 
-      let messageErrors = '';
-      let messageWarnings = '';
       let hasFieldErrors = false;
+
       const recordsWithFieldValidations = recordData.dataRow.filter(
         row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
       );
-      hasFieldErrors = recordsWithFieldValidations.length > 0;
+
+      hasFieldErrors = !isEmpty(recordsWithFieldValidations);
 
       const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
 
       if (hasFieldErrors) {
+        const filteredFieldValidationsWithBlocker = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'BLOCKER'
+        );
+        if (!isEmpty(filteredFieldValidationsWithBlocker)) {
+          validations.push(getRecordValidationByErrorAndMessage('BLOCKER', resources.messages['recordBlockers']));
+        }
+
         const filteredFieldValidationsWithError = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'ERROR'
         );
-        //There are warnings in fields
-        if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
-          validations.push(
-            DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
-          );
+        if (!isEmpty(filteredFieldValidationsWithError)) {
+          validations.push(getRecordValidationByErrorAndMessage('ERROR', resources.messages['recordErrors']));
         }
-        if (filteredFieldValidationsWithError.length > 0) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+
+        const filteredFieldValidationsWithWarning = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'WARNING'
+        );
+        if (!isEmpty(filteredFieldValidationsWithWarning)) {
+          validations.push(getRecordValidationByErrorAndMessage('WARNING', resources.messages['recordWarnings']));
+        }
+
+        const filteredFieldValidationsWithInfo = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
+        );
+        if (!isEmpty(filteredFieldValidationsWithInfo)) {
+          validations.push(getRecordValidationByErrorAndMessage('INFO', resources.messages['recordInfos']));
         }
       }
+
+      const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
       const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
       const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
+      const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
+
+      let messageBlockers = '';
+      let messageErrors = '';
+      let messageWarnings = '';
+      let messageInfos = '';
+
+      blockerValidations.forEach(validation =>
+        validation.message
+          ? (messageBlockers += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
 
       errorValidations.forEach(validation =>
         validation.message
@@ -1038,16 +1119,48 @@ const DataViewer = withRouter(
           : ''
       );
 
-      return errorValidations.length > 0 && warningValidations.length > 0 ? (
-        <div className={styles.iconTooltipWrapper}>
-          <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
-          <IconTooltip levelError="ERROR" message={messageErrors} style={{ width: '1.5em' }} />
-        </div>
-      ) : errorValidations.length > 0 ? (
-        <IconTooltip levelError="ERROR" message={messageErrors} />
-      ) : warningValidations.length > 0 ? (
-        <IconTooltip levelError="WARNING" message={messageWarnings} />
-      ) : null;
+      infoValidations.forEach(validation =>
+        validation.message
+          ? (messageInfos += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
+
+      let validationsGroup = {};
+      validationsGroup.blockers = blockerValidations;
+      validationsGroup.errors = errorValidations;
+      validationsGroup.warnings = warningValidations;
+      validationsGroup.infos = infoValidations;
+
+      validationsGroup.messageBlockers = messageBlockers;
+      validationsGroup.messageErrors = messageErrors;
+      validationsGroup.messageWarnings = messageWarnings;
+      validationsGroup.messageInfos = messageInfos;
+
+      let iconValidaionsCell = getIconsValidationsErrors(validationsGroup);
+      return iconValidaionsCell;
+    };
+
+    const addIconLevelError = (validation, levelError, message) => {
+      let icon = [];
+      if (!isEmpty(validation)) {
+        icon.push(<IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} />);
+      }
+      return icon;
+    };
+
+    const getIconsValidationsErrors = validations => {
+      let icons = [];
+      if (isNull(validations)) {
+        return icons;
+      }
+
+      let blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+      let errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+      let warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+      let infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+
+      icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
+      return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
     const rowClassName = rowData => {
@@ -1081,8 +1194,7 @@ const DataViewer = withRouter(
       return (
         <span>
           {resources.messages['filtered']}
-          {':'}{' '}
-          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {':'} {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : 0}
           {' | '}
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
           {resources.messages['records'].toLowerCase()}
@@ -1102,13 +1214,14 @@ const DataViewer = withRouter(
     };
 
     const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords)) {
-        return totalCount();
-      } else {
-        return totalFilteredRecords == totalRecords ? filteredCountSameValue() : filteredCount();
+      if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
+        if (totalFilteredRecords == 0 && !isFilterValidationsActive) {
+          return totalCount();
+        } else {
+          return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
+        }
       }
     };
-
     return (
       <SnapshotContext.Provider>
         <Toolbar className={styles.dataViewerToolbar}>
@@ -1272,7 +1385,7 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+            totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
             value={fetchedData}
             //scrollable={true}
             //frozenWidth="100px"

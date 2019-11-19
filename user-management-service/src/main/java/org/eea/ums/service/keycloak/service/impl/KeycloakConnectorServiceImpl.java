@@ -117,7 +117,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     TokenInfo tokenInfo = this.generateToken(adminUser, adminPass);
 
     String adminToken =
-        Optional.ofNullable(tokenInfo).map(info -> info.getAccessToken()).orElse("");
+        Optional.ofNullable(tokenInfo).map(TokenInfo::getAccessToken).orElse("");
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
@@ -212,16 +212,36 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   @Override
   public TokenInfo generateToken(String username, String password) {
+    MultiValueMap<String, String> map = getTokenGenerationMap(username, password, false);
+    return retrieveTokenFromKeycloak(map);
+  }
 
+  /**
+   * Generate admin token token info.
+   *
+   * @param username the username
+   * @param password the password
+   *
+   * @return the token info
+   */
+  @Override
+  public TokenInfo generateAdminToken(String username, String password) {
+    MultiValueMap<String, String> map = getTokenGenerationMap(username, password, true);
+    return retrieveTokenFromKeycloak(map);
+  }
+
+  private MultiValueMap<String, String> getTokenGenerationMap(String username, String password,
+      Boolean admin) {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("username", username);
     map.add("grant_type", "password");
     map.add("password", password);
     map.add("client_secret", secret);
     map.add("client_id", clientId);
-
-    return retrieveTokenFromKeycloak(map);
-
+    if (admin) {
+      map.add("scope", "openid info offline_access");
+    }
+    return map;
   }
 
   /**
@@ -304,7 +324,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (GroupInfo[]) entity).orElse(null);
   }
 
@@ -331,7 +351,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (GroupInfo) entity).orElse(null);
   }
 
@@ -472,7 +492,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, RoleRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (RoleRepresentation[]) entity).orElse(null);
   }
 
@@ -580,7 +600,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       String[] resourcesetBody = resourceSet.getBody();
       if (null != resourcesetBody) {
         List<String> resources = Arrays.asList(resourcesetBody);
-        if (null != resources && resources.size() > 0) {
+        if (null != resources && !resources.isEmpty()) {
           resources.forEach(resourceSetId -> {
 
             Map<String, String> uriRequestParam = new HashMap<>();

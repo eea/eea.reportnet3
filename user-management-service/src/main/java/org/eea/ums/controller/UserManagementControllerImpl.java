@@ -39,11 +39,15 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
-  /** The backup managment controler service. */
+  /**
+   * The backup managment controler service.
+   */
   @Autowired
   private BackupManagmentService backupManagmentControlerService;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -59,7 +63,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
   public TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password) {
-    return securityProviderInterfaceService.doLogin(username, password);
+    return securityProviderInterfaceService.doLogin(username, password, false);
   }
 
   /**
@@ -222,6 +226,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Sets the users.
    *
    * @param file the file
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override

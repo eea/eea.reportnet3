@@ -20,7 +20,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -424,32 +423,6 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.updateDataset(null);
   }
 
-  /**
-   * Test load statistics.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testLoadStatistics() throws Exception {
-    when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
-    dataSetControllerImpl.getStatisticsById(1L);
-
-    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
-  }
-
-
-  /**
-   * Test load statistics exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testLoadStatisticsException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
-    dataSetControllerImpl.getStatisticsById(null);
-
-    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
-  }
 
   /**
    * Test get position from any object id.

@@ -1,6 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 
-import { isEmpty, isNull, isString, isUndefined } from 'lodash';
+import * as Yup from 'yup';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -9,25 +11,52 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ webLinks, isCustodian }) => {
+export const WebLinks = ({ isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
-  const [editedRecord, setEditedRecord] = useState({});
-  const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+  const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
-  const [isNewRecord, setIsNewRecord] = useState(false);
-  const [newRecord, setNewRecord] = useState({ description: '', url: '' });
-  const [selectedRecord, setSelectedRecord] = useState({});
+  const [weblinkItem, setWeblinkItem] = useState({});
+  const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+  const [webLinks, setWebLinks] = useState();
 
-  const onSelectRecord = val => {
-    setIsNewRecord(false);
-    setSelectedRecord({ ...val });
-    setEditedRecord({ ...val });
+  const form = useRef(null);
+  const addWeblinkSchema = Yup.object().shape({
+    description: Yup.string().required(),
+    url: Yup.string()
+      .matches(
+        /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
+        resources.messages['urlEror']
+      )
+      .required()
+  });
+
+  const onLoadWebLinks = async () => {
+    // setIsLoading(true);
+    try {
+      setWebLinks(await WebLinkService.all(dataflowId));
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        console.log('error', error.response);
+      }
+    } finally {
+      //setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    onLoadWebLinks();
+    setWeblinkItem({ id: undefined, description: '', url: '' });
+  }, [reload]);
+
+  const onHideAddEditDialog = () => {
+    form.current.resetForm();
+    setIsAddOrEditWeblinkDialogVisible(false);
+    setWeblinkItem({ id: undefined, description: '', url: '' });
   };
 
   const addRowFooter = (
@@ -37,156 +66,70 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         label={resources.messages['add']}
         icon="add"
         onClick={() => {
-          setIsNewRecord(true);
-          setIsAddDialogVisible(true);
+          setIsAddOrEditWeblinkDialogVisible(true);
         }}
       />
     </div>
   );
 
-  const addRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          onSaveRecord(newRecord);
-        }}
-      />
-      <Button
-        className="p-button-secondary"
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => {
-          setIsAddDialogVisible(false);
-        }}
-      />
-    </div>
-  );
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
 
-  const newRecordForm = webLinksColumns.map((column, i) => {
-    if (isAddDialogVisible) {
-      if (i == 0 || i == 3) {
-        return;
-      }
-      return (
-        <React.Fragment key={column.props.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>
-              {column.props.header === 'url'
-                ? column.props.header.toUpperCase()
-                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
-            </label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.props.field}
-              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
-            />
-          </div>
-        </React.Fragment>
-      );
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
     }
-  });
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    }
 
-  const onEditAddFormInput = (field, value) => {
-    let record = {};
-    if (!isNewRecord) {
-      value = changeRecordValue(field, value);
-      record = { ...editedRecord, [field]: value };
-      setEditedRecord(record);
-    } else {
-      value = changeRecordValue(field, value);
-      record = { ...newRecord, [field]: value };
-      setNewRecord(record);
-    }
+    return newUrl;
   };
 
-  const changeRecordValue = (field, value) => {
-    if (!isUndefined(value) && !isNull(value) && isString(value)) {
-      if (field == 'url') {
-        value = value
-          .replace(`\r`, '')
-          .replace(`\n`, '')
-          .replace(/\s/g, '');
-      }
-    }
-    return value;
-  };
+  const fieldsArray = [
+    { field: 'description', header: resources.messages['description'] },
+    { field: 'url', header: resources.messages['url'] }
+  ];
 
-  const editRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          try {
-            onSaveRecord(editedRecord);
-          } catch (error) {
-            console.error(error);
-          }
-        }}
-      />
-      <Button
-        className="p-button-secondary"
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => setIsEditDialogVisible(false)}
-      />
-    </div>
-  );
+  const onSaveRecord = async e => {
+    if (isUndefined(weblinkItem.id)) {
+      setWeblinkItem(e);
 
-  const editRecordForm = webLinksColumns.map((column, i) => {
-    if (isEditDialogVisible) {
-      if (i == 0) {
-        return;
-      }
-      return (
-        <React.Fragment key={column.props.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>
-              {column.props.header === 'url'
-                ? column.props.header.toUpperCase()
-                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
-            </label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.props.field}
-              value={editedRecord[column.props.field]}
-              onChange={e => {
-                return onEditAddFormInput(column.props.field, e.target.value, column.props.field);
-              }}
-            />
-          </div>
-        </React.Fragment>
-      );
-    }
-  });
-
-  const onSaveRecord = async record => {
-    if (isNewRecord) {
       try {
-        setIsAddDialogVisible(false);
+        const newWeblink = await WebLinkService.create(dataflowId, e);
+
+        if (newWeblink.isCreated) {
+          setReload(!reload);
+        }
+
+        onHideAddEditDialog();
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-      } finally {
+        console.error('Error on save new Weblink: ', error);
       }
     } else {
       try {
-        setIsEditDialogVisible(false);
+        setWeblinkItem(e);
+
+        const weblinkToEdit = await WebLinkService.update(dataflowId, e);
+
+        if (weblinkToEdit.isUpdated) {
+          setReload(!reload);
+        }
+
+        onHideAddEditDialog();
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-      } finally {
+        console.error('Error on update new Weblink: ', error);
       }
     }
   };
 
-  const onDeleteWeblink = () => {
+  const onDeleteWeblink = async () => {
+    const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+
+    if (weblinkToDelete.isDeleted) {
+      setReload(!reload);
+    }
+
     setIsConfirmDeleteVisible(false);
   };
 
@@ -201,7 +144,9 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={() => setIsEditDialogVisible(true)}
+          onClick={e => {
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
         />
         <Button
           type="button"
@@ -213,7 +158,9 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
     );
   };
 
-  const webLinkEditionColumn = <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} />;
+  const webLinkEditionColumn = (
+    <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
+  );
 
   useEffect(() => {
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
@@ -232,21 +179,19 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         />
       ));
 
-    // if (isCustodian) {
-    if (false) {
+    if (isCustodian) {
       webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
     }
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
 
-  const emptyWebLink = [
-    { field: 'description', header: resources.messages['description'] },
-    { field: 'url', header: resources.messages['url'] }
-  ].map(item => <Column field={item.field} header={item.header} key={item.field} />);
+  const emptyWebLinkColumns = fieldsArray.map(item => (
+    <Column field={item.field} header={item.header} key={item.field} />
+  ));
 
   const linkTemplate = rowData => {
     return (
-      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
+      <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
         {rowData.url}
       </a>
     );
@@ -257,45 +202,79 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
       <DataTable
         autoLayout={true}
         editable={true}
-        // footer={isCustodian ? addRowFooter : null}
-        onContextMenuSelectionChange={() => {
-          onSelectRecord(webLinks);
-        }}
+        footer={isCustodian ? addRowFooter : null}
         onRowSelect={e => {
-          return onSelectRecord(Object.assign({}, e.data));
+          setWeblinkItem(Object.assign({}, e.data));
         }}
         paginator={true}
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
         value={webLinks}>
-        {!isEmpty(webLinks) ? webLinksColumns : emptyWebLink}
+        {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
 
       <Dialog
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        footer={addRowDialogFooter}
-        header={resources.messages['addNewRow']}
+        header={isUndefined(weblinkItem.id) ? resources.messages['addNewRow'] : resources.messages['editRow']}
         modal={true}
-        onHide={() => setIsAddDialogVisible(false)}
+        onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
-        visible={isAddDialogVisible}>
-        <div className="p-grid p-fluid">{newRecordForm}</div>
-      </Dialog>
-
-      <Dialog
-        className={styles.dialog}
-        blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        footer={editRowDialogFooter}
-        header={resources.messages['editRow']}
-        modal={true}
-        onHide={() => setIsEditDialogVisible(false)}
-        style={{ width: '50%', height: '80%' }}
-        visible={isEditDialogVisible}>
-        <div className="p-grid p-fluid">{editRecordForm}</div>
+        visible={isAddOrEditWeblinkDialogVisible}>
+        <Formik
+          enableReinitialize={true}
+          ref={form}
+          initialValues={weblinkItem}
+          validationSchema={addWeblinkSchema}
+          onSubmit={e => {
+            onSaveRecord(e);
+          }}>
+          {({ isSubmitting, errors, touched, values }) => (
+            <Form>
+              <fieldset>
+                <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+                  <Field
+                    name="description"
+                    type="text"
+                    placeholder={resources.messages['description']}
+                    value={values.description}
+                  />
+                  <ErrorMessage name="description" component="div" />
+                </div>
+                <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
+                  <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
+                  <ErrorMessage name="url" component="div" />
+                </div>
+              </fieldset>
+              <fieldset>
+                <hr />
+                <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+                  <Button
+                    className={
+                      !isEmpty(touched)
+                        ? isEmpty(errors)
+                          ? styles.primaryButton
+                          : styles.disabledButton
+                        : styles.disabledButton
+                    }
+                    label={isUndefined(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
+                    disabled={isSubmitting}
+                    icon={isUndefined(weblinkItem.id) ? 'add' : 'edit'}
+                    type={isSubmitting ? '' : 'submit'}
+                  />
+                  <Button
+                    className={`${styles.cancelButton} p-button-secondary`}
+                    label={resources.messages['cancel']}
+                    icon="cancel"
+                    onClick={() => onHideAddEditDialog()}
+                  />
+                </div>
+              </fieldset>
+            </Form>
+          )}
+        </Formik>
       </Dialog>
 
       <ConfirmDialog
@@ -303,7 +282,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         maximizable={false}
-        onConfirm={() => onDeleteWeblink()}
+        onConfirm={e => onDeleteWeblink(e)}
         onHide={onHideDeleteDialog}
         visible={isConfirmDeleteVisible}>
         {resources.messages['deleteWebLink']}

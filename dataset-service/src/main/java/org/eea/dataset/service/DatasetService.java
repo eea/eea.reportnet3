@@ -9,7 +9,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -136,18 +135,6 @@ public interface DatasetService {
    */
   Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
 
-
-  /**
-   * Gets the statistics.
-   *
-   * @param datasetId the dataset id
-   * @return the statistics
-   * @throws EEAException the EEA exception
-   * @throws InstantiationException the instantiation exception
-   * @throws IllegalAccessException the illegal access exception
-   */
-  StatisticsVO getStatistics(@DatasetId Long datasetId)
-      throws EEAException, InstantiationException, IllegalAccessException;
 
   /**
    * Update record.
@@ -310,13 +297,21 @@ public interface DatasetService {
       throws EEAException;
 
   /**
-   * Detele field values.
+   * Delete field values.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
-   * @return the string
    */
-  String deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
+  void deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
+
+  /**
+   * Update field value type.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @param type the type
+   */
+  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, String type);
 
   /**
    * Delete table values.

@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.data.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Objects;
 import javax.persistence.Column;
@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -24,9 +26,9 @@ public class Statistics {
 
   /** The id. */
   @Id
-  @SequenceGenerator(name = "statistics_sequence_generator", sequenceName = "statistics_sequence",
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "statistics_id_seq")
+  @SequenceGenerator(name = "statistics_id_seq", sequenceName = "statistics_id_seq",
       allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "statistics_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -41,6 +43,12 @@ public class Statistics {
   /** The value. */
   @Column(name = "VALUE")
   private String value;
+
+
+  /** The dataset. */
+  @OneToOne(orphanRemoval = false)
+  @JoinColumn(name = "ID_DATASET", referencedColumnName = "id")
+  private ReportingDataset dataset;
 
 
   /**

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
  * The type Kafka receiver.
  */
 @Component
-//@ConditionalOnProperty
 public class DefaultKafkaReceiver extends KafkaReceiver {
 
 

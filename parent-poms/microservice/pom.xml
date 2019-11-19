@@ -223,9 +223,7 @@
             <exclude>
               org.eea.*.service.vo
             </exclude>
-            <exclude>
-              org.eea.interfaces.*
-            </exclude>
+
             <exclude>
               org.eea.*.mapper
             </exclude>
@@ -234,6 +232,9 @@
             </exclude>
             <exclude>
               org.eea.ums.service.keycloak.model.**
+            </exclude>
+            <exclude>
+              org.eea.indexsearch.io.kafka.domain.**
             </exclude>
           </excludes>
         </configuration>
@@ -305,7 +306,7 @@
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
           **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/validation/util/**,
-          **/org/eea/ums/service/keycloak/model/**
+          **/org/eea/ums/service/keycloak/model/**,**/org/eea/indexsearch/io/kafka/domain/**
         </sonar.coverage.exclusions>
       </properties>
       <build>
