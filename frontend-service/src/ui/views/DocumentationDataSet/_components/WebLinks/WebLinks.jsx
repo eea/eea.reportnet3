@@ -161,7 +161,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           field={key}
           filter={false}
           filterMatchMode="contains"
-          sortable={true}
           header={key === 'url' ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1)}
           body={key === 'url' ? linkTemplate : null}
         />
@@ -206,7 +205,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       )}
       <DataTable
         autoLayout={true}
-        editable={true}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
