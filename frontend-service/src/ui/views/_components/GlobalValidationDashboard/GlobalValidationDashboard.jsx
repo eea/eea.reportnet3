@@ -171,6 +171,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaNa
       yAxes: [
         {
           stacked: true,
+          scaleLabel: {
+            display: true,
+            labelString: resources.messages['percentage']
+          },
           ticks: {
             min: 0,
             max: 100,

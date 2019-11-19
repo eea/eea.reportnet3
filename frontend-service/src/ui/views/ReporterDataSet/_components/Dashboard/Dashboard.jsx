@@ -105,7 +105,7 @@ const Dashboard = withRouter(
               label: (tooltipItems, data) =>
                 `${
                   data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems['index']][tooltipItems.datasetIndex]
-                } (${tooltipItems.yLabel} %)`
+                } (${tooltipItems.yLabel}%)`
             }
           },
           responsive: true,
@@ -115,7 +115,7 @@ const Dashboard = withRouter(
                 stacked: true,
                 scaleLabel: {
                   display: true,
-                  labelString: 'Tables'
+                  labelString: resources.messages['tables']
                 }
               }
             ],
@@ -124,12 +124,12 @@ const Dashboard = withRouter(
                 stacked: true,
                 scaleLabel: {
                   display: true,
-                  labelString: 'Percentage'
+                  labelString: resources.messages['percentage']
                 },
                 ticks: {
                   min: 0,
                   max: 100,
-                  callback: (value, index, values) => `${value} %`
+                  callback: (value, index, values) => `${value}%`
                 }
               }
             ]
