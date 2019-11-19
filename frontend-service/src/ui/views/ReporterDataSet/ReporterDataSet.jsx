@@ -59,6 +59,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
@@ -197,6 +198,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     await DatasetService.validateDataById(datasetId);
   };
 
+  const onLoadTableData = hasData => {
+    setDatasetHasData(hasData);
+  };
+
   const onExportData = async fileType => {
     setLoadingFile(true);
     try {
@@ -293,6 +298,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           isWebFormMMR={isWebFormMMR}
           hasWritePermissions={hasWritePermissions}
           levelErrorTypes={levelErrorTypes}
+          onLoadTableData={onLoadTableData}
         />
       );
     }
@@ -375,7 +381,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR}
+              disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}

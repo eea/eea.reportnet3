@@ -41,6 +41,7 @@ const DataViewer = withRouter(
     isWebFormMMR,
     levelErrorTypes,
     allLevelErrors = correctLevelError.concat(levelErrorTypes),
+    onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
     tableHasErrors,
@@ -58,6 +59,7 @@ const DataViewer = withRouter(
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
+    const [datasetHasData, setDatasetHasData] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -420,6 +422,10 @@ const DataViewer = withRouter(
           fields,
           filterLevelError
         );
+
+        if (!isEmpty(tableData.records)) {
+          onLoadTableData(true);
+        }
 
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {

@@ -32,10 +32,10 @@ const MainLayout = ({ children }) => {
   return (
     <Fragment>
       <Navigation />
-      <div className={styles.disclaimer}>
+      {/* <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
         {resources.messages['disclaimerTitle']}
-      </div>
+      </div> */}
       <div className={styles.mainContent}>{children}</div>
       <Footer />
     </Fragment>

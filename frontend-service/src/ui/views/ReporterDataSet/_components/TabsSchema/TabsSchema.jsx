@@ -16,6 +16,7 @@ export const TabsSchema = ({
   levelErrorTypes,
   hasWritePermissions,
   isWebFormMMR,
+  onLoadTableData,
   onTabChange,
   recordPositionId,
   selectedRecordErrorId,
@@ -38,6 +39,7 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isWebFormMMR={isWebFormMMR}
                   key={table.id}
+                  onLoadTableData={onLoadTableData}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}
