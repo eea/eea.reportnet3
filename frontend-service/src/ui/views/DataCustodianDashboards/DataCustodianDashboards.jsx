@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -7,9 +7,11 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { GlobalReleasedDashboard } from 'ui/views/_components/GlobalReleasedDashboard/';
@@ -78,6 +80,55 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
+  const reducer = (state, { type, payload }) => {
+    switch (type) {
+      case 'TOOGLE_SCHEMA_CHART':
+        return {
+          ...state,
+          [payload]: !state[payload]
+        };
+
+      default:
+        return {
+          ...state
+        };
+    }
+  };
+
+  const initValues = {};
+  if (!isUndefined(dataSchema)) {
+    dataSchema.forEach(schema => {
+      initValues[schema.datasetSchemaId] = false;
+    });
+  }
+
+  const [chartState, chartDispatch] = useReducer(reducer, initValues);
+
+  const onLoadButtons = !isUndefined(dataSchema)
+    ? dataSchema.map(schema => {
+        return (
+          <Button
+            key={schema.datasetSchemaId}
+            label={schema.datasetSchemaName}
+            icon="dashboard"
+            onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
+          />
+        );
+      })
+    : null;
+
+  const onLoadCharts = !isUndefined(dataSchema)
+    ? dataSchema.map(schema => {
+        return (
+          <GlobalValidationDashboard
+            key={schema.datasetSchemaId}
+            datasetSchemaId={schema.datasetSchemaId}
+            isVisible={chartState[schema.datasetSchemaId]}
+          />
+        );
+      })
+    : null;
+
   const layout = children => {
     return (
       <MainLayout>
@@ -90,12 +141,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
-      {!isUndefined(dataSchema) &&
-        dataSchema.map(id => (
-          <>
-            <GlobalValidationDashboard datasetSchemaId={id.datasetSchemaId} />
-          </>
-        ))}
+      <Toolbar>
+        <div className="p-toolbar-group-left">{onLoadButtons}</div>
+      </Toolbar>
+      {onLoadCharts}
       <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
     </>
   );

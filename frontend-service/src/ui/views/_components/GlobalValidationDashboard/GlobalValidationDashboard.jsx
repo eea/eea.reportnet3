@@ -32,7 +32,7 @@ const LEVELS = {
   BLOCKER: 4
 };
 
-const GlobalValidationDashboard = ({ datasetSchemaId }) => {
+const GlobalValidationDashboard = ({ datasetSchemaId, isVisible }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],
@@ -182,23 +182,26 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   if (isLoading) {
     return <Spinner className={styles.positioning} />;
   }
-  if (!isEmpty(filterState.data)) {
-    return (
-      <div className={`rep-row ${styles.chart_released}`}>
-        <FilterList
-          color={dashboardColors}
-          levelErrors={levelErrorTypes}
-          originalData={filterState.originalData}
-          filterDispatch={filterDispatch}></FilterList>
-        <Chart
-          ref={chartRef}
-          type="bar"
-          data={filterState.data}
-          options={datasetOptionsObject}
-          width="100%"
-          height="30%"
-        />
-        {/* <fieldset className={styles.colorPickerWrap}>
+  return (
+    <>
+      {isVisible ? (
+        !isEmpty(filterState.data) ? (
+          <div className={`rep-row ${styles.chart_released}`}>
+            <FilterList
+              color={dashboardColors}
+              levelErrors={levelErrorTypes}
+              originalData={filterState.originalData}
+              filterDispatch={filterDispatch}
+            />
+            <Chart
+              ref={chartRef}
+              type="bar"
+              data={filterState.data}
+              options={datasetOptionsObject}
+              width="100%"
+              height="30%"
+            />
+            {/* <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           <div className={styles.fieldsetContent}>
             {Object.keys(SEVERITY_CODE).map((type, i) => {
@@ -221,15 +224,17 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
             })}
           </div>
         </fieldset> */}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
-      </div>
-    );
-  }
+          </div>
+        ) : (
+          <div>
+            <h2>{resources.messages['emptyErrorsDashboard']}</h2>
+          </div>
+        )
+      ) : (
+        <></>
+      )}
+    </>
+  );
 };
 
 export { GlobalValidationDashboard };
