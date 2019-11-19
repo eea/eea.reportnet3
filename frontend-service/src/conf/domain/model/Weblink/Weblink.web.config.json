@@ -2,6 +2,6 @@
     "all": "/document/{:documentId}",
     "create": "/weblink?idDataFlow={:dataflowId}",
     "delete":"/weblink/{idLink}?idLink={:weblinkId}",
-    "update":"/weblink?idDataFlow={:dataflowId}"
+    "update":"/weblink"
 
 }
