@@ -12,6 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
@@ -20,6 +21,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
@@ -37,7 +39,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   });
 
   const onLoadWebLinks = async () => {
-    // setIsLoading(true);
+    setIsLoading(true);
     try {
       setWebLinks(await WebLinkService.all(dataflowId));
     } catch (error) {
@@ -45,7 +47,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         console.log('error', error.response);
       }
     } finally {
-      //setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -205,6 +207,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       )}
       <DataTable
         autoLayout={true}
+        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
@@ -215,7 +218,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
-
       <Dialog
         className={styles.dialog}
         blockScroll={false}

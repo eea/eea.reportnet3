@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { capitalize, isUndefined } from 'lodash/isUndefined';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './Dashboard.module.css';
 
@@ -148,7 +148,7 @@ const Dashboard = withRouter(
                   {Object.keys(SEVERITY_CODE).map((type, i) => {
                     return (
                       <div className={styles.colorPickerItem} key={i}>
-                        <span key={`label_${type}`}>{`  ${capitalize(type)}${type.slice(1).toLowerCase()}: `}</span>
+                        <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
                         <ColorPicker
                           className={styles.colorPicker}
                           onChange={e => {
