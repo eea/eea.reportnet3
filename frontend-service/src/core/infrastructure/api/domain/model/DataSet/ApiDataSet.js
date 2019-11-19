@@ -49,14 +49,13 @@ export const apiDataset = {
       return false;
     }
   },
-  addTableDesign: async (datasetId, datasetId, tableSchemaName) => {
+  addTableDesign: async (datasetId, tableSchemaName) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
-        ? `/dataschema/${datasetId}/tableSchema`
+          ? `/dataschema/${datasetId}/tableSchema`
           : getUrl(DatasetConfig.addTableDesign, {
-              datasetSchemaId,
               datasetId
             }),
         data: { nameTableSchema: tableSchemaName },
@@ -176,11 +175,11 @@ export const apiDataset = {
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-        ? `/dataschema/${datasetId}/tableSchema/${tableSchemaId}`
-        : getUrl(DatasetConfig.deleteTableDesign, {
-            datasetId,
-            tableSchemaId
-          }),
+          ? `/dataschema/${datasetId}/tableSchema/${tableSchemaId}`
+          : getUrl(DatasetConfig.deleteTableDesign, {
+              datasetId,
+              tableSchemaId
+            }),
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`

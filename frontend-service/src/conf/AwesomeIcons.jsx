@@ -38,7 +38,8 @@ import {
   faArrowUp,
   faToggleOff,
   faMapPin,
-  faDrawPolygon
+  faDrawPolygon,
+  faBars
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
