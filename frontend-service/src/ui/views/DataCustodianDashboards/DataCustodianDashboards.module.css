@@ -1,0 +1,11 @@
+.chartToolbar {
+  /* position: fixed !important; */
+  background: white;
+  /* width: 90vw; */
+  box-shadow: teal;
+  z-index: 999;
+}
+
+.show {
+  color: var(--c-corporate-blue) !important;
+}

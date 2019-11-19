@@ -3,6 +3,8 @@ import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
 
+import styles from './DataCustodianDashboards.module.css';
+
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -108,9 +110,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ? dataSchema.map(schema => {
         return (
           <Button
+            className={`p-button-rounded p-button-secondary ${
+              chartState[schema.datasetSchemaId] ? styles.show : styles.hide
+            }`}
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
-            icon="dashboard"
+            icon={chartState[schema.datasetSchemaId] ? 'dashboard' : 'eye'}
             onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
           />
         );
@@ -141,7 +146,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
-      <Toolbar>
+      <Toolbar className={styles.chartToolbar}>
         <div className="p-toolbar-group-left">{onLoadButtons}</div>
       </Toolbar>
       {onLoadCharts}
