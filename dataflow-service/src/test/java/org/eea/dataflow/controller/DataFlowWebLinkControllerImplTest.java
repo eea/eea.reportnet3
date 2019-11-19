@@ -138,10 +138,9 @@ public class DataFlowWebLinkControllerImplTest {
   public void getLinkException() throws EEAException {
     doThrow(new EEAException()).when(dataflowWebLinkService).getWebLink(Mockito.anyLong());
     try {
-      dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
+      dataFlowWebLinkControllerImpl.getLink(1L);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
   }
 
@@ -170,7 +169,7 @@ public class DataFlowWebLinkControllerImplTest {
       dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVOBad);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
   }
 
@@ -193,13 +192,31 @@ public class DataFlowWebLinkControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void removeLinkthrows() throws EEAException {
+  public void removeLinkthrowsNotFound() throws EEAException {
+    try {
+      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  @Test
+  public void removeLinkthrowsForbidden() throws EEAException {
+    try {
+      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+    }
+  }
+
+
+  @Test
+  public void removeLinkthrowsInternalError() throws EEAException {
     doThrow(new EEAException()).when(dataflowWebLinkService).removeWebLink(Mockito.anyLong());
     try {
       dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
   }
 
@@ -227,11 +244,9 @@ public class DataFlowWebLinkControllerImplTest {
     try {
       dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
   }
-
 
 
   /**
@@ -245,7 +260,7 @@ public class DataFlowWebLinkControllerImplTest {
       dataFlowWebLinkControllerImpl.updateLink(weblinkVOBad);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.URL_FORMAT_INCORRECT, e.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
   }
 

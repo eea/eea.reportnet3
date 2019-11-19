@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.eea.dataflow.exception.EntityNotFoundException;
+import org.eea.dataflow.exception.ResourceNoFoundException;
+import org.eea.dataflow.exception.WrongDataExceptions;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Weblink;
@@ -21,9 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -72,16 +73,18 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   public WeblinkVO getWebLink(Long idLink) throws EEAException {
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(idLink);
+    if (null != dataFlow) {
+      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
     Long dataFlowId = dataFlow.getId();
 
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    List<ResourceAccessVO> resources = userManagementControllerZull
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId)
-          && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-    }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+      return resourceAccessVO.getId().equals(dataFlowId);
+    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
 
     Optional<Weblink> idLinkData = webLinkRepository.findById(idLink);
     LOG.info("get the links with id : {}", idLink);
@@ -89,7 +92,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     if (idLinkData.isPresent()) {
       weblinkVO = dataflowWebLinkMapper.entityToClass(idLinkData.get());
     } else {
-      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT);
+      throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_INCORRECT);
     }
     return weblinkVO;
   }
@@ -111,13 +114,12 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     Matcher matN = patN.matcher(weblink.getUrl());
 
     if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
+      throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
 
     Optional<Dataflow> dataflow = dataflowRepository.findById(idDataflow);
     if (!dataflow.isPresent()) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+      throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     weblink.setDataflow(dataflow.get());
     webLinkRepository.save(weblink);
@@ -136,22 +138,24 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   public void removeWebLink(Long webLinkId) throws EEAException {
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(webLinkId);
+    if (null != dataFlow) {
+      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
     Long dataFlowId = dataFlow.getId();
 
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    List<ResourceAccessVO> resources = userManagementControllerZull
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId)
-          && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-    }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+      return resourceAccessVO.getId().equals(dataFlowId);
+    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
 
     try {
       webLinkRepository.deleteById(webLinkId);
     } catch (EmptyResultDataAccessException e) {
       LOG_ERROR.error("link with id: {}", webLinkId);
-      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT, e);
+      throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_INCORRECT, e);
     }
     LOG.info("delete the link with id : {}", webLinkId);
   }
@@ -168,28 +172,29 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(weblink.getId());
+    if (null != dataFlow) {
+      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
     Long dataFlowId = dataFlow.getId();
 
-    List<ResourceAccessVO> resources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    List<ResourceAccessVO> resources = userManagementControllerZull
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
-    Pattern patN = Pattern.compile(REGEX_URL);
+    Pattern urlPattern = Pattern.compile(REGEX_URL);
 
-    Matcher matN = patN.matcher(weblink.getUrl());
+    Matcher urlMatcher = urlPattern.matcher(weblink.getUrl());
 
-    if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
+    if (!urlMatcher.find()) {
+      throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
     // get idDataflow
     resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId)
-          && SecurityRoleEnum.DATA_CUSTODIAN.equals(resourceAccessVO.getRole());
-    }).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+      return resourceAccessVO.getId().equals(dataFlowId);
+    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
 
     Optional<Weblink> webLinkFound = webLinkRepository.findById(weblink.getId());
     if (!webLinkFound.isPresent()) {
-      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT);
+      throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_NOT_FOUND);
     }
     webLinkFound.get().setDescription(weblink.getDescription());
     webLinkFound.get().setUrl(weblink.getUrl());

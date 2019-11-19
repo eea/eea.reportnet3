@@ -1,12 +1,11 @@
 package org.eea.dataflow.controller;
 
-import org.eea.dataflow.mapper.DataflowWebLinkMapper;
-import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.exception.EntityNotFoundException;
+import org.eea.dataflow.exception.ResourceNoFoundException;
+import org.eea.dataflow.exception.WrongDataExceptions;
 import org.eea.dataflow.service.DataflowWebLinkService;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
-import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +44,6 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
 
-  @Autowired
-  private DataflowWebLinkMapper dataflowWebLinkMapper;
-
-  @Autowired
-  private UserManagementController userManagementControllerZull;
-
-  @Autowired
-  private DataflowRepository dataflowRepository;
-
   /**
    * Gets the link.
    *
@@ -71,8 +61,15 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     try {
       weblink = dataflowWebLinkService.getWebLink(idLink);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     } catch (EEAException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return weblink;
@@ -93,9 +90,15 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     try {
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    } catch (WrongDataExceptions e) {
+      LOG_ERROR.error("Bad Request");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -112,10 +115,15 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -123,6 +131,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Update link.
    *
    * @param weblinkVO the weblink VO
+   * @throws EEAException
    */
   @Override
   @HystrixCommand
@@ -130,10 +139,20 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   public void updateLink(@RequestBody WeblinkVO weblinkVO) {
     try {
       dataflowWebLinkService.updateWebLink(weblinkVO);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    } catch (WrongDataExceptions e) {
+      LOG_ERROR.error("Bad Request");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
   }
 
 }
