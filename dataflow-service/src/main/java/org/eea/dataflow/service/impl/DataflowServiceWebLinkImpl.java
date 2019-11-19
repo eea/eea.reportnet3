@@ -73,8 +73,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   public WeblinkVO getWebLink(Long idLink) throws EEAException {
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(idLink);
-    if (null != dataFlow) {
-      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    if (null == dataFlow) {
+      throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Long dataFlowId = dataFlow.getId();
 
@@ -138,8 +138,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   public void removeWebLink(Long webLinkId) throws EEAException {
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(webLinkId);
-    if (null != dataFlow) {
-      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    if (null == dataFlow) {
+      throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Long dataFlowId = dataFlow.getId();
 
@@ -172,8 +172,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
     Dataflow dataFlow = dataflowRepository.findDataflowByWeblinks_Id(weblink.getId());
-    if (null != dataFlow) {
-      new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    if (null == dataFlow) {
+      throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Long dataFlowId = dataFlow.getId();
 
