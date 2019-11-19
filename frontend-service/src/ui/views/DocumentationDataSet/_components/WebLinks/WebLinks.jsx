@@ -31,7 +31,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     url: Yup.string()
       .matches(
         /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
-        resources.messages['urlEror']
+        resources.messages['urlError']
       )
       .required(' ')
   });
