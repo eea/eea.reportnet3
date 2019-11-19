@@ -91,7 +91,9 @@ export const FieldDesigner = ({
             if (!isUndefined(dropdownChilds)) {
               for (let k = 0; k < dropdownChilds.length; k++) {
                 for (let l = 0; l < dropdownChilds[i].childNodes.length; l++) {
-                  dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
+                  if (!isUndefined(dropdownChilds[k].childNodes[l])) {
+                    dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
+                  }
                 }
               }
             }
