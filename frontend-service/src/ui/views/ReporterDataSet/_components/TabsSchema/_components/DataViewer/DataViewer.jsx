@@ -768,9 +768,13 @@ const DataViewer = withRouter(
           return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
         });
 
+        const errorsValidations = [...new Set(validations.map(validation => validation.levelError))];
         validations.forEach(validation => {
-          let error = getLevelErrorString(validation.levelError);
-          message += '- ' + error + ': ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
+          let error = '';
+          if (errorsValidations.length > 1) {
+            error = `${getLevelErrorString(validation.levelError)}: `;
+          }
+          message += '- ' + error + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
         });
 
         const levelError = getLevelError(validations);
