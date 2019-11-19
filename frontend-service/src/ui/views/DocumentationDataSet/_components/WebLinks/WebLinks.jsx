@@ -12,6 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
 export const WebLinks = ({ isCustodian, dataflowId }) => {
@@ -58,19 +59,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     setIsAddOrEditWeblinkDialogVisible(false);
     setWeblinkItem({ id: undefined, description: '', url: '' });
   };
-
-  const addRowFooter = (
-    <div className="p-clearfix" style={{ width: '100%' }}>
-      <Button
-        style={{ float: 'left' }}
-        label={resources.messages['add']}
-        icon="add"
-        onClick={() => {
-          setIsAddOrEditWeblinkDialogVisible(true);
-        }}
-      />
-    </div>
-  );
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -199,10 +187,26 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   return (
     <>
+      {isCustodian ? (
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              style={{ float: 'left' }}
+              label={resources.messages['add']}
+              icon="add"
+              onClick={() => {
+                setIsAddOrEditWeblinkDialogVisible(true);
+              }}
+            />
+          </div>
+        </Toolbar>
+      ) : (
+        <></>
+      )}
       <DataTable
         autoLayout={true}
         editable={true}
-        footer={isCustodian ? addRowFooter : null}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
