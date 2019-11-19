@@ -206,20 +206,20 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * Insert field in position.
    *
    * @param idDatasetSchema the id dataset schema
-   * @param field the field
+   * @param fieldSchema the field schema
    * @param position the position
    * @return the update result
    * @throws EEAException the EEA exception
    */
   @Override
-  public UpdateResult insertFieldInPosition(String idDatasetSchema, FieldSchema fieldSchema,
+  public UpdateResult insertFieldInPosition(String idDatasetSchema, Document fieldSchema,
       int position) throws EEAException {
     try {
       List<Document> list = new ArrayList<>();
-      list.add(Document.parse(fieldSchema.toJSON()));
+      list.add(fieldSchema);
       return mongoDatabase.getCollection("DataSetSchema").updateMany(
           new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas.recordSchema._id",
-              fieldSchema.getIdRecord()),
+              fieldSchema.get("idRecord")),
           new Document("$push", new Document("tableSchemas.$.recordSchema.fieldSchemas",
               new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
@@ -249,6 +249,43 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
         Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           return (Document) tableSchema;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return the document
+   */
+  @Override
+  public Document findFieldSchema(String datasetSchemaId, String fieldSchemaId) {
+
+    Document document = mongoDatabase.getCollection("DataSetSchema")
+        .find(new Document("_id", new ObjectId(datasetSchemaId))
+            .append("tableSchemas.recordSchema.fieldSchemas._id", new ObjectId(fieldSchemaId)))
+        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+
+    if (document != null) {
+      Object tableSchemas = document.get("tableSchemas");
+      if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
+        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
+          Object recordSchema = ((Document) tableSchema).get("recordSchema");
+          if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
+            Object fieldSchemas = ((Document) recordSchema).get("fieldSchemas");
+            if (fieldSchemas != null && fieldSchemas.getClass().equals(ArrayList.class)) {
+              return (Document) ((ArrayList<?>) fieldSchemas).stream()
+                  .filter(fieldSchema -> ((Document) fieldSchema).get("_id").toString()
+                      .equals(fieldSchemaId))
+                  .findFirst().orElse(null);
+            }
+          }
         }
       }
     }

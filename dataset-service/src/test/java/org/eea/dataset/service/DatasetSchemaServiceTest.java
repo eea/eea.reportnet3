@@ -784,15 +784,15 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderFieldSchemaTest1() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Mockito.when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any()))
-        .thenReturn(new FieldSchema());
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Mockito
         .when(
             schemasRepository.insertFieldInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", new FieldSchemaVO(), 1));
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
   }
 
   /**
@@ -802,15 +802,26 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void orderFieldSchemaTest2() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Mockito.when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any()))
-        .thenReturn(new FieldSchema());
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Mockito
         .when(
             schemasRepository.insertFieldInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.orderFieldSchema("", new FieldSchemaVO(), 1));
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
+  }
+
+  /**
+   * Order field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderFieldSchemaTest3() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertFalse(dataSchemaServiceImpl.orderFieldSchema("", "", 1));
   }
 
   /**

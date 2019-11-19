@@ -725,12 +725,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public Boolean orderFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      Integer position) throws EEAException {
-    schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-    return schemasRepository
-        .insertFieldInPosition(datasetSchemaId,
-            fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO), position)
-        .getModifiedCount() == 1;
+  public Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
+      throws EEAException {
+    Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+    if (fieldSchema != null) {
+      schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId);
+      return schemasRepository.insertFieldInPosition(datasetSchemaId, fieldSchema, position)
+          .getModifiedCount() == 1;
+    }
+    return false;
   }
 }
