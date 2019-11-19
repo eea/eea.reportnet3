@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -161,7 +161,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           field={key}
           filter={false}
           filterMatchMode="contains"
-          header={key === 'url' ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1)}
+          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
           body={key === 'url' ? linkTemplate : null}
         />
       ));

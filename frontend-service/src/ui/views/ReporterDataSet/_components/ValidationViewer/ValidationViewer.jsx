@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isNull, isUndefined } from 'lodash';
+import { capitalize, isNull, isUndefined } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
@@ -73,11 +73,13 @@ const ValidationViewer = React.memo(
         }
       ];
       let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
-      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
+      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.invisibleHeader} />);
       columnsArr.push(
-        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.VisibleHeader} />
+        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.invisibleHeader} />
       );
-      columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
+      columnsArr.push(
+        <Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.invisibleHeader} />
+      );
       setColumns(columnsArr);
     }, []);
 
@@ -136,11 +138,7 @@ const ValidationViewer = React.memo(
       const allLevelErrorsFilterList = [];
       levelErrorTypes.map(filter => {
         allLevelErrorsFilterList.push({
-          label:
-            filter
-              .toString()
-              .charAt(0)
-              .toUpperCase() + filter.slice(1).toLowerCase(),
+          label: capitalize(filter),
           key: `${filter.toString()}_Id`
         });
       });

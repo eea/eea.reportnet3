@@ -2123,6 +2123,14 @@ body .p-paginator .p-dropdown {
   height: 2.286em;
   min-width: auto;
 }
+
+body .p-datatable table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  word-wrap:break-word;
+}
+
 body .p-datatable .p-datatable-header,
 body .p-datatable .p-datatable-footer {
   background-color: #f4f4f4;
@@ -3365,7 +3373,27 @@ body .p-sidebar {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
+  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  scrollbar-width: thin;
 }
+
+body .p-sidebar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body .p-sidebar::-webkit-scrollbar-track {
+  background: var(--c-custom-gray);
+}
+
+body .p-sidebar::-webkit-scrollbar-thumb {
+  background: var(--gray-50);
+}
+
+body .p-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-75);
+}
+
 body .p-sidebar .p-sidebar-close {
   color: #848484;
 }

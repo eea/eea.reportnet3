@@ -1,2 +1,2 @@
-export const AddTableDesign = ({ datasetRepository }) => async (datasetSchemaId, datasetId, tableSchemaName) =>
-  datasetRepository.addTableDesign(datasetSchemaId, datasetId, tableSchemaName);
+export const AddTableDesign = ({ datasetRepository }) => async (datasetId, tableSchemaName) =>
+  datasetRepository.addTableDesign(datasetId, tableSchemaName);

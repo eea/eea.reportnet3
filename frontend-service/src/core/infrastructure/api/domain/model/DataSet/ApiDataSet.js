@@ -4,6 +4,28 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataset = {
+  addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema`
+          : getUrl(DatasetConfig.addNewRecordFieldDesign, {
+              datasetId
+            }),
+        data: datasetTableRecordField,
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response;
+    } catch (error) {
+      console.error(`Error adding record to dataset design data: ${error}`);
+      return false;
+    }
+  },
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
@@ -27,12 +49,12 @@ export const apiDataset = {
       return false;
     }
   },
-  addTableDesign: async (datasetSchemaId, datasetId, tableSchemaName) => {
+  addTableDesign: async (datasetId, datasetId, tableSchemaName) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/createTableSchema/${datasetId}`
+        ? `/dataschema/${datasetId}/tableSchema`
           : getUrl(DatasetConfig.addTableDesign, {
               datasetSchemaId,
               datasetId
@@ -92,6 +114,28 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
+    try {
+      const tokens = userStorage.get();
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema/${fieldSchemaId}`
+          : getUrl(DatasetConfig.deleteRecordFieldDesign, {
+              datasetId,
+              fieldSchemaId
+            }),
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting dataset table design record: ${error}`);
+      return false;
+    }
+  },
   deleteSchemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
@@ -127,16 +171,16 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteTableDesign: async (datasetSchemaId, tableSchemaId) => {
+  deleteTableDesign: async (datasetId, tableSchemaId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/tableschema/${tableSchemaId}`
-          : getUrl(DatasetConfig.deleteTableDesign, {
-              datasetSchemaId,
-              tableSchemaId
-            }),
+        ? `/dataschema/${datasetId}/tableSchema/${tableSchemaId}`
+        : getUrl(DatasetConfig.deleteTableDesign, {
+            datasetId,
+            tableSchemaId
+          }),
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -245,6 +289,40 @@ export const apiDataset = {
     });
     return response.data;
   },
+  orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: window.env.REACT_APP_JSON
+        ? `/dataschema/${datasetId}/fieldSchema/order`
+        : getUrl(DatasetConfig.orderFieldSchemaDesign, {
+            datasetId,
+            position
+          }),
+      data: { id: fieldSchemaId, position },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status >= 200 && response.status <= 299;
+  },
+  orderTableSchema: async (datasetId, position, tableSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: window.env.REACT_APP_JSON
+        ? `/dataschema/${datasetId}/tableSchema/order`
+        : getUrl(DatasetConfig.orderTableSchemaDesign, {
+            datasetId,
+            position
+          }),
+      data: { id: tableSchemaId, position },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status >= 200 && response.status <= 299;
+  },
   schemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
@@ -320,6 +398,28 @@ export const apiDataset = {
       return false;
     }
   },
+  updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema/`
+          : getUrl(DatasetConfig.updateRecordFieldDesign, {
+              datasetId
+            }),
+        data: datasetTableRecordField,
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset record design: ${error}`);
+      return false;
+    }
+  },
   updateRecordsById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
@@ -356,14 +456,13 @@ export const apiDataset = {
     });
     return response.status;
   },
-  updateTableNameDesign: async (datasetSchemaId, tableSchemaId, tableSchemaName, datasetId) => {
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/updateNameTableSchema`
+          ? `/dataschema/${datasetId}/tableSchema`
           : getUrl(DatasetConfig.updateTableNameDesign, {
-              datasetSchemaId,
               datasetId
             }),
         data: {
