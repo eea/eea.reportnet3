@@ -250,7 +250,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                 </div>
               </fieldset>
               <fieldset>
-                <hr />
                 <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                   <Button
                     className={
