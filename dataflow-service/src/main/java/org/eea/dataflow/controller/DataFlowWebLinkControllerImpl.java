@@ -57,10 +57,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @GetMapping(value = "{idLink}")
   public WeblinkVO getLink(@PathVariable("idLink") Long idLink) {
 
-    WeblinkVO weblink = new WeblinkVO();
-
     try {
-      weblink = dataflowWebLinkService.getWebLink(idLink);
+      return dataflowWebLinkService.getWebLink(idLink);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error("Data not found");
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -72,7 +70,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    return weblink;
+
 
   }
 
