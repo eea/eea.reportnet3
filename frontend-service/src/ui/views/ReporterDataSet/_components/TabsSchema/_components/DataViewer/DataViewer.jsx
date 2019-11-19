@@ -897,9 +897,9 @@ const DataViewer = withRouter(
       } else {
         validations.forEach(validation => {
           if (validation.levelError === 'INFO') {
-            const xNum = 1;
-            if (xNum > lvlFlag) {
-              lvlFlag = xNum;
+            const iNum = 1;
+            if (iNum > lvlFlag) {
+              lvlFlag = iNum;
               levelError = 'INFO';
             }
           } else if (validation.levelError === 'WARNING') {
@@ -1215,14 +1215,13 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => {
       if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
-        if (totalFilteredRecords == 0) {
+        if (totalFilteredRecords == 0 && !isFilterValidationsActive) {
           return totalCount();
         } else {
           return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
       }
     };
-
     return (
       <SnapshotContext.Provider>
         <Toolbar className={styles.dataViewerToolbar}>
@@ -1386,7 +1385,7 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+            totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
             value={fetchedData}
             //scrollable={true}
             //frozenWidth="100px"
