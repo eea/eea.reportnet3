@@ -56,8 +56,14 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_INCORRECT_ID. */
   public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
 
+  /** The Constant DATAFLOW_EXISTS_NAME. */
+  public static final String DATAFLOW_EXISTS_NAME = "Dataflow name already exists";
+
   /** The Constant DATAFLOW_NOTFOUND. */
   public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
+
+  /** The Constant DATAFLOW_CRITERIA. */
+  public static final String DATAFLOW_DESCRIPTION_NAME = "Dataflow Description or Name empty";
 
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";

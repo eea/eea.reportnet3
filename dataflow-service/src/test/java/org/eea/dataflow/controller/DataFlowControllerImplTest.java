@@ -327,7 +327,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void createDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataFlowControllerImpl.createDataFlow(dataflowVO);
@@ -347,6 +347,19 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowDateTodayThrowRepeatName() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    doThrow(EEAException.class).when(dataflowService).createDataFlow(dataflowVO);
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
+  }
+
   /**
    * Creates the data flow.
    *
@@ -359,6 +372,8 @@ public class DataFlowControllerImplTest {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date = sdf.parse("2914-09-15");
     dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
     doNothing().when(dataflowService).createDataFlow(dataflowVO);
     dataFlowControllerImpl.createDataFlow(dataflowVO);
     Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);

@@ -1,6 +1,7 @@
 package org.eea.dataflow.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -101,6 +103,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The resource management controller zull. */
+  @Mock
+  private ResourceManagementControllerZull resourceManagementControllerZull;
   /**
    * The document mapper.
    */
@@ -357,9 +362,11 @@ public class DataFlowServiceImplTest {
 
   /**
    * Creates the data flow exist.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void createDataFlowExist() {
+  @Test(expected = EEAException.class)
+  public void createDataFlowExist() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     when(dataflowRepository.findByName(dataFlowVO.getName()))
         .thenReturn(Optional.of(new Dataflow()));
@@ -368,11 +375,19 @@ public class DataFlowServiceImplTest {
 
   /**
    * Creates the data flow non exist.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void createDataFlowNonExist() {
-    DataFlowVO dataFlowVO = new DataFlowVO();
-    dataflowServiceImpl.createDataFlow(dataFlowVO);
+  public void createDataFlowNonExist() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Dataflow dataflow = new Dataflow();
+    when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
+    doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
+    doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+        Mockito.any());
+    when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
+    dataflowServiceImpl.createDataFlow(dataflowVO);
   }
 
 
