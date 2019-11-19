@@ -5,18 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The type Order vo.
+ */
 @Getter
 @Setter
 @ToString
 public class OrderVO implements Serializable {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = -1191036286661187433L;
 
-  /** The position. */
+  /**
+   * The position.
+   */
   private Integer position;
 
-  /** The id. */
+  /**
+   * The id.
+   */
   private String id;
 
   /**
@@ -37,26 +46,32 @@ public class OrderVO implements Serializable {
    * Equals.
    *
    * @param obj the obj
+   *
    * @return true, if successful
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     OrderVO other = (OrderVO) obj;
     if (id == null) {
-      if (other.id != null)
+      if (other.id != null) {
         return false;
+      }
     } else if (!id.equals(other.id)) {
       return false;
     }
     if (position == null) {
-      if (other.position != null)
+      if (other.position != null) {
         return false;
+      }
     } else if (!position.equals(other.position)) {
       return false;
     }
