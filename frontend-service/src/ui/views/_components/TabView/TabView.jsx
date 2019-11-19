@@ -18,7 +18,7 @@ export const TabView = ({
   checkEditingTabs,
   children,
   className = null,
-  designMode,
+  designMode = false,
   id = null,
   initialTabIndexDrag,
   initialTabIndexSelected,
@@ -37,6 +37,7 @@ export const TabView = ({
   style = null,
   totalTabs
 }) => {
+  const [activeIdx, setActiveIdx] = useState(activeIndex);
   const [idx] = useState(id || UniqueComponentId());
   const [idxToDelete, setIdxToDelete] = useState(null);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -63,25 +64,30 @@ export const TabView = ({
   }, [children]);
 
   const onTabHeaderClick = (event, tab, index) => {
-    if (tab.props.addTab) {
-      onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
-        if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
-          scrollTo(ulTabsRef.current.clientWidth + 100, 0);
-        }
-      });
-    } else {
-      if (!tab.props.disabled) {
-        if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
-          onTabClick({ originalEvent: event, index: index, header: tab.props.header });
-        }
-        if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
-          onTabChange({ originalEvent: event, index: index });
-        } else {
-          onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+    if (designMode) {
+      if (tab.props.addTab) {
+        onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
+          if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
+            scrollTo(ulTabsRef.current.clientWidth + 100, 0);
+          }
+        });
+      } else {
+        if (!tab.props.disabled) {
+          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+            onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+          }
+          if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+            onTabChange({ originalEvent: event, index: index });
+          } else {
+            if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+              onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+            }
+          }
         }
       }
+    } else {
+      setActiveIdx(index);
     }
-
     event.preventDefault();
   };
 
@@ -119,7 +125,11 @@ export const TabView = ({
   };
 
   const isSelected = index => {
-    return activeIndex === index && initialTabIndexSelected === index;
+    if (designMode) {
+      return activeIndex === index && initialTabIndexSelected === index;
+    } else {
+      return activeIdx === index;
+    }
   };
 
   const renderTabHeader = (tab, index) => {
