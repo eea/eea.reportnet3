@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull, isString, differenceBy } from 'lodash';
+import { capitalize, isEmpty, isUndefined, isNull, isString, differenceBy } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -743,36 +743,33 @@ const DataViewer = withRouter(
       return `${tableName}.${fileType}`;
     };
 
-    const getLevelErrorString = levelError => {
-      if (levelError.toString().toUpperCase() === 'BLOCKER') {
-        return 'Blocker';
-      } else if (levelError.toString().toUpperCase() === 'ERROR') {
-        return 'Error';
-      } else if (levelError.toString().toUpperCase() === 'WARNING') {
-        return 'Warning';
-      } else if (levelError.toString().toUpperCase() === 'INFO') {
-        return 'Info';
-      } else return '';
+    const orderValidationsByLevelError = validations => {
+      return validations
+        .sort((a, b) => {
+          const levelErrorsWithPriority = [
+            { id: 'INFO', index: 1 },
+            { id: 'WARNING', index: 2 },
+            { id: 'ERROR', index: 3 },
+            { id: 'BLOCKER', index: 4 }
+          ];
+          let levelError = levelErrorsWithPriority.filter(priority => a.levelError === priority.id)[0].index;
+          let levelError2 = levelErrorsWithPriority.filter(priority => b.levelError === priority.id)[0].index;
+          return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
+        })
+        .reverse();
     };
 
     //Template for Field validation
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = [...field.fieldValidations];
         let message = [];
-
-        validations.sort((a, b) => {
-          let levelError = a.levelError;
-          let levelError2 = b.levelError;
-          return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
-        });
-
-        const errorsValidations = [...new Set(validations.map(validation => validation.levelError))];
+        const validations = orderValidationsByLevelError([...field.fieldValidations]);
+        const errorValidations = [...new Set(validations.map(validation => validation.levelError))];
         validations.forEach(validation => {
           let error = '';
-          if (errorsValidations.length > 1) {
-            error = `${getLevelErrorString(validation.levelError)}: `;
+          if (errorValidations.length > 1) {
+            error = `${capitalize(validation.levelError)}: `;
           }
           message += '- ' + error + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
         });
