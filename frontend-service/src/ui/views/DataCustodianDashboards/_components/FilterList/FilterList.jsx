@@ -35,6 +35,8 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByDataset']} disabled={true} />;
     }
   };
 
@@ -49,6 +51,8 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByTable']} disabled={true} />;
     }
   };
 

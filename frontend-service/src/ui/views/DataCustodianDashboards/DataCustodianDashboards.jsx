@@ -129,6 +129,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             key={schema.datasetSchemaId}
             datasetSchemaId={schema.datasetSchemaId}
             isVisible={chartState[schema.datasetSchemaId]}
+            datasetSchemaName={schema.datasetSchemaName}
           />
         );
       })
@@ -146,11 +147,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
-      <Toolbar className={styles.chartToolbar}>
-        <div className="p-toolbar-group-left">{onLoadButtons}</div>
-      </Toolbar>
-      {onLoadCharts}
-      <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
+      <div className={styles.validationChartWrap}>
+        <h2>{resources.messages['validationDashboards']}</h2>
+        <Toolbar className={styles.chartToolbar}>
+          <div className="p-toolbar-group-left">{onLoadButtons}</div>
+        </Toolbar>
+        {onLoadCharts}
+      </div>
+      <div className={styles.releasedChartWrap}>
+        <h2>{resources.messages['releaseDashboard']}</h2>
+        <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
+      </div>
     </>
   );
 });
