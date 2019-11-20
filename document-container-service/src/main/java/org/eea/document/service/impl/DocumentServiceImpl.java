@@ -2,6 +2,7 @@ package org.eea.document.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.PathNotFoundException;
@@ -16,6 +17,7 @@ import org.eea.document.type.FileResponse;
 import org.eea.document.utils.OakRepositoryUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.osgi.service.component.annotations.Modified;
@@ -63,16 +65,15 @@ public class DocumentServiceImpl implements DocumentService {
    * @param inputStream the input stream
    * @param contentType the content type
    * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
+   * @param documentVO the document VO
+   * @param size the size
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
   public void uploadDocument(final InputStream inputStream, final String contentType,
-      final String filename, final Long dataFlowId, final String language, final String description)
+      final String filename, DocumentVO documentVO, final Long size)
       throws EEAException, IOException {
     Session session = null;
     DocumentNodeStore ns = null;
@@ -81,6 +82,9 @@ public class DocumentServiceImpl implements DocumentService {
           || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
+
+      String language = documentVO.getLanguage();
+      Long dataFlowId = documentVO.getDataflowId();
 
       LOG.info("Adding the file...");
       // Initialize the session
@@ -99,7 +103,7 @@ public class DocumentServiceImpl implements DocumentService {
       }
       LOG.info("File added...");
       sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
-          description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
+          documentVO.getDescription(), size, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
@@ -204,12 +208,14 @@ public class DocumentServiceImpl implements DocumentService {
    * @param eventType the event type
    */
   public void sendKafkaNotification(final String filename, final Long dataFlowId,
-      final String language, final String description, final EventType eventType) {
+      final String language, final String description, final Long size, final EventType eventType) {
     Map<String, Object> result = new HashMap<>();
     result.put("dataflow_id", dataFlowId);
     result.put("filename", filename);
     result.put("language", language);
     result.put("description", description);
+    result.put("size", humanReadableByteCount(size, true));
+    result.put("date", Instant.now());
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 
@@ -225,6 +231,22 @@ public class DocumentServiceImpl implements DocumentService {
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 
+  /**
+   * Human readable byte count.
+   *
+   * @param bytes the bytes
+   * @param si the si
+   * @return the string
+   */
+  private String humanReadableByteCount(long bytes, boolean si) {
+    int unit = si ? 1000 : 1024;
+    if (bytes < unit) {
+      return bytes + " B";
+    }
+    int exp = (int) (Math.log(bytes) / Math.log(unit));
+    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+  }
 
   /**
    * Upload schema snapshot.

@@ -99,7 +99,7 @@ public class DocumentControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void uploadDocumentTestException3() throws EEAException, IOException {
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     documentController.uploadDocument(fileMock, 1L, "ES", "desc");
   }
 
@@ -112,8 +112,7 @@ public class DocumentControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void uploadDocumentTestException4() throws EEAException, IOException {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
-        .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any());
+        .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     documentController.uploadDocument(fileMock, 1L, "ES", "desc");
   }
 
@@ -126,10 +125,10 @@ public class DocumentControllerImplTest {
   @Test
   public void uploadDocumentSuccessTest() throws EEAException, IOException {
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
     documentController.uploadDocument(fileMock, 1L, "ES", "desc");
     Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

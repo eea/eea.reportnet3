@@ -57,6 +57,8 @@ CREATE TABLE public."document" (
 	"name" varchar(255) NULL,
 	description varchar(255) NULL,
 	dataflow_id serial NOT NULL,
+	size varchar(255) NULL,
+	date timestamp null,
 	CONSTRAINT document_pkey PRIMARY KEY (id),
 	CONSTRAINT document_dataflow_fkey FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
 );

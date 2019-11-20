@@ -49,16 +49,13 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
    */
   @Override
   @Transactional
-  public void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException {
-    if (dataflowId == null || filename == null || language == null || description == null) {
+  public void insertDocument(String filename, DocumentVO documentVO) throws EEAException {
+    if (documentVO == null || filename == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+    Dataflow dataflow = dataflowRepository.findById(documentVO.getDataflowId()).orElse(null);
     if (dataflow != null) {
-      Document document = new Document();
-      document.setDescription(description);
-      document.setLanguage(language);
+      Document document = documentMapper.classToEntity(documentVO);
       document.setName(filename);
       document.setDataflow(dataflow);
       documentRepository.save(document);
@@ -102,6 +99,24 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
       throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
     }
     return documentMapper.entityToClass(document);
+  }
+
+
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDocument(DocumentVO documentVO) throws EEAException {
+    Dataflow dataflow = dataflowRepository.findById(documentVO.getDataflowId()).orElse(null);
+    if (dataflow == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Document document = documentMapper.classToEntity(documentVO);
+    document.setDataflow(dataflow);
+    documentRepository.save(document);
   }
 
 }

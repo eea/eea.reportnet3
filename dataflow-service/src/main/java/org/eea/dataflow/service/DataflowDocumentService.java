@@ -15,10 +15,11 @@ public interface DataflowDocumentService {
    * @param filename the filename
    * @param language the language
    * @param description the description
+   * @param size the size
+   * @param date the date
    * @throws EEAException the EEA exception
    */
-  void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException;
+  void insertDocument(String filename, DocumentVO documentVO) throws EEAException;
 
 
   /**
@@ -38,5 +39,13 @@ public interface DataflowDocumentService {
    * @throws EEAException the EEA exception
    */
   DocumentVO getDocumentInfoById(Long documentId) throws EEAException;
+
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDocument(DocumentVO documentVO) throws EEAException;
 
 }

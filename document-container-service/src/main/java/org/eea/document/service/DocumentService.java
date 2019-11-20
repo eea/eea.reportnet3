@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.document.DocumentVO;
 
 /**
  * The interface Dataset service.
@@ -16,14 +17,13 @@ public interface DocumentService {
    * @param inputStream the file
    * @param contentType the content type
    * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
+   * @param documentVO the document VO
+   * @param size the size
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void uploadDocument(final InputStream inputStream, final String contentType,
-      final String filename, final Long dataFlowId, final String language, final String description)
+      final String filename, DocumentVO documentVO, final Long size)
       throws EEAException, IOException;
 
   /**
@@ -86,4 +86,5 @@ public interface DocumentService {
    */
   void deleteSnapshotDocument(final String documentName, final Long idDesignDataset)
       throws EEAException;
+
 }

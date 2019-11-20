@@ -100,9 +100,10 @@ public interface DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   * @return the table VO
    */
-  @PostMapping("/{datasetId}/tableSchema")
-  void createTableSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping(value = "/{datasetId}/tableSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO);
 
   /**
@@ -139,7 +140,7 @@ public interface DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
-   * @return
+   * @return the string
    */
   @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   String createFieldSchema(@PathVariable("datasetId") Long datasetId,

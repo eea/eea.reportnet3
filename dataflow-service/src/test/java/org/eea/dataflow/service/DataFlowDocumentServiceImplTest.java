@@ -3,6 +3,7 @@ package org.eea.dataflow.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.eea.dataflow.mapper.DocumentMapper;
@@ -11,6 +12,7 @@ import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.service.impl.DataflowDocumentServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
@@ -44,11 +46,14 @@ public class DataFlowDocumentServiceImplTest {
   @Mock
   private DocumentMapper documentMapper;
 
+  DocumentVO documentVO;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    documentVO = new DocumentVO();
     MockitoAnnotations.initMocks(this);
   }
 
@@ -59,7 +64,7 @@ public class DataFlowDocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void insertDocumentException1Test() throws EEAException {
-    dataflowServiceImpl.insertDocument(null, null, null, null);
+    dataflowServiceImpl.insertDocument(null, null);
   }
 
   /**
@@ -69,27 +74,7 @@ public class DataFlowDocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void insertDocumentException2Test() throws EEAException {
-    dataflowServiceImpl.insertDocument(1L, null, null, null);
-  }
-
-  /**
-   * Insert document exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void insertDocumentException3Test() throws EEAException {
-    dataflowServiceImpl.insertDocument(1L, "filename", null, null);
-  }
-
-  /**
-   * Insert document exception 4 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void insertDocumentException4Test() throws EEAException {
-    dataflowServiceImpl.insertDocument(1L, "filename", "ES", null);
+    dataflowServiceImpl.insertDocument("filename", null);
   }
 
   /**
@@ -98,9 +83,9 @@ public class DataFlowDocumentServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
-  public void insertDocumentException5Test() throws EEAException {
+  public void insertDocumentException3Test() throws EEAException {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    dataflowServiceImpl.insertDocument(1L, "filename", "ES", "desc");
+    dataflowServiceImpl.insertDocument("filename", documentVO);
   }
 
   /**
@@ -111,8 +96,8 @@ public class DataFlowDocumentServiceImplTest {
   @Test
   public void insertDocumentSuccessTest() throws EEAException {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    when(documentRepository.save(Mockito.any())).thenReturn(new Document());
-    dataflowServiceImpl.insertDocument(1L, "filename", "ES", "desc");
+    when(documentMapper.classToEntity(Mockito.any())).thenReturn(new Document());
+    dataflowServiceImpl.insertDocument("filename", documentVO);
     Mockito.verify(documentRepository, times(1)).save(Mockito.any());
   }
 
@@ -176,4 +161,22 @@ public class DataFlowDocumentServiceImplTest {
     assertEquals("not equals", documentVO, dataflowServiceImpl.getDocumentInfoById(1L));
   }
 
+  @Test
+  public void updateDocumentExceptionTest() throws EEAException {
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      dataflowServiceImpl.updateDocument(documentVO);
+    } catch (EEAException e) {
+      assertEquals("bad message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+    }
+  }
+
+  @Test
+  public void updateDocumentSuccessTest() throws EEAException {
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    when(documentMapper.classToEntity(Mockito.any())).thenReturn(new Document());
+    when(documentRepository.save(Mockito.any())).thenReturn(null);
+    dataflowServiceImpl.updateDocument(documentVO);
+    verify(documentRepository, times(1)).save(Mockito.any());
+  }
 }

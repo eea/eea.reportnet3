@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowDocumentService;
@@ -51,6 +52,8 @@ public class LoadDocumentCommandTest {
     data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("datasetId", "1L");
+    data.put("size", "10000L");
+    data.put("date", Instant.now());
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     eeaEventVO.setData(data);
@@ -74,12 +77,10 @@ public class LoadDocumentCommandTest {
    */
   @Test
   public void executeTest() throws EEAException {
-    doNothing().when(dataflowDocumentService).insertDocument(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+    doNothing().when(dataflowDocumentService).insertDocument(Mockito.any(), Mockito.any());
     loadDocumentCommand.execute(eeaEventVO);
 
-    Mockito.verify(dataflowDocumentService, times(1)).insertDocument(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowDocumentService, times(1)).insertDocument(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -90,9 +91,8 @@ public class LoadDocumentCommandTest {
   @Test
   public void executeThrowTest() throws EEAException {
     doThrow(new EEAException("error")).when(dataflowDocumentService).insertDocument(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any());
     loadDocumentCommand.execute(eeaEventVO);
-    Mockito.verify(dataflowDocumentService, times(1)).insertDocument(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowDocumentService, times(1)).insertDocument(Mockito.any(), Mockito.any());
   }
 }

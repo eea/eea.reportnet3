@@ -24,11 +24,10 @@ public interface DataflowWebLinkService {
    * Removes the contributor from dataflow.
    *
    * @param idDataflow the id dataflow
-   * @param url the url
-   * @param description the description
+   * @param weblinkVO the weblink VO
    * @throws EEAException the EEA exception
    */
-  void saveWebLink(Long idDataflow, String url, String description) throws EEAException;
+  void saveWebLink(Long idDataflow, WeblinkVO weblinkVO) throws EEAException;
 
 
   /**
@@ -42,10 +41,8 @@ public interface DataflowWebLinkService {
   /**
    * Update web link.
    *
-   * @param webLinkId the web link id
-   * @param description the description
-   * @param url the url
+   * @param weblinkVO the weblink VO
    * @throws EEAException the EEA exception
    */
-  void updateWebLink(Long webLinkId, String description, String url) throws EEAException;
+  void updateWebLink(WeblinkVO weblinkVO) throws EEAException;
 }

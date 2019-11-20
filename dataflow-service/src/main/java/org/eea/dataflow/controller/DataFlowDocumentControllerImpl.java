@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -52,4 +54,21 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     return document;
   }
 
+  /**
+   * Update user request.
+   *
+   * @param idUserRequest the id user request
+   * @param type the type
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/update")
+  public void updateDocument(@RequestBody DocumentVO document) {
+    try {
+      dataflowService.updateDocument(document);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
+  }
 }

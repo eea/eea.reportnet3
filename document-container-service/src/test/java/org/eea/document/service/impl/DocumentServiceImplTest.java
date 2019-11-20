@@ -11,6 +11,7 @@ import javax.jcr.RepositoryException;
 import org.eea.document.type.FileResponse;
 import org.eea.document.utils.OakRepositoryUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,9 @@ public class DocumentServiceImplTest {
   /** The file mock. */
   private MockMultipartFile fileMock;
 
+  /** The document VO. */
+  private DocumentVO documentVO;
+
   /**
    * Inits the mocks.
    *
@@ -51,6 +55,7 @@ public class DocumentServiceImplTest {
   @Before
   public void initMocks() throws RepositoryException {
     fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
+    documentVO = new DocumentVO();
     MockitoAnnotations.initMocks(this);
   }
 
@@ -58,26 +63,26 @@ public class DocumentServiceImplTest {
    * Upload document exception test.
    *
    * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentExceptionTest() throws EEAException, IOException {
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock.getInputStream(), null, null, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), null, null, null, 1L);
   }
 
   /**
    * Upload document exception 2 test.
    *
    * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentException2Test() throws EEAException, IOException {
     fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
-        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+        fileMock.getOriginalFilename(), null, 1L);
   }
 
   /**
@@ -85,7 +90,7 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentException3Test() throws EEAException, RepositoryException, IOException {
@@ -98,7 +103,7 @@ public class DocumentServiceImplTest {
         Mockito.any(), Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
-        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+        fileMock.getOriginalFilename(), documentVO, 1L);
 
   }
 
@@ -107,7 +112,7 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentException4Test() throws EEAException, RepositoryException, IOException {
@@ -120,7 +125,7 @@ public class DocumentServiceImplTest {
         Mockito.any())).thenReturn("");
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
-        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+        fileMock.getOriginalFilename(), documentVO, 1L);
   }
 
   /**
@@ -128,7 +133,7 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test
   public void uploadDocumentSuccessTest() throws EEAException, RepositoryException, IOException {
@@ -142,7 +147,7 @@ public class DocumentServiceImplTest {
     doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
-        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+        fileMock.getOriginalFilename(), documentVO, 10000L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -270,6 +275,13 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test upload snapshot success.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testUploadSnapshotSuccess() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
@@ -284,6 +296,12 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test upload snapshot exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testUploadSnapshotException() throws EEAException, IOException {
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
@@ -291,6 +309,12 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test upload snapshot exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testUploadSnapshotException2Test() throws EEAException, IOException {
     fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
@@ -300,6 +324,13 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test upload snapshot exception 3.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testUploadSnapshotException3() throws EEAException, RepositoryException, IOException {
 
@@ -309,6 +340,13 @@ public class DocumentServiceImplTest {
 
   }
 
+  /**
+   * Test upload snapshot exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testUploadSnapshotException4Test()
       throws EEAException, RepositoryException, IOException {
@@ -318,6 +356,13 @@ public class DocumentServiceImplTest {
         "test", 1L);
   }
 
+  /**
+   * Test upload snapshot exception 5 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RepositoryException the repository exception
+   */
   @Test(expected = EEAException.class)
   public void testUploadSnapshotException5Test()
       throws EEAException, IOException, RepositoryException {
@@ -332,6 +377,13 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test get snapshot success.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testGetSnapshotSuccess() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
@@ -344,6 +396,13 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test get snapshot exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testGetSnapshotException() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
@@ -355,6 +414,13 @@ public class DocumentServiceImplTest {
     documentService.getSnapshotDocument("test", 1L);
   }
 
+  /**
+   * Test get snapshot exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testGetSnapshotException2Test()
       throws EEAException, RepositoryException, IOException {
@@ -368,6 +434,11 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test delete snapshot success test.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteSnapshotSuccessTest() throws Exception {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
@@ -382,6 +453,13 @@ public class DocumentServiceImplTest {
 
   }
 
+  /**
+   * Test delete snapshot exception test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testDeleteSnapshotExceptionTest()
       throws EEAException, RepositoryException, IOException {
@@ -395,6 +473,13 @@ public class DocumentServiceImplTest {
   }
 
 
+  /**
+   * Test delete snapshot exception 2.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = EEAException.class)
   public void testDeleteSnapshotException2() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);

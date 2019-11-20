@@ -1,7 +1,10 @@
 package org.eea.dataflow.io.kafka.command;
 
+import java.time.Instant;
+import java.util.Date;
 import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -42,15 +45,19 @@ public class LoadDocumentCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    Long dataflowId = (Long) eeaEventVO.getData().get("dataflow_id");
+    DocumentVO documentVO = new DocumentVO();
+    documentVO.setDataflowId((Long) eeaEventVO.getData().get("dataflow_id"));
     String filename = (String) eeaEventVO.getData().get("filename");
-    String language = (String) eeaEventVO.getData().get("language");
-    String description = (String) eeaEventVO.getData().get("description");
+    documentVO.setLanguage((String) eeaEventVO.getData().get("language"));
+    documentVO.setDescription((String) eeaEventVO.getData().get("description"));
+    documentVO.setSize((String) eeaEventVO.getData().get("size"));
+    documentVO.setDate(Date.from((Instant) eeaEventVO.getData().get("date")));
+
     try {
-      dataflowService.insertDocument(dataflowId, filename, language, description);
+      dataflowService.insertDocument(filename, documentVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting document for dataflow {} due to exception {}", dataflowId,
-          e);
+      LOG_ERROR.error("Error inserting document for dataflow {} due to exception {}",
+          documentVO.getDataflowId(), e);
     }
   }
 }

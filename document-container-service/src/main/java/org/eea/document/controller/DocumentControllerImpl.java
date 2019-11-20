@@ -74,8 +74,12 @@ public class DocumentControllerImpl implements DocumentController {
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
+      DocumentVO documentVO = new DocumentVO();
+      documentVO.setDataflowId(dataFlowId);
+      documentVO.setDescription(description);
+      documentVO.setLanguage(language);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
-          file.getOriginalFilename(), dataFlowId, language, description);
+          file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

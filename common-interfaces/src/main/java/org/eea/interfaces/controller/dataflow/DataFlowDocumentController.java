@@ -6,6 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -30,5 +32,13 @@ public interface DataFlowDocumentController {
    */
   @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DocumentVO getDocumentInfoById(@PathVariable("documentId") Long documentId);
+
+  /**
+   * Updatedocument.
+   *
+   * @param document the document
+   */
+  @PutMapping(value = "/update")
+  void updateDocument(@RequestBody DocumentVO document);
 
 }
