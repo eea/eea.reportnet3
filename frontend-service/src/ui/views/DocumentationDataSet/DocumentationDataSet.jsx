@@ -79,7 +79,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   useEffect(() => {
     try {
       getDataflowName();
-      onLoadDocumentsAndWebLinks();
+      onLoadDocuments();
     } catch (error) {
       console.error(error.response);
     }
@@ -102,10 +102,12 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDocumentsAndWebLinks = async () => {
+  const onLoadDocuments = async () => {
     setIsLoading(true);
     try {
-      setDocuments(await DocumentService.all(`${match.params.dataflowId}`));
+      let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
+      loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
+      setDocuments(loadedDocuments);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -138,7 +140,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
         <TabView>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
-              onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
+              onLoadDocuments={onLoadDocuments}
               match={match}
               documents={documents}
               isCustodian={isCustodian}

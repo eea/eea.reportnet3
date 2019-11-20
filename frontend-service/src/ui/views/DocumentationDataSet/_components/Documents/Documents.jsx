@@ -22,7 +22,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }) => {
+const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -135,7 +135,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
               disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}
-              onClick={() => onLoadDocumentsAndWebLinks()}
+              onClick={() => onLoadDocuments()}
             />
           </div>
         </Toolbar>
