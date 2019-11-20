@@ -582,9 +582,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
   @Override
-  public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
+  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
     ObjectId tableSchemaId = new ObjectId();
     tableSchema.setIdTableSchema(tableSchemaId.toString());
     RecordSchema recordSchema = new RecordSchema();
@@ -594,6 +595,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     table.setRecordSchema(recordSchema);
     LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
     schemasRepository.insertTableSchema(table, id);
+    return (tableSchema);
   }
 
   /**
