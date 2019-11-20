@@ -472,6 +472,7 @@ body .p-dropdown-panel .p-dropdown-filter-container {
   color: #404040;
   background-color: #ffffff;
   margin: 0;
+  width: 100%;
 }
 body .p-dropdown-panel .p-dropdown-filter-container .p-dropdown-filter {
   width: 100%;
