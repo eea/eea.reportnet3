@@ -812,6 +812,10 @@
     "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
   },
   {
+  	"key": "config/communication/spring.sleuth.integration.websockets.enabled",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/communication/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },
@@ -1010,9 +1014,5 @@
   {
     "key": "config/application/spring.redis.port",
     "value": "JHtSRURJU19QT1JUOjMyNTYyfQ=="
-  },
-  {
-  	"key": "config/application/spring.sleuth.integration.websockets.enabled",
-    "value": "ZmFsc2U="
   }
 ]
