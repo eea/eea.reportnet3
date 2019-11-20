@@ -1,7 +1,7 @@
 {   
     "all": "/document/{:documentId}",
-    "create": "/weblink?idDataFlow={:dataflowId}",
-    "delete":"/weblink/{idLink}?idLink={:weblinkId}",
-    "update":"/weblink?idDataFlow={:dataflowId}"
+    "create": "/weblink?dataflowId={:dataflowId}",
+    "delete":"/weblink/{:weblinkId}",
+    "update":"/weblink"
 
 }
