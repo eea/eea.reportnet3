@@ -159,7 +159,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       </Dialog>
 
       {
-        <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
+        <DataTable value={documents} autoLayout={true} paginator={false}>
           {isCustodian ? (
             <Column className={styles.crudColumn} body={documentsEditButtons} />
           ) : (
