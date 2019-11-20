@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-import { isUndefined, isNull, isEmpty } from "lodash";
+import { isUndefined, isNull, isEmpty } from 'lodash';
 
-import { Spinner } from "ui/views/_components/Spinner";
-import { TreeView } from "ui/views/_components/TreeView";
+import { Spinner } from 'ui/views/_components/Spinner';
+import { TreeView } from 'ui/views/_components/TreeView';
 
-import { DatasetService } from "core/services/DataSet";
+import { DatasetService } from 'core/services/DataSet';
 
 const DatasetSchema = ({ datasetId }) => {
   const [designDataset, setDesignDataset] = useState([]);
@@ -36,6 +36,7 @@ const DatasetSchema = ({ datasetId }) => {
   };
 
   const renderDatasetSchema = () => {
+    console.log(designDataset);
     if (isLoading) {
       return <Spinner />;
     } else {
@@ -43,10 +44,10 @@ const DatasetSchema = ({ datasetId }) => {
         <div>
           <TreeView
             property={parseDesignDataset(designDataset)}
-            propertyName={""}
+            propertyName={''}
             excludeBottomBorder={false}
-            rootProperty={""}
-            groupableProperties={["fields"]}
+            rootProperty={''}
+            groupableProperties={['fields']}
           />
         </div>
       ) : null;
@@ -61,14 +62,11 @@ const parseDesignDataset = design => {
   const parsedDataset = {};
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
 
-  if (
-    !isUndefined(design.tables) &&
-    !isNull(design.tables) &&
-    design.tables.length > 0
-  ) {
+  if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
+      console.log(tableDTO);
       if (
         !isUndefined(tableDTO.records[0].fields) &&
         !isNull(tableDTO.records[0].fields) &&
