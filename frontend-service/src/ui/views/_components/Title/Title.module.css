@@ -1,18 +1,23 @@
-.Title {
-  color: var(--gray-110);
-  background-color: var(--white);
-  display: table-cell;
-  width: 100%;
+.titleWrap {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem 1rem 1rem 0rem;
 }
 
-.Title h2 {
-  font-weight: 50;
-  vertical-align: middle;
-  text-align: center;
+.title {
+  display: table-cell;
+  font-weight: 100;
 }
-.Title img {
-  height: 35px;
-  vertical-align: middle;
-  text-align: center;
-  margin-right: 10px;
+
+.subtitle {
+  color: var(--c-corporate-blue);
+  font-weight: 100;
+  margin: 0rem !important;
+}
+
+.icon {
+  color: var(--gray-50);
+  margin-right: 0.5rem !important;
 }
