@@ -558,12 +558,18 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createTableSchemaTest2() throws EEAException {
     when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new TableSchemaVO());
     Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    try {
+      dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
   }
 }
