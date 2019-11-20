@@ -1207,7 +1207,7 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => {
       if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
-        if (totalFilteredRecords == 0 && !isFilterValidationsActive) {
+        if (!isFilterValidationsActive) {
           return totalCount();
         } else {
           return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
