@@ -73,19 +73,25 @@ export const FieldDesigner = ({
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
 
-  // const fieldRef = useRef();
+  const fieldRef = useRef();
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     //Set pointerEvents to auto or none depending on isDragging.
+    const dropdownFilterInput = fieldRef.current.getElementsByClassName('p-dropdown-filter')[0];
+    const dropdownFilterInputButton = fieldRef.current.getElementsByClassName('p-dropdown-filter-icon')[0];
     const childs = document.getElementsByClassName('fieldRow');
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
         for (let j = 2; j < childs[i].childNodes.length; j++) {
           if (isDragging) {
             childs[i].childNodes[j].style.pointerEvents = 'none';
+            dropdownFilterInput.style.pointerEvents = 'none';
+            dropdownFilterInputButton.style.pointerEvents = 'none';
           } else {
             childs[i].childNodes[j].style.pointerEvents = 'auto';
+            dropdownFilterInput.style.pointerEvents = 'auto';
+            dropdownFilterInputButton.style.pointerEvents = 'auto';
             //Dropdown
             const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
             if (!isUndefined(dropdownChilds)) {
@@ -329,7 +335,7 @@ export const FieldDesigner = ({
         onDrop={e => {
           onFieldDragDrop(e);
         }}
-        // ref={fieldRef}
+        ref={fieldRef}
         // style={{
         //   animationDuration: '400ms',
         //   animationIterationCount: 1,
