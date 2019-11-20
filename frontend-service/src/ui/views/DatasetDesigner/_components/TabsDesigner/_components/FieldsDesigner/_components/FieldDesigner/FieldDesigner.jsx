@@ -80,6 +80,9 @@ export const FieldDesigner = ({
     //Set pointerEvents to auto or none depending on isDragging.
     const dropdownFilterInput = fieldRef.current.getElementsByClassName('p-dropdown-filter')[0];
     const dropdownFilterInputButton = fieldRef.current.getElementsByClassName('p-dropdown-filter-icon')[0];
+    const dropdownFilterWrapper = fieldRef.current.getElementsByClassName('p-dropdown-items-wrapper')[0];
+    const dropdownFilterItems = fieldRef.current.getElementsByClassName('p-dropdown-items')[0];
+    const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
@@ -88,10 +91,16 @@ export const FieldDesigner = ({
             childs[i].childNodes[j].style.pointerEvents = 'none';
             dropdownFilterInput.style.pointerEvents = 'none';
             dropdownFilterInputButton.style.pointerEvents = 'none';
+            dropdownFilterWrapper.style.pointerEvents = 'none';
+            dropdownFilterItems.style.pointerEvents = 'none';
+            dropdownPanel.style.pointerEvents = 'none';
           } else {
             childs[i].childNodes[j].style.pointerEvents = 'auto';
             dropdownFilterInput.style.pointerEvents = 'auto';
             dropdownFilterInputButton.style.pointerEvents = 'auto';
+            dropdownFilterWrapper.style.pointerEvents = 'auto';
+            dropdownFilterItems.style.pointerEvents = 'auto';
+            dropdownPanel.style.pointerEvents = 'auto';
             //Dropdown
             const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
             if (!isUndefined(dropdownChilds)) {
