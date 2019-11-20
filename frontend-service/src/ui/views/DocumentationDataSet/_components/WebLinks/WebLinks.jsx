@@ -169,6 +169,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           filterMatchMode="contains"
           header={key === 'url' ? key.toUpperCase() : capitalize(key)}
           body={key === 'url' ? linkTemplate : null}
+          sortable={true}
         />
       ));
 
