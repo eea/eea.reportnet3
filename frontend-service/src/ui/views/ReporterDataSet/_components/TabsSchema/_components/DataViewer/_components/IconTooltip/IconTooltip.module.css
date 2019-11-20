@@ -5,7 +5,7 @@
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 200px;
+  width: 250px;
   background-color: #555;
   color: var(--white);
   text-align: center;
@@ -72,4 +72,10 @@ td > .tooltip > span.tooltiptext {
 
 .buttonCustom.multi:hover {
   color: var(--c-lilac-400) !important;
+}
+:global .p-tooltip {
+  max-width: 15rem !important;
+}
+:global .p-tooltip-text {
+  padding: 1rem !important;
 }
