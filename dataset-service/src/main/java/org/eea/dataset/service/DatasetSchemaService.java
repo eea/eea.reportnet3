@@ -100,8 +100,9 @@ public interface DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
-  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+  TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
 
   /**
    * Update name table schema.
