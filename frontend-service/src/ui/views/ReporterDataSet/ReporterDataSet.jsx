@@ -360,12 +360,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
       }}>
-      <Title
-        title={`${resources.messages['dataflow']}: ${dataflowName} -
-        ${resources.messages['schema']}: ${datasetSchemaName} -
-        ${resources.messages['titleDataset']} ${datasetTitle()}`}
-        icon="dataset"
-      />
+      <Title title={`${dataflowName} - ${datasetSchemaName} - ${datasetTitle()}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
