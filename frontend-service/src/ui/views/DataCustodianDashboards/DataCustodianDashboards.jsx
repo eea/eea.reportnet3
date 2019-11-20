@@ -25,6 +25,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
   const [dataSchema, setDataSchema] = useState();
+  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
 
   const home = {
     icon: config.icons['home'],
@@ -74,6 +75,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataSchema(dataflow.designDatasets);
+      setDashboardInitialValues(
+        dataflow.designDatasets.forEach(schema => {
+          dashboardInitialValues[schema.datasetSchemaId] = true;
+        })
+      );
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -97,25 +103,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
-  const dashboardInitialValues = {};
-  if (!isUndefined(dataSchema)) {
-    dataSchema.forEach(schema => {
-      dashboardInitialValues[schema.datasetSchemaId] = false;
-    });
-  }
-
   const [chartState, chartDispatch] = useReducer(chartReducer, dashboardInitialValues);
 
   const onLoadButtons = !isUndefined(dataSchema)
     ? dataSchema.map(schema => {
         return (
           <Button
-            className={`p-button-rounded p-button-secondary ${
-              chartState[schema.datasetSchemaId] ? styles.show : styles.hide
-            }`}
+            className={`p-button-rounded p-button-secondary ${styles.dashboardsButton}`}
+            iconClasses={chartState[schema.datasetSchemaId] ? styles.show : styles.hide}
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
-            icon={chartState[schema.datasetSchemaId] ? 'dashboard' : 'eye'}
+            icon={chartState[schema.datasetSchemaId] ? 'eye-slash' : 'eye'}
             onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
           />
         );
@@ -152,6 +150,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <Toolbar className={styles.chartToolbar}>
           <div className="p-toolbar-group-left">{onLoadButtons}</div>
         </Toolbar>
+        {Object.values(chartState).includes(true) ? (
+          <></>
+        ) : (
+          <div className={styles.informationText}>{resources.messages['noDashboardSelected']}</div>
+        )}
         {onLoadCharts}
       </div>
       <div className={styles.releasedChartWrap}>

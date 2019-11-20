@@ -56,7 +56,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
 
   useEffect(() => {
     onLoadDashboard();
-  }, []);
+  }, [isVisible]);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });

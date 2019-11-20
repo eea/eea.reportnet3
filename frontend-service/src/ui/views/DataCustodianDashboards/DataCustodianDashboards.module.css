@@ -13,7 +13,10 @@
   margin-top: 1rem;
 }
 
-.show {
+.hide {
   color: var(--c-corporate-blue) !important;
-  font-weight: 600 !important;
+}
+
+.dashboardsButton:enabled:focus {
+  box-shadow: none !important;
 }
