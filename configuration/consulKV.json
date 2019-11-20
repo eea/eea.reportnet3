@@ -1010,5 +1010,9 @@
   {
     "key": "config/application/spring.redis.port",
     "value": "JHtSRURJU19QT1JUOjMyNTYyfQ=="
+  },
+  {
+  	"key": "config/application/spring.sleuth.integration.websockets.enabled",
+    "value": "ZmFsc2U="
   }
 ]
