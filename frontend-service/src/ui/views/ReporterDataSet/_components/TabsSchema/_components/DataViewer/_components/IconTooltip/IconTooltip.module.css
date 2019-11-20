@@ -74,8 +74,9 @@ td > .tooltip > span.tooltiptext {
   color: var(--c-lilac-400) !important;
 }
 :global .p-tooltip {
-  max-width: 15rem !important;
+  max-width: 30rem !important;
 }
 :global .p-tooltip-text {
   padding: 1rem !important;
+  word-wrap: break-word !important;
 }
