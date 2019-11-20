@@ -50,16 +50,19 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       setIsLoading(false);
     }
   };
+  const resetForm = () => {
+    setWeblinkItem({ id: undefined, description: '', url: '' });
+    form.current.resetForm();
+  };
 
   useEffect(() => {
     onLoadWebLinks();
-    setWeblinkItem({ id: undefined, description: '', url: '' });
+    resetForm();
   }, [reload]);
 
   const onHideAddEditDialog = () => {
-    form.current.resetForm();
     setIsAddOrEditWeblinkDialogVisible(false);
-    setWeblinkItem({ id: undefined, description: '', url: '' });
+    resetForm();
   };
 
   const getValidUrl = (url = '') => {
@@ -125,6 +128,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onHideDeleteDialog = () => {
     setIsConfirmDeleteVisible(false);
+    resetForm();
   };
 
   const webLinkEditButtons = () => {
@@ -211,7 +215,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
-        paginator={true}
+        paginator={false}
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
