@@ -4,6 +4,8 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
+import { isEmpty } from 'lodash';
+
 export const apiDocument = {
   all: async dataflowId => {
     const tokens = userStorage.get();
@@ -42,6 +44,32 @@ export const apiDocument = {
     formData.append('file', file, file.name);
     const response = await HTTPRequester.postWithFiles({
       url: getUrl(DocumentConfig.uploadDocument, {
+        dataflowId: dataflowId,
+        description: description,
+        language: language
+      }),
+      queryString: {},
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': undefined
+      }
+    });
+    return response.status;
+  },
+  editDocument: async (dataflowId, description, language, file) => {
+    const tokens = userStorage.get();
+    const formData = new FormData();
+
+    if (isEmpty(file)) {
+      formData.append('file', file);
+    } else {
+      formData.append('file', file, file.name);
+    }
+
+    console.log('formData', formData);
+    const response = await HTTPRequester.postWithFiles({
+      url: getUrl(DocumentConfig.editDocument, {
         dataflowId: dataflowId,
         description: description,
         language: language

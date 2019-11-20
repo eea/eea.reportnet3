@@ -29,6 +29,11 @@ const uploadDocument = async (dataflowId, description, language, file) => {
   return responseData;
 };
 
+const editDocument = async (dataflowId, description, language, file) => {
+  const responseData = await apiDocument.editDocument(dataflowId, description, language, file);
+  return responseData;
+};
+
 const deleteDocument = async documentId => {
   const responseData = await apiDocument.deleteDocument(documentId);
   return responseData;
@@ -40,7 +45,8 @@ const getCountryName = countryCode => {
 
 export const ApiDocumentRepository = {
   all,
+  deleteDocument,
   downloadDocumentById,
-  uploadDocument,
-  deleteDocument
+  editDocument,
+  uploadDocument
 };
