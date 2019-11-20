@@ -61,6 +61,7 @@ const parseDesignDataset = design => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       if (
+        !isNull(tableDTO.records) &&
         !isUndefined(tableDTO.records[0].fields) &&
         !isNull(tableDTO.records[0].fields) &&
         tableDTO.records[0].fields.length > 0

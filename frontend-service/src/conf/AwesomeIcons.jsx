@@ -34,6 +34,7 @@ import {
   faShareAlt,
   faInfo,
   faInfoCircle,
+  faQuestion,
   faArrowDown,
   faArrowUp,
   faToggleOff,
@@ -48,6 +49,7 @@ import {
   faCalendarAlt,
   faClone,
   faComments,
+  faQuestionCircle as farQuestionCircle,
   faCircle
 } from '@fortawesome/free-regular-svg-icons';
 
@@ -211,6 +213,10 @@ export const AwesomeIcons = icon => {
       return faInfo;
     case 'infoCircle':
       return faInfoCircle;
+    case 'question':
+      return faQuestion;
+    case 'questionCircle':
+      return farQuestionCircle;
     default:
       return faFileAlt;
   }

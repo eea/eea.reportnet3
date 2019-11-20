@@ -20,7 +20,7 @@ const TreeViewExpandableItem = ({ expanded = true, title, children }) => {
         {title}
       </div>
       {isOpen ? children : null}
-      {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDataset'] : null}
+      {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDatasetDesign'] : null}
     </React.Fragment>
   );
 };

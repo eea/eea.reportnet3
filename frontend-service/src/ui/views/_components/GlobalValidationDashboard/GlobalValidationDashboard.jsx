@@ -32,7 +32,7 @@ const LEVELS = {
   BLOCKER: 4
 };
 
-const GlobalValidationDashboard = ({ datasetSchemaId }) => {
+export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],
@@ -56,7 +56,7 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
 
   useEffect(() => {
     onLoadDashboard();
-  }, []);
+  }, [isVisible]);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -169,6 +169,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       yAxes: [
         {
           stacked: true,
+          scaleLabel: {
+            display: true,
+            labelString: resources.messages['percentage']
+          },
           ticks: {
             min: 0,
             max: 100,
@@ -182,54 +186,62 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   if (isLoading) {
     return <Spinner className={styles.positioning} />;
   }
-  if (!isEmpty(filterState.data)) {
-    return (
-      <div className={`rep-row ${styles.chart_released}`}>
-        <FilterList
-          color={dashboardColors}
-          levelErrors={levelErrorTypes}
-          originalData={filterState.originalData}
-          filterDispatch={filterDispatch}></FilterList>
-        <Chart
-          ref={chartRef}
-          type="bar"
-          data={filterState.data}
-          options={datasetOptionsObject}
-          width="100%"
-          height="30%"
-        />
-        {/* <fieldset className={styles.colorPickerWrap}>
-          <legend>{resources.messages['chooseChartColor']}</legend>
-          <div className={styles.fieldsetContent}>
-            {Object.keys(SEVERITY_CODE).map((type, i) => {
-              return (
-                <div className={styles.colorPickerItem} key={i}>
-                  <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-                    .slice(1)
-                    .toLowerCase()}: `}</span>
-                  <ColorPicker
-                    className={styles.colorPicker}
-                    //key={type}
-                    value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-                    onChange={e => {
-                      e.preventDefault();
-                      onChangeColor(e.value, SEVERITY_CODE[type]);
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </fieldset> */}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
-      </div>
-    );
-  }
+  return (
+    <>
+      {isVisible ? (
+        <div className={`rep-row ${styles.chart_released}`}>
+          <h3>{datasetSchemaName}</h3>
+          {!isEmpty(filterState.data) ? (
+            <>
+              <FilterList
+                color={dashboardColors}
+                levelErrors={levelErrorTypes}
+                originalData={filterState.originalData}
+                filterDispatch={filterDispatch}
+              />
+              <Chart
+                ref={chartRef}
+                type="bar"
+                data={filterState.data}
+                options={datasetOptionsObject}
+                width="100%"
+                height="30%"
+              />
+            </>
+          ) : (
+            //   <fieldset className={styles.colorPickerWrap}>
+            //   <legend>{resources.messages['chooseChartColor']}</legend>
+            //   <div className={styles.fieldsetContent}>
+            //     {Object.keys(SEVERITY_CODE).map((type, i) => {
+            //       return (
+            //         <div className={styles.colorPickerItem} key={i}>
+            //           <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+            //             .slice(1)
+            //             .toLowerCase()}: `}</span>
+            //           <ColorPicker
+            //             className={styles.colorPicker}
+            //             //key={type}
+            //             value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+            //             onChange={e => {
+            //               e.preventDefault();
+            //               onChangeColor(e.value, SEVERITY_CODE[type]);
+            //             }}
+            //           />
+            //         </div>
+            //       );
+            //     })}
+            //   </div>
+            // </fieldset>
+            <>
+              <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
+              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['empty']}</span>
+              <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
+            </>
+          )}
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
+  );
 };
-
-export { GlobalValidationDashboard };
