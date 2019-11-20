@@ -182,7 +182,6 @@ const DataViewer = withRouter(
     }, [recordPositionId]);
 
     const getTextWidth = (text, font) => {
-      // re-use canvas object for better performance
       const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
       const context = canvas.getContext('2d');
       context.font = font;
@@ -191,6 +190,7 @@ const DataViewer = withRouter(
     };
 
     useEffect(() => {
+      console.log(fetchedData);
       const textMaxWidth = colsSchema.map(col => getTextWidth(col.header, '14pt Open Sans'));
       const maxWidth = Math.max(...textMaxWidth) + 23;
       let columnsArr = colsSchema.map(column => {

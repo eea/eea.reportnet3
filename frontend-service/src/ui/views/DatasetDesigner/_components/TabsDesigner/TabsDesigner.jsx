@@ -340,10 +340,10 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       const inmTabs = [...tabs];
       const draggedTabIdx = getIndexByHeader(draggedTabHeader, inmTabs);
       const droppedTabIdx = getIndexByHeader(droppedTabHeader, inmTabs);
-
+      console.log(draggedTabIdx, droppedTabIdx);
       const tableOrdered = await DatasetService.orderTableDesign(
         datasetId,
-        droppedTabIdx,
+        draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
         tabs[draggedTabIdx].tableSchemaId
       );
       if (tableOrdered) {

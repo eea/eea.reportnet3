@@ -305,9 +305,14 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = getIndexByFieldName(droppedFieldName, inmFields);
+      console.log(draggedFieldIdx, droppedFieldIdx, inmFields);
       const fieldOrdered = await DatasetService.orderRecordFieldDesign(
         datasetId,
-        droppedFieldIdx,
+        droppedFieldIdx === -1
+          ? inmFields.length
+          : draggedFieldIdx < droppedFieldIdx
+          ? droppedFieldIdx - 1
+          : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
       if (fieldOrdered) {

@@ -58,12 +58,19 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    const getDatasetSchemaId = async () => {
-      const dataset = await DatasetService.schemaById(datasetId);
+    try {
+      setIsLoading(true);
+      const getDatasetSchemaId = async () => {
+        const dataset = await DatasetService.schemaById(datasetId);
 
-      setDatasetSchemaId(dataset.datasetSchemaId);
-    };
-    getDatasetSchemaId();
+        setDatasetSchemaId(dataset.datasetSchemaId);
+      };
+      getDatasetSchemaId();
+    } catch (error) {
+      console.error(`Error while loading schema: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -99,8 +106,15 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }, []);
 
   const onLoadDatasetSchemaName = async () => {
-    const dataset = await DatasetService.getMetaData(datasetId);
-    setDatasetSchemaName(dataset.datasetSchemaName);
+    setIsLoading(true);
+    try {
+      const dataset = await DatasetService.getMetaData(datasetId);
+      setDatasetSchemaName(dataset.datasetSchemaName);
+    } catch (error) {
+      console.error(`Error while getting datasetSchemaName: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const layout = children => {
