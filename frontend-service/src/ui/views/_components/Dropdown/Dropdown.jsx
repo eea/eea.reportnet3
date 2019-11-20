@@ -8,6 +8,7 @@ export const Dropdown = ({
   filterPlaceholder,
   itemTemplate,
   onChange,
+  onMouseDown,
   optionLabel,
   options,
   placeholder,
@@ -24,6 +25,7 @@ export const Dropdown = ({
       filterPlaceholder={filterPlaceholder}
       itemTemplate={itemTemplate}
       onChange={onChange}
+      onMouseDown={onMouseDown}
       optionLabel={optionLabel}
       options={options}
       placeholder={placeholder}
