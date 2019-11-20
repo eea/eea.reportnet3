@@ -284,6 +284,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
               isErrorDialogVisible={isErrorDialogVisible}
+              key={field.fieldId}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
               onFieldDragAndDropStart={onFieldDragAndDropStart}

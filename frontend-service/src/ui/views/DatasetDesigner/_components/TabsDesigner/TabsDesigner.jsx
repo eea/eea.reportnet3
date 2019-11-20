@@ -41,7 +41,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     if (!isUndefined(scrollFn) && !isNull(scrollFn) && !isEditing) {
       scrollFn();
     }
-
     if (!isUndefined(selectedTabId)) {
       if (!checkExistsHeader()) {
         setActiveIndex(0);
@@ -360,6 +359,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const updateTableName = async (tableSchemaId, tableSchemaName) => {
     const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
     if (tableUpdated) {
+      setSelectedTabId(tableSchemaName);
       const inmTabs = [...tabs];
       inmTabs[getIndexByTableSchemaId(tableSchemaId, inmTabs)].header = tableSchemaName;
       setTabs(inmTabs);
