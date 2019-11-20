@@ -47,14 +47,14 @@ public class LoadDocumentCommand extends AbstractEEAEventHandlerCommand {
   public void execute(EEAEventVO eeaEventVO) {
     DocumentVO documentVO = new DocumentVO();
     documentVO.setDataflowId((Long) eeaEventVO.getData().get("dataflow_id"));
-    String filename = (String) eeaEventVO.getData().get("filename");
+    eeaEventVO.getData().get("filename");
     documentVO.setLanguage((String) eeaEventVO.getData().get("language"));
     documentVO.setDescription((String) eeaEventVO.getData().get("description"));
     documentVO.setSize((String) eeaEventVO.getData().get("size"));
     documentVO.setDate(Date.from((Instant) eeaEventVO.getData().get("date")));
 
     try {
-      dataflowService.insertDocument(filename, documentVO);
+      dataflowService.insertDocument(documentVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error inserting document for dataflow {} due to exception {}",
           documentVO.getDataflowId(), e);

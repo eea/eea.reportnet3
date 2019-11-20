@@ -17,6 +17,7 @@ import org.eea.document.type.FileResponse;
 import org.eea.document.utils.OakRepositoryUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -60,6 +61,12 @@ public class DocumentServiceImpl implements DocumentService {
   private KafkaSenderUtils kafkaSenderUtils;
 
   /**
+   * The dataflow controller.
+   */
+  @Autowired
+  private DataFlowDocumentControllerZuul dataflowController;
+
+  /**
    * upload a document to the jackrabbit content repository.
    *
    * @param inputStream the input stream
@@ -82,28 +89,20 @@ public class DocumentServiceImpl implements DocumentService {
           || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
+      // save to metabase
+      Long idDocument = dataflowController.insertDocument(documentVO);
+      if (idDocument != null) {
+        LOG.info("Adding the file...");
+        // Initialize the session
+        ns = oakRepositoryUtils.initializeNodeStore();
+        Repository repository = oakRepositoryUtils.initializeRepository(ns);
+        session = oakRepositoryUtils.initializeSession(repository);
 
-      String language = documentVO.getLanguage();
-      Long dataFlowId = documentVO.getDataflowId();
-
-      LOG.info("Adding the file...");
-      // Initialize the session
-      ns = oakRepositoryUtils.initializeNodeStore();
-      Repository repository = oakRepositoryUtils.initializeRepository(ns);
-      session = oakRepositoryUtils.initializeSession(repository);
-
-      // Add a file node with the document
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(filename, "-" + language);
-
-      String modifiedFilename = oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + dataFlowId,
-          inputStream, nameWithLanguage, contentType);
-      if (StringUtils.isBlank(modifiedFilename)) {
-        throw new EEAException(EEAErrorMessage.FILE_NAME);
+        // Add a file node with the document
+        oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + documentVO.getDataflowId(),
+            inputStream, Long.toString(idDocument), contentType);
+        LOG.info("File added...");
       }
-      LOG.info("File added...");
-      sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
-          documentVO.getDescription(), size, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);

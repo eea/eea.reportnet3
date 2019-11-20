@@ -71,4 +71,22 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
   }
+
+  /**
+   * Insert document.
+   *
+   * @param document the document
+   * @return the long
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping
+  public Long insertDocument(@RequestBody DocumentVO document) {
+    try {
+      return dataflowService.insertDocument(document);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
+  }
 }

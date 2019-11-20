@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -41,4 +42,12 @@ public interface DataFlowDocumentController {
   @PutMapping(value = "/update")
   void updateDocument(@RequestBody DocumentVO document);
 
+  /**
+   * Insert document.
+   *
+   * @param documentVO the document VO
+   * @return the long
+   */
+  @PostMapping
+  Long insertDocument(@RequestBody DocumentVO documentVO);
 }

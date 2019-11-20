@@ -41,25 +41,24 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
   /**
    * Insert document.
    *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @param description the description
+   * @param documentVO the document VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void insertDocument(String filename, DocumentVO documentVO) throws EEAException {
-    if (documentVO == null || filename == null) {
+  public Long insertDocument(DocumentVO documentVO) throws EEAException {
+    if (documentVO == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow dataflow = dataflowRepository.findById(documentVO.getDataflowId()).orElse(null);
     if (dataflow != null) {
       Document document = documentMapper.classToEntity(documentVO);
-      document.setName(filename);
+      document.setName(documentVO.getName());
       document.setDataflow(dataflow);
-      documentRepository.save(document);
+      document = documentRepository.save(document);
       LOG.info("document saved");
+      return document.getId();
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
