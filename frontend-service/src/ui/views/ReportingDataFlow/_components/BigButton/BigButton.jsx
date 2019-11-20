@@ -206,7 +206,7 @@ export const BigButton = ({
             e.preventDefault();
             handleRedirect();
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('info')} />
+          <FontAwesomeIcon icon={AwesomeIcons('question')} />
         </a>
       </div>
       <p className={styles.caption}>{caption}</p>
