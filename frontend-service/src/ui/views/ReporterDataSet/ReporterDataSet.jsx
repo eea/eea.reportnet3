@@ -48,7 +48,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
-  const [datasetTitle, setDatasetTitle] = useState('');
+  const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
@@ -61,6 +61,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
@@ -130,7 +131,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         command: () => onExportData(type.code)
       }))
     );
-  }, [datasetTitle]);
+  }, [datasetName]);
 
   useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
@@ -152,6 +153,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   useEffect(() => {
     try {
       getDataflowName();
+      onLoadDataflow();
     } catch (error) {
       console.error(error.response);
     }
@@ -205,12 +207,26 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onExportData = async fileType => {
     setLoadingFile(true);
     try {
-      setExportDatasetDataName(createFileName(datasetTitle, fileType));
+      setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
       console.error(error);
     } finally {
       setLoadingFile(false);
+    }
+  };
+
+  const onLoadDataflow = async () => {
+    try {
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
+      setIsDatasetReleased(dataset[0].isReleased);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,7 +236,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
-      setDatasetTitle(datasetStatistics.datasetSchemaName);
+      setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
       setTableSchema(
@@ -267,6 +283,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onTabChange = tableSchemaId => {
     setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
     // setActiveIndex(tableSchemaId.index);
+  };
+
+  const datasetTitle = () => {
+    let datasetReleasedTitle = `${datasetName} (${resources.messages['released'].toString().toLowerCase()})`;
+    return isDatasetReleased ? datasetReleasedTitle : datasetName;
   };
 
   const showWebFormInputSwitch = () => {
@@ -337,10 +358,9 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
       }}>
-      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
       <Title
         title={`${resources.messages['dataflow']}: ${dataflowName} - 
-        ${resources.messages['titleDataset']}${datasetTitle}`}
+        ${resources.messages['titleDataset']}${datasetTitle()}`}
         icon="dataset"
       />
       <div className={styles.ButtonsBar}>
@@ -449,7 +469,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
-            datasetName={datasetTitle}
+            datasetName={datasetName}
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
             tableSchemaNames={tableSchemaNames}
