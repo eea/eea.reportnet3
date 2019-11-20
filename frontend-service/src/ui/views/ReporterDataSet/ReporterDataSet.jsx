@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
@@ -260,7 +260,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
-              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+              header: `${capitalize(field['name'])}`,
               type: field['type'],
               recordId: field['recordId']
             };

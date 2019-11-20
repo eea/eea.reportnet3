@@ -7,6 +7,7 @@ import { isUndefined } from 'lodash';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -134,6 +135,9 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
             <WebLinks isCustodian={isCustodian} dataflowId={match.params.dataflowId} />
+          </TabPanel>
+          <TabPanel header={resources.messages['datasetSchemas']}>
+            <DatasetSchemas dataflowId={match.params.dataflowId} />
           </TabPanel>
         </TabView>
       </React.Fragment>

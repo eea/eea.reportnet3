@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 

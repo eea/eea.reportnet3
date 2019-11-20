@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined, isEmpty } from 'lodash';
+import { isUndefined } from 'lodash';
 
 import styles from './DataCustodianDashboards.module.css';
 

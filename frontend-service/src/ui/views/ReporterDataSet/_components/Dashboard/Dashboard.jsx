@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isUndefined from 'lodash/isUndefined';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './Dashboard.module.css';
 
@@ -73,11 +73,7 @@ const Dashboard = withRouter(
       const getBarsByErrorAndStatistics = dataset => {
         const levelErrorBars = allLevelErrorTypes.map(function(error, i) {
           const errorBar = {
-            label:
-              error
-                .toString()
-                .charAt(0)
-                .toUpperCase() + error.slice(1).toLowerCase(),
+            label: capitalize(error),
             backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[error] : colors.error,
             data: dataset.tableStatisticPercentages[i],
             totalData: dataset.tableStatisticValues
@@ -152,9 +148,7 @@ const Dashboard = withRouter(
                   {Object.keys(SEVERITY_CODE).map((type, i) => {
                     return (
                       <div className={styles.colorPickerItem} key={i}>
-                        <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-                          .slice(1)
-                          .toLowerCase()}: `}</span>
+                        <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
                         <ColorPicker
                           className={styles.colorPicker}
                           onChange={e => {
