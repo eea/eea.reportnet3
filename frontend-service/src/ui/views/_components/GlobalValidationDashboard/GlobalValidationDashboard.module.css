@@ -28,4 +28,6 @@
 }
 .chart_released {
   padding-top: 1rem;
+  margin-right: 0rem !important;
+  margin-left: 0rem !important;
 }

@@ -191,7 +191,7 @@ const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaNa
   return (
     <>
       {isVisible ? (
-        <div className={`${styles.chart_released}`}>
+        <div className={`rep-row ${styles.chart_released}`}>
           <h3>{datasetSchemaName}</h3>
           {!isEmpty(filterState.data) ? (
             <>
