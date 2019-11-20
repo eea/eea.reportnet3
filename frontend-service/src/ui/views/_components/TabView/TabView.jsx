@@ -18,12 +18,15 @@ export const TabView = ({
   checkEditingTabs,
   children,
   className = null,
-  designMode,
+  designMode = false,
   id = null,
+  initialTabIndexDrag,
+  initialTabIndexSelected,
   isErrorDialogVisible,
   onTabAdd,
   onTabBlur,
   onTabDragAndDrop,
+  onTabDragAndDropStart,
   onTabAddCancel,
   onTabConfirmDelete,
   onTabChange = null,
@@ -31,12 +34,13 @@ export const TabView = ({
   onTabNameError,
   onTabClick,
   renderActiveOnly = true,
-  style = null
+  style = null,
+  totalTabs
 }) => {
   const [activeIdx, setActiveIdx] = useState(activeIndex);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [idx] = useState(id || UniqueComponentId());
-  const [idxToDelete, setidxToDelete] = useState(null);
+  const [idxToDelete, setIdxToDelete] = useState(null);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isNavigationHidden, setIsNavigationHidden] = useState(true);
 
   const divTabsRef = useRef();
@@ -46,36 +50,50 @@ export const TabView = ({
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
   useEffect(() => {
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
-        setIsNavigationHidden(false);
+      if (
+        !isUndefined(ulTabsRef.current) &&
+        !isNull(ulTabsRef.current) &&
+        !isUndefined(divTabsRef.current) &&
+        !isNull(divTabsRef.current)
+      ) {
+        if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
+          setIsNavigationHidden(false);
+        }
       }
     }, 100);
   }, [children]);
 
   const onTabHeaderClick = (event, tab, index) => {
-    if (tab.props.addTab) {
-      onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
-        scrollTo(ulTabsRef.current.clientWidth + 100, 0);
-      });
-    } else {
-      if (!tab.props.disabled) {
-        if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
-          onTabClick({ originalEvent: event, index: index });
-        }
-        if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
-          onTabChange({ originalEvent: event, index: index });
-        } else {
-          setActiveIdx(index);
+    if (designMode) {
+      if (tab.props.addTab) {
+        onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
+          if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
+            scrollTo(ulTabsRef.current.clientWidth + 100, 0);
+          }
+        });
+      } else {
+        if (!tab.props.disabled) {
+          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+            onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+          }
+          if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+            onTabChange({ originalEvent: event, index: index });
+          } else {
+            if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+              onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+            }
+          }
         }
       }
+    } else {
+      setActiveIdx(index);
     }
-
     event.preventDefault();
   };
 
   const onTabDeleteClicked = deleteIndex => {
-    setidxToDelete(deleteIndex);
-    setDeleteDialogVisible(true);
+    setIdxToDelete(deleteIndex);
+    setIsDeleteDialogVisible(true);
   };
 
   const onTabMouseWheel = deltaY => {
@@ -94,21 +112,24 @@ export const TabView = ({
 
     return (
       <div
-        id={id}
-        aria-labelledby={ariaLabelledBy}
         aria-hidden={!selected}
+        aria-labelledby={ariaLabelledBy}
         className={className}
-        style={tab.props.contentStyle}
+        key={id}
+        id={id}
         role="tabpanel"
-        key={id}>
+        style={tab.props.contentStyle}>
         {!renderActiveOnly ? tab.props.children : selected && tab.props.children}
       </div>
     );
   };
 
   const isSelected = index => {
-    const actIndex = !isUndefined(onTabChange) && !isNull(onTabChange) ? activeIndex : activeIdx;
-    return actIndex === index;
+    if (designMode) {
+      return activeIndex === index && initialTabIndexSelected === index;
+    } else {
+      return activeIdx === index;
+    }
   };
 
   const renderTabHeader = (tab, index) => {
@@ -119,6 +140,8 @@ export const TabView = ({
     });
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
+    if (!isUndefined(divTabsRef.current) && !isNull(divTabsRef.current)) {
+    }
     return (
       <Tab
         addTab={tab.props.addTab}
@@ -128,10 +151,12 @@ export const TabView = ({
         className={className}
         editable={tab.props.editable}
         designMode={designMode}
+        divScrollTabsRef={divTabsRef.current}
         header={tab.props.header}
         headerStyle={tab.props.headerStyle}
         id={id}
         index={index}
+        initialTabIndexDrag={initialTabIndexDrag}
         key={id}
         leftIcon={tab.props.leftIcon}
         newTab={tab.props.newTab}
@@ -139,6 +164,7 @@ export const TabView = ({
         onTabAddCancel={onTabAddCancel}
         onTabDeleteClick={onTabDeleteClicked}
         onTabDragAndDrop={onTabDragAndDrop}
+        onTabDragAndDropStart={onTabDragAndDropStart}
         onTabHeaderClick={event => {
           onTabHeaderClick(event, tab, index);
           if (!isUndefined(onTabEditingHeader)) {
@@ -151,6 +177,7 @@ export const TabView = ({
         rightIcon={tab.props.rightIcon}
         scrollTo={scrollTo}
         selected={selected}
+        totalTabs={totalTabs}
       />
     );
   };
@@ -222,10 +249,10 @@ export const TabView = ({
         labelConfirm={resources.messages['yes']}
         onConfirm={() => {
           onTabConfirmDelete(idxToDelete);
-          setDeleteDialogVisible(false);
+          setIsDeleteDialogVisible(false);
         }}
-        onHide={() => setDeleteDialogVisible(false)}
-        visible={deleteDialogVisible}>
+        onHide={() => setIsDeleteDialogVisible(false)}
+        visible={isDeleteDialogVisible}>
         {resources.messages['deleteTabConfirm']}
       </ConfirmDialog>
     );
@@ -235,13 +262,15 @@ export const TabView = ({
     divTabsRef.current.scrollTo(xCoordinate, yCoordinate);
     //Await for scroll
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
-        if (isNavigationHidden) {
-          setIsNavigationHidden(false);
-        }
-      } else {
-        if (!isNavigationHidden) {
-          setIsNavigationHidden(true);
+      if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
+        if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
+          if (isNavigationHidden) {
+            setIsNavigationHidden(false);
+          }
+        } else {
+          if (!isNavigationHidden) {
+            setIsNavigationHidden(true);
+          }
         }
       }
     }, 100);
