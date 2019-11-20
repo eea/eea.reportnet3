@@ -35,7 +35,6 @@ const DatasetSchemas = ({ dataflowId }) => {
     if (isLoading) {
       return <Spinner />;
     } else {
-      console.log(designDatasets);
       return !isUndefined(designDatasets) && !isNull(designDatasets)
         ? designDatasets.map(designDataset => {
             return <DatasetSchema datasetId={designDataset.datasetId} />;
