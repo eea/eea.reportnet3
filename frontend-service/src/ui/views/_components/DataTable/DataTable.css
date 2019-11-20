@@ -68,6 +68,25 @@
 .p-datatable-scrollable-body {
   overflow: auto;
   position: relative;
+  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  scrollbar-width: thin;
+}
+
+.p-datatable-scrollable-body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.p-datatable-scrollable-body::-webkit-scrollbar-track {
+  background: var(--c-custom-gray);
+}
+
+.p-datatable-scrollable-body::-webkit-scrollbar-thumb {
+  background: var(--gray-50);
+}
+
+.p-datatable-scrollable-body::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-75);
 }
 
 .p-datatable-scrollable-body > table > .p-datatable-tbody > tr:first-child > td {

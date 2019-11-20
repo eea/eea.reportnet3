@@ -1,2 +1,2 @@
-export const DeleteTableDesign = ({ datasetRepository }) => async (datasetSchemaId, tableId) =>
-  datasetRepository.deleteTableDesign(datasetSchemaId, tableId);
+export const DeleteTableDesign = ({ datasetRepository }) => async (datasetId, tableId) =>
+  datasetRepository.deleteTableDesign(datasetId, tableId);

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
@@ -48,6 +48,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -233,6 +234,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
@@ -258,7 +260,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
-              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+              header: `${capitalize(field['name'])}`,
               type: field['type'],
               recordId: field['recordId']
             };
@@ -358,11 +360,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
       }}>
-      <Title
-        title={`${resources.messages['dataflow']}: ${dataflowName} - 
-        ${resources.messages['titleDataset']}${datasetTitle()}`}
-        icon="dataset"
-      />
+      <Title title={`${dataflowName} - ${datasetSchemaName} - ${datasetTitle()}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

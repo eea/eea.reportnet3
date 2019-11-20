@@ -1,0 +1,22 @@
+.validationChartWrap {
+  margin-bottom: 5rem !important;
+}
+
+.chartToolbar {
+  /* position: fixed !important; */
+  background: white;
+  /* width: 90vw; */
+  z-index: 999;
+}
+
+.informationText {
+  margin-top: 1rem;
+}
+
+.hide {
+  color: var(--c-corporate-blue) !important;
+}
+
+.dashboardsButton:enabled:focus {
+  box-shadow: none !important;
+}
