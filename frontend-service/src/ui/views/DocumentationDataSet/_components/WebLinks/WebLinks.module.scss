@@ -23,3 +23,11 @@
   display: flex;
   justify-content: center;
 }
+.buttonWrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.cancelButton {
+  margin-left: 0.5rem !important;
+}
