@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { capitalize, isEmpty, isUndefined, sortBy } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -12,20 +12,16 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ isCustodian, dataflowId }) => {
+export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) => {
   const resources = useContext(ResourcesContext);
-
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
-  const [webLinks, setWebLinks] = useState();
 
   const form = useRef(null);
   const addWeblinkSchema = Yup.object().shape({
@@ -38,20 +34,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       .required(' ')
   });
 
-  const onLoadWebLinks = async () => {
-    setIsLoading(true);
-    try {
-      let loadedWebLinks = await WebLinkService.all(dataflowId);
-      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
-      setWebLinks(loadedWebLinks);
-    } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        console.log('error', error.response);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const resetForm = () => {
     setWeblinkItem({ id: undefined, description: '', url: '' });
     form.current.resetForm();
@@ -214,7 +196,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       )}
       <DataTable
         autoLayout={true}
-        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}

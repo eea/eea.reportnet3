@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import { isUndefined, sortBy } from 'lodash';
 
 import { config } from 'conf';
 
@@ -18,7 +18,6 @@ import { Title } from 'ui/views/_components/Title';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 import { WebLinks } from './_components/WebLinks';
-
 import { DataflowService } from 'core/services/DataFlow';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
@@ -91,6 +90,18 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     setDataflowName(dataflowData.name);
   };
 
+  const onLoadWebLinks = async () => {
+    try {
+      let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
+      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
+      setWebLinks(loadedWebLinks);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        console.log('error', error.response);
+      }
+    }
+  };
+
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
     try {
@@ -134,7 +145,12 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             />
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
-            <WebLinks isCustodian={isCustodian} dataflowId={match.params.dataflowId} />
+            <WebLinks
+              isCustodian={isCustodian}
+              dataflowId={match.params.dataflowId}
+              webLinks={webLinks}
+              onLoadWebLinks={onLoadWebLinks}
+            />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
             <DatasetSchemas dataflowId={match.params.dataflowId} />
