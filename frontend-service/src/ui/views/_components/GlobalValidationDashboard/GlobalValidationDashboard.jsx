@@ -32,7 +32,7 @@ const LEVELS = {
   BLOCKER: 4
 };
 
-const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
+export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],
@@ -125,8 +125,6 @@ const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaNa
     });
     return levelErrorBars;
   };
-
-  console.log('chartRef', chartRef.current);
 
   const buildDatasetDashboardObject = (datasetsDashboardsData, levelErrors) => {
     let datasets = [];
@@ -246,5 +244,3 @@ const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaNa
     </>
   );
 };
-
-export { GlobalValidationDashboard };

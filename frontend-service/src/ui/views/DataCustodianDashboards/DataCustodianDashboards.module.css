@@ -1,9 +1,5 @@
 .validationChartWrap {
-  margin: 0px 0px 5rem 0px !important;
-}
-
-.releasedChartWrap {
-  margin: 0px 0px 5rem 0px !important;
+  margin-bottom: 5rem !important;
 }
 
 .chartToolbar {
@@ -13,6 +9,11 @@
   z-index: 999;
 }
 
+.informationText {
+  margin-top: 1rem;
+}
+
 .show {
   color: var(--c-corporate-blue) !important;
+  font-weight: 600 !important;
 }

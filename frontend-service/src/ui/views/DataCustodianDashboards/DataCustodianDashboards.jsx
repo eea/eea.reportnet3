@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import { isUndefined, isEmpty } from 'lodash';
 
 import styles from './DataCustodianDashboards.module.css';
 
@@ -82,7 +82,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
-  const reducer = (state, { type, payload }) => {
+  const chartReducer = (state, { type, payload }) => {
     switch (type) {
       case 'TOOGLE_SCHEMA_CHART':
         return {
@@ -97,14 +97,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
-  const initValues = {};
+  const dashboardInitialValues = {};
   if (!isUndefined(dataSchema)) {
     dataSchema.forEach(schema => {
-      initValues[schema.datasetSchemaId] = false;
+      dashboardInitialValues[schema.datasetSchemaId] = false;
     });
   }
 
-  const [chartState, chartDispatch] = useReducer(reducer, initValues);
+  const [chartState, chartDispatch] = useReducer(chartReducer, dashboardInitialValues);
 
   const onLoadButtons = !isUndefined(dataSchema)
     ? dataSchema.map(schema => {

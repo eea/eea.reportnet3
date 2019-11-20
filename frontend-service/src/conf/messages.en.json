@@ -150,6 +150,7 @@
 		"newItem": "New item",
 		"newTablePlaceHolder": "Table name",
 		"no": "No",
+		"noDashboardSelected": "There is no dashboard selected",
 		"noDataInDataTable": "There is not any data to show",
 		"noErrorData": "There is not any validation data to show",
 		"noWeblinks": "There is not any web link to show",
