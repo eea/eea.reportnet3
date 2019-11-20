@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isUndefined, sortBy } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -41,7 +41,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const onLoadWebLinks = async () => {
     setIsLoading(true);
     try {
-      setWebLinks(await WebLinkService.all(dataflowId));
+      let loadedWebLinks = await WebLinkService.all(dataflowId);
+      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
+      setWebLinks(loadedWebLinks);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         console.log('error', error.response);
