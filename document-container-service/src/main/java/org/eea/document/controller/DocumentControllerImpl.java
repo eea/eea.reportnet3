@@ -105,8 +105,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      FileResponse file = documentService.getDocument(document.getName(), document.getDataflowId(),
-          document.getLanguage());
+      FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
       HttpHeaders header = new HttpHeaders();
       header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
       header.add("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -140,8 +139,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      documentService.deleteDocument(documentId, document.getName(), document.getDataflowId(),
-          document.getLanguage());
+      documentService.deleteDocument(documentId, document.getDataflowId());
     } catch (final FeignException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {

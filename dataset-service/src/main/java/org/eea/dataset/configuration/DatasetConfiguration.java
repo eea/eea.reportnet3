@@ -61,7 +61,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * The batch size.
    */
   @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
-  private String batch_Size;
+  private String batchSize;
 
   /**
    * The show sql propertie
@@ -133,7 +133,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   public DataSource datasetDataSource() {
     final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
     DataSource dataSource = null;
-    if (null != connections && connections.size() > 0) {
+    if (null != connections && !connections.isEmpty()) {
       dataSource = dataSetsDataSource(connections.get(0));
     }
     return dataSource;
@@ -195,7 +195,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
-    properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
+    properties.setProperty("hibernate.jdbc.batch_size", batchSize);
     properties.setProperty("hibernate.show_sql", showSql);
     properties.setProperty("hibernate.flushMode", flushMode);
     properties.setProperty("hibernate.order_updates", orderUpdates);

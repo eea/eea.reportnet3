@@ -2,7 +2,7 @@ package org.eea.document.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.PathNotFoundException;
@@ -90,6 +90,8 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
       // save to metabase
+      documentVO.setSize(humanReadableByteCount(size, true));
+      documentVO.setDate(new Date());
       Long idDocument = dataflowController.insertDocument(documentVO);
       if (idDocument != null) {
         LOG.info("Adding the file...");
@@ -102,6 +104,8 @@ public class DocumentServiceImpl implements DocumentService {
         oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + documentVO.getDataflowId(),
             inputStream, Long.toString(idDocument), contentType);
         LOG.info("File added...");
+      } else {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
@@ -116,15 +120,14 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * Gets the document.
    *
-   * @param documentName the document name
+   * @param documentId the document id
    * @param dataFlowId the data flow id
-   * @param language the language
    * @return the document
    * @throws EEAException the EEA exception
    */
   @Override
-  public FileResponse getDocument(final String documentName, final Long dataFlowId,
-      final String language) throws EEAException {
+  public FileResponse getDocument(final Long documentId, final Long dataFlowId)
+      throws EEAException {
     Session session = null;
     FileResponse fileResponse = null;
     DocumentNodeStore ns = null;
@@ -135,11 +138,8 @@ public class DocumentServiceImpl implements DocumentService {
       session = oakRepositoryUtils.initializeSession(repository);
 
       // retrieve the file to the controller
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(documentName, "-" + language);
-
       fileResponse = oakRepositoryUtils.getFileContents(session, PATH_DELIMITER + dataFlowId,
-          nameWithLanguage);
+          Long.toString(documentId));
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
       LOG_ERROR.error("Error in getDocument due to", e);
@@ -157,16 +157,13 @@ public class DocumentServiceImpl implements DocumentService {
    * Delete document.
    *
    * @param documentId the document id
-   * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @param language the language
    * @throws EEAException the EEA exception
    */
   @Override
   @Modified
   @Async
-  public void deleteDocument(Long documentId, String documentName, Long dataFlowId,
-      final String language) throws EEAException {
+  public void deleteDocument(Long documentId, Long dataFlowId) throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -176,9 +173,7 @@ public class DocumentServiceImpl implements DocumentService {
       session = oakRepositoryUtils.initializeSession(repository);
 
       // Delete a file node with the document
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(documentName, "-" + language);
-      oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), nameWithLanguage);
+      oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), Long.toString(documentId));
       LOG.info("File deleted...");
 
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
@@ -197,26 +192,6 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
 
-  /**
-   * Send kafka notification.
-   *
-   * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
-   * @param eventType the event type
-   */
-  public void sendKafkaNotification(final String filename, final Long dataFlowId,
-      final String language, final String description, final Long size, final EventType eventType) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("dataflow_id", dataFlowId);
-    result.put("filename", filename);
-    result.put("language", language);
-    result.put("description", description);
-    result.put("size", humanReadableByteCount(size, true));
-    result.put("date", Instant.now());
-    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
-  }
 
   /**
    * Send kafka notification.

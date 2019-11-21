@@ -286,8 +286,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody OrderVO orderVO) {
     try {
       // Update the fieldSchema from the datasetSchema
-      if (!dataschemaService.orderTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          orderVO.getId(), orderVO.getPosition())) {
+      if (Boolean.FALSE.equals(
+          dataschemaService.orderTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
+              orderVO.getId(), orderVO.getPosition()))) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {

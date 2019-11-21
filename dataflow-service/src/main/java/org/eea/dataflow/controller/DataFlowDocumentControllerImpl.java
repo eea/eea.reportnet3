@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,7 +81,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
    */
   @Override
   @HystrixCommand
-  @PutMapping
+  @PostMapping
   public Long insertDocument(@RequestBody DocumentVO document) {
     try {
       return dataflowService.insertDocument(document);

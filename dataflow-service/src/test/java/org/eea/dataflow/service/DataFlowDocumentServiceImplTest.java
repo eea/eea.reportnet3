@@ -62,30 +62,29 @@ public class DataFlowDocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test
   public void insertDocumentException1Test() throws EEAException {
-    dataflowServiceImpl.insertDocument(null, null);
+    try {
+      dataflowServiceImpl.insertDocument(null);
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+    }
   }
 
-  /**
-   * Insert document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void insertDocumentException2Test() throws EEAException {
-    dataflowServiceImpl.insertDocument("filename", null);
-  }
 
   /**
    * Insert document exception 5 test.
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test
   public void insertDocumentException3Test() throws EEAException {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    dataflowServiceImpl.insertDocument("filename", documentVO);
+    try {
+      dataflowServiceImpl.insertDocument(documentVO);
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+    }
   }
 
   /**
@@ -95,10 +94,12 @@ public class DataFlowDocumentServiceImplTest {
    */
   @Test
   public void insertDocumentSuccessTest() throws EEAException {
+    Document document = new Document();
+    document.setId(1L);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    when(documentMapper.classToEntity(Mockito.any())).thenReturn(new Document());
-    dataflowServiceImpl.insertDocument("filename", documentVO);
-    Mockito.verify(documentRepository, times(1)).save(Mockito.any());
+    when(documentMapper.classToEntity(Mockito.any())).thenReturn(document);
+    when(documentRepository.save(Mockito.any())).thenReturn(document);
+    assertEquals((Long) 1L, dataflowServiceImpl.insertDocument(documentVO));
   }
 
   /**

@@ -29,29 +29,22 @@ public interface DocumentService {
   /**
    * Gets the document.
    *
-   * @param documentName the document name
+   * @param documentId the document id
    * @param dataFlowId the data flow id
-   * @param language the language
    * @return the document
    * @throws EEAException the EEA exception
    */
-  FileResponse getDocument(final String documentName, final Long dataFlowId, final String language)
-      throws EEAException;
+  FileResponse getDocument(final Long documentId, final Long dataFlowId) throws EEAException;
 
 
   /**
    * Delete document.
    *
    * @param documentId the document id
-   * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final Long documentId, final String documentName, final Long dataFlowId,
-      final String language) throws EEAException;
-
-
+  void deleteDocument(final Long documentId, final Long dataFlowId) throws EEAException;
 
   /**
    * Upload schema snapshot.

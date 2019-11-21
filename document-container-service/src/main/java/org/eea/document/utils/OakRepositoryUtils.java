@@ -22,7 +22,6 @@ import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.apache.jackrabbit.oak.plugins.document.mongo.MongoDocumentNodeStoreBuilder;
 import org.apache.jackrabbit.oak.spi.blob.GarbageCollectableBlobStore;
 import org.apache.jackrabbit.oak.spi.cluster.ClusterRepositoryInfo;
-import org.eea.document.service.impl.DocumentServiceImpl;
 import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
 import org.eea.exception.EEAErrorMessage;
@@ -92,7 +91,7 @@ public class OakRepositoryUtils {
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OakRepositoryUtils.class);
 
   /**
    * Insert string before point.
@@ -184,13 +183,8 @@ public class OakRepositoryUtils {
     if (node == null) {
       throw new EEAException("Error creating nodes");
     }
-    String newFilename = filename;
-    if (node.hasNode(filename)) {
-      LOG.info("File already added.");
-      newFilename = increaseCounterFileName(node, filename);
-    }
     // Created a node with that of file Name
-    Node fileHolder = node.addNode(newFilename, "nt:file");
+    Node fileHolder = node.addNode(filename, "nt:file");
     Date now = new Date();
 
     if (fileHolder == null) {
@@ -205,30 +199,7 @@ public class OakRepositoryUtils {
     content.setProperty("jcr:lastModified", now.toInstant().toString());
     session.save();
     LOG.info("File Saved...");
-    return newFilename;
-  }
-
-  /**
-   * Increase counter file name.
-   *
-   * @param node the node
-   * @param filename the filename
-   *
-   * @return the string
-   *
-   * @throws RepositoryException the repository exception
-   * @throws EEAException the EEA exception
-   */
-  private String increaseCounterFileName(final Node node, final String filename)
-      throws RepositoryException, EEAException {
-    String result = filename;
-    for (int i = 1; true; i++) {
-      result = insertStringBeforePoint(filename, LEFT_PARENTHESIS + i + ")");
-      if (!node.hasNode(result)) {
-        break;
-      }
-    }
-    return result;
+    return filename;
   }
 
   /**
