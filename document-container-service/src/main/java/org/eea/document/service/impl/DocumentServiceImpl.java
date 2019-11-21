@@ -92,6 +92,7 @@ public class DocumentServiceImpl implements DocumentService {
       // save to metabase
       documentVO.setSize(humanReadableByteCount(size, true));
       documentVO.setDate(new Date());
+      documentVO.setName(filename);
       Long idDocument = dataflowController.insertDocument(documentVO);
       if (idDocument != null) {
         LOG.info("Adding the file...");
