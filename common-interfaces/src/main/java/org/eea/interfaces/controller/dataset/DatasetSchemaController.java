@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -99,9 +100,10 @@ public interface DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   * @return the table VO
    */
-  @PostMapping("/{datasetId}/tableSchema")
-  void createTableSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping(value = "/{datasetId}/tableSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO);
 
   /**
@@ -128,21 +130,20 @@ public interface DatasetSchemaController {
    * Order table schema.
    *
    * @param datasetId the dataset id
-   * @param tableSchemaVO the table schema VO
-   * @param position the position
+   * @param orderVO the order VO
    */
-  @PutMapping("/{datasetId}/tableSchema/position/{position}")
-  void orderTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody String tableSchemaId, @PathVariable("position") Integer position);
+  @PutMapping("/{datasetId}/tableSchema/order")
+  void orderTableSchema(@PathVariable("datasetId") Long datasetId, @RequestBody OrderVO orderVO);
 
   /**
    * Creates the field schema.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   * @return the string
    */
-  @PostMapping("/{datasetId}/fieldSchema/")
-  void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
   /**
@@ -151,7 +152,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
    */
-  @PutMapping("/{datasetId}/fieldSchema/")
+  @PutMapping("/{datasetId}/fieldSchema")
   void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
@@ -169,10 +170,8 @@ public interface DatasetSchemaController {
    * Order field schema.
    *
    * @param datasetId the dataset id
-   * @param fieldSchemaVO the field schema VO
-   * @param position the position
+   * @param orderVO the order VO
    */
-  @PutMapping("/{datasetId}/fieldSchema/position/{position}")
-  void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody FieldSchemaVO fieldSchemaVO, @PathVariable("position") Integer position);
+  @PutMapping("/{datasetId}/fieldSchema/order")
+  void orderFieldSchema(@PathVariable("datasetId") Long datasetId, @RequestBody OrderVO orderVO);
 }

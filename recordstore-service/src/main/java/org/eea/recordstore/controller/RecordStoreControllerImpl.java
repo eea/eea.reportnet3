@@ -152,6 +152,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
    * @param datasetType the dataset type
    */
   @Override
@@ -159,10 +160,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "partitionId", required = true) Long idPartition,
       @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType) {
 
     try {
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, datasetType);
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

@@ -8,6 +8,17 @@ import { DatasetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSe
 import { DatasetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
+const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
+  const datasetTableFieldDesign = new DatasetTableField();
+
+  datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
+  datasetTableFieldDesign.name = datasetTableRecordField.name;
+  datasetTableFieldDesign.type = datasetTableRecordField.type;
+
+  const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
+  return recordsAdded;
+};
+
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
   const datasetTableRecords = [];
   records.forEach(record => {
@@ -34,8 +45,8 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
   return recordsAdded;
 };
 
-const addTableDesign = async (datasetSchemaId, datasetId, tableSchemaName) => {
-  const tableAdded = await apiDataset.addTableDesign(datasetSchemaId, datasetId, tableSchemaName);
+const addTableDesign = async (datasetId, tableSchemaName) => {
+  const tableAdded = await apiDataset.addTableDesign(datasetId, tableSchemaName);
   return tableAdded;
 };
 
@@ -47,6 +58,11 @@ const createValidation = (entityType, id, levelError, message) => {
 const deleteDataById = async datasetId => {
   const dataDeleted = await apiDataset.deleteDataById(datasetId);
   return dataDeleted;
+};
+
+const deleteRecordFieldDesign = async (datasetId, recordId) => {
+  const recordDeleted = await apiDataset.deleteRecordFieldDesign(datasetId, recordId);
+  return recordDeleted;
 };
 
 const deleteRecordById = async (datasetId, recordId) => {
@@ -63,8 +79,8 @@ const deleteTableDataById = async (datasetId, tableId) => {
   return dataDeleted;
 };
 
-const deleteTableDesign = async (datasetSchemaId, tableSchemaId) => {
-  const dataDeleted = await apiDataset.deleteTableDesign(datasetSchemaId, tableSchemaId);
+const deleteTableDesign = async (datasetId, tableSchemaId) => {
+  const dataDeleted = await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
   return dataDeleted;
 };
 
@@ -146,7 +162,8 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
 
   const tableStatisticValues = [];
-
+  let levelErrors = [];
+  const tableLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
@@ -159,22 +176,52 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.totalRecordsWithErrors,
       datasetTableDTO.totalRecordsWithBlockers
     ]);
-
+    tableLevelErrors.push(getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
       datasetTableDTO.nameTableSchema
     );
   });
-  //Transpose value matrix to fit Chart data structure
+  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
+  dataset.levelErrorTypes = levelErrors;
+
   let transposedValues = transposeMatrix(tableStatisticValues);
 
   dataset.tableStatisticValues = tableStatisticValues;
   dataset.tableStatisticPercentages = getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
-
   return dataset;
+};
+
+const getDashboardLevelErrors = datasetTableDTO => {
+  let levelErrors = [];
+  if (datasetTableDTO.totalErrors > 0) {
+    let corrects =
+      datasetTableDTO.totalRecords -
+      (datasetTableDTO.totalRecordsWithBlockers +
+        datasetTableDTO.totalRecordsWithErrors +
+        datasetTableDTO.totalRecordsWithWarnings +
+        datasetTableDTO.totalRecordsWithInfos);
+
+    if (corrects > 0) {
+      levelErrors.push('CORRECT');
+    }
+    if (datasetTableDTO.totalRecordsWithInfos > 0) {
+      levelErrors.push('INFO');
+    }
+    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+      levelErrors.push('WARNING');
+    }
+    if (datasetTableDTO.totalRecordsWithErrors > 0) {
+      levelErrors.push('ERROR');
+    }
+    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+      levelErrors.push('BLOCKER');
+    }
+  }
+  return levelErrors;
 };
 
 const exportDataById = async (datasetId, fileType) => {
@@ -222,6 +269,16 @@ const orderLevelErrors = levelErrors => {
     .flat()
     .sort((a, b) => a.index - b.index)
     .map(orderedError => orderedError.id);
+};
+
+const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
+  const fieldOrdered = await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
+  return fieldOrdered;
+};
+
+const orderTableSchema = async (datasetId, position, tableSchemaId) => {
+  const tableOrdered = await apiDataset.orderTableSchema(datasetId, position, tableSchemaId);
+  return tableOrdered;
 };
 
 const findObjects = (obj, targetProp, finalResults) => {
@@ -291,22 +348,10 @@ function findObjects2(obj, targetProp, finalResults) {
 
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
-  //reorder tables alphabetically
-  // datasetSchemaDTO.tableSchemas = datasetSchemaDTO.tableSchemas.sort(function(a, b) {
-  //   if (a.nameTableSchema.toUpperCase() < b.nameTableSchema.toUpperCase()) {
-  //     return -1;
-  //   }
-  //   if (a.nameTableSchema.toUpperCase() > b.nameTableSchema.toUpperCase()) {
-  //     return 1;
-  //   }
-  //   return 0;
-  // });
-
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
   dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
-
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
@@ -323,15 +368,15 @@ const schemaById = async datasetId => {
           return new DatasetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
         })
       : null;
-    return new DatasetTable(
-      null,
-      datasetTableDTO.idTableSchema,
-      datasetTableDTO.nameTableSchema,
-      null,
-      null,
-      null,
-      records
-    );
+    const datasetTable = new DatasetTable();
+    datasetTable.tableSchemaId = datasetTableDTO.idTableSchema;
+    datasetTable.tableSchemaName = datasetTableDTO.nameTableSchema;
+    datasetTable.records = records;
+    datasetTable.recordSchemaId = !isNull(datasetTableDTO.recordSchema)
+      ? datasetTableDTO.recordSchema.idRecordSchema
+      : null;
+
+    return datasetTable;
   });
 
   dataset.tables = tables;
@@ -502,6 +547,18 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
   return fieldUpdated;
 };
 
+const updateRecordFieldDesign = async (datasetId, record) => {
+  const datasetTableFieldDesign = new DatasetTableField();
+
+  datasetTableFieldDesign.id = record.fieldSchemaId;
+  datasetTableFieldDesign.idRecord = record.recordId;
+  datasetTableFieldDesign.name = record.name;
+  datasetTableFieldDesign.type = record.type;
+
+  const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
+  return recordUpdated;
+};
+
 const updateRecordsById = async (datasetId, record) => {
   const fields = record.dataRow.map(DataTableFieldDTO => {
     let newField = new DatasetTableField();
@@ -527,13 +584,8 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
   return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 };
 
-const updateTableNameDesign = async (datasetSchemaId, tableSchemaId, tableSchemaName, datasetId) => {
-  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(
-    datasetSchemaId,
-    tableSchemaId,
-    tableSchemaName,
-    datasetId
-  );
+const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
+  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
   return tableSchemaUpdated;
 };
 
@@ -552,11 +604,13 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDatasetRepository = {
+  addRecordFieldDesign,
   addRecordsById,
   addTableDesign,
   createValidation,
   deleteDataById,
   deleteRecordById,
+  deleteRecordFieldDesign,
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
@@ -566,9 +620,12 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportTableDataById,
   getMetaData,
+  orderFieldSchema,
+  orderTableSchema,
   schemaById,
   tableDataById,
   updateFieldById,
+  updateRecordFieldDesign,
   updateRecordsById,
   updateSchemaNameById,
   updateTableNameDesign,

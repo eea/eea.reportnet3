@@ -1,11 +1,9 @@
 package org.eea.dataflow.controller;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.eea.dataflow.mapper.DataflowWebLinkMapper;
-import org.eea.dataflow.persistence.domain.Weblink;
+import org.eea.dataflow.exception.EntityNotFoundException;
+import org.eea.dataflow.exception.ResourceNoFoundException;
+import org.eea.dataflow.exception.WrongDataExceptions;
 import org.eea.dataflow.service.DataflowWebLinkService;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
@@ -13,10 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,18 +38,11 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
-  private static final String REGEX_URL =
-      "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$";
   /**
    * The dataflow web link service.
    */
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
-
-  @Autowired
-  private DataflowWebLinkMapper dataflowWebLinkMapper;
-
 
   /**
    * Gets the link.
@@ -56,17 +50,28 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param idLink the id link
    *
    * @return the link
+   * @throws EEAException
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
-  public WeblinkVO getLink(@RequestParam("idLink") Long idLink) {
+  public WeblinkVO getLink(@PathVariable("idLink") Long idLink) {
+
     try {
       return dataflowWebLinkService.getWebLink(idLink);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+
+
+
   }
 
   /**
@@ -78,25 +83,20 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping
-  public void saveLink(Long dataflowId, WeblinkVO weblinkVO) {
-
-
-    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
-
-    Pattern patN = Pattern.compile(REGEX_URL);
-
-    Matcher matN = patN.matcher(weblink.getUrl());
-
-    if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    }
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  public void saveLink(@RequestParam(value = "dataflowId") Long dataflowId, WeblinkVO weblinkVO) {
 
     try {
-      dataflowWebLinkService.saveWebLink(dataflowId, weblink.getUrl(), weblink.getDescription());
+      dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (WrongDataExceptions e) {
+      LOG_ERROR.error("Bad Request");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
   }
@@ -108,14 +108,20 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{idLink}")
-  public void removeLink(@RequestParam(value = "idLink") Long idLink) {
+  @DeleteMapping(value = "/{idLink}")
+  public void removeLink(@PathVariable(value = "idLink") Long idLink) {
+
     try {
       dataflowWebLinkService.removeWebLink(idLink);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
@@ -123,30 +129,28 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Update link.
    *
    * @param weblinkVO the weblink VO
+   * @throws EEAException
    */
   @Override
   @HystrixCommand
   @PutMapping
-  public void updateLink(WeblinkVO weblinkVO) {
-
-    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
-
-    Pattern patN = Pattern.compile(REGEX_URL);
-
-    Matcher matN = patN.matcher(weblink.getUrl());
-
-    if (!matN.find()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    }
-
+  public void updateLink(@RequestBody WeblinkVO weblinkVO) {
     try {
-      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getDescription(),
-          weblink.getUrl());
+      dataflowWebLinkService.updateWebLink(weblinkVO);
+    } catch (EntityNotFoundException e) {
+      LOG_ERROR.error("Data not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (ResourceNoFoundException e) {
+      LOG_ERROR.error("Access forbidden");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (WrongDataExceptions e) {
+      LOG_ERROR.error("Bad Request");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      LOG_ERROR.error("Internal server Error");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+
   }
 
 }

@@ -77,6 +77,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 /**
  * The type Dataset service.
@@ -908,10 +909,10 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Fill table stat.
    *
+   * @param idDataset the id dataset
    * @param idTableSchema the id table schema
    * @param statName the stat name
    * @param value the value
-   *
    * @return the statistics
    */
   private Statistics fillStat(Long idDataset, String idTableSchema, String statName, String value) {
@@ -1251,7 +1252,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
+  @org.springframework.transaction.annotation.Transactional(propagation = Propagation.NESTED)
   public void deleteRecordValuesToRestoreSnapshot(Long datasetId, Long idPartition)
       throws EEAException {
     recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);

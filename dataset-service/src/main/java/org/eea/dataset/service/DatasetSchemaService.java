@@ -42,7 +42,7 @@ public interface DatasetSchemaService {
 
   /**
    * Gets the data schema by id dataset.
-   * 
+   *
    * @param addRules the add rules
    * @param datasetId the dataset id
    * @return the data schema by id flow
@@ -73,13 +73,16 @@ public interface DatasetSchemaService {
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
+
   /**
    * Replace schema.
    *
    * @param idSchema the id schema
    * @param schema the schema
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
    */
-  void replaceSchema(String idSchema, DataSetSchema schema);
+  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot);
 
 
   /**
@@ -97,8 +100,9 @@ public interface DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
-  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+  TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
 
   /**
    * Update name table schema.
@@ -138,8 +142,7 @@ public interface DatasetSchemaService {
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
-      throws EEAException;
+  String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
 
   /**
    * Update field schema.
@@ -165,11 +168,11 @@ public interface DatasetSchemaService {
    * Order field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchemaId the field schema id
    * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception
    */
-  Boolean orderFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Integer position)
+  Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
 }

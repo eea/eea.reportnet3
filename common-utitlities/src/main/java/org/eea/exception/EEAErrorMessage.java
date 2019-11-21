@@ -107,6 +107,12 @@ public final class EEAErrorMessage {
   /** The Constant WRONG_DATASET_SCHEMA. */
   public static final String INVALID_OBJECTID = "A given ObjectId is not valid";
 
+  /** The Constant FORBIDDEN. */
+  public static final String FORBIDDEN = "The user has no permissions";
+
+  /** The Constant ID_LINK_NOT_FOUND. */
+  public static final String ID_LINK_NOT_FOUND = "WebLink not found";
+
   /**
    * Instantiates a new EEA error message.
    */

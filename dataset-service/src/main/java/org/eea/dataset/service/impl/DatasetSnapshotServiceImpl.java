@@ -99,11 +99,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private DatasetSchemaService schemaService;
 
-  /** The transaction manager. */
-  // @Autowired
-  // private PlatformTransactionManager transactionManager;
-
-
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
@@ -185,8 +180,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @throws EEAException the EEA exception
    */
-
-
   @Override
   @Async
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
@@ -213,11 +206,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
-    datasetService.deleteRecordValuesToRestoreSnapshot(idDataset, idPartition);
-    LOG.info("First step of restoring snapshot completed. Previously data erased");
-
-    // 2. Restore the dataset data, using the operation from recordstore
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.REPORTING);
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
+        TypeDatasetEnum.REPORTING);
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
@@ -228,6 +218,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Snapshot {} restored", idSnapshot);
 
   }
+
 
 
   /**
@@ -330,35 +321,23 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
-    // TransactionDefinition def = new DefaultTransactionDefinition();
-    // TransactionStatus status = transactionManager.getTransaction(def);
-
     try {
-      // 1. Get the schema document to mapper it to DataSchema class
+      // Get the schema document to mapper it to DataSchema class
       String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
 
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
       DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-      String schemaId = schema.getIdDataSetSchema().toString();
       LOG.info("Schema class recovered");
-      // 2. Delete the dataset values
-      datasetService.deleteAllTableValues(idDataset);
-      LOG.info("Previous values from the dataset erased");
-      // 3. Replace the schema: delete the older and save the new we have already recovered on step
-      schemaService.replaceSchema(schemaId, schema);
-      LOG.info("DataSetSchema replaced");
-      // 4. Restore the dataset data, using the operation from recordstore. First delete the dataset
-      // values implied
-      recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.DESIGN);
-      // transactionManager.commit(status);
+
+      // Replace the schema: delete the older and save the new we have already recovered on step
+      // Also in the service we call the recordstore to do the restore of the dataset_X data
+      schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
+          idSnapshot);
 
       LOG.info("Schema Snapshot {} totally restored", idSnapshot);
-    }
-    /*
-     * } catch (Exception e) { // transactionManager.rollback(status); }
-     */ finally {
+    } finally {
       // Remove the lock
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
@@ -369,17 +348,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
   }
-
-  /**
-   * Sets the transaction manager.
-   *
-   * @param transactionManager the new transaction manager
-   */
-  /*
-   * public void setTransactionManager(PlatformTransactionManager transactionManager) {
-   * this.transactionManager = transactionManager; }
-   */
-
 
   /**
    * Removes the schema snapshot.

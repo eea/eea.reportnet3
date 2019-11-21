@@ -1,4 +1,4 @@
-package org.eea.kafka;
+package org.eea.kafka.configuration;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -12,6 +12,8 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
 export const WebLinks = ({ isCustodian, dataflowId }) => {
@@ -19,6 +21,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
@@ -29,14 +32,14 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     description: Yup.string().required(),
     url: Yup.string()
       .matches(
-        /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
-        resources.messages['urlEror']
+        /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
+        resources.messages['urlError']
       )
-      .required()
+      .required(' ')
   });
 
   const onLoadWebLinks = async () => {
-    // setIsLoading(true);
+    setIsLoading(true);
     try {
       setWebLinks(await WebLinkService.all(dataflowId));
     } catch (error) {
@@ -44,7 +47,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         console.log('error', error.response);
       }
     } finally {
-      //setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -58,19 +61,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     setIsAddOrEditWeblinkDialogVisible(false);
     setWeblinkItem({ id: undefined, description: '', url: '' });
   };
-
-  const addRowFooter = (
-    <div className="p-clearfix" style={{ width: '100%' }}>
-      <Button
-        style={{ float: 'left' }}
-        label={resources.messages['add']}
-        icon="add"
-        onClick={() => {
-          setIsAddOrEditWeblinkDialogVisible(true);
-        }}
-      />
-    </div>
-  );
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -173,8 +163,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           field={key}
           filter={false}
           filterMatchMode="contains"
-          sortable={true}
-          header={key === 'url' ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1)}
+          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
           body={key === 'url' ? linkTemplate : null}
         />
       ));
@@ -199,10 +188,26 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   return (
     <>
+      {isCustodian ? (
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              style={{ float: 'left' }}
+              label={resources.messages['add']}
+              icon="add"
+              onClick={() => {
+                setIsAddOrEditWeblinkDialogVisible(true);
+              }}
+            />
+          </div>
+        </Toolbar>
+      ) : (
+        <></>
+      )}
       <DataTable
         autoLayout={true}
-        editable={true}
-        footer={isCustodian ? addRowFooter : null}
+        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
@@ -213,12 +218,13 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
-
       <Dialog
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        header={isUndefined(weblinkItem.id) ? resources.messages['addNewRow'] : resources.messages['editRow']}
+        header={
+          isUndefined(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
+        }
         modal={true}
         onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
@@ -241,7 +247,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                     placeholder={resources.messages['description']}
                     value={values.description}
                   />
-                  <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
                   <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
@@ -249,7 +254,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                 </div>
               </fieldset>
               <fieldset>
-                <hr />
                 <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                   <Button
                     className={

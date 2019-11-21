@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
@@ -48,7 +48,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
-  const [datasetTitle, setDatasetTitle] = useState('');
+  const [datasetSchemaName, setDatasetSchemaName] = useState();
+  const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
@@ -59,7 +60,9 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
@@ -129,7 +132,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         command: () => onExportData(type.code)
       }))
     );
-  }, [datasetTitle]);
+  }, [datasetName]);
 
   useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
@@ -151,6 +154,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   useEffect(() => {
     try {
       getDataflowName();
+      onLoadDataflow();
     } catch (error) {
       console.error(error.response);
     }
@@ -197,10 +201,14 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     await DatasetService.validateDataById(datasetId);
   };
 
+  const onLoadTableData = hasData => {
+    setDatasetHasData(hasData);
+  };
+
   const onExportData = async fileType => {
     setLoadingFile(true);
     try {
-      setExportDatasetDataName(createFileName(datasetTitle, fileType));
+      setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
       console.error(error);
@@ -209,13 +217,28 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
+  const onLoadDataflow = async () => {
+    try {
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
+      setIsDatasetReleased(dataset[0].isReleased);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
-      setDatasetTitle(datasetStatistics.datasetSchemaName);
+      setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
       setTableSchema(
@@ -237,7 +260,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
-              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+              header: `${capitalize(field['name'])}`,
               type: field['type'],
               recordId: field['recordId']
             };
@@ -262,6 +285,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onTabChange = tableSchemaId => {
     setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
     // setActiveIndex(tableSchemaId.index);
+  };
+
+  const datasetTitle = () => {
+    let datasetReleasedTitle = `${datasetName} (${resources.messages['released'].toString().toLowerCase()})`;
+    return isDatasetReleased ? datasetReleasedTitle : datasetName;
   };
 
   const showWebFormInputSwitch = () => {
@@ -293,6 +321,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           isWebFormMMR={isWebFormMMR}
           hasWritePermissions={hasWritePermissions}
           levelErrorTypes={levelErrorTypes}
+          onLoadTableData={onLoadTableData}
         />
       );
     }
@@ -331,12 +360,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
       }}>
-      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
-      <Title
-        title={`${resources.messages['dataflow']}: ${dataflowName} - 
-        ${resources.messages['titleDataset']}${datasetTitle}`}
-        icon="dataset"
-      />
+      <Title title={`${dataflowName} - ${datasetSchemaName} - ${datasetTitle()}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -375,7 +399,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR}
+              disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -443,7 +467,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
-            datasetName={datasetTitle}
+            datasetName={datasetName}
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
             tableSchemaNames={tableSchemaNames}
@@ -476,7 +500,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
-        isReleaseVisible={true}
       />
     </SnapshotContext.Provider>
   );
