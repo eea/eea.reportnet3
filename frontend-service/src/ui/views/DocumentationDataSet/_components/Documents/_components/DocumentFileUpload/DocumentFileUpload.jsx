@@ -27,22 +27,17 @@ const DocumentFileUpload = ({
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
     lang: Yup.string().required(),
-    /* uploadFile: isEditForm
-      ? Yup.mixed().test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
-          return value.size <= config.MAX_FILE_SIZE;
-        }) */
+
     uploadFile: isEditForm
-      ? Yup.object()
-          .nullable()
-          .test('validObject', ' ', value => {
-            if (value === undefined) {
+      ? Yup.mixed()
+          .test('checkSizeWhenNotEmpty', resources.messages['tooLargeFileValidationError'], value => {
+            if (value === undefined || value == {} || value === null) {
               return true;
             } else {
-              return Yup.mixed().test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
-                return value.size <= config.MAX_FILE_SIZE;
-              });
+              return value.size <= config.MAX_FILE_SIZE;
             }
           })
+          .nullable()
       : Yup.mixed()
           .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
             return !isPlainObject(value);
