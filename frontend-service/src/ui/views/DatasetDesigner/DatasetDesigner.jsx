@@ -23,6 +23,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 import { Title } from 'ui/views/_components/Title';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
@@ -32,6 +33,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     params: { dataflowId, datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
@@ -95,8 +97,14 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       },
       { label: resources.messages['datasetDesigner'] }
     ]);
+    getDataflowName();
     onLoadDatasetSchemaName();
   }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
 
   const onLoadDatasetSchemaName = async () => {
     const dataset = await DatasetService.getMetaData(datasetId);
@@ -125,7 +133,12 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         isSnapshotsBarVisible: isSnapshotsBarVisible,
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
       }}>
-      <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} icon="pencilRuler" />
+      <Title
+        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
+        subtitle={dataflowName}
+        icon="pencilRuler"
+        iconSize="3.4rem"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-right">
