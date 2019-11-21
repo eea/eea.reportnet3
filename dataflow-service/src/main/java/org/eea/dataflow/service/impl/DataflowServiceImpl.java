@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -318,6 +319,7 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
+      dataflowVO.setCreationDate(new Date());
       dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
       LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
     }
