@@ -234,7 +234,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             // </fieldset>
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['emptyDataset']}</span>
+              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['empty']}</span>
               <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
             </>
           )}

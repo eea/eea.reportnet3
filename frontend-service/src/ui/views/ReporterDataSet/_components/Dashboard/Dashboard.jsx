@@ -176,7 +176,11 @@ const Dashboard = withRouter(
             dashboardData.datasets.length > 0 &&
             ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
           ) {
-            return <Chart ref={chartRef} type="bar" data={dashboardData} options={dashboardOptions} />;
+            return (
+              <div className={styles.chartDiv}>
+                <Chart ref={chartRef} type="bar" data={dashboardData} options={dashboardOptions} />
+              </div>
+            );
           } else {
             return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
           }
@@ -185,7 +189,7 @@ const Dashboard = withRouter(
 
       return (
         <React.Fragment>
-          <h1>{dashboardTitle}</h1>
+          <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>
           {renderDashboard()}
           {/* {renderColorPicker()} */}
         </React.Fragment>
