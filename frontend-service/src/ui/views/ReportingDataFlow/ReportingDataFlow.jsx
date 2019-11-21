@@ -296,7 +296,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
-              {/* <Title title={`${dataflowData.name}`} icon="archive" /> */}
+              {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
@@ -397,6 +397,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
+                          disabled: true,
                           command: () => getDeleteSchemaIndex(newDatasetSchema.index)
                         },
                         {
