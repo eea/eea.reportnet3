@@ -27,7 +27,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const [isEditing, setIsEditing] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTabId, setSelectedTabId] = useState();
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
 
@@ -114,7 +113,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   };
 
   const onTabClicked = event => {
-    setSelectedTabId(event.header);
     setActiveIndex(event.index);
   };
 
@@ -147,12 +145,13 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     reorderTable(draggedTabHeader, droppedTabHeader);
   };
 
-  const onTableDragAndDropStart = (draggedTabIdx, selected, header) => {
-    setActiveIndex(draggedTabIdx);
-    setInitialTabIndexDrag(draggedTabIdx);
-    if (selected) {
-      setSelectedTabId(header);
+  const onTableDragAndDropStart = draggedTabIdx => {
+    if (!isUndefined(draggedTabIdx)) {
+      setActiveIndex(draggedTabIdx);
+    } else {
+      setActiveIndex(0);
     }
+    setInitialTabIndexDrag(draggedTabIdx);
   };
 
   const onTabNameError = (errorTitle, error) => {
@@ -164,7 +163,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const addTable = async (header, tabIndex) => {
     try {
       const response = await DatasetService.addTableDesign(datasetId, header);
-      console.log(response);
       if (response.status < 200 || response.status > 299) {
         console.error('Error during table Add');
       } else {
@@ -174,7 +172,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
         inmTabs[tabIndex].header = header;
         inmTabs[tabIndex].newTab = false;
         inmTabs[tabIndex].showContextMenu = false;
-        console.log(inmTabs);
         setActiveIndex(inmTabs.length - 2);
         setTabs(inmTabs);
       }
@@ -294,9 +291,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
           checkEditingTabs={checkEditingTabs}
           designMode={true}
           initialTabIndexDrag={initialTabIndexDrag}
-          initialTabIndexSelected={
-            getIndexByHeader(selectedTabId, tabs) === -1 ? 0 : getIndexByHeader(selectedTabId, tabs)
-          }
           isErrorDialogVisible={isErrorDialogVisible}
           onTabAdd={onTabAdd}
           onTabBlur={onTableAdd}
@@ -350,10 +344,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
         draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
         tabs[draggedTabIdx].tableSchemaId
       );
-      console.log(tableOrdered);
       if (tableOrdered) {
         const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
-        console.log(draggedTabIdx, droppedTabIdx, draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1);
         setActiveIndex(draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1);
         setTabs([...shiftedTabs]);
       }
@@ -366,7 +358,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const updateTableName = async (tableSchemaId, tableSchemaName) => {
     const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
     if (tableUpdated) {
-      setSelectedTabId(tableSchemaName);
       const inmTabs = [...tabs];
       inmTabs[getIndexByTableSchemaId(tableSchemaId, inmTabs)].header = tableSchemaName;
       setTabs(inmTabs);

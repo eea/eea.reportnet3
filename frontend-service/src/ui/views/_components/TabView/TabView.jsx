@@ -21,7 +21,6 @@ export const TabView = ({
   designMode = false,
   id = null,
   initialTabIndexDrag,
-  initialTabIndexSelected,
   isErrorDialogVisible,
   onTabAdd,
   onTabBlur,

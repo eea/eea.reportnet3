@@ -1379,7 +1379,6 @@ const DataViewer = withRouter(
             }}
             //onPasteAccept={onPasteAccept}
             onRowSelect={e => {
-              console.log(e);
               onSelectRecord(Object.assign({}, e.data));
             }}
             // onSelectionChange={e => {
