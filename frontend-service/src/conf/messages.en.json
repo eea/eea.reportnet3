@@ -230,6 +230,7 @@
 		"subscribeDataflow": "No open dataflow to show",
 		"subscribeThisButton": "Subscribe to this dataflow",
 		"state":"state",
+		"status": "Status",
 		"supportingDocuments": "Supporting documents",
 		"tables": "Tables",
 		"title": "Title",

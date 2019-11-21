@@ -364,7 +364,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         title={`${datasetTitle()}`}
         subtitle={`${dataflowName} - ${datasetSchemaName}`}
         icon="dataset"
-        iconSize="3.3rem"
+        iconSize="3.5rem"
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>
