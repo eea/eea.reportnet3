@@ -22,7 +22,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }) => {
+const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -135,7 +135,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
               disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}
-              onClick={() => onLoadDocumentsAndWebLinks()}
+              onClick={() => onLoadDocuments()}
             />
           </div>
         </Toolbar>
@@ -159,7 +159,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       </Dialog>
 
       {
-        <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
+        <DataTable value={documents} autoLayout={true} paginator={false}>
           {isCustodian ? (
             <Column className={styles.crudColumn} body={documentsEditButtons} />
           ) : (
@@ -171,15 +171,29 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['title']}
+            sortable={true}
           />
           <Column
             field="description"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['description']}
+            sortable={true}
           />
-          <Column field="category" filter={false} filterMatchMode="contains" header={resources.messages['category']} />
-          <Column field="language" filter={false} filterMatchMode="contains" header={resources.messages['language']} />
+          <Column
+            field="category"
+            filter={false}
+            filterMatchMode="contains"
+            header={resources.messages['category']}
+            sortable={true}
+          />
+          <Column
+            field="language"
+            filter={false}
+            filterMatchMode="contains"
+            header={resources.messages['language']}
+            sortable={true}
+          />
           <Column
             body={downloadTemplate}
             field="url"
