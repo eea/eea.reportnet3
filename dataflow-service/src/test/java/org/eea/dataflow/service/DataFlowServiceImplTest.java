@@ -21,6 +21,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -142,7 +143,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getByIdThrows() throws EEAException {
-    dataflowServiceImpl.getById(null);
+    try {
+      dataflowServiceImpl.getById(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
   /**
@@ -374,7 +380,12 @@ public class DataFlowServiceImplTest {
     DataFlowVO dataFlowVO = new DataFlowVO();
     when(dataflowRepository.findByName(dataFlowVO.getName()))
         .thenReturn(Optional.of(new Dataflow()));
-    dataflowServiceImpl.createDataFlow(dataFlowVO);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getMessage());
+      throw ex;
+    }
 
   }
 
@@ -416,8 +427,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void testGetDatasetsIdError() throws EEAException {
-
-    dataflowServiceImpl.getReportingDatasetsId(null);
+    try {
+      dataflowServiceImpl.getReportingDatasetsId(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.SCHEMA_NOT_FOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
 
@@ -430,7 +445,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getMetabaseByIdThrows() throws EEAException {
-    dataflowServiceImpl.getMetabaseById(null);
+    try {
+      dataflowServiceImpl.getMetabaseById(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
 
