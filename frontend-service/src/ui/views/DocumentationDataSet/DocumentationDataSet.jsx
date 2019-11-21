@@ -120,10 +120,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   if (documents) {
     return layout(
       <React.Fragment>
-        <Title
-          title={`${resources.messages['dataflowHelp']} - ${resources.messages['dataflow']}: ${dataflowName}`}
-          icon="questionCircle"
-        />
+        <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3rem" />
         <TabView>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
