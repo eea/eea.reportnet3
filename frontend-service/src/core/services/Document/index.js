@@ -10,5 +10,5 @@ export const DocumentService = {
   downloadDocumentById: DownloadById({ documentRepository }),
   uploadDocument: Upload({ documentRepository }),
   deleteDocument: DeleteDocument({ documentRepository }),
-  editDocument: DeleteDocument({ documentRepository })
+  editDocument: EditDocument({ documentRepository })
 };

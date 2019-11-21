@@ -32,15 +32,17 @@ const DocumentFileUpload = ({
           return value.size <= config.MAX_FILE_SIZE;
         }) */
     uploadFile: isEditForm
-      ? Yup.object().test('validObject', ' ', value => {
-          if (value === undefined) {
-            return true;
-          } else {
-            return Yup.mixed().test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
-              return value.size <= config.MAX_FILE_SIZE;
-            });
-          }
-        })
+      ? Yup.object()
+          .nullable()
+          .test('validObject', ' ', value => {
+            if (value === undefined) {
+              return true;
+            } else {
+              return Yup.mixed().test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
+                return value.size <= config.MAX_FILE_SIZE;
+              });
+            }
+          })
       : Yup.mixed()
           .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
             return !isPlainObject(value);
@@ -85,15 +87,8 @@ const DocumentFileUpload = ({
           life: '5000'
         });
 
-        /* const response = await DocumentService.uploadDocument(
-          dataflowId,
-          values.description,
-          values.lang,
-          values.uploadFile
-        ); */
-
         const response = isEditForm
-          ? 200 //await DocumentService.editDocument(dataflowId, values.description, values.lang, values.uploadFile);
+          ? await DocumentService.editDocument(dataflowId, values.description, values.lang, values.uploadFile)
           : await DocumentService.uploadDocument(dataflowId, values.description, values.lang, values.uploadFile);
 
         onUpload();

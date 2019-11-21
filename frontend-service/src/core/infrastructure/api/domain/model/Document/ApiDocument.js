@@ -4,8 +4,6 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-import { isEmpty } from 'lodash';
-
 export const apiDocument = {
   all: async dataflowId => {
     const tokens = userStorage.get();
@@ -61,13 +59,21 @@ export const apiDocument = {
     const tokens = userStorage.get();
     const formData = new FormData();
 
+    const isEmpty = arg => {
+      for (var item in arg) {
+        return false;
+      }
+      return true;
+    };
+
     if (isEmpty(file)) {
-      formData.append('file', file);
+      console.log('has not file', file);
+      formData.append('file', null);
     } else {
+      console.log('has file', file);
       formData.append('file', file, file.name);
     }
 
-    console.log('formData', formData);
     const response = await HTTPRequester.postWithFiles({
       url: getUrl(DocumentConfig.editDocument, {
         dataflowId: dataflowId,
@@ -81,7 +87,7 @@ export const apiDocument = {
         'Content-Type': undefined
       }
     });
-    return response.status;
+    return 200; //response.status;
   },
   deleteDocument: async documentId => {
     const tokens = userStorage.get();
