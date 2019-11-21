@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
@@ -85,7 +85,7 @@ export const GlobalReleasedDashboard = dataflowId => {
   if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
-        <div className={`rep-row ${styles.chart_released}`}>
+        <div className={`${styles.chart_released}`}>
           <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
         </div>
       );

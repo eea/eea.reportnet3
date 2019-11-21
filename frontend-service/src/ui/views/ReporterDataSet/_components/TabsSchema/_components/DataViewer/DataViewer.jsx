@@ -30,7 +30,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
-import { Object } from 'es6-shim';
 import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
@@ -94,9 +93,9 @@ const DataViewer = withRouter(
     const [totalRecords, setTotalRecords] = useState(0);
     const [totalFilteredRecords, setTotalFilteredRecords] = useState();
     const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
-    const [visibilityColumnIcon, setVisibleColumnIcon] = useState('eye');
+    const [visibilityColumnIcon, setinvisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
-    const [visibleColumns, setVisibleColumns] = useState([]);
+    const [invisibleColumns, setinvisibleColumns] = useState([]);
 
     const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
@@ -182,20 +181,33 @@ const DataViewer = withRouter(
       onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
     }, [recordPositionId]);
 
+    const getTextWidth = (text, font) => {
+      // re-use canvas object for better performance
+      const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
+      const context = canvas.getContext('2d');
+      context.font = font;
+      const metrics = context.measureText(text);
+      return Number(metrics.width);
+    };
+
     useEffect(() => {
+      const textMaxWidth = colsSchema.map(col => getTextWidth(col.header, '14pt Open Sans'));
+      const maxWidth = Math.max(...textMaxWidth) + 23;
       let columnsArr = colsSchema.map(column => {
         let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
-        let visibleColumn = column.field === 'id' || column.field === 'datasetPartitionId' ? styles.VisibleHeader : '';
+        let invisibleColumn =
+          column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
         return (
           <Column
             body={dataTemplate}
-            className={visibleColumn}
+            className={invisibleColumn}
             editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
             key={column.field}
             sortable={sort}
+            style={{ width: !invisibleColumn ? `${maxWidth}px` : '1px' }}
           />
         );
       });
@@ -206,17 +218,17 @@ const DataViewer = withRouter(
           key="actions"
           body={row => actionTemplate(row)}
           sortable={false}
-          style={{ width: '100px', height: '45px' }}
+          style={{ width: '100px' }}
         />
       );
       let validationCol = (
         <Column
-          className={styles.validationCol}
           body={validationsTemplate}
+          header={resources.messages['errors']}
           field="validations"
-          header={resources.messages['validations']}
           key="recordValidation"
           sortable={false}
+          style={{ width: '100px' }}
         />
       );
 
@@ -224,8 +236,8 @@ const DataViewer = withRouter(
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
-      if (visibleColumns.length > 0 && columnsArr.length !== visibleColumns.length) {
-        const visibleKeys = visibleColumns.map(column => {
+      if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
+        const visibleKeys = invisibleColumns.map(column => {
           return column.key;
         });
         setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
@@ -237,35 +249,29 @@ const DataViewer = withRouter(
 
     const showFilters = columnKeys => {
       const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
-      const currentVisibleColumns = originalColumns.filter(
+      const currentinvisibleColumns = originalColumns.filter(
         column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
       );
-      setColumns(currentVisibleColumns);
-      setVisibleColumns(currentVisibleColumns);
+      setColumns(currentinvisibleColumns);
+      setinvisibleColumns(currentinvisibleColumns);
 
-      if (isFiltered(originalColumns, currentVisibleColumns)) {
-        setVisibleColumnIcon('eye-slash');
+      if (isFiltered(originalColumns, currentinvisibleColumns)) {
+        setinvisibleColumnIcon('eye-slash');
       } else {
-        setVisibleColumnIcon('eye');
+        setinvisibleColumnIcon('eye');
       }
     };
 
     const getLevelErrorFilters = () => {
       let filters = [];
-      allLevelErrors.map(function(value) {
-        let filter = {
-          label:
-            value
-              .toString()
-              .charAt(0)
-              .toUpperCase() + value.slice(1).toLowerCase(),
-          key:
-            value
-              .toString()
-              .charAt(0)
-              .toUpperCase() + value.slice(1).toLowerCase()
-        };
-        filters.push(filter);
+      allLevelErrors.map(value => {
+        if (!isUndefined(value) && !isNull(value)) {
+          let filter = {
+            label: capitalize(value),
+            key: capitalize(value)
+          };
+          filters.push(filter);
+        }
       });
       return filters;
     };
@@ -668,19 +674,6 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const capitalizeFirstLetterAndToLowerCase = string => {
-      return (
-        string
-          .trim()
-          .charAt(0)
-          .toUpperCase() +
-        string
-          .trim()
-          .slice(1)
-          .toLowerCase()
-      );
-    };
-
     const cellDataEditor = (cells, record) => {
       return (
         <InputText
@@ -777,7 +770,7 @@ const DataViewer = withRouter(
           if (errorValidations.length > 1) {
             error = `${capitalize(validation.levelError)}: `;
           }
-          message += '- ' + error + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
+          message += '- ' + error + capitalize(validation.message) + '\n';
         });
 
         const levelError = getLevelError(validations);
@@ -1109,27 +1102,19 @@ const DataViewer = withRouter(
       let messageInfos = '';
 
       blockerValidations.forEach(validation =>
-        validation.message
-          ? (messageBlockers += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
-          : ''
+        validation.message ? (messageBlockers += '- ' + capitalize(validation.message) + '\n') : ''
       );
 
       errorValidations.forEach(validation =>
-        validation.message
-          ? (messageErrors += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
-          : ''
+        validation.message ? (messageErrors += '- ' + capitalize(validation.message) + '\n') : ''
       );
 
       warningValidations.forEach(validation =>
-        validation.message
-          ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
-          : ''
+        validation.message ? (messageWarnings += '- ' + capitalize(validation.message) + '\n') : ''
       );
 
       infoValidations.forEach(validation =>
-        validation.message
-          ? (messageInfos += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
-          : ''
+        validation.message ? (messageInfos += '- ' + capitalize(validation.message) + '\n') : ''
       );
 
       let validationsGroup = {};
@@ -1344,7 +1329,7 @@ const DataViewer = withRouter(
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
-            autoLayout={true}
+            // autoLayout={true}
             //columnsPreviewNumber={columnsPreviewNumber}
             contextMenuSelection={selectedRecord}
             editable={hasWritePermissions}
@@ -1388,13 +1373,14 @@ const DataViewer = withRouter(
             rows={numRows}
             rowsPerPageOptions={[5, 10, 20, 100]}
             //selection={selectedRecords}
+            scrollable={true}
+            scrollHeight="70vh"
             selectionMode="single"
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
             totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
             value={fetchedData}
-            //scrollable={true}
             //frozenWidth="100px"
             // unfrozenWidth="600px"
           >
