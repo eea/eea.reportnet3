@@ -1,18 +1,28 @@
-.Title {
-  color: var(--gray-110);
-  background-color: var(--white);
-  display: table-cell;
-  width: 100%;
+.titleWrap {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2rem 0rem 2rem 0rem;
 }
 
-.Title h2 {
-  font-weight: 50;
-  vertical-align: middle;
-  text-align: center;
+.title {
+  display: table-cell;
+  font-size: 2.25rem;
+  color: var(--gray-110);
+  margin: 0px;
+  font-weight: bold;
 }
-.Title img {
-  height: 35px;
-  vertical-align: middle;
-  text-align: center;
-  margin-right: 10px;
+
+.subtitle {
+  font-size: 1.3rem;
+  color: var(--c-corporate-blue);
+  margin: 0px;
+  font-weight: 400;
+}
+
+.icon {
+  color: var(--gray-110);
+  opacity: 0.6;
+  margin-right: 0.5rem !important;
 }
