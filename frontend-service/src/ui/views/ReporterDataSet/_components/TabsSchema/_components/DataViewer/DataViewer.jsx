@@ -73,6 +73,7 @@ const DataViewer = withRouter(
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [initialRecordValue, setInitialRecordValue] = useState();
+    // const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -190,10 +191,25 @@ const DataViewer = withRouter(
     };
 
     useEffect(() => {
-      console.log(fetchedData);
+      const maxWidths = [];
+      // if (!isEditing) {
+      //Calculate the max width of the shown data
+      // colsSchema.forEach(col => {
+      //   const bulkData = fetchedData.map(data => data.dataRow.map(d => d.fieldData).flat()).flat();
+      //   const filteredBulkData = bulkData
+      //     .filter(data => col.field === Object.keys(data)[0])
+      //     .map(filteredData => Object.values(filteredData)[0]);
+      //   console.log('RECARGANDO');
+      //   if (filteredBulkData.length > 0) {
+      //     const maxDataWidth = filteredBulkData.map(data => getTextWidth(data, '14pt Open Sans'));
+      //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);
+      //   }
+      // });
+
+      //Calculate the max width of data column
       const textMaxWidth = colsSchema.map(col => getTextWidth(col.header, '14pt Open Sans'));
-      const maxWidth = Math.max(...textMaxWidth) + 23;
-      let columnsArr = colsSchema.map(column => {
+      const maxWidth = Math.max(...textMaxWidth) + 30;
+      let columnsArr = colsSchema.map((column, i) => {
         let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
         let invisibleColumn =
           column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
@@ -207,7 +223,11 @@ const DataViewer = withRouter(
             header={column.header}
             key={column.field}
             sortable={sort}
-            style={{ width: !invisibleColumn ? `${maxWidth}px` : '1px' }}
+            style={{
+              width: !invisibleColumn
+                ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
+                : '1px'
+            }}
           />
         );
       });
@@ -245,6 +265,7 @@ const DataViewer = withRouter(
         setColumns(columnsArr);
         setOriginalColumns(columnsArr);
       }
+      // }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     const showFilters = columnKeys => {
@@ -1351,12 +1372,16 @@ const DataViewer = withRouter(
             onContextMenuSelectionChange={e => {
               onSelectRecord(e.value);
             }}
+            // onEditingToggle={editing => setIsEditing(editing)}
             onPage={onChangePage}
             onPaste={e => {
               onPaste(e);
             }}
             //onPasteAccept={onPasteAccept}
-            onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
+            onRowSelect={e => {
+              console.log(e);
+              onSelectRecord(Object.assign({}, e.data));
+            }}
             // onSelectionChange={e => {
             //   setSelectedRecords(e.value);
             // }}

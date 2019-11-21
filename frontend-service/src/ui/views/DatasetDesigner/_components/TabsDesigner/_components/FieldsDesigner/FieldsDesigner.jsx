@@ -332,6 +332,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           <InputSwitch
             checked={isPreviewModeOn}
             disabled={true}
+            // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
             onChange={e => {
               setIsPreviewModeOn(e.value);
             }}

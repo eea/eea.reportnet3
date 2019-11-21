@@ -14,7 +14,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Tab } from './_components/Tab';
 
 export const TabView = ({
-  activeIndex = 0,
+  activeIndex = -1,
   checkEditingTabs,
   children,
   className = null,
@@ -126,7 +126,7 @@ export const TabView = ({
 
   const isSelected = index => {
     if (designMode) {
-      return activeIndex === index && initialTabIndexSelected === index;
+      return activeIndex === index;
     } else {
       return activeIdx === index;
     }

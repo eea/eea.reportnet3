@@ -192,6 +192,7 @@ export class BodyRow extends Component {
           rowSpan={rowSpan}
           rowData={this.props.rowData}
           rowIndex={this.props.rowIndex}
+          onEditingToggle={this.props.onEditingToggle}
           onRowToggle={this.props.onRowToggle}
           expanded={this.props.expanded}
           onRadioClick={this.props.onRadioClick}

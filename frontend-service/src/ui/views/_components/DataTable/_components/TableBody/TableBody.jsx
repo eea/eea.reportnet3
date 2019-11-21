@@ -450,6 +450,7 @@ export class TableBody extends Component {
             rowData={rowData}
             rowIndex={i}
             onClick={this.onRowClick}
+            onEditingToggle={this.props.onEditingToggle}
             onDoubleClick={this.props.onRowDoubleClick}
             onRightClick={this.onRowRightClick}
             onTouchEnd={this.onRowTouchEnd}
