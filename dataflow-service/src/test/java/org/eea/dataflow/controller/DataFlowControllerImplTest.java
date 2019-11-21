@@ -320,6 +320,7 @@ public class DataFlowControllerImplTest {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setDeadlineDate(new Date(-1));
     dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
   /**
@@ -331,6 +332,7 @@ public class DataFlowControllerImplTest {
   public void createDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
   /**
@@ -345,6 +347,7 @@ public class DataFlowControllerImplTest {
     date.setTime(date.getTime() - 1000L);
     dataflowVO.setDeadlineDate(date);
     dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
   @Test(expected = ResponseStatusException.class)

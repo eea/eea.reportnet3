@@ -375,6 +375,7 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findByName(dataFlowVO.getName()))
         .thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.createDataFlow(dataFlowVO);
+
   }
 
   /**
@@ -392,6 +393,7 @@ public class DataFlowServiceImplTest {
         Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
+    Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
   }
 
 

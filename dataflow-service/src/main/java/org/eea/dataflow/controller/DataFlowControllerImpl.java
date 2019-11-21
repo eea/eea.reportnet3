@@ -271,7 +271,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       dataflowService.createDataFlow(dataFlowVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Create dataflow failed");
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 

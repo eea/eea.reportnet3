@@ -310,6 +310,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
     Dataflow dataFlowSaved;
     // we find if the name of this dataflow exist
