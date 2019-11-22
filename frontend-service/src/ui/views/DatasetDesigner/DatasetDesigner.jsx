@@ -54,11 +54,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotState
   } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     try {
       setIsLoading(true);
@@ -87,22 +82,37 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(routes.DATAFLOWS))
+        icon: 'home',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(getUrl(routes.DATAFLOWS))
+            : window.open(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
+        icon: 'archive',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
+            : window.open(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
       },
-      { label: resources.messages['datasetDesigner'] }
+      { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
     ]);
     getDataflowName();
     onLoadDatasetSchemaName();
@@ -129,7 +139,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     return (
       <MainLayout>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
