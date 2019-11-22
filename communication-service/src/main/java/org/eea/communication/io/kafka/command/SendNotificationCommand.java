@@ -1,11 +1,9 @@
 package org.eea.communication.io.kafka.command;
 
+import java.util.Map;
 import org.eea.communication.service.NotificationService;
-import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.commands.DefaultEventHandlerCommand;
-import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,6 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
    */
   private static final Logger LOG = LoggerFactory.getLogger(SendNotificationCommand.class);
 
-
   /**
    * Execute.
    *
@@ -42,18 +39,18 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-
-    String userId = (String) eeaEventVO.getData().get("userId");
-    String message = (String) eeaEventVO.getData().get("message");
-
-    if (!notificationService.send(userId, message)) {
-      LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
+    if (eeaEventVO.getData().get("user") != null
+        && eeaEventVO.getData().get("notification") != null) {
+      String user = (String) eeaEventVO.getData().get("user");
+      Object object = eeaEventVO.getData().get("notification");
+      if (object instanceof Map) {
+        Map<?, ?> notification = (Map<?, ?>) object;
+        if (!notificationService.send(user, notification)) {
+          LOG.error("Error sending notification: {}", notification);
+        }
+      }
     }
-
   }
-
-
 }
-
 
 
