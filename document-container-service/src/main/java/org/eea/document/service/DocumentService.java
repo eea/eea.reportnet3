@@ -80,4 +80,12 @@ public interface DocumentService {
   void deleteSnapshotDocument(final String documentName, final Long idDesignDataset)
       throws EEAException;
 
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDocument(DocumentVO documentVO) throws EEAException;
+
 }

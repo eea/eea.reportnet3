@@ -3,6 +3,7 @@ package org.eea.document.controller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.ws.rs.Produces;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -150,6 +152,50 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+  /**
+   * Update document.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
+   * @param idDocument the id document
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/upload/{idDocument}/dataflow/{dataFlowId}")
+  public void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam(name = "description", required = false) final String description,
+      @RequestParam(name = "language", required = false) final String language,
+      @PathVariable("idDocument") final long idDocument) {
+    if (dataFlowId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    try {
+      DocumentVO documentVO = dataflowController.getDocumentInfoById(idDocument);
+      documentVO.setDataflowId(dataFlowId);
+      if (StringUtils.isNotBlank(description)) {
+        documentVO.setDescription(description);
+      }
+      if (StringUtils.isNotBlank(language)) {
+        documentVO.setLanguage(language);
+      }
+      documentVO.setId(idDocument);
+      if (file == null || file.isEmpty()) {
+        documentService.updateDocument(documentVO);
+      } else {
+        documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+            file.getOriginalFilename(), documentVO, file.getSize());
+      }
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
 
   /**

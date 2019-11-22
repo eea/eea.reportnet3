@@ -117,6 +117,21 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+  @Override
+  @Async
+  public void updateDocument(DocumentVO documentVO) throws EEAException {
+    try {
+      // save to metabase
+      documentVO.setDate(new Date());
+      Long idDocument = dataflowController.insertDocument(documentVO);
+      if (idDocument == null) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error in uploadDocument due to", e);
+      throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    }
+  }
 
   /**
    * Gets the document.

@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -91,6 +93,21 @@ public interface DocumentController {
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName) throws Exception;
+
+  /**
+   * Update document.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
+   */
+  @PutMapping(value = "/upload/{idDocument}/dataflow/{dataFlowId}")
+  void updateDocument(@RequestPart("file") final MultipartFile file,
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam(name = "description", required = false) final String description,
+      @RequestParam(name = "language", required = false) final String language,
+      @PathVariable("idDocument") final long idDocument);
 
 
 }

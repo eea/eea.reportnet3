@@ -184,6 +184,10 @@ public class OakRepositoryUtils {
       throw new EEAException("Error creating nodes");
     }
     // Created a node with that of file Name
+    if (node.hasNode(filename)) {
+      Node oldnode = node.getNode(filename);
+      oldnode.remove();
+    }
     Node fileHolder = node.addNode(filename, "nt:file");
     Date now = new Date();
 
