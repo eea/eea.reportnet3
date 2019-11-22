@@ -91,18 +91,18 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(routes.DATAFLOWS))
+        icon: 'home',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(getUrl(routes.DATAFLOWS))
+            : window.open(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['dataflow']
+        label: resources.messages['dataflow'],
+        icon: 'archive'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const onLoadReportingDataflow = async () => {
     try {
@@ -270,7 +270,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
