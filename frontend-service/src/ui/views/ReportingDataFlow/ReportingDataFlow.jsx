@@ -341,6 +341,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     )
                   )
                 }
+                onWheel={getUrl(
+                  routes.DOCUMENTS,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )}
               />
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
@@ -367,6 +374,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      onWheel={getUrl(
+                        routes.DATASET_SCHEMA,
+                        {
+                          dataflowId: match.params.dataflowId,
+                          datasetId: newDatasetSchema.datasetId
+                        },
+                        true
+                      )}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
@@ -432,6 +447,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         )
                       );
                     }}
+                    onWheel={getUrl(
+                      routes.DATASET,
+                      {
+                        dataflowId: match.params.dataflowId,
+                        datasetId: dataset.datasetId
+                      },
+                      true
+                    )}
                     model={
                       hasWritePermissions
                         ? [
@@ -485,6 +508,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       )
                     )
                   }
+                  onWheel={getUrl(
+                    routes.DASHBOARDS,
+                    {
+                      dataflowId: match.params.dataflowId
+                    },
+                    true
+                  )}
                 />
               </div>
             )}
