@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull, isPlainObject, sortBy } from 'lodash';
 
-import styles from './DocumentFileUpload.module.css';
+import styles from './DocumentFileUpload.module.scss';
 
 import { config } from 'conf';
 
@@ -27,11 +27,10 @@ const DocumentFileUpload = ({
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
     lang: Yup.string().required(),
-
     uploadFile: isEditForm
       ? Yup.mixed()
           .test('checkSizeWhenNotEmpty', resources.messages['tooLargeFileValidationError'], value => {
-            if (value === undefined || value == {} || value === null) {
+            if (value === undefined || isPlainObject(value) || value === null) {
               return true;
             } else {
               return value.size <= config.MAX_FILE_SIZE;
@@ -51,8 +50,19 @@ const DocumentFileUpload = ({
     form.current.resetForm();
   }
 
+  const Checkbox = ({ field, type, checked }) => {
+    return (
+      <>
+        <input id="isPublic" {...field} type={type} checked={checked} />
+        <label htmlFor="isPublic" style={{ display: 'block' }}>
+          {resources.messages['documentUploadCheckboxIsPublic']}
+        </label>
+      </>
+    );
+  };
+
   const buildInitialValue = documentInitialValues => {
-    let initiaValues = { description: '', lang: '', uploadFile: {} };
+    let initiaValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
       const langField = {
         lang: config.languages
@@ -143,6 +153,11 @@ const DocumentFileUpload = ({
                 )}
               </Field>
               <ErrorMessage name="uploadFile" component="div" />
+            </div>
+          </fieldset>
+          <fieldset>
+            <div className={styles.checkboxIsPublick}>
+              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={Checkbox} />
             </div>
           </fieldset>
           <fieldset>
