@@ -55,6 +55,10 @@ public class Document {
   @Column(name = "DATE")
   private Date date;
 
+  /** The publicly. */
+  @Column(name = "PUBLICLY")
+  private Boolean publicly;
+
   /**
    * Equals.
    *

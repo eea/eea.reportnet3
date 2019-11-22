@@ -67,7 +67,8 @@ public class DocumentControllerImpl implements DocumentController {
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam("description") final String description,
-      @RequestParam("language") final String language) {
+      @RequestParam("language") final String language,
+      @RequestParam("publicly") final Boolean publicly) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -80,6 +81,7 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setDataflowId(dataFlowId);
       documentVO.setDescription(description);
       documentVO.setLanguage(language);
+      documentVO.setPublicly(publicly);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
           file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
@@ -168,7 +170,8 @@ public class DocumentControllerImpl implements DocumentController {
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
-      @PathVariable("idDocument") final Long idDocument) {
+      @PathVariable("idDocument") final Long idDocument,
+      @RequestParam("publicly") final Boolean publicly) {
     if (dataFlowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
@@ -183,6 +186,9 @@ public class DocumentControllerImpl implements DocumentController {
         documentVO.setLanguage(language);
       }
       documentVO.setId(idDocument);
+      if (publicly != null) {
+        documentVO.setPublicly(publicly);
+      }
       if (file == null || file.isEmpty()) {
         documentService.updateDocument(documentVO);
       } else {
