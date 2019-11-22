@@ -6,6 +6,7 @@ import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { DatasetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
 import { DatasetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
 import { DatasetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
+import { Utils } from 'core/infrastructure/Utils';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
@@ -183,13 +184,13 @@ const errorStatisticsById = async datasetId => {
     );
   });
   const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
-  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
+  levelErrors = [...new Set(Utils.orderLevelErrors(tableLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
-  let transposedValues = transposeMatrix(tableStatisticValues);
+  let transposedValues = Utils.transposeMatrix(tableStatisticValues);
 
-  dataset.tableStatisticValues = transposeMatrix(tableBarStatisticValues);
-  dataset.tableStatisticPercentages = getPercentage(transposedValues);
+  dataset.tableStatisticValues = Utils.transposeMatrix(tableBarStatisticValues);
+  dataset.tableStatisticPercentages = Utils.getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
   return dataset;
@@ -197,7 +198,7 @@ const errorStatisticsById = async datasetId => {
 
 const tableStatisticValuesWithErrors = tableStatisticValues => {
   let tableStatisticValuesWithSomeError = [];
-  let valuesWithValidations = transposeMatrix(tableStatisticValues).map(error => {
+  let valuesWithValidations = Utils.transposeMatrix(tableStatisticValues).map(error => {
     return error.map(subError => {
       return subError;
     });
@@ -267,48 +268,8 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
     }
   });
   let levelErrors = [...new Set(levelErrorsRepeated)];
-  levelErrors = orderLevelErrors(levelErrors);
+  levelErrors = Utils.orderLevelErrors(levelErrors);
   return levelErrors;
-};
-
-const getLevelErrorPriorityByLevelError = levelError => {
-  let levelErrorIndex = 0;
-  switch (levelError) {
-    case 'CORRECT':
-      levelErrorIndex = 0;
-      break;
-    case 'INFO':
-      levelErrorIndex = 1;
-      break;
-    case 'WARNING':
-      levelErrorIndex = 2;
-      break;
-    case 'ERROR':
-      levelErrorIndex = 3;
-      break;
-    case 'BLOCKER':
-      levelErrorIndex = 4;
-      break;
-    default:
-      levelErrorIndex = null;
-  }
-  return levelErrorIndex;
-};
-
-const orderLevelErrors = levelErrors => {
-  const levelErrorsWithPriority = [
-    { id: 'CORRECT', index: 0 },
-    { id: 'INFO', index: 1 },
-    { id: 'WARNING', index: 2 },
-    { id: 'ERROR', index: 3 },
-    { id: 'BLOCKER', index: 4 }
-  ];
-
-  return levelErrors
-    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
-    .flat()
-    .sort((a, b) => a.index - b.index)
-    .map(orderedError => orderedError.id);
 };
 
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
@@ -634,14 +595,14 @@ const validateDataById = async datasetId => {
   return dataValidation;
 };
 
-const getPercentage = valArr => {
-  let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
-  return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
-};
+// const getPercentage = valArr => {
+//   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
+//   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
+// };
 
-const transposeMatrix = matrix => {
-  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
-};
+// const transposeMatrix = matrix => {
+//   return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+// };
 
 export const ApiDatasetRepository = {
   addRecordFieldDesign,
@@ -660,8 +621,6 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportTableDataById,
   getMetaData,
-  getLevelErrorPriorityByLevelError,
-  orderLevelErrors,
   orderFieldSchema,
   orderTableSchema,
   schemaById,

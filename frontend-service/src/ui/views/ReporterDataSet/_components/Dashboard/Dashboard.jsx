@@ -11,7 +11,9 @@ import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+
 import { DatasetService } from 'core/services/DataSet';
+import { Utils } from 'core/infrastructure/Utils';
 
 const SEVERITY_CODE = {
   CORRECT: 1,
@@ -61,11 +63,11 @@ const Dashboard = withRouter(
     };
 
     const getLevelErrorsOrdered = levelErrors => {
-      return DatasetService.orderLevelErrors(levelErrors);
+      return Utils.orderLevelErrors(levelErrors);
     };
 
     const getLevelErrorPriority = levelError => {
-      return DatasetService.getLevelErrorPriorityByLevelError(levelError);
+      return Utils.getLevelErrorPriorityByLevelError(levelError);
     };
 
     const getDashboardBarsByDatasetData = dataset => {
