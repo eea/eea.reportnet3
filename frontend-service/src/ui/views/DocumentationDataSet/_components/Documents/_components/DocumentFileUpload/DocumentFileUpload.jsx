@@ -48,6 +48,7 @@ const DocumentFileUpload = ({
 
   if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
+    document.querySelector('.uploadFile').value = '';
   }
 
   const Checkbox = ({ field, type, checked }) => {
@@ -143,6 +144,7 @@ const DocumentFileUpload = ({
               <Field name="uploadFile">
                 {() => (
                   <input
+                    className="uploadFile"
                     type="file"
                     name="uploadFile"
                     placeholder="file upload"
