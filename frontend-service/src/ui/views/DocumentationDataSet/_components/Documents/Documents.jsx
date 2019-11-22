@@ -223,6 +223,27 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
             sortable={true}
           />
           <Column
+            field="isPublic"
+            filter={false}
+            filterMatchMode="contains"
+            header={resources.messages['documentIsPublic']}
+            sortable={true}
+          />
+          <Column
+            field="uploadDate"
+            filter={false}
+            filterMatchMode="contains"
+            header={resources.messages['documentUploadDate']}
+            sortable={true}
+          />
+          <Column
+            field="documentSize"
+            filter={false}
+            filterMatchMode="contains"
+            header={resources.messages['documentSize']}
+            sortable={true}
+          />
+          <Column
             body={downloadTemplate}
             field="url"
             filter={false}
