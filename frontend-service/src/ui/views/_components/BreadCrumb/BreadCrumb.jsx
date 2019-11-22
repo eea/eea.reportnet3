@@ -29,11 +29,7 @@ export const BreadCrumb = ({ className, id, model, style }) => {
 
     return (
       <li role="menuitem" className={className} style={item.style}>
-        <a
-          href={item.href ? item.href : '#'}
-          className="p-menuitem-link"
-          target={item.target}
-          onMouseDown={event => onItemClick(event, item)}>
+        <a className="p-menuitem-link" target={item.target} onMouseDown={event => onItemClick(event, item)}>
           <FontAwesomeIcon icon={AwesomeIcons(item.icon)} />
           <span className="p-menuitem-text">{item.label}</span>
         </a>
