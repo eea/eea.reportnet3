@@ -144,9 +144,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
+      <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
       <div className={styles.validationChartWrap}>
-        <h2>{resources.messages['validationDashboards']}</h2>
+        <h2 className={styles.dashboardType}>{resources.messages['validationDashboards']}</h2>
         <Toolbar className={styles.chartToolbar}>
           <div className="p-toolbar-group-left">{onLoadButtons}</div>
         </Toolbar>
@@ -158,7 +158,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {onLoadCharts}
       </div>
       <div className={styles.releasedChartWrap}>
-        <h2>{resources.messages['releaseDashboard']}</h2>
+        <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
         <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
       </div>
     </>

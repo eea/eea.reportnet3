@@ -33,6 +33,12 @@
   margin-left: 0rem !important;
 }
 
+.dashboardName {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0.5rem !important;
+}
+
 .stamp {
   position: relative;
   top: 50% !important;
