@@ -230,14 +230,14 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
             sortable={true}
           />
           <Column
-            field="uploadDate"
+            field="date"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['documentUploadDate']}
             sortable={true}
           />
           <Column
-            field="documentSize"
+            field="size"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['documentSize']}
