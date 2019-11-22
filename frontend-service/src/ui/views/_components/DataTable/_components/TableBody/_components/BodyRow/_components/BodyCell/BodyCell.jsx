@@ -41,10 +41,6 @@ export class BodyCell extends Component {
         editing: true
       });
 
-      if(this.props.onEditingToggle){
-        this.props.onEditingToggle(true);
-      }
-
       if (this.props.editorValidatorEvent === 'click') {
         this.bindDocumentEditListener();
       }
@@ -54,9 +50,6 @@ export class BodyCell extends Component {
   onBlur() {
     if (this.state.editing && this.props.editorValidatorEvent === 'blur') {
       this.switchCellToViewMode();
-      if(this.props.onEditingToggle){
-        this.props.onEditingToggle(false);
-      }
     }
   }
 

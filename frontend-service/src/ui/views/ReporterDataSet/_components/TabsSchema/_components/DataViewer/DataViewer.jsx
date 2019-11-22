@@ -73,7 +73,7 @@ const DataViewer = withRouter(
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [initialRecordValue, setInitialRecordValue] = useState();
-    // const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -407,6 +407,9 @@ const DataViewer = withRouter(
           }
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
+        if (isEditing) {
+          setIsEditing(false);
+        }
       }
     };
 
@@ -418,6 +421,9 @@ const DataViewer = withRouter(
     const onEditorValueFocus = (props, value) => {
       setSelectedCellId(getCellId(props, props.field));
       setInitialCellValue(value);
+      if (!isEditing) {
+        setIsEditing(true);
+      }
     };
 
     const onExportTableData = async fileType => {
@@ -1362,7 +1368,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions
+              hasWritePermissions && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
@@ -1372,7 +1378,6 @@ const DataViewer = withRouter(
             onContextMenuSelectionChange={e => {
               onSelectRecord(e.value);
             }}
-            // onEditingToggle={editing => setIsEditing(editing)}
             onPage={onChangePage}
             onPaste={e => {
               onPaste(e);

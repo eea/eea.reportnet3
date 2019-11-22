@@ -1348,7 +1348,6 @@ export class DataTable extends Component {
         selection={this.props.selection}
         metaKeySelection={this.props.metaKeySelection}
         frozenSelectionMode={this.frozenSelectionMode}
-        onEditingToggle={this.props.onEditingToggle}
         onSelectionChange={this.props.onSelectionChange}
         onRowClick={this.props.onRowClick}
         onRowDoubleClick={this.props.onRowDoubleClick}
