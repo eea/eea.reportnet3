@@ -95,7 +95,7 @@ export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => 
       </div>
       <div className={styles.status}>
         <p>
-          <span>{`${resources.messages['state']}:`}</span> {resources.messages[status]}
+          <span>{`${resources.messages['status']}:`}</span> {resources.messages[status]}
         </p>
       </div>
 
