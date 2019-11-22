@@ -162,6 +162,79 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
         <></>
       )}
 
+      <DataTable
+        value={documents}
+        autoLayout={true}
+        paginator={false}
+        selectionMode="single"
+        onRowSelect={e => {
+          setDocumentInitialValues(Object.assign({}, e.data));
+        }}>
+        {isCustodian ? (
+          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
+        ) : (
+          <Column className={styles.hideColumn} />
+        )}
+        <Column
+          columnResizeMode="expand"
+          field="title"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['title']}
+          sortable={true}
+        />
+        <Column
+          field="description"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['description']}
+          sortable={true}
+        />
+        <Column
+          field="category"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['category']}
+          sortable={true}
+        />
+        <Column
+          field="language"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['language']}
+          sortable={true}
+        />
+        <Column
+          field="isPublic"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentIsPublic']}
+          sortable={true}
+        />
+        <Column
+          field="date"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentUploadDate']}
+          sortable={true}
+        />
+        <Column
+          field="size"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentSize']}
+          sortable={true}
+        />
+        <Column
+          body={downloadTemplate}
+          field="url"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['file']}
+          style={{ textAlign: 'center', width: '8em' }}
+        />
+      </DataTable>
+
       <Dialog
         header={isEditForm ? resources.messages['edit'] : resources.messages['upload']}
         className={styles.dialog}
@@ -179,80 +252,6 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
         />
       </Dialog>
 
-      {
-        <DataTable
-          value={documents}
-          autoLayout={true}
-          paginator={false}
-          selectionMode="single"
-          onRowSelect={e => {
-            setDocumentInitialValues(Object.assign({}, e.data));
-          }}>
-          {isCustodian ? (
-            <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
-          ) : (
-            <Column className={styles.hideColumn} />
-          )}
-          <Column
-            columnResizeMode="expand"
-            field="title"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['title']}
-            sortable={true}
-          />
-          <Column
-            field="description"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['description']}
-            sortable={true}
-          />
-          <Column
-            field="category"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['category']}
-            sortable={true}
-          />
-          <Column
-            field="language"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['language']}
-            sortable={true}
-          />
-          <Column
-            field="isPublic"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['documentIsPublic']}
-            sortable={true}
-          />
-          <Column
-            field="date"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['documentUploadDate']}
-            sortable={true}
-          />
-          <Column
-            field="size"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['documentSize']}
-            sortable={true}
-          />
-          <Column
-            body={downloadTemplate}
-            field="url"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['file']}
-            style={{ textAlign: 'center', width: '8em' }}
-          />
-        </DataTable>
-      }
       <ConfirmDialog
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}
