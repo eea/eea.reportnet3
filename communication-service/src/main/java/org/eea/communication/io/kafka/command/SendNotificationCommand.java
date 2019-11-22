@@ -2,6 +2,8 @@ package org.eea.communication.io.kafka.command;
 
 import org.eea.communication.service.NotificationService;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
+import org.eea.kafka.commands.DefaultEventHandlerCommand;
+import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component;
  * The Class CreateConnectionCommand.
  */
 @Component
-public class SendNotificationCommand extends AbstractEEAEventHandlerCommand {
+public class SendNotificationCommand extends DefaultEventHandlerCommand {
 
 
   /**
@@ -31,16 +33,6 @@ public class SendNotificationCommand extends AbstractEEAEventHandlerCommand {
    * The logger.
    */
   private static final Logger LOG = LoggerFactory.getLogger(SendNotificationCommand.class);
-
-  /**
-   * Gets the event type.
-   *
-   * @return the event type
-   */
-  @Override
-  public EventType getEventType() {
-    return EventType.WEBSOCKET_NOTIFICATION;
-  }
 
 
   /**
