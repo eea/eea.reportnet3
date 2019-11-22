@@ -160,7 +160,6 @@ const errorStatisticsById = async datasetId => {
   const dataset = new Dataset();
   dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
-
   const tableStatisticValues = [];
   let levelErrors = [];
   const tableLevelErrors = [];
@@ -183,16 +182,32 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.nameTableSchema
     );
   });
+  const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
   levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
   let transposedValues = transposeMatrix(tableStatisticValues);
 
-  dataset.tableStatisticValues = tableStatisticValues;
+  dataset.tableStatisticValues = transposeMatrix(tableBarStatisticValues);
   dataset.tableStatisticPercentages = getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
   return dataset;
+};
+
+const tableStatisticValuesWithErrors = tableStatisticValues => {
+  let tableStatisticValuesWithSomeError = [];
+  let valuesWithValidations = transposeMatrix(tableStatisticValues).map(error => {
+    return error.map(subError => {
+      return subError;
+    });
+  });
+  valuesWithValidations.map(item => {
+    if (item != null && item != undefined && !item.every(value => value === 0)) {
+      tableStatisticValuesWithSomeError.push(item);
+    }
+  });
+  return tableStatisticValuesWithSomeError;
 };
 
 const getDashboardLevelErrors = datasetTableDTO => {
@@ -256,8 +271,33 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
   return levelErrors;
 };
 
+const getLevelErrorPriorityByLevelError = levelError => {
+  let levelErrorIndex = 0;
+  switch (levelError) {
+    case 'CORRECT':
+      levelErrorIndex = 0;
+      break;
+    case 'INFO':
+      levelErrorIndex = 1;
+      break;
+    case 'WARNING':
+      levelErrorIndex = 2;
+      break;
+    case 'ERROR':
+      levelErrorIndex = 3;
+      break;
+    case 'BLOCKER':
+      levelErrorIndex = 4;
+      break;
+    default:
+      levelErrorIndex = null;
+  }
+  return levelErrorIndex;
+};
+
 const orderLevelErrors = levelErrors => {
   const levelErrorsWithPriority = [
+    { id: 'CORRECT', index: 0 },
     { id: 'INFO', index: 1 },
     { id: 'WARNING', index: 2 },
     { id: 'ERROR', index: 3 },
@@ -620,6 +660,8 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportTableDataById,
   getMetaData,
+  getLevelErrorPriorityByLevelError,
+  orderLevelErrors,
   orderFieldSchema,
   orderTableSchema,
   schemaById,

@@ -19,6 +19,8 @@ import { GetMetaData } from './GetMetaData';
 import { GetSchema } from './GetSchema';
 import { GetStatistics } from './GetStatistics';
 import { GetWebFormData } from './GetWebFormData';
+import { LevelErrorPriority } from './LevelErrorPriority';
+import { OrderLevelErrors } from './OrderLevelErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
 import { UpdateField } from './UpdateField';
@@ -44,7 +46,9 @@ export const DatasetService = {
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
+  getLevelErrorPriorityByLevelError: LevelErrorPriority({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
+  orderLevelErrors: OrderLevelErrors({ datasetRepository }),
   orderRecordFieldDesign: OrderRecordFieldDesign({ datasetRepository }),
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
