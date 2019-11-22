@@ -307,7 +307,11 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       const droppedFieldIdx = getIndexByFieldName(droppedFieldName, inmFields);
       const fieldOrdered = await DatasetService.orderRecordFieldDesign(
         datasetId,
-        droppedFieldIdx,
+        droppedFieldIdx === -1
+          ? inmFields.length
+          : draggedFieldIdx < droppedFieldIdx
+          ? droppedFieldIdx - 1
+          : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
       if (fieldOrdered) {
@@ -327,6 +331,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           <InputSwitch
             checked={isPreviewModeOn}
             disabled={true}
+            // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
             onChange={e => {
               setIsPreviewModeOn(e.value);
             }}
