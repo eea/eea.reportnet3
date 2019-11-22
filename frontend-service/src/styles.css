@@ -2221,7 +2221,8 @@ body .p-datatable .p-datatable-tbody > tr {
 body .p-datatable .p-datatable-tbody > tr > td {
   background: inherit;
   border: 1px solid #c8c8c8;
-  padding: 0.429em 0.857em;
+  padding: 0.429em 0.657em;
+  word-break: break-word;
 }
 body .p-datatable .p-datatable-tbody > tr > td > div .infoTableCellError {
   background: repeating-linear-gradient(
