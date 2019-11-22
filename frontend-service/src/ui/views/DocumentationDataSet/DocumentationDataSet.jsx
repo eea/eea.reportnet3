@@ -35,11 +35,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [webLinks, setWebLinks] = useState();
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
@@ -57,22 +52,37 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(routes.DATAFLOWS))
+        icon: 'home',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(getUrl(routes.DATAFLOWS))
+            : window.open(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
+        icon: 'archive',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
+            : window.open(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
       },
-      { label: resources.messages['dataflowHelp'] }
+      { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
@@ -120,7 +130,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
