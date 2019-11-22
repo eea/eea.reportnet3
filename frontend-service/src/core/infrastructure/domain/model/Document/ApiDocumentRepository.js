@@ -27,13 +27,13 @@ const downloadDocumentById = async documentId => {
   return fileData;
 };
 
-const uploadDocument = async (dataflowId, description, language, file) => {
-  const responseData = await apiDocument.upload(dataflowId, description, language, file);
+const uploadDocument = async (dataflowId, description, language, file, isPublic) => {
+  const responseData = await apiDocument.upload(dataflowId, description, language, file, isPublic);
   return responseData;
 };
 
-const editDocument = async (dataflowId, description, language, file) => {
-  const responseData = await apiDocument.editDocument(dataflowId, description, language, file);
+const editDocument = async (dataflowId, description, language, file, isPublic) => {
+  const responseData = await apiDocument.editDocument(dataflowId, description, language, file, isPublic);
   return responseData;
 };
 

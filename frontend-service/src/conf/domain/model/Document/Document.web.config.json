@@ -1,6 +1,6 @@
 {
     "deleteDocument": "/document/{:documentId}",
-    "editDocument": "/document/upload/{:dataflowId}?description={:description}&language={:language}",
+    "editDocument": "/document/upload/{:dataflowId}?description={:description}&language={:language}&isPublic={:isPublic}",
     "downloadDocumentById": "/document/{:documentId}",
-    "uploadDocument": "/document/upload/{:dataflowId}?description={:description}&language={:language}"
+    "uploadDocument": "/document/upload/{:dataflowId}?description={:description}&language={:language}&isPublic={:isPublic}"
 }

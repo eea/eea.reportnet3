@@ -36,7 +36,7 @@ export const apiDocument = {
     });
     return response.data;
   },
-  upload: async (dataflowId, description, language, file) => {
+  upload: async (dataflowId, description, language, file, isPublic) => {
     const tokens = userStorage.get();
     const formData = new FormData();
     formData.append('file', file, file.name);
@@ -44,7 +44,8 @@ export const apiDocument = {
       url: getUrl(DocumentConfig.uploadDocument, {
         dataflowId: dataflowId,
         description: description,
-        language: language
+        language: language,
+        isPublic: isPublic
       }),
       queryString: {},
       data: formData,
@@ -55,7 +56,7 @@ export const apiDocument = {
     });
     return response.status;
   },
-  editDocument: async (dataflowId, description, language, file) => {
+  editDocument: async (dataflowId, description, language, file, isPublic) => {
     const tokens = userStorage.get();
     const formData = new FormData();
 
@@ -67,10 +68,8 @@ export const apiDocument = {
     };
 
     if (isEmpty(file)) {
-      console.log('has not file', file);
       formData.append('file', null);
     } else {
-      console.log('has file', file);
       formData.append('file', file, file.name);
     }
 
@@ -78,7 +77,8 @@ export const apiDocument = {
       url: getUrl(DocumentConfig.editDocument, {
         dataflowId: dataflowId,
         description: description,
-        language: language
+        language: language,
+        isPublic: isPublic
       }),
       queryString: {},
       data: formData,

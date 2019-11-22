@@ -94,8 +94,20 @@ const DocumentFileUpload = ({
         });
 
         const response = isEditForm
-          ? await DocumentService.editDocument(dataflowId, values.description, values.lang, values.uploadFile)
-          : await DocumentService.uploadDocument(dataflowId, values.description, values.lang, values.uploadFile);
+          ? await DocumentService.editDocument(
+              dataflowId,
+              values.description,
+              values.lang,
+              values.uploadFile,
+              values.isPublic
+            )
+          : await DocumentService.uploadDocument(
+              dataflowId,
+              values.description,
+              values.lang,
+              values.uploadFile,
+              values.isPublic
+            );
 
         onUpload();
         if (response === 200) {
