@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
  * The Class CustomChannelInterceptor.
  */
 @Component
-public class CustomChannelInterceptor implements ChannelInterceptor {
+public class WebsocketChannelInterceptor implements ChannelInterceptor {
 
   /** The client outbound channel. */
   @Autowired
@@ -33,7 +33,7 @@ public class CustomChannelInterceptor implements ChannelInterceptor {
   private JwtTokenProvider jwtTokenProvider;
 
   /** The logger. */
-  private final Logger logger = LoggerFactory.getLogger(CustomChannelInterceptor.class);
+  private final Logger logger = LoggerFactory.getLogger(WebsocketChannelInterceptor.class);
 
   /**
    * Pre send.
