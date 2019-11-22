@@ -57,7 +57,20 @@ public interface DocumentController {
   @DeleteMapping(value = "/{documentId}")
   void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
 
-
+  /**
+   * Update document.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
+   */
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  void updateDocument(@RequestPart("file") final MultipartFile file,
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam(name = "description", required = false) final String description,
+      @RequestParam(name = "language", required = false) final String language,
+      @PathVariable("idDocument") final Long idDocument);
 
   /**
    * Upload schema snapshot document.
@@ -93,21 +106,5 @@ public interface DocumentController {
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName) throws Exception;
-
-  /**
-   * Update document.
-   *
-   * @param file the file
-   * @param dataFlowId the data flow id
-   * @param description the description
-   * @param language the language
-   */
-  @PutMapping(value = "/upload/{idDocument}/dataflow/{dataFlowId}")
-  void updateDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId,
-      @RequestParam(name = "description", required = false) final String description,
-      @RequestParam(name = "language", required = false) final String language,
-      @PathVariable("idDocument") final long idDocument);
-
 
 }

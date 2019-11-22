@@ -163,12 +163,12 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/upload/{idDocument}/dataflow/{dataFlowId}")
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
   public void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
-      @PathVariable("idDocument") final long idDocument) {
+      @PathVariable("idDocument") final Long idDocument) {
     if (dataFlowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
