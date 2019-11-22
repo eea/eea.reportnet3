@@ -162,6 +162,4 @@ public class FileTreatmentHelper {
 
     return generalList;
   }
-
-
 }
