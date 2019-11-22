@@ -28,7 +28,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-
   const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
@@ -134,7 +133,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     return layout(
       <React.Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView>
+        <TabView activeIndex={0}>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
               onLoadDocuments={onLoadDocuments}
