@@ -23,36 +23,47 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
   const [dataflowName, setDataflowName] = useState('');
   const [dataSchema, setDataSchema] = useState();
-  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   useEffect(() => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(routes.DATAFLOWS))
+        icon: 'home',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(getUrl(routes.DATAFLOWS))
+            : window.open(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages.dataflow,
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
+        label: resources.messages['dataflow'],
+        icon: 'archive',
+        command: event =>
+          event.originalEvent.button === 0
+            ? history.push(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
+            : window.open(
+                getUrl(
+                  routes.DATAFLOW,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )
+              )
       },
       {
-        label: resources.messages.dashboards
+        label: resources.messages.dashboards,
+        icon: 'barChart'
       }
     ]);
   }, []);
@@ -136,7 +147,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
