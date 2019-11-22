@@ -6,7 +6,6 @@ import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleDataSet;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -35,7 +34,6 @@ public class DataSetSchema {
 
   /** The idDataFlow. */
   @Field(value = "idDataFlow")
-  @Indexed(unique = false)
   private Long idDataFlow;
 
   /** The table schemas. */

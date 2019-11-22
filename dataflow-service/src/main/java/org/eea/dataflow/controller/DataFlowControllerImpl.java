@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -249,7 +250,8 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
 
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
@@ -258,7 +260,19 @@ public class DataFlowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATE_AFTER_INCORRECT);
     }
-    dataflowService.createDataFlow(dataFlowVO);
+
+    if (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+    }
+
+    try {
+      dataflowService.createDataFlow(dataFlowVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Create dataflow failed");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
 
@@ -272,7 +286,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   public DataFlowVO getMetabaseById(@PathVariable("id") final Long id) {
 
     if (id == null) {
