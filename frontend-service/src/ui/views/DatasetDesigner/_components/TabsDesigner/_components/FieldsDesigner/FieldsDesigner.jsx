@@ -17,7 +17,7 @@ import { DatasetService } from 'core/services/DataSet';
 
 export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [fields, setFields] = useState();
+  const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -35,23 +35,14 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       !isNull(table.records[0].fields)
     ) {
       setFields(table.records[0].fields);
-    } else {
-      setFields([]);
     }
   }, []);
-
-  useEffect(() => {
-    if (!isUndefined(fields)) {
-      if (!isUndefined(onChangeFields) && !isNull(onChangeFields)) {
-        onChangeFields(fields, table.tableSchemaId);
-      }
-    }
-  }, [fields]);
 
   const onFieldAdd = (fieldId, fieldName, recordId, fieldType) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, { fieldId, name: fieldName, recordId, type: fieldType });
     setFields(inmFields);
+    onChangeFields(inmFields, table.tableSchemaId);
   };
 
   const onFieldDelete = deletedFieldIndx => {
@@ -129,6 +120,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndx, 1);
+        onChangeFields(inmFields, table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -255,14 +247,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           fieldValue=""
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
-          isErrorDialogVisible={isErrorDialogVisible}
           onFieldDragAndDrop={onFieldDragAndDrop}
-          onLoad={load => {
-            setIsLoading(load);
-          }}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
-          recordId={table.recordSchemaId}
+          recordId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
           totalFields={!isUndefined(fields) && !isNull(fields) ? fields.length : 0}
         />
       </div>
@@ -283,7 +271,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
               fieldValue={field.value}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
-              isErrorDialogVisible={isErrorDialogVisible}
               key={field.fieldId}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
@@ -307,7 +294,11 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       const droppedFieldIdx = getIndexByFieldName(droppedFieldName, inmFields);
       const fieldOrdered = await DatasetService.orderRecordFieldDesign(
         datasetId,
-        droppedFieldIdx,
+        droppedFieldIdx === -1
+          ? inmFields.length
+          : draggedFieldIdx < droppedFieldIdx
+          ? droppedFieldIdx - 1
+          : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
       if (fieldOrdered) {
@@ -327,6 +318,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           <InputSwitch
             checked={isPreviewModeOn}
             disabled={true}
+            // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
             onChange={e => {
               setIsPreviewModeOn(e.value);
             }}

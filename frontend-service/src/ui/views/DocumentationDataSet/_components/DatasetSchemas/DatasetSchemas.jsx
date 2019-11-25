@@ -33,7 +33,7 @@ const DatasetSchemas = ({ dataflowId }) => {
 
   const renderDatasetSchemas = () => {
     if (isLoading) {
-      return <Spinner />;
+      return <Spinner style={{ top: '5px' }} />;
     } else {
       return !isUndefined(designDatasets) && !isNull(designDatasets)
         ? designDatasets.map(designDataset => {

@@ -24,6 +24,7 @@ export const BigButton = ({
   onDuplicateName,
   onSaveError,
   onSaveName,
+  onWheel,
   placeholder
 }) => {
   const resources = useContext(ResourcesContext);
@@ -112,15 +113,21 @@ export const BigButton = ({
     }
   };
 
+  const onWheelClick = event => {
+    if (event.button === 1) {
+      window.open(onWheel);
+    }
+  };
+
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
         <a
-          href="#"
           onClick={e => {
             e.preventDefault();
             handleRedirect();
-          }}>
+          }}
+          onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
         </a>
         <DropdownButton
@@ -142,11 +149,11 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.dashboard}`}>
         <a
-          href="#"
           onClick={e => {
             e.preventDefault();
             handleRedirect();
-          }}>
+          }}
+          onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons('barChart')} />
         </a>
       </div>
@@ -157,11 +164,11 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
         <a
-          href="#"
           onClick={e => {
             e.preventDefault();
             handleRedirect();
-          }}>
+          }}
+          onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons('pencilRuler')} />
         </a>
         <DropdownButton
@@ -201,12 +208,12 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.documents}`}>
         <a
-          href="#"
           onClick={e => {
             e.preventDefault();
             handleRedirect();
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('question')} />
+          }}
+          onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon icon={AwesomeIcons('info')} />
         </a>
       </div>
       <p className={styles.caption}>{caption}</p>
@@ -216,7 +223,6 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.newItem}`}>
         <a
-          href="#"
           onClick={e => {
             e.preventDefault();
             newDatasetRef.current.show(e);

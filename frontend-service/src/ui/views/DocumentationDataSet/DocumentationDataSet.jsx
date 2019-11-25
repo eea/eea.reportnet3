@@ -28,17 +28,11 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-
   const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [webLinks, setWebLinks] = useState();
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
+  const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -57,10 +51,20 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -72,7 +76,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['dataflowHelp'] }
+      { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
@@ -80,6 +84,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     try {
       getDataflowName();
       onLoadDocuments();
+      onLoadWebLinks();
     } catch (error) {
       console.error(error.response);
     }
@@ -97,7 +102,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       setWebLinks(loadedWebLinks);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        console.log('error', error.response);
+        console.error('error', error.response);
       }
     }
   };
@@ -111,6 +116,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
+        console.log('error', error.response);
       }
     } finally {
       setIsLoading(false);
@@ -120,7 +126,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -133,11 +139,8 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   if (documents) {
     return layout(
       <React.Fragment>
-        <Title
-          title={`${resources.messages['dataflowHelp']} - ${resources.messages['dataflow']}: ${dataflowName}`}
-          icon="questionCircle"
-        />
-        <TabView>
+        <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
+        <TabView activeIndex={0}>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
               onLoadDocuments={onLoadDocuments}
