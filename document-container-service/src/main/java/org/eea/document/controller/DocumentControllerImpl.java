@@ -60,6 +60,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param dataFlowId the data flow id
    * @param description the description
    * @param language the language
+   * @param isPublic the is public
    */
   @Override
   @HystrixCommand
@@ -68,7 +69,7 @@ public class DocumentControllerImpl implements DocumentController {
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
-      @RequestParam("publicly") final Boolean publicly) {
+      @RequestParam("isPublic") final Boolean isPublic) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -81,7 +82,7 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setDataflowId(dataFlowId);
       documentVO.setDescription(description);
       documentVO.setLanguage(language);
-      documentVO.setPublicly(publicly);
+      documentVO.setIsPublic(isPublic);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
           file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
@@ -162,6 +163,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param description the description
    * @param language the language
    * @param idDocument the id document
+   * @param isPublic the is public
    */
   @Override
   @HystrixCommand
@@ -171,7 +173,7 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
-      @RequestParam("publicly") final Boolean publicly) {
+      @RequestParam("isPublic") final Boolean isPublic) {
     if (dataFlowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
@@ -186,8 +188,8 @@ public class DocumentControllerImpl implements DocumentController {
         documentVO.setLanguage(language);
       }
       documentVO.setId(idDocument);
-      if (publicly != null) {
-        documentVO.setPublicly(publicly);
+      if (isPublic != null) {
+        documentVO.setIsPublic(isPublic);
       }
       if (file == null || file.isEmpty()) {
         documentService.updateDocument(documentVO);

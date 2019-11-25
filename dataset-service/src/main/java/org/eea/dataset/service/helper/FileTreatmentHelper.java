@@ -3,7 +3,9 @@ package org.eea.dataset.service.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -69,7 +71,7 @@ public class FileTreatmentHelper {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the input stream
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
@@ -77,9 +79,9 @@ public class FileTreatmentHelper {
    */
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
-      String idTableSchema) throws EEAException, IOException, InterruptedException {
+      String tableSchemaId, String user) throws EEAException, IOException, InterruptedException {
     LOG.info("Processing file");
-    DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, idTableSchema);
+    DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
 
     // map the VO to the entity
     datasetVO.setId(datasetId);
@@ -96,8 +98,8 @@ public class FileTreatmentHelper {
     dataset.getTableValues().get(0).setRecords(new ArrayList<>());
 
     // Check if the table with idTableSchema has been populated already
-    Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, idTableSchema);
-    fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
+    Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
+    fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
 
     if (null == oldTableId) {
       datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
@@ -115,12 +117,19 @@ public class FileTreatmentHelper {
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.LOAD_TABLE.getValue());
     criteria.add(datasetId);
-    criteria.add(idTableSchema);
+    criteria.add(tableSchemaId);
     lockService.removeLockByCriteria(criteria);
 
     // after the dataset has been saved, an event is sent to notify it
+    Map<String, Object> notification = new HashMap<>();
+    notification.put("user", user);
+    notification.put("datasetId", datasetId);
+    notification.put("tableSchemaId", tableSchemaId);
+    Map<String, Object> value = new HashMap<>();
+    value.put("dataset_id", datasetId);
+    value.put("notification", notification);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, value);
   }
 
   /**

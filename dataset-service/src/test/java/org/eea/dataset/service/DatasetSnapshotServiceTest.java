@@ -5,10 +5,12 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
@@ -26,6 +28,7 @@ import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
 import org.junit.After;
 import org.junit.Before;
@@ -228,7 +231,7 @@ public class DatasetSnapshotServiceTest {
     doNothing().when(documentControllerZuul).deleteSnapshotSchemaDocument(Mockito.any(),
         Mockito.any());
     datasetSnapshotService.removeSchemaSnapshot(1L, 1L);
-    Mockito.verify(snapshotSchemaRepository, times(1)).deleteById(Mockito.anyLong());
+    Mockito.verify(snapshotSchemaRepository, times(1)).deleteSnapshotSchemaById(Mockito.anyLong());
 
   }
 
@@ -246,6 +249,37 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+
+  @Test
+  public void testDeleteAllSchemaSnapshots() throws Exception {
+
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    snapshots.add(snap);
+    when(snapshotSchemaMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
+    datasetSnapshotService.deleteAllSchemaSnapshots(1L);
+
+    Mockito.verify(snapshotSchemaMapper, times(1)).entityListToClass(Mockito.any());
+  }
+
+  @Test
+  public void testDeleteAllSchemaSnapshotsException() throws Exception {
+
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(null);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    snapshots.add(snap);
+    when(snapshotSchemaMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
+    doThrow(new Exception()).when(documentControllerZuul)
+        .deleteSnapshotSchemaDocument(Mockito.any(), Mockito.any());
+    datasetSnapshotService.deleteAllSchemaSnapshots(1L);
+    Mockito.verify(snapshotSchemaRepository, times(1))
+        .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
+  }
+
+
 
   @After
   public void afterTests() {

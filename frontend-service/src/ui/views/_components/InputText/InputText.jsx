@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { InputText as PrimeInputText } from 'primereact/inputtext';
 
-export const InputText = ({
-  autoFocus,
-  className,
-  disabled = false,
-  onBlur,
-  onChange,
-  onFocus,
-  onInput,
-  onKeyDown,
-  placeholder,
-  type,
-  value
-}) => {
+export const InputText = forwardRef((props, _) => {
+  const {
+    autoFocus,
+    className,
+    disabled = false,
+    inputRef,
+    onBlur,
+    onChange,
+    onFocus,
+    onInput,
+    onKeyDown,
+    placeholder,
+    type,
+    value
+  } = props;
   return (
     <PrimeInputText
       autoFocus={autoFocus}
@@ -26,7 +28,8 @@ export const InputText = ({
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       type={type}
+      ref={inputRef}
       value={value}
     />
   );
-};
+});

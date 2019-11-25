@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -194,7 +195,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will realease the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
+          SecurityContextHolder.getContext().getAuthentication().getName());
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException | EEAException | InterruptedException e) {
       LOG_ERROR.error(e.getMessage());

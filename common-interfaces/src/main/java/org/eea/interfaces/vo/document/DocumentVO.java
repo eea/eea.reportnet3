@@ -42,6 +42,6 @@ public class DocumentVO implements Serializable {
   /** The date. */
   private Date date;
 
-  /** The publicly. */
-  private Boolean publicly;
+  /** The is public. */
+  private Boolean isPublic;
 }

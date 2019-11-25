@@ -33,12 +33,13 @@ public interface DocumentController {
    * @param dataFlowId the data flow id
    * @param description the description
    * @param language the language
+   * @param isPublic the is public
    */
   @PostMapping(value = "/upload/{dataFlowId}")
   void uploadDocument(final MultipartFile file, @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
-      @RequestParam("publicly") final Boolean publicly);
+      @RequestParam("isPublic") final Boolean isPublic);
 
   /**
    * Download document .
@@ -65,6 +66,8 @@ public interface DocumentController {
    * @param dataFlowId the data flow id
    * @param description the description
    * @param language the language
+   * @param idDocument the id document
+   * @param isPublic the is public
    */
   @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
   void updateDocument(@RequestPart("file") final MultipartFile file,
@@ -72,7 +75,7 @@ public interface DocumentController {
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
-      @RequestParam("publicly") final Boolean publicly);
+      @RequestParam("isPublic") final Boolean isPublic);
 
   /**
    * Upload schema snapshot document.
