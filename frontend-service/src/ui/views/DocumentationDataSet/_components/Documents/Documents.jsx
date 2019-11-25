@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { isUndefined } from 'lodash';
+import moment from 'moment';
 
 import styles from './Documents.module.scss';
 
@@ -117,7 +118,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
     return `${title.split(' ').join('_')}`;
   };
 
-  const downloadTemplate = rowData => {
+  const downloadColumnTemplate = rowData => {
     switch (rowData.category) {
     }
     return (
@@ -129,6 +130,18 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
         )}
       </span>
     );
+  };
+
+  const isPublicColumnTemplate = rowData => {
+    return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
+  };
+
+  const sizeColumnTemplate = rowData => {
+    return <span>{rowData.size} mb</span>;
+  };
+
+  const dateColumnTemplate = rowData => {
+    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
   };
 
   return (
@@ -205,6 +218,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           sortable={true}
         />
         <Column
+          body={isPublicColumnTemplate}
           field="isPublic"
           filter={false}
           filterMatchMode="contains"
@@ -212,6 +226,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           sortable={true}
         />
         <Column
+          body={dateColumnTemplate}
           field="date"
           filter={false}
           filterMatchMode="contains"
@@ -219,6 +234,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           sortable={true}
         />
         <Column
+          body={sizeColumnTemplate}
           field="size"
           filter={false}
           filterMatchMode="contains"
@@ -226,7 +242,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           sortable={true}
         />
         <Column
-          body={downloadTemplate}
+          body={downloadColumnTemplate}
           field="url"
           filter={false}
           filterMatchMode="contains"

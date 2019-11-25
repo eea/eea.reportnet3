@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isPlainObject, sortBy } from 'lodash';
+import { isEmpty, isNull, isPlainObject, sortBy, isUndefined } from 'lodash';
 
 import styles from './DocumentFileUpload.module.scss';
 
@@ -30,7 +30,7 @@ const DocumentFileUpload = ({
     uploadFile: isEditForm
       ? Yup.mixed()
           .test('checkSizeWhenNotEmpty', resources.messages['tooLargeFileValidationError'], value => {
-            if (value === undefined || isPlainObject(value) || value === null) {
+            if (isUndefined(value) || isPlainObject(value) || isNull(value)) {
               return true;
             } else {
               return value.size <= config.MAX_FILE_SIZE;
@@ -131,6 +131,7 @@ const DocumentFileUpload = ({
       }}>
       {({ isSubmitting, setFieldValue, errors, touched, values }) => (
         <Form>
+          {console.log('values', values)}
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
@@ -171,6 +172,7 @@ const DocumentFileUpload = ({
           </fieldset>
           <fieldset>
             <div className={styles.checkboxIsPublick}>
+              {console.log('values.isPublic', values.isPublic)}
               <Field name="isPublic" type="checkbox" checked={values.isPublic} component={Checkbox} />
             </div>
           </fieldset>

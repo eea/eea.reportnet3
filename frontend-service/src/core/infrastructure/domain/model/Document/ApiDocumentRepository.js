@@ -3,8 +3,6 @@ import { Document } from 'core/domain/model/Document/Document';
 
 import { config } from 'conf/index';
 
-import moment from 'moment';
-
 const all = async dataflowId => {
   const documentsDTO = await apiDocument.all(dataflowId);
 
@@ -17,8 +15,8 @@ const all = async dataflowId => {
         documentDTO.category,
         getCountryName(documentDTO.language),
         documentDTO.url,
-        'false', //documentDTO.isPublic,
-        moment(Date.now()).format('YYYY-MM-DD'), //moment(documentDTO.date).format('YYYY-MM-DD'),
+        false, //documentDTO.isPublic,
+        Date.now(), //documentDTO.date),
         10 //documentDTO.size
       )
   );
