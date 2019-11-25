@@ -5,7 +5,7 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispatch }) => {
+export const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispatch }) => {
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map(errorLevel => {
     return (
@@ -31,8 +31,6 @@ const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispatch }) =
   });
   return <ul className={styles.list}>{errorListFilters}</ul>;
 };
-
-export { StatusList };
 
 // return (
 //   <ul className={styles.list}>

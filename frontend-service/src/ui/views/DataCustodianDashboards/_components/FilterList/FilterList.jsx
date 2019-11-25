@@ -10,7 +10,15 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
-const FilterList = ({ arrayStatusFilter, color, levelErrors, filterDispatch, originalData: { datasets, labels } }) => {
+const FilterList = ({
+  arrayReporterFilter,
+  arrayStatusFilter,
+  arrayTableFilter,
+  color,
+  levelErrors,
+  filterDispatch,
+  originalData: { datasets, labels }
+}) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
@@ -30,7 +38,12 @@ const FilterList = ({ arrayStatusFilter, color, levelErrors, filterDispatch, ori
         <AccordionTab header={resources.messages['filterByDataset']}>
           <ul className={styles.list}>
             {labels.map(item => (
-              <ReportersListItem key={item} filterDispatch={filterDispatch} item={item} />
+              <ReportersListItem
+                key={item}
+                arrayReporterFilter={arrayReporterFilter}
+                filterDispatch={filterDispatch}
+                item={item}
+              />
             ))}
           </ul>
         </AccordionTab>
@@ -46,7 +59,12 @@ const FilterList = ({ arrayStatusFilter, color, levelErrors, filterDispatch, ori
         <AccordionTab header={resources.messages['filterByTable']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
-              <TableListItem key={item.tableId} filterDispatch={filterDispatch} item={item} />
+              <TableListItem
+                key={item.tableId}
+                arrayTableFilter={arrayTableFilter}
+                filterDispatch={filterDispatch}
+                item={item}
+              />
             ))}
           </ul>
         </AccordionTab>
