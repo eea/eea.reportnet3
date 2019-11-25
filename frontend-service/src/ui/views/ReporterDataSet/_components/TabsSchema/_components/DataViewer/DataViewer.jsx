@@ -54,6 +54,7 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [allLevelErrorWithValidations, setAllLevelErrorWithValidations] = useState(levelErrorTypesWithCorrects);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
@@ -290,7 +291,7 @@ const DataViewer = withRouter(
 
     const getLevelErrorFilters = () => {
       let filters = [];
-      levelErrorValidations.map(value => {
+      levelErrorTypesWithCorrects.map(value => {
         if (!isUndefined(value) && !isNull(value)) {
           let filter = {
             label: capitalize(value),
@@ -619,7 +620,7 @@ const DataViewer = withRouter(
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
-      onFetchData(event.sortField, event.sortOrder, 0, numRows, levelErrorValidations);
+      onFetchData(event.sortField, event.sortOrder, 0, numRows, levelErrorTypesWithCorrects);
     };
 
     const onUpload = () => {
