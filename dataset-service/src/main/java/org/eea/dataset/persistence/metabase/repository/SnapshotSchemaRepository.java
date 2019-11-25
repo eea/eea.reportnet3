@@ -33,9 +33,8 @@ public interface SnapshotSchemaRepository extends CrudRepository<SnapshotSchema,
    */
   @Transactional
   @Modifying
-  @Query(nativeQuery = true,
-      value = "delete from Snapshot_Schema where id= ?1 ; delete from Dataset where id= ?1")
-  void deleteSnapshotSchemaById(Long idSnapshotSchema);
+  @Query(nativeQuery = true, value = "delete from Snapshot_Schema where id= :idSnapshot")
+  void deleteSnapshotSchemaById(@Param("idSnapshot") Long idSnapshotSchema);
 
 
 }

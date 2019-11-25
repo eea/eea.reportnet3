@@ -310,16 +310,19 @@ public class DataSetSchemaControllerImplTest {
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
 
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void deleteDatasetSchemaException3Test() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
-    dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    try {
+      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("Not the same status", HttpStatus.BAD_REQUEST, e.getStatus());
+    }
 
-    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
 
 

@@ -13,6 +13,7 @@ import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
@@ -98,6 +99,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The schema service. */
   @Autowired
   private DatasetSchemaService schemaService;
+
+  /** The metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository metabaseRepository;
+
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -361,6 +367,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws Exception {
     // Remove from the metabase
     snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
+    metabaseRepository.deleteSnapshotDatasetByIdSnapshot(idSnapshot);
     // Delete the file
     String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);

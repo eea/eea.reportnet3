@@ -275,8 +275,8 @@ public class DatasetSnapshotServiceTest {
     doThrow(new Exception()).when(documentControllerZuul)
         .deleteSnapshotSchemaDocument(Mockito.any(), Mockito.any());
     datasetSnapshotService.deleteAllSchemaSnapshots(1L);
-
-    Mockito.verify(snapshotSchemaMapper, times(1)).entityListToClass(Mockito.any());
+    Mockito.verify(snapshotSchemaRepository, times(1))
+        .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
   }
 
 
