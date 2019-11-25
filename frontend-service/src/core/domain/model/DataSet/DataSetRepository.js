@@ -14,10 +14,7 @@ export const DatasetRepository = {
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
-  getLevelErrorPriorityByLevelError: () =>
-    Promise.reject('[DatasetRepository#getLevelErrorPriorityByLevelError] must be implemented'),
   getMetaData: () => Promise.reject('[DatasetRepository#getMetaData] must be implemented'),
-  orderLevelErrors: () => Promise.reject('[DatasetRepository#orderLevelErrors] must be implemented'),
   orderFieldSchema: () => Promise.reject('[DatasetRepository#orderFieldSchema] must be implemented'),
   orderTableSchema: () => Promise.reject('[DatasetRepository#orderTableSchema] must be implemented'),
   schemaById: () => Promise.reject('[DatasetRepository#schemaById] must be implemented'),

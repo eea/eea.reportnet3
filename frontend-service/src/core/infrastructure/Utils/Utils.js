@@ -1,5 +1,34 @@
 export const Utils = (() => {
   const UtilsAPI = {
+    getDashboardLevelErrors: datasetTableDTO => {
+      let levelErrors = [];
+      if (datasetTableDTO.totalErrors > 0) {
+        let corrects =
+          datasetTableDTO.totalRecords -
+          (datasetTableDTO.totalRecordsWithBlockers +
+            datasetTableDTO.totalRecordsWithErrors +
+            datasetTableDTO.totalRecordsWithWarnings +
+            datasetTableDTO.totalRecordsWithInfos);
+
+        if (corrects > 0) {
+          levelErrors.push('CORRECT');
+        }
+        if (datasetTableDTO.totalRecordsWithInfos > 0) {
+          levelErrors.push('INFO');
+        }
+        if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+          levelErrors.push('WARNING');
+        }
+        if (datasetTableDTO.totalRecordsWithErrors > 0) {
+          levelErrors.push('ERROR');
+        }
+        if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+          levelErrors.push('BLOCKER');
+        }
+      }
+      return levelErrors;
+    },
+
     getLevelErrorPriorityByLevelError: levelError => {
       let levelErrorIndex = 0;
       switch (levelError) {
@@ -43,6 +72,21 @@ export const Utils = (() => {
         .flat()
         .sort((a, b) => a.index - b.index)
         .map(orderedError => orderedError.id);
+    },
+
+    tableStatisticValuesWithErrors: tableStatisticValues => {
+      let tableStatisticValuesWithSomeError = [];
+      let valuesWithValidations = Utils.transposeMatrix(tableStatisticValues).map(error => {
+        return error.map(subError => {
+          return subError;
+        });
+      });
+      valuesWithValidations.map(item => {
+        if (item != null && item != undefined && !item.every(value => value === 0)) {
+          tableStatisticValuesWithSomeError.push(item);
+        }
+      });
+      return tableStatisticValuesWithSomeError;
     },
 
     transposeMatrix: matrix => {

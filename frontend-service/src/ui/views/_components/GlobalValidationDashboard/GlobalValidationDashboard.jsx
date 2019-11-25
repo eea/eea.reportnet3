@@ -15,6 +15,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { filterReducer } from './_components/_context/filterReducer';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { Utils } from 'core/infrastructure/Utils';
 
 const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
@@ -110,15 +111,20 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     return allDatasets.flat();
   };
 
+  const getLevelErrorPriority = levelError => {
+    return Utils.getLevelErrorPriorityByLevelError(levelError);
+  };
+
   const getBarsByErrorAndStatistics = (table, levelErrors) => {
-    const levelErrorBars = levelErrors.map(function(type, i) {
+    const levelErrorBars = levelErrors.map((levelError, i) => {
+      let levelErrorIndex = getLevelErrorPriority(levelError);
       const errorBar = {
-        label: type,
+        label: levelError,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[type] : colors.type,
-        data: table.tableStatisticPercentages[i],
-        totalData: table.tableStatisticValues[i],
+        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+        data: table.tableStatisticPercentages[levelErrorIndex],
+        totalData: table.tableStatisticValues[levelErrorIndex],
         stack: table.tableName
       };
       return errorBar;

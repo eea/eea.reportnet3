@@ -7,6 +7,8 @@ import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
+import { Utils } from 'core/infrastructure/Utils';
+
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
@@ -150,15 +152,13 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tableValues = [];
   let levelErrors = [];
   const tableLevelErrors = [];
-
   datasetsDashboardsDataDTO.map(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
-
     dataset.tables.map((table, i) => {
-      tableLevelErrors.push(getDashboardLevelErrors(table));
+      tableLevelErrors.push(Utils.getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
@@ -178,7 +178,6 @@ const datasetsValidationStatistics = async datasetSchemaId => {
           [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
           [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
         );
-
         tableValues.push(
           [
             table.totalRecords -
@@ -232,7 +231,6 @@ const datasetsValidationStatistics = async datasetSchemaId => {
         );
 
         tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
-
         tableById.tableStatisticValues[0].push(
           table.totalRecords -
             (table.totalRecordsWithBlockers +
@@ -248,57 +246,12 @@ const datasetsValidationStatistics = async datasetSchemaId => {
       }
     });
   });
-  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
 
+  levelErrors = [...new Set(Utils.orderLevelErrors(tableLevelErrors.flat()))];
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
   return datasetsDashboardsData;
-};
-
-const orderLevelErrors = levelErrors => {
-  const levelErrorsWithPriority = [
-    { id: 'CORRECT', index: 0 },
-    { id: 'INFO', index: 1 },
-    { id: 'WARNING', index: 2 },
-    { id: 'ERROR', index: 3 },
-    { id: 'BLOCKER', index: 4 }
-  ];
-
-  return levelErrors
-    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
-    .flat()
-    .sort((a, b) => a.index - b.index)
-    .map(orderedError => orderedError.id);
-};
-
-const getDashboardLevelErrors = datasetTableDTO => {
-  let levelErrors = [];
-  if (datasetTableDTO.totalErrors > 0) {
-    let corrects =
-      datasetTableDTO.totalRecords -
-      (datasetTableDTO.totalRecordsWithBlockers +
-        datasetTableDTO.totalRecordsWithErrors +
-        datasetTableDTO.totalRecordsWithWarnings +
-        datasetTableDTO.totalRecordsWithInfos);
-
-    if (corrects > 0) {
-      levelErrors.push('CORRECT');
-    }
-    if (datasetTableDTO.totalRecordsWithInfos > 0) {
-      levelErrors.push('INFO');
-    }
-    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
-      levelErrors.push('WARNING');
-    }
-    if (datasetTableDTO.totalRecordsWithErrors > 0) {
-      levelErrors.push('ERROR');
-    }
-    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
-      levelErrors.push('BLOCKER');
-    }
-  }
-  return levelErrors;
 };
 
 const datasetsReleasedStatus = async dataflowId => {
@@ -351,10 +304,6 @@ const reject = async dataflowId => {
 
 const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
-};
-
-const transposeMatrix = matrix => {
-  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
 };
 
 export const ApiDataflowRepository = {
