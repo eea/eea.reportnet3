@@ -115,7 +115,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ? dataSchema.map(schema => {
         return (
           <Button
-            className={`p-button-rounded p-button-secondary ${styles.dashboardsButton}`}
+            className={`p-button-rounded ${
+              chartState[schema.datasetSchemaId] ? 'p-button-primary' : 'p-button-secondary'
+            } ${styles.dashboardsButton}`}
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
             icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
