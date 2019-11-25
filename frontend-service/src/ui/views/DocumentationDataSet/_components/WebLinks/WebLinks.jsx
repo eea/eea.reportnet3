@@ -20,7 +20,6 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
-  const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
   const form = useRef(null);
@@ -38,11 +37,6 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     setWeblinkItem({ id: undefined, description: '', url: '' });
     form.current.resetForm();
   };
-
-  useEffect(() => {
-    onLoadWebLinks();
-    resetForm();
-  }, [reload]);
 
   const onHideAddEditDialog = () => {
     setIsAddOrEditWeblinkDialogVisible(false);
@@ -76,7 +70,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -90,7 +84,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
         if (weblinkToEdit.isUpdated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -104,7 +98,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
 
     if (weblinkToDelete.isDeleted) {
-      setReload(!reload);
+      onLoadWebLinks();
     }
 
     setIsConfirmDeleteVisible(false);
