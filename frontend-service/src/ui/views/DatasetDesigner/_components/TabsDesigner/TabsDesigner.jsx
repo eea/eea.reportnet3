@@ -233,7 +233,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
         if (deletedTabIndx === inmTabs.length - 2) {
           setActiveIndex(inmTabs.length - 2);
         } else {
-          setActiveIndex(activeIndex - 1);
+          if (activeIndex !== 0) {
+            setActiveIndex(activeIndex - 1);
+          }
         }
       }
       setTabs(inmTabs);
