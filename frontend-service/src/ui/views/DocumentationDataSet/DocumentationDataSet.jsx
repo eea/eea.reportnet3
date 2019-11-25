@@ -28,12 +28,11 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-
   const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [webLinks, setWebLinks] = useState();
+  const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -85,6 +84,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     try {
       getDataflowName();
       onLoadDocuments();
+      onLoadWebLinks();
     } catch (error) {
       console.error(error.response);
     }
@@ -102,7 +102,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       setWebLinks(loadedWebLinks);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        console.log('error', error.response);
+        console.error('error', error.response);
       }
     }
   };
@@ -116,6 +116,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
+        console.log('error', error.response);
       }
     } finally {
       setIsLoading(false);
@@ -139,7 +140,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     return layout(
       <React.Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView>
+        <TabView activeIndex={0}>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
               onLoadDocuments={onLoadDocuments}
