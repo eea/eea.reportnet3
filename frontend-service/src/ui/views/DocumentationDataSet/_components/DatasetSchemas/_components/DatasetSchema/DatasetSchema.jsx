@@ -15,7 +15,7 @@ const DatasetSchema = ({ datasetId }) => {
 
   const onLoadDatasetDesignSchema = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const datasetSchema = await DatasetService.schemaById(datasetId);
       if (!isEmpty(datasetSchema)) {
         setDesignDataset(datasetSchema);
@@ -25,26 +25,26 @@ const DatasetSchema = ({ datasetId }) => {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   const renderDatasetSchema = () => {
-    // if (isLoading) {
-    //   return <Spinner />;
-    // } else {
-    return !isUndefined(designDataset) && !isNull(designDataset) ? (
-      <div>
-        <TreeView
-          property={parseDesignDataset(designDataset)}
-          propertyName={''}
-          excludeBottomBorder={false}
-          rootProperty={''}
-          groupableProperties={['fields']}
-        />
-      </div>
-    ) : null;
-    // }
+    if (isLoading) {
+      return <Spinner style={{ top: '5px' }} />;
+    } else {
+      return !isUndefined(designDataset) && !isNull(designDataset) ? (
+        <div>
+          <TreeView
+            excludeBottomBorder={false}
+            groupableProperties={['fields']}
+            property={parseDesignDataset(designDataset)}
+            propertyName={''}
+            rootProperty={''}
+          />
+        </div>
+      ) : null;
+    }
   };
 
   return renderDatasetSchema();
@@ -79,6 +79,11 @@ const parseDesignDataset = design => {
   const dataset = {};
   dataset[design.datasetSchemaName] = parsedDataset;
   return dataset;
+};
+
+DatasetSchema.whyDidYouRender = {
+  logOnDifferentValues: true,
+  customName: 'DatasetSchema'
 };
 
 export { DatasetSchema };

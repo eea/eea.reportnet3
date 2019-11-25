@@ -60,6 +60,10 @@ export const TabView = ({
     }, 100);
   }, [children]);
 
+  useEffect(() => {
+    setActiveIdx(activeIndex);
+  }, [activeIndex]);
+
   const onTabHeaderClick = (event, tab, index) => {
     if (designMode) {
       if (tab.props.addTab) {
