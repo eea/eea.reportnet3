@@ -30,7 +30,7 @@ const StatusList = ({ color, levelErrors, filterDispatch }) => {
             }
           }}
         />
-        <label htmlFor={errorLevel} className={styles.labelItem}>
+        <label htmlFor={errorLevel.toString().toLowerCase()} className={styles.labelItem}>
           {resources.messages[errorLevel.toString().toLowerCase()]}
         </label>
       </li>
