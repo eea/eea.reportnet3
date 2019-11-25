@@ -275,7 +275,7 @@ export const FieldDesigner = ({
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setFieldValue(initialFieldValue);
-    } else if (event.key === 'Enter') {
+    } else if (event.key == 'Enter') {
       event.preventDefault();
       onBlurFieldName(event.target.value);
     }

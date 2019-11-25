@@ -225,7 +225,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onLoadDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      const dataset = dataflow.datasets.filter(datasets => datasets.datasetId === datasetId);
+      const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
       setIsDatasetReleased(dataset[0].isReleased);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {

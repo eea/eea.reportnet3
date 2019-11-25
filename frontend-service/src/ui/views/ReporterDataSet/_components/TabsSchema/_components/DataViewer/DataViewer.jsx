@@ -1237,7 +1237,7 @@ const DataViewer = withRouter(
         if (!isFilterValidationsActive) {
           return totalCount();
         } else {
-          return totalRecords === totalFilteredRecords ? filteredCountSameValue() : filteredCount();
+          return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
       }
     };
@@ -1408,7 +1408,7 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={totalFilteredRecords !== 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
+            totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
             value={fetchedData}
             //frozenWidth="100px"
             // unfrozenWidth="600px"

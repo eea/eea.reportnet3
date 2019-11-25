@@ -15,13 +15,21 @@ import { filterReducer } from './_components/_context/filterReducer';
 
 import { DataflowService } from 'core/services/DataFlow';
 
-// const SEVERITY_CODE = {
-//   CORRECT: colors.dashboardCorrect,
-//   INFO: colors.dashboardInfo,
-//   WARNING: colors.dashboardWarning,
-//   ERROR: colors.dashboardError,
-//   BLOCKER: colors.dashboardBlocker
-// };
+const SEVERITY_CODE = {
+  CORRECT: colors.dashboardCorrect,
+  INFO: colors.dashboardInfo,
+  WARNING: colors.dashboardWarning,
+  ERROR: colors.dashboardError,
+  BLOCKER: colors.dashboardBlocker
+};
+
+const LEVELS = {
+  CORRECT: 0,
+  INFO: 1,
+  WARNING: 2,
+  ERROR: 3,
+  BLOCKER: 4
+};
 
 export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);

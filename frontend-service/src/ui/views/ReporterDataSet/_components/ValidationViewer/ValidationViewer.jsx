@@ -88,7 +88,7 @@ const ValidationViewer = React.memo(
         onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
       } else {
-        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow !== 0) {
+        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
           resetFilters();
           setFirstRow(0);
           fetchData('', sortOrder, 0, numberRows, [], [], []);
@@ -329,7 +329,7 @@ const ValidationViewer = React.memo(
     };
 
     const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords === totalRecords) {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
         return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
