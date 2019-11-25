@@ -81,12 +81,15 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   }, [history, match.params.dataflowId, resources.messages]);
 
   useEffect(() => {
+    setIsLoading(true);
     try {
       getDataflowName();
       onLoadDocuments();
       onLoadWebLinks();
     } catch (error) {
       console.error(error.response);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -96,7 +99,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   };
 
   const onLoadWebLinks = async () => {
-    setIsLoading(true);
     try {
       let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
       loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
@@ -106,13 +108,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
         console.log('error', error.response);
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const onLoadDocuments = async () => {
-    setIsLoading(true);
     try {
       let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
       loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
@@ -122,8 +121,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
         console.log('error', error.response);
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
