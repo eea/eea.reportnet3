@@ -24,7 +24,7 @@ export const Eulogin = ({ location, history }) => {
         history.push(getUrl(routes.ACCESS_POINT));
       }
     } catch (error) {
-      console.log('error: ', error);
+      console.error('error: ', error);
       history.push(getUrl(routes.ACCESS_POINT));
     }
   };
