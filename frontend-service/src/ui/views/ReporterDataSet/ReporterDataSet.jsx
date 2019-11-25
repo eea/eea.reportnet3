@@ -81,11 +81,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   let growlRef = useRef();
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     setBreadCrumbItems([
       {
@@ -341,7 +336,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     return (
       <MainLayout>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
