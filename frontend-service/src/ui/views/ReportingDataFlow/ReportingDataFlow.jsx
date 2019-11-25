@@ -92,10 +92,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
-        command: event =>
-          event.originalEvent.button === 0
-            ? history.push(getUrl(routes.DATAFLOWS))
-            : window.open(getUrl(routes.DATAFLOWS))
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],

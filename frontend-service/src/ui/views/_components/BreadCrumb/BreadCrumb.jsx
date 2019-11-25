@@ -29,8 +29,12 @@ export const BreadCrumb = ({ className, id, model, style }) => {
 
     return (
       <li role="menuitem" className={className} style={item.style}>
-        <a className="p-menuitem-link" target={item.target} onMouseDown={event => onItemClick(event, item)}>
-          <FontAwesomeIcon icon={AwesomeIcons(item.icon)} />
+        <a
+          href={item.href || ''}
+          className="p-menuitem-link"
+          target={item.target}
+          onClick={event => onItemClick(event, item)}>
+          <FontAwesomeIcon className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
           <span className="p-menuitem-text">{item.label}</span>
         </a>
       </li>
@@ -40,7 +44,7 @@ export const BreadCrumb = ({ className, id, model, style }) => {
   const onLoadModel = () => {
     if (model) {
       const items = model.map((item, index) => {
-        const menuitem = onLoadItem(item);
+        const menuitem = onLoadItem(item, index);
         const separator = index === model.length - 1 ? null : onLoadSeparator();
 
         return (

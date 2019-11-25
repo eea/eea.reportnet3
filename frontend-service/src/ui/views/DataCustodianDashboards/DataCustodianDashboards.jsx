@@ -32,34 +32,29 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
-        command: event =>
-          event.originalEvent.button === 0
-            ? history.push(getUrl(routes.DATAFLOWS))
-            : window.open(getUrl(routes.DATAFLOWS))
+        href: routes.DATAFLOWS,
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
         icon: 'archive',
-        command: event =>
-          event.originalEvent.button === 0
-            ? history.push(
-                getUrl(
-                  routes.DATAFLOW,
-                  {
-                    dataflowId: match.params.dataflowId
-                  },
-                  true
-                )
-              )
-            : window.open(
-                getUrl(
-                  routes.DATAFLOW,
-                  {
-                    dataflowId: match.params.dataflowId
-                  },
-                  true
-                )
-              )
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
+        command: () =>
+          history.push(
+            getUrl(
+              routes.DATAFLOW,
+              {
+                dataflowId: match.params.dataflowId
+              },
+              true
+            )
+          )
       },
       {
         label: resources.messages.dashboards,

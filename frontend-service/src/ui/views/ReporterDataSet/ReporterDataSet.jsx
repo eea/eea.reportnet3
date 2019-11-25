@@ -90,10 +90,20 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -105,7 +115,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['dataset'] }
+      { label: resources.messages['dataset'], icon: 'dataset' }
     ]);
   }, []);
 
