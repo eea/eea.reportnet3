@@ -34,6 +34,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -66,6 +69,10 @@ public class DataSetControllerImplTest {
   @Mock
   private FileTreatmentHelper fileTreatmentHelper;
 
+  SecurityContext securityContext;
+
+  Authentication authentication;
+
   /**
    * Inits the mocks.
    */
@@ -74,6 +81,10 @@ public class DataSetControllerImplTest {
     records = new ArrayList<>();
     records.add(new RecordVO());
     recordId = 1L;
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -133,8 +144,10 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess2() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 

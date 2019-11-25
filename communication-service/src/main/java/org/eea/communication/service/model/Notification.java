@@ -1,6 +1,7 @@
 package org.eea.communication.service.model;
 
 import java.util.Map;
+import org.eea.kafka.domain.EventType;
 
 /**
  * The type Notification.
@@ -10,6 +11,8 @@ public class Notification {
    * The Class Notification.
    */
 
+  private EventType type;
+
   /**
    * The content.
    */
@@ -17,11 +20,22 @@ public class Notification {
 
   /**
    * Instantiates a new notification.
-   * 
-   * @param message the message
+   *
+   * @param type the type
+   * @param content the content
    */
-  public Notification(Map<?, ?> content) {
+  public Notification(EventType type, Map<?, ?> content) {
+    this.type = type;
     this.content = content;
+  }
+
+  /**
+   * Gets the type.
+   *
+   * @return the type
+   */
+  public EventType getType() {
+    return type;
   }
 
   /**
