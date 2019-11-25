@@ -10,7 +10,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
-const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datasets, labels } }) => {
+const FilterList = ({ arrayStatusFilter, color, levelErrors, filterDispatch, originalData: { datasets, labels } }) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
@@ -62,7 +62,12 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         {filterByReporters()}
         {filterByTables()}
       </Accordion>
-      <StatusList color={color} levelErrors={levelErrors} filterDispatch={filterDispatch} />
+      <StatusList
+        arrayStatusFilter={arrayStatusFilter}
+        color={color}
+        levelErrors={levelErrors}
+        filterDispatch={filterDispatch}
+      />
     </>
   );
 };

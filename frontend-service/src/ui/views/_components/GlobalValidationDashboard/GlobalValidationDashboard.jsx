@@ -56,7 +56,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
 
   useEffect(() => {
     onLoadDashboard();
-  }, [isVisible]);
+  }, []);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -198,6 +198,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
           {!isEmpty(filterState.data) ? (
             <>
               <FilterList
+                arrayStatusFilter={filterState.statusFilter}
                 color={dashboardColors}
                 levelErrors={levelErrorTypes}
                 originalData={filterState.originalData}

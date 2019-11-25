@@ -5,7 +5,7 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const StatusList = ({ color, levelErrors, filterDispatch }) => {
+const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispatch }) => {
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map(errorLevel => {
     return (
@@ -15,19 +15,12 @@ const StatusList = ({ color, levelErrors, filterDispatch }) => {
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
-          defaultChecked={true}
+          defaultChecked={arrayStatusFilter.includes(errorLevel.toString()) ? false : true}
           onChange={e => {
-            if (e.target.checked) {
-              filterDispatch({
-                type: 'STATUS_FILTER_ON',
-                payload: { msg: errorLevel.toString() }
-              });
-            } else {
-              filterDispatch({
-                type: 'STATUS_FILTER_OFF',
-                payload: { msg: errorLevel.toString() }
-              });
-            }
+            filterDispatch({
+              type: e.target.checked ? 'STATUS_FILTER_ON' : 'STATUS_FILTER_OFF',
+              payload: { msg: errorLevel.toString() }
+            });
           }}
         />
         <label htmlFor={errorLevel.toString().toLowerCase()} className={styles.labelItem}>
