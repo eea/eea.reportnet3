@@ -41,10 +41,6 @@ export const DataflowTasks = withRouter(({ match, history }) => {
   const [pendingContent, setpendingContent] = useState([]);
   const [acceptedContent, setacceptedContent] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const dataFetch = async () => {
     setLoading(true);
@@ -66,13 +62,13 @@ export const DataflowTasks = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataflowList'] }]);
+    setBreadCrumbItems([{ label: resources.messages['dataflowList'], icon: 'home' }]);
   }, [history, match.params.dataflowId, resources.messages]);
 
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
