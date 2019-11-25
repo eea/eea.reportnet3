@@ -35,11 +35,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [webLinks, setWebLinks] = useState();
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
@@ -57,10 +52,20 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -72,7 +77,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['dataflowHelp'] }
+      { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
@@ -120,7 +125,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
