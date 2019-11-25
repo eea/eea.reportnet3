@@ -31,6 +31,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
 import { routes } from 'ui/routes';
+import { tsThisType } from '@babel/types';
 
 const DataViewer = withRouter(
   ({
@@ -38,8 +39,8 @@ const DataViewer = withRouter(
     correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isWebFormMMR,
-    levelErrorTypes,
-    allLevelErrors = correctLevelError.concat(levelErrorTypes),
+    levelErrorTypes = correctLevelError.concat(levelErrorTypes),
+    levelErrorTypesWithCorrects = correctLevelError.concat(levelErrorTypes),
     onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
@@ -78,7 +79,7 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
-    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypes);
+    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numCopiedRecords, setNumCopiedRecords] = useState();
@@ -178,7 +179,13 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, allLevelErrors);
+      onFetchData(
+        undefined,
+        undefined,
+        Math.floor(recordPositionId / numRows) * numRows,
+        numRows,
+        levelErrorTypesWithCorrects
+      );
     }, [recordPositionId]);
 
     const getTextWidth = (text, font) => {
@@ -283,7 +290,7 @@ const DataViewer = withRouter(
 
     const getLevelErrorFilters = () => {
       let filters = [];
-      allLevelErrors.map(value => {
+      levelErrorValidations.map(value => {
         if (!isUndefined(value) && !isNull(value)) {
           let filter = {
             label: capitalize(value),
@@ -297,7 +304,7 @@ const DataViewer = withRouter(
 
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
-      setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypes.length + 1); // +1 -> corrects
+      setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypesWithCorrects.length);
       setFirstRow(0);
       setLevelErrorValidations(filteredKeys);
     };
@@ -1406,7 +1413,11 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={totalFilteredRecords != 0 || isFilterValidationsActive ? totalFilteredRecords : totalRecords}
+            totalRecords={
+              !isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) && isFilterValidationsActive
+                ? totalFilteredRecords
+                : totalRecords
+            }
             value={fetchedData}
             //frozenWidth="100px"
             // unfrozenWidth="600px"
