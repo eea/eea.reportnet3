@@ -1,5 +1,6 @@
 package org.eea.communication.io.kafka.command;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.eea.communication.service.NotificationService;
 import org.eea.kafka.commands.DefaultEventHandlerCommand;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SendNotificationCommand extends DefaultEventHandlerCommand {
 
-
   /**
    * The Constant LOG_ERROR.
    */
@@ -28,28 +28,23 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
   private NotificationService notificationService;
 
   /**
-   * The logger.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(SendNotificationCommand.class);
-
-  /**
    * Execute.
    *
    * @param eeaEventVO the eea event VO
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    if (eeaEventVO.getData().get("user") != null
-        && eeaEventVO.getData().get("notification") != null) {
-      String user = (String) eeaEventVO.getData().get("user");
+    if (eeaEventVO.getData().containsKey("notification")) {
       Object object = eeaEventVO.getData().get("notification");
       if (object instanceof Map) {
-        Map<?, ?> notification = (Map<?, ?>) object;
-        if (!notificationService.send(user, notification)) {
-          LOG.error("Error sending notification: {}", notification);
+        Map<?, ?> notification = (HashMap<?, ?>) object;
+        String user = (String) notification.remove("user");
+        if (notificationService.send(user, eeaEventVO.getEventType(), notification)) {
+          return;
         }
       }
     }
+    LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
   }
 }
 
