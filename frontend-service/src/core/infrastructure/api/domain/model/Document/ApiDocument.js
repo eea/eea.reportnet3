@@ -56,7 +56,7 @@ export const apiDocument = {
     });
     return response.status;
   },
-  editDocument: async (dataflowId, description, language, file, isPublic) => {
+  editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
     const tokens = userStorage.get();
     const formData = new FormData();
 
@@ -73,12 +73,13 @@ export const apiDocument = {
       formData.append('file', file, file.name);
     }
 
-    const response = await HTTPRequester.postWithFiles({
+    const response = await HTTPRequester.putWithFiles({
       url: getUrl(DocumentConfig.editDocument, {
         dataflowId: dataflowId,
         description: description,
         language: language,
-        isPublic: isPublic
+        isPublic: isPublic,
+        documentId: documentId
       }),
       queryString: {},
       data: formData,

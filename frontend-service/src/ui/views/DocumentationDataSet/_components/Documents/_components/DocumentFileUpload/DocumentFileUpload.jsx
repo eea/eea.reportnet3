@@ -99,7 +99,8 @@ const DocumentFileUpload = ({
               values.description,
               values.lang,
               values.uploadFile,
-              values.isPublic
+              values.isPublic,
+              values.id
             )
           : await DocumentService.uploadDocument(
               dataflowId,

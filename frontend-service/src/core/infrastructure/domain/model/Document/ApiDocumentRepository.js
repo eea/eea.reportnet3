@@ -17,7 +17,7 @@ const all = async dataflowId => {
         documentDTO.url,
         false, //documentDTO.isPublic,
         Date.now(), //documentDTO.date,
-        10 //documentDTO.size
+        '10' //documentDTO.size
       )
   );
 };
@@ -32,8 +32,8 @@ const uploadDocument = async (dataflowId, description, language, file, isPublic)
   return responseData;
 };
 
-const editDocument = async (dataflowId, description, language, file, isPublic) => {
-  const responseData = await apiDocument.editDocument(dataflowId, description, language, file, isPublic);
+const editDocument = async (dataflowId, description, language, file, isPublic, documentId) => {
+  const responseData = await apiDocument.editDocument(dataflowId, description, language, file, isPublic, documentId);
   return responseData;
 };
 
