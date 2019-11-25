@@ -40,7 +40,8 @@ import {
   faToggleOff,
   faMapPin,
   faDrawPolygon,
-  faBars
+  faBars,
+  faHome
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -217,6 +218,8 @@ export const AwesomeIcons = icon => {
       return faQuestion;
     case 'questionCircle':
       return farQuestionCircle;
+    case 'home':
+      return faHome;
     default:
       return faFileAlt;
   }

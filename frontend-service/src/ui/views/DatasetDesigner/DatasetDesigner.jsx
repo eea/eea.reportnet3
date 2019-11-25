@@ -54,11 +54,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotState
   } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     try {
       setIsLoading(true);
@@ -87,10 +82,20 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -102,7 +107,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['datasetDesigner'] }
+      { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
     ]);
     getDataflowName();
     onLoadDatasetSchemaName();
@@ -129,7 +134,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     return (
       <MainLayout>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
