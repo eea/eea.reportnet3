@@ -102,6 +102,10 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     }
   };
 
+  const onLoadStamp = message => {
+    return <span className={`${styles.stamp} ${styles.emptySchema}`}>{message}</span>;
+  };
+
   const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
     let allDatasets = [];
     tablesDashboardData.forEach(table => {
@@ -199,6 +203,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
                 originalData={filterState.originalData}
                 filterDispatch={filterDispatch}
               />
+              {!isEmpty(filterState.data.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
               <Chart
                 ref={chartRef}
                 type="bar"
@@ -234,7 +239,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             // </fieldset>
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['empty']}</span>
+              {onLoadStamp(resources.messages['empty'])}
               <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
             </>
           )}
