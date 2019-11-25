@@ -122,9 +122,12 @@ public class DocumentServiceImpl implements DocumentService {
   public void updateDocument(DocumentVO documentVO) throws EEAException {
     try {
       // save to metabase
+      if (documentVO == null) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
+      }
       documentVO.setDate(new Date());
       Long idDocument = dataflowController.insertDocument(documentVO);
-      if (idDocument == null) {
+      if (idDocument == null || idDocument == 0L) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
     } catch (EEAException e) {

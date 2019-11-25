@@ -64,10 +64,14 @@ public class DocumentControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void uploadDocumentTestException() throws EEAException {
-
-    documentController.uploadDocument(null, 1L, "ES", "desc");
+    try {
+      documentController.uploadDocument(null, 1L, "ES", "desc", true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
+    }
   }
 
   /**
@@ -75,10 +79,14 @@ public class DocumentControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void uploadDocumentTestException1() throws EEAException {
-
-    documentController.uploadDocument(emptyFileMock, 1L, "ES", "desc");
+    try {
+      documentController.uploadDocument(emptyFileMock, 1L, "ES", "desc", true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
+    }
   }
 
   /**
@@ -86,10 +94,14 @@ public class DocumentControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void uploadDocumentTestException2() throws EEAException {
-
-    documentController.uploadDocument(fileMock, null, "ES", "desc");
+    try {
+      documentController.uploadDocument(fileMock, null, "ES", "desc", true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getReason());
+    }
   }
 
   /**
@@ -98,11 +110,15 @@ public class DocumentControllerImplTest {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void uploadDocumentTestException3() throws EEAException, IOException {
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.uploadDocument(fileMock, 1L, "ES", "desc");
+    try {
+      documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+    }
   }
 
   /**
@@ -111,11 +127,16 @@ public class DocumentControllerImplTest {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void uploadDocumentTestException4() throws EEAException, IOException {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.uploadDocument(fileMock, 1L, "ES", "desc");
+    try {
+      documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
   }
 
   /**
@@ -128,7 +149,7 @@ public class DocumentControllerImplTest {
   public void uploadDocumentSuccessTest() throws EEAException, IOException {
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
-    documentController.uploadDocument(fileMock, 1L, "ES", "desc");
+    documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
     Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -268,7 +289,108 @@ public class DocumentControllerImplTest {
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update document exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDocumentExceptionTest() throws EEAException {
+    try {
+      documentController.updateDocument(fileMock, null, "ES", "desc", 1L, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getReason());
+    }
+  }
 
+  /**
+   * Update document exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentException2Test() throws EEAException, IOException {
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      documentController.updateDocument(fileMock, 1L, "ES", "desc", 1L, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+    }
+  }
+
+  /**
+   * Update document exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentException3Test() throws EEAException, IOException {
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      documentController.updateDocument(fileMock, 1L, null, null, 1L, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Update document success test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentSuccessTest() throws EEAException, IOException {
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    documentController.updateDocument(fileMock, 1L, "ES", "desc", 1L, null);
+    Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Update document success 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentSuccess2Test() throws EEAException, IOException {
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doNothing().when(documentService).updateDocument(Mockito.any());
+    documentController.updateDocument(null, 1L, "ES", "desc", 1L, true);
+    Mockito.verify(documentService, times(1)).updateDocument(Mockito.any());
+  }
+
+  /**
+   * Update document success 3 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentSuccess3Test() throws EEAException, IOException {
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doNothing().when(documentService).updateDocument(Mockito.any());
+    documentController.updateDocument(emptyFileMock, 1L, "ES", "desc", 1L, true);
+    Mockito.verify(documentService, times(1)).updateDocument(Mockito.any());
+  }
+
+  /**
+   * Test upload snapshot success.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testUploadSnapshotSuccess() throws EEAException, IOException {
     doNothing().when(documentService).uploadSchemaSnapshot(Mockito.any(), Mockito.any(),
@@ -278,7 +400,11 @@ public class DocumentControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
-
+  /**
+   * Test upload snapshot exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException() throws EEAException {
 
@@ -287,6 +413,12 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test upload snapshot exception 2.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException2() throws EEAException, IOException {
 
@@ -295,6 +427,12 @@ public class DocumentControllerImplTest {
 
 
 
+  /**
+   * Test upload snapshot exception 3.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException3() throws EEAException, IOException {
     doThrow(new EEAException()).when(documentService).uploadSchemaSnapshot(Mockito.any(),
@@ -303,6 +441,12 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test upload snapshot exception 4.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException4() throws EEAException, IOException {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
@@ -311,6 +455,12 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test get snapshot success.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testGetSnapshotSuccess() throws EEAException, IOException {
     FileResponse content = new FileResponse();
@@ -323,6 +473,11 @@ public class DocumentControllerImplTest {
 
 
 
+  /**
+   * Test get snapshot exception null.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotExceptionNull() throws EEAException {
 
@@ -330,6 +485,11 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test get snapshot exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotException() throws EEAException {
 
@@ -338,6 +498,11 @@ public class DocumentControllerImplTest {
     documentController.getSnapshotDocument(1L, "test");
   }
 
+  /**
+   * Test get snapshot exception 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotException2() throws EEAException {
 
@@ -347,6 +512,11 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test delete snapshot success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteSnapshotSuccess() throws Exception {
     FileResponse content = new FileResponse();
@@ -356,6 +526,11 @@ public class DocumentControllerImplTest {
     Mockito.verify(documentService, times(1)).deleteSnapshotDocument(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test delete snapshot exception null.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotExceptionNull() throws Exception {
 
@@ -363,6 +538,11 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Tets delete snapshot exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void tetsDeleteSnapshotException() throws Exception {
 
@@ -372,6 +552,11 @@ public class DocumentControllerImplTest {
   }
 
 
+  /**
+   * Test delete snapshot exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotException2() throws Exception {
 

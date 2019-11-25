@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import javax.jcr.PathNotFoundException;
@@ -140,6 +141,66 @@ public class DocumentServiceImplTest {
         fileMock.getOriginalFilename(), documentVO, 10000L);
     Mockito.verify(oakRepositoryUtils, times(1)).addFileNode(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Update document exception 1 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentException1Test() throws EEAException, IOException {
+    try {
+      documentService.updateDocument(null);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
+    }
+  }
+
+  /**
+   * Update document exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentException2Test() throws EEAException, IOException {
+    when(dataflowController.insertDocument(Mockito.any())).thenReturn(null);
+    try {
+      documentService.updateDocument(documentVO);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
+    }
+  }
+
+  /**
+   * Update document exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentException3Test() throws EEAException, IOException {
+    when(dataflowController.insertDocument(Mockito.any())).thenReturn(0L);
+    try {
+      documentService.updateDocument(documentVO);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
+    }
+  }
+
+  /**
+   * Update document success test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentSuccessTest() throws EEAException, IOException {
+    when(dataflowController.insertDocument(Mockito.any())).thenReturn(1L);
+    documentService.updateDocument(documentVO);
+    verify(dataflowController, times(1)).insertDocument(documentVO);
   }
 
   /**
