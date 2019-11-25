@@ -360,7 +360,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws Exception {
     // Remove from the metabase
-    snapshotSchemaRepository.deleteById(idSnapshot);
+    snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
     // Delete the file
     String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
@@ -369,6 +369,29 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Schema Snapshot {} removed", idSnapshot);
+  }
+
+
+
+  /**
+   * Delete all schema snapshots.
+   *
+   * @param idDesignDataset the id design dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException {
+
+    LOG.info("Deleting all schema snapshots when the design dataset it's going to be deleted");
+    List<SnapshotVO> snapshots = getSchemaSnapshotsByIdDataset(idDesignDataset);
+    snapshots.stream().forEach(s -> {
+      try {
+        removeSchemaSnapshot(idDesignDataset, s.getId());
+      } catch (Exception e) {
+        LOG_ERROR.error("Error deleting the schema snapshot " + s.getId(), e.getMessage(), e);
+      }
+    });
   }
 
 
