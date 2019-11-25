@@ -4,7 +4,9 @@
   font-size: 0.8rem;
   border: 1px solid var(--c-black-200);
   background-color: var(--white);
-  min-width: 170px;
+  min-width: 250px;
+  max-height: 50vh;
+  overflow-y: auto;
   border-radius: 2%;
   z-index: 1000;
   padding: 0 0.8rem;
