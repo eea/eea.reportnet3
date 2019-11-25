@@ -47,6 +47,9 @@ export const Utils = (() => {
         case 'BLOCKER':
           levelErrorIndex = 4;
           break;
+        case '':
+          levelErrorIndex = 99;
+          break;
         default:
           levelErrorIndex = null;
       }
