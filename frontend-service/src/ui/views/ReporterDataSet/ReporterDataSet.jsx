@@ -81,19 +81,24 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   let growlRef = useRef();
 
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
   useEffect(() => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -105,7 +110,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['dataset'] }
+      { label: resources.messages['dataset'], icon: 'dataset' }
     ]);
   }, []);
 
@@ -331,7 +336,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     return (
       <MainLayout>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
