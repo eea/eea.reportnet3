@@ -32,7 +32,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [webLinks, setWebLinks] = useState();
+  const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -84,6 +84,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     try {
       getDataflowName();
       onLoadDocuments();
+      onLoadWebLinks();
     } catch (error) {
       console.error(error.response);
     }
