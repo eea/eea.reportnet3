@@ -30,7 +30,7 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   if (!isNull(datasetsDTO)) {
     const datasets = [];
-    datasetsDTO.map(datasetDTO => {
+    datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
@@ -61,7 +61,7 @@ const parseDocumentListDTO = documentsDTO => {
   }
   if (!isNull(documentsDTO)) {
     const documents = [];
-    documentsDTO.map(documentDTO => {
+    documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
@@ -87,7 +87,7 @@ const parseWebLinkListDTO = webLinksDTO => {
   }
   if (!isNull(webLinksDTO)) {
     const webLinks = [];
-    webLinksDTO.map(webLinkDTO => {
+    webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
@@ -151,13 +151,13 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let levelErrors = [];
   const tableLevelErrors = [];
 
-  datasetsDashboardsDataDTO.map(dataset => {
+  datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
 
-    dataset.tables.map((table, i) => {
+    dataset.tables.forEach((table, i) => {
       tableLevelErrors.push(getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
@@ -353,9 +353,9 @@ const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
 };
 
-const transposeMatrix = matrix => {
-  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
-};
+// const transposeMatrix = matrix => {
+//   return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+// };
 
 export const ApiDataflowRepository = {
   all,

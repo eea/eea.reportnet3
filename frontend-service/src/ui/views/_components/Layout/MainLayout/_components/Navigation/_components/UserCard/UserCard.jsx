@@ -34,7 +34,7 @@ const UserCard = React.memo(() => {
           onClick={async e => {
             e.preventDefault();
             try {
-              const logout = await UserService.logout();
+              await UserService.logout();
             } catch (error) {
               console.error(error);
             } finally {

@@ -88,7 +88,7 @@ const ValidationViewer = React.memo(
         onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
       } else {
-        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
+        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow !== 0) {
           resetFilters();
           setFirstRow(0);
           fetchData('', sortOrder, 0, numberRows, [], [], []);
@@ -136,7 +136,7 @@ const ValidationViewer = React.memo(
 
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [];
-      levelErrorTypes.map(filter => {
+      levelErrorTypes.forEach(filter => {
         allLevelErrorsFilterList.push({
           label: capitalize(filter),
           key: `${filter.toString()}_Id`
@@ -161,7 +161,7 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}_Id`
       });
-      tableSchemaNames.map(name => {
+      tableSchemaNames.forEach(name => {
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
       setAllOriginsFilter(allOriginsFilterList);
@@ -329,7 +329,7 @@ const ValidationViewer = React.memo(
     };
 
     const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords === totalRecords) {
         return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();

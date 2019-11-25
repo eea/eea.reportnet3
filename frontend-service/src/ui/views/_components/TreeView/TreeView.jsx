@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { capitalize, isUndefined, isNull, isEmpty } from 'lodash';
+import { capitalize, isUndefined, isNull } from 'lodash';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 

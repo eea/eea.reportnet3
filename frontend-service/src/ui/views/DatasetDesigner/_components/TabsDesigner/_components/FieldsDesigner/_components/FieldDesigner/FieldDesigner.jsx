@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { isUndefined, isNull } from 'lodash';
-import PropTypes from 'prop-types';
 
 import styles from './FieldDesigner.module.css';
 
@@ -64,7 +63,7 @@ export const FieldDesigner = ({
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
 
-  const [animation, setAnimation] = useState('');
+  const [animation] = useState('');
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
   const [initialFieldValue, setInitialFieldValue] = useState();
@@ -276,7 +275,7 @@ export const FieldDesigner = ({
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setFieldValue(initialFieldValue);
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       onBlurFieldName(event.target.value);
     }

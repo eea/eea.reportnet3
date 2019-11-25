@@ -1,7 +1,5 @@
 import React, { useContext, useState } from 'react';
 
-import styles from './TreeViewExpandableItem.module.css';
-
 // import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 

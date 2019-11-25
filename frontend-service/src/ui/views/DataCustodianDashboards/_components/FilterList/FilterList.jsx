@@ -19,7 +19,7 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
   const tableNamesIdsArray = [];
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
-  uniqDatasets.map(dataset => {
+  uniqDatasets.forEach(dataset => {
     const datasetObject = createTableCheckBoxObject(dataset);
     tableNamesIdsArray.push(datasetObject);
   });

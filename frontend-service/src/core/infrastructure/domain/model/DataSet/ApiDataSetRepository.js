@@ -246,7 +246,7 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
   const allLevelErrorsFromRules = [];
   findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
   let levelErrorsRepeated = [];
-  allLevelErrorsFromRules.map(rule => {
+  allLevelErrorsFromRules.forEach(rule => {
     if (!isUndefined(rule.thenCondition)) {
       levelErrorsRepeated.push(rule.thenCondition[1]);
     }
@@ -303,48 +303,48 @@ const findObjects = (obj, targetProp, finalResults) => {
   getObject(obj);
 };
 
-function findObjects2(obj, targetProp, finalResults) {
-  function getObject(theObject) {
-    let result = null;
-    if (theObject instanceof Array) {
-      for (let i = 0; i < theObject.length; i++) {
-        getObject(theObject[i]);
-      }
-    } else {
-      for (let prop in theObject) {
-        if (theObject.hasOwnProperty(prop)) {
-          if (prop.includes(targetProp) && prop !== 'ruleId') {
-            if (!isUndefined(theObject.thenCondition)) {
-              finalResults.push(theObject);
-            } else {
-              if (!isUndefined(theObject.ruleField)) {
-                theObject.ruleField.map(function(value, i) {
-                  finalResults.push(value);
-                });
-              } else if (!isUndefined(theObject.ruleRecord)) {
-                theObject.ruleRecord.map(function(value, i) {
-                  finalResults.push(value);
-                });
-              } else if (!isUndefined(theObject.ruleTable)) {
-                theObject.ruleTable.map(function(value, i) {
-                  finalResults.push(value);
-                });
-              } else if (!isUndefined(theObject.ruleDataSet)) {
-                theObject.ruleDataSet.map(function(value, i) {
-                  finalResults.push(value);
-                });
-              }
-            }
-          }
-          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
-            getObject(theObject[prop]);
-          }
-        }
-      }
-    }
-  }
-  getObject(obj);
-}
+// function findObjects2(obj, targetProp, finalResults) {
+//   function getObject(theObject) {
+//     let result = null;
+//     if (theObject instanceof Array) {
+//       for (let i = 0; i < theObject.length; i++) {
+//         getObject(theObject[i]);
+//       }
+//     } else {
+//       for (let prop in theObject) {
+//         if (theObject.hasOwnProperty(prop)) {
+//           if (prop.includes(targetProp) && prop !== 'ruleId') {
+//             if (!isUndefined(theObject.thenCondition)) {
+//               finalResults.push(theObject);
+//             } else {
+//               if (!isUndefined(theObject.ruleField)) {
+//                 theObject.ruleField.map(function(value, i) {
+//                   finalResults.push(value);
+//                 });
+//               } else if (!isUndefined(theObject.ruleRecord)) {
+//                 theObject.ruleRecord.map(function(value, i) {
+//                   finalResults.push(value);
+//                 });
+//               } else if (!isUndefined(theObject.ruleTable)) {
+//                 theObject.ruleTable.map(function(value, i) {
+//                   finalResults.push(value);
+//                 });
+//               } else if (!isUndefined(theObject.ruleDataSet)) {
+//                 theObject.ruleDataSet.map(function(value, i) {
+//                   finalResults.push(value);
+//                 });
+//               }
+//             }
+//           }
+//           if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+//             getObject(theObject[prop]);
+//           }
+//         }
+//       }
+//     }
+//   }
+//   getObject(obj);
+// }
 
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
@@ -459,7 +459,6 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
   const rows = [];
   const letters = [];
   const rowHeaders = [];
-  const rowPositions = [];
   columnHeaders.unshift('GREENHOUSE GAS SOURCE');
 
   if (webFormDataDTO.totalRecords > 0) {
@@ -471,7 +470,7 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
     const records = webFormDataDTO.records.map(webFormRecordDTO => {
       record = new DatasetTableRecord();
       let row = {};
-      const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
+      webFormRecordDTO.fields.forEach(webFormFieldDTO => {
         field = new DatasetTableField();
         field.fieldId = webFormFieldDTO.id;
         field.fieldSchemaId = webFormFieldDTO.idFieldSchema;

@@ -3,8 +3,6 @@ import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowTasks.module.scss';
 
-import { config } from 'conf';
-
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DataflowList } from './DataFlowList';
@@ -14,13 +12,9 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { UserContext } from '../_components/_context/UserContext';
-import { getUrl } from 'core/infrastructure/api/getUrl';
-import { routes } from 'ui/routes';
 
 export const DataflowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
-  const userData = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [tabMenuItems] = useState([

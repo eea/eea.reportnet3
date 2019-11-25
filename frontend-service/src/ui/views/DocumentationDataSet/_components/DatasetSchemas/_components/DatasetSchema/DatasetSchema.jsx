@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 
 import { isUndefined, isNull, isEmpty } from 'lodash';
 
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TreeView } from 'ui/views/_components/TreeView';
 
 import { DatasetService } from 'core/services/DataSet';
 
 const DatasetSchema = ({ datasetId }) => {
   const [designDataset, setDesignDataset] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     onLoadDatasetDesignSchema();

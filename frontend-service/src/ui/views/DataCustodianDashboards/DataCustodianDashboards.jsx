@@ -5,7 +5,6 @@ import { isUndefined } from 'lodash';
 
 import styles from './DataCustodianDashboards.module.css';
 
-import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';

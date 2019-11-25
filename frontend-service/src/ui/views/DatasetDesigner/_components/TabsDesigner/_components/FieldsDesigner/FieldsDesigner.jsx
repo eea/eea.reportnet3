@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { capitalize, isUndefined, isNull } from 'lodash';
 
 import styles from './FieldsDesigner.module.css';
