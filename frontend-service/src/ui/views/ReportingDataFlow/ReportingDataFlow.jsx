@@ -91,18 +91,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['dataflow']
+        label: resources.messages['dataflow'],
+        icon: 'archive'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const onLoadReportingDataflow = async () => {
     try {
@@ -270,7 +268,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -341,6 +339,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     )
                   )
                 }
+                onWheel={getUrl(
+                  routes.DOCUMENTS,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )}
               />
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
@@ -367,6 +372,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      onWheel={getUrl(
+                        routes.DATASET_SCHEMA,
+                        {
+                          dataflowId: match.params.dataflowId,
+                          datasetId: newDatasetSchema.datasetId
+                        },
+                        true
+                      )}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
@@ -432,6 +445,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         )
                       );
                     }}
+                    onWheel={getUrl(
+                      routes.DATASET,
+                      {
+                        dataflowId: match.params.dataflowId,
+                        datasetId: dataset.datasetId
+                      },
+                      true
+                    )}
                     model={
                       hasWritePermissions
                         ? [
@@ -485,6 +506,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       )
                     )
                   }
+                  onWheel={getUrl(
+                    routes.DASHBOARDS,
+                    {
+                      dataflowId: match.params.dataflowId
+                    },
+                    true
+                  )}
                 />
               </div>
             )}
