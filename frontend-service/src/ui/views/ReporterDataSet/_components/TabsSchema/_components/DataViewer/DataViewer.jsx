@@ -198,7 +198,6 @@ const DataViewer = withRouter(
       //   const filteredBulkData = bulkData
       //     .filter(data => col.field === Object.keys(data)[0])
       //     .map(filteredData => Object.values(filteredData)[0]);
-      //   console.log('RECARGANDO');
       //   if (filteredBulkData.length > 0) {
       //     const maxDataWidth = filteredBulkData.map(data => getTextWidth(data, '14pt Open Sans'));
       //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);

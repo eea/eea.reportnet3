@@ -60,6 +60,10 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     if (!isUndefined(inmTabs[tabIdx].records) && !isNull(inmTabs[tabIdx].records)) {
       inmTabs[tabIdx].records[0].fields = fields;
       setTabs(inmTabs);
+    } else {
+      inmTabs[tabIdx].records = [];
+      inmTabs[tabIdx].records[0] = {};
+      inmTabs[tabIdx].records[0].fields = fields;
     }
   };
 
@@ -228,6 +232,10 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       } else {
         if (deletedTabIndx === inmTabs.length - 2) {
           setActiveIndex(inmTabs.length - 2);
+        } else {
+          if (activeIndex !== 0) {
+            setActiveIndex(activeIndex - 1);
+          }
         }
       }
       setTabs(inmTabs);

@@ -102,7 +102,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       setWebLinks(loadedWebLinks);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        console.log('error', error.response);
+        console.error('error', error.response);
       }
     }
   };

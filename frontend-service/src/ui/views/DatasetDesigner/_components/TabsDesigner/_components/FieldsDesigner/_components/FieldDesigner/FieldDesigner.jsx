@@ -22,12 +22,10 @@ export const FieldDesigner = ({
   fieldType,
   index,
   initialFieldIndexDragged,
-  isErrorDialogVisible,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
   onFieldUpdate,
-  onLoad,
   onNewFieldAdd,
   onShowDialogError,
   recordId,
@@ -74,14 +72,15 @@ export const FieldDesigner = ({
   // const [position, setPosition] = useState({});
 
   const fieldRef = useRef();
+  const inputRef = useRef();
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     //Set pointerEvents to auto or none depending on isDragging.
-    const dropdownFilterInput = fieldRef.current.getElementsByClassName('p-dropdown-filter')[0];
-    const dropdownFilterInputButton = fieldRef.current.getElementsByClassName('p-dropdown-filter-icon')[0];
-    const dropdownFilterWrapper = fieldRef.current.getElementsByClassName('p-dropdown-items-wrapper')[0];
-    const dropdownFilterItems = fieldRef.current.getElementsByClassName('p-dropdown-items')[0];
+    // const dropdownFilterInput = fieldRef.current.getElementsByClassName('p-dropdown-filter')[0];
+    // const dropdownFilterInputButton = fieldRef.current.getElementsByClassName('p-dropdown-filter-icon')[0];
+    // const dropdownFilterWrapper = fieldRef.current.getElementsByClassName('p-dropdown-items-wrapper')[0];
+    // const dropdownFilterItems = fieldRef.current.getElementsByClassName('p-dropdown-items')[0];
     const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
     if (!isUndefined(childs)) {
@@ -89,17 +88,17 @@ export const FieldDesigner = ({
         for (let j = 2; j < childs[i].childNodes.length; j++) {
           if (isDragging) {
             childs[i].childNodes[j].style.pointerEvents = 'none';
-            dropdownFilterInput.style.pointerEvents = 'none';
-            dropdownFilterInputButton.style.pointerEvents = 'none';
-            dropdownFilterWrapper.style.pointerEvents = 'none';
-            dropdownFilterItems.style.pointerEvents = 'none';
+            // dropdownFilterInput.style.pointerEvents = 'none';
+            // dropdownFilterInputButton.style.pointerEvents = 'none';
+            // dropdownFilterWrapper.style.pointerEvents = 'none';
+            // dropdownFilterItems.style.pointerEvents = 'none';
             dropdownPanel.style.pointerEvents = 'none';
           } else {
             childs[i].childNodes[j].style.pointerEvents = 'auto';
-            dropdownFilterInput.style.pointerEvents = 'auto';
-            dropdownFilterInputButton.style.pointerEvents = 'auto';
-            dropdownFilterWrapper.style.pointerEvents = 'auto';
-            dropdownFilterItems.style.pointerEvents = 'auto';
+            // dropdownFilterInput.style.pointerEvents = 'auto';
+            // dropdownFilterInputButton.style.pointerEvents = 'auto';
+            // dropdownFilterWrapper.style.pointerEvents = 'auto';
+            // dropdownFilterItems.style.pointerEvents = 'auto';
             dropdownPanel.style.pointerEvents = 'auto';
             //Dropdown
             const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
@@ -220,6 +219,7 @@ export const FieldDesigner = ({
     // setPosition(fieldRef.current.getBoundingClientRect());
     if (!isUndefined(onFieldDragAndDropStart)) {
       onFieldDragAndDropStart(undefined);
+      inputRef.current.element.focus();
     }
     //   setInEffect(`
     //   @keyframes swap {
@@ -379,13 +379,14 @@ export const FieldDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e, index)}
           placeholder={resources.messages['newFieldPlaceHolder']}
+          inputRef={inputRef}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
         />
         <Dropdown
           className={styles.dropdownFieldType}
-          filter={true}
-          filterBy="fieldType,value"
-          filterPlaceholder={resources.messages['newFieldTypePlaceHolder']}
+          // filter={true}
+          // filterBy="fieldType,value"
+          // filterPlaceholder={resources.messages['newFieldTypePlaceHolder']}
           itemTemplate={fieldTypeTemplate}
           onChange={e => onChangeFieldType(e.target.value)}
           onMouseDown={event => {
