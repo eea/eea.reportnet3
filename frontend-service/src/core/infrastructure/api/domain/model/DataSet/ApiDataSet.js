@@ -64,7 +64,7 @@ export const apiDataset = {
           Authorization: `Bearer ${tokens.accessToken}`
         }
       });
-      return response.status >= 200 && response.status <= 299;
+      return response;
     } catch (error) {
       console.error(`Error adding table to dataset design data: ${error}`);
       return false;

@@ -2,11 +2,23 @@
   margin-bottom: 5rem !important;
 }
 
+.dashboardType {
+  font-size: 1.75rem;
+  color: var(--gray-110);
+  font-weight: 600;
+}
+
 .chartToolbar {
   /* position: fixed !important; */
   background: white;
   /* width: 90vw; */
   z-index: 999;
+  font-size: 1rem;
+  font-weight: 600 !important;
+}
+
+.dashboardsButton:enabled:focus {
+  box-shadow: none !important;
 }
 
 .informationText {
@@ -15,8 +27,4 @@
 
 .hide {
   color: var(--c-corporate-blue) !important;
-}
-
-.dashboardsButton:enabled:focus {
-  box-shadow: none !important;
 }

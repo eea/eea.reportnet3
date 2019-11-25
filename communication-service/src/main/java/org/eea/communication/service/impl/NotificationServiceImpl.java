@@ -1,5 +1,6 @@
 package org.eea.communication.service.impl;
 
+import java.util.Map;
 import org.eea.communication.service.NotificationService;
 import org.eea.communication.service.model.Notification;
 import org.slf4j.Logger;
@@ -34,10 +35,10 @@ public class NotificationServiceImpl implements NotificationService {
    * @return true, if successful
    */
   @Override
-  public boolean send(String userId, String message) {
-    if (userId != null && !userId.isEmpty() && message != null) {
-      logger.info("Notification sent to user: userId={}, message={}", userId, message);
-      template.convertAndSendToUser(userId, "/queue/notifications", new Notification(message));
+  public boolean send(String user, Map<?, ?> notification) {
+    if (user != null && !user.isEmpty() && notification != null) {
+      logger.info("Notification sent to user: userId={}, message={}", user, notification);
+      template.convertAndSendToUser(user, "/queue/notifications", new Notification(notification));
       return true;
     }
     return false;

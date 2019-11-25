@@ -109,11 +109,11 @@ export const Tab = ({
     }
   };
 
-  const onTabDragEnd = event => {
+  const onTabDragEnd = () => {
     if (!isUndefined(initialTabIndexDrag)) {
       setIsDragging(false);
       if (!isUndefined(onTabDragAndDropStart)) {
-        onTabDragAndDropStart(undefined);
+        onTabDragAndDropStart(index);
       }
     }
   };

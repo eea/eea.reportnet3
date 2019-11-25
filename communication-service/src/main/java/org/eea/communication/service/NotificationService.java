@@ -1,5 +1,7 @@
 package org.eea.communication.service;
 
+import java.util.Map;
+
 /**
  * The Interface NotificationService.
  */
@@ -10,8 +12,8 @@ public interface NotificationService {
    * "userId" and "message" on data property.
    *
    * @param userId the user id
-   * @param message the message
+   * @param notification the notification
    * @return true, if successful
    */
-  boolean send(String userId, String message);
+  boolean send(String user, Map<?, ?> notification);
 }
