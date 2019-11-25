@@ -67,7 +67,6 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [filterLevelError, setFilterLevelError] = useState(allLevelErrors);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -179,7 +178,7 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, allLevelErrors);
     }, [recordPositionId]);
 
     const getTextWidth = (text, font) => {
@@ -301,12 +300,12 @@ const DataViewer = withRouter(
       // length of errors in data schema rules of validation
       setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypes.length + 1); // +1 -> corrects
       setFirstRow(0);
-      setFilterLevelError(filteredKeys);
+      setLevelErrorValidations(filteredKeys);
     };
 
     useEffect(() => {
-      onFetchData(sortField, sortOrder, 0, numRows, filterLevelError);
-    }, [filterLevelError]);
+      onFetchData(sortField, sortOrder, 0, numRows, levelErrorValidations);
+    }, [levelErrorValidations]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
@@ -336,7 +335,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       setNumRows(event.rows);
       setFirstRow(event.first);
-      onFetchData(sortField, sortOrder, event.first, event.rows, filterLevelError);
+      onFetchData(sortField, sortOrder, event.first, event.rows, levelErrorValidations);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -438,7 +437,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       setIsLoading(true);
       try {
         let fields;
@@ -453,7 +452,7 @@ const DataViewer = withRouter(
           Math.floor(fRow / nRows),
           nRows,
           fields,
-          filterLevelError
+          levelErrorValidations
         );
 
         if (!isEmpty(tableData.records)) {
@@ -550,7 +549,7 @@ const DataViewer = withRouter(
     };
 
     const onRefresh = () => {
-      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
+      onFetchData(sortField, sortOrder, firstRow, numRows, levelErrorValidations);
     };
 
     const onPasteCancel = () => {
@@ -614,7 +613,7 @@ const DataViewer = withRouter(
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
-      onFetchData(event.sortField, event.sortOrder, 0, numRows, filterLevelError);
+      onFetchData(event.sortField, event.sortOrder, 0, numRows, levelErrorValidations);
     };
 
     const onUpload = () => {
