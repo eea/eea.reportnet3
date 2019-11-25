@@ -131,7 +131,6 @@ const DocumentFileUpload = ({
       }}>
       {({ isSubmitting, setFieldValue, errors, touched, values }) => (
         <Form>
-          {console.log('values', values)}
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
@@ -172,7 +171,6 @@ const DocumentFileUpload = ({
           </fieldset>
           <fieldset>
             <div className={styles.checkboxIsPublick}>
-              {console.log('values.isPublic', values.isPublic)}
               <Field name="isPublic" type="checkbox" checked={values.isPublic} component={Checkbox} />
             </div>
           </fieldset>

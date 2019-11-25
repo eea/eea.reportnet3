@@ -16,7 +16,7 @@ const all = async dataflowId => {
         getCountryName(documentDTO.language),
         documentDTO.url,
         false, //documentDTO.isPublic,
-        Date.now(), //documentDTO.date),
+        Date.now(), //documentDTO.date,
         10 //documentDTO.size
       )
   );

@@ -95,14 +95,18 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   };
 
   const onLoadWebLinks = async () => {
+    setIsLoading(true);
     try {
       let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
       loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
       setWebLinks(loadedWebLinks);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
         console.log('error', error.response);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,6 +119,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
+        console.log('error', error.response);
       }
     } finally {
       setIsLoading(false);
@@ -149,10 +154,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
             <WebLinks
+              onLoadWebLinks={onLoadWebLinks}
               isCustodian={isCustodian}
               dataflowId={match.params.dataflowId}
               webLinks={webLinks}
-              onLoadWebLinks={onLoadWebLinks}
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
