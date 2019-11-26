@@ -14,6 +14,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { filterReducer } from './_components/_context/filterReducer';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
@@ -55,7 +56,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
 
   useEffect(() => {
     onLoadDashboard();
-  }, [isVisible]);
+  }, []);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -101,6 +102,10 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     }
   };
 
+  const onLoadStamp = message => {
+    return <span className={`${styles.stamp} ${styles.emptySchema}`}>{message}</span>;
+  };
+
   const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
     let allDatasets = [];
     tablesDashboardData.forEach(table => {
@@ -109,15 +114,20 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     return allDatasets.flat();
   };
 
+  const getLevelErrorPriority = levelError => {
+    return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+  };
+
   const getBarsByErrorAndStatistics = (table, levelErrors) => {
-    const levelErrorBars = levelErrors.map(function(type, i) {
+    const levelErrorBars = levelErrors.map((levelError, i) => {
+      let levelErrorIndex = getLevelErrorPriority(levelError);
       const errorBar = {
-        label: type,
+        label: levelError,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[type] : colors.type,
-        data: table.tableStatisticPercentages[i],
-        totalData: table.tableStatisticValues[i],
+        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+        data: table.tableStatisticPercentages[levelErrorIndex],
+        totalData: table.tableStatisticValues[levelErrorIndex],
         stack: table.tableName
       };
       return errorBar;
@@ -194,10 +204,14 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             <>
               <FilterList
                 color={dashboardColors}
+                filterDispatch={filterDispatch}
                 levelErrors={levelErrorTypes}
                 originalData={filterState.originalData}
-                filterDispatch={filterDispatch}
+                reporterFilters={filterState.reporterFilter}
+                statusFilters={filterState.statusFilter}
+                tableFilters={filterState.tableFilter}
               />
+              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
               <Chart
                 ref={chartRef}
                 type="bar"
@@ -233,7 +247,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             // </fieldset>
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['empty']}</span>
+              {onLoadStamp(resources.messages['empty'])}
               <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
             </>
           )}

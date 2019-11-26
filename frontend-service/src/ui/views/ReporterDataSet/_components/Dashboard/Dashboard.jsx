@@ -8,18 +8,20 @@ import styles from './Dashboard.module.css';
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-// import { ColorPicker } from 'ui/views/_components/ColorPicker';
+import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { DatasetService } from 'core/services/DataSet';
 
-// const SEVERITY_CODE = {
-//   CORRECT: 1,
-//   INFO: 2,
-//   WARNING: 3,
-//   ERROR: 4,
-//   BLOCKER: 5
-// };
+import { DatasetService } from 'core/services/DataSet';
+import { ViewUtils } from 'ui/ViewUtils';
+
+const SEVERITY_CODE = {
+  CORRECT: 1,
+  INFO: 2,
+  WARNING: 3,
+  ERROR: 4,
+  BLOCKER: 5
+};
 
 const Dashboard = withRouter(
   React.memo(
@@ -27,17 +29,13 @@ const Dashboard = withRouter(
       refresh,
       match: {
         params: { datasetId }
-      },
-      correctLevelError = ['CORRECT'],
-      levelErrorTypes,
-      allLevelErrorTypes = correctLevelError.concat(levelErrorTypes)
+      }
     }) => {
       const [dashboardColors, setDashboardColors] = useState();
       const [dashboardData, setDashboardData] = useState({});
       const [dashboardOptions, setDashboardOptions] = useState({});
       const [dashboardTitle, setDashboardTitle] = useState('');
       const [isLoading, setIsLoading] = useState(false);
-      // const [levelErrorAFilters, setLevelErrorFilters] = useState(allLevelErrorFilters);
 
       const resources = useContext(ResourcesContext);
 
@@ -62,25 +60,36 @@ const Dashboard = withRouter(
         };
       }, [refresh, datasetId]);
 
-      // const onChangeColor = (color, type) => {
-      //   const inmDashboardColors = { ...dashboardColors };
-      //   inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
-      //   setDashboardColors(inmDashboardColors);
-      //   chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
-      //   chartRef.current.refresh();
-      // };
+      const onChangeColor = (color, type) => {
+        const inmDashboardColors = { ...dashboardColors };
+        inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
+        setDashboardColors(inmDashboardColors);
+        chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
+        chartRef.current.refresh();
+      };
 
-      const getBarsByErrorAndStatistics = dataset => {
-        const levelErrorBars = allLevelErrorTypes.map(function(error, i) {
-          const errorBar = {
-            label: capitalize(error),
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[error] : colors.error,
-            data: dataset.tableStatisticPercentages[i],
+      const getLevelErrorsOrdered = levelErrors => {
+        return ViewUtils.orderLevelErrors(levelErrors);
+      };
+
+      const getLevelErrorPriority = levelError => {
+        return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+      };
+
+      const getDashboardBarsByDatasetData = dataset => {
+        const dashboardBars = [];
+        let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
+        levelErrors.forEach(levelError => {
+          let levelErrorIndex = getLevelErrorPriority(levelError);
+          let bar = {
+            label: capitalize(levelError),
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+            data: dataset.tableStatisticPercentages[levelErrorIndex],
             totalData: dataset.tableStatisticValues
           };
-          return errorBar;
+          dashboardBars.push(bar);
         });
-        return levelErrorBars;
+        return dashboardBars;
       };
 
       const onLoadStatistics = async () => {
@@ -90,7 +99,7 @@ const Dashboard = withRouter(
         setDashboardTitle(dataset.datasetSchemaName);
         setDashboardData({
           labels: tableNames,
-          datasets: getBarsByErrorAndStatistics(dataset)
+          datasets: getDashboardBarsByDatasetData(dataset)
         });
 
         setDashboardOptions({
@@ -133,38 +142,38 @@ const Dashboard = withRouter(
         setIsLoading(false);
       };
 
-      // const renderColorPicker = () => {
-      //   if (
-      //     !isUndefined(dashboardData.datasets) &&
-      //     dashboardData.datasets.length > 0 &&
-      //     ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
-      //   ) {
-      //     return (
-      //       <div className={styles.dashboardWraper}>
-      //         <fieldset className={styles.colorPickerWrap}>
-      //           <legend>{resources.messages['chooseChartColor']}</legend>
-      //           <div className={styles.fieldsetContent}>
-      //             {Object.keys(SEVERITY_CODE).map((type, i) => {
-      //               return (
-      //                 <div className={styles.colorPickerItem} key={i}>
-      //                   <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
-      //                   <ColorPicker
-      //                     className={styles.colorPicker}
-      //                     onChange={e => {
-      //                       e.preventDefault();
-      //                       onChangeColor(e.value, SEVERITY_CODE[type]);
-      //                     }}
-      //                     value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
-      //                   />
-      //                 </div>
-      //               );
-      //             })}
-      //           </div>
-      //         </fieldset>
-      //       </div>
-      //     );
-      //   }
-      // };
+      const renderColorPicker = () => {
+        if (
+          !isUndefined(dashboardData.datasets) &&
+          dashboardData.datasets.length > 0 &&
+          ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
+        ) {
+          return (
+            <div className={styles.dashboardWraper}>
+              <fieldset className={styles.colorPickerWrap}>
+                <legend>{resources.messages['chooseChartColor']}</legend>
+                <div className={styles.fieldsetContent}>
+                  {Object.keys(SEVERITY_CODE).map((type, i) => {
+                    return (
+                      <div className={styles.colorPickerItem} key={i}>
+                        <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
+                        <ColorPicker
+                          className={styles.colorPicker}
+                          onChange={e => {
+                            e.preventDefault();
+                            onChangeColor(e.value, SEVERITY_CODE[type]);
+                          }}
+                          value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            </div>
+          );
+        }
+      };
 
       const renderDashboard = () => {
         if (isLoading) {

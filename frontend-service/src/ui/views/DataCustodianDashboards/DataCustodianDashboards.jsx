@@ -114,11 +114,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ? dataSchema.map(schema => {
         return (
           <Button
-            className={`p-button-rounded p-button-secondary ${styles.dashboardsButton}`}
-            iconClasses={chartState[schema.datasetSchemaId] ? styles.show : styles.hide}
+            className={`p-button-rounded ${
+              chartState[schema.datasetSchemaId] ? 'p-button-primary' : 'p-button-secondary'
+            } ${styles.dashboardsButton}`}
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
-            icon={chartState[schema.datasetSchemaId] ? 'eye-slash' : 'eye'}
+            icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
             onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
           />
         );
