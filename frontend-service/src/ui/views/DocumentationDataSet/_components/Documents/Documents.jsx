@@ -155,6 +155,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           onGrowlAlert={onGrowlAlert}
           isFormReset={isFormReset}
           setIsUploadDialogVisible={setIsUploadDialogVisible}
+          isUploadDialogVisible={isUploadDialogVisible}
         />
       </Dialog>
 
