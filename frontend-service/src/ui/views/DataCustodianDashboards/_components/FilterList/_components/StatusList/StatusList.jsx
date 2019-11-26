@@ -7,9 +7,9 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters }) => {
   const resources = useContext(ResourcesContext);
-  let errorListFilters = levelErrors.map(errorLevel => {
+  let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
-      <li className={styles.listItem}>
+      <li key={i} className={styles.listItem}>
         <input
           id={errorLevel.toString().toLowerCase()}
           className={styles.checkbox}

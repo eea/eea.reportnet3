@@ -4,13 +4,14 @@ import { isUndefined, isNull } from 'lodash';
 
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset }) => {
+const DatasetSchema = ({ designDataset, index }) => {
   const renderDatasetSchema = () => {
     return !isUndefined(designDataset) && !isNull(designDataset) ? (
       <div>
         <TreeView
           excludeBottomBorder={false}
           groupableProperties={['fields']}
+          key={index}
           property={parseDesignDataset(designDataset)}
           propertyName={''}
           rootProperty={''}
