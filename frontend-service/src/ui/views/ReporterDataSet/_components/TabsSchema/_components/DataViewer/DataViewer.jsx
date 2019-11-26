@@ -1168,7 +1168,9 @@ const DataViewer = withRouter(
     const addIconLevelError = (validation, levelError, message) => {
       let icon = [];
       if (!isEmpty(validation)) {
-        icon.push(<IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} />);
+        icon.push(
+          <IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} key={levelError} />
+        );
       }
       return icon;
     };
