@@ -161,7 +161,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
 
       {
         <DataTable value={documents} autoLayout={true} paginator={false}>
-          {isCustodian ? (
+          {isCustodian && !isEmpty(documents) ? (
             <Column className={styles.crudColumn} body={documentsEditButtons} />
           ) : (
             <Column className={styles.hideColumn} />
