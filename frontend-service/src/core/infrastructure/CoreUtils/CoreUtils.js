@@ -1,4 +1,4 @@
-export const Utils = (() => {
+export const CoreUtils = (() => {
   const UtilsAPI = {
     getDashboardLevelErrors: datasetTableDTO => {
       let levelErrors = [];
@@ -79,7 +79,7 @@ export const Utils = (() => {
 
     tableStatisticValuesWithErrors: tableStatisticValues => {
       let tableStatisticValuesWithSomeError = [];
-      let valuesWithValidations = Utils.transposeMatrix(tableStatisticValues).map(error => {
+      let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
         return error.map(subError => {
           return subError;
         });

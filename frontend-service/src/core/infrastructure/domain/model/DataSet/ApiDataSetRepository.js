@@ -1,12 +1,12 @@
 import { isNull, isUndefined } from 'lodash';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/DataSet';
+import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { DatasetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { DatasetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
 import { DatasetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
 import { DatasetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
-import { Utils } from 'core/infrastructure/Utils';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
@@ -176,7 +176,7 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.totalRecordsWithErrors,
       datasetTableDTO.totalRecordsWithBlockers
     ]);
-    tableLevelErrors.push(Utils.getDashboardLevelErrors(datasetTableDTO));
+    tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
@@ -184,13 +184,13 @@ const errorStatisticsById = async datasetId => {
     );
   });
   const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
-  levelErrors = [...new Set(Utils.orderLevelErrors(tableLevelErrors.flat()))];
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
-  let transposedValues = Utils.transposeMatrix(tableStatisticValues);
+  let transposedValues = CoreUtils.transposeMatrix(tableStatisticValues);
 
-  dataset.tableStatisticValues = Utils.transposeMatrix(tableBarStatisticValues);
-  dataset.tableStatisticPercentages = Utils.getPercentage(transposedValues);
+  dataset.tableStatisticValues = CoreUtils.transposeMatrix(tableBarStatisticValues);
+  dataset.tableStatisticPercentages = CoreUtils.getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
   return dataset;
@@ -198,7 +198,7 @@ const errorStatisticsById = async datasetId => {
 
 const tableStatisticValuesWithErrors = tableStatisticValues => {
   let tableStatisticValuesWithSomeError = [];
-  let valuesWithValidations = Utils.transposeMatrix(tableStatisticValues).map(error => {
+  let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
     return error.map(subError => {
       return subError;
     });
@@ -239,7 +239,7 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
     }
   });
   let levelErrors = [...new Set(levelErrorsRepeated)];
-  levelErrors = Utils.orderLevelErrors(levelErrors);
+  levelErrors = CoreUtils.orderLevelErrors(levelErrors);
   return levelErrors;
 };
 

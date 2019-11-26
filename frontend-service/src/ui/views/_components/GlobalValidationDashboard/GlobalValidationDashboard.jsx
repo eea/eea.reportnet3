@@ -15,7 +15,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { filterReducer } from './_components/_context/filterReducer';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { Utils } from 'core/infrastructure/Utils';
+import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
@@ -112,7 +112,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
   };
 
   const getLevelErrorPriority = levelError => {
-    return Utils.getLevelErrorPriorityByLevelError(levelError);
+    return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
   };
 
   const getBarsByErrorAndStatistics = (table, levelErrors) => {

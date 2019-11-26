@@ -7,7 +7,7 @@ import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-import { Utils } from 'core/infrastructure/Utils';
+import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
@@ -158,7 +158,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
       reporterName: dataset.nameDataSetSchema
     });
     dataset.tables.map((table, i) => {
-      tableLevelErrors.push(Utils.getDashboardLevelErrors(table));
+      tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
@@ -247,7 +247,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
     });
   });
 
-  levelErrors = [...new Set(Utils.orderLevelErrors(tableLevelErrors.flat()))];
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;

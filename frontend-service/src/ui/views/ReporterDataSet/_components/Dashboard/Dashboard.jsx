@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/DataSet';
-import { Utils } from 'core/infrastructure/Utils';
+import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
   CORRECT: 1,
@@ -63,11 +63,11 @@ const Dashboard = withRouter(
     };
 
     const getLevelErrorsOrdered = levelErrors => {
-      return Utils.orderLevelErrors(levelErrors);
+      return ViewUtils.orderLevelErrors(levelErrors);
     };
 
     const getLevelErrorPriority = levelError => {
-      return Utils.getLevelErrorPriorityByLevelError(levelError);
+      return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
     };
 
     const getDashboardBarsByDatasetData = dataset => {
