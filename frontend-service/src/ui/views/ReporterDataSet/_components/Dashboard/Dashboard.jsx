@@ -16,11 +16,11 @@ import { DatasetService } from 'core/services/DataSet';
 import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
-  CORRECT: 1,
-  INFO: 2,
-  WARNING: 3,
-  ERROR: 4,
-  BLOCKER: 5
+  CORRECT: 0,
+  INFO: 1,
+  WARNING: 2,
+  ERROR: 3,
+  BLOCKER: 4
 };
 
 const Dashboard = withRouter(
