@@ -3,4 +3,5 @@
 }
 .chart_released {
   padding-bottom: 100px;
+  user-select: none;
 }
