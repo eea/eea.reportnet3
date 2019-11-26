@@ -233,7 +233,7 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
   const allLevelErrorsFromRules = [];
   findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
   let levelErrorsRepeated = [];
-  allLevelErrorsFromRules.map(rule => {
+  allLevelErrorsFromRules.forEach(rule => {
     if (!isUndefined(rule.thenCondition)) {
       levelErrorsRepeated.push(rule.thenCondition[1]);
     }
@@ -388,7 +388,6 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
   const rows = [];
   const letters = [];
   const rowHeaders = [];
-  const rowPositions = [];
   columnHeaders.unshift('GREENHOUSE GAS SOURCE');
 
   if (webFormDataDTO.totalRecords > 0) {
@@ -400,7 +399,7 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
     const records = webFormDataDTO.records.map(webFormRecordDTO => {
       record = new DatasetTableRecord();
       let row = {};
-      const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
+      webFormRecordDTO.fields.forEach(webFormFieldDTO => {
         field = new DatasetTableField();
         field.fieldId = webFormFieldDTO.id;
         field.fieldSchemaId = webFormFieldDTO.idFieldSchema;

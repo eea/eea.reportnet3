@@ -273,6 +273,12 @@ body {
   margin-right: -1rem;
 }
 
+@media (max-width: 996px) {
+  .rep-row {
+    flex-direction: column;
+  }
+}
+
 @media (min-width: 480px) {
   .rep-row {
     margin-left: -1rem;

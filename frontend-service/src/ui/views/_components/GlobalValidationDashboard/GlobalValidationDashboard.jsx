@@ -7,7 +7,6 @@ import styles from './GlobalValidationDashboard.module.css';
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -42,7 +41,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     originalData: {},
     data: {}
   };
-  const [dashboardColors, setDashboardColors] = useState({
+  const [dashboardColors] = useState({
     CORRECT: colors.correct,
     INFO: colors.info,
     WARNING: colors.warning,
@@ -63,22 +62,22 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
   }, [validationDashboardData]);
 
-  const onChangeColor = (color, type) => {
-    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
-    const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
+  // const onChangeColor = (color, type) => {
+  //   setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
+  //   const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
 
-    const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
-      dataset => dataset.label === SEVERITY_CODE[type]
-    );
-    filteredDatasets.forEach(dataset => {
-      dataset.backgroundColor = `#${color}`;
-    });
-    filteredDatasetsCurrent.forEach(dataset => {
-      dataset.backgroundColor = `#${color}`;
-    });
+  //   const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
+  //     dataset => dataset.label === SEVERITY_CODE[type]
+  //   );
+  //   filteredDatasets.forEach(dataset => {
+  //     dataset.backgroundColor = `#${color}`;
+  //   });
+  //   filteredDatasetsCurrent.forEach(dataset => {
+  //     dataset.backgroundColor = `#${color}`;
+  //   });
 
-    chartRef.current.refresh();
-  };
+  //   chartRef.current.refresh();
+  // };
 
   const onErrorLoadingDashboard = error => {
     console.error('Dashboard error: ', error);

@@ -12,8 +12,8 @@ const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
 
   const renderDatasetSchemas = () => {
     return !isUndefined(designDatasets) && !isNull(designDatasets)
-      ? designDatasets.map(designDataset => {
-          return <DatasetSchema designDataset={designDataset} />;
+      ? designDatasets.map((designDataset, i) => {
+          return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
         })
       : null;
   };
