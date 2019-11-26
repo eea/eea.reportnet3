@@ -43,8 +43,8 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
           return;
         }
       }
+      LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
     }
-    LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
   }
 }
 

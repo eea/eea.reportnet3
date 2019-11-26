@@ -1,15 +1,15 @@
 package org.eea.dataset.service.helper;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.mock.web.MockMultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileTreatmentHelperTest {
@@ -32,20 +31,34 @@ public class FileTreatmentHelperTest {
   private FileTreatmentHelper fileTreatmentHelper;
 
   @Mock
+  private DatasetService datasetService;
+
+  @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
-  private DatasetService datasetService;
+  private LockService lockService;
 
   @Mock
   private DataSetMapper dataSetMapper;
 
   @Mock
-  private TableRepository tableRepository;
+  private DataSetVO datasetVO;
 
   @Mock
-  private LockService lockService;
+  private DatasetValue datasetValue;
 
+  @Mock
+  private List<TableValue> listTableValue;
+
+  @Mock
+  private TableValue tableValue;
+
+  @Mock
+  private List<RecordValue> listRecordValue;
+
+  @Mock
+  private Stream<TableValue> tableValueStream;
 
   /**
    * Inits the mocks.
@@ -56,71 +69,78 @@ public class FileTreatmentHelperTest {
   }
 
   @Test
-  public void executeFileProcessTest() throws EEAException, IOException, InterruptedException {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+  public void executeFileProcessTest1() throws EEAException, IOException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetVO());
-    final DatasetValue entityValue = new DatasetValue();
-    final ArrayList<TableValue> tableValues = new ArrayList<>();
-    ArrayList<RecordValue> records = new ArrayList<>();
-    TableValue table = new TableValue();
-    RecordValue record = new RecordValue();
-    for (int i = 0; i < 1001; i++) {
-      records.add(record);
-    }
-    table.setRecords(records);
-    tableValues.add(table);
-    entityValue.setId(1L);
-    entityValue.setTableValues(tableValues);
-    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
-    doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+        .thenReturn(datasetVO);
+    Mockito.doNothing().when(datasetVO).setId(Mockito.any());
+    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
+    Mockito.when(datasetValue.getTableValues()).thenReturn(listTableValue);
+    Mockito.when(listTableValue.get(Mockito.anyInt())).thenReturn(tableValue);
+    Mockito.when(tableValue.getRecords()).thenReturn(listRecordValue);
+    Mockito.doNothing().when(tableValue).setRecords(Mockito.any());
+    Mockito.when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(listTableValue.stream()).thenReturn(tableValueStream);
+    Mockito.when(tableValueStream.filter(Mockito.any())).thenReturn(tableValueStream);
+    Mockito.doNothing().when(tableValueStream).forEach(Mockito.any());
+    Mockito.when(listRecordValue.size()).thenReturn(2000);
+    Mockito.when(listRecordValue.subList(Mockito.anyInt(), Mockito.anyInt()))
+        .thenReturn(new ArrayList<RecordValue>());
+    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
+        "5d4abe555b1c1e0001477410", "user");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   @Test
-  public void executeFileProcessTestOldTable()
-      throws EEAException, IOException, InterruptedException {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+  public void executeFileProcessTest2() throws EEAException, IOException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetVO());
-    final DatasetValue entityValue = new DatasetValue();
-    final ArrayList<TableValue> tableValues = new ArrayList<>();
-    ArrayList<RecordValue> records = new ArrayList<>();
-    TableValue table = new TableValue();
-    RecordValue record = new RecordValue();
-    records.add(record);
-    table.setRecords(records);
-    table.setIdTableSchema("");
-    tableValues.add(table);
-    entityValue.setId(1L);
-    entityValue.setTableValues(tableValues);
-    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(1L);
-    doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+        .thenReturn(datasetVO);
+    Mockito.doNothing().when(datasetVO).setId(Mockito.any());
+    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
+    Mockito.when(datasetValue.getTableValues()).thenReturn(listTableValue);
+    Mockito.when(listTableValue.get(Mockito.anyInt())).thenReturn(tableValue);
+    Mockito.when(tableValue.getRecords()).thenReturn(listRecordValue);
+    Mockito.doNothing().when(tableValue).setRecords(Mockito.any());
+    Mockito.when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    Mockito.doNothing().when(datasetService).saveTable(Mockito.any(), Mockito.any());
+    Mockito.when(listRecordValue.size()).thenReturn(1);
+    Mockito.when(listRecordValue.subList(Mockito.anyInt(), Mockito.anyInt()))
+        .thenReturn(new ArrayList<RecordValue>());
+    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
+        "5d4abe555b1c1e0001477410", "user");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
-  @Test(expected = IOException.class)
-  public void executeFileProcessMapperErrorTest()
-      throws EEAException, IOException, InterruptedException {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+  @Test
+  public void executeFileProcessTest3() throws EEAException, IOException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetVO());
-    Mockito.when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(null);
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
+        .thenReturn(datasetVO);
+    Mockito.doNothing().when(datasetVO).setId(Mockito.any());
+    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(null);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
+        "5d4abe555b1c1e0001477410", "user");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 }

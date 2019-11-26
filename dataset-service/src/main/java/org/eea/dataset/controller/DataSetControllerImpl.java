@@ -138,9 +138,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return result;
-
   }
-
 
   /**
    * Update dataset.
@@ -163,7 +161,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Load dataset data.
    *
@@ -171,7 +168,6 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    */
-
   @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
@@ -194,11 +190,10 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      // This method will realease the lock
+      // This method will release the lock
       fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
           SecurityContextHolder.getContext().getAuthentication().getName());
-      // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (IOException | EEAException | InterruptedException e) {
+    } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -243,9 +238,7 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
-
   }
-
 
   /**
    * Gets the table from any object id.
