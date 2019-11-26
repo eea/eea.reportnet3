@@ -145,10 +145,6 @@ const Documents = ({
     return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
   };
 
-  const sizeColumnTemplate = rowData => {
-    return <span>{rowData.size}</span>;
-  };
-
   const dateColumnTemplate = rowData => {
     return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
   };
@@ -250,7 +246,6 @@ const Documents = ({
           sortable={!isEmpty(documents)}
         />
         <Column
-          body={sizeColumnTemplate}
           field="size"
           filter={false}
           filterMatchMode="contains"
