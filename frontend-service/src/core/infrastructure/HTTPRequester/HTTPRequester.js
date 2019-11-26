@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const HTTPRequester = (function() {
+export const HTTPRequester = (() => {
   const baseURL = window.env.REACT_APP_BACKEND;
   //Maps object queryString to 'key=value' format. Checks if queryString is undefined or empty object
   const mapQueryString = queryString =>
