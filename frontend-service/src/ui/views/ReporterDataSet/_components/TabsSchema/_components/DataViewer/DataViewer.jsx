@@ -31,7 +31,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
 import { routes } from 'ui/routes';
-import { tsThisType } from '@babel/types';
 
 const DataViewer = withRouter(
   ({
