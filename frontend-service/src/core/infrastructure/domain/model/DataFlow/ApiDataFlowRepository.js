@@ -151,14 +151,14 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tablePercentages = [];
   let tableValues = [];
   let levelErrors = [];
-  const tableLevelErrors = [];
+  const allDatasetLevelErrors = [];
   datasetsDashboardsDataDTO.map(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
     dataset.tables.map((table, i) => {
-      tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
@@ -246,8 +246,8 @@ const datasetsValidationStatistics = async datasetSchemaId => {
       }
     });
   });
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
-  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;

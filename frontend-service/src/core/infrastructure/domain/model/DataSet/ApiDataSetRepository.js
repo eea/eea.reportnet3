@@ -163,8 +163,9 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
   const tableStatisticValues = [];
   let levelErrors = [];
-  const allDatasetLevelErrors = CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO);
+  const allDatasetLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO));
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
         (datasetTableDTO.totalRecordsWithBlockers +

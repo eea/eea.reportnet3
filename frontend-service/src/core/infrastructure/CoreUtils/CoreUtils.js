@@ -1,31 +1,39 @@
 export const CoreUtils = (() => {
   const UtilsAPI = {
-    getDashboardLevelErrorByTable: datasetDTO => {
+    getDashboardLevelErrorByDataset: datasetDTO => {
       let levelErrors = [];
-      datasetDTO.tables.forEach(table => {
+      datasetDTO.forEach(datasetTableDTO => {
+        levelErrors.push(UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO));
+      });
+      return levelErrors;
+    },
+
+    getDashboardLevelErrorByTable: datasetTableDTO => {
+      let levelErrors = [];
+      datasetTableDTO.tables.forEach(datasetTableDTO => {
         let corrects =
-          table.totalRecords -
-          (table.totalRecordsWithBlockers +
-            table.totalRecordsWithErrors +
-            table.totalRecordsWithWarnings +
-            table.totalRecordsWithInfos);
+          datasetTableDTO.totalRecords -
+          (datasetTableDTO.totalRecordsWithBlockers +
+            datasetTableDTO.totalRecordsWithErrors +
+            datasetTableDTO.totalRecordsWithWarnings +
+            datasetTableDTO.totalRecordsWithInfos);
         if (corrects > 0) {
           levelErrors.push('CORRECT');
         }
-        if (table.totalRecordsWithInfos > 0) {
+        if (datasetTableDTO.totalRecordsWithInfos > 0) {
           levelErrors.push('INFO');
         }
-        if (table.totalRecordsWithWarnings > 0) {
+        if (datasetTableDTO.totalRecordsWithWarnings > 0) {
           levelErrors.push('WARNING');
         }
-        if (table.totalRecordsWithErrors > 0) {
+        if (datasetTableDTO.totalRecordsWithErrors > 0) {
           levelErrors.push('ERROR');
         }
-        if (table.totalRecordsWithBlockers > 0) {
+        if (datasetTableDTO.totalRecordsWithBlockers > 0) {
           levelErrors.push('BLOCKER');
         }
       });
-      return levelErrors;
+      return [...new Set(levelErrors)];
     },
 
     getLevelErrorPriorityByLevelError: levelError => {
