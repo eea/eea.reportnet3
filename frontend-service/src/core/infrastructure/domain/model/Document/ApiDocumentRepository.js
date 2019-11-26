@@ -15,9 +15,9 @@ const all = async dataflowId => {
         documentDTO.category,
         getCountryName(documentDTO.language),
         documentDTO.url,
-        false, //documentDTO.isPublic,
-        Date.now(), //documentDTO.date,
-        '10' //documentDTO.size
+        documentDTO.isPublic,
+        documentDTO.date,
+        documentDTO.size
       )
   );
 };

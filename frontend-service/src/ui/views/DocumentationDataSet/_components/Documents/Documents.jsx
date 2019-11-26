@@ -146,7 +146,7 @@ const Documents = ({
   };
 
   const sizeColumnTemplate = rowData => {
-    return <span>{rowData.size} mb</span>;
+    return <span>{rowData.size}</span>;
   };
 
   const dateColumnTemplate = rowData => {
@@ -199,7 +199,7 @@ const Documents = ({
           setSortOrderDocuments(e.sortOrder);
         }}>
         {isCustodian && !isEmpty(documents) ? (
-          <Column className={styles.crudColumn} body={documentsEditButtons} />
+          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
         ) : (
           <Column className={styles.hideColumn} />
         )}
