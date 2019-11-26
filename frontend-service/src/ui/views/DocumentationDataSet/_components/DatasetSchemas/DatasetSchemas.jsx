@@ -1,49 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 
-import { isUndefined, isNull, isEmpty } from 'lodash';
+import { isUndefined, isNull } from 'lodash';
 
+import { Button } from 'ui/views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
-import { Spinner } from 'ui/views/_components/Spinner';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DataflowService } from 'core/services/DataFlow';
-
-const DatasetSchemas = ({ dataflowId }) => {
-  const [designDatasets, setDesignDatasets] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    onLoadDesignDatasets();
-  }, []);
-
-  const onLoadDesignDatasets = async () => {
-    try {
-      setIsLoading(true);
-      const dataflow = await DataflowService.reporting(dataflowId);
-      if (!isEmpty(dataflow.designDatasets)) {
-        setDesignDatasets(dataflow.designDatasets);
-      }
-    } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
+  const resources = useContext(ResourcesContext);
 
   const renderDatasetSchemas = () => {
-    if (isLoading) {
-      return <Spinner />;
-    } else {
-      return !isUndefined(designDatasets) && !isNull(designDatasets)
-        ? designDatasets.map(designDataset => {
-            return <DatasetSchema datasetId={designDataset.datasetId} />;
-          })
-        : null;
-    }
+    return !isUndefined(designDatasets) && !isNull(designDatasets)
+      ? designDatasets.map(designDataset => {
+          return <DatasetSchema designDataset={designDataset} />;
+        })
+      : null;
   };
 
-  return renderDatasetSchemas();
+  const renderToolbar = () => {
+    return (
+      <Toolbar>
+        <div className="p-toolbar-group-right">
+          <Button
+            className={`p-button-rounded p-button-secondary`}
+            disabled={false}
+            icon={'refresh'}
+            label={resources.messages['refresh']}
+            onClick={() => onLoadDesignDatasets()}
+          />
+        </div>
+      </Toolbar>
+    );
+  };
+
+  return (
+    <>
+      {renderToolbar()}
+      {renderDatasetSchemas()}
+    </>
+  );
 };
 
 export { DatasetSchemas };
