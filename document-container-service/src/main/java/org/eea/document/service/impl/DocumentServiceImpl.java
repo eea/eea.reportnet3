@@ -82,7 +82,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
       // save to metabase
-      documentVO.setSize(humanReadableByteCount(size, true));
+      documentVO.setSize(humanReadableByteCount(size));
       documentVO.setDate(new Date());
       documentVO.setName(filename);
       Long idDocument = dataflowController.insertDocument(documentVO);
@@ -109,6 +109,12 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Async
   public void updateDocument(DocumentVO documentVO) throws EEAException {
@@ -205,16 +211,15 @@ public class DocumentServiceImpl implements DocumentService {
    * Human readable byte count.
    *
    * @param bytes the bytes
-   * @param si the si
    * @return the string
    */
-  private String humanReadableByteCount(long bytes, boolean si) {
-    int unit = si ? 1000 : 1024;
+  private String humanReadableByteCount(long bytes) {
+    int unit = 1000;
     if (bytes < unit) {
       return bytes + " B";
     }
     int exp = (int) (Math.log(bytes) / Math.log(unit));
-    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+    char pre = "kMGTPE".charAt(exp - 1);
     return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
   }
 
