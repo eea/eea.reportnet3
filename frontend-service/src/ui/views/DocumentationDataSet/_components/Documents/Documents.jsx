@@ -194,7 +194,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['language']}
-            sortable={isEmpty(documents)}
+            sortable={!isEmpty(documents)}
           />
           <Column
             body={downloadTemplate}
