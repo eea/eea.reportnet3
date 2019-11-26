@@ -41,17 +41,10 @@ public class FileTreatmentHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-
-  /**
-   * The dataset service.
-   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The data set mapper.
-   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
@@ -79,57 +72,103 @@ public class FileTreatmentHelper {
    */
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
-      String tableSchemaId, String user) throws EEAException, IOException, InterruptedException {
-    LOG.info("Processing file");
-    DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
+      String tableSchemaId, String user) {
+    Long dataflowId = -1L;
+    try {
+      LOG.info("Processing file");
+      dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
 
-    // map the VO to the entity
-    datasetVO.setId(datasetId);
-    final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-    if (dataset == null) {
-      throw new IOException("Error mapping file");
+      // map the VO to the entity
+      datasetVO.setId(datasetId);
+      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      if (dataset == null) {
+        throw new IOException("Error mapping file");
+      }
+
+      // Save empty table
+      List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
+      dataset.getTableValues().get(0).setRecords(new ArrayList<>());
+
+      // Check if the table with idTableSchema has been populated already
+      Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
+      fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
+
+      if (null == oldTableId) {
+        datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
+      }
+
+      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
+
+      listaGeneral.parallelStream()
+          .forEach(value -> datasetService.saveAllRecords(datasetId, value));
+
+      LOG.info("File processed and saved into DB");
+      releaseSuccessEvents(user, dataflowId, datasetId, tableSchemaId, fileName);
+    } catch (Exception e) {
+      LOG.error("Error loading file: {}", e.getCause());
+      releaseFailEvents(user, dataflowId, datasetId, tableSchemaId, fileName);
+    } finally {
+      removeLock(datasetId, tableSchemaId);
     }
+  }
 
-    // **********************************************************************************
-    // **********************************************************************************
-
-    // Save empty table
-    List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
-    dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
-    // Check if the table with idTableSchema has been populated already
-    Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
-    fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
-
-    if (null == oldTableId) {
-      datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
-    }
-
-    List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
-
-    listaGeneral.parallelStream().forEach(value -> {
-      datasetService.saveAllRecords(datasetId, value);
-    });
-
-    LOG.info("File processed and saved into DB");
-
-    // Release the lock manually
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.LOAD_TABLE.getValue());
-    criteria.add(datasetId);
-    criteria.add(tableSchemaId);
-    lockService.removeLockByCriteria(criteria);
-
-    // after the dataset has been saved, an event is sent to notify it
+  /**
+   * Release success events.
+   *
+   * @param user the user
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
+  private void releaseSuccessEvents(String user, Long dataflowId, Long datasetId,
+      String tableSchemaId, String fileName) {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", user);
     notification.put("datasetId", datasetId);
+    notification.put("dataflowId", dataflowId);
     notification.put("tableSchemaId", tableSchemaId);
+    notification.put("fileName", fileName);
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("notification", notification);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, value);
+  }
+
+  /**
+   * Release fail events.
+   *
+   * @param user the user
+   * @param datasetId the dataset id
+   * @param e the e
+   */
+  private void releaseFailEvents(String user, Long dataflowId, Long datasetId, String tableSchemaId,
+      String fileName) {
+    Map<String, Object> notification = new HashMap<>();
+    notification.put("user", user);
+    notification.put("datasetId", datasetId);
+    notification.put("dataflowId", dataflowId);
+    notification.put("tableSchemaId", tableSchemaId);
+    notification.put("fileName", fileName);
+    notification.put("error", "Filed importing file " + fileName);
+    Map<String, Object> value = new HashMap<>();
+    value.put("dataset_id", datasetId);
+    value.put("notification", notification);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DATA_FAILED_EVENT, value);
+  }
+
+  /**
+   * Removes the lock.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
+  private void removeLock(Long datasetId, String tableSchemaId) {
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.LOAD_TABLE.getValue());
+    criteria.add(datasetId);
+    criteria.add(tableSchemaId);
+    lockService.removeLockByCriteria(criteria);
   }
 
   /**
