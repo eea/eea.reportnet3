@@ -19,6 +19,8 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
   const resources = useContext(ResourcesContext);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [weblinkItem, setWeblinkItem] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
@@ -207,7 +209,14 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
-        value={webLinks}>
+        value={webLinks}
+        sortField={sortFieldWeblinks}
+        sortOrder={sortOrderWeblinks}
+        onSort={e => {
+          console.log('e.multiSortMeta', e);
+          setSortFieldWeblinks(e.sortField);
+          setSortOrderWeblinks(e.sortOrder);
+        }}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
       <Dialog
