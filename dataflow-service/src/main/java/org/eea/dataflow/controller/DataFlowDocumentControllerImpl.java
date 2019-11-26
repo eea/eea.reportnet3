@@ -8,7 +8,9 @@ import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,8 +60,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   /**
    * Update user request.
    *
-   * @param idUserRequest the id user request
-   * @param type the type
+   * @param document the document
    */
   @Override
   @HystrixCommand
@@ -68,8 +69,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       dataflowService.updateDocument(document);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     }
   }
 
@@ -86,8 +86,23 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       return dataflowService.insertDocument(document);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    }
+  }
+
+  /**
+   * Delete document.
+   *
+   * @param documentId the document id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{documentId}")
+  public void deleteDocument(@PathVariable("documentId") Long documentId) {
+    try {
+      dataflowService.deleteDocument(documentId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     }
   }
 }

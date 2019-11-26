@@ -3,8 +3,6 @@ package org.eea.document.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
@@ -19,8 +17,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +51,6 @@ public class DocumentServiceImpl implements DocumentService {
   /** The oak repository utils. */
   @Autowired
   private OakRepositoryUtils oakRepositoryUtils;
-
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * The dataflow controller.
@@ -186,6 +178,7 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
+      dataflowController.deleteDocument(documentId);
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -197,8 +190,6 @@ public class DocumentServiceImpl implements DocumentService {
 
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
 
-      sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
-
     } catch (Exception e) {
       LOG_ERROR.error("Error in deleteDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
@@ -208,20 +199,6 @@ public class DocumentServiceImpl implements DocumentService {
     } finally {
       oakRepositoryUtils.cleanUp(session, ns);
     }
-  }
-
-
-
-  /**
-   * Send kafka notification.
-   *
-   * @param documentId the document id
-   * @param eventType the event type
-   */
-  public void sendKafkaNotification(final Long documentId, final EventType eventType) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("documentId", documentId);
-    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 
   /**

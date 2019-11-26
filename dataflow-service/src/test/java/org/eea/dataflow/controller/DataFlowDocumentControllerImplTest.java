@@ -95,7 +95,7 @@ public class DataFlowDocumentControllerImplTest {
       dataFlowDocumentControllerImpl.updateDocument(document);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
     }
   }
 
@@ -108,5 +108,59 @@ public class DataFlowDocumentControllerImplTest {
   public void updateDocumentSuccessTest() throws EEAException {
     dataFlowDocumentControllerImpl.updateDocument(document);
     verify(dataflowService, times(1)).updateDocument(Mockito.any());
+  }
+
+  /**
+   * Insert document exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertDocumentExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).insertDocument(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.insertDocument(document);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Insert document success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertDocumentSuccessTest() throws EEAException {
+    dataFlowDocumentControllerImpl.insertDocument(document);
+    verify(dataflowService, times(1)).insertDocument(Mockito.any());
+  }
+
+  /**
+   * Delete document exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDocumentExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).deleteDocument(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Delete document success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDocumentSuccessTest() throws EEAException {
+    dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+    verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
 }

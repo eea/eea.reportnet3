@@ -4,6 +4,7 @@ package org.eea.interfaces.controller.dataflow;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,4 +51,12 @@ public interface DataFlowDocumentController {
    */
   @PostMapping
   Long insertDocument(@RequestBody DocumentVO documentVO);
+
+  /**
+   * Delete document.
+   *
+   * @param documentId the document id
+   */
+  @DeleteMapping(value = "/{documentId}")
+  void deleteDocument(@PathVariable("documentId") Long documentId);
 }
