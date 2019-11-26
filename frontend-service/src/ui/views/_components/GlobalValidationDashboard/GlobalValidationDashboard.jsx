@@ -206,7 +206,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
                 originalData={filterState.originalData}
                 filterDispatch={filterDispatch}
               />
-              {!isEmpty(filterState.data.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
+              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
               <Chart
                 ref={chartRef}
                 type="bar"
