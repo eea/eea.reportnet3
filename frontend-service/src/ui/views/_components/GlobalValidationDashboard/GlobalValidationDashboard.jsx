@@ -57,7 +57,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
 
   useEffect(() => {
     onLoadDashboard();
-  }, [isVisible]);
+  }, []);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -101,6 +101,10 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     } finally {
       setLoading(false);
     }
+  };
+
+  const onLoadStamp = message => {
+    return <span className={`${styles.stamp} ${styles.emptySchema}`}>{message}</span>;
   };
 
   const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
@@ -201,10 +205,14 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             <>
               <FilterList
                 color={dashboardColors}
+                filterDispatch={filterDispatch}
                 levelErrors={levelErrorTypes}
                 originalData={filterState.originalData}
-                filterDispatch={filterDispatch}
+                reporterFilters={filterState.reporterFilter}
+                statusFilters={filterState.statusFilter}
+                tableFilters={filterState.tableFilter}
               />
+              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
               <Chart
                 ref={chartRef}
                 type="bar"
@@ -240,7 +248,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             // </fieldset>
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-              <span className={`${styles.stamp} ${styles.emptySchema}`}>{resources.messages['empty']}</span>
+              {onLoadStamp(resources.messages['empty'])}
               <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
             </>
           )}
