@@ -11,13 +11,13 @@ import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
 const FilterList = ({
-  arrayReporterFilter,
-  arrayStatusFilter,
-  arrayTableFilter,
   color,
-  levelErrors,
   filterDispatch,
-  originalData: { datasets, labels }
+  levelErrors,
+  originalData: { datasets, labels },
+  reporterFilters,
+  statusFilters,
+  tableFilters
 }) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
@@ -40,7 +40,7 @@ const FilterList = ({
             {labels.map(item => (
               <ReportersListItem
                 key={item}
-                arrayReporterFilter={arrayReporterFilter}
+                reporterFilters={reporterFilters}
                 filterDispatch={filterDispatch}
                 item={item}
               />
@@ -61,7 +61,7 @@ const FilterList = ({
             {tableNamesIdsArray.map(item => (
               <TableListItem
                 key={item.tableId}
-                arrayTableFilter={arrayTableFilter}
+                tableFilters={tableFilters}
                 filterDispatch={filterDispatch}
                 item={item}
               />
@@ -81,7 +81,7 @@ const FilterList = ({
         {filterByTables()}
       </Accordion>
       <StatusList
-        arrayStatusFilter={arrayStatusFilter}
+        statusFilters={statusFilters}
         color={color}
         levelErrors={levelErrors}
         filterDispatch={filterDispatch}

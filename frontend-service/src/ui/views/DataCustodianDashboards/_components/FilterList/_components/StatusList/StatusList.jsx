@@ -5,7 +5,7 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispatch }) => {
+export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters }) => {
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map(errorLevel => {
     return (
@@ -15,7 +15,7 @@ export const StatusList = ({ arrayStatusFilter, color, levelErrors, filterDispat
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
-          defaultChecked={arrayStatusFilter.includes(errorLevel.toString()) ? false : true}
+          defaultChecked={statusFilters.includes(errorLevel.toString()) ? false : true}
           onChange={e => {
             filterDispatch({
               type: e.target.checked ? 'STATUS_FILTER_ON' : 'STATUS_FILTER_OFF',

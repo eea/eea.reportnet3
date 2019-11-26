@@ -2,14 +2,14 @@ import React from 'react';
 
 import styles from './TableListItem.module.css';
 
-export const TableListItem = ({ arrayTableFilter, filterDispatch, item }) => {
+export const TableListItem = ({ filterDispatch, item, tableFilters }) => {
   return (
     <li className={styles.listItem}>
       <input
         id={item.tableId}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={arrayTableFilter.includes(item.tableId) ? false : true}
+        defaultChecked={tableFilters.includes(item.tableId) ? false : true}
         onChange={e =>
           filterDispatch({
             type: e.target.checked ? 'TABLE_CHECKBOX_ON' : 'TABLE_CHECKBOX_OFF',
