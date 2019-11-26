@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -49,10 +48,6 @@ public class CSVWriterStrategy implements WriterStrategy {
 
   /** The file common. */
   private FileCommonUtils fileCommon;
-
-
-  /** The response. */
-  private HttpServletResponse response;
 
   /**
    * Instantiates a new CSV writer strategy.

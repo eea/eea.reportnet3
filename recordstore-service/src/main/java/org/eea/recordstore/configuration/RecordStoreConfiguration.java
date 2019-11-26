@@ -1,7 +1,6 @@
 package org.eea.recordstore.configuration;
 
 import javax.sql.DataSource;
-import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +64,6 @@ public class RecordStoreConfiguration {
   @Bean
   @Autowired
   public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-    return jdbcTemplate;
+    return new JdbcTemplate(dataSource);
   }
 }

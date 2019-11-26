@@ -2,16 +2,22 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.eea.dataflow.service.DataflowDocumentService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -27,6 +33,18 @@ public class DataFlowDocumentControllerImplTest {
   /** The dataflow service. */
   @Mock
   private DataflowDocumentService dataflowService;
+
+  /** The document. */
+  DocumentVO document;
+
+  /**
+   * Inits the mocks.
+   */
+  @Before
+  public void initMocks() {
+    document = new DocumentVO();
+    MockitoAnnotations.initMocks(this);
+  }
 
   /**
    * Gets the document by id exception test.
@@ -63,5 +81,86 @@ public class DataFlowDocumentControllerImplTest {
     document.setId(1L);
     when(dataflowService.getDocumentInfoById(Mockito.any())).thenReturn(document);
     assertEquals("fail", document, dataFlowDocumentControllerImpl.getDocumentInfoById(1L));
+  }
+
+  /**
+   * Update documentd exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDocumentExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).updateDocument(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.updateDocument(document);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Update document success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDocumentSuccessTest() throws EEAException {
+    dataFlowDocumentControllerImpl.updateDocument(document);
+    verify(dataflowService, times(1)).updateDocument(Mockito.any());
+  }
+
+  /**
+   * Insert document exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertDocumentExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).insertDocument(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.insertDocument(document);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Insert document success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertDocumentSuccessTest() throws EEAException {
+    dataFlowDocumentControllerImpl.insertDocument(document);
+    verify(dataflowService, times(1)).insertDocument(Mockito.any());
+  }
+
+  /**
+   * Delete document exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDocumentExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).deleteDocument(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Delete document success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDocumentSuccessTest() throws EEAException {
+    dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+    verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
 }
