@@ -88,7 +88,7 @@ export const apiDocument = {
         'Content-Type': undefined
       }
     });
-    return 200; //response.status;
+    return response.status;
   },
   deleteDocument: async documentId => {
     const tokens = userStorage.get();
