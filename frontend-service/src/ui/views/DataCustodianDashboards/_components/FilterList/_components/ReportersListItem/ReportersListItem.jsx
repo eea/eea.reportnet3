@@ -2,26 +2,19 @@ import React from 'react';
 
 import styles from './ReportersListItem.module.scss';
 
-function ReportersListItem({ filterDispatch, item }) {
+export const ReportersListItem = ({ filterDispatch, item, reporterFilters }) => {
   return (
     <li className={styles.listItem}>
       <input
         id={item}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={true}
+        defaultChecked={reporterFilters.includes(item) ? false : true}
         onChange={e => {
-          if (e.target.checked) {
-            filterDispatch({
-              type: 'REPORTER_CHECKBOX_ON',
-              payload: { label: item }
-            });
-          } else {
-            filterDispatch({
-              type: 'REPORTER_CHECKBOX_OFF',
-              payload: { label: item }
-            });
-          }
+          filterDispatch({
+            type: e.target.checked ? 'REPORTER_CHECKBOX_ON' : 'REPORTER_CHECKBOX_OFF',
+            payload: { label: item }
+          });
         }}
       />
       <label htmlFor={item} className={styles.labelItem}>
@@ -29,6 +22,4 @@ function ReportersListItem({ filterDispatch, item }) {
       </label>
     </li>
   );
-}
-
-export { ReportersListItem };
+};
