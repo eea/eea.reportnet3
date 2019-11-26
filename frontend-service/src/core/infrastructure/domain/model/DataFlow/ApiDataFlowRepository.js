@@ -32,7 +32,7 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   if (!isNull(datasetsDTO)) {
     const datasets = [];
-    datasetsDTO.map(datasetDTO => {
+    datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
@@ -63,7 +63,7 @@ const parseDocumentListDTO = documentsDTO => {
   }
   if (!isNull(documentsDTO)) {
     const documents = [];
-    documentsDTO.map(documentDTO => {
+    documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
@@ -89,7 +89,7 @@ const parseWebLinkListDTO = webLinksDTO => {
   }
   if (!isNull(webLinksDTO)) {
     const webLinks = [];
-    webLinksDTO.map(webLinkDTO => {
+    webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
