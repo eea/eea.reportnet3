@@ -40,8 +40,9 @@ const Documents = ({
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isDownloading, setIsDownloading] = useState('');
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isFormReset, setIsFormReset] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
@@ -172,7 +173,11 @@ const Documents = ({
               disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}
-              onClick={() => onLoadDocuments()}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadDocuments();
+                setIsLoading(false);
+              }}
             />
           </div>
         </Toolbar>
@@ -181,19 +186,20 @@ const Documents = ({
       )}
 
       <DataTable
-        value={documents}
         autoLayout={true}
-        paginator={false}
-        selectionMode="single"
+        loading={isLoading}
         onRowSelect={e => {
           setDocumentInitialValues(Object.assign({}, e.data));
         }}
-        sortField={sortFieldDocuments}
-        sortOrder={sortOrderDocuments}
         onSort={e => {
           setSortFieldDocuments(e.sortField);
           setSortOrderDocuments(e.sortOrder);
-        }}>
+        }}
+        paginator={false}
+        selectionMode="single"
+        sortField={sortFieldDocuments}
+        sortOrder={sortOrderDocuments}
+        value={documents}>
         {isCustodian && !isEmpty(documents) ? (
           <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
         ) : (
