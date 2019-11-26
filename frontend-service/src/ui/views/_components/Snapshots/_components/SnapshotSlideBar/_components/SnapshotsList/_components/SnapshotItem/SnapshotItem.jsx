@@ -17,16 +17,9 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
     <li className={styles.listItem}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <div>
-            <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
-              {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-            </h5>
-            {itemData.isReleased ? (
-              <h5 className={styles.is_released_snapshot}>{resources.messages['snapshotIsReleased']}</h5>
-            ) : (
-              ''
-            )}
-          </div>
+          <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
+            {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+          </h5>
           <div className={styles.listActions}>
             <Button
               tooltip={resources.messages.restoreSnapshotTooltip}
