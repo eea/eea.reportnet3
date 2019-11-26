@@ -249,7 +249,7 @@ export const WebLinks = ({
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
-                    autofocus="true"
+                    autoFocus={true}
                     innerRef={inputRef}
                     name="description"
                     type="text"
