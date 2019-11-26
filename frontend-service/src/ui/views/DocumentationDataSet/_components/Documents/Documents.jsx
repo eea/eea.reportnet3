@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { isUndefined } from 'lodash';
+import { isUndefined, isEmpty } from 'lodash';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
@@ -23,7 +23,16 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
+const Documents = ({
+  documents,
+  isCustodian,
+  match,
+  onLoadDocuments,
+  sortFieldDocuments,
+  setSortFieldDocuments,
+  sortOrderDocuments,
+  setSortOrderDocuments
+}) => {
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -182,40 +191,47 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
         selectionMode="single"
         onRowSelect={e => {
           setDocumentInitialValues(Object.assign({}, e.data));
+        }}
+        sortField={sortFieldDocuments}
+        sortOrder={sortOrderDocuments}
+        onSort={e => {
+          setSortFieldDocuments(e.sortField);
+          setSortOrderDocuments(e.sortOrder);
         }}>
-        {isCustodian ? (
-          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
+        {isCustodian && !isEmpty(documents) ? (
+          <Column className={styles.crudColumn} body={documentsEditButtons} />
         ) : (
           <Column className={styles.hideColumn} />
         )}
+
         <Column
           columnResizeMode="expand"
           field="title"
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['title']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           field="description"
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['description']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           field="category"
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['category']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           field="language"
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['language']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           body={isPublicColumnTemplate}
@@ -223,7 +239,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['documentIsPublic']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           body={dateColumnTemplate}
@@ -231,7 +247,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['documentUploadDate']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           body={sizeColumnTemplate}
@@ -239,7 +255,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           filter={false}
           filterMatchMode="contains"
           header={resources.messages['documentSize']}
-          sortable={true}
+          sortable={!isEmpty(documents)}
         />
         <Column
           body={downloadColumnTemplate}
@@ -265,6 +281,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           isFormReset={isFormReset}
           documentInitialValues={documentInitialValues}
           setIsUploadDialogVisible={setIsUploadDialogVisible}
+          isUploadDialogVisible={isUploadDialogVisible}
         />
       </Dialog>
 

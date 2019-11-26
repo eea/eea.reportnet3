@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -20,10 +20,16 @@ const DocumentFileUpload = ({
   onGrowlAlert,
   isFormReset,
   setIsUploadDialogVisible,
-  isEditForm = false
+  isEditForm = false,
+  isUploadDialogVisible
 }) => {
   const form = useRef(null);
+  const inputRef = useRef();
+
   const resources = useContext(ResourcesContext);
+
+  const initialValues = { description: '', lang: '', uploadFile: {} };
+
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
     lang: Yup.string().required(),
@@ -45,6 +51,14 @@ const DocumentFileUpload = ({
             return value.size <= config.MAX_FILE_SIZE;
           })
   });
+
+  useEffect(() => {
+    if (isUploadDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isUploadDialogVisible]);
 
   if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
@@ -137,8 +151,9 @@ const DocumentFileUpload = ({
               <Field
                 name="description"
                 type="text"
-                placeholder={resources.messages.fileDescription}
+                placeholder={resources.messages['fileDescription']}
                 value={values.description}
+                innerRef={inputRef}
               />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>

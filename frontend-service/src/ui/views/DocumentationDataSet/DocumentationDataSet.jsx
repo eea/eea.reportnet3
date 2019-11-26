@@ -32,6 +32,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortFieldDocuments, setSortFieldDocuments] = useState();
+  const [sortOrderDocuments, setSortOrderDocuments] = useState();
+  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
@@ -147,6 +151,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
               match={match}
               documents={documents}
               isCustodian={isCustodian}
+              sortFieldDocuments={sortFieldDocuments}
+              setSortFieldDocuments={setSortFieldDocuments}
+              sortOrderDocuments={sortOrderDocuments}
+              setSortOrderDocuments={setSortOrderDocuments}
             />
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
@@ -155,6 +163,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
               isCustodian={isCustodian}
               dataflowId={match.params.dataflowId}
               webLinks={webLinks}
+              sortFieldWeblinks={sortFieldWeblinks}
+              setSortFieldWeblinks={setSortFieldWeblinks}
+              sortOrderWeblinks={sortOrderWeblinks}
+              setSortOrderWeblinks={setSortOrderWeblinks}
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
