@@ -41,8 +41,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
   const onFieldAdd = (fieldId, fieldName, recordId, fieldType) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, { fieldId, name: fieldName, recordId, type: fieldType });
-    setFields(inmFields);
     onChangeFields(inmFields, table.tableSchemaId);
+    setFields(inmFields);
   };
 
   const onFieldDelete = deletedFieldIndx => {
