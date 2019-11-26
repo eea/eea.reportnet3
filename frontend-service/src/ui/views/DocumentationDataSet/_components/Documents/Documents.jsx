@@ -22,7 +22,16 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
+const Documents = ({
+  documents,
+  isCustodian,
+  match,
+  onLoadDocuments,
+  sortFieldDocuments,
+  setSortFieldDocuments,
+  sortOrderDocuments,
+  setSortOrderDocuments
+}) => {
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -160,7 +169,16 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
       </Dialog>
 
       {
-        <DataTable value={documents} autoLayout={true} paginator={false}>
+        <DataTable
+          value={documents}
+          autoLayout={true}
+          paginator={false}
+          sortField={sortFieldDocuments}
+          sortOrder={sortOrderDocuments}
+          onSort={e => {
+            setSortFieldDocuments(e.sortField);
+            setSortOrderDocuments(e.sortOrder);
+          }}>
           {isCustodian && !isEmpty(documents) ? (
             <Column className={styles.crudColumn} body={documentsEditButtons} />
           ) : (
