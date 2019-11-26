@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isPlainObject, sortBy } from 'lodash';
+import { isEmpty, isNull, isPlainObject, isUndefined, sortBy } from 'lodash';
 
 import styles from './DocumentFileUpload.module.css';
 
@@ -13,10 +13,21 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DocumentService } from 'core/services/Document';
 
-const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, setIsUploadDialogVisible }) => {
+const DocumentFileUpload = ({
+  dataflowId,
+  onUpload,
+  onGrowlAlert,
+  isFormReset,
+  setIsUploadDialogVisible,
+  isUploadDialogVisible
+}) => {
   const form = useRef(null);
+  const inputRef = useRef();
+
   const resources = useContext(ResourcesContext);
+
   const initialValues = { description: '', lang: '', uploadFile: {} };
+
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
     lang: Yup.string().required(),
@@ -28,6 +39,14 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, s
         return value.size <= config.MAX_FILE_SIZE;
       })
   });
+
+  useEffect(() => {
+    if (isUploadDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isUploadDialogVisible]);
 
   if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
@@ -77,7 +96,12 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, s
         <Form>
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-              <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
+              <Field
+                name="description"
+                innerRef={inputRef}
+                type="text"
+                placeholder={resources.messages.fileDescription}
+              />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field name="lang" component="select">
