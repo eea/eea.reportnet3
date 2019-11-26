@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { isUndefined } from 'lodash';
+import { isUndefined, isEmpty } from 'lodash';
 
 import styles from './Documents.module.scss';
 
@@ -166,34 +166,35 @@ const Documents = ({ documents, isCustodian, match, onLoadDocuments }) => {
           ) : (
             <Column className={styles.hideColumn} />
           )}
+
           <Column
             columnResizeMode="expand"
             field="title"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['title']}
-            sortable={true}
+            sortable={!isEmpty(documents)}
           />
           <Column
             field="description"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['description']}
-            sortable={true}
+            sortable={!isEmpty(documents)}
           />
           <Column
             field="category"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['category']}
-            sortable={true}
+            sortable={!isEmpty(documents)}
           />
           <Column
             field="language"
             filter={false}
             filterMatchMode="contains"
             header={resources.messages['language']}
-            sortable={true}
+            sortable={isEmpty(documents)}
           />
           <Column
             body={downloadTemplate}
