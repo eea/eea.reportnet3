@@ -87,6 +87,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   }, [history, match.params.dataflowId, resources.messages]);
 
   useEffect(() => {
+    setIsLoading(true);
     try {
       getDataflowName();
       onLoadDocuments();
@@ -94,6 +95,8 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       onLoadDesignDatasets();
     } catch (error) {
       console.error(error.response);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -115,7 +118,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   };
 
   const onLoadDocuments = async () => {
-    setIsLoading(true);
     try {
       let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
       loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
@@ -199,10 +201,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
             <WebLinks
+              onLoadWebLinks={onLoadWebLinks}
               isCustodian={isCustodian}
               dataflowId={match.params.dataflowId}
               webLinks={webLinks}
-              onLoadWebLinks={onLoadWebLinks}
               sortFieldWeblinks={sortFieldWeblinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
               sortOrderWeblinks={sortOrderWeblinks}

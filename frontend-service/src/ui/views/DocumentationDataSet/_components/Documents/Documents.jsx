@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { isUndefined, isEmpty } from 'lodash';
+import moment from 'moment';
 
 import styles from './Documents.module.scss';
 
@@ -35,10 +36,12 @@ const Documents = ({
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [documentInitialValues, setDocumentInitialValues] = useState({});
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isDownloading, setIsDownloading] = useState('');
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isEditForm, setIsEditForm] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
@@ -79,18 +82,32 @@ const Documents = ({
     setDeleteDialogVisible(false);
   };
 
+  const onEditDocument = () => {
+    setIsEditForm(true);
+    setIsUploadDialogVisible(true);
+  };
+
   const documentsEditButtons = rowData => {
     return (
-      <>
-        <span
-          className={styles.delete}
+      <div className={styles.documentsEditButtons}>
+        <Button
+          type="button"
+          icon="edit"
+          className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+          onClick={e => {
+            onEditDocument();
+          }}
+        />
+        <Button
+          type="button"
+          icon="trash"
+          className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
           onClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        </span>
-      </>
+          }}
+        />
+      </div>
     );
   };
 
@@ -110,7 +127,7 @@ const Documents = ({
     return `${title.split(' ').join('_')}`;
   };
 
-  const downloadTemplate = rowData => {
+  const downloadColumnTemplate = rowData => {
     switch (rowData.category) {
     }
     return (
@@ -124,6 +141,14 @@ const Documents = ({
     );
   };
 
+  const isPublicColumnTemplate = rowData => {
+    return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
+  };
+
+  const dateColumnTemplate = rowData => {
+    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
+  };
+
   return (
     <>
       <Growl ref={growlRef} />
@@ -135,7 +160,10 @@ const Documents = ({
               disabled={false}
               icon={'export'}
               label={resources.messages['upload']}
-              onClick={() => setIsUploadDialogVisible(true)}
+              onClick={() => {
+                setIsEditForm(false);
+                setIsUploadDialogVisible(true);
+              }}
             />
           </div>
           <div className="p-toolbar-group-right">
@@ -152,8 +180,90 @@ const Documents = ({
         <></>
       )}
 
+      <DataTable
+        value={documents}
+        autoLayout={true}
+        paginator={false}
+        selectionMode="single"
+        onRowSelect={e => {
+          setDocumentInitialValues(Object.assign({}, e.data));
+        }}
+        sortField={sortFieldDocuments}
+        sortOrder={sortOrderDocuments}
+        onSort={e => {
+          setSortFieldDocuments(e.sortField);
+          setSortOrderDocuments(e.sortOrder);
+        }}>
+        {isCustodian && !isEmpty(documents) ? (
+          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
+        ) : (
+          <Column className={styles.hideColumn} />
+        )}
+
+        <Column
+          columnResizeMode="expand"
+          field="title"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['title']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          field="description"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['description']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          field="category"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['category']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          field="language"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['language']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          body={isPublicColumnTemplate}
+          field="isPublic"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentIsPublic']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          body={dateColumnTemplate}
+          field="date"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentUploadDate']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          field="size"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['documentSize']}
+          sortable={!isEmpty(documents)}
+        />
+        <Column
+          body={downloadColumnTemplate}
+          field="url"
+          filter={false}
+          filterMatchMode="contains"
+          header={resources.messages['file']}
+          style={{ textAlign: 'center', width: '8em' }}
+        />
+      </DataTable>
+
       <Dialog
-        header={resources.messages['upload']}
+        header={isEditForm ? resources.messages['edit'] : resources.messages['upload']}
         className={styles.dialog}
         visible={isUploadDialogVisible}
         dismissableMask={false}
@@ -162,68 +272,14 @@ const Documents = ({
           dataflowId={match.params.dataflowId}
           onUpload={onUploadDocument}
           onGrowlAlert={onGrowlAlert}
+          isEditForm={isEditForm}
           isFormReset={isFormReset}
+          documentInitialValues={documentInitialValues}
           setIsUploadDialogVisible={setIsUploadDialogVisible}
           isUploadDialogVisible={isUploadDialogVisible}
         />
       </Dialog>
 
-      {
-        <DataTable
-          value={documents}
-          autoLayout={true}
-          paginator={false}
-          sortField={sortFieldDocuments}
-          sortOrder={sortOrderDocuments}
-          onSort={e => {
-            setSortFieldDocuments(e.sortField);
-            setSortOrderDocuments(e.sortOrder);
-          }}>
-          {isCustodian && !isEmpty(documents) ? (
-            <Column className={styles.crudColumn} body={documentsEditButtons} />
-          ) : (
-            <Column className={styles.hideColumn} />
-          )}
-
-          <Column
-            columnResizeMode="expand"
-            field="title"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['title']}
-            sortable={!isEmpty(documents)}
-          />
-          <Column
-            field="description"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['description']}
-            sortable={!isEmpty(documents)}
-          />
-          <Column
-            field="category"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['category']}
-            sortable={!isEmpty(documents)}
-          />
-          <Column
-            field="language"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['language']}
-            sortable={!isEmpty(documents)}
-          />
-          <Column
-            body={downloadTemplate}
-            field="url"
-            filter={false}
-            filterMatchMode="contains"
-            header={resources.messages['file']}
-            style={{ textAlign: 'center', width: '8em' }}
-          />
-        </DataTable>
-      }
       <ConfirmDialog
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}

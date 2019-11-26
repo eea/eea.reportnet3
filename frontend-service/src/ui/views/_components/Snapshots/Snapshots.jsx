@@ -41,7 +41,7 @@ const Snapshots = ({
         <ul>
           <li>
             <strong>{resources.messages.creationDate}: </strong>
-            {moment(snapshotContext.snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            {moment(snapshotContext.snapshotState.creationDate).format('YYYY-MM-DD HH:mm:ss')}
           </li>
           <li>
             <strong>{resources.messages.description}: </strong>

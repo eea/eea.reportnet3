@@ -18,7 +18,7 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
           <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
-            {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
           </h5>
           <div className={styles.listActions}>
             <Button
