@@ -59,7 +59,7 @@ CREATE TABLE public."document" (
 	dataflow_id serial NOT NULL,
 	size varchar(255) NULL,
 	date timestamp NULL,
-	bool publicly NULL,
+	is_public bool NULL,
 	CONSTRAINT document_pkey PRIMARY KEY (id),
 	CONSTRAINT document_dataflow_fkey FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
 );

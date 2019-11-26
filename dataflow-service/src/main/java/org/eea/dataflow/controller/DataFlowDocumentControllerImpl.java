@@ -52,7 +52,8 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       document = dataflowService.getDocumentInfoById(documentId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND,
+          e);
     }
     return document;
   }
@@ -69,7 +70,8 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       dataflowService.updateDocument(document);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
+          e);
     }
   }
 
@@ -86,7 +88,8 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       return dataflowService.insertDocument(document);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
+          e);
     }
   }
 
@@ -102,7 +105,8 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
     try {
       dataflowService.deleteDocument(documentId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
+          e);
     }
   }
 }

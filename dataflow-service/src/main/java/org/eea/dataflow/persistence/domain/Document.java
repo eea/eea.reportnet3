@@ -56,7 +56,7 @@ public class Document {
   private Date date;
 
   /** The is public. */
-  @Column(name = "ISPUBLIC")
+  @Column(name = "IS_PUBLIC")
   private Boolean isPublic;
 
   /**
