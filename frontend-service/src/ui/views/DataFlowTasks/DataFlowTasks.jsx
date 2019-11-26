@@ -93,10 +93,11 @@ export const DataflowTasks = withRouter(({ match, history }) => {
         components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
         isCustodian={isCustodian}
+        onFetchData={dataFetch}
         subscribeButtonTitle={resources.messages['subscribeButton']}
         style={{ textAlign: 'left' }}
       />
-      <div className={`${styles.container} rep-col-xs-12 rep-col-md-10`}>
+      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-10`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isUndefined } from 'lodash';
 import { config } from 'conf';
 
 import styles from './Tab.module.css';
@@ -277,8 +277,7 @@ export const Tab = ({
           }
         }}
         role="presentation"
-        style={headerStyle}
-        style={{ pointerEvents: 'fill' }}
+        style={{ ...headerStyle, pointerEvents: 'fill' }}
         ref={tabRef}
         tabIndex={index}>
         <a

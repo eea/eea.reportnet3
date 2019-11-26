@@ -9,6 +9,8 @@ import styles from './CreateDataflowForm.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
+import { DataflowService } from 'core/services/DataFlow';
+
 export const CreateDataflowForm = ({ isFormReset, onCreate, setCreateDataflowDialogVisible }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
@@ -27,7 +29,17 @@ export const CreateDataflowForm = ({ isFormReset, onCreate, setCreateDataflowDia
       ref={form}
       initialValues={initialValues}
       validationSchema={createDataflowValidationSchema}
-      onSubmit={onCreate}>
+      onSubmit={async (values, { setSubmitting }) => {
+        setSubmitting(true);
+        const response = await DataflowService.create(values.dataflowName, values.dataflowDescription);
+        console.log(response);
+        if (response.status >= 200 && response.status <= 299) {
+          onCreate();
+        } else {
+          console.error(`Error in the creation of dataflow`);
+        }
+        setSubmitting(false);
+      }}>
       {({ isSubmitting, errors, touched }) => (
         <Form>
           <fieldset>

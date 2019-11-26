@@ -35,7 +35,7 @@ const deleteDocument = async documentId => {
 };
 
 const getCountryName = countryCode => {
-  return config.languages.filter(language => language.code == countryCode).map(name => name.name);
+  return config.languages.filter(language => language.code === countryCode).map(name => name.name);
 };
 
 export const ApiDocumentRepository = {

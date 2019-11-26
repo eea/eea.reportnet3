@@ -1,26 +1,28 @@
+import { Accept } from './Accept';
+import { Create } from './Create';
+import { CreateDatasetSchema } from './CreateDatasetSchema';
 import { dataflowRepository } from 'core/domain/model/DataFlow/DataFlowRepository';
 import { GetPending } from './GetPending';
 import { GetAccepted } from './GetAccepted';
+import { GetAll } from './GetAll';
 import { GetCompleted } from './GetCompleted';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
 import { GetDetails } from './GetDetails';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
-import { Accept } from './Accept';
 import { Reject } from './Reject';
-import { GetAll } from './GetAll';
-import { CreateDatasetSchema } from './CreateDatasetSchema';
 
 export const DataflowService = {
-  all: GetAll({ dataflowRepository }),
-  accepted: GetAccepted({ dataflowRepository }),
-  pending: GetPending({ dataflowRepository }),
-  completed: GetCompleted({ dataflowRepository }),
-  dataflowDetails: GetDetails({ dataflowRepository }),
-  datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
-  datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
-  reporting: GetReporting({ dataflowRepository }),
   accept: Accept({ dataflowRepository }),
-  reject: Reject({ dataflowRepository }),
-  newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository })
+  accepted: GetAccepted({ dataflowRepository }),
+  all: GetAll({ dataflowRepository }),
+  completed: GetCompleted({ dataflowRepository }),
+  create: Create({ dataflowRepository }),
+  dataflowDetails: GetDetails({ dataflowRepository }),
+  datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
+  datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
+  newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
+  pending: GetPending({ dataflowRepository }),
+  reporting: GetReporting({ dataflowRepository }),
+  reject: Reject({ dataflowRepository })
 };

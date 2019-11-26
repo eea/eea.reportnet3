@@ -12,7 +12,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 const DataflowColumn = withRouter(
-  ({ components = [], createDataflowButtonTitle, isCustodian, navTitle, style, subscribeButtonTitle }) => {
+  ({ components = [], createDataflowButtonTitle, onFetchData, isCustodian, navTitle, style, subscribeButtonTitle }) => {
     const resources = useContext(ResourcesContext);
     const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
     const [isFormReset, setIsFormReset] = useState(true);
@@ -28,6 +28,7 @@ const DataflowColumn = withRouter(
 
     const onCreateDataflow = () => {
       setCreateDataflowDialogVisible(false);
+      onFetchData();
     };
 
     const onHideDialog = () => {
@@ -36,7 +37,7 @@ const DataflowColumn = withRouter(
     };
 
     return (
-      <div className="nav rep-col-12 rep-col-sm-2">
+      <div className="nav rep-col-12 rep-col-xl-2">
         <h2 className={styles.title}>{navTitle}</h2>
         {components.includes('search') && (
           <div className="navSection">
