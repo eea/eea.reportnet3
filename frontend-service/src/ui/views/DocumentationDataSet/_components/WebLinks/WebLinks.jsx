@@ -15,12 +15,19 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) => {
+export const WebLinks = ({
+  isCustodian,
+  dataflowId,
+  webLinks,
+  onLoadWebLinks,
+  sortFieldWeblinks,
+  setSortFieldWeblinks,
+  sortOrderWeblinks,
+  setSortOrderWeblinks
+}) => {
   const resources = useContext(ResourcesContext);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
-  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [weblinkItem, setWeblinkItem] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
@@ -213,7 +220,6 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         sortField={sortFieldWeblinks}
         sortOrder={sortOrderWeblinks}
         onSort={e => {
-          console.log('e.multiSortMeta', e);
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);
         }}>

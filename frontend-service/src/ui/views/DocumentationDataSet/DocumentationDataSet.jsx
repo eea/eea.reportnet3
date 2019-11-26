@@ -33,6 +33,8 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [webLinks, setWebLinks] = useState([]);
+  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -155,6 +157,10 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
               dataflowId={match.params.dataflowId}
               webLinks={webLinks}
               onLoadWebLinks={onLoadWebLinks}
+              sortFieldWeblinks={sortFieldWeblinks}
+              setSortFieldWeblinks={setSortFieldWeblinks}
+              sortOrderWeblinks={sortOrderWeblinks}
+              setSortOrderWeblinks={setSortOrderWeblinks}
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
