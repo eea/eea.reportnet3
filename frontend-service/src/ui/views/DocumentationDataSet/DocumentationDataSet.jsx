@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined, sortBy } from 'lodash';
+import { isUndefined, isEmpty, sortBy } from 'lodash';
 
 import { config } from 'conf';
 
@@ -19,6 +19,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 import { WebLinks } from './_components/WebLinks';
 import { DataflowService } from 'core/services/DataFlow';
+import { DatasetService } from 'core/services/DataSet';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -33,6 +34,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [webLinks, setWebLinks] = useState([]);
+  const [designDatasets, setDesignDatasets] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -85,6 +87,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       getDataflowName();
       onLoadDocuments();
       onLoadWebLinks();
+      onLoadDesignDatasets();
     } catch (error) {
       console.error(error.response);
     }
@@ -116,10 +119,47 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
-        console.log('error', error.response);
+        console.error('error', error.response);
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onLoadDesignDatasets = async () => {
+    try {
+      setIsLoading(true);
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      if (!isEmpty(dataflow.designDatasets)) {
+        const datasetSchemas = dataflow.designDatasets.map(async designDataset => {
+          return await onLoadDatasetDesignSchema(designDataset.datasetId);
+        });
+        Promise.all(datasetSchemas).then(completed => {
+          setDesignDatasets(completed);
+        });
+      }
+    } catch (error) {
+      // if (error.response.status === 401 || error.response.status === 403) {
+      //   history.push(getUrl(routes.DATAFLOWS));
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onLoadDatasetDesignSchema = async datasetId => {
+    try {
+      const datasetSchema = await DatasetService.schemaById(datasetId);
+      if (!isEmpty(datasetSchema)) {
+        const datasetMetaData = await DatasetService.getMetaData(datasetId);
+        datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+        return datasetSchema;
+      }
+    } catch (error) {
+      // if (error.response.status === 401 || error.response.status === 403) {
+      //   history.push(getUrl(routes.DATAFLOWS));
+      // }
+    } finally {
     }
   };
 
@@ -158,7 +198,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
-            <DatasetSchemas dataflowId={match.params.dataflowId} />
+            <DatasetSchemas designDatasets={designDatasets} onLoadDesignDatasets={onLoadDesignDatasets} />
           </TabPanel>
         </TabView>
       </React.Fragment>
