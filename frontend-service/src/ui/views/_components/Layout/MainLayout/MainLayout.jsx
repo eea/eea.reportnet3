@@ -6,12 +6,10 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
 const MainLayout = ({ children }) => {
-  const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   useEffect(() => {
     async function fetchData() {
@@ -20,7 +18,7 @@ const MainLayout = ({ children }) => {
           const userObject = await UserService.refreshToken();
           user.onTokenRefresh(userObject);
         } catch (error) {
-          const logout = await UserService.logout();
+          await UserService.logout();
           user.onLogout();
         }
       }
