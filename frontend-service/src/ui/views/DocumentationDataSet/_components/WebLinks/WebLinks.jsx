@@ -23,6 +23,8 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
   const form = useRef(null);
+  const inputRef = useRef();
+
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
@@ -108,6 +110,14 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     setIsConfirmDeleteVisible(false);
     resetForm();
   };
+
+  useEffect(() => {
+    if (isAddOrEditWeblinkDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isAddOrEditWeblinkDialogVisible]);
 
   const webLinkEditButtons = () => {
     return (
@@ -224,6 +234,8 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
+                    autofocus="true"
+                    innerRef={inputRef}
                     name="description"
                     type="text"
                     placeholder={resources.messages['description']}
