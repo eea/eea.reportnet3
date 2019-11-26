@@ -630,7 +630,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <ul>
             <li>
               <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
             </li>
             <li>
               <strong>{resources.messages['description']}: </strong>
