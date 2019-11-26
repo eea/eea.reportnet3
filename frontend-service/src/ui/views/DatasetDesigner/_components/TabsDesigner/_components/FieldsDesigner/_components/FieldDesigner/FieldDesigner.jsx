@@ -76,6 +76,14 @@ export const FieldDesigner = ({
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
+    if (!isUndefined(inputRef.current)) {
+      if (index === '-1') {
+        inputRef.current.element.focus();
+      }
+    }
+  }, [totalFields]);
+
+  useEffect(() => {
     //Set pointerEvents to auto or none depending on isDragging.
     // const dropdownFilterInput = fieldRef.current.getElementsByClassName('p-dropdown-filter')[0];
     // const dropdownFilterInputButton = fieldRef.current.getElementsByClassName('p-dropdown-filter-icon')[0];
