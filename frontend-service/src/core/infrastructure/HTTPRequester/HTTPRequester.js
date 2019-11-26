@@ -43,6 +43,12 @@ export const HTTPRequester = (() => {
       return axios.post(`${baseURL}${options.url}`, options.data, {
         headers
       });
+    },
+    putWithFiles: options => {
+      const headers = options.headers;
+      return axios.put(`${baseURL}${options.url}`, options.data, {
+        headers
+      });
     }
   };
   return HTTPRequesterAPI;

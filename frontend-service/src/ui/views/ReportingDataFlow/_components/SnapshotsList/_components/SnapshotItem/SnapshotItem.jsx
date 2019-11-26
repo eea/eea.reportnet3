@@ -15,7 +15,7 @@ export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
           <span className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
-            {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
           </span>
           <div className={styles.listActions}>
             <Button
