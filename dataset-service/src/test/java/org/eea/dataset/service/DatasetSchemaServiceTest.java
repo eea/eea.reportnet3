@@ -15,10 +15,12 @@ import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -121,6 +123,10 @@ public class DatasetSchemaServiceTest {
   /** The record store controller zull. */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  /** The design dataset repository. */
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
 
   /**
    * Inits the mocks.
@@ -386,10 +392,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
     when(dataSchemaMapper.entityToClass((DataSetSchema) Mockito.any())).thenReturn(dataschema);
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new DesignDataset()));
     assertEquals("not equals", dataschema,
         dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73"));
-
-
   }
 
 
@@ -432,14 +438,12 @@ public class DatasetSchemaServiceTest {
     assertEquals("Not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
 
     DataSetSchema schema2 = new DataSetSchema();
-    schema2.setNameDataSetSchema("test");
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
@@ -455,7 +459,7 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
-    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema"));
+    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 
   /**
@@ -466,7 +470,7 @@ public class DatasetSchemaServiceTest {
   @Test(expected = EEAException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
-    dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema");
+    dataSchemaServiceImpl.createEmptyDataSetSchema(1L);
   }
 
   /**
@@ -608,7 +612,6 @@ public class DatasetSchemaServiceTest {
     table2.setIdTableSchema(new ObjectId());
     table2.setNameTableSchema("test");
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
@@ -630,7 +633,6 @@ public class DatasetSchemaServiceTest {
   public void deleteTableSchemaExceptionTest() throws EEAException {
     ObjectId id = new ObjectId();
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = null;
     schema.setTableSchemas(listaTables);
@@ -652,7 +654,6 @@ public class DatasetSchemaServiceTest {
     table.setIdTableSchema(id);
     table.setNameTableSchema("test");
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);

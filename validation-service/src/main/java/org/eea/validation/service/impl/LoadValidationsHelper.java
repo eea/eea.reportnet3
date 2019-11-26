@@ -82,7 +82,6 @@ public class LoadValidationsHelper {
     validation.setIdDataset(datasetId);
     DataSetSchema schema = validationService.getfindByIdDataSetSchema(datasetId,
         new ObjectId(dataset.getIdDatasetSchema()));
-    validation.setNameDataSetSchema(schema.getNameDataSetSchema());
 
     Page<Validation> validationStream = validationRepository.findAllRecordsByFilter(datasetId,
         levelErrorsFilter, typeEntitiesFilter, originsFilter, pageable, headerField, asc);

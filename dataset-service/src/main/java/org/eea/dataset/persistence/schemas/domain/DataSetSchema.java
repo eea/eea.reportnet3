@@ -28,10 +28,6 @@ public class DataSetSchema {
   @Field(value = "_id")
   private ObjectId idDataSetSchema;
 
-  /** The nameDataSetSchema. */
-  @Field(value = "nameDataSetSchema")
-  private String nameDataSetSchema;
-
   /** The idDataFlow. */
   @Field(value = "idDataFlow")
   private Long idDataFlow;
@@ -51,7 +47,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, nameDataSetSchema, ruleDataSet, tableSchemas);
+    return Objects.hash(idDataFlow, idDataSetSchema, ruleDataSet, tableSchemas);
   }
 
   /**
@@ -71,7 +67,6 @@ public class DataSetSchema {
     DataSetSchema other = (DataSetSchema) obj;
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema)
         && Objects.equals(ruleDataSet, other.ruleDataSet)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }
