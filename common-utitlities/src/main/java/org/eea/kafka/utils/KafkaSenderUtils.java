@@ -33,7 +33,6 @@ public class KafkaSenderUtils {
     final Map<String, Object> dataOutput = new HashMap<>();
     dataOutput.put("dataset_id", datasetId);
     releaseKafkaEvent(eventType, dataOutput);
-
   }
 
   /**

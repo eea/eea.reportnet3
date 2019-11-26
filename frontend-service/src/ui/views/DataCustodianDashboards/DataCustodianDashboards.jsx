@@ -23,23 +23,28 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
   const [dataflowName, setDataflowName] = useState('');
   const [dataSchema, setDataSchema] = useState();
-  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   useEffect(() => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: routes.DATAFLOWS,
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages.dataflow,
+        label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -52,7 +57,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           )
       },
       {
-        label: resources.messages.dashboards
+        label: resources.messages.dashboards,
+        icon: 'barChart'
       }
     ]);
   }, []);
@@ -109,11 +115,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ? dataSchema.map(schema => {
         return (
           <Button
-            className={`p-button-rounded p-button-secondary ${styles.dashboardsButton}`}
-            iconClasses={chartState[schema.datasetSchemaId] ? styles.show : styles.hide}
+            className={`p-button-rounded ${
+              chartState[schema.datasetSchemaId] ? 'p-button-primary' : 'p-button-secondary'
+            } ${styles.dashboardsButton}`}
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
-            icon={chartState[schema.datasetSchemaId] ? 'eye-slash' : 'eye'}
+            icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
             onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
           />
         );
@@ -136,7 +143,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -144,9 +151,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
+      <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
       <div className={styles.validationChartWrap}>
-        <h2>{resources.messages['validationDashboards']}</h2>
+        <h2 className={styles.dashboardType}>{resources.messages['validationDashboards']}</h2>
         <Toolbar className={styles.chartToolbar}>
           <div className="p-toolbar-group-left">{onLoadButtons}</div>
         </Toolbar>
@@ -158,7 +165,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {onLoadCharts}
       </div>
       <div className={styles.releasedChartWrap}>
-        <h2>{resources.messages['releaseDashboard']}</h2>
+        <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
         <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
       </div>
     </>

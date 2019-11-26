@@ -12,22 +12,28 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ isCustodian, dataflowId }) => {
+export const WebLinks = ({
+  isCustodian,
+  dataflowId,
+  webLinks,
+  onLoadWebLinks,
+  sortFieldWeblinks,
+  setSortFieldWeblinks,
+  sortOrderWeblinks,
+  setSortOrderWeblinks
+}) => {
   const resources = useContext(ResourcesContext);
-
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
-  const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
-  const [webLinks, setWebLinks] = useState();
 
   const form = useRef(null);
+  const inputRef = useRef();
+
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
@@ -38,28 +44,14 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       .required(' ')
   });
 
-  const onLoadWebLinks = async () => {
-    setIsLoading(true);
-    try {
-      setWebLinks(await WebLinkService.all(dataflowId));
-    } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        console.log('error', error.response);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const resetForm = () => {
+    setWeblinkItem({ id: undefined, description: '', url: '' });
+    form.current.resetForm();
   };
 
-  useEffect(() => {
-    onLoadWebLinks();
-    setWeblinkItem({ id: undefined, description: '', url: '' });
-  }, [reload]);
-
   const onHideAddEditDialog = () => {
-    form.current.resetForm();
     setIsAddOrEditWeblinkDialogVisible(false);
-    setWeblinkItem({ id: undefined, description: '', url: '' });
+    resetForm();
   };
 
   const getValidUrl = (url = '') => {
@@ -89,7 +81,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -103,7 +95,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
         if (weblinkToEdit.isUpdated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -117,7 +109,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
 
     if (weblinkToDelete.isDeleted) {
-      setReload(!reload);
+      onLoadWebLinks();
     }
 
     setIsConfirmDeleteVisible(false);
@@ -125,7 +117,16 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onHideDeleteDialog = () => {
     setIsConfirmDeleteVisible(false);
+    resetForm();
   };
+
+  useEffect(() => {
+    if (isAddOrEditWeblinkDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isAddOrEditWeblinkDialogVisible]);
 
   const webLinkEditButtons = () => {
     return (
@@ -165,6 +166,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           filterMatchMode="contains"
           header={key === 'url' ? key.toUpperCase() : capitalize(key)}
           body={key === 'url' ? linkTemplate : null}
+          sortable={true}
         />
       ));
 
@@ -207,15 +209,20 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       )}
       <DataTable
         autoLayout={true}
-        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
         }}
-        paginator={true}
+        paginator={false}
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
-        value={webLinks}>
+        value={webLinks}
+        sortField={sortFieldWeblinks}
+        sortOrder={sortOrderWeblinks}
+        onSort={e => {
+          setSortFieldWeblinks(e.sortField);
+          setSortOrderWeblinks(e.sortOrder);
+        }}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
       <Dialog
@@ -242,6 +249,8 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
+                    autofocus="true"
+                    innerRef={inputRef}
                     name="description"
                     type="text"
                     placeholder={resources.messages['description']}

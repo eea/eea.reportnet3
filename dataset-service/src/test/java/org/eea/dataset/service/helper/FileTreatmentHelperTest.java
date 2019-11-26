@@ -78,8 +78,8 @@ public class FileTreatmentHelperTest {
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
-    Mockito.verify(kafkaSenderUtils, times(2)).releaseDatasetKafkaEvent(Mockito.any(),
+    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
   }
 
@@ -106,8 +106,8 @@ public class FileTreatmentHelperTest {
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(1L);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
-    Mockito.verify(kafkaSenderUtils, times(2)).releaseDatasetKafkaEvent(Mockito.any(),
+    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
   }
 
@@ -121,6 +121,6 @@ public class FileTreatmentHelperTest {
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetVO());
     Mockito.when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(null);
-    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
+    fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null, "user");
   }
 }

@@ -90,6 +90,7 @@ public interface DatasetSnapshotService {
   void restoreSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
 
 
+
   /**
    * Removes the schema snapshot.
    *
@@ -97,11 +98,18 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws Exception
+   * @throws Exception the exception
    */
   void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException, Exception;
 
 
+  /**
+   * Delete all schema snapshots.
+   *
+   * @param idDesignDataset the id design dataset
+   * @throws EEAException the EEA exception
+   */
+  void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException;
 
 }

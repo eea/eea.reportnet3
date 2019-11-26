@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 
-import styles from './TreeViewExpandableItem.module.css';
+import { isUndefined } from 'lodash';
 
 // import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -17,7 +17,7 @@ const TreeViewExpandableItem = ({ expanded = true, title, children }) => {
         }}
         style={{ color: '#008080', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', marginTop: '0.5rem' }}>
         {title !== '' ? (isOpen ? '- ' : '+ ') : ''}
-        {title}
+        {!isUndefined(title) ? title : null}
       </div>
       {isOpen ? children : null}
       {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDatasetDesign'] : null}
