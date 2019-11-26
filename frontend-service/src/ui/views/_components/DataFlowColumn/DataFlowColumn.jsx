@@ -58,7 +58,7 @@ const DataflowColumn = withRouter(
     };
 
     return (
-      <div className="nav rep-col-12 rep-col-sm-2">
+      <div className="nav rep-col-12 rep-col-xl-2">
         <h2 className={styles.title}>{navTitle}</h2>
         {components.includes('search') && (
           <div className="navSection">
