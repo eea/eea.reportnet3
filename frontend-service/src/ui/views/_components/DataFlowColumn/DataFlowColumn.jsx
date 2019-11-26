@@ -80,8 +80,10 @@ const DataflowColumn = withRouter(
               className={`${styles.columnButton} p-button-primary`}
               icon="plus"
               label={createDataflowButtonTitle}
-              onClick={() => (setCreateDataflowDialogVisible(true), setIsFormReset(true))}
-              disabled={true}
+              onClick={() => {
+                setCreateDataflowDialogVisible(true);
+                setIsFormReset(true);
+              }}
               style={{ textAlign: 'left' }}
             />
           )}
