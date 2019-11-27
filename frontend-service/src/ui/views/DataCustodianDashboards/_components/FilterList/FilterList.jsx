@@ -11,6 +11,7 @@ import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
 const FilterList = ({
+  datasetSchemaId,
   color,
   filterDispatch,
   levelErrors,
@@ -81,6 +82,7 @@ const FilterList = ({
         {filterByTables()}
       </Accordion>
       <StatusList
+        datasetSchemaId={datasetSchemaId}
         statusFilters={statusFilters}
         color={color}
         levelErrors={levelErrors}
