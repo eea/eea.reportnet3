@@ -44,7 +44,7 @@ const DocumentFileUpload = ({
           })
           .nullable()
       : Yup.mixed()
-          .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
+          .test('fileEmpty', ' ', value => {
             return !isPlainObject(value);
           })
           .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {

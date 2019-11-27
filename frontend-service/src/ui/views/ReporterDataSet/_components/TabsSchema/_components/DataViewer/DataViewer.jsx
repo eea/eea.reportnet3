@@ -114,6 +114,7 @@ const DataViewer = withRouter(
       if (contextReporterDataset.isValidationSelected) {
         setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
+        setLevelErrorValidations(levelErrorTypesWithCorrects);
         contextReporterDataset.setIsValidationSelected(false);
       }
     }, [contextReporterDataset.isValidationSelected]);
