@@ -513,7 +513,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Optional<DesignDataset> designDataset =
         designDatasetRepository.findFirstByDatasetSchema(schemaId);
     if (designDataset.isPresent()) {
-      dataschemaVO.setNameDataSetSchema(designDataset.get().getDataSetName());
+      dataschemaVO.setNameDatasetSchema(designDataset.get().getDataSetName());
     }
   }
 
