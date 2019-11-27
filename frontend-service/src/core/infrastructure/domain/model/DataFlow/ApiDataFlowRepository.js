@@ -158,13 +158,13 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tableValues = [];
   let levelErrors = [];
   const allDatasetLevelErrors = [];
-  datasetsDashboardsDataDTO.map(dataset => {
+  datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
     allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
-    dataset.tables.map((table, i) => {
+    dataset.tables.forEach((table, i) => {
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
