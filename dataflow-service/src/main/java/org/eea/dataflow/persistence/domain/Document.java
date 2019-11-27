@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.domain;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,6 +47,18 @@ public class Document {
   @JoinColumn(name = "DATAFLOW_ID")
   private Dataflow dataflow;
 
+  /** The size. */
+  @Column(name = "SIZE")
+  private String size;
+
+  /** The date. */
+  @Column(name = "DATE")
+  private Date date;
+
+  /** The is public. */
+  @Column(name = "IS_PUBLIC")
+  private Boolean isPublic;
+
   /**
    * Equals.
    *
@@ -72,6 +85,6 @@ public class Document {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, language, description, dataflow);
+    return Objects.hash(id, name, language, description, dataflow, size, date);
   }
 }

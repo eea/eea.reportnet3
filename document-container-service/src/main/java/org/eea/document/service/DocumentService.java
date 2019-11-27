@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.document.DocumentVO;
 
 /**
  * The interface Dataset service.
@@ -16,42 +17,34 @@ public interface DocumentService {
    * @param inputStream the file
    * @param contentType the content type
    * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
+   * @param documentVO the document VO
+   * @param size the size
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void uploadDocument(final InputStream inputStream, final String contentType,
-      final String filename, final Long dataFlowId, final String language, final String description)
+      final String filename, DocumentVO documentVO, final Long size)
       throws EEAException, IOException;
 
   /**
    * Gets the document.
    *
-   * @param documentName the document name
+   * @param documentId the document id
    * @param dataFlowId the data flow id
-   * @param language the language
    * @return the document
    * @throws EEAException the EEA exception
    */
-  FileResponse getDocument(final String documentName, final Long dataFlowId, final String language)
-      throws EEAException;
+  FileResponse getDocument(final Long documentId, final Long dataFlowId) throws EEAException;
 
 
   /**
    * Delete document.
    *
    * @param documentId the document id
-   * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final Long documentId, final String documentName, final Long dataFlowId,
-      final String language) throws EEAException;
-
-
+  void deleteDocument(final Long documentId, final Long dataFlowId) throws EEAException;
 
   /**
    * Upload schema snapshot.
@@ -86,4 +79,13 @@ public interface DocumentService {
    */
   void deleteSnapshotDocument(final String documentName, final Long idDesignDataset)
       throws EEAException;
+
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDocument(DocumentVO documentVO) throws EEAException;
+
 }

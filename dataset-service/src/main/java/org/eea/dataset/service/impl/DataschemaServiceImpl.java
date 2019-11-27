@@ -36,6 +36,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -582,18 +583,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
   @Override
-  public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
+  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
     ObjectId tableSchemaId = new ObjectId();
-    tableSchema.setIdTableSchema(tableSchemaId.toString());
+    tableSchemaVO.setIdTableSchema(tableSchemaId.toString());
     RecordSchema recordSchema = new RecordSchema();
-    recordSchema.setIdRecordSchema(new ObjectId());
+    ObjectId recordSchemaId = new ObjectId();
+    recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
-    TableSchema table = tableSchemaMapper.classToEntity(tableSchema);
+    TableSchema table = tableSchemaMapper.classToEntity(tableSchemaVO);
     table.setRecordSchema(recordSchema);
-    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    LOG.info("Creating table schema with id {}", tableSchemaId);
     schemasRepository.insertTableSchema(table, id);
+    // prepare ids to return to the frontend
+    RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
+    recordSchemaVO.setIdRecordSchema(recordSchemaId.toString());
+    tableSchemaVO.setRecordSchema(recordSchemaVO);
+    return (tableSchemaVO);
   }
 
   /**

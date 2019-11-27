@@ -10,7 +10,15 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
-const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datasets, labels } }) => {
+const FilterList = ({
+  color,
+  filterDispatch,
+  levelErrors,
+  originalData: { datasets, labels },
+  reporterFilters,
+  statusFilters,
+  tableFilters
+}) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
@@ -30,11 +38,18 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         <AccordionTab header={resources.messages['filterByDataset']}>
           <ul className={styles.list}>
             {labels.map(item => (
-              <ReportersListItem key={item} filterDispatch={filterDispatch} item={item} />
+              <ReportersListItem
+                key={item}
+                reporterFilters={reporterFilters}
+                filterDispatch={filterDispatch}
+                item={item}
+              />
             ))}
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByDataset']} disabled={true} />;
     }
   };
 
@@ -44,11 +59,18 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         <AccordionTab header={resources.messages['filterByTable']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
-              <TableListItem key={item.tableId} filterDispatch={filterDispatch} item={item} />
+              <TableListItem
+                key={item.tableId}
+                tableFilters={tableFilters}
+                filterDispatch={filterDispatch}
+                item={item}
+              />
             ))}
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByTable']} disabled={true} />;
     }
   };
 
@@ -58,7 +80,12 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         {filterByReporters()}
         {filterByTables()}
       </Accordion>
-      <StatusList color={color} levelErrors={levelErrors} filterDispatch={filterDispatch} />
+      <StatusList
+        statusFilters={statusFilters}
+        color={color}
+        levelErrors={levelErrors}
+        filterDispatch={filterDispatch}
+      />
     </>
   );
 };

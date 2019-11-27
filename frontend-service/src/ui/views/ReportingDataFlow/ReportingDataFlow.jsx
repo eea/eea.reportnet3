@@ -91,18 +91,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['dataflow']
+        label: resources.messages['dataflow'],
+        icon: 'archive'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const onLoadReportingDataflow = async () => {
     try {
@@ -270,7 +268,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -296,7 +294,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
-              {/* <Title title={`${dataflowData.name}`} icon="archive" /> */}
+              {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
@@ -329,7 +327,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                caption={resources.messages['informationPoint']}
+                caption={resources.messages['dataflowHelp']}
                 handleRedirect={() =>
                   handleRedirect(
                     getUrl(
@@ -341,6 +339,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     )
                   )
                 }
+                onWheel={getUrl(
+                  routes.DOCUMENTS,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )}
               />
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
@@ -367,6 +372,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      onWheel={getUrl(
+                        routes.DATASET_SCHEMA,
+                        {
+                          dataflowId: match.params.dataflowId,
+                          datasetId: newDatasetSchema.datasetId
+                        },
+                        true
+                      )}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
@@ -397,6 +410,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
+                          disabled: true,
                           command: () => getDeleteSchemaIndex(newDatasetSchema.index)
                         },
                         {
@@ -431,6 +445,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         )
                       );
                     }}
+                    onWheel={getUrl(
+                      routes.DATASET,
+                      {
+                        dataflowId: match.params.dataflowId,
+                        datasetId: dataset.datasetId
+                      },
+                      true
+                    )}
                     model={
                       hasWritePermissions
                         ? [
@@ -468,7 +490,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 </div>
               );
             })}
-            {isCustodian && (
+            {isCustodian && !isEmpty(dataflowData.datasets) && (
               <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="dashboard"
@@ -484,6 +506,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       )
                     )
                   }
+                  onWheel={getUrl(
+                    routes.DASHBOARDS,
+                    {
+                      dataflowId: match.params.dataflowId
+                    },
+                    true
+                  )}
                 />
               </div>
             )}

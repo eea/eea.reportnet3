@@ -15,6 +15,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { filterReducer } from './_components/_context/filterReducer';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
@@ -32,7 +33,7 @@ const LEVELS = {
   BLOCKER: 4
 };
 
-const GlobalValidationDashboard = ({ datasetSchemaId }) => {
+export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],
@@ -102,6 +103,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
     }
   };
 
+  const onLoadStamp = message => {
+    return <span className={`${styles.stamp} ${styles.emptySchema}`}>{message}</span>;
+  };
+
   const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
     let allDatasets = [];
     tablesDashboardData.forEach(table => {
@@ -110,15 +115,20 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
     return allDatasets.flat();
   };
 
+  const getLevelErrorPriority = levelError => {
+    return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+  };
+
   const getBarsByErrorAndStatistics = (table, levelErrors) => {
-    const levelErrorBars = levelErrors.map(function(type, i) {
+    const levelErrorBars = levelErrors.map((levelError, i) => {
+      let levelErrorIndex = getLevelErrorPriority(levelError);
       const errorBar = {
-        label: type,
+        label: levelError,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[type] : colors.type,
-        data: table.tableStatisticPercentages[i],
-        totalData: table.tableStatisticValues[i],
+        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+        data: table.tableStatisticPercentages[levelErrorIndex],
+        totalData: table.tableStatisticValues[levelErrorIndex],
         stack: table.tableName
       };
       return errorBar;
@@ -169,6 +179,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       yAxes: [
         {
           stacked: true,
+          scaleLabel: {
+            display: true,
+            labelString: resources.messages['percentage']
+          },
           ticks: {
             min: 0,
             max: 100,
@@ -182,54 +196,66 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
   if (isLoading) {
     return <Spinner className={styles.positioning} />;
   }
-  if (!isEmpty(filterState.data)) {
-    return (
-      <div className={`rep-row ${styles.chart_released}`}>
-        <FilterList
-          color={dashboardColors}
-          levelErrors={levelErrorTypes}
-          originalData={filterState.originalData}
-          filterDispatch={filterDispatch}></FilterList>
-        <Chart
-          ref={chartRef}
-          type="bar"
-          data={filterState.data}
-          options={datasetOptionsObject}
-          width="100%"
-          height="30%"
-        />
-        {/* <fieldset className={styles.colorPickerWrap}>
-          <legend>{resources.messages['chooseChartColor']}</legend>
-          <div className={styles.fieldsetContent}>
-            {Object.keys(SEVERITY_CODE).map((type, i) => {
-              return (
-                <div className={styles.colorPickerItem} key={i}>
-                  <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-                    .slice(1)
-                    .toLowerCase()}: `}</span>
-                  <ColorPicker
-                    className={styles.colorPicker}
-                    //key={type}
-                    value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-                    onChange={e => {
-                      e.preventDefault();
-                      onChangeColor(e.value, SEVERITY_CODE[type]);
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </fieldset> */}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
-      </div>
-    );
-  }
+  return (
+    <>
+      {isVisible ? (
+        <div className={`rep-row ${styles.chart_released}`}>
+          <h3 className={styles.dashboardName}>{datasetSchemaName}</h3>
+          {!isEmpty(filterState.data) ? (
+            <>
+              <FilterList
+                color={dashboardColors}
+                filterDispatch={filterDispatch}
+                levelErrors={levelErrorTypes}
+                originalData={filterState.originalData}
+                reporterFilters={filterState.reporterFilter}
+                statusFilters={filterState.statusFilter}
+                tableFilters={filterState.tableFilter}
+              />
+              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
+              <Chart
+                ref={chartRef}
+                type="bar"
+                data={filterState.data}
+                options={datasetOptionsObject}
+                width="100%"
+                height="30%"
+              />
+            </>
+          ) : (
+            //   <fieldset className={styles.colorPickerWrap}>
+            //   <legend>{resources.messages['chooseChartColor']}</legend>
+            //   <div className={styles.fieldsetContent}>
+            //     {Object.keys(SEVERITY_CODE).map((type, i) => {
+            //       return (
+            //         <div className={styles.colorPickerItem} key={i}>
+            //           <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+            //             .slice(1)
+            //             .toLowerCase()}: `}</span>
+            //           <ColorPicker
+            //             className={styles.colorPicker}
+            //             //key={type}
+            //             value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+            //             onChange={e => {
+            //               e.preventDefault();
+            //               onChangeColor(e.value, SEVERITY_CODE[type]);
+            //             }}
+            //           />
+            //         </div>
+            //       );
+            //     })}
+            //   </div>
+            // </fieldset>
+            <>
+              <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
+              {onLoadStamp(resources.messages['empty'])}
+              <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
+            </>
+          )}
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
+  );
 };
-
-export { GlobalValidationDashboard };

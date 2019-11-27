@@ -33,7 +33,15 @@ import {
   faList,
   faShareAlt,
   faInfo,
-  faInfoCircle
+  faInfoCircle,
+  faQuestion,
+  faArrowDown,
+  faArrowUp,
+  faToggleOff,
+  faMapPin,
+  faDrawPolygon,
+  faBars,
+  faHome
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -41,7 +49,9 @@ import {
   faCheckSquare as faCheckSquareRegular,
   faCalendarAlt,
   faClone,
-  faComments
+  faComments,
+  faQuestionCircle as farQuestionCircle,
+  faCircle
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -132,6 +142,12 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'arrowDown':
+      return faArrowDown;
+    case 'arrowUp':
+      return faArrowUp;
+    case 'boolean':
+      return faToggleOff;
     case 'delete':
       return faTrashAlt;
     case 'dropDown':
@@ -160,6 +176,8 @@ export const AwesomeIcons = icon => {
       return faAt;
     case 'calendar':
       return faCalendarAlt;
+    case 'circle':
+      return faCircle;
     case 'formula':
       return faSquareRootAlt;
     case 'italic':
@@ -172,10 +190,16 @@ export const AwesomeIcons = icon => {
       return faList;
     case 'map':
       return faMapMarkedAlt;
+    case 'move':
+      return faBars;
     case 'number':
       return faDiceSix;
     case 'percentage':
       return faPercentage;
+    case 'point':
+      return faMapPin;
+    case 'polygon':
+      return faDrawPolygon;
     case 'text':
       return faAlignJustify;
     case 'url':
@@ -190,6 +214,12 @@ export const AwesomeIcons = icon => {
       return faInfo;
     case 'infoCircle':
       return faInfoCircle;
+    case 'question':
+      return faQuestion;
+    case 'questionCircle':
+      return farQuestionCircle;
+    case 'home':
+      return faHome;
     default:
       return faFileAlt;
   }

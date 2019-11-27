@@ -13,6 +13,7 @@ import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
@@ -98,6 +99,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The schema service. */
   @Autowired
   private DatasetSchemaService schemaService;
+
+  /** The metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository metabaseRepository;
+
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -360,7 +366,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws Exception {
     // Remove from the metabase
-    snapshotSchemaRepository.deleteById(idSnapshot);
+    snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
+    metabaseRepository.deleteSnapshotDatasetByIdSnapshot(idSnapshot);
     // Delete the file
     String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
@@ -369,6 +376,29 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Schema Snapshot {} removed", idSnapshot);
+  }
+
+
+
+  /**
+   * Delete all schema snapshots.
+   *
+   * @param idDesignDataset the id design dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException {
+
+    LOG.info("Deleting all schema snapshots when the design dataset it's going to be deleted");
+    List<SnapshotVO> snapshots = getSchemaSnapshotsByIdDataset(idDesignDataset);
+    snapshots.stream().forEach(s -> {
+      try {
+        removeSchemaSnapshot(idDesignDataset, s.getId());
+      } catch (Exception e) {
+        LOG_ERROR.error("Error deleting the schema snapshot " + s.getId(), e.getMessage(), e);
+      }
+    });
   }
 
 

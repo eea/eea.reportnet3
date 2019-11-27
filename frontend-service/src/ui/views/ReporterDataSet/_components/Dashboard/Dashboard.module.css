@@ -46,3 +46,12 @@
   display: flex;
   justify-content: flex-start;
 }
+.chartDiv {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+}
+.dashboardTitle {
+  margin: 0px;
+}
