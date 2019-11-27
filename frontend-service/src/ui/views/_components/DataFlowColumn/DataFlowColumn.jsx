@@ -5,40 +5,22 @@ import { isUndefined } from 'lodash';
 
 import styles from './DataFlowColumn.module.css';
 
-import { config } from 'conf';
-
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CreateDataflowForm } from './_components/CreateDataflowForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
+
 import { UserService } from 'core/services/User';
 
 const DataflowColumn = withRouter(
-  ({
-    navTitle,
-    dataflowTitle,
-    components = [],
-    entity,
-    createDataflowButtonTitle,
-    subscribeButtonTitle,
-    history,
-    style,
-    match
-  }) => {
+  ({ components = [], createDataflowButtonTitle, onFetchData, isCustodian, navTitle, style, subscribeButtonTitle }) => {
     const resources = useContext(ResourcesContext);
+    const user = useContext(UserContext);
     const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
-    const [isCustodian, setIsCustodian] = useState(false);
     const [isFormReset, setIsFormReset] = useState(true);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
-    const user = useContext(UserContext);
-
-    useEffect(() => {
-      if (!isUndefined(user.accessRole)) {
-        setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
-      }
-    }, [user]);
 
     const setVisibleHandler = (fnUseState, visible) => {
       fnUseState(visible);
@@ -50,6 +32,18 @@ const DataflowColumn = withRouter(
 
     const onCreateDataflow = () => {
       setCreateDataflowDialogVisible(false);
+      onFetchData();
+      onRefreshToken();
+    };
+
+    const onRefreshToken = async () => {
+      try {
+        const userObject = await UserService.refreshToken();
+        user.onTokenRefresh(userObject);
+      } catch (error) {
+        await UserService.logout();
+        user.onLogout();
+      }
     };
 
     const onHideDialog = () => {
@@ -72,7 +66,7 @@ const DataflowColumn = withRouter(
           </div>
         )}
         <div className="navSection">
-          {isCustodian && components.includes('createDataflow') && (
+          {isCustodian && components.includes('createDataflow') ? (
             <Button
               className={`${styles.columnButton} p-button-primary`}
               icon="plus"
@@ -81,10 +75,9 @@ const DataflowColumn = withRouter(
                 setCreateDataflowDialogVisible(true);
                 setIsFormReset(true);
               }}
-              disabled={true}
               style={{ textAlign: 'left' }}
             />
-          )}
+          ) : null}
 
           <Button
             className={styles.columnButton}
@@ -107,7 +100,7 @@ const DataflowColumn = withRouter(
           <CreateDataflowForm
             isFormReset={isFormReset}
             onCreate={onCreateDataflow}
-            setCreateDataflowDialogVisible={setCreateDataflowDialogVisible}></CreateDataflowForm>
+            onCancel={onHideDialog}></CreateDataflowForm>
         </Dialog>
 
         <ConfirmDialog
