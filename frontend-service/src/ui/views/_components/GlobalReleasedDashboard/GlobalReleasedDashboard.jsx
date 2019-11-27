@@ -41,7 +41,15 @@ export const GlobalReleasedDashboard = dataflowId => {
 
   const releasedOptionsObject = {
     tooltips: {
-      enabled: false
+      mode: 'point',
+      intersect: true
+      // callbacks: {
+      //   label: (tooltipItems, data) =>
+      //     `${tooltipItems.yLabel} ${data.datasets[tooltipItems.datasetIndex].label}: ${
+      //       data.datasets[tooltipItems.datasetIndex]
+      //     }
+      //     `
+      // }
     },
     responsive: true,
     scales: {
@@ -54,7 +62,15 @@ export const GlobalReleasedDashboard = dataflowId => {
       yAxes: [
         {
           stacked: true,
-          display: false
+          ticks: {
+            beginAtZero: true,
+            callback: value => {
+              if (Number.isInteger(value)) {
+                return value;
+              }
+            },
+            stepSize: 1
+          }
         }
       ]
     }
@@ -62,17 +78,17 @@ export const GlobalReleasedDashboard = dataflowId => {
 
   const buildReleasedDashboardObject = releasedData => {
     return {
-      labels: releasedData.map(dataset => dataset.dataSetName),
+      labels: releasedData.labels,
       datasets: [
         {
           label: resources.messages['released'],
           backgroundColor: colors.green400,
-          data: releasedData.map(dataset => dataset.isReleased)
+          data: releasedData.releasedData
         },
         {
           label: resources.messages['unreleased'],
           backgroundColor: colors.gray25,
-          data: releasedData.map(dataset => !dataset.isReleased)
+          data: releasedData.unReleasedData
         }
       ]
     };
