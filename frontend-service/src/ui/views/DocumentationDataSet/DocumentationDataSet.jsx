@@ -134,7 +134,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
 
   const onLoadDesignDatasets = async () => {
     try {
-      setIsLoading(true);
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       if (!isEmpty(dataflow.designDatasets)) {
         const datasetSchemas = dataflow.designDatasets.map(async designDataset => {
