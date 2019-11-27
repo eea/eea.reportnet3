@@ -269,7 +269,7 @@ const Documents = ({
       </DataTable>
 
       <Dialog
-        header={isEditForm ? resources.messages['edit'] : resources.messages['upload']}
+        header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
         className={styles.dialog}
         visible={isUploadDialogVisible}
         dismissableMask={false}
