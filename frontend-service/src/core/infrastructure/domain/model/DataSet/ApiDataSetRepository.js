@@ -163,8 +163,9 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
   const tableStatisticValues = [];
   let levelErrors = [];
-  const tableLevelErrors = [];
+  const allDatasetLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO));
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
         (datasetTableDTO.totalRecordsWithBlockers +
@@ -176,7 +177,6 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.totalRecordsWithErrors,
       datasetTableDTO.totalRecordsWithBlockers
     ]);
-    tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
@@ -184,7 +184,7 @@ const errorStatisticsById = async datasetId => {
     );
   });
   const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
-  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
   let transposedValues = CoreUtils.transposeMatrix(tableStatisticValues);

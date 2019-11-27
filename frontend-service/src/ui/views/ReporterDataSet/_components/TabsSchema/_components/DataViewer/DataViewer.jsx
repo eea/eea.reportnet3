@@ -114,6 +114,7 @@ const DataViewer = withRouter(
       if (contextReporterDataset.isValidationSelected) {
         setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
+        setLevelErrorValidations(levelErrorTypesWithCorrects);
         contextReporterDataset.setIsValidationSelected(false);
       }
     }, [contextReporterDataset.isValidationSelected]);
@@ -1050,20 +1051,25 @@ const DataViewer = withRouter(
       }
     };
 
-    const newRecordForm = colsSchema.forEach((column, i) => {
+    const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
-          let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          return (
-            <React.Fragment key={column.field}>
-              <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
-              </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
-                <InputText id={column.field} onChange={e => onEditAddFormInput(column.field, e.target.value, field)} />
-              </div>
-            </React.Fragment>
-          );
+          if (!isUndefined(newRecord.dataRow)) {
+            const field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            return (
+              <React.Fragment key={column.field}>
+                <div className="p-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor={column.field}>{column.header}</label>
+                </div>
+                <div className="p-col-8" style={{ padding: '.5em' }}>
+                  <InputText
+                    id={column.field}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          }
         }
       }
     });
@@ -1451,7 +1457,7 @@ const DataViewer = withRouter(
         </Dialog>
 
         <ConfirmDialog
-          header={resources.messages['deleteDatasetTableHeader']}
+          header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onConfirmDeleteTable}
