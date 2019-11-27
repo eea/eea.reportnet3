@@ -1,15 +1,22 @@
 export const CoreUtils = (() => {
   const UtilsAPI = {
-    getDashboardLevelErrors: datasetTableDTO => {
+    getDashboardLevelErrorByDataset: datasetDTO => {
       let levelErrors = [];
-      if (datasetTableDTO.totalErrors > 0) {
+      datasetDTO.forEach(datasetTableDTO => {
+        levelErrors.push(UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO));
+      });
+      return levelErrors;
+    },
+
+    getDashboardLevelErrorByTable: datasetTableDTO => {
+      let levelErrors = [];
+      datasetTableDTO.tables.forEach(datasetTableDTO => {
         let corrects =
           datasetTableDTO.totalRecords -
           (datasetTableDTO.totalRecordsWithBlockers +
             datasetTableDTO.totalRecordsWithErrors +
             datasetTableDTO.totalRecordsWithWarnings +
             datasetTableDTO.totalRecordsWithInfos);
-
         if (corrects > 0) {
           levelErrors.push('CORRECT');
         }
@@ -25,8 +32,8 @@ export const CoreUtils = (() => {
         if (datasetTableDTO.totalRecordsWithBlockers > 0) {
           levelErrors.push('BLOCKER');
         }
-      }
-      return levelErrors;
+      });
+      return [...new Set(levelErrors)];
     },
 
     getLevelErrorPriorityByLevelError: levelError => {
