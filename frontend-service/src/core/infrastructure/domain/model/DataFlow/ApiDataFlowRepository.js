@@ -287,11 +287,7 @@ const datasetsReleasedStatus = async dataflowId => {
 
   Object.values(groupByReporter(datasetsReleasedStatusDTO)).forEach((reporter, i) => {
     reporter.forEach(dataset => {
-      if (dataset.isReleased) {
-        isReleased[i] += 1;
-      } else {
-        isNotReleased[i] += 1;
-      }
+      dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
     });
   });
 
