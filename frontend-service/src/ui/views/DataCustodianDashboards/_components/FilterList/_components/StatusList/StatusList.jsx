@@ -11,7 +11,7 @@ export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters, 
     return (
       <li key={i} className={styles.listItem}>
         <input
-          id={errorLevel.toString().toLowerCase() + datasetSchemaId}
+          id={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`}
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
@@ -23,7 +23,7 @@ export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters, 
             });
           }}
         />
-        <label htmlFor={errorLevel.toString().toLowerCase() + datasetSchemaId} className={styles.labelItem}>
+        <label htmlFor={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`} className={styles.labelItem}>
           {resources.messages[errorLevel.toString().toLowerCase()]}
         </label>
       </li>
