@@ -197,6 +197,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
           {!isEmpty(filterState.data) ? (
             <>
               <FilterList
+                datasetSchemaId={datasetSchemaId}
                 color={dashboardColors}
                 filterDispatch={filterDispatch}
                 levelErrors={levelErrorTypes}
