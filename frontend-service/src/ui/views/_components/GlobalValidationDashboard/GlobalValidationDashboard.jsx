@@ -103,10 +103,6 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     return allDatasets.flat();
   };
 
-  const getLevelErrorsOrdered = levelErrors => {
-    return ViewUtils.orderLevelErrors(levelErrors);
-  };
-
   const getLevelErrorPriority = levelError => {
     return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
   };
