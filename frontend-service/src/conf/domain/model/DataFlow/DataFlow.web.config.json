@@ -1,5 +1,6 @@
 {
     "acceptDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
+    "createDataflow": "/dataflow",
     "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
     "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
     "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",

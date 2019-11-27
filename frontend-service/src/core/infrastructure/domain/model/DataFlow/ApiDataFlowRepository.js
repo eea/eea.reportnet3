@@ -130,6 +130,12 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
+const create = async (name, description) => {
+  const createdDataflow = await apiDataflow.create(name, description);
+  console.log(createdDataflow);
+  return createdDataflow;
+};
+
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
   return parseDataflowDTOs(completedDataflowsDTO);
@@ -311,6 +317,7 @@ export const ApiDataflowRepository = {
   all,
   accept,
   accepted,
+  create,
   completed,
   dataflowDetails,
   datasetsValidationStatistics,

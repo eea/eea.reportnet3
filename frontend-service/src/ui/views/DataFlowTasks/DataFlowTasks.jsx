@@ -1,7 +1,11 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined } from 'lodash';
+
 import styles from './DataFlowTasks.module.scss';
+
+import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
@@ -12,11 +16,19 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { UserContext } from '../_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 
 export const DataflowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
+  const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [completedContent, setcompletedContent] = useState([]);
+  const [isCustodian, setIsCustodian] = useState();
+  const [loading, setLoading] = useState(true);
+  const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowAcceptedPendingTab'],
@@ -31,10 +43,6 @@ export const DataflowTasks = withRouter(({ match, history }) => {
     }
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
-  const [loading, setLoading] = useState(true);
-  const [pendingContent, setpendingContent] = useState([]);
-  const [acceptedContent, setacceptedContent] = useState([]);
-  const [completedContent, setcompletedContent] = useState([]);
 
   const dataFetch = async () => {
     setLoading(true);
@@ -59,6 +67,12 @@ export const DataflowTasks = withRouter(({ match, history }) => {
     setBreadCrumbItems([{ label: resources.messages['dataflowList'], icon: 'home' }]);
   }, [history, match.params.dataflowId, resources.messages]);
 
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
+    }
+  }, [user]);
+
   const layout = children => {
     return (
       <MainLayout>
@@ -78,6 +92,8 @@ export const DataflowTasks = withRouter(({ match, history }) => {
         navTitle={resources.messages['dataflow']}
         components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
+        isCustodian={isCustodian}
+        onFetchData={dataFetch}
         subscribeButtonTitle={resources.messages['subscribeButton']}
         style={{ textAlign: 'left' }}
       />
