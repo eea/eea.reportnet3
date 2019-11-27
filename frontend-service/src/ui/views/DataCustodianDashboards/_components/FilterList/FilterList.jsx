@@ -11,6 +11,7 @@ import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
 const FilterList = ({
+  datasetSchemaId,
   color,
   filterDispatch,
   levelErrors,
@@ -27,7 +28,7 @@ const FilterList = ({
   const tableNamesIdsArray = [];
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
-  uniqDatasets.map(dataset => {
+  uniqDatasets.forEach(dataset => {
     const datasetObject = createTableCheckBoxObject(dataset);
     tableNamesIdsArray.push(datasetObject);
   });
@@ -81,6 +82,7 @@ const FilterList = ({
         {filterByTables()}
       </Accordion>
       <StatusList
+        datasetSchemaId={datasetSchemaId}
         statusFilters={statusFilters}
         color={color}
         levelErrors={levelErrors}

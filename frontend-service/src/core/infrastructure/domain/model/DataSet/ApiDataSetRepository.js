@@ -163,8 +163,9 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
   const tableStatisticValues = [];
   let levelErrors = [];
-  const tableLevelErrors = [];
+  const allDatasetLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO));
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
         (datasetTableDTO.totalRecordsWithBlockers +
@@ -176,7 +177,6 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.totalRecordsWithErrors,
       datasetTableDTO.totalRecordsWithBlockers
     ]);
-    tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
@@ -184,7 +184,7 @@ const errorStatisticsById = async datasetId => {
     );
   });
   const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
-  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
   let transposedValues = CoreUtils.transposeMatrix(tableStatisticValues);
@@ -233,7 +233,7 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
   const allLevelErrorsFromRules = [];
   findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
   let levelErrorsRepeated = [];
-  allLevelErrorsFromRules.map(rule => {
+  allLevelErrorsFromRules.forEach(rule => {
     if (!isUndefined(rule.thenCondition)) {
       levelErrorsRepeated.push(rule.thenCondition[1]);
     }
@@ -388,7 +388,6 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
   const rows = [];
   const letters = [];
   const rowHeaders = [];
-  const rowPositions = [];
   columnHeaders.unshift('GREENHOUSE GAS SOURCE');
 
   if (webFormDataDTO.totalRecords > 0) {
@@ -400,7 +399,7 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
     const records = webFormDataDTO.records.map(webFormRecordDTO => {
       record = new DatasetTableRecord();
       let row = {};
-      const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
+      webFormRecordDTO.fields.forEach(webFormFieldDTO => {
         field = new DatasetTableField();
         field.fieldId = webFormFieldDTO.id;
         field.fieldSchemaId = webFormFieldDTO.idFieldSchema;

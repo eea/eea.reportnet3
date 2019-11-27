@@ -28,6 +28,7 @@ export const WebLinks = ({
   const resources = useContext(ResourcesContext);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
@@ -203,26 +204,40 @@ export const WebLinks = ({
               }}
             />
           </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadWebLinks();
+                setIsLoading(false);
+              }}
+            />
+          </div>
         </Toolbar>
       ) : (
         <></>
       )}
       <DataTable
         autoLayout={true}
+        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
+        }}
+        onSort={e => {
+          setSortFieldWeblinks(e.sortField);
+          setSortOrderWeblinks(e.sortOrder);
         }}
         paginator={false}
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
-        value={webLinks}
         sortField={sortFieldWeblinks}
         sortOrder={sortOrderWeblinks}
-        onSort={e => {
-          setSortFieldWeblinks(e.sortField);
-          setSortOrderWeblinks(e.sortOrder);
-        }}>
+        value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
       <Dialog
@@ -249,7 +264,7 @@ export const WebLinks = ({
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
-                    autofocus="true"
+                    autoFocus={true}
                     innerRef={inputRef}
                     name="description"
                     type="text"

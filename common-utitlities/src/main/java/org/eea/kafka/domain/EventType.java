@@ -55,16 +55,6 @@ public enum EventType {
   DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table", true),
 
   /**
-   * The load document completed event.
-   */
-  LOAD_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_document_completed_key", true),
-
-  /**
-   * The delete document completed event.
-   */
-  DELETE_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_document_completed_key", true),
-
-  /**
    * The field updated completed event.
    */
   FIELD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "updated_field_completed_key", true),

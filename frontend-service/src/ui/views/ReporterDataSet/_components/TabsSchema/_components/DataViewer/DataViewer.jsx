@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { capitalize, isEmpty, isUndefined, isNull, isString, differenceBy } from 'lodash';
+import { capitalize, isEmpty, isUndefined, isNull, isString } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -59,7 +59,7 @@ const DataViewer = withRouter(
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-    const [datasetHasData, setDatasetHasData] = useState(false);
+    // const [datasetHasData, setDatasetHasData] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -114,6 +114,7 @@ const DataViewer = withRouter(
       if (contextReporterDataset.isValidationSelected) {
         setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
+        setLevelErrorValidations(levelErrorTypesWithCorrects);
         contextReporterDataset.setIsValidationSelected(false);
       }
     }, [contextReporterDataset.isValidationSelected]);
@@ -290,7 +291,7 @@ const DataViewer = withRouter(
 
     const getLevelErrorFilters = () => {
       let filters = [];
-      levelErrorTypesWithCorrects.map(value => {
+      levelErrorTypesWithCorrects.forEach(value => {
         if (!isUndefined(value) && !isNull(value)) {
           let filter = {
             label: capitalize(value),
@@ -860,6 +861,7 @@ const DataViewer = withRouter(
           }
         }
       }
+      return null;
     });
 
     const editRowDialogFooter = (
@@ -919,7 +921,7 @@ const DataViewer = withRouter(
       let levelError = '';
       let lvlFlag = 0;
       const errors = [];
-      validations.map(validation => {
+      validations.forEach(validation => {
         errors.push(validation.levelError);
       });
       let differentErrors = [...new Set(errors)];
@@ -1016,7 +1018,7 @@ const DataViewer = withRouter(
           column.key !== 'id' &&
           column.key !== 'datasetPartitionId'
       );
-      filteredColumns.map(column => {
+      filteredColumns.forEach(column => {
         if (!isUndefined(record.dataRow)) {
           const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           initialValues.push([column.field, field.fieldData[column.field]]);
@@ -1052,25 +1054,30 @@ const DataViewer = withRouter(
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
-          let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          return (
-            <React.Fragment key={column.field}>
-              <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
-              </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
-                <InputText id={column.field} onChange={e => onEditAddFormInput(column.field, e.target.value, field)} />
-              </div>
-            </React.Fragment>
-          );
+          if (!isUndefined(newRecord.dataRow)) {
+            const field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            return (
+              <React.Fragment key={column.field}>
+                <div className="p-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor={column.field}>{column.header}</label>
+                </div>
+                <div className="p-col-8" style={{ padding: '.5em' }}>
+                  <InputText
+                    id={column.field}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          }
         }
       }
     });
 
-    const requiredValidator = props => {
-      let value = getCellValue(props, props.field);
-      return value && value.length > 0;
-    };
+    // const requiredValidator = props => {
+    //   let value = getCellValue(props, props.field);
+    //   return value && value.length > 0;
+    // };
 
     const getRecordValidationByErrorAndMessage = (levelError, message) => {
       return DatasetService.createValidation('RECORD', 0, levelError, message);
@@ -1167,7 +1174,9 @@ const DataViewer = withRouter(
     const addIconLevelError = (validation, levelError, message) => {
       let icon = [];
       if (!isEmpty(validation)) {
-        icon.push(<IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} />);
+        icon.push(
+          <IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} key={levelError} />
+        );
       }
       return icon;
     };
@@ -1448,7 +1457,7 @@ const DataViewer = withRouter(
         </Dialog>
 
         <ConfirmDialog
-          header={resources.messages['deleteDatasetTableHeader']}
+          header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onConfirmDeleteTable}

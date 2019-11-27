@@ -5,13 +5,13 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters }) => {
+export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
   const resources = useContext(ResourcesContext);
-  let errorListFilters = levelErrors.map(errorLevel => {
+  let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
-      <li className={styles.listItem}>
+      <li key={i} className={styles.listItem}>
         <input
-          id={errorLevel.toString().toLowerCase()}
+          id={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`}
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
@@ -23,7 +23,7 @@ export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters }
             });
           }}
         />
-        <label htmlFor={errorLevel.toString().toLowerCase()} className={styles.labelItem}>
+        <label htmlFor={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`} className={styles.labelItem}>
           {resources.messages[errorLevel.toString().toLowerCase()]}
         </label>
       </li>

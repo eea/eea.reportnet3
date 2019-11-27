@@ -851,7 +851,7 @@ public class DatasetServiceImpl implements DatasetService {
     tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
     tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);
     tableStats.setTotalRecordsWithInfos(totalRecordsWithInfos);
-    tableStats.setTableErrors(totalTableErrors > 0 ? true : false);
+    tableStats.setTableErrors(totalTableErrors > 0);
 
     List<Statistics> stats = new ArrayList<>();
 
@@ -885,7 +885,7 @@ public class DatasetServiceImpl implements DatasetService {
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(datasetId);
     statsTableErrors.setDataset(reporting);
-    if (tableValue.getTableValidations() != null && tableValue.getTableValidations().size() > 0) {
+    if (tableValue.getTableValidations() != null && !tableValue.getTableValidations().isEmpty()) {
       statsTableErrors.setValue("true");
     } else {
       statsTableErrors.setValue(totalTableErrors > 0 ? "true" : "false");
@@ -1103,9 +1103,8 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       record.setTableValue(table);
-      record.getFields().stream().filter(field -> field.getValue() == null).forEach(field -> {
-        field.setValue("");
-      });
+      record.getFields().stream().filter(field -> field.getValue() == null)
+          .forEach(field -> field.setValue(""));
 
     });
     recordRepository.saveAll(recordValue);
