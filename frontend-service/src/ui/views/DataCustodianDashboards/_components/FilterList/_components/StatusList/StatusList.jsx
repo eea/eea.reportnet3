@@ -6,7 +6,6 @@ import colors from 'conf/colors.json';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
-  console.log('statusFilters', datasetSchemaId);
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
