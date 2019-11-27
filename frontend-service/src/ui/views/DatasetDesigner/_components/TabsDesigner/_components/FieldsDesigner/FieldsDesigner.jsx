@@ -23,6 +23,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
 
   const resources = useContext(ResourcesContext);
 
@@ -36,6 +37,17 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       setFields(table.records[0].fields);
     }
   }, []);
+
+  useEffect(() => {
+    if (isPreviewModeOn) {
+      setLevelErrorTypes(onLoadErrorTypes());
+    }
+  }, [isPreviewModeOn]);
+
+  const onLoadErrorTypes = async () => {
+    const datasetSchema = await DatasetService.schemaById(datasetId);
+    return datasetSchema.levelErrorTypes;
+  };
 
   const onFieldAdd = (fieldId, fieldName, recordId, fieldType) => {
     const inmFields = [...fields];
@@ -179,6 +191,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
         isWebFormMMR={false}
         // buttonsList={[]}
         key={table.id}
+        levelErrorTypes={levelErrorTypes}
         tableId={table.tableSchemaId}
         tableName={table}
         tableSchemaColumns={tableSchemaColumns}
@@ -316,8 +329,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           <span className={styles.InputSwitchText}>{resources.messages['design']}</span>
           <InputSwitch
             checked={isPreviewModeOn}
-            disabled={true}
-            // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
+            // disabled={true}
+            disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
             onChange={e => {
               setIsPreviewModeOn(e.value);
             }}
