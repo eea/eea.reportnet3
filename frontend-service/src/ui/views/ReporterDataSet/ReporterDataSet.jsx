@@ -426,7 +426,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={isWebFormMMR}
+              disabled={isWebFormMMR || !datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}

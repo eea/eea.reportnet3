@@ -1050,7 +1050,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const newRecordForm = colsSchema.forEach((column, i) => {
+    const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
           let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
