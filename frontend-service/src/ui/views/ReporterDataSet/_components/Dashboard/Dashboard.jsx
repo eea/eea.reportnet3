@@ -11,14 +11,16 @@ import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+
 import { DatasetService } from 'core/services/DataSet';
+import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {
-  CORRECT: 1,
-  INFO: 2,
-  WARNING: 3,
-  ERROR: 4,
-  BLOCKER: 5
+  CORRECT: 0,
+  INFO: 1,
+  WARNING: 2,
+  ERROR: 3,
+  BLOCKER: 4
 };
 
 const Dashboard = withRouter(
@@ -27,17 +29,13 @@ const Dashboard = withRouter(
       refresh,
       match: {
         params: { datasetId }
-      },
-      correctLevelError = ['CORRECT'],
-      levelErrorTypes,
-      allLevelErrorTypes = correctLevelError.concat(levelErrorTypes)
+      }
     }) => {
       const [dashboardColors, setDashboardColors] = useState();
       const [dashboardData, setDashboardData] = useState({});
       const [dashboardOptions, setDashboardOptions] = useState({});
       const [dashboardTitle, setDashboardTitle] = useState('');
       const [isLoading, setIsLoading] = useState(false);
-      // const [levelErrorAFilters, setLevelErrorFilters] = useState(allLevelErrorFilters);
 
       const resources = useContext(ResourcesContext);
 
@@ -70,28 +68,38 @@ const Dashboard = withRouter(
         chartRef.current.refresh();
       };
 
-      const getBarsByErrorAndStatistics = dataset => {
-        const levelErrorBars = allLevelErrorTypes.map(function(error, i) {
-          const errorBar = {
-            label: capitalize(error),
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[error] : colors.error,
-            data: dataset.tableStatisticPercentages[i],
+      const getLevelErrorsOrdered = levelErrors => {
+        return ViewUtils.orderLevelErrors(levelErrors);
+      };
+
+      const getLevelErrorPriority = levelError => {
+        return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+      };
+
+      const getDashboardBarsByDatasetData = dataset => {
+        const dashboardBars = [];
+        let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
+        levelErrors.forEach(levelError => {
+          let levelErrorIndex = getLevelErrorPriority(levelError);
+          let bar = {
+            label: capitalize(levelError),
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+            data: dataset.tableStatisticPercentages[levelErrorIndex],
             totalData: dataset.tableStatisticValues
           };
-          return errorBar;
+          dashboardBars.push(bar);
         });
-        return levelErrorBars;
+        return dashboardBars;
       };
 
       const onLoadStatistics = async () => {
         setIsLoading(true);
         const dataset = await DatasetService.errorStatisticsById(datasetId);
-        const tableStatisticValues = dataset.tableStatisticValues;
         const tableNames = dataset.tables.map(table => table.tableSchemaName);
         setDashboardTitle(dataset.datasetSchemaName);
         setDashboardData({
           labels: tableNames,
-          datasets: getBarsByErrorAndStatistics(dataset)
+          datasets: getDashboardBarsByDatasetData(dataset)
         });
 
         setDashboardOptions({

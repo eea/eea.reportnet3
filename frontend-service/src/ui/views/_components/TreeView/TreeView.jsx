@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { capitalize, isUndefined, isNull, isEmpty } from 'lodash';
+import { capitalize, isUndefined, isNull } from 'lodash';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -32,21 +32,19 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
             <TreeViewExpandableItem
               title={!Number.isInteger(Number(propertyName)) ? camelCaseToNormal(propertyName) : ''}
               expanded={true}>
-              {groupableProperties.indexOf(propertyName.toLowerCase()) > -1 ? (
-                groupFields(property)
-              ) : !isUndefined(property) ? (
-                Object.values(property).map((proper, index, { length }) => (
-                  <TreeView
-                    key={index}
-                    property={proper}
-                    propertyName={Object.getOwnPropertyNames(property)[index]}
-                    excludeBottomBorder={index === length - 1}
-                    groupableProperties={groupableProperties}
-                  />
-                ))
-              ) : (
-                <div>Loading...</div>
-              )}
+              {groupableProperties.indexOf(propertyName.toLowerCase()) > -1
+                ? groupFields(property)
+                : !isUndefined(property)
+                ? Object.values(property).map((proper, index, { length }) => (
+                    <TreeView
+                      key={index}
+                      property={proper}
+                      propertyName={Object.getOwnPropertyNames(property)[index]}
+                      excludeBottomBorder={index === length - 1}
+                      groupableProperties={groupableProperties}
+                    />
+                  ))
+                : null}
             </TreeViewExpandableItem>
           )}
         </div>

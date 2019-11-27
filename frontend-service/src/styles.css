@@ -2129,7 +2129,7 @@ body .p-datatable table {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-  word-wrap:break-word;
+  word-wrap: break-word;
 }
 
 body .p-datatable .p-datatable-header,
@@ -2252,7 +2252,7 @@ body .p-datatable .p-datatable-tbody > tr {
 }
 
 body .p-datatable .p-datatable-tbody > tr.p-highlight {
-  background-color: rgba(240,233,145,0.3);
+  background-color: rgba(240, 233, 145, 0.3);
   color: #404040;
   font-weight: bold;
 }
@@ -2274,7 +2274,7 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight {
-  background-color: rgba(240,233,145,0.3);
+  background-color: rgba(240, 233, 145, 0.3);
   color: #404040;
   font-weight: bold;
 }
@@ -3499,6 +3499,7 @@ body .p-breadcrumb ul li .p-menuitem-link {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  cursor: pointer;
 }
 body .p-breadcrumb ul li .p-menuitem-link:focus {
   outline: 0 none;

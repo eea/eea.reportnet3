@@ -5,32 +5,25 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const StatusList = ({ color, levelErrors, filterDispatch }) => {
+export const StatusList = ({ color, levelErrors, filterDispatch, statusFilters }) => {
   const resources = useContext(ResourcesContext);
-  let errorListFilters = levelErrors.map(errorLevel => {
+  let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
-      <li className={styles.listItem}>
+      <li key={i} className={styles.listItem}>
         <input
           id={errorLevel.toString().toLowerCase()}
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
-          defaultChecked={true}
+          defaultChecked={statusFilters.includes(errorLevel.toString()) ? false : true}
           onChange={e => {
-            if (e.target.checked) {
-              filterDispatch({
-                type: 'STATUS_FILTER_ON',
-                payload: { msg: errorLevel.toString() }
-              });
-            } else {
-              filterDispatch({
-                type: 'STATUS_FILTER_OFF',
-                payload: { msg: errorLevel.toString() }
-              });
-            }
+            filterDispatch({
+              type: e.target.checked ? 'STATUS_FILTER_ON' : 'STATUS_FILTER_OFF',
+              payload: { msg: errorLevel.toString() }
+            });
           }}
         />
-        <label htmlFor={errorLevel} className={styles.labelItem}>
+        <label htmlFor={errorLevel.toString().toLowerCase()} className={styles.labelItem}>
           {resources.messages[errorLevel.toString().toLowerCase()]}
         </label>
       </li>
@@ -38,8 +31,6 @@ const StatusList = ({ color, levelErrors, filterDispatch }) => {
   });
   return <ul className={styles.list}>{errorListFilters}</ul>;
 };
-
-export { StatusList };
 
 // return (
 //   <ul className={styles.list}>

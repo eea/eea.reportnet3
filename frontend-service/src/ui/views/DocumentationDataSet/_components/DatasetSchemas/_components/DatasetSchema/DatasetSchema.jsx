@@ -1,52 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { isUndefined, isNull, isEmpty } from 'lodash';
+import { isUndefined, isNull } from 'lodash';
 
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TreeView } from 'ui/views/_components/TreeView';
 
-import { DatasetService } from 'core/services/DataSet';
-
-const DatasetSchema = ({ datasetId }) => {
-  const [designDataset, setDesignDataset] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    onLoadDatasetDesignSchema();
-  }, []);
-
-  const onLoadDatasetDesignSchema = async () => {
-    try {
-      // setIsLoading(true);
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      if (!isEmpty(datasetSchema)) {
-        setDesignDataset(datasetSchema);
-      }
-    } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
-    } finally {
-      // setIsLoading(false);
-    }
-  };
-
+const DatasetSchema = ({ designDataset, index }) => {
   const renderDatasetSchema = () => {
-    // if (isLoading) {
-    //   return <Spinner />;
-    // } else {
     return !isUndefined(designDataset) && !isNull(designDataset) ? (
       <div>
         <TreeView
+          excludeBottomBorder={false}
+          groupableProperties={['fields']}
+          key={index}
           property={parseDesignDataset(designDataset)}
           propertyName={''}
-          excludeBottomBorder={false}
           rootProperty={''}
-          groupableProperties={['fields']}
         />
       </div>
     ) : null;
-    // }
   };
 
   return renderDatasetSchema();

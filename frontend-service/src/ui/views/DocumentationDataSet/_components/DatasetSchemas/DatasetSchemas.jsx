@@ -1,49 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 
-import { isUndefined, isNull, isEmpty } from 'lodash';
+import { isUndefined, isNull } from 'lodash';
 
+import styles from './DatasetSchemas.module.css';
+
+import { Button } from 'ui/views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DataflowService } from 'core/services/DataFlow';
+const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
+  const resources = useContext(ResourcesContext);
 
-const DatasetSchemas = ({ dataflowId }) => {
-  const [designDatasets, setDesignDatasets] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    onLoadDesignDatasets();
-  }, []);
-
-  const onLoadDesignDatasets = async () => {
-    try {
-      setIsLoading(true);
-      const dataflow = await DataflowService.reporting(dataflowId);
-      if (!isEmpty(dataflow.designDatasets)) {
-        setDesignDatasets(dataflow.designDatasets);
-      }
-    } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const renderDatasetSchemas = () => {
-    if (isLoading) {
-      return <Spinner />;
-    } else {
-      return !isUndefined(designDatasets) && !isNull(designDatasets)
-        ? designDatasets.map(designDataset => {
-            return <DatasetSchema datasetId={designDataset.datasetId} />;
-          })
-        : null;
-    }
+    return !isUndefined(designDatasets) && !isNull(designDatasets)
+      ? designDatasets.map((designDataset, i) => {
+          return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
+        })
+      : null;
   };
 
-  return renderDatasetSchemas();
+  const renderToolbar = () => {
+    return (
+      <Toolbar>
+        <div className="p-toolbar-group-right">
+          <Button
+            className={`p-button-rounded p-button-secondary`}
+            disabled={false}
+            icon={'refresh'}
+            label={resources.messages['refresh']}
+            onClick={async () => {
+              setIsLoading(true);
+              await onLoadDesignDatasets();
+              setIsLoading(false);
+            }}
+          />
+        </div>
+      </Toolbar>
+    );
+  };
+
+  return (
+    <>
+      {renderToolbar()}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
+    </>
+  );
 };
 
 export { DatasetSchemas };

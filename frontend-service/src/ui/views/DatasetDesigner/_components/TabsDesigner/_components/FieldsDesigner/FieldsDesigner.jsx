@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { capitalize, isUndefined, isNull } from 'lodash';
 
 import styles from './FieldsDesigner.module.css';
@@ -17,7 +16,7 @@ import { DatasetService } from 'core/services/DataSet';
 
 export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [fields, setFields] = useState();
+  const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -35,22 +34,13 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       !isNull(table.records[0].fields)
     ) {
       setFields(table.records[0].fields);
-    } else {
-      setFields([]);
     }
   }, []);
-
-  useEffect(() => {
-    if (!isUndefined(fields)) {
-      if (!isUndefined(onChangeFields) && !isNull(onChangeFields)) {
-        onChangeFields(fields, table.tableSchemaId);
-      }
-    }
-  }, [fields]);
 
   const onFieldAdd = (fieldId, fieldName, recordId, fieldType) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, { fieldId, name: fieldName, recordId, type: fieldType });
+    onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
   };
 
@@ -129,6 +119,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndx, 1);
+        onChangeFields(inmFields, table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -255,14 +246,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
           fieldValue=""
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
-          isErrorDialogVisible={isErrorDialogVisible}
           onFieldDragAndDrop={onFieldDragAndDrop}
-          onLoad={load => {
-            setIsLoading(load);
-          }}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
-          recordId={table.recordSchemaId}
+          recordId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
           totalFields={!isUndefined(fields) && !isNull(fields) ? fields.length : 0}
         />
       </div>
@@ -283,7 +270,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
               fieldValue={field.value}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
-              isErrorDialogVisible={isErrorDialogVisible}
               key={field.fieldId}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}

@@ -15,15 +15,26 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) => {
+export const WebLinks = ({
+  isCustodian,
+  dataflowId,
+  webLinks,
+  onLoadWebLinks,
+  sortFieldWeblinks,
+  setSortFieldWeblinks,
+  sortOrderWeblinks,
+  setSortOrderWeblinks
+}) => {
   const resources = useContext(ResourcesContext);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
-  const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
   const form = useRef(null);
+  const inputRef = useRef();
+
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
@@ -38,11 +49,6 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     setWeblinkItem({ id: undefined, description: '', url: '' });
     form.current.resetForm();
   };
-
-  useEffect(() => {
-    onLoadWebLinks();
-    resetForm();
-  }, [reload]);
 
   const onHideAddEditDialog = () => {
     setIsAddOrEditWeblinkDialogVisible(false);
@@ -76,7 +82,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -90,7 +96,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
         if (weblinkToEdit.isUpdated) {
-          setReload(!reload);
+          onLoadWebLinks();
         }
 
         onHideAddEditDialog();
@@ -104,7 +110,7 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
 
     if (weblinkToDelete.isDeleted) {
-      setReload(!reload);
+      onLoadWebLinks();
     }
 
     setIsConfirmDeleteVisible(false);
@@ -114,6 +120,14 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
     setIsConfirmDeleteVisible(false);
     resetForm();
   };
+
+  useEffect(() => {
+    if (isAddOrEditWeblinkDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isAddOrEditWeblinkDialogVisible]);
 
   const webLinkEditButtons = () => {
     return (
@@ -190,19 +204,39 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
               }}
             />
           </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadWebLinks();
+                setIsLoading(false);
+              }}
+            />
+          </div>
         </Toolbar>
       ) : (
         <></>
       )}
       <DataTable
         autoLayout={true}
+        loading={isLoading}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
+        }}
+        onSort={e => {
+          setSortFieldWeblinks(e.sortField);
+          setSortOrderWeblinks(e.sortOrder);
         }}
         paginator={false}
         rows={10}
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
+        sortField={sortFieldWeblinks}
+        sortOrder={sortOrderWeblinks}
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
@@ -230,6 +264,8 @@ export const WebLinks = ({ isCustodian, dataflowId, webLinks, onLoadWebLinks }) 
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
+                    autoFocus={true}
+                    innerRef={inputRef}
                     name="description"
                     type="text"
                     placeholder={resources.messages['description']}

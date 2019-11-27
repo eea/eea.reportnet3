@@ -15,6 +15,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -77,6 +78,10 @@ public class DataSetSchemaControllerImplTest {
    */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  /** The dataset snapshot service. */
+  @Mock
+  private DatasetSnapshotService datasetSnapshotService;
 
   /**
    * Inits the mocks.
@@ -297,10 +302,27 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
+    doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
+
+  @Test
+  public void deleteDatasetSchemaException3Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+    doThrow(new EEAException()).when(datasetSnapshotService)
+        .deleteAllSchemaSnapshots(Mockito.any());
+    try {
+      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("Not the same status", HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+
+  }
+
 
   /**
    * Update table schema test.

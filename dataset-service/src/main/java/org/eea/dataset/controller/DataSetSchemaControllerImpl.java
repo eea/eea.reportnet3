@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
@@ -60,6 +61,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
 
   /**
    * The Constant LOG.
@@ -184,6 +189,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   * @throws EEAException
    */
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -197,11 +203,22 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (schemaId.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
+
+    // delete the schema snapshots too
+    try {
+      datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+
+
     dataschemaService.deleteDatasetSchema(datasetId, schemaId);
     datasetMetabaseService.deleteDesignDataset(datasetId);
     recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+
     dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
         ResourceGroupEnum.DATASCHEMA_PROVIDER);
+
   }
 
   /**
@@ -285,8 +302,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody OrderVO orderVO) {
     try {
       // Update the fieldSchema from the datasetSchema
-      if (!dataschemaService.orderTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          orderVO.getId(), orderVO.getPosition())) {
+      if (Boolean.FALSE.equals(
+          dataschemaService.orderTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
+              orderVO.getId(), orderVO.getPosition()))) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {

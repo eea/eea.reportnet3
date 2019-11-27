@@ -6,3 +6,13 @@
 .cancelButton {
   margin-left: 0.5rem !important;
 }
+
+.checkboxIsPublick {
+  display: -webkit-inline-box;
+  input {
+    width: auto;
+  }
+  label {
+    margin-left: 0.5rem;
+  }
+}

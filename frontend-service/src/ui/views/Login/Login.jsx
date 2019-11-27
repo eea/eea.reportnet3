@@ -20,11 +20,6 @@ const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [loginError, setLoginError] = useState();
-  const refreshTimeout = () => {
-    return setTimeout(() => {
-      user.removeRefreshTimeout();
-    }, 1000);
-  };
   const initialValues = {
     userName: '',
     password: ''

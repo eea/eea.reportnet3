@@ -1,7 +1,9 @@
 package org.eea.communication.service.impl;
 
+import java.util.Map;
 import org.eea.communication.service.NotificationService;
 import org.eea.communication.service.model.Notification;
+import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +28,20 @@ public class NotificationServiceImpl implements NotificationService {
   private final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
   /**
-   * Send a message to the given user.
+   * Send.
    *
-   * @param userId the user that should receive the message.
-   * @param message the message to send to the user.
-   *
+   * @param user the user
+   * @param type the type
+   * @param notification the notification
    * @return true, if successful
    */
   @Override
-  public boolean send(String userId, String message) {
-    if (userId != null && !userId.isEmpty() && message != null) {
-      logger.info("Notification sent to user: userId={}, message={}", userId, message);
-      template.convertAndSendToUser(userId, "/queue/notifications", new Notification(message));
+  public boolean send(String user, EventType type, Map<?, ?> notification) {
+    if (user != null && !user.isEmpty() && notification != null) {
+      logger.info("Notification sent to user: userId={}, type={}, message={}", user, type,
+          notification);
+      template.convertAndSendToUser(user, "/queue/notifications",
+          new Notification(type, notification));
       return true;
     }
     return false;
