@@ -282,23 +282,22 @@ const datasetsReleasedStatus = async dataflowId => {
 
   const groupByReporter = onGroupBy('dataSetName');
 
-  const isUnReleased = Object.entries(groupByReporter(datasetsReleasedStatusDTO))
-    .flat()
-    .map(country =>
-      Array.isArray(country) ? country.map(aux => aux.isReleased).filter(item => item === false).length : null
-    )
-    .filter(item => item !== null);
+  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO)).length).fill(0);
+  const isNotReleased = [...isReleased];
 
-  const isReleased = Object.entries(groupByReporter(datasetsReleasedStatusDTO))
-    .flat()
-    .map(country =>
-      Array.isArray(country) ? country.map(aux => aux.isReleased).filter(item => item === true).length : null
-    )
-    .filter(item => item !== null);
+  Object.values(groupByReporter(datasetsReleasedStatusDTO)).forEach((reporter, i) => {
+    reporter.forEach(dataset => {
+      if (dataset.isReleased) {
+        isReleased[i] += 1;
+      } else {
+        isNotReleased[i] += 1;
+      }
+    });
+  });
 
   const releasedStatusData = {
     releasedData: isReleased,
-    unReleasedData: isUnReleased,
+    unReleasedData: isNotReleased,
     labels: Array.from(new Set(reporters))
   };
 
