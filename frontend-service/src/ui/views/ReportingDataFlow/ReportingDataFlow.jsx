@@ -296,8 +296,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            <div className={`${styles.datasetItem}`}>
-              {isCustodian && (
+            {isCustodian && (
+              <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="newItem"
                   caption={resources.messages['newItem']}
@@ -314,8 +314,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     }
                   ]}
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
