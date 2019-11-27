@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
@@ -30,7 +29,7 @@ import { UserService } from 'core/services/User';
 
 export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
-    params: { dataflowId, datasetId }
+    params: { datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');

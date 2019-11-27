@@ -7,7 +7,6 @@ import styles from './GlobalValidationDashboard.module.css';
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -25,14 +24,6 @@ const SEVERITY_CODE = {
   BLOCKER: colors.dashboardBlocker
 };
 
-const LEVELS = {
-  CORRECT: 0,
-  INFO: 1,
-  WARNING: 2,
-  ERROR: 3,
-  BLOCKER: 4
-};
-
 export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
@@ -42,7 +33,7 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     originalData: {},
     data: {}
   };
-  const [dashboardColors, setDashboardColors] = useState({
+  const [dashboardColors] = useState({
     CORRECT: colors.correct,
     INFO: colors.info,
     WARNING: colors.warning,
@@ -63,22 +54,22 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
   }, [validationDashboardData]);
 
-  const onChangeColor = (color, type) => {
-    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
-    const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
+  // const onChangeColor = (color, type) => {
+  //   setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
+  //   const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
 
-    const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
-      dataset => dataset.label === SEVERITY_CODE[type]
-    );
-    filteredDatasets.forEach(dataset => {
-      dataset.backgroundColor = `#${color}`;
-    });
-    filteredDatasetsCurrent.forEach(dataset => {
-      dataset.backgroundColor = `#${color}`;
-    });
+  //   const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
+  //     dataset => dataset.label === SEVERITY_CODE[type]
+  //   );
+  //   filteredDatasets.forEach(dataset => {
+  //     dataset.backgroundColor = `#${color}`;
+  //   });
+  //   filteredDatasetsCurrent.forEach(dataset => {
+  //     dataset.backgroundColor = `#${color}`;
+  //   });
 
-    chartRef.current.refresh();
-  };
+  //   chartRef.current.refresh();
+  // };
 
   const onErrorLoadingDashboard = error => {
     console.error('Dashboard error: ', error);
@@ -107,11 +98,8 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     return <span className={`${styles.stamp} ${styles.emptySchema}`}>{message}</span>;
   };
 
-  const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
-    let allDatasets = [];
-    tablesDashboardData.forEach(table => {
-      allDatasets.push(getBarsByErrorAndStatistics(table, levelErrors));
-    });
+  const getDatasetsByErrorAndStatistics = (datasets, levelErrors) => {
+    let allDatasets = getDashboardBarsByDataset(datasets, levelErrors);
     return allDatasets.flat();
   };
 
@@ -119,32 +107,37 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
     return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
   };
 
-  const getBarsByErrorAndStatistics = (table, levelErrors) => {
-    const levelErrorBars = levelErrors.map((levelError, i) => {
-      let levelErrorIndex = getLevelErrorPriority(levelError);
-      const errorBar = {
-        label: levelError,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
-        data: table.tableStatisticPercentages[levelErrorIndex],
-        totalData: table.tableStatisticValues[levelErrorIndex],
-        stack: table.tableName
-      };
-      return errorBar;
+  const getDashboardBarsByDataset = (datasets, levelErrors) => {
+    let allDatasets = [];
+    datasets.tables.forEach((table, z) => {
+      let allLevelErrorBars = [];
+      levelErrors.forEach((levelError, i) => {
+        let levelErrorIndex = getLevelErrorPriority(levelError);
+        const errorBar = {
+          label: levelError,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelErrorIndex,
+          data: table.tableStatisticPercentages[levelErrorIndex],
+          totalData: table.tableStatisticValues[levelErrorIndex],
+          stack: table.tableName
+        };
+        allLevelErrorBars.push(errorBar);
+      });
+      allDatasets.push(allLevelErrorBars);
     });
-    return levelErrorBars;
+    return allDatasets;
   };
 
-  const buildDatasetDashboardObject = (datasetsDashboardsData, levelErrors) => {
-    let datasets = [];
-    if (!isUndefined(datasetsDashboardsData.tables)) {
-      datasets = getDatasetsByErrorAndStatistics(datasetsDashboardsData.tables, levelErrors);
+  const buildDatasetDashboardObject = (datasets, levelErrors) => {
+    let dashboards = [];
+    if (!isUndefined(datasets)) {
+      dashboards = getDatasetsByErrorAndStatistics(datasets, levelErrors);
     }
-    const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
+    const labels = datasets.datasetReporters.map(reporterData => reporterData.reporterName);
     const datasetDataObject = {
       labels: labels,
-      datasets: datasets
+      datasets: dashboards
     };
     return datasetDataObject;
   };

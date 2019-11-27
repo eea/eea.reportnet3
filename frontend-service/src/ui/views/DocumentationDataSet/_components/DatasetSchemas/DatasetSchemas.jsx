@@ -1,25 +1,33 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { isUndefined, isNull } from 'lodash';
+
+import styles from './DatasetSchemas.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
+const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const renderDatasetSchemas = () => {
-    return !isUndefined(designDatasets) && !isNull(designDatasets)
-      ? designDatasets.map(designDataset => {
-          return <DatasetSchema designDataset={designDataset} />;
-        })
-      : null;
+    console.log(datasetsSchemas);
+    return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+      datasetsSchemas.map((designDataset, i) => {
+        return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
+      })
+    ) : (
+      <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
+    );
   };
 
   const renderToolbar = () => {
-    return (
+    return isCustodian ? (
       <Toolbar>
         <div className="p-toolbar-group-right">
           <Button
@@ -27,17 +35,23 @@ const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
             disabled={false}
             icon={'refresh'}
             label={resources.messages['refresh']}
-            onClick={() => onLoadDesignDatasets()}
+            onClick={async () => {
+              setIsLoading(true);
+              await onLoadDatasetsSchemas();
+              setIsLoading(false);
+            }}
           />
         </div>
       </Toolbar>
+    ) : (
+      <></>
     );
   };
 
   return (
     <>
       {renderToolbar()}
-      {renderDatasetSchemas()}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
     </>
   );
 };

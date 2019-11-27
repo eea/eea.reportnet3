@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
@@ -24,10 +24,8 @@ import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { ScrollPanel } from 'primereact/scrollpanel';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
@@ -61,8 +59,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
-
-  let growlRef = useRef();
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -134,10 +130,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setLoading(true);
     onLoadReportingDataflow();
   }, [match.params.dataflowId, isDataUpdated]);
-
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
 
   const handleRedirect = target => {
     history.push(target);
@@ -304,8 +296,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            <div className={`${styles.datasetItem}`}>
-              {isCustodian && (
+            {isCustodian && (
+              <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="newItem"
                   caption={resources.messages['newItem']}
@@ -322,8 +314,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     }
                   ]}
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
@@ -533,7 +525,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           visible={newDatasetDialog}
           className={styles.dialog}
           dismissableMask={false}
-          onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
+          onHide={() => {
+            setNewDatasetDialog(false);
+            setIsFormReset(false);
+          }}>
           <NewDatasetSchemaForm
             dataflowId={match.params.dataflowId}
             datasetSchemaInfo={updatedDatasetSchema}
@@ -635,7 +630,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <ul>
             <li>
               <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
             </li>
             <li>
               <strong>{resources.messages['description']}: </strong>
