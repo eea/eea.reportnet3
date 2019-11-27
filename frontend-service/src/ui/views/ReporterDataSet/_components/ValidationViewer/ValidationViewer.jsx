@@ -136,7 +136,7 @@ const ValidationViewer = React.memo(
 
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [];
-      levelErrorTypes.map(filter => {
+      levelErrorTypes.forEach(filter => {
         allLevelErrorsFilterList.push({
           label: capitalize(filter),
           key: `${filter.toString()}_Id`
@@ -161,7 +161,7 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}_Id`
       });
-      tableSchemaNames.map(name => {
+      tableSchemaNames.forEach(name => {
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
       setAllOriginsFilter(allOriginsFilterList);
