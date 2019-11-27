@@ -262,7 +262,41 @@ const datasetsReleasedStatus = async dataflowId => {
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
 
-  return datasetsReleasedStatusDTO;
+  const reporters = [];
+  datasetsReleasedStatusDTO.map(dataset => {
+    reporters.push(dataset.dataSetName);
+  });
+
+  const onGroupBy = key => array =>
+    array.reduce((objectsByKeyValue, obj) => {
+      const value = obj[key];
+      objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+      return objectsByKeyValue;
+    }, {});
+
+  const groupByReporter = onGroupBy('dataSetName');
+
+  const isUnReleased = Object.entries(groupByReporter(datasetsReleasedStatusDTO))
+    .flat()
+    .map(country =>
+      Array.isArray(country) ? country.map(aux => aux.isReleased).filter(item => item === false).length : null
+    )
+    .filter(item => item !== null);
+
+  const isReleased = Object.entries(groupByReporter(datasetsReleasedStatusDTO))
+    .flat()
+    .map(country =>
+      Array.isArray(country) ? country.map(aux => aux.isReleased).filter(item => item === true).length : null
+    )
+    .filter(item => item !== null);
+
+  const releasedStatusData = {
+    releasedData: isReleased,
+    unReleasedData: isUnReleased,
+    labels: Array.from(new Set(reporters))
+  };
+
+  return releasedStatusData;
 };
 
 const dataflowDetails = async dataflowId => {
