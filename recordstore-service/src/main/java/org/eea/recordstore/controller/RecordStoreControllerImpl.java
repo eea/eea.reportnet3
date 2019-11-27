@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -157,14 +158,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
+  @PostMapping("/dataset/{datasetId}/snapshot/restore")
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType) {
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
+      @RequestParam(value = "user", required = true) String user) {
 
     try {
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType);
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType, user);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

@@ -79,8 +79,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SchemasRepository schemaRepository;
 
-
-
   /**
    * The record store controller zull.
    */
@@ -207,13 +205,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
+  public void restoreSnapshot(Long idDataset, Long idSnapshot, String user) throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        TypeDatasetEnum.REPORTING);
+        TypeDatasetEnum.REPORTING, user);
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
@@ -313,18 +311,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Snapshot schema {} data files created", idSnapshot);
   }
 
-
   /**
    * Restore schema snapshot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param user the user
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
-  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
+  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String user)
       throws EEAException, IOException {
 
     try {
@@ -340,7 +338,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Replace the schema: delete the older and save the new we have already recovered on step
       // Also in the service we call the recordstore to do the restore of the dataset_X data
       schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot);
+          idSnapshot, user);
 
       LOG.info("Schema Snapshot {} totally restored", idSnapshot);
     } finally {

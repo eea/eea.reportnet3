@@ -89,7 +89,8 @@ public interface RecordStoreController {
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long partitionId,
-      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType);
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
+      @RequestParam(value = "user", required = true) String user);
 
   /**
    * Delete snapshot data.

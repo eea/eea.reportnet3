@@ -509,9 +509,9 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
 
-    dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
+    dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L, "");
     verify(schemasRepository, times(1)).save(Mockito.any());
   }
 

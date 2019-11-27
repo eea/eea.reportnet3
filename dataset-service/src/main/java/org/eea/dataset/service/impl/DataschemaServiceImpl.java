@@ -556,7 +556,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .findAny().orElse(null);
   }
 
-
   /**
    * Replace schema.
    *
@@ -564,24 +563,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param schema the schema
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param user the user
    */
   @Override
   @Transactional
-  public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset,
-      Long idSnapshot) {
+  public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot,
+      String user) {
     schemasRepository.deleteDatasetSchemaById(idSchema);
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L,
-        TypeDatasetEnum.DESIGN);
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+        user);
   }
 
   /**
    * Creates the table schema.
    *
    * @param id the id
-   * @param tableSchema the table schema
+   * @param tableSchemaVO the table schema VO
    * @param datasetId the dataset id
    * @return the table schema VO
    */
@@ -727,7 +727,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Order field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchemaId the field schema id
    * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception

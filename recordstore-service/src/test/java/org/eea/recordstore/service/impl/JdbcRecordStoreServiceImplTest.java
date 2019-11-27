@@ -9,9 +9,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.junit.After;
@@ -151,7 +151,8 @@ public class JdbcRecordStoreServiceImplTest {
   }
 
   @Test
-  public void testRestoreSnapshot() throws SQLException, IOException, URISyntaxException {
+  public void testRestoreSnapshot()
+      throws SQLException, IOException, URISyntaxException, EEAException {
     PowerMockito.mockStatic(DriverManager.class);
 
     final Connection connection = Mockito.mock(BaseConnection.class);
@@ -177,10 +178,11 @@ public class JdbcRecordStoreServiceImplTest {
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
-
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN);
-    Mockito.verify(kafkaSender, Mockito.times(2))
-        .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
+    Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN, "");
+    Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
 

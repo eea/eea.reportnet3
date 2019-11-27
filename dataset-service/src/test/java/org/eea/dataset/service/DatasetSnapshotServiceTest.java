@@ -171,7 +171,7 @@ public class DatasetSnapshotServiceTest {
   @Test(expected = EEAException.class)
   public void testRestoreSnapshotsException() throws Exception {
 
-    datasetSnapshotService.restoreSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSnapshot(1L, 1L, "");
 
   }
 
@@ -185,7 +185,7 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSnapshot(1L, 1L, "");
     Mockito.verify(partitionDataSetMetabaseRepository, times(1))
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any());
   }
@@ -245,9 +245,9 @@ public class DatasetSnapshotServiceTest {
     when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
         .thenReturn(objectMapper.writeValueAsBytes(schema));
 
-    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, "");
     Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 

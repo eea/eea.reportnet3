@@ -15,6 +15,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.notification.event.NotificableEventHandler;
+import org.eea.notification.factory.NotificableEventFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,9 @@ public class FileTreatmentHelperTest {
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private NotificableEventFactory notificableEventFactory;
 
   @Mock
   private LockService lockService;
@@ -60,6 +65,9 @@ public class FileTreatmentHelperTest {
   @Mock
   private Stream<TableValue> tableValueStream;
 
+  @Mock
+  private NotificableEventHandler notificableEventHandler;
+
   /**
    * Inits the mocks.
    */
@@ -70,7 +78,6 @@ public class FileTreatmentHelperTest {
 
   @Test
   public void executeFileProcessTest1() throws EEAException, IOException {
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -92,16 +99,17 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410", "user");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
   public void executeFileProcessTest2() throws EEAException, IOException {
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -121,26 +129,29 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410", "user");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
   public void executeFileProcessTest3() throws EEAException, IOException {
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito
         .when(
             datasetService.processFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.doNothing().when(datasetVO).setId(Mockito.any());
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(null);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410", "user");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 }

@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
@@ -356,8 +358,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-
-
   /**
    * Restore data snapshot.
    *
@@ -365,13 +365,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param user the user
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType) throws SQLException, IOException {
+      TypeDatasetEnum datasetType, String user) throws SQLException, IOException {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
@@ -445,11 +446,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     // Send kafka event to launch Validation
     final EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.SNAPSHOT_RESTORED_EVENT);
-
+    Map<String, Object> value = new HashMap<>();
+    value.put("dataset_id", idReportingDataset);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
         idReportingDataset);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT,
-        idReportingDataset);
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT, value,
+          NotificationVO.builder().user(user).datasetId(idReportingDataset).build());
+    } catch (EEAException e) {
+      LOG.error("Error realeasing event: {}", e);
+    }
+
   }
 
   /**

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -157,7 +158,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, "");
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -281,7 +282,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot,
+          SecurityContextHolder.getContext().getAuthentication().getName());
     } catch (EEAException | IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
