@@ -10,7 +10,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 
 export const Eulogin = ({ location, history }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(true);
   const user = useContext(UserContext);
   const onLogin = async () => {
     try {
@@ -33,7 +33,9 @@ export const Eulogin = ({ location, history }) => {
   }, []);
   return (
     <div className="rp-container">
-      <div className={`${styles.loginBoxContainer}`}>{isLoading && <img className={styles.logo} src={logo} />}</div>
+      <div className={`${styles.loginBoxContainer}`}>
+        {isLoading && <img className={styles.logo} alt="EEA logo" src={logo} />}
+      </div>
     </div>
   );
 };

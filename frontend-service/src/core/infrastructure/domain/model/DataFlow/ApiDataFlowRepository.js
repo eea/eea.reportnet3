@@ -32,7 +32,7 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   if (!isNull(datasetsDTO)) {
     const datasets = [];
-    datasetsDTO.map(datasetDTO => {
+    datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
@@ -63,7 +63,7 @@ const parseDocumentListDTO = documentsDTO => {
   }
   if (!isNull(documentsDTO)) {
     const documents = [];
-    documentsDTO.map(documentDTO => {
+    documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
@@ -89,7 +89,7 @@ const parseWebLinkListDTO = webLinksDTO => {
   }
   if (!isNull(webLinksDTO)) {
     const webLinks = [];
-    webLinksDTO.map(webLinkDTO => {
+    webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
@@ -130,6 +130,12 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
+const create = async (name, description) => {
+  const createdDataflow = await apiDataflow.create(name, description);
+  console.log(createdDataflow);
+  return createdDataflow;
+};
+
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
   return parseDataflowDTOs(completedDataflowsDTO);
@@ -152,12 +158,13 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tableValues = [];
   let levelErrors = [];
   const tableLevelErrors = [];
-  datasetsDashboardsDataDTO.map(dataset => {
+
+  datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
-    dataset.tables.map((table, i) => {
+    dataset.tables.forEach((table, i) => {
       tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
@@ -310,6 +317,7 @@ export const ApiDataflowRepository = {
   all,
   accept,
   accepted,
+  create,
   completed,
   dataflowDetails,
   datasetsValidationStatistics,

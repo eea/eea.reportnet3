@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -31,11 +33,13 @@ public interface DocumentController {
    * @param dataFlowId the data flow id
    * @param description the description
    * @param language the language
+   * @param isPublic the is public
    */
   @PostMapping(value = "/upload/{dataFlowId}")
   void uploadDocument(final MultipartFile file, @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam("description") final String description,
-      @RequestParam("language") final String language);
+      @RequestParam("language") final String language,
+      @RequestParam("isPublic") final Boolean isPublic);
 
   /**
    * Download document .
@@ -55,7 +59,23 @@ public interface DocumentController {
   @DeleteMapping(value = "/{documentId}")
   void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
 
-
+  /**
+   * Update document.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
+   * @param idDocument the id document
+   * @param isPublic the is public
+   */
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  void updateDocument(@RequestPart("file") final MultipartFile file,
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam(name = "description", required = false) final String description,
+      @RequestParam(name = "language", required = false) final String language,
+      @PathVariable("idDocument") final Long idDocument,
+      @RequestParam("isPublic") final Boolean isPublic);
 
   /**
    * Upload schema snapshot document.
@@ -91,6 +111,5 @@ public interface DocumentController {
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName) throws Exception;
-
 
 }

@@ -34,7 +34,7 @@ class DropdownFilter extends React.Component {
       fields: [],
       menuClick: false
     };
-    ['show', 'updateChecked', 'hide'].map(item => {
+    ['show', 'updateChecked', 'hide'].forEach(item => {
       this[item] = this[item].bind(this);
     });
   }

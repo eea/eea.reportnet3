@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.serializer.EEAEventDeserializer;
-import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -115,13 +114,14 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   public ConsumerFactory<String, EEAEventVO> broadcastConsumerFactory() {
     final Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-    props.put(ConsumerConfig.GROUP_ID_CONFIG,
-        groupId + UUID.randomUUID());//single group in one partition topic garantees broadcasting
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + UUID.randomUUID());// single group in one
+                                                                           // partition topic
+                                                                           // garantees broadcasting
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
     props.put("heartbeat.interval.ms", 3000);
     props.put("session.timeout.ms", 150000);
-    //props.put("enable.auto.commit", "false");
+    // props.put("enable.auto.commit", "false");
     props.put("isolation.level", "read_committed");
 
     return new DefaultKafkaConsumerFactory<>(props);

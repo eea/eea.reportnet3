@@ -255,8 +255,8 @@ public class DataFlowControllerImpl implements DataFlowController {
   public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
 
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
-    if (null != dataFlowVO.getDeadlineDate() && ((dataFlowVO.getDeadlineDate().before(dateToday)
-        || dataFlowVO.getDeadlineDate().equals(dateToday)))) {
+    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATE_AFTER_INCORRECT);
     }
