@@ -67,13 +67,15 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   private void getDatasetSchemaNames(List<ReportingDatasetVO> datasetsVO) {
     List<String> datasetsSchemas =
         datasetsVO.stream().map(dataset -> dataset.getDatasetSchema()).collect(Collectors.toList());
-    List<DesignDataset> resultList =
-        designDatasetRepository.findbyDatasetSchemaList(datasetsSchemas);
-    datasetsVO.stream().forEach(dataset -> resultList.stream().forEach(design -> {
-      if (design.getDatasetSchema().equals(dataset.getDatasetSchema())) {
-        dataset.setNameDatasetSchema(design.getDataSetName());
-      }
-    }));
+    if (!datasetsSchemas.isEmpty()) {
+      List<DesignDataset> resultList =
+          designDatasetRepository.findbyDatasetSchemaList(datasetsSchemas);
+      datasetsVO.stream().forEach(dataset -> resultList.stream().forEach(design -> {
+        if (design.getDatasetSchema().equals(dataset.getDatasetSchema())) {
+          dataset.setNameDatasetSchema(design.getDataSetName());
+        }
+      }));
+    }
   }
 
 
