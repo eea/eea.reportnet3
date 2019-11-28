@@ -57,7 +57,7 @@ CREATE TABLE public."document" (
 	"name" varchar(255) NULL,
 	description varchar(255) NULL,
 	dataflow_id serial NOT NULL,
-	size varchar(255) NULL,
+	size int8 NULL,
 	date timestamp NULL,
 	is_public bool NULL,
 	CONSTRAINT document_pkey PRIMARY KEY (id),
