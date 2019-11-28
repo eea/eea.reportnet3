@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 
@@ -10,17 +10,31 @@ import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { ReleasedFilterReducer } from './_components/_context/ReleasedFilterReducer';
+
 import { DataflowService } from 'core/services/DataFlow';
 
 export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
+  const initialDashboardValues = {
+    isReleasedFilter: [],
+    reporterFilter: [],
+    originalData: {},
+    data: {}
+  };
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
+  const [releasedFilterState, releasedFilterDispatch] = useReducer(ReleasedFilterReducer, initialDashboardValues);
+
   useEffect(() => {
     onLoadDashboard();
   }, []);
+
+  useEffect(() => {
+    releasedFilterDispatch({ type: 'INIT_DATA', payload: releasedDashboardData });
+  }, [releasedDashboardData]);
 
   const onLoadDashboard = async () => {
     try {
@@ -111,7 +125,34 @@ export const GlobalReleasedDashboard = dataflowId => {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
         <div className={`${styles.chart_released}`}>
-          <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
+          {!isEmpty(releasedFilterState.data) ? (
+            <>
+              {/* <FilterList
+                datasetSchemaId={datasetSchemaId}
+                color={dashboardColors}
+                filterDispatch={filterDispatch}
+                levelErrors={levelErrorTypes}
+                originalData={filterState.originalData}
+                reporterFilters={filterState.reporterFilter}
+                statusFilters={filterState.statusFilter}
+                tableFilters={filterState.tableFilter}
+              />
+              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])} */}
+              <Chart
+                type="bar"
+                data={releasedFilterState.data}
+                options={releasedOptionsObject}
+                width="100%"
+                height="25%"
+              />
+            </>
+          ) : (
+            <>
+              {/* <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} /> */}
+              {/* {onLoadStamp(resources.messages['empty'])} */}
+              <Chart type="bar" options={releasedOptionsObject} width="100%" height="25%" />
+            </>
+          )}
         </div>
       );
     }
