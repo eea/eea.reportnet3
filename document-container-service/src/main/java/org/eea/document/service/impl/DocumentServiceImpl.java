@@ -82,7 +82,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
       // save to metabase
-      documentVO.setSize(humanReadableByteCount(size));
+      documentVO.setSize(size);
       documentVO.setDate(new Date());
       documentVO.setName(filename);
       Long idDocument = dataflowController.insertDocument(documentVO);
@@ -205,22 +205,6 @@ public class DocumentServiceImpl implements DocumentService {
     } finally {
       oakRepositoryUtils.cleanUp(session, ns);
     }
-  }
-
-  /**
-   * Human readable byte count.
-   *
-   * @param bytes the bytes
-   * @return the string
-   */
-  private String humanReadableByteCount(long bytes) {
-    int unit = 1000;
-    if (bytes < unit) {
-      return bytes + " B";
-    }
-    int exp = (int) (Math.log(bytes) / Math.log(unit));
-    char pre = "kMGTPE".charAt(exp - 1);
-    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
   }
 
   /**
