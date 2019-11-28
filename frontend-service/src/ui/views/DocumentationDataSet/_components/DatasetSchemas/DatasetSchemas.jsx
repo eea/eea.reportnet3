@@ -16,7 +16,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const [isLoading, setIsLoading] = useState(false);
 
   const renderDatasetSchemas = () => {
-    console.log(datasetsSchemas);
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
         return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
@@ -51,7 +50,13 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   return (
     <>
       {renderToolbar()}
-      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
+      {!isUndefined(datasetsSchemas) ? (
+        renderDatasetSchemas()
+      ) : isLoading ? (
+        <Spinner className={styles.positioning} />
+      ) : (
+        renderDatasetSchemas()
+      )}
     </>
   );
 };
