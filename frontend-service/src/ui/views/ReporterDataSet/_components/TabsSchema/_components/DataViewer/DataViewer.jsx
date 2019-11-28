@@ -463,7 +463,9 @@ const DataViewer = withRouter(
         );
 
         if (!isEmpty(tableData.records)) {
-          onLoadTableData(true);
+          if (!isUndefined(onLoadTableData)) {
+            onLoadTableData(true);
+          }
         }
 
         if (!isUndefined(colsSchema)) {

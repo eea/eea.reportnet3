@@ -22,6 +22,7 @@ export const Tab = ({
   className,
   closeIcon,
   divScrollTabsRef,
+  disabled = false,
   editable = false,
   designMode = false,
   header,
@@ -308,8 +309,10 @@ export const Tab = ({
             }
           }}
           onClick={e => {
-            onTabHeaderClick(e);
-            scrollTo(tabRef.current.offsetLeft - 80, 0);
+            if (!disabled) {
+              onTabHeaderClick(e);
+              scrollTo(tabRef.current.offsetLeft - 80, 0);
+            }
           }}
           onDragEnd={e => {
             onTabDragEnd(e);
