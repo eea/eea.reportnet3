@@ -15,6 +15,7 @@ import { DataflowService } from 'core/services/DataFlow';
 export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
   const [isLoading, setLoading] = useState(true);
+  const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   useEffect(() => {
@@ -37,6 +38,31 @@ export const GlobalReleasedDashboard = dataflowId => {
     console.error('Released dashboard error: ', error);
     const errorResponse = error.response;
     console.error('Released dashboard errorResponse: ', errorResponse);
+  };
+
+  const getMaxOfArrays = (releasedNumArr, unReleasedNumArr) => {
+    const maxReleased = Math.max.apply(null, releasedNumArr);
+    const maxUnReleased = Math.max.apply(null, unReleasedNumArr);
+    return Math.max(maxReleased, maxUnReleased);
+  };
+
+  const buildReleasedDashboardObject = data => {
+    setMaxValue(getMaxOfArrays(data.releasedData, data.unReleasedData));
+    return {
+      labels: data.labels,
+      datasets: [
+        {
+          label: resources.messages['released'],
+          backgroundColor: colors.green400,
+          data: data.releasedData
+        },
+        {
+          label: resources.messages['unreleased'],
+          backgroundColor: colors.gray25,
+          data: data.unReleasedData
+        }
+      ]
+    };
   };
 
   const releasedOptionsObject = {
@@ -64,6 +90,7 @@ export const GlobalReleasedDashboard = dataflowId => {
           stacked: true,
           ticks: {
             beginAtZero: true,
+            max: maxValue,
             callback: value => {
               if (Number.isInteger(value)) {
                 return value;
@@ -74,24 +101,6 @@ export const GlobalReleasedDashboard = dataflowId => {
         }
       ]
     }
-  };
-
-  const buildReleasedDashboardObject = releasedData => {
-    return {
-      labels: releasedData.labels,
-      datasets: [
-        {
-          label: resources.messages['released'],
-          backgroundColor: colors.green400,
-          data: releasedData.releasedData
-        },
-        {
-          label: resources.messages['unreleased'],
-          backgroundColor: colors.gray25,
-          data: releasedData.unReleasedData
-        }
-      ]
-    };
   };
 
   if (isLoading) {
