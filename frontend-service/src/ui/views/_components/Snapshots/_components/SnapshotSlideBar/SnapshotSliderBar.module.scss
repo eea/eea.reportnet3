@@ -21,7 +21,8 @@
 }
 .title {
   composes: heading-3 from global;
-  margin-bottom: 1rem;
+  margin-top: 0.8rem;
+  margin-bottom: 1.8rem;
 }
 .title h3 {
   color: var(--c-corporate-blue);
