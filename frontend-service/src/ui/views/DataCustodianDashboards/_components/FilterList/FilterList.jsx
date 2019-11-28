@@ -41,9 +41,10 @@ const FilterList = ({
             {labels.map(item => (
               <ReportersListItem
                 key={item}
-                reporterFilters={reporterFilters}
+                datasetSchemaId={datasetSchemaId}
                 filterDispatch={filterDispatch}
                 item={item}
+                reporterFilters={reporterFilters}
               />
             ))}
           </ul>
@@ -62,9 +63,10 @@ const FilterList = ({
             {tableNamesIdsArray.map(item => (
               <TableListItem
                 key={item.tableId}
-                tableFilters={tableFilters}
+                datasetSchemaId={datasetSchemaId}
                 filterDispatch={filterDispatch}
                 item={item}
+                tableFilters={tableFilters}
               />
             ))}
           </ul>
