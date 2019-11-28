@@ -1,22 +1,24 @@
-package org.eea.dataset.io.notification.events;
+package org.eea.recordstore.io.notification.event;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class SnapshotRestoredEvent.
  */
+@Component
 public class SnapshotRestoredEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
-  private DatasetService datasetService;
+  private DataSetControllerZuul dataSetControllerZuul;
 
   /**
    * Gets the event type.
@@ -42,7 +44,7 @@ public class SnapshotRestoredEvent implements NotificableEventHandler {
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("dataflowId",
         notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-            : datasetService.getDataFlowIdById(notificationVO.getDatasetId()));
+            : dataSetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId()));
     return notification;
   }
 

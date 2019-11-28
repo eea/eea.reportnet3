@@ -163,7 +163,8 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void testRestoreSnapshots() throws Exception {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any());
@@ -176,7 +177,6 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testRestsoreSnapshotsException() throws Exception {
-
     dataSetSnapshotControllerImpl.restoreSnapshot(null, 1L);
   }
 
@@ -187,7 +187,8 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSnapshotsException2() throws Exception {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any());
     dataSetSnapshotControllerImpl.restoreSnapshot(1L, 1L);

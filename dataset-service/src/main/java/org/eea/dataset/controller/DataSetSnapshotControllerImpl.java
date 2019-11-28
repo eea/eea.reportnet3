@@ -158,7 +158,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, "");
+      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot,
+          SecurityContextHolder.getContext().getAuthentication().getName());
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
