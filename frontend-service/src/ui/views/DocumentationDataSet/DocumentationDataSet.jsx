@@ -98,7 +98,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isCustodian]);
 
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);

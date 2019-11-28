@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isUndefined, isNull } from 'lodash';
 
@@ -16,7 +16,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const [isLoading, setIsLoading] = useState(false);
 
   const renderDatasetSchemas = () => {
-    console.log(datasetsSchemas);
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
         return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
