@@ -68,6 +68,13 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    onGroupBy: key => array =>
+      array.reduce((objectsByKeyValue, obj) => {
+        const value = obj[key];
+        objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+        return objectsByKeyValue;
+      }, {}),
+
     orderLevelErrors: levelErrors => {
       const levelErrorsWithPriority = [
         { id: 'CORRECT', index: 0 },
