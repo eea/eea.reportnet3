@@ -19,7 +19,7 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
         <div className={styles.listItemData}>
           <div>
             <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
-              {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+              {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
             </h5>
             {itemData.isReleased ? (
               <h5 className={styles.is_released_snapshot}>{resources.messages['snapshotIsReleased']}</h5>
