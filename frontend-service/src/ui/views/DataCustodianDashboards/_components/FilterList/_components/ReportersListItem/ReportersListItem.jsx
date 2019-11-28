@@ -2,11 +2,11 @@ import React from 'react';
 
 import styles from './ReportersListItem.module.scss';
 
-export const ReportersListItem = ({ filterDispatch, item, reporterFilters }) => {
+export const ReportersListItem = ({ datasetSchemaId, filterDispatch, item, reporterFilters }) => {
   return (
     <li className={styles.listItem}>
       <input
-        id={item}
+        id={`${item}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
         defaultChecked={reporterFilters.includes(item) ? false : true}
@@ -17,7 +17,7 @@ export const ReportersListItem = ({ filterDispatch, item, reporterFilters }) => 
           });
         }}
       />
-      <label htmlFor={item} className={styles.labelItem}>
+      <label htmlFor={`${item}_${datasetSchemaId}`} className={styles.labelItem}>
         {item}
       </label>
     </li>
