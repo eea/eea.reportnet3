@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isUndefined, isNull } from 'lodash';
 
@@ -50,13 +50,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   return (
     <>
       {renderToolbar()}
-      {!isUndefined(datasetsSchemas) ? (
-        renderDatasetSchemas()
-      ) : isLoading ? (
-        <Spinner className={styles.positioning} />
-      ) : (
-        renderDatasetSchemas()
-      )}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
     </>
   );
 };
