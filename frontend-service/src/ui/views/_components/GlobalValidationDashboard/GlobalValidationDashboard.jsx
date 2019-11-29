@@ -16,13 +16,13 @@ import { filterReducer } from './_components/_context/filterReducer';
 import { DataflowService } from 'core/services/DataFlow';
 import { ViewUtils } from 'ui/ViewUtils';
 
-const SEVERITY_CODE = {
+/* const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
   INFO: colors.dashboardInfo,
   WARNING: colors.dashboardWarning,
   ERROR: colors.dashboardError,
   BLOCKER: colors.dashboardBlocker
-};
+}; */
 
 export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);

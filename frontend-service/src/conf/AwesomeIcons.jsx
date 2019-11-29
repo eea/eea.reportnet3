@@ -41,7 +41,8 @@ import {
   faMapPin,
   faDrawPolygon,
   faBars,
-  faHome
+  faHome,
+  faCloudUploadAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -220,6 +221,8 @@ export const AwesomeIcons = icon => {
       return farQuestionCircle;
     case 'home':
       return faHome;
+    case 'released':
+      return faCloudUploadAlt;
     default:
       return faFileAlt;
   }
