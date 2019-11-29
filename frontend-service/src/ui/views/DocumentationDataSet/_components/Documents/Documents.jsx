@@ -128,9 +128,11 @@ const Documents = ({
     return `${title.split(' ').join('_')}`;
   };
 
+  const titleColumnTemplate = rowData => {
+    return <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
+  };
+
   const downloadColumnTemplate = rowData => {
-    switch (rowData.category) {
-    }
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {isDownloading === rowData.id ? (
@@ -148,6 +150,32 @@ const Documents = ({
 
   const dateColumnTemplate = rowData => {
     return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
+  };
+
+  const formatBytes = bytes => {
+    if (bytes === 0) return '0 B';
+
+    const k = 1024;
+    const sizeTypes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const decimals = i !== 0 ? 2 : 0;
+
+    const bytesParsed = parseFloat(bytes / k ** i).toFixed(decimals);
+
+    const result = { bytesParsed, sizeType: sizeTypes[i] };
+
+    return result;
+  };
+
+  const sizeColumnTemplate = rowData => {
+    const formatedRowData = formatBytes(rowData.size);
+    console.log('formatedRowData', formatedRowData);
+    return (
+      <>
+        {formatedRowData.bytesParsed} {formatedRowData.sizeType}
+      </>
+    );
   };
 
   return (
@@ -207,6 +235,7 @@ const Documents = ({
         )}
 
         <Column
+          body={titleColumnTemplate}
           columnResizeMode="expand"
           field="title"
           filter={false}
@@ -252,6 +281,7 @@ const Documents = ({
           sortable={!isEmpty(documents)}
         />
         <Column
+          body={sizeColumnTemplate}
           field="size"
           filter={false}
           filterMatchMode="contains"

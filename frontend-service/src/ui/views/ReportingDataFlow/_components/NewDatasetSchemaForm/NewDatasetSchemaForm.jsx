@@ -28,7 +28,7 @@ export const NewDatasetSchemaForm = ({
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
-      .required(resources.messages['emptyDatasetSchema'])
+      .required(' ')
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (value !== undefined && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
