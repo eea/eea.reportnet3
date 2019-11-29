@@ -5,6 +5,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,6 +35,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Autowired
   private DataflowDocumentService dataflowService;
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataFlowDocumentControllerImpl.class);
 
   /**
    * Gets the document info by id.
@@ -67,6 +73,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @HystrixCommand
   @PutMapping(value = "/update")
   public void updateDocument(@RequestBody DocumentVO document) {
+    LOG.info("updating document in controller");
     try {
       dataflowService.updateDocument(document);
     } catch (EEAException e) {
@@ -85,6 +92,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @HystrixCommand
   @PostMapping
   public Long insertDocument(@RequestBody DocumentVO document) {
+    LOG.info("inserting document in controller");
     try {
       return dataflowService.insertDocument(document);
     } catch (EEAException e) {

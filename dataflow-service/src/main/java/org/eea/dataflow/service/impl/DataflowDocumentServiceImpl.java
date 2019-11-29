@@ -48,6 +48,7 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
   @Override
   @Transactional
   public Long insertDocument(DocumentVO documentVO) throws EEAException {
+    LOG.info("inserting document in metabase");
     if (documentVO == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
@@ -109,6 +110,7 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
    */
   @Override
   public void updateDocument(DocumentVO documentVO) throws EEAException {
+    LOG.info("updating document in metabase");
     Dataflow dataflow = dataflowRepository.findById(documentVO.getDataflowId()).orElse(null);
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
