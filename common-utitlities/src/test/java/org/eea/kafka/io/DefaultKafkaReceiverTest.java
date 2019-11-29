@@ -1,7 +1,5 @@
 package org.eea.kafka.io;
 
-import static org.junit.Assert.*;
-
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.handler.EEAEventHandler;
@@ -53,7 +51,7 @@ public class DefaultKafkaReceiverTest {
    *
    * @throws EEAException the eea exception
    */
-  @Test(expected = EEAException.class)
+  @Test
   public void listenMessageErrorTest() throws EEAException {
     Message<EEAEventVO> messageMock = Mockito.mock(Message.class);
     Mockito.when(messageMock.getPayload()).thenReturn(new EEAEventVO());
@@ -63,10 +61,7 @@ public class DefaultKafkaReceiverTest {
       defaultKafkaReceiver.listenMessage(messageMock);
     } catch (EEAException e) {
       Mockito.verify(handler, Mockito.times(1)).processMessage(messageMock.getPayload());
-      Assert.assertEquals("Wrong exception caught", e.getMessage(), "test");
-      throw e;
+      Assert.assertEquals("Wrong exception caught", "test", e.getMessage());
     }
-
-
   }
 }
