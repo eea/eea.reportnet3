@@ -152,21 +152,31 @@ const Documents = ({
     return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
   };
 
-  const formatBytes = (bytes, decimals = 2) => {
-    bytes = 10000;
-    if (bytes === 0) return '0 Bytes';
+  const formatBytes = bytes => {
+    if (bytes === 0) return '0 B';
 
     const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizeTypes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const decimals = i === 0 ? 0 : 2;
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    const bytesParsed = parseFloat(bytes / k ** i).toFixed(decimals);
+
+    const result = { bytesParsed, sizeType: sizeTypes[i] };
+
+    // return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+    return result;
   };
 
   const sizeColumnTemplate = rowData => {
-    return <span>{formatBytes(rowData.size)}</span>;
+    const formatedRowData = formatBytes(rowData.size);
+    console.log('formatedRowData', formatedRowData);
+    return (
+      <>
+        {formatedRowData.bytesParsed} {formatedRowData.sizeType}
+      </>
+    );
   };
 
   return (
