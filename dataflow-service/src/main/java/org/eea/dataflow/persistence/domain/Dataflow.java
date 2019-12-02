@@ -69,19 +69,19 @@ public class Dataflow {
   private TypeStatusEnum status;
 
   /** The submission agreement. */
-  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL)
   private SubmissionAgreement submissionAgreement;
 
   /** The contributors. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL)
   private List<Contributor> contributors;
 
   /** The documents. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL)
   private List<Document> documents;
 
   /** The weblinks. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL)
   private List<Weblink> weblinks;
 
   /** The user requests. */

@@ -407,6 +407,38 @@ public class DataFlowServiceImplTest {
     Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
   }
 
+  /**
+   * Update data flow exist.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateDataFlowExist() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    when(dataflowRepository.findByName(dataFlowVO.getName()))
+        .thenReturn(Optional.of(new Dataflow()));
+    try {
+      dataflowServiceImpl.updateDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  /**
+   * Update dataflow.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDataflow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Dataflow dataflow = new Dataflow();
+    when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
+    when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
+    dataflowServiceImpl.updateDataFlow(dataflowVO);
+    Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
+  }
 
   /**
    * Test get datasets id.

@@ -275,6 +275,36 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Update data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+    final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
+    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATE_AFTER_INCORRECT);
+    }
+
+    if (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+    }
+
+    try {
+      dataflowService.updateDataFlow(dataFlowVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Create dataflow failed");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
    * Gets the metabase by id.
@@ -302,5 +332,24 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return result;
   }
+
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void deleteDataFlow(Long idDataflow) {
+    try {
+      dataflowService.deleteDataFlow(idDataflow);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 
 }

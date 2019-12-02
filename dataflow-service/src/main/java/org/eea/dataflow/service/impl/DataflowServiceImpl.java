@@ -334,6 +334,25 @@ public class DataflowServiceImpl implements DataflowService {
 
 
   /**
+   * Update data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
+
+    // we find if the name of this dataflow exist
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
+      throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    } else {
+      Dataflow dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
+      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+    }
+  }
+
+  /**
    * Creates the group.
    *
    * @param datasetId the dataset id
@@ -395,5 +414,34 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowVO;
   }
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteDataFlow(Long idDataflow) throws EEAException {
+
+    // List<String> nameResource = new ArrayList<>();
+    // ResourceInfoVO resourceCustodian = resourceManagementControllerZull
+    // .getResourceDetail(idDataflow, ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+
+    // ResourceInfoVO resourceProvider =
+    // resourceManagementControllerZull.getResourceDetail(idDataflow,
+    // ResourceGroupEnum.DATAFLOW_PROVIDER);
+    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
+    // + SecurityRoleEnum.DATA_PROVIDER);
+    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
+    // + SecurityRoleEnum.DATA_CUSTODIAN);
+    // resourceManagementControllerZull.deleteResourceByName(nameResource);
+
+    // dataflowRepository.deleteById(idDataflow);
+
+  }
+
+
 
 }
