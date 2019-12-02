@@ -42,10 +42,9 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @param user the user
    * @throws EEAException the EEA exception
    */
-  void restoreSnapshot(Long idDataset, Long idSnapshot, String user) throws EEAException;
+  void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
   /**
    * Release snapshot.
@@ -83,12 +82,10 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @param user the user
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String user)
-      throws EEAException, IOException;
+  void restoreSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
 
 
 

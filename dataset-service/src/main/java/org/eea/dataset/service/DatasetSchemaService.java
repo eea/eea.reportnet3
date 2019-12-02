@@ -79,10 +79,8 @@ public interface DatasetSchemaService {
    * @param schema the schema
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @param user the user
    */
-  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot,
-      String user);
+  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot);
 
 
   /**

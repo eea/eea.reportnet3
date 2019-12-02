@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class SnapshotRestoredEvent.
+ * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class SnapshotRestoredEvent implements NotificableEventHandler {
+public class RestoreDatasetSnapshotFailedEvent implements NotificableEventHandler {
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
@@ -27,7 +29,7 @@ public class SnapshotRestoredEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.SNAPSHOT_RESTORED_EVENT;
+    return EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT;
   }
 
   /**
@@ -45,6 +47,7 @@ public class SnapshotRestoredEvent implements NotificableEventHandler {
     notification.put("dataflowId",
         notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
             : dataSetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId()));
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 

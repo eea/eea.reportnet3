@@ -18,6 +18,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,11 +70,10 @@ public class FileTreatmentHelper {
    * @param fileName the file name
    * @param is the input stream
    * @param tableSchemaId the id table schema
-   * @param user the user
    */
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
-      String tableSchemaId, String user) {
+      String tableSchemaId) {
     try {
       LOG.info("Processing file");
       DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
@@ -103,11 +103,12 @@ public class FileTreatmentHelper {
           .forEach(value -> datasetService.saveAllRecords(datasetId, value));
 
       LOG.info("File processed and saved into DB");
-      releaseSuccessEvents(user, datasetId, tableSchemaId, fileName);
+      releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+          tableSchemaId, fileName);
     } catch (Exception e) {
-      LOG.error("Error loading file: {}", e.getCause());
-      releaseFailEvents(user, datasetId, tableSchemaId, fileName,
-          "Fail importing file " + fileName);
+      LOG.error("Error loading file: " + fileName, e);
+      releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+          tableSchemaId, fileName, "Fail importing file " + fileName);
     } finally {
       removeLock(datasetId, tableSchemaId);
     }
@@ -131,7 +132,7 @@ public class FileTreatmentHelper {
           NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
               .fileName(fileName).build());
     } catch (EEAException e) {
-      LOG.error("Error realeasing event: {}", e);
+      LOG.error("Error realeasing event " + EventType.LOAD_DATA_COMPLETED_EVENT, e);
     }
   }
 
@@ -149,11 +150,11 @@ public class FileTreatmentHelper {
     try {
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, value,
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LOAD_DATA_FAILED_EVENT, value,
           NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
               .fileName(fileName).error(error).build());
     } catch (EEAException e) {
-      LOG.error("Error realeasing event: {}", e);
+      LOG.error("Error realeasing event " + EventType.LOAD_DATA_FAILED_EVENT, e);
     }
   }
 

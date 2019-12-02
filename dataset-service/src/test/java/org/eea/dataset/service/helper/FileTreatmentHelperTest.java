@@ -17,6 +17,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.notification.event.NotificableEventHandler;
 import org.eea.notification.factory.NotificableEventFactory;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +74,7 @@ public class FileTreatmentHelperTest {
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("name", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -103,7 +105,7 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
-        "5d4abe555b1c1e0001477410", "user");
+        "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -133,7 +135,7 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
-        "5d4abe555b1c1e0001477410", "user");
+        "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -150,7 +152,7 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
-        "5d4abe555b1c1e0001477410", "user");
+        "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

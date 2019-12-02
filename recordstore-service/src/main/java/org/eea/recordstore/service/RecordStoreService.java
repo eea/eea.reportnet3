@@ -83,13 +83,13 @@ public interface RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param typeDataset the type dataset
-   * @param user the user
+   * @param isSchemaSnapshot the is schema snapshot
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum typeDataset, String user)
+      TypeDatasetEnum typeDataset, Boolean isSchemaSnapshot)
       throws SQLException, IOException, RecordStoreAccessException;
 
   /**

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -147,7 +150,7 @@ public class DataSetControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
@@ -630,6 +633,16 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.exportFile(1L, "id", "csv");
   }
 
+  @Test
+  public void exportFileTest() throws EEAException, IOException {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      dataSetControllerImpl.exportFile(1L, "id", "csv");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
 
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNullEntry() throws Exception {

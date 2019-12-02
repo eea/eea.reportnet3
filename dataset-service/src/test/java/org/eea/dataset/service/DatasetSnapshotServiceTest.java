@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,12 +107,12 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DatasetSchemaService schemaService;
 
-
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -171,7 +172,7 @@ public class DatasetSnapshotServiceTest {
   @Test(expected = EEAException.class)
   public void testRestoreSnapshotsException() throws Exception {
 
-    datasetSnapshotService.restoreSnapshot(1L, 1L, "");
+    datasetSnapshotService.restoreSnapshot(1L, 1L);
 
   }
 
@@ -185,7 +186,7 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshot(1L, 1L, "");
+    datasetSnapshotService.restoreSnapshot(1L, 1L);
     Mockito.verify(partitionDataSetMetabaseRepository, times(1))
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any());
   }
@@ -245,9 +246,9 @@ public class DatasetSnapshotServiceTest {
     when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
         .thenReturn(objectMapper.writeValueAsBytes(schema));
 
-    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, "");
+    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
     Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
 

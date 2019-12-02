@@ -44,6 +44,7 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -583,18 +584,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param schema the schema
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @param user the user
    */
   @Override
   @Transactional
-  public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot,
-      String user) {
+  public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset,
+      Long idSnapshot) {
     schemasRepository.deleteDatasetSchemaById(idSchema);
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
-        user);
+        (String) ThreadPropertiesManager.getVariable("user"));
   }
 
   /**

@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,7 +167,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam(value = "user", required = true) String user) {
 
     try {
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType, user);
+      ThreadPropertiesManager.setVariable("user", user);
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType,
+          false);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

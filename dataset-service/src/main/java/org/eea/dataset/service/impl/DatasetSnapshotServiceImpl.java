@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,22 +206,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSnapshot(Long idDataset, Long idSnapshot, String user) throws EEAException {
+  public void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        TypeDatasetEnum.REPORTING, user);
-
-    // Release the lock manually
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
-    criteria.add(idDataset);
-    lockService.removeLockByCriteria(criteria);
-
-    LOG.info("Snapshot {} restored", idSnapshot);
-
+        TypeDatasetEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"));
   }
 
 
@@ -322,7 +314,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String user)
+  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
     try {
@@ -338,7 +330,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Replace the schema: delete the older and save the new we have already recovered on step
       // Also in the service we call the recordstore to do the restore of the dataset_X data
       schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot, user);
+          idSnapshot);
 
       LOG.info("Schema Snapshot {} totally restored", idSnapshot);
     } finally {

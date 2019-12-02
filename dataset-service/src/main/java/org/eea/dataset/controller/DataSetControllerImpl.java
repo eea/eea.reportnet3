@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,8 +192,9 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
+      ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

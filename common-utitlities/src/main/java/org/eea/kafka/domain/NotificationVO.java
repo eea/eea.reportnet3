@@ -1,17 +1,17 @@
 package org.eea.kafka.domain;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
 @Builder
 public class NotificationVO implements Serializable {
@@ -36,14 +36,4 @@ public class NotificationVO implements Serializable {
 
   /** The error. */
   private String error;
-
-  public NotificationVO(String user, Long datasetId, Long dataflowId, String tableSchemaId,
-      String fileName, String error) {
-    this.user = user;
-    this.datasetId = datasetId;
-    this.dataflowId = dataflowId;
-    this.tableSchemaId = tableSchemaId;
-    this.fileName = fileName;
-    this.error = error;
-  }
 }

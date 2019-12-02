@@ -62,7 +62,26 @@ public enum EventType {
   /**
    * The snapshot restored event.
    */
-  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key", true),
+  RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore dataset snapshot failed event.
+   */
+  RESTORE_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_failed_key", true),
+
+  /**
+   * The restore datasetschema snapshot completed event.
+   */
+  RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "datasetschema_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore datasetschema snapshot failed event.
+   */
+  RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "datasetchema_snapshot_restored_failed_key", true),
 
   /**
    * The command execute validation.
