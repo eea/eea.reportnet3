@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
@@ -128,7 +128,7 @@ export const GlobalReleasedDashboard = dataflowId => {
               <StatusList
                 filterDispatch={statusDispatcher}
                 filteredStatusTypes={updatedState.filterStatus}
-                statusTypes={['Released', 'Unreleased']}
+                statusTypes={['RELEASED', 'UNRELEASED']}
               />
               <Chart
                 type="bar"

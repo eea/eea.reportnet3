@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, capitalize } from 'lodash';
 
 const useStatusFilter = dataArray => {
   const initialState = {
@@ -18,7 +18,8 @@ const useStatusFilter = dataArray => {
       return;
     }
 
-    let tablesData = originalData.datasets.filter(table => showArrayItem(payloadDataArray, table.label));
+    const capitalizedArray = payloadDataArray.map(label => capitalize(label));
+    let tablesData = originalData.datasets.filter(table => showArrayItem(capitalizedArray, capitalize(table.label)));
 
     return { labels: originalData.labels, datasets: tablesData };
   };

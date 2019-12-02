@@ -11,6 +11,9 @@ import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { StatusList } from 'ui/views/_components/StatusList';
+
+import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 import { DatasetService } from 'core/services/DataSet';
 import { ViewUtils } from 'ui/ViewUtils';
@@ -36,6 +39,9 @@ const Dashboard = withRouter(
       const [dashboardOptions, setDashboardOptions] = useState({});
       const [dashboardTitle, setDashboardTitle] = useState('');
       const [isLoading, setIsLoading] = useState(false);
+      const [levelErrorTypes, setLevelErrorTypes] = useState([]);
+
+      const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
       const resources = useContext(ResourcesContext);
 
@@ -59,6 +65,10 @@ const Dashboard = withRouter(
           setDashboardData([]);
         };
       }, [refresh, datasetId]);
+
+      useEffect(() => {
+        statusDispatcher({ type: 'INIT_DATA', payload: dashboardData });
+      }, [dashboardData]);
 
       const onChangeColor = (color, type) => {
         const inmDashboardColors = { ...dashboardColors };
@@ -95,6 +105,7 @@ const Dashboard = withRouter(
       const onLoadStatistics = async () => {
         setIsLoading(true);
         const dataset = await DatasetService.errorStatisticsById(datasetId);
+        setLevelErrorTypes(dataset.levelErrorTypes);
         const tableNames = dataset.tables.map(table => table.tableSchemaName);
         setDashboardTitle(dataset.datasetSchemaName);
         setDashboardData({
@@ -113,6 +124,9 @@ const Dashboard = withRouter(
             }
           },
           responsive: true,
+          legend: {
+            display: false
+          },
           scales: {
             xAxes: [
               {
@@ -186,7 +200,12 @@ const Dashboard = withRouter(
           ) {
             return (
               <div className={styles.chartDiv}>
-                <Chart ref={chartRef} type="bar" data={dashboardData} options={dashboardOptions} />
+                <StatusList
+                  filterDispatch={statusDispatcher}
+                  filteredStatusTypes={updatedState.filterStatus}
+                  statusTypes={levelErrorTypes}
+                />
+                <Chart ref={chartRef} type="bar" data={updatedState.dashboardData} options={dashboardOptions} />
               </div>
             );
           } else {
