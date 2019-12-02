@@ -70,7 +70,7 @@ public interface DocumentController {
    * @param isPublic the is public
    */
   @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
-  void updateDocument(@RequestPart("file") final MultipartFile file,
+  void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
