@@ -279,7 +279,7 @@ const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
-  dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
+  dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
   dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)

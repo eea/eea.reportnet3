@@ -150,6 +150,7 @@ export const TabView = ({
         checkEditingTabs={checkEditingTabs}
         children={tab.props.children}
         className={className}
+        disabled={tab.props.disabled}
         editable={tab.props.editable}
         designMode={designMode}
         divScrollTabsRef={divTabsRef.current}

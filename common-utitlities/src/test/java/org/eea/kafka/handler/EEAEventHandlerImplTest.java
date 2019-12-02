@@ -1,7 +1,5 @@
 package org.eea.kafka.handler;
 
-import static org.junit.Assert.*;
-
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -19,8 +17,11 @@ import org.mockito.MockitoAnnotations;
  */
 public class EEAEventHandlerImplTest {
 
+  /** The eea event handler. */
   @InjectMocks
   private EEAEventHandlerImpl eeaEventHandler;
+
+  /** The eea eent command factory. */
   @Mock
   private EEAEventCommandFactory eeaEentCommandFactory;
 
@@ -34,6 +35,8 @@ public class EEAEventHandlerImplTest {
 
   /**
    * Gets type.
+   *
+   * @return the type
    */
   @Test
   public void getType() {
@@ -42,6 +45,8 @@ public class EEAEventHandlerImplTest {
 
   /**
    * Process message.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void processMessage() throws EEAException {
@@ -56,8 +61,10 @@ public class EEAEventHandlerImplTest {
 
   /**
    * Process message.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test
   public void processError() throws EEAException {
     EEAEventHandlerCommand eeaEventHandlerCommand = Mockito.mock(EEAEventHandlerCommand.class);
     Mockito.doThrow(new EEAException("test")).when(eeaEventHandlerCommand)
@@ -70,9 +77,25 @@ public class EEAEventHandlerImplTest {
     } catch (EEAException e) {
       Mockito.verify(eeaEentCommandFactory, Mockito.times(1)).getEventCommand(vo);
       Mockito.verify(eeaEventHandlerCommand, Mockito.times(1)).execute(vo);
-      Assert.assertEquals("Wrong exception caught", e.getMessage(), "test");
-      throw e;
+      Assert.assertEquals("Wrong exception caught", "test", e.getMessage());
     }
+  }
 
+
+  /**
+   * Process error 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void processError2() throws EEAException {
+    EEAEventHandlerCommand eeaEventHandlerCommand = Mockito.mock(EEAEventHandlerCommand.class);
+    Mockito.doThrow(new EEAException("test")).when(eeaEventHandlerCommand)
+        .execute(Mockito.any(EEAEventVO.class));
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any(EEAEventVO.class)))
+        .thenReturn(null);
+    EEAEventVO vo = new EEAEventVO();
+    eeaEventHandler.processMessage(vo);
+    Mockito.verify(eeaEventHandlerCommand, Mockito.times(0)).execute(vo);
   }
 }

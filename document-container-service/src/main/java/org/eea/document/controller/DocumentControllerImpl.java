@@ -11,6 +11,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -52,6 +54,10 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DataFlowDocumentControllerZuul dataflowController;
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DocumentControllerImpl.class);
 
   /**
    * Upload document.
@@ -70,6 +76,7 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic) {
+    LOG.info("uploadDocument");
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -174,6 +181,7 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
       @RequestParam("isPublic") final Boolean isPublic) {
+    LOG.info("updateDocument");
     if (dataFlowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
