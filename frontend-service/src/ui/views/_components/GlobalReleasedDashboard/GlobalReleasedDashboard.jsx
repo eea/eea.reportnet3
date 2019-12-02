@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
@@ -9,31 +9,33 @@ import colors from 'conf/colors.json';
 import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { StatusList } from 'ui/views/_components/StatusList';
 
-import { ReleasedFilterReducer } from './_components/_context/ReleasedFilterReducer';
+import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 import { DataflowService } from 'core/services/DataFlow';
 
 export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
-  const initialDashboardValues = {
-    isReleasedFilter: [],
-    reporterFilter: [],
-    originalData: {},
-    data: {}
-  };
+  // const initialDashboardValues = {
+  //   statusFilter: [],
+  //   originalData: {},
+  //   data: {}
+  // };
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
+  // const [releasedFilterState, releasedFilterDispatch] = useReducer(ReleasedFilterReducer, initialDashboardValues);
 
-  const [releasedFilterState, releasedFilterDispatch] = useReducer(ReleasedFilterReducer, initialDashboardValues);
+  const { updatedState, statusDispatcher } = useStatusFilter(releasedDashboardData);
 
   useEffect(() => {
     onLoadDashboard();
   }, []);
 
   useEffect(() => {
-    releasedFilterDispatch({ type: 'INIT_DATA', payload: releasedDashboardData });
+    statusDispatcher({ type: 'INIT_DATA', payload: releasedDashboardData });
+    // console.log('releasedDashboardData', releasedDashboardData);
   }, [releasedDashboardData]);
 
   const onLoadDashboard = async () => {
@@ -91,6 +93,9 @@ export const GlobalReleasedDashboard = dataflowId => {
       //     `
       // }
     },
+    legend: {
+      display: false
+    },
     responsive: true,
     scales: {
       xAxes: [
@@ -121,26 +126,22 @@ export const GlobalReleasedDashboard = dataflowId => {
     return <Spinner className={styles.positioning} />;
   }
 
+  console.log('updatedState', updatedState.filterStatus);
+
   if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
         <div className={`${styles.chart_released}`}>
-          {!isEmpty(releasedFilterState.data) ? (
+          {!isEmpty(updatedState.dashboardData) ? (
             <>
-              {/* <FilterList
-                datasetSchemaId={datasetSchemaId}
-                color={dashboardColors}
-                filterDispatch={filterDispatch}
-                levelErrors={levelErrorTypes}
-                originalData={filterState.originalData}
-                reporterFilters={filterState.reporterFilter}
-                statusFilters={filterState.statusFilter}
-                tableFilters={filterState.tableFilter}
+              <StatusList
+                filterDispatch={statusDispatcher}
+                filteredStatusTypes={updatedState}
+                statusTypes={updatedState.filterStatus}
               />
-              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])} */}
               <Chart
                 type="bar"
-                data={releasedFilterState.data}
+                data={updatedState.dashboardData}
                 options={releasedOptionsObject}
                 width="100%"
                 height="25%"
@@ -148,8 +149,6 @@ export const GlobalReleasedDashboard = dataflowId => {
             </>
           ) : (
             <>
-              {/* <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} /> */}
-              {/* {onLoadStamp(resources.messages['empty'])} */}
               <Chart type="bar" options={releasedOptionsObject} width="100%" height="25%" />
             </>
           )}
