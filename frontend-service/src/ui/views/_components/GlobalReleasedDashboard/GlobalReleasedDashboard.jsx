@@ -17,15 +17,9 @@ import { DataflowService } from 'core/services/DataFlow';
 
 export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
-  // const initialDashboardValues = {
-  //   statusFilter: [],
-  //   originalData: {},
-  //   data: {}
-  // };
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
-  // const [releasedFilterState, releasedFilterDispatch] = useReducer(ReleasedFilterReducer, initialDashboardValues);
 
   const { updatedState, statusDispatcher } = useStatusFilter(releasedDashboardData);
 
@@ -35,7 +29,6 @@ export const GlobalReleasedDashboard = dataflowId => {
 
   useEffect(() => {
     statusDispatcher({ type: 'INIT_DATA', payload: releasedDashboardData });
-    // console.log('releasedDashboardData', releasedDashboardData);
   }, [releasedDashboardData]);
 
   const onLoadDashboard = async () => {
@@ -126,8 +119,6 @@ export const GlobalReleasedDashboard = dataflowId => {
     return <Spinner className={styles.positioning} />;
   }
 
-  console.log('updatedState', updatedState.filterStatus);
-
   if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
@@ -136,8 +127,8 @@ export const GlobalReleasedDashboard = dataflowId => {
             <>
               <StatusList
                 filterDispatch={statusDispatcher}
-                filteredStatusTypes={updatedState}
-                statusTypes={updatedState.filterStatus}
+                filteredStatusTypes={updatedState.filterStatus}
+                statusTypes={['Released', 'Unreleased']}
               />
               <Chart
                 type="bar"

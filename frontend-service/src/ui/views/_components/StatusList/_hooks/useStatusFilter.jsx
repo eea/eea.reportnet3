@@ -17,17 +17,13 @@ const useStatusFilter = dataArray => {
     if (isEmpty(originalData)) {
       return;
     }
-    let tablesData = tablesData.filter(table => showArrayItem(payloadDataArray, table.label));
 
-    console.log('pay', payloadDataArray);
+    let tablesData = originalData.datasets.filter(table => showArrayItem(payloadDataArray, table.label));
 
     return { labels: originalData.labels, datasets: tablesData };
   };
 
   const reducer = (state, { type, payload }) => {
-    console.log('state', state);
-    console.log('payload', payload);
-    console.log('type', type);
     let payloadLabelsArr = [];
     let filteredStatusData;
     switch (type) {
