@@ -7,8 +7,6 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes }) => {
   const resources = useContext(ResourcesContext);
-  console.log('statusTypes', statusTypes);
-  console.log('filteredStatusTypes', filteredStatusTypes);
   let statusTypesFilters = statusTypes.map((label, i) => {
     return (
       <li key={i} className={styles.listItem}>
