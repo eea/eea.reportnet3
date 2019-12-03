@@ -131,12 +131,13 @@ pipeline {
             }
         }
         stage('Setup sandbox docker images build'){
-            when{
-                branch 'sandbox'
-            }
             steps{
-                script{
-                   env.TAG_SUFIX="_sandbox"
+                script {
+                  if (env.BRANCH_NAME == '_sandbox') {
+                      env.TAG_SUFIX="_sandbox"
+                  } else {
+                     env.TAG_SUFIX=""
+                  }
                 }
             }
         }
