@@ -425,20 +425,16 @@ public class DataflowServiceImpl implements DataflowService {
   @Transactional
   public void deleteDataFlow(Long idDataflow) throws EEAException {
 
-    // List<String> nameResource = new ArrayList<>();
-    // ResourceInfoVO resourceCustodian = resourceManagementControllerZull
-    // .getResourceDetail(idDataflow, ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    // we find all groups that the dataflow have
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+        .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
 
-    // ResourceInfoVO resourceProvider =
-    // resourceManagementControllerZull.getResourceDetail(idDataflow,
-    // ResourceGroupEnum.DATAFLOW_PROVIDER);
-    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
-    // + SecurityRoleEnum.DATA_PROVIDER);
-    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
-    // + SecurityRoleEnum.DATA_CUSTODIAN);
-    // resourceManagementControllerZull.deleteResourceByName(nameResource);
 
-    // dataflowRepository.deleteById(idDataflow);
+    // we delete the list of dataflow that we need
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
+
+    // we delete the dataflow in metabase
+    dataflowRepository.deleteById(idDataflow);
 
   }
 

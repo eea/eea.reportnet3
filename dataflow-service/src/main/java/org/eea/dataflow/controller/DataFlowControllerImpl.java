@@ -341,7 +341,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void deleteDataFlow(Long idDataflow) {
     try {
       dataflowService.deleteDataFlow(idDataflow);
