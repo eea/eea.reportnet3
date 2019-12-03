@@ -56,14 +56,20 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_INCORRECT_ID. */
   public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
 
+  /** The Constant DATAFLOW_EXISTS_NAME. */
+  public static final String DATAFLOW_EXISTS_NAME = "Dataflow name already exists";
+
   /** The Constant DATAFLOW_NOTFOUND. */
   public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
+
+  /** The Constant DATAFLOW_CRITERIA. */
+  public static final String DATAFLOW_DESCRIPTION_NAME = "Dataflow Description or Name empty";
 
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
   /** The Constant SCHEMA_ID_NONFOUND. */
-  public static final String SCHEMA_ID_NONFOUND = "IdSchema not found";
+  public static final String SCHEMA_NOT_FOUND = "Schema not found";
 
   /** The Constant DOCUMENT_UPLOAD_ERROR. */
   public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
@@ -89,6 +95,7 @@ public final class EEAErrorMessage {
   /** The Constant DATE_FORMAT_INCORRECT. */
   public static final String DATE_FORMAT_INCORRECT = "Format date is incorrect";
 
+  /** The Constant DATE_AFTER_INCORRECT. */
   public static final String DATE_AFTER_INCORRECT = "The date has to be later than today's date";
 
   /** The Constant FIELD_NOTFOUND. */
@@ -98,8 +105,13 @@ public final class EEAErrorMessage {
   public static final String FIELD_SCHEMA_ID_NOT_FOUND = "fieldSchemaId not found";
 
   /** The Constant WRONG_DATASET_SCHEMA. */
-  public static final String WRONG_DATASET_SCHEMA =
-      "The datasetSchema associated with the dataset does not contain the passed fieldSchema";
+  public static final String INVALID_OBJECTID = "A given ObjectId is not valid";
+
+  /** The Constant FORBIDDEN. */
+  public static final String FORBIDDEN = "The user has no permissions";
+
+  /** The Constant ID_LINK_NOT_FOUND. */
+  public static final String ID_LINK_NOT_FOUND = "WebLink not found";
 
   /**
    * Instantiates a new EEA error message.

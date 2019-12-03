@@ -1,17 +1,20 @@
 package org.eea.communication.service;
 
+import java.util.Map;
+import org.eea.kafka.domain.EventType;
+
 /**
  * The Interface NotificationService.
  */
 public interface NotificationService {
 
   /**
-   * Process the event to get the message and a user to send it. EEAEventVO should has set keys
-   * "userId" and "message" on data property.
+   * Send.
    *
-   * @param userId the user id
-   * @param message the message
+   * @param user the user
+   * @param type the type
+   * @param notification the notification
    * @return true, if successful
    */
-  boolean send(String userId, String message);
+  boolean send(String user, EventType type, Map<?, ?> notification);
 }

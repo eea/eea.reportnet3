@@ -1,20 +1,20 @@
 import { isEmpty } from 'lodash';
 
-function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
+const cleanOutFilteredTableData = (tablesData, labelsPositionsInFilteredLabelsArray) => {
   return tablesData.map(table => ({
     ...table,
     data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),
     totalData: table.totalData.filter((td, i) => !labelsPositionsInFilteredLabelsArray.includes(i))
   }));
-}
+};
 
-function getLabelIndex(originalData, label) {
+const getLabelIndex = (originalData, label) => {
   return originalData.labels.indexOf(label);
-}
+};
 
-function showArrayItem(array, item) {
+const showArrayItem = (array, item) => {
   return !array.includes(item);
-}
+};
 
 const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
   if (isEmpty(originalData)) {
@@ -22,12 +22,10 @@ const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgSt
   }
 
   let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
-
   const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
   const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-
   tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
   return { labels: labels, datasets: tablesData };
 };
@@ -112,14 +110,12 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'STATUS_FILTER_OFF':
       msgStatusTypesArray = [...state.statusFilter, payload.msg];
-
       filteredTableData = onFilteringData(
         state.originalData,
         state.tableFilter,
         state.reporterFilter,
         msgStatusTypesArray
       );
-
       return {
         ...state,
         statusFilter: msgStatusTypesArray,

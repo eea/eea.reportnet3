@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.recordstore;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -75,15 +76,20 @@ public interface RecordStoreController {
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset);
 
 
+
   /**
    * Restore snapshot data.
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot);
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "partitionId", required = true) Long partitionId,
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType);
 
   /**
    * Delete snapshot data.

@@ -1,13 +1,18 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { config } from 'conf';
+import { isUndefined } from 'lodash';
+
+import styles from './DataCustodianDashboards.module.css';
+
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { GlobalReleasedDashboard } from 'ui/views/_components/GlobalReleasedDashboard/';
@@ -17,21 +22,28 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dashboardInitialValues, setDashboardInitialValues] = useState({});
   const [dataflowName, setDataflowName] = useState('');
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
+  const [dataSchema, setDataSchema] = useState();
 
   useEffect(() => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: routes.DATAFLOWS,
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages.dataflow,
+        label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -44,7 +56,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           )
       },
       {
-        label: resources.messages.dashboards
+        label: resources.messages.dashboards,
+        icon: 'barChart'
       }
     ]);
   }, []);
@@ -52,6 +65,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   useEffect(() => {
     try {
       getDataflowName();
+      onLoadDataSchemas();
     } catch (error) {
       console.error(error.response);
     }
@@ -62,30 +76,97 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setDataflowName(dataflowData.name);
   };
 
+  const onLoadDataSchemas = async () => {
+    try {
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      setDataSchema(dataflow.designDatasets);
+      setDashboardInitialValues(
+        dataflow.designDatasets.forEach(schema => {
+          dashboardInitialValues[schema.datasetSchemaId] = true;
+        })
+      );
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    } finally {
+    }
+  };
+
+  const chartReducer = (state, { type, payload }) => {
+    switch (type) {
+      case 'TOOGLE_SCHEMA_CHART':
+        return {
+          ...state,
+          [payload]: !state[payload]
+        };
+
+      default:
+        return {
+          ...state
+        };
+    }
+  };
+
+  const [chartState, chartDispatch] = useReducer(chartReducer, dashboardInitialValues);
+
+  const onLoadButtons = !isUndefined(dataSchema)
+    ? dataSchema.map(schema => {
+        return (
+          <Button
+            className={`p-button-rounded ${
+              chartState[schema.datasetSchemaId] ? 'p-button-primary' : 'p-button-secondary'
+            } ${styles.dashboardsButton}`}
+            key={schema.datasetSchemaId}
+            label={schema.datasetSchemaName}
+            icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
+            onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
+          />
+        );
+      })
+    : null;
+
+  const onLoadCharts = !isUndefined(dataSchema)
+    ? dataSchema.map(schema => {
+        return (
+          <GlobalValidationDashboard
+            key={schema.datasetSchemaId}
+            datasetSchemaId={schema.datasetSchemaId}
+            isVisible={chartState[schema.datasetSchemaId]}
+            datasetSchemaName={schema.datasetSchemaName}
+          />
+        );
+      })
+    : null;
+
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
   };
 
-  const DataflowTitle = () => {
-    return (
-      <div className="rep-row">
-        <h1>
-          {resources.messages['dataflow']}: {dataflowName}
-        </h1>
-      </div>
-    );
-  };
-
   return layout(
     <>
-      <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
-      <GlobalValidationDashboard dataflowId={match.params.dataflowId} />
-      <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
+      <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
+      <div className={styles.validationChartWrap}>
+        <h2 className={styles.dashboardType}>{resources.messages['validationDashboards']}</h2>
+        <Toolbar className={styles.chartToolbar}>
+          <div className="p-toolbar-group-left">{onLoadButtons}</div>
+        </Toolbar>
+        {Object.values(chartState).includes(true) ? (
+          <></>
+        ) : (
+          <div className={styles.informationText}>{resources.messages['noDashboardSelected']}</div>
+        )}
+        {onLoadCharts}
+      </div>
+      <div className={styles.releasedChartWrap}>
+        <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
+        <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
+      </div>
     </>
   );
 });

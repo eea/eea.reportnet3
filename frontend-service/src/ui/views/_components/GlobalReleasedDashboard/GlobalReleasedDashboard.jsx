@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
@@ -15,6 +15,7 @@ import { DataflowService } from 'core/services/DataFlow';
 export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
   const [isLoading, setLoading] = useState(true);
+  const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   useEffect(() => {
@@ -39,9 +40,42 @@ export const GlobalReleasedDashboard = dataflowId => {
     console.error('Released dashboard errorResponse: ', errorResponse);
   };
 
+  const getMaxOfArrays = (releasedNumArr, unReleasedNumArr) => {
+    const maxReleased = Math.max.apply(null, releasedNumArr);
+    const maxUnReleased = Math.max.apply(null, unReleasedNumArr);
+    return Math.max(maxReleased, maxUnReleased);
+  };
+
+  const buildReleasedDashboardObject = data => {
+    setMaxValue(getMaxOfArrays(data.releasedData, data.unReleasedData));
+    return {
+      labels: data.labels,
+      datasets: [
+        {
+          label: resources.messages['released'],
+          backgroundColor: colors.green400,
+          data: data.releasedData
+        },
+        {
+          label: resources.messages['unreleased'],
+          backgroundColor: colors.gray25,
+          data: data.unReleasedData
+        }
+      ]
+    };
+  };
+
   const releasedOptionsObject = {
     tooltips: {
-      enabled: false
+      mode: 'point',
+      intersect: true
+      // callbacks: {
+      //   label: (tooltipItems, data) =>
+      //     `${tooltipItems.yLabel} ${data.datasets[tooltipItems.datasetIndex].label}: ${
+      //       data.datasets[tooltipItems.datasetIndex]
+      //     }
+      //     `
+      // }
     },
     responsive: true,
     scales: {
@@ -54,28 +88,19 @@ export const GlobalReleasedDashboard = dataflowId => {
       yAxes: [
         {
           stacked: true,
-          display: false
+          ticks: {
+            beginAtZero: true,
+            max: maxValue,
+            callback: value => {
+              if (Number.isInteger(value)) {
+                return value;
+              }
+            },
+            stepSize: 1
+          }
         }
       ]
     }
-  };
-
-  const buildReleasedDashboardObject = releasedData => {
-    return {
-      labels: releasedData.map(dataset => dataset.dataSetName),
-      datasets: [
-        {
-          label: resources.messages['released'],
-          backgroundColor: colors.green400,
-          data: releasedData.map(dataset => dataset.isReleased)
-        },
-        {
-          label: resources.messages['unreleased'],
-          backgroundColor: colors.gray25,
-          data: releasedData.map(dataset => !dataset.isReleased)
-        }
-      ]
-    };
   };
 
   if (isLoading) {
@@ -85,7 +110,7 @@ export const GlobalReleasedDashboard = dataflowId => {
   if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
-        <div className={`rep-row ${styles.chart_released}`}>
+        <div className={`${styles.chart_released}`}>
           <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
         </div>
       );

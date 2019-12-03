@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const HTTPRequester = (function() {
+export const HTTPRequester = (() => {
   const baseURL = window.env.REACT_APP_BACKEND;
   //Maps object queryString to 'key=value' format. Checks if queryString is undefined or empty object
   const mapQueryString = queryString =>
@@ -41,6 +41,12 @@ export const HTTPRequester = (function() {
     postWithFiles: options => {
       const headers = options.headers;
       return axios.post(`${baseURL}${options.url}`, options.data, {
+        headers
+      });
+    },
+    putWithFiles: options => {
+      const headers = options.headers;
+      return axios.put(`${baseURL}${options.url}`, options.data, {
         headers
       });
     }

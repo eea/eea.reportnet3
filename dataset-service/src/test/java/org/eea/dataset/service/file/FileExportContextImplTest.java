@@ -2,8 +2,8 @@ package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertEquals;
 import java.io.IOException;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
+import org.eea.exception.EEAException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,10 +47,10 @@ public class FileExportContextImplTest {
    * Test file writer.
    * 
    * @throws IOException
-   * @throws InvalidFileException
+   * @throws EEAException
    */
   @Test
-  public void testFileWriter() throws InvalidFileException, IOException {
+  public void testFileWriter() throws IOException, EEAException {
     byte[] expectedResult = "".getBytes();
     Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(expectedResult);

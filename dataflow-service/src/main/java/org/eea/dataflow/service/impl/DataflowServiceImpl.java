@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -17,13 +18,16 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +83,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+
+  /** The resource management controller zull. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZull;
 
   /**
    * The Constant LOG.
@@ -300,50 +308,65 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
-   */
-  @Override
-  @Transactional
-  public void createDataFlow(DataFlowVO dataflowVO) {
-    createMetabaseDataFlow(dataflowVO);
-  }
-
-  /**
-   * Creates the metabase data flow.
-   *
-   * @param dataflowVO the dataflow VO
-   */
-  // @Transactional
-  private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
-    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
-      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
-    } else {
-      Dataflow dataflow = dataflowMapper.classToEntity(dataflowVO);
-      dataflowRepository.save(dataflow);
-    }
-  }
-
-
-  /**
-   * Gets the datasets id.
-   *
-   * @param id the id
-   *
-   * @return the datasets id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public DataFlowVO getReportingDatasetsId(Long id) throws EEAException {
+  public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
+    Dataflow dataFlowSaved;
+    // we find if the name of this dataflow exist
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
+      throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    } else {
+      dataflowVO.setCreationDate(new Date());
+      dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
+      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+    }
+    // With that method we create the group in keycloack
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
-    if (id == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    // // with that service we assing the group created to a user who create it
+    userManagementControllerZull.addContributorToResource(dataFlowSaved.getId(),
+        ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+  }
+
+
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+    return resourceInfoVO;
+  }
+
+  /**
+   * Gets the datasets id.
+   *
+   * @param dataschemaId the dataschema id
+   * @return the datasets id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException {
+
+    if (dataschemaId == null) {
+      throw new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
 
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setId(id);
     dataflowVO
-        .setReportingDatasets(datasetMetabaseController.findReportingDataSetIdByDataflowId(id));
+        .setReportingDatasets(datasetMetabaseController.getReportingsIdBySchemaId(dataschemaId));
 
     return dataflowVO;
   }

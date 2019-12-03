@@ -8,23 +8,35 @@ import lombok.Data;
 @Data
 public class ElasticDataset {
 
-  /** The Name. */
-  String Name;
+  /**
+   * The Name.
+   */
+  private String Name;
 
-  /** The Countries. */
-  String Countries;
+  /**
+   * The Countries.
+   */
+  private String Countries;
 
-  /** The Issue. */
-  String Issue;
+  /**
+   * The Issue.
+   */
+  private String Issue;
 
-  /** The Release. */
-  String Release;
+  /**
+   * The Release.
+   */
+  private String Release;
 
-  /** The Acces URL. */
-  String AccesURL;
+  /**
+   * The Acces URL.
+   */
+  private String AccesURL;
 
-  /** The elastic user. */
-  ElasticUser elasticUser;
+  /**
+   * The elastic user.
+   */
+  private ElasticUser elasticUser;
 
 
 }

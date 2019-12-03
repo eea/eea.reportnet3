@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
@@ -12,33 +11,63 @@ import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Snapshots } from 'ui/views/_components/Snapshots';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
+import { Title } from 'ui/views/_components/Title';
+
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
 export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
-    params: { dataflowId, datasetId }
+    params: { datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
   let growlRef = useRef();
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
+
+  const {
+    isLoadingSnapshotListData,
+    isSnapshotsBarVisible,
+    setIsSnapshotsBarVisible,
+    isSnapshotDialogVisible,
+    setIsSnapshotDialogVisible,
+    snapshotDispatch,
+    snapshotListData,
+    snapshotState
+  } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
+
+  useEffect(() => {
+    try {
+      setIsLoading(true);
+      const getDatasetSchemaId = async () => {
+        const dataset = await DatasetService.schemaById(datasetId);
+
+        setDatasetSchemaId(dataset.datasetSchemaId);
+      };
+      getDatasetSchemaId();
+    } catch (error) {
+      console.error(`Error while loading schema: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -52,10 +81,20 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
+        icon: 'archive',
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId: match.params.dataflowId
+          },
+          true
+        ),
         command: () =>
           history.push(
             getUrl(
@@ -67,21 +106,34 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['datasetDesigner'] }
+      { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
     ]);
+    getDataflowName();
     onLoadDatasetSchemaName();
   }, []);
 
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
+
   const onLoadDatasetSchemaName = async () => {
-    const dataset = await DatasetService.getMetaData(datasetId);
-    setDatasetSchemaName(dataset.datasetSchemaName);
+    setIsLoading(true);
+    try {
+      const dataset = await DatasetService.getMetaData(datasetId);
+      setDatasetSchemaName(dataset.datasetSchemaName);
+    } catch (error) {
+      console.error(`Error while getting datasetSchemaName: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const layout = children => {
     return (
       <MainLayout>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -92,8 +144,19 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <>
-      <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} icon="pencilRuler" />
+    <SnapshotContext.Provider
+      value={{
+        snapshotState: snapshotState,
+        snapshotDispatch: snapshotDispatch,
+        isSnapshotsBarVisible: isSnapshotsBarVisible,
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+      }}>
+      <Title
+        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
+        subtitle={dataflowName}
+        icon="pencilRuler"
+        iconSize="3.4rem"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-right">
@@ -123,15 +186,21 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
+              disabled={hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => null}
+              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
           </div>
         </Toolbar>
       </div>
       <TabsDesigner editable={true} />
-    </>
+      <Snapshots
+        isLoadingSnapshotListData={isLoadingSnapshotListData}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
+        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        snapshotListData={snapshotListData}
+      />
+    </SnapshotContext.Provider>
   );
 });

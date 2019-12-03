@@ -19,7 +19,6 @@ public class TokenGeneratorThread implements Runnable {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   private KeycloakConnectorService keycloakConnectorService;
   private Boolean exit = false;
   private String adminUser;
@@ -52,7 +51,7 @@ public class TokenGeneratorThread implements Runnable {
 
     log.info("Starting token generator thread");
     //First attemp to retrieve an admin token during ums initialization
-    TokenInfo firstToken = keycloakConnectorService.generateToken(adminUser, adminPass);
+    TokenInfo firstToken = keycloakConnectorService.generateAdminToken(adminUser, adminPass);
     if (null != firstToken) {
       manageTokenInfo(firstToken);
     }
@@ -60,6 +59,7 @@ public class TokenGeneratorThread implements Runnable {
     while (!exit) {
       TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
       manageTokenInfo(tokenInfo);
+      log.info("Token refreshed. Token info: {}", tokenInfo);
     }
     log.info("Exited from token generator thread");
   }

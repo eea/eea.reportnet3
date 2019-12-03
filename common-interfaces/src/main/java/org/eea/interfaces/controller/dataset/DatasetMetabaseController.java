@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -80,4 +81,40 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+
+
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics by id
+   */
+  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
+
+
+
+  /**
+   * Gets the global statistics by dataschema id.
+   *
+   * @param dataschemaId the dataschema id
+   * @return the global statistics by dataschema id
+   */
+  @GetMapping(value = "/globalStatistics/{dataschemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<StatisticsVO> getGlobalStatisticsByDataschemaId(
+      @PathVariable("dataschemaId") String dataschemaId);
+
+
+  /**
+   * Gets the reportings id by schema id.
+   *
+   * @param schemaId the schema id
+   * @return the reportings id by schema id
+   */
+  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
+
+
 }

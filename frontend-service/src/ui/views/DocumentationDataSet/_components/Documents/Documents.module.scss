@@ -1,10 +1,7 @@
 .crudColumn {
   text-align: center;
 }
-.delete {
-  color: var(--errors);
-  cursor: pointer;
-}
+
 .downloadIcon {
   font-size: 1.5rem;
   cursor: pointer;
@@ -13,4 +10,26 @@
 
 .dialog :global .p-dialog-content {
   padding-bottom: 0 !important;
+}
+
+.hideColumn {
+  display: none;
+}
+
+.deleteRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+}
+
+.documentsEditButtons {
+  display: flex;
+  justify-content: center;
+}
+
+.editRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  margin-left: 3px !important;
 }

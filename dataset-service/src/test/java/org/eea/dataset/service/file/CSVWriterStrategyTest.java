@@ -3,9 +3,9 @@ package org.eea.dataset.service.file;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,11 +52,11 @@ public class CSVWriterStrategyTest {
   /**
    * Test write file.
    *
-   * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Test
-  public void testWriteFile() throws InvalidFileException, IOException {
+  public void testWriteFile() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     List<FieldValue> fields = new ArrayList<>();
@@ -70,19 +70,18 @@ public class CSVWriterStrategyTest {
     records.add(record);
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
-    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldSchemas);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
   }
 
   /**
    * Test write file write.
    *
-   * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Test
-  public void testWriteFileWrite() throws InvalidFileException, IOException {
+  public void testWriteFileWrite() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     List<FieldValue> fields = new ArrayList<>();
@@ -98,8 +97,7 @@ public class CSVWriterStrategyTest {
     records.add(record2);
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
-    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldSchemas);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
   }
 }

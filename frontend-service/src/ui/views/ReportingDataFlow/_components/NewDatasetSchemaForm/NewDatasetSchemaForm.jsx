@@ -12,7 +12,14 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DataflowService } from 'core/services/DataFlow';
 
-export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpdateData, setNewDatasetDialog }) => {
+export const NewDatasetSchemaForm = ({
+  dataflowId,
+  datasetSchemaInfo,
+  isFormReset,
+  onCreate,
+  onUpdateData,
+  setNewDatasetDialog
+}) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
 
@@ -21,8 +28,16 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
-      .matches(/^[a-zA-Z0-9-]+$/, resources.messages['invalidCharacter'])
-      .required()
+      .required(' ')
+      .test('', resources.messages['duplicateSchemaError'], value => {
+        if (value !== undefined && !isEmpty(datasetSchemaInfo)) {
+          const schemas = [...datasetSchemaInfo];
+          const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
+          return isRepeat.length === schemas.length;
+        } else {
+          return true;
+        }
+      })
   });
 
   if (!isNull(form.current)) {
@@ -40,7 +55,10 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         showLoading();
-        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, values.datasetSchemaName);
+        const response = await DataflowService.newEmptyDatasetSchema(
+          dataflowId,
+          encodeURIComponent(values.datasetSchemaName)
+        );
         onCreate();
         if (response === 200) {
           onCreate();
@@ -68,13 +86,7 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
           <fieldset>
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
-                className={
-                  !isEmpty(touched)
-                    ? isEmpty(errors)
-                      ? styles.primaryButton
-                      : styles.disabledButton
-                    : styles.disabledButton
-                }
+                className={styles.primaryButton}
                 disabled={isSubmitting}
                 label={resources.messages['create']}
                 icon="add"

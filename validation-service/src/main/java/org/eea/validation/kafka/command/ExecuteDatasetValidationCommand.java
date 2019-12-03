@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -79,13 +78,14 @@ public class ExecuteDatasetValidationCommand extends AbstractEEAEventHandlerComm
       eeaEventVO.getData().put("error", e);
     } finally {
 
-      //if this is the coordinator validation  instance, then no need to send message, just updates expected validations and verify if process is finished
+      // if this is the coordinator validation instance, then no need to send message, just updates
+      // expected validations and verify if process is finished
       ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
       synchronized (processMap) {
         if (processMap.containsKey(uuid)) {
           processMap.merge(uuid, -1, Integer::sum);
           validationHelper.checkFinishedValidations(datasetId, uuid);
-        } else {//send the message to coordinator validation instance
+        } else {// send the message to coordinator validation instance
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
               eeaEventVO.getData());
         }

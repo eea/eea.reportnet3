@@ -55,10 +55,23 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  datasetsValidationStatistics: async dataflowId => {
+  create: async (name, description) => {
+    console.log(name, description);
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: window.env.REACT_APP_JSON ? '/dataflow' : getUrl(DataflowConfig.createDataflow),
+      data: { name, description },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+  datasetsValidationStatistics: async datasetSchemaId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
+      url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`

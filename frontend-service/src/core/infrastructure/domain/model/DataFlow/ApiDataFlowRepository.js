@@ -1,16 +1,20 @@
 import { isNull, isUndefined } from 'lodash';
 
+import moment from 'moment';
+
 import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
 import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
+
+import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
   dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
-  dataflow.deadlineDate = dataflowDTO.deadlineDate;
+  dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
   dataflow.description = dataflowDTO.description;
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
   dataflow.id = dataflowDTO.id;
@@ -28,7 +32,7 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   if (!isNull(datasetsDTO)) {
     const datasets = [];
-    datasetsDTO.map(datasetDTO => {
+    datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
@@ -41,7 +45,7 @@ const parseDatasetDTO = datasetDTO => {
   return new Dataset(
     null,
     datasetDTO.id,
-    null,
+    datasetDTO.datasetSchema,
     datasetDTO.dataSetName,
     null,
     null,
@@ -59,7 +63,7 @@ const parseDocumentListDTO = documentsDTO => {
   }
   if (!isNull(documentsDTO)) {
     const documents = [];
-    documentsDTO.map(documentDTO => {
+    documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
@@ -85,7 +89,7 @@ const parseWebLinkListDTO = webLinksDTO => {
   }
   if (!isNull(webLinksDTO)) {
     const webLinks = [];
-    webLinksDTO.map(webLinkDTO => {
+    webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
@@ -99,9 +103,17 @@ const parseWebLinkDTO = webLinkDTO => {
 };
 
 const parseDataflowDTOs = dataflowDTOs => {
-  return dataflowDTOs.map(dataflowDTO => {
+  let dataflows = dataflowDTOs.map(dataflowDTO => {
     return parseDataflowDTO(dataflowDTO);
   });
+
+  dataflows.sort((a, b) => {
+    let deadline_1 = a.deadlineDate;
+    let deadline_2 = b.deadlineDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+
+  return dataflows;
 };
 
 const all = async () => {
@@ -118,13 +130,19 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
+const create = async (name, description) => {
+  const createdDataflow = await apiDataflow.create(name, description);
+  console.log(createdDataflow);
+  return createdDataflow;
+};
+
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetsValidationStatistics = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
+const datasetsValidationStatistics = async datasetSchemaId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
   datasetsDashboardsDataDTO.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -138,32 +156,46 @@ const datasetsValidationStatistics = async dataflowId => {
   const tables = [];
   let tablePercentages = [];
   let tableValues = [];
-
-  datasetsDashboardsDataDTO.map(dataset => {
+  let levelErrors = [];
+  const allDatasetLevelErrors = [];
+  datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
-
-    dataset.tables.map((table, i) => {
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
+    dataset.tables.forEach((table, i) => {
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
         tablePercentages.push(
           [
             getPercentageOfValue(
-              table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+              table.totalRecords -
+                (table.totalRecordsWithBlockers +
+                  table.totalRecordsWithErrors +
+                  table.totalRecordsWithWarnings +
+                  table.totalRecordsWithInfos),
               table.totalRecords
             )
           ],
+          [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
           [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)]
+          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
+          [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
         );
-
         tableValues.push(
-          [table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)],
+          [
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos)
+          ],
+          [table.totalRecordsWithInfos],
           [table.totalRecordsWithWarnings],
-          [table.totalRecordsWithErrors]
+          [table.totalRecordsWithErrors],
+          [table.totalRecordsWithBlockers]
         );
 
         tables.push({
@@ -179,32 +211,52 @@ const datasetsValidationStatistics = async dataflowId => {
 
         tableById.tableStatisticPercentages[0].push(
           getPercentageOfValue(
-            table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos),
             table.totalRecords
           )
         );
+
         tableById.tableStatisticPercentages[1].push(
+          getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages[2].push(
           getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
         );
-        tableById.tableStatisticPercentages[2].push(
+
+        tableById.tableStatisticPercentages[3].push(
           getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
         );
 
-        tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
-
-        tableById.tableStatisticValues[0].push(
-          table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)
+        tableById.tableStatisticPercentages[4].push(
+          getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
         );
-        tableById.tableStatisticValues[1].push(table.totalRecordsWithWarnings);
-        tableById.tableStatisticValues[2].push(table.totalRecordsWithErrors);
+
+        tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
+        tableById.tableStatisticValues[0].push(
+          table.totalRecords -
+            (table.totalRecordsWithBlockers +
+              table.totalRecordsWithErrors +
+              table.totalRecordsWithWarnings +
+              table.totalRecordsWithInfos)
+        );
+        tableById.tableStatisticValues[1].push(table.totalRecordsWithInfos);
+        tableById.tableStatisticValues[2].push(table.totalRecordsWithWarnings);
+        tableById.tableStatisticValues[3].push(table.totalRecordsWithErrors);
+        tableById.tableStatisticValues[4].push(table.totalRecordsWithBlockers);
         tables[index] = tableById;
       }
     });
   });
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
   datasetsDashboardsData.datasetReporters = datasetReporters;
+  datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
-
   return datasetsDashboardsData;
 };
 
@@ -216,7 +268,36 @@ const datasetsReleasedStatus = async dataflowId => {
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
 
-  return datasetsReleasedStatusDTO;
+  const reporters = [];
+  datasetsReleasedStatusDTO.map(dataset => {
+    reporters.push(dataset.dataSetName);
+  });
+
+  const onGroupBy = key => array =>
+    array.reduce((objectsByKeyValue, obj) => {
+      const value = obj[key];
+      objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+      return objectsByKeyValue;
+    }, {});
+
+  const groupByReporter = onGroupBy('dataSetName');
+
+  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO)).length).fill(0);
+  const isNotReleased = [...isReleased];
+
+  Object.values(groupByReporter(datasetsReleasedStatusDTO)).forEach((reporter, i) => {
+    reporter.forEach(dataset => {
+      dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
+    });
+  });
+
+  const releasedStatusData = {
+    releasedData: isReleased,
+    unReleasedData: isNotReleased,
+    labels: Array.from(new Set(reporters))
+  };
+
+  return releasedStatusData;
 };
 
 const dataflowDetails = async dataflowId => {
@@ -237,7 +318,13 @@ const pending = async () => {
 
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
-  return parseDataflowDTO(reportingDataflowDTO);
+  const dataflow = parseDataflowDTO(reportingDataflowDTO);
+  dataflow.datasets.sort((a, b) => {
+    let datasetName_A = a.datasetSchemaName;
+    let datasetName_B = b.datasetSchemaName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
+  return dataflow;
 };
 
 const accept = async dataflowId => {
@@ -254,14 +341,11 @@ const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
 };
 
-const transposeMatrix = matrix => {
-  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
-};
-
 export const ApiDataflowRepository = {
   all,
   accept,
   accepted,
+  create,
   completed,
   dataflowDetails,
   datasetsValidationStatistics,

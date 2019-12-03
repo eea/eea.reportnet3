@@ -2,11 +2,10 @@ package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.mapper.GroupInfoMapper;
@@ -48,11 +47,33 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
   @Test
+  public void doAdminLogin() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito
+        .when(keycloakConnectorService.generateAdminToken(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", true);
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
+  public void doNotAdminLogin() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", false);
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
   public void doLoginByCode() {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("token");
-    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString()))
-        .thenReturn(tokenInfo);
+    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString())).thenReturn(tokenInfo);
     TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("code");
     Assert.assertNotNull(token);
     Assert.assertEquals("token", token.getAccessToken());
@@ -62,8 +83,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   public void refreshToken() {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("token");
-    Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString()))
-        .thenReturn(tokenInfo);
+    Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString())).thenReturn(tokenInfo);
     TokenVO token = keycloakSecurityProviderInterfaceService.refreshToken("1234");
     Assert.assertNotNull(token);
     Assert.assertEquals("token", token.getAccessToken());
@@ -71,12 +91,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   @Test
   public void checkAccessPermission() {
-    Mockito.when(keycloakConnectorService
-        .checkUserPermision("Dataflow", new AccessScopeEnum[]{AccessScopeEnum.CREATE}))
-        .thenReturn("PERMIT");
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
-    boolean checkedAccessPermission = keycloakSecurityProviderInterfaceService
-        .checkAccessPermission("Dataflow", scopes);
+    Mockito.when(keycloakConnectorService.checkUserPermision("Dataflow",
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn("PERMIT");
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+    boolean checkedAccessPermission =
+        keycloakSecurityProviderInterfaceService.checkAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
   }
 
@@ -113,22 +132,20 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService
-        .getGroupsByUser(Mockito.anyString()))
+    Mockito.when(keycloakConnectorService.getGroupsByUser(Mockito.anyString()))
         .thenReturn(groupInfos);
-    List<ResourceAccessVO> result = keycloakSecurityProviderInterfaceService
-        .getResourcesByUser("user1");
+    List<ResourceAccessVO> result =
+        keycloakSecurityProviderInterfaceService.getResourcesByUser("user1");
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
-    Assert.assertEquals(result.get(0).getResource(), ResourceTypeEnum.DATAFLOW);
-    Assert.assertEquals(result.get(0).getRole(), SecurityRoleEnum.DATA_PROVIDER);
+    Assert.assertEquals(ResourceTypeEnum.DATAFLOW, result.get(0).getResource());
+    Assert.assertEquals(SecurityRoleEnum.DATA_PROVIDER, result.get(0).getRole());
   }
 
   @Test
   public void doLogout() {
     keycloakSecurityProviderInterfaceService.doLogout("refreshToken");
-    Mockito.verify(keycloakConnectorService, Mockito.times(1))
-        .logout(Mockito.anyString());
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).logout(Mockito.anyString());
   }
 
   @Test
@@ -138,12 +155,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito
-        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
-    keycloakSecurityProviderInterfaceService
-        .addUserToUserGroup("user1", "DATAFLOW-1-DATA_CUSTODIAN");
-    Mockito.verify(keycloakConnectorService, Mockito.times(1))
-        .addUserToGroup("user1", "idGroupInfo");
+    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    keycloakSecurityProviderInterfaceService.addUserToUserGroup("user1",
+        "DATAFLOW-1-DATA_CUSTODIAN");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup("user1",
+        "idGroupInfo");
   }
 
   @Test
@@ -153,10 +169,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito
-        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
-    Mockito
-        .when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
+    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    Mockito.when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
 
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setResourceId(1l);
@@ -166,10 +180,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     ResourceInfoVO result = this.keycloakSecurityProviderInterfaceService
         .getResourceDetails("Dataflow-1-DATA_CUSTODIAN");
     Assert.assertNotNull(result);
-    Assert.assertEquals(((ResourceInfoVO) result).getName(), resourceInfoVO.getName());
-    Assert.assertEquals(((ResourceInfoVO) result).getResourceTypeEnum(), ResourceTypeEnum.DATAFLOW);
-    Assert.assertEquals(((ResourceInfoVO) result).getSecurityRoleEnum(),
-        SecurityRoleEnum.DATA_CUSTODIAN);
+    Assert.assertEquals(result.getName(), resourceInfoVO.getName());
+    Assert.assertEquals(result.getResourceTypeEnum(), ResourceTypeEnum.DATAFLOW);
+    Assert.assertEquals(result.getSecurityRoleEnum(), SecurityRoleEnum.DATA_CUSTODIAN);
   }
 
   @Test
@@ -183,8 +196,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito
-        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstances(resourceInfoVOs);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
@@ -200,8 +212,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito
-        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstancesByName(resourceNames);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");

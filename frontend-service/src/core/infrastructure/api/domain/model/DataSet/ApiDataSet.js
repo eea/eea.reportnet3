@@ -2,9 +2,30 @@ import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { async } from 'q';
 
 export const apiDataset = {
+  addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema`
+          : getUrl(DatasetConfig.addNewRecordFieldDesign, {
+              datasetId
+            }),
+        data: datasetTableRecordField,
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response;
+    } catch (error) {
+      console.error(`Error adding record to dataset design data: ${error}`);
+      return false;
+    }
+  },
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
@@ -28,14 +49,13 @@ export const apiDataset = {
       return false;
     }
   },
-  addTableDesign: async (datasetSchemaId, datasetId, tableSchemaName) => {
+  addTableDesign: async (datasetId, tableSchemaName) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/createTableSchema/${datasetId}`
+          ? `/dataschema/${datasetId}/tableSchema`
           : getUrl(DatasetConfig.addTableDesign, {
-              datasetSchemaId,
               datasetId
             }),
         data: { nameTableSchema: tableSchemaName },
@@ -44,7 +64,7 @@ export const apiDataset = {
           Authorization: `Bearer ${tokens.accessToken}`
         }
       });
-      return response.status >= 200 && response.status <= 299;
+      return response;
     } catch (error) {
       console.error(`Error adding table to dataset design data: ${error}`);
       return false;
@@ -93,6 +113,28 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
+    try {
+      const tokens = userStorage.get();
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema/${fieldSchemaId}`
+          : getUrl(DatasetConfig.deleteRecordFieldDesign, {
+              datasetId,
+              fieldSchemaId
+            }),
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting dataset table design record: ${error}`);
+      return false;
+    }
+  },
   deleteSchemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
@@ -128,14 +170,14 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteTableDesign: async (datasetSchemaId, tableSchemaId) => {
+  deleteTableDesign: async (datasetId, tableSchemaId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/tableschema/${tableSchemaId}`
+          ? `/dataschema/${datasetId}/tableSchema/${tableSchemaId}`
           : getUrl(DatasetConfig.deleteTableDesign, {
-              datasetSchemaId,
+              datasetId,
               tableSchemaId
             }),
         queryString: {},
@@ -246,13 +288,47 @@ export const apiDataset = {
     });
     return response.data;
   },
-  schemaById: async dataflowId => {
+  orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: window.env.REACT_APP_JSON
+        ? `/dataschema/${datasetId}/fieldSchema/order`
+        : getUrl(DatasetConfig.orderFieldSchemaDesign, {
+            datasetId,
+            position
+          }),
+      data: { id: fieldSchemaId, position },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status >= 200 && response.status <= 299;
+  },
+  orderTableSchema: async (datasetId, position, tableSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: window.env.REACT_APP_JSON
+        ? `/dataschema/${datasetId}/tableSchema/order`
+        : getUrl(DatasetConfig.orderTableSchemaDesign, {
+            datasetId,
+            position
+          }),
+      data: { id: tableSchemaId, position },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status >= 200 && response.status <= 299;
+  },
+  schemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
         : getUrl(DatasetConfig.dataSchema, {
-            dataflowId: dataflowId
+            datasetId
           }),
       queryString: {},
       headers: {
@@ -277,7 +353,8 @@ export const apiDataset = {
     return response.data;
   },
   tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
-    levelError = levelError.join(',');
+    let errors = levelError.map(error => error.toUpperCase());
+    levelError = errors.join(',');
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -295,6 +372,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {
@@ -316,6 +394,28 @@ export const apiDataset = {
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
       console.error(`Error updating dataset field: ${error}`);
+      return false;
+    }
+  },
+  updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema/`
+          : getUrl(DatasetConfig.updateRecordFieldDesign, {
+              datasetId
+            }),
+        data: datasetTableRecordField,
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset record design: ${error}`);
       return false;
     }
   },
@@ -355,14 +455,13 @@ export const apiDataset = {
     });
     return response.status;
   },
-  updateTableNameDesign: async (datasetSchemaId, tableSchemaId, tableSchemaName, datasetId) => {
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataschema/${datasetSchemaId}/updateNameTableSchema`
+          ? `/dataschema/${datasetId}/tableSchema`
           : getUrl(DatasetConfig.updateTableNameDesign, {
-              datasetSchemaId,
               datasetId
             }),
         data: {

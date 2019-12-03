@@ -12,15 +12,14 @@
   margin-bottom: 0rem;
 
   li {
-    min-width: 10em;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     color: #676767;
     background-color: var(--white);
-    padding: 4px;
-    margin: 0.5rem;
+    margin: 0;
+    margin-left: 3rem;
     cursor: pointer;
     user-select: none;
   }
@@ -28,7 +27,7 @@
 
 .labelItem {
   margin: 0rem;
-  margin-left: 0rem;
+  padding-left: 1rem;
   text-transform: capitalize;
   cursor: pointer;
   font-size: 0.9rem;
@@ -41,7 +40,7 @@
 
 .checkbox {
   position: relative;
-  margin: 0 0.5rem 0 0;
+  margin: 0;
   cursor: pointer;
   appearance: none;
   border: transparent;
@@ -57,8 +56,10 @@
     box-shadow: none;
   }
   &[data-status='correct'],
+  &[data-status='info'],
   &[data-status='warning'],
-  &[data-status='error'] {
+  &[data-status='error'],
+  &[data-status='blocker'] {
     border: 1px solid var(--gray-50);
   }
 

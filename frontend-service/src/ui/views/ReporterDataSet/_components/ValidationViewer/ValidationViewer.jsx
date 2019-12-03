@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isNull, isUndefined } from 'lodash';
+import { capitalize, isNull, isUndefined } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
@@ -18,7 +18,15 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DatasetService } from 'core/services/DataSet';
 
 const ValidationViewer = React.memo(
-  ({ visible, datasetId, datasetName, buttonsList = undefined, hasWritePermissions, tableSchemaNames }) => {
+  ({
+    visible,
+    datasetId,
+    datasetName,
+    buttonsList = undefined,
+    levelErrorTypes,
+    hasWritePermissions,
+    tableSchemaNames
+  }) => {
     const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
@@ -65,11 +73,13 @@ const ValidationViewer = React.memo(
         }
       ];
       let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
-      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
+      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.invisibleHeader} />);
       columnsArr.push(
-        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.VisibleHeader} />
+        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.invisibleHeader} />
       );
-      columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
+      columnsArr.push(
+        <Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.invisibleHeader} />
+      );
       setColumns(columnsArr);
     }, []);
 
@@ -125,7 +135,13 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadLevelErrorsFilter = () => {
-      const allLevelErrorsFilterList = [{ label: 'Error', key: 'Error_Id' }, { label: 'Warning', key: 'Warning_Id' }];
+      const allLevelErrorsFilterList = [];
+      levelErrorTypes.forEach(filter => {
+        allLevelErrorsFilterList.push({
+          label: capitalize(filter),
+          key: `${filter.toString()}_Id`
+        });
+      });
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
     };
 
@@ -145,7 +161,7 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}_Id`
       });
-      tableSchemaNames.map(name => {
+      tableSchemaNames.forEach(name => {
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
       setAllOriginsFilter(allOriginsFilterList);
@@ -291,7 +307,8 @@ const ValidationViewer = React.memo(
     const filteredCount = () => {
       return (
         <span>
-          {resources.messages['filtered']}{' '}
+          {resources.messages['filtered']}
+          {':'}{' '}
           {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
           {' | '}
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
@@ -300,9 +317,20 @@ const ValidationViewer = React.memo(
       );
     };
 
+    const filteredCountSameValue = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()} {'('}
+          {resources.messages['filtered'].toLowerCase()}
+          {')'}
+        </span>
+      );
+    };
+
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return totalCount();
+        return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
       }
