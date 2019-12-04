@@ -133,7 +133,7 @@ pipeline {
         stage('Setup sandbox docker images build'){
             steps{
                 script {
-                  if (env.BRANCH_NAME == '_sandbox') {
+                  if (env.BRANCH_NAME == 'sandbox') {
                       env.TAG_SUFIX="_sandbox"
                   } else {
                      env.TAG_SUFIX=""
