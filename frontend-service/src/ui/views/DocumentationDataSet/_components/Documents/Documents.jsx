@@ -170,7 +170,6 @@ const Documents = ({
 
   const sizeColumnTemplate = rowData => {
     const formatedRowData = formatBytes(rowData.size);
-    console.log('formatedRowData', formatedRowData);
     return (
       <>
         {formatedRowData.bytesParsed} {formatedRowData.sizeType}

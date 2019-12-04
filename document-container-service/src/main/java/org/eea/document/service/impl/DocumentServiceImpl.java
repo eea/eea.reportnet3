@@ -28,27 +28,38 @@ import org.springframework.stereotype.Service;
  * The type Document service.
  *
  * @author ruben.lozano
- *
  */
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant PATH_DELIMITER. */
+  /**
+   * The Constant PATH_DELIMITER.
+   */
   private static final String PATH_DELIMITER = "/";
 
-  /** The Constant PATH_DELIMITER_SNAPSHOT. */
+  /**
+   * The Constant PATH_DELIMITER_SNAPSHOT.
+   */
   private static final String PATH_DELIMITER_SNAPSHOT = "/snapshotSchema/";
 
-  /** The Constant PATH_DELIMITER_SNAPSHOT_DELETE. */
+  /**
+   * The Constant PATH_DELIMITER_SNAPSHOT_DELETE.
+   */
   private static final String PATH_DELIMITER_SNAPSHOT_DELETE = "snapshotSchema/";
 
-  /** The oak repository utils. */
+  /**
+   * The oak repository utils.
+   */
   @Autowired
   private OakRepositoryUtils oakRepositoryUtils;
 
@@ -66,6 +77,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @param filename the filename
    * @param documentVO the document VO
    * @param size the size
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -113,10 +125,10 @@ public class DocumentServiceImpl implements DocumentService {
    * Update document.
    *
    * @param documentVO the document VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
   public void updateDocument(DocumentVO documentVO) throws EEAException {
     try {
       // save to metabase
@@ -139,7 +151,9 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentId the document id
    * @param dataFlowId the data flow id
+   *
    * @return the document
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -175,6 +189,7 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentId the document id
    * @param dataFlowId the data flow id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -214,6 +229,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @param contentType the content type
    * @param filename the filename
    * @param designDataset the design dataset
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -260,7 +276,9 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param idDesignDataset the id design dataset
+   *
    * @return the snapshot document
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -297,6 +315,7 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param designDatasetId the design dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
