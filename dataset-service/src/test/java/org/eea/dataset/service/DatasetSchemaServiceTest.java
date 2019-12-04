@@ -37,6 +37,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +134,7 @@ public class DatasetSchemaServiceTest {
    */
   @Before
   public void initMocks() {
-
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 

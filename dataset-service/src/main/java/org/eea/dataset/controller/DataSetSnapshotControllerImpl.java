@@ -9,14 +9,12 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -159,8 +157,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
@@ -285,8 +281,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
       datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
       LOG_ERROR.error(e.getMessage());

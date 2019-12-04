@@ -57,11 +57,11 @@ public class ExecuteDatasetValidationCommand extends AbstractEEAEventHandlerComm
     return EventType.COMMAND_VALIDATE_DATASET;
   }
 
-
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async

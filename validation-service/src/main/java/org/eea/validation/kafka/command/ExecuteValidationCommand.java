@@ -43,7 +43,7 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
   }
 
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
    */

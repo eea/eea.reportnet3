@@ -147,8 +147,6 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess2() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");

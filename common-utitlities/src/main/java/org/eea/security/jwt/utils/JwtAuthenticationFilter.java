@@ -9,7 +9,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.eea.thread.ThreadPropertiesManager;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Jwt authentication filter.
@@ -60,13 +61,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         UserDetails userDetails = EeaUserDetails.create(username, roles);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userDetails, jwt, userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
         Map<String, String> details = new HashMap<>();
         details.put("userId", token.getSubject());
         authentication.setDetails(details);
         authentication.getDetails();
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        ThreadPropertiesManager.setVariable("user", authentication.getName());
       }
     } catch (VerificationException e) {
       LOG_ERROR.error("Could not set user authentication in security context", e);

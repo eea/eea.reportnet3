@@ -163,8 +163,6 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void testRestoreSnapshots() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any());
   }
@@ -177,21 +175,6 @@ public class DataSetSnapshotControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testRestsoreSnapshotsException() throws Exception {
     dataSetSnapshotControllerImpl.restoreSnapshot(null, 1L);
-  }
-
-  /**
-   * Test restore snapshots exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testRestoreSnapshotsException2() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(datasetSnapshotService).restoreSnapshot(Mockito.any(),
-        Mockito.any());
-    dataSetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
-
   }
 
   /**
@@ -240,7 +223,6 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).getSchemaSnapshotsByIdDataset(Mockito.any());
   }
 
-
   @Test
   public void testAddSchemaSnapshots() throws Exception {
 
@@ -249,11 +231,8 @@ public class DataSetSnapshotControllerImplTest {
         Mockito.any());
   }
 
-
   @Test
   public void testRestoreSchemaSnapshots() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSchemaSnapshot(Mockito.any(),
         Mockito.any());
@@ -311,6 +290,10 @@ public class DataSetSnapshotControllerImplTest {
     dataSetSnapshotControllerImpl.createSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void restoreSnapshotTest() {
+    dataSetSnapshotControllerImpl.restoreSnapshot(null, 1L);
+  }
 
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSchemaSnapshotsException() throws Exception {
@@ -320,13 +303,8 @@ public class DataSetSnapshotControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSchemaSnapshotsException2() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
         Mockito.any());
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
-
   }
-
-
 }
