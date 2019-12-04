@@ -5,11 +5,12 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   align-self: stretch;
   align-items: center;
   margin-top: 2rem;
-  margin-bottom: 0rem;
+  margin-bottom: 1rem;
+  padding: 0;
 
   li {
     display: flex;
@@ -19,7 +20,8 @@
     color: #676767;
     background-color: var(--white);
     margin: 0;
-    margin-left: 3rem;
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
     cursor: pointer;
     user-select: none;
   }
