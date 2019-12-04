@@ -36,7 +36,6 @@ const Dashboard = withRouter(
     }) => {
       const [dashboardColors, setDashboardColors] = useState();
       const [dashboardData, setDashboardData] = useState({});
-      const [dashboardOptions, setDashboardOptions] = useState({});
       const [dashboardTitle, setDashboardTitle] = useState('');
       const [isLoading, setIsLoading] = useState(false);
       const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -109,47 +108,48 @@ const Dashboard = withRouter(
           datasets: getDashboardBarsByDatasetData(dataset)
         });
 
-        setDashboardOptions({
-          tooltips: {
-            mode: 'index',
-            callbacks: {
-              label: (tooltipItems, data) =>
-                `${
-                  data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems['index']][tooltipItems.datasetIndex]
-                } (${tooltipItems.yLabel}%)`
-            }
-          },
-          responsive: true,
-          legend: {
-            display: false
-          },
-          scales: {
-            xAxes: [
-              {
-                stacked: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: resources.messages['tables']
-                }
-              }
-            ],
-            yAxes: [
-              {
-                stacked: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: resources.messages['percentage']
-                },
-                ticks: {
-                  min: 0,
-                  max: 100,
-                  callback: (value, index, values) => `${value}%`
-                }
-              }
-            ]
-          }
-        });
         setIsLoading(false);
+      };
+
+      const dashboardOptions = {
+        tooltips: {
+          mode: 'index',
+          callbacks: {
+            label: (tooltipItems, data) =>
+              `${
+                data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems['index']][tooltipItems.datasetIndex]
+              } (${tooltipItems.yLabel}%)`
+          }
+        },
+        legend: {
+          display: false
+        },
+        responsive: true,
+        scales: {
+          xAxes: [
+            {
+              stacked: true,
+              scaleLabel: {
+                display: true,
+                labelString: resources.messages['tables']
+              }
+            }
+          ],
+          yAxes: [
+            {
+              stacked: true,
+              scaleLabel: {
+                display: true,
+                labelString: resources.messages['percentage']
+              },
+              ticks: {
+                min: 0,
+                max: 100,
+                callback: (value, index, values) => `${value}%`
+              }
+            }
+          ]
+        }
       };
 
       const renderColorPicker = () => {
