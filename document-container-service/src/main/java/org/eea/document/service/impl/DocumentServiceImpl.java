@@ -135,11 +135,7 @@ public class DocumentServiceImpl implements DocumentService {
       if (documentVO == null) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
-      documentVO.setDate(new Date());
-      Long idDocument = dataflowController.insertDocument(documentVO);
-      if (idDocument == null || idDocument == 0L) {
-        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
-      }
+      dataflowController.updateDocument(documentVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
