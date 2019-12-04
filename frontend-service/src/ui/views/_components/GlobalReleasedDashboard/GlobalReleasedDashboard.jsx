@@ -27,10 +27,6 @@ export const GlobalReleasedDashboard = dataflowId => {
     onLoadDashboard();
   }, []);
 
-  useEffect(() => {
-    statusDispatcher({ type: 'INIT_DATA', payload: releasedDashboardData });
-  }, [releasedDashboardData]);
-
   const onLoadDashboard = async () => {
     try {
       const releasedData = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);

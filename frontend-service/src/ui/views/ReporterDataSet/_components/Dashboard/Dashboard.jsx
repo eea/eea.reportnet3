@@ -66,10 +66,6 @@ const Dashboard = withRouter(
         };
       }, [refresh, datasetId]);
 
-      useEffect(() => {
-        statusDispatcher({ type: 'INIT_DATA', payload: dashboardData });
-      }, [dashboardData]);
-
       const onChangeColor = (color, type) => {
         const inmDashboardColors = { ...dashboardColors };
         inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;

@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 
 import { isEmpty, capitalize } from 'lodash';
 
@@ -8,6 +8,10 @@ const useStatusFilter = dataArray => {
     filterStatus: [],
     originalData: dataArray
   };
+
+  useEffect(() => {
+    statusDispatcher({ type: 'INIT_DATA', payload: dataArray });
+  }, [dataArray]);
 
   const showArrayItem = (array, item) => {
     return !array.includes(item);
@@ -62,4 +66,5 @@ const useStatusFilter = dataArray => {
     statusDispatcher
   };
 };
+
 export { useStatusFilter };
