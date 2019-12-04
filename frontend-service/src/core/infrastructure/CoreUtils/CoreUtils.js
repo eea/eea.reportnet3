@@ -1,3 +1,5 @@
+import { isUndefined } from 'lodash';
+
 export const CoreUtils = (() => {
   const UtilsAPI = {
     getDashboardLevelErrorByDataset: datasetDTO => {
@@ -107,7 +109,9 @@ export const CoreUtils = (() => {
     },
 
     transposeMatrix: matrix => {
-      return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      if (!isUndefined(matrix[0])) {
+        return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      }
     }
   };
   return UtilsAPI;

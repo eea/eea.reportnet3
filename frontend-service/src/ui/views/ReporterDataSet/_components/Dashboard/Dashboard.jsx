@@ -30,6 +30,7 @@ const Dashboard = withRouter(
   React.memo(
     ({
       refresh,
+      tableSchemaNames,
       match: {
         params: { datasetId }
       }
@@ -99,7 +100,7 @@ const Dashboard = withRouter(
 
       const onLoadStatistics = async () => {
         setIsLoading(true);
-        const dataset = await DatasetService.errorStatisticsById(datasetId);
+        const dataset = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
         setLevelErrorTypes(dataset.levelErrorTypes);
         const tableNames = dataset.tables.map(table => table.tableSchemaName);
         setDashboardTitle(dataset.datasetSchemaName);
