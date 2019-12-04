@@ -43,7 +43,7 @@ export const apiDocument = {
     const response = await HTTPRequester.postWithFiles({
       url: getUrl(DocumentConfig.uploadDocument, {
         dataflowId: dataflowId,
-        description: description,
+        description: encodeURIComponent(description),
         language: language,
         isPublic: isPublic
       }),
@@ -59,7 +59,6 @@ export const apiDocument = {
   editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
     const tokens = userStorage.get();
     const formData = new FormData();
-
     const isEmpty = arg => {
       for (var item in arg) {
         return false;
@@ -76,7 +75,7 @@ export const apiDocument = {
     const response = await HTTPRequester.putWithFiles({
       url: getUrl(DocumentConfig.editDocument, {
         dataflowId: dataflowId,
-        description: description,
+        description: encodeURIComponent(description),
         language: language,
         isPublic: isPublic,
         documentId: documentId
