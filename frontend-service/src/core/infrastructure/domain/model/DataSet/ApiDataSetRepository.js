@@ -147,17 +147,14 @@ const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
   return datasetError;
 };
 
-const errorStatisticsById = async datasetId => {
+const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
+
+  //Sort by schema order
   datasetTablesDTO.tables = datasetTablesDTO.tables.sort((a, b) => {
-    if (a.nameTableSchema < b.nameTableSchema) {
-      return -1;
-    }
-    if (a.nameTableSchema > b.nameTableSchema) {
-      return 1;
-    }
-    return 0;
+    return tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema);
   });
+
   const dataset = new Dataset();
   dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
