@@ -188,6 +188,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
     return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
       <DataViewer
         hasWritePermissions={true}
+        isPreviewModeOn={isPreviewModeOn}
         isWebFormMMR={false}
         // buttonsList={[]}
         key={table.id}
