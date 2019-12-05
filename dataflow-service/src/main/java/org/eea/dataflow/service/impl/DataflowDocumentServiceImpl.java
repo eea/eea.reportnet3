@@ -111,7 +111,7 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
   @Override
   public void updateDocument(DocumentVO documentVO) throws EEAException {
     LOG.info("updating document in metabase");
-    Document document = documentRepository.findById(documentVO.getDataflowId()).orElse(null);
+    Document document = documentRepository.findById(documentVO.getId()).orElse(null);
     if (document == null) {
       throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
     }
