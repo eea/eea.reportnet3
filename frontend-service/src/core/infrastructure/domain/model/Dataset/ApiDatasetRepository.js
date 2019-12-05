@@ -2,11 +2,11 @@ import { isNull, isUndefined } from 'lodash';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
-import { DatasetError } from 'core/domain/model/Dataset/DataSetError/DataSetError';
-import { Dataset } from 'core/domain/model/Dataset/Dataset_';
-import { DatasetTable } from 'core/domain/model/Dataset/DataSetTable/DatasetTable_';
-import { DatasetTableField } from 'core/domain/model/Dataset/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
-import { DatasetTableRecord } from 'core/domain/model/Dataset/DataSetTable/DataSetRecord/DatasetTableRecord_';
+import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
+import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
+import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
+import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {

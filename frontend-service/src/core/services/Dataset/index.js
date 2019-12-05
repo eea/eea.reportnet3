@@ -1,4 +1,4 @@
-import { datasetRepository } from 'core/domain/model/Dataset/DatasetRepository_';
+import { datasetRepository } from 'core/domain/model/Dataset/DatasetRepository';
 
 import { AddRecords } from './AddRecords';
 import { AddRecordFieldDesign } from './AddRecordFieldDesign';
