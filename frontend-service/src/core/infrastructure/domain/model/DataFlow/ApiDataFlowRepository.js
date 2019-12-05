@@ -3,7 +3,7 @@ import { isNull, isUndefined } from 'lodash';
 import moment from 'moment';
 
 import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
-import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
+import { Dataflow } from 'core/domain/model/Dataflow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
