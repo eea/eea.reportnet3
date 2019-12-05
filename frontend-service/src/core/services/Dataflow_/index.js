@@ -1,7 +1,7 @@
 import { Accept } from './Accept';
 import { Create } from './Create';
 import { CreateDatasetSchema } from './CreateDatasetSchema';
-import { dataflowRepository } from 'core/domain/model/Dataflow/DataFlowRepository';
+import { dataflowRepository } from 'core/domain/model/Dataflow/Dataflow_Repository';
 import { GetPending } from './GetPending';
 import { GetAccepted } from './GetAccepted';
 import { GetAll } from './GetAll';
