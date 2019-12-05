@@ -415,33 +415,6 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVO;
   }
 
-  /**
-   * Delete data flow.
-   *
-   * @param idDataflow the id dataflow
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void deleteDataFlow(Long idDataflow) throws EEAException {
-
-    // List<String> nameResource = new ArrayList<>();
-    // ResourceInfoVO resourceCustodian = resourceManagementControllerZull
-    // .getResourceDetail(idDataflow, ResourceGroupEnum.DATAFLOW_CUSTODIAN);
-
-    // ResourceInfoVO resourceProvider =
-    // resourceManagementControllerZull.getResourceDetail(idDataflow,
-    // ResourceGroupEnum.DATAFLOW_PROVIDER);
-    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
-    // + SecurityRoleEnum.DATA_PROVIDER);
-    // nameResource.add(ResourceTypeEnum.DATAFLOW.toString() + "-" + idDataflow.toString() + "-"
-    // + SecurityRoleEnum.DATA_CUSTODIAN);
-    // resourceManagementControllerZull.deleteResourceByName(nameResource);
-
-    // dataflowRepository.deleteById(idDataflow);
-
-  }
-
 
 
 }

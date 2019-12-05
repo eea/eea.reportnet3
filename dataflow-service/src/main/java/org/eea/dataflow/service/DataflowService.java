@@ -113,15 +113,6 @@ public interface DataflowService {
    */
   void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
-
-  /**
-   * Delete data flow.
-   *
-   * @param dataflowVO the dataflow VO
-   * @throws EEAException the EEA exception
-   */
-  void deleteDataFlow(Long idDataflow) throws EEAException;
-
   /**
    * Update data flow.
    *
