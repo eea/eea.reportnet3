@@ -1,4 +1,4 @@
-import { ApiDatasetRepository } from 'core/infrastructure/domain/model/DataSet/ApiDataSetRepository';
+import { ApiDatasetRepository } from 'core/infrastructure/domain/model/Dataset/ApiDataSetRepository';
 
 export const DatasetRepository = {
   addRecordsById: () => Promise.reject('[DatasetRepository#addRecordsById] must be implemented'),

@@ -14,7 +14,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
 import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 import { getUrl } from 'core/infrastructure/api/getUrl';

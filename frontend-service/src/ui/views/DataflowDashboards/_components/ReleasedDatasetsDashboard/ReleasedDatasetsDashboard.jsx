@@ -13,7 +13,7 @@ import { StatusList } from 'ui/views/_components/StatusList';
 
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 
 export const ReleasedDatasetsDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);

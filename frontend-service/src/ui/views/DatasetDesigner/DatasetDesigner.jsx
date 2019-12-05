@@ -22,8 +22,8 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 import { Title } from 'ui/views/_components/Title';
 
-import { DataflowService } from 'core/services/DataFlow';
-import { DatasetService } from 'core/services/DataSet';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 

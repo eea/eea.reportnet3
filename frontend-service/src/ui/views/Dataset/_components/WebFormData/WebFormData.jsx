@@ -9,7 +9,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 import { routes } from 'ui/routes';
 
 const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {

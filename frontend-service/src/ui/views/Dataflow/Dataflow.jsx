@@ -27,8 +27,8 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { DataflowService } from 'core/services/DataFlow';
-import { DatasetService } from 'core/services/DataSet';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';

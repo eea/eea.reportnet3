@@ -15,7 +15,7 @@ import { DatasetContext } from 'ui/views/Dataset/_components/_context/DatasetCon
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 
 const ValidationViewer = React.memo(
   ({

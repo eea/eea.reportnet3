@@ -5,7 +5,7 @@ import { capitalize, isEmpty, isUndefined, isNull, isString } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
-import { DatasetConfig } from 'conf/domain/model/DataSet';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
@@ -29,7 +29,7 @@ import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(

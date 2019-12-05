@@ -2,9 +2,9 @@ import { isNull, isUndefined } from 'lodash';
 
 import moment from 'moment';
 
-import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
+import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow_';
-import { Dataset } from 'core/domain/model/DataSet/Dataset_';
+import { Dataset } from 'core/domain/model/Dataset/Dataset_';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils } from 'core/infrastructure/CoreUtils';

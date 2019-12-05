@@ -10,7 +10,7 @@ import { Button } from 'ui/views/_components/Button';
 import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 
 export const NewDatasetSchemaForm = ({
   dataflowId,

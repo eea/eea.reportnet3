@@ -12,7 +12,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 
 export const TabsDesigner = withRouter(({ editable = false, match, history }) => {
   const {

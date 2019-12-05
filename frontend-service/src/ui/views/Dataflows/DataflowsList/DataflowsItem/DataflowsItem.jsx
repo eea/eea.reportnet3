@@ -11,7 +11,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 
 export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) => {
   const resources = useContext(ResourcesContext);

@@ -1,4 +1,4 @@
-import { ApiDataflowRepository } from 'core/infrastructure/domain/model/DataFlow/ApiDataFlowRepository';
+import { ApiDataflowRepository } from 'core/infrastructure/domain/model/Dataflow/ApiDataFlowRepository';
 
 export const DataflowRepository = {
   accept: () => Promise.reject('[DataflowRepository#accept] must be implemented'),

@@ -1,4 +1,4 @@
-import { DataflowConfig } from 'conf/domain/model/DataFlow';
+import { DataflowConfig } from 'conf/domain/model/Dataflow';
 import { DocumentConfig } from 'conf/domain/model/Document';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';

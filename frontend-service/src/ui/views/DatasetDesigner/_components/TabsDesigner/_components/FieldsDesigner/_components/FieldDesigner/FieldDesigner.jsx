@@ -10,7 +10,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 
 export const FieldDesigner = ({
   addField = false,

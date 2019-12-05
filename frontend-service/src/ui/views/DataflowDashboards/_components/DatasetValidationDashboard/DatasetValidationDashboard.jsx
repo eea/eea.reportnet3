@@ -13,7 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { filterReducer } from './_components/_context/filterReducer';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 import { ViewUtils } from 'ui/ViewUtils';
 
 /* const SEVERITY_CODE = {

@@ -15,7 +15,7 @@ import { StatusList } from 'ui/views/_components/StatusList';
 
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 import { ViewUtils } from 'ui/ViewUtils';
 
 const SEVERITY_CODE = {

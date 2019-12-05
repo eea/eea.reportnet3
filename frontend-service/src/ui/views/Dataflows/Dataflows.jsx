@@ -15,7 +15,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 import { UserContext } from '../_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 

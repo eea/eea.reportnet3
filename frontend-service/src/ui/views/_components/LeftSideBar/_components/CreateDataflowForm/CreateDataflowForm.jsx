@@ -9,7 +9,7 @@ import styles from './CreateDataflowForm.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { DataflowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/Dataflow';
 
 export const CreateDataflowForm = ({ isFormReset, onCreate, onCancel }) => {
   const form = useRef(null);
