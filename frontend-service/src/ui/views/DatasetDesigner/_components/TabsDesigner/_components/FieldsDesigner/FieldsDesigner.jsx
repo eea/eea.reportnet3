@@ -5,7 +5,7 @@ import styles from './FieldsDesigner.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DataViewer } from 'ui/views/ReporterDataSet/_components/TabsSchema/_components/DataViewer';
+import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';

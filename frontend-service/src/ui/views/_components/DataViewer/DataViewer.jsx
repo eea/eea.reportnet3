@@ -15,7 +15,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFilter';
+import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
@@ -23,7 +23,7 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
-import { ReporterDatasetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
+import { DatasetContext } from 'ui/views/Dataset/_components/_context/DatasetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
@@ -99,7 +99,7 @@ const DataViewer = withRouter(
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
     const [invisibleColumns, setinvisibleColumns] = useState([]);
 
-    const contextReporterDataset = useContext(ReporterDatasetContext);
+    const datasetContext = useContext(DatasetContext);
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
 
@@ -112,13 +112,13 @@ const DataViewer = withRouter(
     let growlRef = useRef();
 
     useEffect(() => {
-      if (contextReporterDataset.isValidationSelected) {
+      if (datasetContext.isValidationSelected) {
         setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        contextReporterDataset.setIsValidationSelected(false);
+        datasetContext.setIsValidationSelected(false);
       }
-    }, [contextReporterDataset.isValidationSelected]);
+    }, [datasetContext.isValidationSelected]);
 
     useEffect(() => {
       setExportButtonsList(

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 import { capitalize, isUndefined } from 'lodash';
 
-import styles from './ReporterDataSet.module.css';
+import styles from './Dataset.module.css';
 
 import { config } from 'conf';
 
@@ -18,7 +18,7 @@ import { Growl } from 'primereact/growl';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
-import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
+import { DatasetContext } from './_components/_context/DatasetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
@@ -39,7 +39,7 @@ import { routes } from 'ui/routes';
 
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
-export const ReporterDataset = withRouter(({ match, history }) => {
+export const Dataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -452,7 +452,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
       </Dialog>
-      <ReporterDatasetContext.Provider
+      <DatasetContext.Provider
         value={{
           isValidationSelected: isValidationSelected,
           setIsValidationSelected: setIsValidationSelected,
@@ -486,7 +486,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             levelErrorTypes={levelErrorTypes}
           />
         </Dialog>
-      </ReporterDatasetContext.Provider>
+      </DatasetContext.Provider>
       <ConfirmDialog
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}

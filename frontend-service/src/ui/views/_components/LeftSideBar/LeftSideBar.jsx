@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
 
-import styles from './DataFlowColumn.module.css';
+import styles from './LeftSideBar.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -14,7 +14,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 
 import { UserService } from 'core/services/User';
 
-const DataflowColumn = withRouter(
+const LeftSideBar = withRouter(
   ({ components = [], createDataflowButtonTitle, onFetchData, isCustodian, navTitle, style, subscribeButtonTitle }) => {
     const resources = useContext(ResourcesContext);
     const user = useContext(UserContext);
@@ -118,4 +118,4 @@ const DataflowColumn = withRouter(
   }
 );
 
-export { DataflowColumn };
+export { LeftSideBar };

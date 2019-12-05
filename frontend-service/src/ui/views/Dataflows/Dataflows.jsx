@@ -8,7 +8,7 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
+import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DataflowsList } from './DataflowsList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -88,8 +88,8 @@ export const Dataflows = withRouter(({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <DataflowColumn
-        navTitle={resources.messages['dataflow']}
+      <LeftSideBar
+        navTitle={resources.messages['dataflowList']}
         components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
         isCustodian={isCustodian}

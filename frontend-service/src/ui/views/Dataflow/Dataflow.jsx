@@ -17,7 +17,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
-import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
+import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
@@ -272,7 +272,7 @@ export const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <DataflowColumn
+      <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}

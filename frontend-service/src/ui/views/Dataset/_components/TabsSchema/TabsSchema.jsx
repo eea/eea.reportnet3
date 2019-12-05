@@ -6,7 +6,7 @@ import styles from './TabsSchema.module.css';
 
 import { config } from 'conf';
 
-import { DataViewer } from './_components/DataViewer';
+import { DataViewer } from 'ui/views/_components/DataViewer';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 

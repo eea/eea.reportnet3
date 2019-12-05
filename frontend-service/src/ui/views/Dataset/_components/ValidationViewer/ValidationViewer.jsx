@@ -10,8 +10,8 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Column } from 'primereact/column';
 
 import { Button } from 'ui/views/_components/Button';
-import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFilter';
-import { ReporterDatasetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
+import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { DatasetContext } from 'ui/views/Dataset/_components/_context/DatasetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
@@ -27,7 +27,7 @@ const ValidationViewer = React.memo(
     hasWritePermissions,
     tableSchemaNames
   }) => {
-    const contextReporterDataset = useContext(ReporterDatasetContext);
+    const datasetContext = useContext(DatasetContext);
     const resources = useContext(ResourcesContext);
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
@@ -278,17 +278,17 @@ const ValidationViewer = React.memo(
         case 'FIELD':
         case 'RECORD':
           const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-          contextReporterDataset.setIsValidationSelected(true);
-          contextReporterDataset.onSelectValidation(
+          datasetContext.setIsValidationSelected(true);
+          datasetContext.onSelectValidation(
             event.data.tableSchemaId,
             datasetError.position,
             datasetError.recordId
           );
-          contextReporterDataset.onValidationsVisible();
+          datasetContext.onValidationsVisible();
           break;
         case 'TABLE':
-          contextReporterDataset.onSelectValidation(event.data.tableSchemaId, -1, -1);
-          contextReporterDataset.onValidationsVisible();
+          datasetContext.onSelectValidation(event.data.tableSchemaId, -1, -1);
+          datasetContext.onValidationsVisible();
           break;
         default:
           break;

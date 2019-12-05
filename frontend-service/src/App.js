@@ -12,8 +12,8 @@ import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
 import { Eulogin } from 'ui/views/Eulogin';
 import { LoadingProvider } from 'ui/views/_components/_provider/LoadingProvider';
 import { Login } from 'ui/views/Login';
-import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
-import { Dataflow } from 'ui/views/Dataflow/Dataflow';
+import { Dataset } from 'ui/views/Dataset';
+import { Dataflow } from 'ui/views/Dataflow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -64,7 +64,7 @@ const App = () => {
                 <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
                 <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
                 <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
-                <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
+                <PrivateRoute exact path={routes.DATASET} component={Dataset} />
                 <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
               </Switch>
             </Router>
