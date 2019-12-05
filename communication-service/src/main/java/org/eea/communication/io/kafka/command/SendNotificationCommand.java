@@ -19,7 +19,7 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
   /**
    * The Constant LOG_ERROR.
    */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger(SendNotificationCommand.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The notification service.

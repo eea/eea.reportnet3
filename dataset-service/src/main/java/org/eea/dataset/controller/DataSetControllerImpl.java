@@ -424,6 +424,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
+      // This method will release the lock
       deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

@@ -317,32 +317,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
-    try {
-      // Get the schema document to mapper it to DataSchema class
-      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    // Get the schema document to mapper it to DataSchema class
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
 
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
-      DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-      LOG.info("Schema class recovered");
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
+    DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+    LOG.info("Schema class recovered");
 
-      // Replace the schema: delete the older and save the new we have already recovered on step
-      // Also in the service we call the recordstore to do the restore of the dataset_X data
-      schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot);
+    // Replace the schema: delete the older and save the new we have already recovered on step
+    // Also in the service we call the recordstore to do the restore of the dataset_X data
+    schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
+        idSnapshot);
 
-      LOG.info("Schema Snapshot {} totally restored", idSnapshot);
-    } finally {
-      // Remove the lock
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
-      criteria.add(idDataset);
-      lockService.removeLockByCriteria(criteria);
-    }
-
-
-
+    LOG.info("Schema Snapshot {} totally restored", idSnapshot);
   }
 
   /**

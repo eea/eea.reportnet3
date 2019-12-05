@@ -48,7 +48,10 @@ public class KafkaSender {
    */
   public void sendMessage(final EEAEventVO event) {
 
-    event.getData().put("user", ThreadPropertiesManager.getVariable("user"));
+    String user = String.valueOf(ThreadPropertiesManager.getVariable("user"));
+    if (user != null) {
+      event.getData().put("user", user);
+    }
     Message<EEAEventVO> message = null;
     final List<PartitionInfo> partitions =
         kafkaTemplate.partitionsFor(event.getEventType().getTopic());

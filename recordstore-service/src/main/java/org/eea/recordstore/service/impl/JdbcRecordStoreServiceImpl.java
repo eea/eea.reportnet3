@@ -389,6 +389,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     NotificationVO notificationVO =
         NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
             .datasetId(idReportingDataset).build();
+    String signature = isSchemaSnapshot ? LockSignature.RESTORE_SNAPSHOT.getValue()
+        : LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
@@ -452,7 +454,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value, notificationVO);
       } catch (EEAException e) {
-        LOG.error("Error realeasing event " + successEventType, e);
+        LOG.error("Error realeasing event {}: ", successEventType, e);
       }
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
@@ -476,7 +478,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
+      criteria.add(signature);
       criteria.add(idReportingDataset);
       lockService.removeLockByCriteria(criteria);
     }
