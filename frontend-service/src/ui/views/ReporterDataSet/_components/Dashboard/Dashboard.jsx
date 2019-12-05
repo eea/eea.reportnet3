@@ -11,6 +11,9 @@ import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { StatusList } from 'ui/views/_components/StatusList';
+
+import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 import { DatasetService } from 'core/services/DataSet';
 import { ViewUtils } from 'ui/ViewUtils';
@@ -24,79 +27,92 @@ const SEVERITY_CODE = {
 };
 
 const Dashboard = withRouter(
-  React.memo(({ refresh, tableSchemaNames, match: { params: { datasetId } } }) => {
-    const [dashboardColors, setDashboardColors] = useState();
-    const [dashboardData, setDashboardData] = useState({});
-    const [dashboardOptions, setDashboardOptions] = useState({});
-    const [dashboardTitle, setDashboardTitle] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const resources = useContext(ResourcesContext);
-
-    const chartRef = useRef();
-
-    useEffect(() => {
-      setDashboardColors({
-        CORRECT: colors.correct,
-        INFO: colors.info,
-        WARNING: colors.warning,
-        ERROR: colors.error,
-        BLOCKER: colors.blocker
-      });
-    }, []);
-
-    useEffect(() => {
-      if (refresh) {
-        onLoadStatistics();
+  React.memo(
+    ({
+      refresh,
+      tableSchemaNames,
+      match: {
+        params: { datasetId }
       }
-      return () => {
-        setDashboardData([]);
-      };
-    }, [refresh, datasetId]);
+    }) => {
+      const [dashboardColors, setDashboardColors] = useState();
+      const [dashboardData, setDashboardData] = useState({});
+      const [dashboardTitle, setDashboardTitle] = useState('');
+      const [isLoading, setIsLoading] = useState(false);
+      const [levelErrorTypes, setLevelErrorTypes] = useState([]);
 
-    const onChangeColor = (color, type) => {
-      const inmDashboardColors = { ...dashboardColors };
-      inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
-      setDashboardColors(inmDashboardColors);
-      chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
-      chartRef.current.refresh();
-    };
+      const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
-    const getLevelErrorsOrdered = levelErrors => {
-      return ViewUtils.orderLevelErrors(levelErrors);
-    };
+      const resources = useContext(ResourcesContext);
 
-    const getLevelErrorPriority = levelError => {
-      return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
-    };
+      const chartRef = useRef();
 
-    const getDashboardBarsByDatasetData = dataset => {
-      const dashboardBars = [];
-      let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
-      levelErrors.forEach(levelError => {
-        let levelErrorIndex = getLevelErrorPriority(levelError);
-        let bar = {
-          label: capitalize(levelError),
-          backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
-          data: dataset.tableStatisticPercentages[levelErrorIndex],
-          totalData: dataset.tableStatisticValues
+      useEffect(() => {
+        setDashboardColors({
+          CORRECT: colors.correct,
+          INFO: colors.info,
+          WARNING: colors.warning,
+          ERROR: colors.error,
+          BLOCKER: colors.blocker
+        });
+      }, []);
+
+      useEffect(() => {
+        if (refresh) {
+          onLoadStatistics();
+        }
+        return () => {
+          setDashboardData([]);
         };
-        dashboardBars.push(bar);
-      });
-      return dashboardBars;
-    };
+      }, [refresh, datasetId]);
 
-    const onLoadStatistics = async () => {
-      setIsLoading(true);
-      const dataset = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      const tableNames = dataset.tables.map(table => table.tableSchemaName);
-      setDashboardTitle(dataset.datasetSchemaName);
-      setDashboardData({
-        labels: tableNames,
-        datasets: getDashboardBarsByDatasetData(dataset)
-      });
+      const onChangeColor = (color, type) => {
+        const inmDashboardColors = { ...dashboardColors };
+        inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
+        setDashboardColors(inmDashboardColors);
+        chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
+        chartRef.current.refresh();
+      };
 
-      setDashboardOptions({
+      const getLevelErrorsOrdered = levelErrors => {
+        return ViewUtils.orderLevelErrors(levelErrors);
+      };
+
+      const getLevelErrorPriority = levelError => {
+        return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+      };
+
+      const getDashboardBarsByDatasetData = dataset => {
+        const dashboardBars = [];
+        let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
+        levelErrors.forEach(levelError => {
+          let levelErrorIndex = getLevelErrorPriority(levelError);
+          let bar = {
+            label: capitalize(levelError),
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
+            data: dataset.tableStatisticPercentages[levelErrorIndex],
+            totalData: dataset.tableStatisticValues
+          };
+          dashboardBars.push(bar);
+        });
+        return dashboardBars;
+      };
+
+      const onLoadStatistics = async () => {
+        setIsLoading(true);
+        const dataset = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+        setLevelErrorTypes(dataset.levelErrorTypes);
+        const tableNames = dataset.tables.map(table => table.tableSchemaName);
+        setDashboardTitle(dataset.datasetSchemaName);
+        setDashboardData({
+          labels: tableNames,
+          datasets: getDashboardBarsByDatasetData(dataset)
+        });
+
+        setIsLoading(false);
+      };
+
+      const dashboardOptions = {
         tooltips: {
           mode: 'index',
           callbacks: {
@@ -105,6 +121,9 @@ const Dashboard = withRouter(
                 data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems['index']][tooltipItems.datasetIndex]
               } (${tooltipItems.yLabel}%)`
           }
+        },
+        legend: {
+          display: false
         },
         responsive: true,
         scales: {
@@ -132,71 +151,75 @@ const Dashboard = withRouter(
             }
           ]
         }
-      });
-      setIsLoading(false);
-    };
+      };
 
-    const renderColorPicker = () => {
-      if (
-        !isUndefined(dashboardData.datasets) &&
-        dashboardData.datasets.length > 0 &&
-        ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
-      ) {
-        return (
-          <div className={styles.dashboardWraper}>
-            <fieldset className={styles.colorPickerWrap}>
-              <legend>{resources.messages['chooseChartColor']}</legend>
-              <div className={styles.fieldsetContent}>
-                {Object.keys(SEVERITY_CODE).map((type, i) => {
-                  return (
-                    <div className={styles.colorPickerItem} key={i}>
-                      <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
-                      <ColorPicker
-                        className={styles.colorPicker}
-                        onChange={e => {
-                          e.preventDefault();
-                          onChangeColor(e.value, SEVERITY_CODE[type]);
-                        }}
-                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </fieldset>
-          </div>
-        );
-      }
-    };
-
-    const renderDashboard = () => {
-      if (isLoading) {
-        return <Spinner className={styles.dashBoardSpinner} />;
-      } else {
+      const renderColorPicker = () => {
         if (
           !isUndefined(dashboardData.datasets) &&
           dashboardData.datasets.length > 0 &&
           ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
         ) {
           return (
-            <div className={styles.chartDiv}>
-              <Chart ref={chartRef} type="bar" data={dashboardData} options={dashboardOptions} />
+            <div className={styles.dashboardWraper}>
+              <fieldset className={styles.colorPickerWrap}>
+                <legend>{resources.messages['chooseChartColor']}</legend>
+                <div className={styles.fieldsetContent}>
+                  {Object.keys(SEVERITY_CODE).map((type, i) => {
+                    return (
+                      <div className={styles.colorPickerItem} key={i}>
+                        <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
+                        <ColorPicker
+                          className={styles.colorPicker}
+                          onChange={e => {
+                            e.preventDefault();
+                            onChangeColor(e.value, SEVERITY_CODE[type]);
+                          }}
+                          value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </fieldset>
             </div>
           );
-        } else {
-          return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
         }
-      }
-    };
+      };
 
-    return (
-      <React.Fragment>
-        <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>
-        {renderDashboard()}
-        {/* {renderColorPicker()} */}
-      </React.Fragment>
-    );
-  })
+      const renderDashboard = () => {
+        if (isLoading) {
+          return <Spinner className={styles.dashBoardSpinner} />;
+        } else {
+          if (
+            !isUndefined(dashboardData.datasets) &&
+            dashboardData.datasets.length > 0 &&
+            ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
+          ) {
+            return (
+              <div className={styles.chartDiv}>
+                <StatusList
+                  filterDispatch={statusDispatcher}
+                  filteredStatusTypes={updatedState.filterStatus}
+                  statusTypes={levelErrorTypes}
+                />
+                <Chart ref={chartRef} type="bar" data={updatedState.dashboardData} options={dashboardOptions} />
+              </div>
+            );
+          } else {
+            return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
+          }
+        }
+      };
+
+      return (
+        <React.Fragment>
+          <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>
+          {renderDashboard()}
+          {/* {renderColorPicker()} */}
+        </React.Fragment>
+      );
+    }
+  )
 );
 
 export { Dashboard };

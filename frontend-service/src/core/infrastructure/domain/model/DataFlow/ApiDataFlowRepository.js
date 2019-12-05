@@ -273,14 +273,7 @@ const datasetsReleasedStatus = async dataflowId => {
     reporters.push(dataset.dataSetName);
   });
 
-  const onGroupBy = key => array =>
-    array.reduce((objectsByKeyValue, obj) => {
-      const value = obj[key];
-      objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
-      return objectsByKeyValue;
-    }, {});
-
-  const groupByReporter = onGroupBy('dataSetName');
+  const groupByReporter = CoreUtils.onGroupBy('dataSetName');
 
   const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO)).length).fill(0);
   const isNotReleased = [...isReleased];

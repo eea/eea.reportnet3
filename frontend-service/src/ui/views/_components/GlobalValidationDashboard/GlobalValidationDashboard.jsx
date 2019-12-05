@@ -243,7 +243,13 @@ export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetS
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
               {onLoadStamp(resources.messages['empty'])}
-              <Chart type="bar" options={datasetOptionsObject} width="100%" height="30%" />
+              <Chart
+                className={styles.emptyChart}
+                type="bar"
+                options={datasetOptionsObject}
+                width="100%"
+                height="30%"
+              />
             </>
           )}
         </div>
