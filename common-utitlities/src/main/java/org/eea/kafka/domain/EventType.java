@@ -50,9 +50,9 @@ public enum EventType {
   RECORD_DELETED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key", true),
 
   /**
-   * The deleted table.
+   * The delete table completed event.
    */
-  DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table", true),
+  DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
 
   /**
    * The field updated completed event.

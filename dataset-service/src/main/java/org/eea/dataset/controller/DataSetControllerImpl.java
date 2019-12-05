@@ -403,25 +403,28 @@ public class DataSetControllerImpl implements DatasetController {
   /**
    * Delete import table.
    *
-   * @param dataSetId the data set id
-   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
    */
+  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
-      @PathVariable("idTableSchema") final String idTableSchema) {
-    if (dataSetId == null || dataSetId < 1) {
+  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  public void deleteImportTable(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
+      @LockCriteria(
+          name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+    if (datasetId == null || datasetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (idTableSchema == null) {
+    } else if (tableSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    LOG.info("Executing delete table value with id {} from dataset {}", idTableSchema, dataSetId);
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
-      deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
+      deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -435,10 +438,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
-   *
    * @return the response entity
-   *
-   * @throws Exception the exception
    */
   @Override
   @HystrixCommand

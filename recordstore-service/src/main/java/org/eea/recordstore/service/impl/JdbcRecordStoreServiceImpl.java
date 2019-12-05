@@ -461,6 +461,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         con.rollback();
       }
       try {
+        notificationVO.setError("Error restoring the snapshot data. Rollback");
         kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event " + failEventType, ex);
