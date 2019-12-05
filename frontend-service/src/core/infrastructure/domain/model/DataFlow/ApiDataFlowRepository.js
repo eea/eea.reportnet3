@@ -157,15 +157,14 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tablePercentages = [];
   let tableValues = [];
   let levelErrors = [];
-  const tableLevelErrors = [];
-
+  const allDatasetLevelErrors = [];
   datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
     dataset.tables.forEach((table, i) => {
-      tableLevelErrors.push(CoreUtils.getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
@@ -253,8 +252,8 @@ const datasetsValidationStatistics = async datasetSchemaId => {
       }
     });
   });
+  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
-  levelErrors = [...new Set(CoreUtils.orderLevelErrors(tableLevelErrors.flat()))];
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
@@ -269,7 +268,36 @@ const datasetsReleasedStatus = async dataflowId => {
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
 
-  return datasetsReleasedStatusDTO;
+  const reporters = [];
+  datasetsReleasedStatusDTO.map(dataset => {
+    reporters.push(dataset.dataSetName);
+  });
+
+  const onGroupBy = key => array =>
+    array.reduce((objectsByKeyValue, obj) => {
+      const value = obj[key];
+      objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+      return objectsByKeyValue;
+    }, {});
+
+  const groupByReporter = onGroupBy('dataSetName');
+
+  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO)).length).fill(0);
+  const isNotReleased = [...isReleased];
+
+  Object.values(groupByReporter(datasetsReleasedStatusDTO)).forEach((reporter, i) => {
+    reporter.forEach(dataset => {
+      dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
+    });
+  });
+
+  const releasedStatusData = {
+    releasedData: isReleased,
+    unReleasedData: isNotReleased,
+    labels: Array.from(new Set(reporters))
+  };
+
+  return releasedStatusData;
 };
 
 const dataflowDetails = async dataflowId => {

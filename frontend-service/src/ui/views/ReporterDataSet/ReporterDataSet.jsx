@@ -241,7 +241,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       const datasetSchema = await DatasetService.schemaById(datasetId);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
-      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
+      const datasetStatistics = await DatasetService.errorStatisticsById(
+        datasetId,
+        datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
+      );
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
@@ -426,7 +429,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={isWebFormMMR}
+              disabled={isWebFormMMR || !datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
@@ -447,7 +450,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         onHide={() => onSetVisible(setDashDialogVisible, false)}
         style={{ width: '70vw' }}
         visible={dashDialogVisible}>
-        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} />
+        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
       </Dialog>
       <ReporterDatasetContext.Provider
         value={{

@@ -11,6 +11,7 @@ import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
 const FilterList = ({
+  datasetSchemaId,
   color,
   filterDispatch,
   levelErrors,
@@ -40,9 +41,10 @@ const FilterList = ({
             {labels.map(item => (
               <ReportersListItem
                 key={item}
-                reporterFilters={reporterFilters}
+                datasetSchemaId={datasetSchemaId}
                 filterDispatch={filterDispatch}
                 item={item}
+                reporterFilters={reporterFilters}
               />
             ))}
           </ul>
@@ -61,9 +63,10 @@ const FilterList = ({
             {tableNamesIdsArray.map(item => (
               <TableListItem
                 key={item.tableId}
-                tableFilters={tableFilters}
+                datasetSchemaId={datasetSchemaId}
                 filterDispatch={filterDispatch}
                 item={item}
+                tableFilters={tableFilters}
               />
             ))}
           </ul>
@@ -81,6 +84,7 @@ const FilterList = ({
         {filterByTables()}
       </Accordion>
       <StatusList
+        datasetSchemaId={datasetSchemaId}
         statusFilters={statusFilters}
         color={color}
         levelErrors={levelErrors}

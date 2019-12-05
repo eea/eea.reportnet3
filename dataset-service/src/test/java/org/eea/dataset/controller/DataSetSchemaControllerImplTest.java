@@ -228,14 +228,12 @@ public class DataSetSchemaControllerImplTest {
     assertEquals("error, not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
 
     DataSetSchema schema2 = new DataSetSchema();
-    schema2.setNameDataSetSchema("test");
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
@@ -249,7 +247,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
-    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(1L);
@@ -267,7 +265,7 @@ public class DataSetSchemaControllerImplTest {
   public void createEmptyDataSetSchemaException() throws EEAException {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
         .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
   }

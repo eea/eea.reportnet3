@@ -22,7 +22,7 @@ public class DataSetSchemaVO {
   private String idDataSetSchema;
 
   /** The name data set schema. */
-  private String nameDataSetSchema;
+  private String nameDatasetSchema;
 
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;
@@ -39,7 +39,7 @@ public class DataSetSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, nameDataSetSchema, ruleDataSet, tableSchemas);
+    return Objects.hash(idDataSetSchema, nameDatasetSchema, ruleDataSet, tableSchemas);
   }
 
 
@@ -59,7 +59,7 @@ public class DataSetSchemaVO {
     }
     DataSetSchemaVO other = (DataSetSchemaVO) obj;
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema)
+        && Objects.equals(nameDatasetSchema, other.nameDatasetSchema)
         && Objects.equals(ruleDataSet, other.ruleDataSet)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }

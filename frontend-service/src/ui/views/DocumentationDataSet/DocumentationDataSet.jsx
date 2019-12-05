@@ -38,7 +38,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
-  const [designDatasets, setDesignDatasets] = useState([]);
+  const [datasetsSchemas, setDatasetsSchemas] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -92,13 +92,13 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       getDataflowName();
       onLoadDocuments();
       onLoadWebLinks();
-      onLoadDesignDatasets();
+      onLoadDatasetsSchemas();
     } catch (error) {
       console.error(error.response);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isCustodian]);
 
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
@@ -132,16 +132,30 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDesignDatasets = async () => {
+  const onLoadDatasetsSchemas = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      if (!isEmpty(dataflow.designDatasets)) {
-        const datasetSchemas = dataflow.designDatasets.map(async designDataset => {
-          return await onLoadDatasetDesignSchema(designDataset.datasetId);
-        });
-        Promise.all(datasetSchemas).then(completed => {
-          setDesignDatasets(completed);
-        });
+      if (!isCustodian) {
+        if (!isEmpty(dataflow.datasets)) {
+          const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {
+            return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
+          });
+          const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
+            return await onLoadDatasetSchema(datasetSchema.datasetId);
+          });
+          Promise.all(datasetSchemas).then(completed => {
+            setDatasetsSchemas(completed);
+          });
+        }
+      } else {
+        if (!isEmpty(dataflow.designDatasets)) {
+          const datasetSchemas = dataflow.designDatasets.map(async designDataset => {
+            return await onLoadDatasetSchema(designDataset.datasetId);
+          });
+          Promise.all(datasetSchemas).then(completed => {
+            setDatasetsSchemas(completed);
+          });
+        }
       }
     } catch (error) {
       // if (error.response.status === 401 || error.response.status === 403) {
@@ -152,12 +166,16 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDatasetDesignSchema = async datasetId => {
+  const onLoadDatasetSchema = async datasetId => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
       if (!isEmpty(datasetSchema)) {
-        const datasetMetaData = await DatasetService.getMetaData(datasetId);
-        datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+        if (isCustodian) {
+          const datasetMetaData = await DatasetService.getMetaData(datasetId);
+          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+        }
+        // const datasetMetaData = await DatasetService.getMetaData(datasetId);
+        // datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
         return datasetSchema;
       }
     } catch (error) {
@@ -211,7 +229,11 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>
-            <DatasetSchemas designDatasets={designDatasets} onLoadDesignDatasets={onLoadDesignDatasets} />
+            <DatasetSchemas
+              datasetsSchemas={datasetsSchemas}
+              isCustodian={isCustodian}
+              onLoadDatasetsSchemas={onLoadDatasetsSchemas}
+            />
           </TabPanel>
         </TabView>
       </React.Fragment>
