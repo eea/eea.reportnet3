@@ -156,7 +156,17 @@ public enum EventType {
   /**
    * The unlock entity.
    */
-  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true);
+  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true),
+
+  /**
+   * The document upload completed event.
+   */
+  DOCUMENT_UPLOAD_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_upload_completed_event", true),
+
+  /**
+   * The document upload failed event.
+   */
+  DOCUMENT_UPLOAD_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_upload_failed_event", true);
 
   /**
    * The topic.
