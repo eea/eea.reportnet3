@@ -15,6 +15,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -77,6 +78,10 @@ public class DataSetSchemaControllerImplTest {
    */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  /** The dataset snapshot service. */
+  @Mock
+  private DatasetSnapshotService datasetSnapshotService;
 
   /**
    * Inits the mocks.
@@ -223,14 +228,12 @@ public class DataSetSchemaControllerImplTest {
     assertEquals("error, not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
 
     DataSetSchema schema2 = new DataSetSchema();
-    schema2.setNameDataSetSchema("test");
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
@@ -244,7 +247,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
-    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(1L);
@@ -262,7 +265,7 @@ public class DataSetSchemaControllerImplTest {
   public void createEmptyDataSetSchemaException() throws EEAException {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
         .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
   }
@@ -299,10 +302,27 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
+    doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
+
+  @Test
+  public void deleteDatasetSchemaException3Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+    doThrow(new EEAException()).when(datasetSnapshotService)
+        .deleteAllSchemaSnapshots(Mockito.any());
+    try {
+      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("Not the same status", HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+
+  }
+
 
   /**
    * Update table schema test.
@@ -544,12 +564,13 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void createTableSchemaTest1() throws EEAException {
-    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setIdTableSchema("id");
+    when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(tableSchemaVO);
     Mockito.doNothing().when(datasetService).saveTablePropagation(Mockito.any(), Mockito.any());
-    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    assertEquals(tableSchemaVO,
+        dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO()));
   }
 
   /**
@@ -557,12 +578,18 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createTableSchemaTest2() throws EEAException {
-    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new TableSchemaVO());
     Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    try {
+      dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
   }
 }

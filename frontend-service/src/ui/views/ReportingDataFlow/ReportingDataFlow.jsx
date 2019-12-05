@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
@@ -24,10 +24,8 @@ import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { ScrollPanel } from 'primereact/scrollpanel';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
@@ -62,8 +60,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
-  let growlRef = useRef();
-
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
@@ -91,18 +87,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['dataflow']
+        label: resources.messages['dataflow'],
+        icon: 'archive'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
-
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const onLoadReportingDataflow = async () => {
     try {
@@ -136,10 +130,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setLoading(true);
     onLoadReportingDataflow();
   }, [match.params.dataflowId, isDataUpdated]);
-
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
 
   const handleRedirect = target => {
     history.push(target);
@@ -270,7 +260,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -296,7 +286,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
-              {/* <Title title={`${dataflowData.name}`} icon="archive" /> */}
+              {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
@@ -306,8 +296,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            <div className={`${styles.datasetItem}`}>
-              {isCustodian && (
+            {isCustodian && (
+              <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="newItem"
                   caption={resources.messages['newItem']}
@@ -324,12 +314,12 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     }
                   ]}
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                caption={resources.messages['informationPoint']}
+                caption={resources.messages['dataflowHelp']}
                 handleRedirect={() =>
                   handleRedirect(
                     getUrl(
@@ -341,6 +331,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     )
                   )
                 }
+                onWheel={getUrl(
+                  routes.DOCUMENTS,
+                  {
+                    dataflowId: match.params.dataflowId
+                  },
+                  true
+                )}
               />
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
@@ -367,6 +364,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      onWheel={getUrl(
+                        routes.DATASET_SCHEMA,
+                        {
+                          dataflowId: match.params.dataflowId,
+                          datasetId: newDatasetSchema.datasetId
+                        },
+                        true
+                      )}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
@@ -397,6 +402,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
+                          disabled: true,
                           command: () => getDeleteSchemaIndex(newDatasetSchema.index)
                         },
                         {
@@ -431,6 +437,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         )
                       );
                     }}
+                    onWheel={getUrl(
+                      routes.DATASET,
+                      {
+                        dataflowId: match.params.dataflowId,
+                        datasetId: dataset.datasetId
+                      },
+                      true
+                    )}
                     model={
                       hasWritePermissions
                         ? [
@@ -468,7 +482,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 </div>
               );
             })}
-            {isCustodian && (
+            {isCustodian && !isEmpty(dataflowData.datasets) && (
               <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="dashboard"
@@ -484,6 +498,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       )
                     )
                   }
+                  onWheel={getUrl(
+                    routes.DASHBOARDS,
+                    {
+                      dataflowId: match.params.dataflowId
+                    },
+                    true
+                  )}
                 />
               </div>
             )}
@@ -504,7 +525,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           visible={newDatasetDialog}
           className={styles.dialog}
           dismissableMask={false}
-          onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
+          onHide={() => {
+            setNewDatasetDialog(false);
+            setIsFormReset(false);
+          }}>
           <NewDatasetSchemaForm
             dataflowId={match.params.dataflowId}
             datasetSchemaInfo={updatedDatasetSchema}
@@ -606,7 +630,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <ul>
             <li>
               <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
             </li>
             <li>
               <strong>{resources.messages['description']}: </strong>

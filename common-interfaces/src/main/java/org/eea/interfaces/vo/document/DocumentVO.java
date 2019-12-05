@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.document;
 
 import java.io.Serializable;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -35,4 +36,12 @@ public class DocumentVO implements Serializable {
   /** The dataflow id. */
   private Long dataflowId;
 
+  /** The size. */
+  private Long size;
+
+  /** The date. */
+  private Date date;
+
+  /** The is public. */
+  private Boolean isPublic;
 }

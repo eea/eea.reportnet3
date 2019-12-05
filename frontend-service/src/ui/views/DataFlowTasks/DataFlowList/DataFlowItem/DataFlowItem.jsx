@@ -5,7 +5,6 @@ import styles from './DataFlowItem.module.scss';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -13,7 +12,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { random } from 'node-forge';
 
 export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => {
   const resources = useContext(ResourcesContext);
@@ -95,7 +93,7 @@ export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => 
       </div>
       <div className={styles.status}>
         <p>
-          <span>{`${resources.messages['state']}:`}</span> {resources.messages[status]}
+          <span>{`${resources.messages['status']}:`}</span> {resources.messages[status]}
         </p>
       </div>
 
@@ -116,22 +114,22 @@ export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => 
           </>
         ) : (
           <>
-            <a
+            <span
               className={styles.btn}
               href="#"
               onClick={e => {
                 e.preventDefault();
               }}>
               <FontAwesomeIcon icon={AwesomeIcons('comments')} />
-            </a>
-            <a
+            </span>
+            <span
               className={styles.btn}
               href="http://"
               onClick={e => {
                 e.preventDefault();
               }}>
               <FontAwesomeIcon icon={AwesomeIcons('share')} />
-            </a>
+            </span>
           </>
         )}
       </div>

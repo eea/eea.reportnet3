@@ -44,9 +44,6 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
     if (null != command) {
       command.execute(message);
     }
-
-
-
   }
 
 }

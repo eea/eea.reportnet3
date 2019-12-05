@@ -25,11 +25,10 @@ public interface DatasetSchemaService {
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id
-   * @param datasetSchemaName the dataset schema name
    * @return the object id
    * @throws EEAException the EEA exception
    */
-  ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName) throws EEAException;
+  ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException;
 
   /**
    * Gets dataschema by id.
@@ -100,8 +99,9 @@ public interface DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
-  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+  TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
 
   /**
    * Update name table schema.
@@ -174,4 +174,5 @@ public interface DatasetSchemaService {
    */
   Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
+
 }

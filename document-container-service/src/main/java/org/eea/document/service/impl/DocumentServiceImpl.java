@@ -2,8 +2,7 @@ package org.eea.document.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
@@ -16,8 +15,8 @@ import org.eea.document.type.FileResponse;
 import org.eea.document.utils.OakRepositoryUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,33 +28,46 @@ import org.springframework.stereotype.Service;
  * The type Document service.
  *
  * @author ruben.lozano
- *
  */
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant PATH_DELIMITER. */
+  /**
+   * The Constant PATH_DELIMITER.
+   */
   private static final String PATH_DELIMITER = "/";
 
-  /** The Constant PATH_DELIMITER_SNAPSHOT. */
+  /**
+   * The Constant PATH_DELIMITER_SNAPSHOT.
+   */
   private static final String PATH_DELIMITER_SNAPSHOT = "/snapshotSchema/";
 
-  /** The Constant PATH_DELIMITER_SNAPSHOT_DELETE. */
+  /**
+   * The Constant PATH_DELIMITER_SNAPSHOT_DELETE.
+   */
   private static final String PATH_DELIMITER_SNAPSHOT_DELETE = "snapshotSchema/";
 
-  /** The oak repository utils. */
+  /**
+   * The oak repository utils.
+   */
   @Autowired
   private OakRepositoryUtils oakRepositoryUtils;
 
-  /** The kafka sender utils. */
+  /**
+   * The dataflow controller.
+   */
   @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
+  private DataFlowDocumentControllerZuul dataflowController;
 
   /**
    * upload a document to the jackrabbit content repository.
@@ -63,16 +75,16 @@ public class DocumentServiceImpl implements DocumentService {
    * @param inputStream the input stream
    * @param contentType the content type
    * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
+   * @param documentVO the document VO
+   * @param size the size
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
   public void uploadDocument(final InputStream inputStream, final String contentType,
-      final String filename, final Long dataFlowId, final String language, final String description)
+      final String filename, DocumentVO documentVO, final Long size)
       throws EEAException, IOException {
     Session session = null;
     DocumentNodeStore ns = null;
@@ -81,25 +93,25 @@ public class DocumentServiceImpl implements DocumentService {
           || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
+      // save to metabase
+      documentVO.setSize(size);
+      documentVO.setDate(new Date());
+      documentVO.setName(filename);
+      Long idDocument = dataflowController.insertDocument(documentVO);
+      if (idDocument != null) {
+        LOG.info("Adding the file...");
+        // Initialize the session
+        ns = oakRepositoryUtils.initializeNodeStore();
+        Repository repository = oakRepositoryUtils.initializeRepository(ns);
+        session = oakRepositoryUtils.initializeSession(repository);
 
-      LOG.info("Adding the file...");
-      // Initialize the session
-      ns = oakRepositoryUtils.initializeNodeStore();
-      Repository repository = oakRepositoryUtils.initializeRepository(ns);
-      session = oakRepositoryUtils.initializeSession(repository);
-
-      // Add a file node with the document
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(filename, "-" + language);
-
-      String modifiedFilename = oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + dataFlowId,
-          inputStream, nameWithLanguage, contentType);
-      if (StringUtils.isBlank(modifiedFilename)) {
-        throw new EEAException(EEAErrorMessage.FILE_NAME);
+        // Add a file node with the document
+        oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + documentVO.getDataflowId(),
+            inputStream, Long.toString(idDocument), contentType);
+        LOG.info("File added...");
+      } else {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
-      LOG.info("File added...");
-      sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
-          description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
@@ -109,19 +121,44 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+  /**
+   * Update document.
+   *
+   * @param documentVO the document VO
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDocument(DocumentVO documentVO) throws EEAException {
+    try {
+      // save to metabase
+      if (documentVO == null) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
+      }
+      documentVO.setDate(new Date());
+      Long idDocument = dataflowController.insertDocument(documentVO);
+      if (idDocument == null || idDocument == 0L) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error in uploadDocument due to", e);
+      throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    }
+  }
 
   /**
    * Gets the document.
    *
-   * @param documentName the document name
+   * @param documentId the document id
    * @param dataFlowId the data flow id
-   * @param language the language
+   *
    * @return the document
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public FileResponse getDocument(final String documentName, final Long dataFlowId,
-      final String language) throws EEAException {
+  public FileResponse getDocument(final Long documentId, final Long dataFlowId)
+      throws EEAException {
     Session session = null;
     FileResponse fileResponse = null;
     DocumentNodeStore ns = null;
@@ -132,11 +169,8 @@ public class DocumentServiceImpl implements DocumentService {
       session = oakRepositoryUtils.initializeSession(repository);
 
       // retrieve the file to the controller
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(documentName, "-" + language);
-
       fileResponse = oakRepositoryUtils.getFileContents(session, PATH_DELIMITER + dataFlowId,
-          nameWithLanguage);
+          Long.toString(documentId));
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
       LOG_ERROR.error("Error in getDocument due to", e);
@@ -154,33 +188,28 @@ public class DocumentServiceImpl implements DocumentService {
    * Delete document.
    *
    * @param documentId the document id
-   * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @param language the language
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Modified
   @Async
-  public void deleteDocument(Long documentId, String documentName, Long dataFlowId,
-      final String language) throws EEAException {
+  public void deleteDocument(Long documentId, Long dataFlowId) throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
+      dataflowController.deleteDocument(documentId);
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
       session = oakRepositoryUtils.initializeSession(repository);
 
       // Delete a file node with the document
-      String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(documentName, "-" + language);
-      oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), nameWithLanguage);
+      oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), Long.toString(documentId));
       LOG.info("File deleted...");
 
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
-
-      sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error in deleteDocument due to", e);
@@ -193,39 +222,6 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
-
-  /**
-   * Send kafka notification.
-   *
-   * @param filename the filename
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @param description the description
-   * @param eventType the event type
-   */
-  public void sendKafkaNotification(final String filename, final Long dataFlowId,
-      final String language, final String description, final EventType eventType) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("dataflow_id", dataFlowId);
-    result.put("filename", filename);
-    result.put("language", language);
-    result.put("description", description);
-    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
-  }
-
-  /**
-   * Send kafka notification.
-   *
-   * @param documentId the document id
-   * @param eventType the event type
-   */
-  public void sendKafkaNotification(final Long documentId, final EventType eventType) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("documentId", documentId);
-    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
-  }
-
-
   /**
    * Upload schema snapshot.
    *
@@ -233,6 +229,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @param contentType the content type
    * @param filename the filename
    * @param designDataset the design dataset
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -279,7 +276,9 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param idDesignDataset the id design dataset
+   *
    * @return the snapshot document
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -316,6 +315,7 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param designDatasetId the design dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override

@@ -12,44 +12,50 @@ import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 export const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
   className,
   closeIcon,
+  divScrollTabsRef,
+  disabled = false,
   editable = false,
   designMode = false,
   header,
   headerStyle,
   id,
   index,
+  initialTabIndexDrag,
   leftIcon,
   newTab,
-  onContextMenu,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
   onTabDragAndDrop,
+  onTabDragAndDropStart,
   onTabEditingHeader,
   onTabHeaderClick,
   onTabMouseWheel,
   onTabNameError,
   rightIcon,
   scrollTo,
-  selected
+  selected,
+  totalTabs
 }) => {
+  const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
   const [hasErrors, setHasErrors] = useState(false);
   const [initialTitleHeader, setInitialTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
   const [menu, setMenu] = useState();
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
-  //const [draggedTabIndex, setDraggedTabIndex] = useState(null);
 
   const resources = useContext(ResourcesContext);
 
-  // const draggableTabRef = useRef();
   let contextMenuRef = useRef();
   const tabRef = useRef();
 
@@ -92,40 +98,81 @@ export const Tab = ({
     }
   }, [newTab]);
 
-  // const onTabDragStart = () => {
-  //   console.log('DragStart: ', index);
-  //   setDraggedTabIndex(index);
-  // };
+  const onTabDragStart = event => {
+    if (editingHeader) {
+      event.preventDefault();
+    } else {
+      //For firefox
+      event.dataTransfer.setData('text/plain', null);
+      if (!isUndefined(onTabDragAndDropStart)) {
+        onTabDragAndDropStart(index, selected, header);
+      }
+    }
+  };
 
-  // const onTabDragEnd = event => {
-  //   console.log(draggedTabIndex, event.currentTarget, event.target);
-  // };
+  const onTabDragEnd = () => {
+    if (!isUndefined(initialTabIndexDrag)) {
+      setIsDragging(false);
+      if (!isUndefined(onTabDragAndDropStart)) {
+        onTabDragAndDropStart(index);
+      }
+    }
+  };
 
-  // const onTabDragEnter = () => {
-  //   setDragging(true);
-  // };
+  const onTabDragOver = event => {
+    if (!isUndefined(initialTabIndexDrag)) {
+      if (index !== initialTabIndexDrag && !addTab) {
+        event.currentTarget.style.border = '1px dashed var(--gray-75)';
+        event.currentTarget.style.opacity = '0.7';
+      }
+      if (event.currentTarget.tabIndex !== initialTabIndexDrag) {
+        if (!isDragging) {
+          if (
+            (index === '-1' && totalTabs - initialTabIndexDrag !== 1) ||
+            (index !== '-1' && initialTabIndexDrag - index !== -1)
+          ) {
+            setIsDragging(true);
+          }
+        }
+      }
+    }
+  };
 
-  // const onTabDragLeave = () => {
-  //   setDragging(false);
-  // };
+  const onTabDragLeave = event => {
+    if (!isUndefined(initialTabIndexDrag)) {
+      event.currentTarget.style.border = '';
+      event.currentTarget.style.opacity = '';
+      event.preventDefault();
 
-  // const onTabDrop = event => {
-  //   //Get the dragged tab header
-  //   const dataString = event.dataTransfer.getData('text/html');
-  //   const range = document.createRange();
-  //   const draggedTabHeader = range.createContextualFragment(dataString).childNodes[0].innerText;
-  //   //currentTarget gets the child's target parent
-  //   const childs = event.currentTarget.childNodes;
-  //   for (let i = 0; i < childs.length; i++) {
-  //     if (childs[i].nodeName === 'SPAN') {
-  //       if (!isUndefined(onTabDragAndDrop)) {
-  //         onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
-  //       }
-  //     }
-  //     // console.log(childs[i]);
-  //   }
-  //   console.log(event.currentTarget);
-  // };
+      setIsDragging(false);
+      if (event.currentTarget.tabIndex !== initialTabIndexDrag) {
+        if (isDragging) {
+          setIsDragging(false);
+        }
+      }
+    }
+  };
+
+  const onTabDrop = event => {
+    if (!isUndefined(initialTabIndexDrag)) {
+      //Get the dragged tab header
+      event.currentTarget.style.border = '';
+      event.currentTarget.style.opacity = '';
+      const dataString = event.dataTransfer.getData('text/html');
+      const range = document.createRange();
+      const draggedTabHeader = range.createContextualFragment(dataString).childNodes[0].innerText;
+      //currentTarget gets the child's target parent
+      const childs = event.currentTarget.childNodes;
+      for (let i = 0; i < childs.length; i++) {
+        if (childs[i].nodeName === 'SPAN') {
+          if (!isUndefined(onTabDragAndDrop)) {
+            onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
+            setIsDragging(false);
+          }
+        }
+      }
+    }
+  };
 
   const onKeyChange = (event, index) => {
     if (event.key === 'Escape') {
@@ -181,6 +228,44 @@ export const Tab = ({
 
   return (
     <React.Fragment>
+      <div
+        style={{
+          display: isDragging ? 'inline' : 'none',
+          left:
+            !isUndefined(tabRef.current) && !isUndefined(divScrollTabsRef)
+              ? `${tabRef.current.offsetLeft - divScrollTabsRef.scrollLeft - 18}px`
+              : '0px',
+          opacity: '0.6',
+          position: 'absolute',
+          top: !isUndefined(tabRef.current) ? `${tabRef.current.offsetTop - 15}px` : '100px',
+          zIndex: 9999
+        }}>
+        <FontAwesomeIcon icon={AwesomeIcons('arrowDown')} />
+      </div>
+      <div
+        style={{
+          display: isDragging ? 'inline' : 'none',
+          left:
+            !isUndefined(tabRef.current) && !isUndefined(divScrollTabsRef)
+              ? `${tabRef.current.offsetLeft - divScrollTabsRef.scrollLeft - 18}px`
+              : '0px',
+          opacity: '0.6',
+          position: 'absolute',
+          top: !isUndefined(tabRef.current)
+            ? `${tabRef.current.offsetTop + tabRef.current.clientHeight - 4}px`
+            : '100px',
+          zIndex: 9999
+        }}>
+        <FontAwesomeIcon icon={AwesomeIcons('arrowUp')} />
+        {/* <div
+          style={{
+            height: '40px',
+            width: '30px',
+            // border: '2px 2px 0 2px solid gray',
+            marginRight: '3px',
+            backgroundColor: 'var(--yellow-120)'
+          }}></div> */}
+      </div>
       <li
         className={`${className} p-tabview-nav-li`}
         onContextMenu={e => {
@@ -193,18 +278,17 @@ export const Tab = ({
           }
         }}
         role="presentation"
-        style={headerStyle}
-        // style={{ pointerEvents: 'fill' }}
+        style={{ ...headerStyle, pointerEvents: 'fill' }}
         ref={tabRef}
         tabIndex={index}>
         <a
-          // draggable={!addTab ? true : false}
+          draggable={designMode ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
             editable ? styles.p_tabview_design : addTab ? styles.p_tabview_design_add : styles.p_tabview_noDesign
           }
-          // href={'#' + ariaControls}
+          href={'#' + ariaControls}
           id={id}
           onMouseDownCapture={e => {
             if (e.button === 1) {
@@ -225,25 +309,18 @@ export const Tab = ({
             }
           }}
           onClick={e => {
-            onTabHeaderClick(e);
-            scrollTo(tabRef.current.offsetLeft - 80, 0);
-            // console.log(tabRef);
-            // console.log(
-            //   tabRef.current.clientWidth,
-            //   tabRef.current.offsetLeft,
-            //   tabRef.current.getBoundingClientRect().right
-            // );
-            // if (tabRef.current.getBoundingClientRect().right + tabRef.current.clientWidth >= divTabWidth) {
-            //   navigationHidden(false);
-            // }
+            if (!disabled) {
+              onTabHeaderClick(e);
+              scrollTo(tabRef.current.offsetLeft - 80, 0);
+            }
           }}
-          // onDragEnd={e => {
-          //   onTabDragEnd(e);
-          // }}
-          // onDragEnter={onTabDragEnter}
-          // onDragLeave={onTabDragLeave}
-          // onDragStart={onTabDragStart}
-          // onDrop={e => onTabDrop(e)}
+          onDragEnd={e => {
+            onTabDragEnd(e);
+          }}
+          onDragOver={onTabDragOver}
+          onDragLeave={onTabDragLeave}
+          onDragStart={onTabDragStart}
+          onDrop={e => onTabDrop(e)}
           onDoubleClick={onTabDoubleClick}
           role="tab"
           style={{ pointerEvents: 'fill', display: 'inline-block' }}
@@ -278,6 +355,7 @@ export const Tab = ({
             <div
               onClick={e => {
                 e.preventDefault();
+                e.stopPropagation();
                 if (!isUndefined(checkEditingTabs)) {
                   if (!checkEditingTabs()) {
                     if (!isUndefined(onTabDeleteClick)) {

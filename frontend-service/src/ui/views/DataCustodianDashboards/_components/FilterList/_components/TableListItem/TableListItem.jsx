@@ -2,33 +2,24 @@ import React from 'react';
 
 import styles from './TableListItem.module.css';
 
-function TableListItem({ filterDispatch, item }) {
+export const TableListItem = ({ datasetSchemaId, filterDispatch, item, tableFilters }) => {
   return (
     <li className={styles.listItem}>
       <input
-        id={item.tableId}
+        id={`${item.tableId}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={true}
-        onChange={e => {
-          if (e.target.checked) {
-            filterDispatch({
-              type: 'TABLE_CHECKBOX_ON',
-              payload: { tableId: item.tableId }
-            });
-          } else {
-            filterDispatch({
-              type: 'TABLE_CHECKBOX_OFF',
-              payload: { tableId: item.tableId }
-            });
-          }
-        }}
+        defaultChecked={tableFilters.includes(item.tableId) ? false : true}
+        onChange={e =>
+          filterDispatch({
+            type: e.target.checked ? 'TABLE_CHECKBOX_ON' : 'TABLE_CHECKBOX_OFF',
+            payload: { tableId: item.tableId }
+          })
+        }
       />
-      <label htmlFor={item.tableId} className={styles.labelItem}>
+      <label htmlFor={`${item.tableId}_${datasetSchemaId}`} className={styles.labelItem}>
         {item.tableName}
       </label>
     </li>
   );
-}
-
-export { TableListItem };
+};

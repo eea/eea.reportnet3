@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined } from 'lodash';
+
 import styles from './DataFlowTasks.module.scss';
 
 import { config } from 'conf';
@@ -15,14 +17,18 @@ import { TabMenu } from 'primereact/tabmenu';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
-import { getUrl } from 'core/infrastructure/api/getUrl';
-import { routes } from 'ui/routes';
+import { UserService } from 'core/services/User';
 
 export const DataflowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
-  const userData = useContext(UserContext);
+  const user = useContext(UserContext);
 
+  const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [completedContent, setcompletedContent] = useState([]);
+  const [isCustodian, setIsCustodian] = useState();
+  const [loading, setLoading] = useState(true);
+  const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowAcceptedPendingTab'],
@@ -37,14 +43,6 @@ export const DataflowTasks = withRouter(({ match, history }) => {
     }
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
-  const [loading, setLoading] = useState(true);
-  const [pendingContent, setpendingContent] = useState([]);
-  const [acceptedContent, setacceptedContent] = useState([]);
-  const [completedContent, setcompletedContent] = useState([]);
-  const home = {
-    icon: config.icons['home'],
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
 
   const dataFetch = async () => {
     setLoading(true);
@@ -66,13 +64,19 @@ export const DataflowTasks = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataflowList'] }]);
+    setBreadCrumbItems([{ label: resources.messages['dataflowList'], icon: 'home' }]);
   }, [history, match.params.dataflowId, resources.messages]);
+
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
+    }
+  }, [user]);
 
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
+        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -88,10 +92,12 @@ export const DataflowTasks = withRouter(({ match, history }) => {
         navTitle={resources.messages['dataflow']}
         components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
+        isCustodian={isCustodian}
+        onFetchData={dataFetch}
         subscribeButtonTitle={resources.messages['subscribeButton']}
         style={{ textAlign: 'left' }}
       />
-      <div className={`${styles.container} rep-col-xs-12 rep-col-md-10`}>
+      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-10`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>

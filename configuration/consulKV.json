@@ -812,6 +812,10 @@
     "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
   },
   {
+  	"key": "config/communication/spring.sleuth.integration.websockets.enabled",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/communication/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },

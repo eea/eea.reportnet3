@@ -1,13 +1,6 @@
 package org.eea.validation.kafka.command;
 
-import org.eea.exception.EEAException;
-import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
-import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.validation.util.ValidationHelper;
-import org.kie.api.KieBase;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**

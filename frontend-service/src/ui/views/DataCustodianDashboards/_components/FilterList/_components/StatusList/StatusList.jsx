@@ -5,32 +5,25 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const StatusList = ({ color, levelErrors, filterDispatch }) => {
+export const StatusList = ({ levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
   const resources = useContext(ResourcesContext);
-  let errorListFilters = levelErrors.map(errorLevel => {
+  let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
-      <li className={styles.listItem}>
+      <li key={i} className={styles.listItem}>
         <input
-          id={errorLevel.toString().toLowerCase()}
+          id={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`}
           className={styles.checkbox}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
-          defaultChecked={true}
+          defaultChecked={statusFilters.includes(errorLevel.toString()) ? false : true}
           onChange={e => {
-            if (e.target.checked) {
-              filterDispatch({
-                type: 'STATUS_FILTER_ON',
-                payload: { msg: errorLevel.toString() }
-              });
-            } else {
-              filterDispatch({
-                type: 'STATUS_FILTER_OFF',
-                payload: { msg: errorLevel.toString() }
-              });
-            }
+            filterDispatch({
+              type: e.target.checked ? 'STATUS_FILTER_ON' : 'STATUS_FILTER_OFF',
+              payload: { msg: errorLevel.toString() }
+            });
           }}
         />
-        <label htmlFor={errorLevel} className={styles.labelItem}>
+        <label htmlFor={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`} className={styles.labelItem}>
           {resources.messages[errorLevel.toString().toLowerCase()]}
         </label>
       </li>
@@ -38,85 +31,3 @@ const StatusList = ({ color, levelErrors, filterDispatch }) => {
   });
   return <ul className={styles.list}>{errorListFilters}</ul>;
 };
-
-export { StatusList };
-
-// return (
-//   <ul className={styles.list}>
-//     <li className={styles.listItem}>
-//       <input
-//         id="correct"
-//         className={styles.checkbox}
-//         style={{ backgroundColor: color.CORRECT }}
-//         type="checkbox"
-//         defaultChecked={true}
-//         onChange={e => {
-//           if (e.target.checked) {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_ON',
-//               payload: { msg: 'CORRECT' }
-//             });
-//           } else {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_OFF',
-//               payload: { msg: 'CORRECT' }
-//             });
-//           }
-//         }}
-//       />
-//       <label htmlFor="correct" className={styles.labelItem}>
-//         {resources.messages.correct}
-//       </label>
-//     </li>
-//     <li className={styles.listItem}>
-//       <input
-//         id="warning"
-//         className={styles.checkbox}
-//         style={{ backgroundColor: color.WARNING }}
-//         type="checkbox"
-//         defaultChecked={true}
-//         onChange={e => {
-//           if (e.target.checked) {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_ON',
-//               payload: { msg: 'WARNING' }
-//             });
-//           } else {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_OFF',
-//               payload: { msg: 'WARNING' }
-//             });
-//           }
-//         }}
-//       />
-//       <label htmlFor="warning" className={styles.labelItem}>
-//         {resources.messages.warning}
-//       </label>
-//     </li>
-//     <li className={styles.listItem}>
-//       <input
-//         id="error"
-//         className={styles.checkbox}
-//         style={{ backgroundColor: color.ERROR }}
-//         type="checkbox"
-//         defaultChecked={true}
-//         onChange={e => {
-//           if (e.target.checked) {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_ON',
-//               payload: { msg: 'ERROR' }
-//             });
-//           } else {
-//             filterDispatch({
-//               type: 'STATUS_FILTER_OFF',
-//               payload: { msg: 'ERROR' }
-//             });
-//           }
-//         }}
-//       />
-//       <label htmlFor="error" className={styles.labelItem}>
-//         {resources.messages.error}
-//       </label>
-//     </li>
-//   </ul>
-// );

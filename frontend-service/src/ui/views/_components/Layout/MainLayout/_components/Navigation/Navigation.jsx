@@ -17,7 +17,7 @@ const Navigation = withRouter(({ history }) => {
   return (
     <div id="header" className={styles.header}>
       <a
-        href="#home"
+        href={getUrl(routes.DATAFLOWS)}
         className={styles.appLogo}
         title={resources.messages['titleHeader']}
         onClick={e => {

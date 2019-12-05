@@ -21,24 +21,11 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
     onLoadWebForm();
   }, []);
 
-  // const onEditorEnterKeyPress = event => {
-  //   if (event.key === 'Enter') {
-  //     const form = event.target;
-  //     const index = Array.prototype.indexOf.call(form, event.target);
-  //     form.elements[index + 1].focus();
-  //     event.preventDefault();
-  //   }
-  // };
-
   const onEditorKeyChange = (props, event) => {
     if (event.key === 'Escape') {
       const updatedData = changeCellValue(fetchedData.dataColumns, initialCellValue, props.fieldId);
       setFetchedData({ ...fetchedData, dataColumns: updatedData });
     }
-    // else if (event.key === 'Enter') {
-    //   onEditorEnterKeyPress(event);
-    //   // onEditorSubmitValue(props, event.target.value);
-    // }
   };
 
   const onEditorSubmitValue = async (cell, value) => {
@@ -208,7 +195,7 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
         let filteredColumn = [];
         if (!isUndefined(dataColumns[j])) {
-          filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
+          filteredColumn = dataColumns[j].filter(column => column.rowPosition === rowIndex.toString());
           if (!isEmpty(filteredColumn)) {
             header = filteredColumn[0].description;
             tds.push(
@@ -248,20 +235,6 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
     }
     return filledRows;
   };
-
-  // const inputRow = (indexes, column) => {
-  //   return (
-  //     <td key={`${columnIndex}${rowIndex}`} name={`${columnPosition}${rowIndex}`}>
-  //       <InputText
-  //         value={filteredColumn[0].value}
-  //         onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
-  //         onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
-  //         onFocus={e => onEditorValueFocus(e.target.value)}
-  //         onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
-  //       />
-  //     </td>
-  //   );
-  // };
 
   const getWebFormRows = dataColumns => {
     let webFormRows = [];

@@ -12,10 +12,12 @@ import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -36,6 +38,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -99,6 +102,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The design dataset repository. */
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
+
 
   /**
    * The Constant LOG.
@@ -161,13 +168,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id
-   * @param datasetSchemaName the dataset schema name
    * @return the object id
    * @throws EEAException the EEA exception
    */
   @Override
-  public ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName)
-      throws EEAException {
+  public ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException {
 
     if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
@@ -176,7 +181,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
 
-    dataSetSchema.setNameDataSetSchema(datasetSchemaName);
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
@@ -257,7 +261,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<TableSchema> tableSchemas = new ArrayList<>();
 
     ObjectId idDataSetSchema = new ObjectId();
-    dataSetSchema.setNameDataSetSchema("dataSet_" + datasetId);
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     List<RuleDataSet> ruleDataSetList = new ArrayList<>();
@@ -470,6 +473,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataschema.isPresent()) {
       DataSetSchema datasetSchema = dataschema.get();
       dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
+      setNameSchema(dataschemaId, dataSchemaVO);
     }
 
     return dataSchemaVO;
@@ -491,9 +495,26 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchema dataschema =
         schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
     LOG.info("Schema retrived by datasetId {}", datasetId);
-    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
-        : noRulesDataSchemaMapper.entityToClass(dataschema);
+    DataSetSchemaVO dataschemaVO =
+        Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
+            : noRulesDataSchemaMapper.entityToClass(dataschema);
+    setNameSchema(metabase.getDatasetSchema(), dataschemaVO);
+    return dataschemaVO;
 
+  }
+
+  /**
+   * Sets the name schema.
+   *
+   * @param schemaId the schema id
+   * @param dataschemaVO the dataschema VO
+   */
+  private void setNameSchema(String schemaId, DataSetSchemaVO dataschemaVO) {
+    Optional<DesignDataset> designDataset =
+        designDatasetRepository.findFirstByDatasetSchema(schemaId);
+    if (designDataset.isPresent()) {
+      dataschemaVO.setNameDatasetSchema(designDataset.get().getDataSetName());
+    }
   }
 
 
@@ -582,18 +603,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   * @return the table schema VO
    */
   @Override
-  public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
+  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
     ObjectId tableSchemaId = new ObjectId();
-    tableSchema.setIdTableSchema(tableSchemaId.toString());
+    tableSchemaVO.setIdTableSchema(tableSchemaId.toString());
     RecordSchema recordSchema = new RecordSchema();
-    recordSchema.setIdRecordSchema(new ObjectId());
+    ObjectId recordSchemaId = new ObjectId();
+    recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
-    TableSchema table = tableSchemaMapper.classToEntity(tableSchema);
+    TableSchema table = tableSchemaMapper.classToEntity(tableSchemaVO);
     table.setRecordSchema(recordSchema);
-    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    LOG.info("Creating table schema with id {}", tableSchemaId);
     schemasRepository.insertTableSchema(table, id);
+    // prepare ids to return to the frontend
+    RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
+    recordSchemaVO.setIdRecordSchema(recordSchemaId.toString());
+    tableSchemaVO.setRecordSchema(recordSchemaVO);
+    return (tableSchemaVO);
   }
 
   /**

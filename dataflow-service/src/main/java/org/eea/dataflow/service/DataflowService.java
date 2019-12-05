@@ -110,7 +110,7 @@ public interface DataflowService {
    *
    * @param dataflowVO the dataflow VO
    */
-  void createDataFlow(DataFlowVO dataflowVO);
+  void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
   /**
    * Gets the reporting datasets id.

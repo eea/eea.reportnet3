@@ -3,6 +3,7 @@ package org.eea.document.controller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.ws.rs.Produces;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
@@ -10,6 +11,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,6 +54,10 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DataFlowDocumentControllerZuul dataflowController;
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DocumentControllerImpl.class);
 
   /**
    * Upload document.
@@ -58,6 +66,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param dataFlowId the data flow id
    * @param description the description
    * @param language the language
+   * @param isPublic the is public
    */
   @Override
   @HystrixCommand
@@ -65,7 +74,9 @@ public class DocumentControllerImpl implements DocumentController {
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId,
       @RequestParam("description") final String description,
-      @RequestParam("language") final String language) {
+      @RequestParam("language") final String language,
+      @RequestParam("isPublic") final Boolean isPublic) {
+    LOG.info("uploadDocument");
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -74,8 +85,13 @@ public class DocumentControllerImpl implements DocumentController {
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
+      DocumentVO documentVO = new DocumentVO();
+      documentVO.setDataflowId(dataFlowId);
+      documentVO.setDescription(description);
+      documentVO.setLanguage(language);
+      documentVO.setIsPublic(isPublic);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
-          file.getOriginalFilename(), dataFlowId, language, description);
+          file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -101,8 +117,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      FileResponse file = documentService.getDocument(document.getName(), document.getDataflowId(),
-          document.getLanguage());
+      FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
       HttpHeaders header = new HttpHeaders();
       header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
       header.add("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -136,8 +151,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      documentService.deleteDocument(documentId, document.getName(), document.getDataflowId(),
-          document.getLanguage());
+      documentService.deleteDocument(documentId, document.getDataflowId());
     } catch (final FeignException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {
@@ -148,6 +162,56 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+  /**
+   * Update document.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
+   * @param idDocument the id document
+   * @param isPublic the is public
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  public void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam(name = "description", required = false) final String description,
+      @RequestParam(name = "language", required = false) final String language,
+      @PathVariable("idDocument") final Long idDocument,
+      @RequestParam("isPublic") final Boolean isPublic) {
+    LOG.info("updateDocument");
+    if (dataFlowId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    try {
+      DocumentVO documentVO = dataflowController.getDocumentInfoById(idDocument);
+      documentVO.setDataflowId(dataFlowId);
+      if (StringUtils.isNotBlank(description)) {
+        documentVO.setDescription(description);
+      }
+      if (StringUtils.isNotBlank(language)) {
+        documentVO.setLanguage(language);
+      }
+      documentVO.setId(idDocument);
+      if (isPublic != null) {
+        documentVO.setIsPublic(isPublic);
+      }
+      if (file == null || file.isEmpty()) {
+        documentService.updateDocument(documentVO);
+      } else {
+        documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+            file.getOriginalFilename(), documentVO, file.getSize());
+      }
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
 
   /**

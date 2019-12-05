@@ -10,7 +10,16 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
-const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datasets, labels } }) => {
+const FilterList = ({
+  datasetSchemaId,
+  color,
+  filterDispatch,
+  levelErrors,
+  originalData: { datasets, labels },
+  reporterFilters,
+  statusFilters,
+  tableFilters
+}) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
@@ -19,7 +28,7 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
   const tableNamesIdsArray = [];
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
-  uniqDatasets.map(dataset => {
+  uniqDatasets.forEach(dataset => {
     const datasetObject = createTableCheckBoxObject(dataset);
     tableNamesIdsArray.push(datasetObject);
   });
@@ -30,11 +39,19 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         <AccordionTab header={resources.messages['filterByDataset']}>
           <ul className={styles.list}>
             {labels.map(item => (
-              <ReportersListItem key={item} filterDispatch={filterDispatch} item={item} />
+              <ReportersListItem
+                key={item}
+                datasetSchemaId={datasetSchemaId}
+                filterDispatch={filterDispatch}
+                item={item}
+                reporterFilters={reporterFilters}
+              />
             ))}
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByDataset']} disabled={true} />;
     }
   };
 
@@ -44,11 +61,19 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         <AccordionTab header={resources.messages['filterByTable']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
-              <TableListItem key={item.tableId} filterDispatch={filterDispatch} item={item} />
+              <TableListItem
+                key={item.tableId}
+                datasetSchemaId={datasetSchemaId}
+                filterDispatch={filterDispatch}
+                item={item}
+                tableFilters={tableFilters}
+              />
             ))}
           </ul>
         </AccordionTab>
       );
+    } else {
+      return <AccordionTab header={resources.messages['filterByTable']} disabled={true} />;
     }
   };
 
@@ -58,7 +83,13 @@ const FilterList = ({ color, levelErrors, filterDispatch, originalData: { datase
         {filterByReporters()}
         {filterByTables()}
       </Accordion>
-      <StatusList color={color} levelErrors={levelErrors} filterDispatch={filterDispatch} />
+      <StatusList
+        datasetSchemaId={datasetSchemaId}
+        statusFilters={statusFilters}
+        color={color}
+        levelErrors={levelErrors}
+        filterDispatch={filterDispatch}
+      />
     </>
   );
 };
