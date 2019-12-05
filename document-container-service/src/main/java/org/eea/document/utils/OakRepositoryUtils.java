@@ -22,7 +22,6 @@ import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.apache.jackrabbit.oak.plugins.document.mongo.MongoDocumentNodeStoreBuilder;
 import org.apache.jackrabbit.oak.spi.blob.GarbageCollectableBlobStore;
 import org.apache.jackrabbit.oak.spi.cluster.ClusterRepositoryInfo;
-import org.eea.document.service.impl.DocumentServiceImpl;
 import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
 import org.eea.exception.EEAErrorMessage;
@@ -39,47 +38,69 @@ import org.springframework.stereotype.Component;
 public class OakRepositoryUtils {
 
 
-  /** The Constant UPDATE_DELAY. */
+  /**
+   * The Constant UPDATE_DELAY.
+   */
   private static final int UPDATE_DELAY = 6000;
 
-  /** The Constant LEFT_PARENTHESIS. */
+  /**
+   * The Constant LEFT_PARENTHESIS.
+   */
   private static final String LEFT_PARENTHESIS = "(";
 
-  /** The Constant CACHE_SIZE. */
+  /**
+   * The Constant CACHE_SIZE.
+   */
   private static final int NODE_CACHE_SIZE = 16;
 
-  /** The oak repository url. */
-  @Value("${oakRepositoryUrl}")
+  /**
+   * The oak repository url.
+   */
+  @Value("${mongodb.primary.host}")
   private String oakRepositoryUrl;
 
-  /** The name oak collection. */
+  /**
+   * The name oak collection.
+   */
   @Value("${nameOakCollection}")
   private String nameOakCollection;
 
-  /** The oak port. */
-  @Value("${oakPort}")
+  /**
+   * The oak port.
+   */
+  @Value("${mongodb.primary.port}")
   private int oakPort;
 
-  /** The oak user. */
+  /**
+   * The oak user.
+   */
   @Value("${oakUser}")
   private String oakUser;
 
-  /** The target directory. */
+  /**
+   * The target directory.
+   */
   @Value("${targetDirectory}")
   private String targetDirectory;
 
-  /** The Constant PATH_DELIMITER. */
+  /**
+   * The Constant PATH_DELIMITER.
+   */
   private static final String PATH_DELIMITER = "/";
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(OakRepositoryUtils.class);
 
   /**
    * Insert string before point.
    *
    * @param documentName the document name
    * @param language the language
+   *
    * @return the string
+   *
    * @throws EEAException the EEA exception
    */
   public String insertStringBeforePoint(final String documentName, final String language)
@@ -100,7 +121,9 @@ public class OakRepositoryUtils {
    * Initialize session.
    *
    * @param repository the repository
+   *
    * @return the session
+   *
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
@@ -131,6 +154,7 @@ public class OakRepositoryUtils {
    * Initialize repository.
    *
    * @param ns the ns
+   *
    * @return the repository
    */
   public Repository initializeRepository(DocumentNodeStore ns) {
@@ -146,7 +170,9 @@ public class OakRepositoryUtils {
    * @param is the file
    * @param filename the filename
    * @param contentType the content type
+   *
    * @return the string
+   *
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
@@ -157,13 +183,12 @@ public class OakRepositoryUtils {
     if (node == null) {
       throw new EEAException("Error creating nodes");
     }
-    String newFilename = filename;
-    if (node.hasNode(filename)) {
-      LOG.info("File already added.");
-      newFilename = increaseCounterFileName(node, filename);
-    }
     // Created a node with that of file Name
-    Node fileHolder = node.addNode(newFilename, "nt:file");
+    if (node.hasNode(filename)) {
+      Node oldnode = node.getNode(filename);
+      oldnode.remove();
+    }
+    Node fileHolder = node.addNode(filename, "nt:file");
     Date now = new Date();
 
     if (fileHolder == null) {
@@ -178,28 +203,7 @@ public class OakRepositoryUtils {
     content.setProperty("jcr:lastModified", now.toInstant().toString());
     session.save();
     LOG.info("File Saved...");
-    return newFilename;
-  }
-
-  /**
-   * Increase counter file name.
-   *
-   * @param node the node
-   * @param filename the filename
-   * @return the string
-   * @throws RepositoryException the repository exception
-   * @throws EEAException the EEA exception
-   */
-  private String increaseCounterFileName(final Node node, final String filename)
-      throws RepositoryException, EEAException {
-    String result = filename;
-    for (int i = 1; true; i++) {
-      result = insertStringBeforePoint(filename, LEFT_PARENTHESIS + i + ")");
-      if (!node.hasNode(result)) {
-        break;
-      }
-    }
-    return result;
+    return filename;
   }
 
   /**
@@ -208,6 +212,7 @@ public class OakRepositoryUtils {
    * @param session the session
    * @param relPath the rel path
    * @param documentName the document name
+   *
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
@@ -242,7 +247,9 @@ public class OakRepositoryUtils {
    *
    * @param session the session
    * @param absPath the abs path
+   *
    * @return the node
+   *
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
@@ -269,7 +276,9 @@ public class OakRepositoryUtils {
    *
    * @param session the session
    * @param nodes the nodes
+   *
    * @return the node
+   *
    * @throws RepositoryException the repository exception
    */
   private static Node createNodes(final Session session, final String[] nodes)
@@ -292,7 +301,9 @@ public class OakRepositoryUtils {
    *
    * @param parentNode the parent node
    * @param childNode the child node
+   *
    * @return true, if successful
+   *
    * @throws RepositoryException the repository exception
    */
   private static boolean addChild(final Node parentNode, final String childNode)
@@ -329,7 +340,9 @@ public class OakRepositoryUtils {
    * @param session the session
    * @param basePath the base path
    * @param fileName the file name
+   *
    * @return the file contents
+   *
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -361,6 +374,7 @@ public class OakRepositoryUtils {
    * Delete blobs from repository.
    *
    * @param ns the ns
+   *
    * @throws Exception the exception
    */
   public void deleteBlobsFromRepository(DocumentNodeStore ns) throws Exception {

@@ -10,14 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
-import org.eea.dataflow.service.helper.StatsHelper;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,10 +53,6 @@ public class DataFlowControllerImplTest {
   @Mock
   private DataflowService dataflowService;
 
-  /** The statistics helper. */
-  @Mock
-  private StatsHelper statisticsHelper;
-
 
   /**
    * Inits the mocks.
@@ -74,8 +69,13 @@ public class DataFlowControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testFindByIdDataFlowIncorrect() {
-    dataFlowControllerImpl.findById(null);
-    Mockito.verify(dataFlowControllerImpl, times(1)).findById(Mockito.any());
+    try {
+      dataFlowControllerImpl.findById(null);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
 
@@ -250,9 +250,13 @@ public class DataFlowControllerImplTest {
   public void updateUserRequestThrows() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-
-    dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
+    try {
+      dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
   /**
@@ -281,9 +285,14 @@ public class DataFlowControllerImplTest {
     doThrow(new EEAException()).when(dataflowService).addContributorToDataflow(Mockito.any(),
         Mockito.any());
 
-    dataFlowControllerImpl.addContributor(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).addContributorToDataflow(Mockito.any(),
-        Mockito.any());
+
+    try {
+      dataFlowControllerImpl.addContributor(Mockito.any(), Mockito.any());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
   /**
@@ -308,13 +317,16 @@ public class DataFlowControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void removeContributorThrows() throws EEAException {
-
     doThrow(new EEAException()).when(dataflowService).removeContributorFromDataflow(Mockito.any(),
         Mockito.any());
 
-    dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
-        Mockito.any());
+    try {
+      dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
   /**
@@ -327,6 +339,7 @@ public class DataFlowControllerImplTest {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setDeadlineDate(new Date(-1));
     dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
   /**
@@ -334,10 +347,16 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void createDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    try {
+      dataFlowControllerImpl.createDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
   /**
@@ -351,7 +370,32 @@ public class DataFlowControllerImplTest {
     Date date = new Date();
     date.setTime(date.getTime() - 1000L);
     dataflowVO.setDeadlineDate(date);
-    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    try {
+      dataFlowControllerImpl.createDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createDataThrowRepeatName() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    EEAException EEAException = new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    doThrow(EEAException).when(dataflowService).createDataFlow(dataflowVO);
+    try {
+      dataFlowControllerImpl.createDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
   }
 
   /**
@@ -366,37 +410,11 @@ public class DataFlowControllerImplTest {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date = sdf.parse("2914-09-15");
     dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
     doNothing().when(dataflowService).createDataFlow(dataflowVO);
     dataFlowControllerImpl.createDataFlow(dataflowVO);
     Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
-  }
-
-
-  /**
-   * Test global statistics.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testGlobalStatistics() throws EEAException {
-
-    List<StatisticsVO> stats = new ArrayList<>();
-    when(statisticsHelper.executeStatsProcess(Mockito.any())).thenReturn(stats);
-    dataFlowControllerImpl.getStatisticsByDataflow(1L);
-
-  }
-
-  /**
-   * Test global statistics error.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testGlobalStatisticsError() throws EEAException {
-
-    doThrow(new EEAException()).when(statisticsHelper).executeStatsProcess(Mockito.any());
-    dataFlowControllerImpl.getStatisticsByDataflow(1L);
-
   }
 
 
@@ -430,8 +448,13 @@ public class DataFlowControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetMetabaseByIdExceptionNull() {
-    dataFlowControllerImpl.getMetabaseById(null);
-    Mockito.verify(dataFlowControllerImpl, times(1)).getMetabaseById(Mockito.any());
+    try {
+      dataFlowControllerImpl.getMetabaseById(null);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
   }
 
 

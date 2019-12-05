@@ -11,6 +11,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +54,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   private DesignDatasetService designDatasetService;
 
   /**
-   * The Constant LOG_ERROR.
+   * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
-
 
   /**
    * The Constant LOG_ERROR.
@@ -75,6 +75,21 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(Long idDataflow) {
     return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
+  }
+
+  /**
+   * Find data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetVO> getReportingsIdBySchemaId(
+      @PathVariable("schemaId") String schemaId) {
+    return reportingDatasetService.getDataSetIdBySchemaId(schemaId);
   }
 
   /**
@@ -153,5 +168,56 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
 
   }
+
+
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the statistics by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetMetabaseService.getStatistics(datasetId);
+    } catch (EEAException | InstantiationException | IllegalAccessException e) {
+      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
+    }
+
+    return statistics;
+  }
+
+
+
+  /**
+   * Gets the global statistics by dataschema id.
+   *
+   * @param dataschemaId the dataschema id
+   * @return the global statistics by dataschema id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/globalStatistics/{dataschemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
+      @PathVariable("dataschemaId") String dataschemaId) {
+
+    List<StatisticsVO> statistics = null;
+
+    try {
+      statistics = datasetMetabaseService.getGlobalStatistics(dataschemaId);
+    } catch (EEAException | InstantiationException | IllegalAccessException e) {
+      LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
+    }
+
+    return statistics;
+  }
+
 
 }

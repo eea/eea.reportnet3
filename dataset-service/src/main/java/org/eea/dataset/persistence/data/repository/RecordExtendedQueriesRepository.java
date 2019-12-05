@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.springframework.data.domain.Pageable;
 
@@ -17,12 +18,12 @@ public interface RecordExtendedQueriesRepository {
    * Find by table value with order.
    *
    * @param idTableSchema the id table schema
-   * @param levelError the level error
+   * @param levelErrorList the level error list
    * @param pageable the pageable
    * @param sortFields the sort fields
    * @return the list
    */
-  List<RecordValue> findByTableValueWithOrder(String idTableSchema, TypeErrorEnum[] levelError,
+  TableVO findByTableValueWithOrder(String idTableSchema, List<TypeErrorEnum> levelErrorList,
       Pageable pageable, SortField... sortFields);
 
 

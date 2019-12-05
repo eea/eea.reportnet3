@@ -14,7 +14,6 @@ import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -33,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,9 +138,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return result;
-
   }
-
 
   /**
    * Update dataset.
@@ -163,7 +161,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Load dataset data.
    *
@@ -171,7 +168,6 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    */
-
   @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
@@ -194,10 +190,10 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      // This method will realease the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
-      // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (IOException | EEAException | InterruptedException e) {
+      // This method will release the lock
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -242,9 +238,7 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
-
   }
-
 
   /**
    * Gets the table from any object id.
@@ -331,28 +325,6 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
-
-  /**
-   * Gets the statistics by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the statistics by id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
-
-    StatisticsVO statistics = null;
-    try {
-      statistics = datasetService.getStatistics(datasetId);
-    } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
-    }
-
-    return statistics;
-  }
 
 
   /**
@@ -477,16 +449,22 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTER'))")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) throws Exception {
+      @RequestParam("mimeType") String mimeType) {
     LOG.info("Init the export controller");
-    byte[] file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
+    byte[] file;
+    try {
+      file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
 
-    // set file name and content type
-    String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+      // set file name and content type
+      String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
 
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-    return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
 

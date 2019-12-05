@@ -16,4 +16,12 @@ public interface ReportingDatasetService {
    */
   List<ReportingDatasetVO> getDataSetIdByDataflowId(Long idFlow);
 
+  /**
+   * Gets the data set id by dataflow id and schema id.
+   *
+   * @param schemaId the schema id
+   * @return the data set id by dataflow id and schema id
+   */
+  List<ReportingDatasetVO> getDataSetIdBySchemaId(String schemaId);
+
 }

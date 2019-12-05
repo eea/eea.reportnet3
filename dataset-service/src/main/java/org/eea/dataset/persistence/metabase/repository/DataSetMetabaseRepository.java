@@ -1,9 +1,12 @@
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
+import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataSetMetabaseRepository.
@@ -28,5 +31,15 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    * @return the list
    */
   List<DataSetMetabase> findByDataflowId(Long dataflowId);
+
+  /**
+   * Delete snapshot dataset by id snapshot.
+   *
+   * @param idSnapshot the id snapshot
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from Dataset where id=:idSnapshot")
+  void deleteSnapshotDatasetByIdSnapshot(@Param("idSnapshot") Long idSnapshot);
 
 }

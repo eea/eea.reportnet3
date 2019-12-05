@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +12,10 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type User management controller.
@@ -34,6 +40,17 @@ public class UserManagementControllerImpl implements UserManagementController {
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
   /**
+   * The backup managment controler service.
+   */
+  @Autowired
+  private BackupManagmentService backupManagmentControlerService;
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Generate token.
    *
    * @param username the username
@@ -46,7 +63,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
   public TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password) {
-    return securityProviderInterfaceService.doLogin(username, password);
+    return securityProviderInterfaceService.doLogin(username, password, false);
   }
 
   /**
@@ -102,6 +119,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @RequestMapping(value = "/resources", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser() {
+    // Recover user id from Security context
     Map<String, String> details =
         (Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails();
     String userId = "";
@@ -199,9 +217,25 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
+  }
+
+  /**
+   * Sets the users.
+   *
+   * @param file the file
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
+  public void createUsers(@RequestParam("file") MultipartFile file) throws IOException {
+    InputStream is = file.getInputStream();
+    backupManagmentControlerService.readAndSaveUsers(is);
+
   }
 
 

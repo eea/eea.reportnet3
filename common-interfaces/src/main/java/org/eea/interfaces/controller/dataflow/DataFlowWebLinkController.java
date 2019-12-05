@@ -1,11 +1,14 @@
 package org.eea.interfaces.controller.dataflow;
 
+
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -19,47 +22,45 @@ public interface DataFlowWebLinkController {
    */
   @FeignClient(value = "weblink", contextId = "weblink", path = "/weblink")
   interface DataFlowWebLinkControllerZuul extends DataFlowWebLinkController {
+
   }
 
   /**
    * Gets the link.
    *
    * @param idLink the id link
+   *
    * @return the link
+   * @throws EEAException
    */
   @GetMapping(value = "{idLink}")
-  WeblinkVO getLink(@RequestParam("idLink") Long idLink);
+  WeblinkVO getLink(@PathVariable("idLink") Long idLink);
 
   /**
    * Save link.
    *
-   * @param idDataflow the id dataflow
-   * @param url the url
-   * @param description the description
+   * @param weblinkVO the weblink VO
    */
-  @PutMapping
-  void saveLink(@RequestParam("idDataflow") Long idDataflow,
-      @RequestParam(value = "url") String url,
-      @RequestParam(value = "description") String description);
+  @PostMapping
+  void saveLink(@RequestParam(value = "idDataFlow") Long idDataflow,
+      @RequestBody WeblinkVO weblinkVO);
 
   /**
    * Removes the link.
    *
    * @param idLink the id link
    */
-  @DeleteMapping(value = "{idLink}")
-  void removeLink(@RequestParam(value = "idLink") Long idLink);
+  @DeleteMapping(value = "/{idLink}")
+  void removeLink(@PathVariable(value = "idLink") Long idLink);
 
   /**
    * Update link.
    *
-   * @param idLink the id link
-   * @param url the url
-   * @param description the description
+   * @param weblinkVO the weblink VO
    */
-  @PostMapping(value = "{idLink}")
-  void updateLink(@RequestParam(value = "idLink") Long idLink,
-      @RequestParam(value = "url") String url,
-      @RequestParam(value = "description") String description);
+  @PutMapping
+  void updateLink(@RequestBody WeblinkVO weblinkVO);
+
+
 }
 

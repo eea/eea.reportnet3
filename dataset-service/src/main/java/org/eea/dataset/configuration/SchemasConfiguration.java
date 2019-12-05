@@ -1,6 +1,5 @@
 package org.eea.dataset.configuration;
 
-import com.mongodb.MongoClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,16 +9,21 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
+
 
 /**
- * The Class SchemasConfiguration.
- *
- * @author Mario Severa
+ * The type Schemas configuration.
  */
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
 @EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.schemas.repository")
+/**
+ * The Class SchemasConfiguration.
+ *
+ */
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
@@ -74,6 +78,16 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
   @Override
   protected String getDatabaseName() {
     return "dataset_schema";
+  }
+
+  /**
+   * Mongo database mongo database.
+   *
+   * @return the mongo database
+   */
+  @Bean
+  public MongoDatabase mongoDatabase() {
+    return mongoClient().getDatabase(getDatabaseName());
   }
 
   /**

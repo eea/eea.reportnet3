@@ -152,9 +152,11 @@ public class ValidationHelper {
    */
   private void releaseFieldsValidation(Long datasetId, String uuId) {
     Integer totalFields = validationService.countFieldsDataset(datasetId);
-    for (int i = 0; totalFields >= 0; totalFields = totalFields - fieldBatchSize) {
-      releaseFieldValidation(datasetId, uuId, i);
-      i++;
+    if (fieldBatchSize != 0) {
+      for (int i = 0; totalFields >= 0; totalFields = totalFields - fieldBatchSize) {
+        releaseFieldValidation(datasetId, uuId, i);
+        i++;
+      }
     }
   }
 
@@ -166,9 +168,11 @@ public class ValidationHelper {
    */
   private void releaseRecordsValidation(Long datasetId, String uuId) {
     Integer totalRecords = validationService.countRecordsDataset(datasetId);
-    for (int i = 0; totalRecords >= 0; totalRecords = totalRecords - recordBatchSize) {
-      releaseRecordValidation(datasetId, uuId, i);
-      i++;
+    if (recordBatchSize != 0) {
+      for (int i = 0; totalRecords >= 0; totalRecords = totalRecords - recordBatchSize) {
+        releaseRecordValidation(datasetId, uuId, i);
+        i++;
+      }
     }
   }
 

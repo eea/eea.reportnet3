@@ -6,8 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
-
+/**
+ * The Class DesignDatasetVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -25,6 +26,10 @@ public class DesignDatasetVO implements Serializable {
   /** The creation date. */
   private Date creationDate;
 
+  /** The status. */
   private String status;
+
+  /** The dataset schema. */
+  private String datasetSchema;
 
 }

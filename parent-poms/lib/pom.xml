@@ -21,6 +21,7 @@
       <artifactId>lombok</artifactId>
       <version>${projectlombok.version}</version>
     </dependency>
+
   </dependencies>
 
   <dependencyManagement>
@@ -49,14 +50,86 @@
         <artifactId>sonar-maven-plugin</artifactId>
         <version>3.2</version>
       </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.4</version>
+        <configuration>
+          <excludes>
+            <exclude>
+              org.eea.interfaces.**
+            </exclude>
+            <exclude>
+              org.eea.**.mapper
+            </exclude>
+            <exclude>
+              org.eea.**.configuration
+            </exclude>
+            <exclude>
+              org.eea.*.persistence.**
+            </exclude>
+            <exclude>
+              org.eea.swagger.*
+            </exclude>
+            <exclude>
+              org.eea.enums.**
+            </exclude>
+            <exclude>
+              org.eea.exception.*
+            </exclude>
+            <exclude>
+              org.eea.kafka.domain.*
+            </exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <!-- attached to Maven test phase -->
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+
+          </execution>
+
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!-- select non-aggregate reports -->
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <distributionManagement>
     <snapshotRepository>
       <id>nexus-snapshots</id>
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
+
 
   <profiles>
     <profile>
@@ -65,6 +138,9 @@
         <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}
         </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
+        <sonar.coverage.exclusions>
+          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/swagger/**,**/org/eea/enums/**,**/org/eea/exception/**,**/org/eea/kafka/domain/**
+        </sonar.coverage.exclusions>
       </properties>
       <build>
         <plugins>
@@ -76,4 +152,5 @@
       </build>
     </profile>
   </profiles>
+
 </project>

@@ -9,7 +9,7 @@ CREATE TABLE %dataset_name%.DATASET_VALIDATION (ID bigint,ID_DATASET bigint,ID_V
 CREATE TABLE %dataset_name%.TABLE_VALIDATION (ID bigint,ID_TABLE bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_TABLE) REFERENCES %dataset_name%.TABLE_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.RECORD_VALIDATION (ID bigint,ID_RECORD bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_RECORD) REFERENCES %dataset_name%.RECORD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.FIELD_VALIDATION (ID bigint,ID_FIELD bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE ,FOREIGN KEY (ID_FIELD) REFERENCES %dataset_name%.FIELD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.STATISTICS (ID bigint, ID_TABLE_SCHEMA text, STAT_NAME text, VALUE text, PRIMARY KEY (ID));
+
 
 
 ALTER TABLE %dataset_name%.DATASET_VALUE  OWNER to %user%;
@@ -21,7 +21,7 @@ ALTER TABLE %dataset_name%.TABLE_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.FIELD_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.RECORD_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.VALIDATION OWNER TO %user%;
-ALTER TABLE %dataset_name%.STATISTICS OWNER TO %user%;
+
 
 CREATE SEQUENCE %dataset_name%.field_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.record_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
@@ -31,7 +31,7 @@ CREATE SEQUENCE %dataset_name%.record_validation_sequence INCREMENT BY 1 MINVALU
 CREATE SEQUENCE %dataset_name%.table_validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.dataset_validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
-CREATE SEQUENCE %dataset_name%.statistics_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
+
 	
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
@@ -58,7 +58,7 @@ CREATE INDEX idx_field_validation_validation ON %dataset_name%.field_validation(
 CREATE INDEX idx_record_validation_record ON %dataset_name%.record_validation(id_record);
 CREATE INDEX idx_record_validation_validation ON %dataset_name%.record_validation(id_validation);
 CREATE INDEX idx_validation_level_error ON %dataset_name%.validation(level_error);
-CREATE INDEX idx_stats_table_schema ON %dataset_name%.statistics(id_table_schema);
+
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.field_validation_sequence TO %user%;
@@ -75,8 +75,6 @@ GRANT ALL ON SEQUENCE %dataset_name%.validation_sequence TO %user%;
 ALTER SEQUENCE %dataset_name%.dataset_validation_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.dataset_validation_sequence TO %user%;
 
-ALTER SEQUENCE %dataset_name%.statistics_sequence OWNER TO %user%;
-GRANT ALL ON SEQUENCE %dataset_name%.statistics_sequence TO %user%;
 
 CREATE OR REPLACE FUNCTION %dataset_name%.is_numeric(text) RETURNS boolean  LANGUAGE plpgsql  IMMUTABLE STRICT AS $function$ DECLARE x NUMERIC; BEGIN x = $1::NUMERIC; RETURN TRUE; EXCEPTION WHEN others THEN RETURN FALSE; END; $function$;
 CREATE OR REPLACE FUNCTION %dataset_name%.is_double(text) RETURNS boolean LANGUAGE plpgsql IMMUTABLE STRICT AS $function$ DECLARE x double precision;BEGIN    x = $1::double precision;    RETURN TRUE;EXCEPTION WHEN others THEN    RETURN FALSE;END;$function$;

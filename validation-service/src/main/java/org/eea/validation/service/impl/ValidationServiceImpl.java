@@ -16,7 +16,7 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.ums.ResourceManagementController;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -150,6 +150,12 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
+
+  /** The dataset schema controller. */
+  @Autowired
+  private DatasetSchemaController datasetSchemaController;
+
+
   /**
    * Gets the element lenght.
    *
@@ -237,7 +243,8 @@ public class ValidationServiceImpl implements ValidationService {
   public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
     KieBase kieBase;
     try {
-      kieBase = kieBaseManager.reloadRules(datasetId);
+      kieBase = kieBaseManager.reloadRules(datasetId,
+          datasetSchemaController.getDatasetSchemaId(datasetId));
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -405,9 +412,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    */
   private void initVariablesToValidate(Long datasetId) {
-    ResourceInfoVO resourceInfoVO =
-        resourceManagementController
-            .getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
+    ResourceInfoVO resourceInfoVO = resourceManagementController.getResourceDetail(datasetId,
+        ResourceGroupEnum.DATASET_PROVIDER);
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {

@@ -164,10 +164,25 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    */
   public interface EntityErrors {
 
+    /**
+     * Gets the id.
+     *
+     * @return the id
+     */
     BigInteger getId();
 
+    /**
+     * Gets the origin.
+     *
+     * @return the origin
+     */
     String getOrigin();
 
+    /**
+     * Gets the error.
+     *
+     * @return the error
+     */
     String getError();
 
   }

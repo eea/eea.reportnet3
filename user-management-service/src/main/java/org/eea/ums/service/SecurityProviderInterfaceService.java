@@ -63,6 +63,21 @@ public interface SecurityProviderInterfaceService {
   void createResourceInstance(ResourceInfoVO resourceInfoVO);
 
   /**
+   * Delete resource instances.
+   *
+   * @param resourceInfoVO the resource info vo
+   */
+  void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO);
+
+  /**
+   * Delete resource instances by name.
+   *
+   * @param resourceName the resource name
+   */
+  void deleteResourceInstancesByName(List<String> resourceName);
+
+
+  /**
    * Add user to user group.
    *
    * @param userId the user id

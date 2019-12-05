@@ -75,6 +75,15 @@
       <scope>test</scope>
     </dependency>
 
+    <!--Redis-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+    </dependency>
 
     <!-- Metrics -->
     <dependency>
@@ -140,19 +149,6 @@
       <artifactId>guava</artifactId>
       <version>27.1-jre</version>
     </dependency>
-    <!--Redis-->
-    <!--<dependency>-->
-    <!--<groupId>org.springframework.data</groupId>-->
-    <!--<artifactId>spring-data-redis</artifactId>-->
-    <!--<version>2.1.5.RELEASE</version>-->
-    <!--</dependency>-->
-
-    <!--<dependency>-->
-    <!--<groupId>redis.clients</groupId>-->
-    <!--<artifactId>jedis</artifactId>-->
-    <!--<version>2.9.0</version>-->
-    <!--<type>jar</type>-->
-    <!--</dependency>-->
 
 
     <dependency>
@@ -227,9 +223,7 @@
             <exclude>
               org.eea.*.service.vo
             </exclude>
-            <exclude>
-              org.eea.interfaces.*
-            </exclude>
+
             <exclude>
               org.eea.*.mapper
             </exclude>
@@ -238,6 +232,9 @@
             </exclude>
             <exclude>
               org.eea.ums.service.keycloak.model.**
+            </exclude>
+            <exclude>
+              org.eea.indexsearch.io.kafka.domain.**
             </exclude>
           </excludes>
         </configuration>
@@ -309,7 +306,7 @@
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
           **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/validation/util/**,
-          **/org/eea/ums/service/keycloak/model/**
+          **/org/eea/ums/service/keycloak/model/**,**/org/eea/indexsearch/io/kafka/domain/**
         </sonar.coverage.exclusions>
       </properties>
       <build>

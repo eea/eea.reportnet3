@@ -1,17 +1,42 @@
 package org.eea.indexsearch.io.kafka.domain;
 
-import java.util.Objects;
 import lombok.Data;
 
+/**
+ * Instantiates a new elastic dataset.
+ */
 @Data
 public class ElasticDataset {
 
-  String Name;
-  String Countries;
-  String Issue;
-  String Release;
-  String AccesURL;
-  ElasticUser elasticUser;
+  /**
+   * The Name.
+   */
+  private String Name;
+
+  /**
+   * The Countries.
+   */
+  private String Countries;
+
+  /**
+   * The Issue.
+   */
+  private String Issue;
+
+  /**
+   * The Release.
+   */
+  private String Release;
+
+  /**
+   * The Acces URL.
+   */
+  private String AccesURL;
+
+  /**
+   * The elastic user.
+   */
+  private ElasticUser elasticUser;
 
 
 }

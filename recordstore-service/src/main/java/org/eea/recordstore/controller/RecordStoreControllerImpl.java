@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
@@ -145,20 +146,25 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
+
   /**
    * Restore snapshot data.
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
    */
   @Override
   @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "partitionId", required = true) Long idPartition,
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType) {
 
     try {
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot);
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

@@ -10,6 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.junit.Before;
@@ -98,24 +99,24 @@ public class ExcelReaderStrategyTest {
   /**
    * Test parse file.
    *
-   * @throws InvalidFileException the invalid file exception
    * @throws EncryptedDocumentException the encrypted document exception
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Test
   public void testParseFile()
-      throws InvalidFileException, EncryptedDocumentException, InvalidFormatException, IOException {
+      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
-    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
   }
 
   @Test
   public void testParseFileNotNull()
-      throws InvalidFileException, EncryptedDocumentException, InvalidFormatException, IOException {
+      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
-    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
@@ -124,19 +125,19 @@ public class ExcelReaderStrategyTest {
   /**
    * Test parse file 2.
    *
-   * @throws InvalidFileException the invalid file exception
    * @throws EncryptedDocumentException the encrypted document exception
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Test
   public void testParseFile2()
-      throws InvalidFileException, EncryptedDocumentException, InvalidFormatException, IOException {
+      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
   }
 
   @Test
-  public void testParseAllPages() throws InvalidFileException {
+  public void testParseAllPages() throws EEAException {
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, null));
   }
 
@@ -144,10 +145,10 @@ public class ExcelReaderStrategyTest {
    * Test parse file exception.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException
    */
   @Test(expected = InvalidFileException.class)
-  public void testParseFileException() throws IOException, InvalidFileException {
+  public void testParseFileException() throws IOException, EEAException {
     XSSFWorkbook workbook = new XSSFWorkbook();
 
     ByteArrayOutputStream outStream = new ByteArrayOutputStream();

@@ -1,9 +1,9 @@
 package org.eea.dataflow.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +21,10 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -102,6 +104,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The resource management controller zull. */
+  @Mock
+  private ResourceManagementControllerZull resourceManagementControllerZull;
   /**
    * The document mapper.
    */
@@ -138,7 +143,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getByIdThrows() throws EEAException {
-    dataflowServiceImpl.getById(null);
+    try {
+      dataflowServiceImpl.getById(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
   /**
@@ -234,11 +244,12 @@ public class DataFlowServiceImplTest {
         .thenReturn(resources);
 
     Optional<Dataflow> df2 = Optional.of(df.getDataflow());
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(df2);
-
-    when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
 
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
+    List<Dataflow> list = new ArrayList<>();
+    list.add(new Dataflow());
+    Mockito.when(dataflowRepository.findAllById(Mockito.any())).thenReturn(list);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(new DataFlowVO());
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }
 
@@ -361,22 +372,39 @@ public class DataFlowServiceImplTest {
 
   /**
    * Creates the data flow exist.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void createDataFlowExist() {
+  @Test(expected = EEAException.class)
+  public void createDataFlowExist() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     when(dataflowRepository.findByName(dataFlowVO.getName()))
         .thenReturn(Optional.of(new Dataflow()));
-    dataflowServiceImpl.createDataFlow(dataFlowVO);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getMessage());
+      throw ex;
+    }
+
   }
 
   /**
    * Creates the data flow non exist.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void createDataFlowNonExist() {
-    DataFlowVO dataFlowVO = new DataFlowVO();
-    dataflowServiceImpl.createDataFlow(dataFlowVO);
+  public void createDataFlowNonExist() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Dataflow dataflow = new Dataflow();
+    when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
+    doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
+    doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+        Mockito.any());
+    when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
+    dataflowServiceImpl.createDataFlow(dataflowVO);
+    Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
   }
 
 
@@ -388,7 +416,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void testGetDatasetsId() throws EEAException {
 
-    dataflowServiceImpl.getReportingDatasetsId(1L);
+    dataflowServiceImpl.getReportingDatasetsId("");
   }
 
 
@@ -399,8 +427,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void testGetDatasetsIdError() throws EEAException {
-
-    dataflowServiceImpl.getReportingDatasetsId(null);
+    try {
+      dataflowServiceImpl.getReportingDatasetsId(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.SCHEMA_NOT_FOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
 
@@ -413,7 +445,12 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getMetabaseByIdThrows() throws EEAException {
-    dataflowServiceImpl.getMetabaseById(null);
+    try {
+      dataflowServiceImpl.getMetabaseById(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
   }
 
 

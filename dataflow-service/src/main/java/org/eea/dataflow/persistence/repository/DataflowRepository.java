@@ -58,4 +58,15 @@ public interface DataflowRepository
    * @return the optional
    */
   Optional<Dataflow> findByName(String name);
+
+
+
+  /**
+   * Find dataflow by weblink.
+   *
+   * @param idLink the id link
+   * @return the long
+   */
+  Dataflow findDataflowByWeblinks_Id(Long idLink);
+
 }

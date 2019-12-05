@@ -2,8 +2,8 @@ package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,11 +42,11 @@ public class FileParseContextImplTest {
 
   /**
    * Test parse.
-   *
-   * @throws InvalidFileException the invalid file exception
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testParse() throws InvalidFileException {
+  public void testParse() throws EEAException {
     Mockito
         .when(readerStrategy.parseFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetVO());
