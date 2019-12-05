@@ -166,7 +166,17 @@ public enum EventType {
   /**
    * The document upload failed event.
    */
-  DOCUMENT_UPLOAD_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_upload_failed_event", true);
+  DOCUMENT_UPLOAD_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_upload_failed_event", true),
+
+  /**
+   * The document delete completed event.
+   */
+  DOCUMENT_DELETE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_delete_completed_event", true),
+
+  /**
+   * The document delete failed event.
+   */
+  DOCUMENT_DELETE_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_delete_failed_event", true);
 
   /**
    * The topic.

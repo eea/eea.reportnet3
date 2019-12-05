@@ -228,7 +228,18 @@ public class DocumentServiceImpl implements DocumentService {
 
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
 
+      // Release finish event
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOCUMENT_DELETE_COMPLETED_EVENT,
+          new HashMap<String, Object>(),
+          NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+              .dataflowId(dataFlowId).build());
     } catch (Exception e) {
+
+      // Release finish event
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOCUMENT_DELETE_FAILED_EVENT,
+          new HashMap<String, Object>(),
+          NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+              .dataflowId(dataFlowId).build());
       LOG_ERROR.error("Error in deleteDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
