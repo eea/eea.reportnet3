@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 
@@ -9,6 +9,9 @@ import colors from 'conf/colors.json';
 import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { StatusList } from 'ui/views/_components/StatusList';
+
+import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 import { DataflowService } from 'core/services/DataFlow';
 
@@ -17,6 +20,8 @@ export const GlobalReleasedDashboard = dataflowId => {
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
+
+  const { updatedState, statusDispatcher } = useStatusFilter(releasedDashboardData);
 
   useEffect(() => {
     onLoadDashboard();
@@ -77,6 +82,9 @@ export const GlobalReleasedDashboard = dataflowId => {
       //     `
       // }
     },
+    legend: {
+      display: false
+    },
     responsive: true,
     scales: {
       xAxes: [
@@ -111,7 +119,26 @@ export const GlobalReleasedDashboard = dataflowId => {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
         <div className={`${styles.chart_released}`}>
-          <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
+          {!isEmpty(updatedState.dashboardData) ? (
+            <>
+              <StatusList
+                filterDispatch={statusDispatcher}
+                filteredStatusTypes={updatedState.filterStatus}
+                statusTypes={['RELEASED', 'UNRELEASED']}
+              />
+              <Chart
+                type="bar"
+                data={updatedState.dashboardData}
+                options={releasedOptionsObject}
+                width="100%"
+                height="25%"
+              />
+            </>
+          ) : (
+            <>
+              <Chart type="bar" options={releasedOptionsObject} width="100%" height="25%" />
+            </>
+          )}
         </div>
       );
     }
