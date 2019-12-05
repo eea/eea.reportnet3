@@ -283,7 +283,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
   public void updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
     if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
