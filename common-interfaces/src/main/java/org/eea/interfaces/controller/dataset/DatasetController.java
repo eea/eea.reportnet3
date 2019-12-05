@@ -217,4 +217,7 @@ public interface DatasetController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
+
+  @DeleteMapping(value = "/{id}")
+  void deleteDataset(@PathVariable("id") final Long datasetId);
 }

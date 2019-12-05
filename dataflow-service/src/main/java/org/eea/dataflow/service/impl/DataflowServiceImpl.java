@@ -17,12 +17,16 @@ import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -77,6 +81,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The dataset controller. */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
   /**
    * The user management controller zull.
    */
@@ -87,6 +94,14 @@ public class DataflowServiceImpl implements DataflowService {
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
+
+  /** The data set schema controller zuul. */
+  @Autowired
+  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+
+  /** The document controller zuul. */
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
 
   /**
    * The Constant LOG.
@@ -136,6 +151,8 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
+   *
    *
    * @return the by status
    *
@@ -419,22 +436,53 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   * @throws EEAException the EEA exception
+   * @throws Exception the exception
    */
   @Override
   @Transactional
-  public void deleteDataFlow(Long idDataflow) throws EEAException {
+  public void deleteDataFlow(Long idDataflow) throws Exception {
 
-    // we find all groups that the dataflow have
-    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-        .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+    // LOAD DATAFLOW DATA
+    final DataFlowVO dataflow = getById(idDataflow);
+    LOG.info("Get the dataflow metabaser with id {}", idDataflow);
+
+    // // PART DELETE DOCUMENTS
+    // for (DocumentVO document : dataflow.getDocuments()) {
+    // documentControllerZuul.deleteDocument(document.getId());
+    // }
+    // LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
 
 
-    // we delete the list of dataflow that we need
-    resourceManagementControllerZull.deleteResource(resourceCustodian);
+    // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
+    if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
+      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
+      }
+    }
+    LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
-    // we delete the dataflow in metabase
-    dataflowRepository.deleteById(idDataflow);
+
+    // add resource to delete(DATAFLOW PART)
+    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+
+    // // PART OF DELETE ALL THE DATASET we have in the dataflow
+    // if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
+    // dataflow.getReportingDatasets().stream().forEach(datasets -> {
+    // dataSetControllerZuul.deleteDataset(datasets.getId());
+    // // add more resource to delete(DATASET PART)
+    // resourceCustodian.addAll(resourceManagementControllerZull
+    // .getGroupsByIdResourceType(datasets.getId(), ResourceTypeEnum.DATASET));
+    // });
+    // }
+    // resourceManagementControllerZull.deleteResource(resourceCustodian);
+    // LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
+
+
+
+    // we delete the dataflow in metabase at the end
+    // dataflowRepository.deleteById(idDataflow);
+    // LOG.info("Delete full dataflow with id: {}", idDataflow);
 
   }
 

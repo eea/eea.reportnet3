@@ -563,9 +563,9 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void deleteDataflowThrow() throws EEAException {
-    EEAException EEAException = new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
-    doThrow(EEAException).when(dataflowService).deleteDataFlow(Mockito.anyLong());
+  public void deleteDataflowThrow() throws Exception {
+    EEAException Exception = new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    doThrow(Exception).when(dataflowService).deleteDataFlow(Mockito.anyLong());
     try {
       dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
     } catch (ResponseStatusException ex) {
@@ -581,7 +581,7 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void deleteDataflow() throws EEAException {
+  public void deleteDataflow() throws Exception {
     dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
     Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
   }

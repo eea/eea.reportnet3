@@ -511,4 +511,11 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @DeleteMapping(value = "/{id}")
+  public void deleteDataset(Long datasetId) {
+    // TODO Auto-generated method stub
+
+  }
+
 }

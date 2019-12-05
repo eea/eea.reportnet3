@@ -150,6 +150,6 @@ public interface DataFlowController {
    *
    * @param idDataflow the id dataflow
    */
-  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
+  @DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDataFlow(@RequestParam("idDataflow") Long idDataflow);
 }

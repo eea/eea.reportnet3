@@ -119,8 +119,9 @@ public interface DataflowService {
    *
    * @param dataflowVO the dataflow VO
    * @throws EEAException the EEA exception
+   * @throws Exception
    */
-  void deleteDataFlow(Long idDataflow) throws EEAException;
+  void deleteDataFlow(Long idDataflow) throws Exception;
 
   /**
    * Update data flow.
