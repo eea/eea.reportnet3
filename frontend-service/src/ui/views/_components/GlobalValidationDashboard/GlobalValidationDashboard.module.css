@@ -39,6 +39,10 @@
   margin: 0.5rem !important;
 }
 
+.emptyChart {
+  margin-top: 1.5rem !important;
+}
+
 .stamp {
   position: relative;
   top: 50% !important;
