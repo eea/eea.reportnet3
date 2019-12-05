@@ -159,38 +159,6 @@ public class DocumentServiceImplTest {
   }
 
   /**
-   * Update document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void updateDocumentException2Test() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(null);
-    try {
-      documentService.updateDocument(documentVO);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
-    }
-  }
-
-  /**
-   * Update document exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void updateDocumentException3Test() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(0L);
-    try {
-      documentService.updateDocument(documentVO);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
-    }
-  }
-
-  /**
    * Update document success test.
    *
    * @throws EEAException the EEA exception
@@ -198,9 +166,9 @@ public class DocumentServiceImplTest {
    */
   @Test
   public void updateDocumentSuccessTest() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(1L);
+    doNothing().when(dataflowController).updateDocument(Mockito.any());
     documentService.updateDocument(documentVO);
-    verify(dataflowController, times(1)).insertDocument(documentVO);
+    verify(dataflowController, times(1)).updateDocument(documentVO);
   }
 
   /**
