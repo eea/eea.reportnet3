@@ -7,8 +7,11 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -76,6 +79,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Creates the data schema.
@@ -204,20 +211,33 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    // delete the schema snapshots too
+    // Check if the dataflow its on the correct state to allow delete design datasets
     try {
-      datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+
+      if (TypeStatusEnum.DRAFT == dataflow.getStatus()) {
+        // delete the schema snapshots too
+        datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+
+        // delete the metabase
+        dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+        datasetMetabaseService.deleteDesignDataset(datasetId);
+        // delete the schema
+        recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+
+        // delete the group in keycloak
+        dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
+            ResourceGroupEnum.DATASCHEMA_PROVIDER);
+
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.NOT_ENOUGH_PERMISSION);
+      }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
 
-
-    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-    datasetMetabaseService.deleteDesignDataset(datasetId);
-    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-
-    dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
-        ResourceGroupEnum.DATASCHEMA_PROVIDER);
 
   }
 

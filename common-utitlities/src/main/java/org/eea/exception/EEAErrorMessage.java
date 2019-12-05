@@ -113,6 +113,9 @@ public final class EEAErrorMessage {
   /** The Constant ID_LINK_NOT_FOUND. */
   public static final String ID_LINK_NOT_FOUND = "WebLink not found";
 
+  /** The Constant NOT_ENOUGH_PERMISSION. */
+  public static final String NOT_ENOUGH_PERMISSION = "Not enough permission to perform";
+
   /**
    * Instantiates a new EEA error message.
    */
