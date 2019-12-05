@@ -75,9 +75,11 @@ export const FieldDesigner = ({
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    if (!isUndefined(inputRef.current)) {
-      if (index === '-1') {
-        inputRef.current.element.focus();
+    if (totalFields > 0) {
+      if (!isUndefined(inputRef.current)) {
+        if (index === '-1') {
+          inputRef.current.element.focus();
+        }
       }
     }
   }, [totalFields]);

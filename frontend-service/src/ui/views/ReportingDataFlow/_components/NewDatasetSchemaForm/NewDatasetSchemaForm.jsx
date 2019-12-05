@@ -28,9 +28,9 @@ export const NewDatasetSchemaForm = ({
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
-      .required(resources.messages['emptyDatasetSchema'])
+      .required(' ')
       .test('', resources.messages['duplicateSchemaError'], value => {
-        if (!isEmpty(datasetSchemaInfo)) {
+        if (value !== undefined && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
           const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
           return isRepeat.length === schemas.length;
@@ -86,13 +86,7 @@ export const NewDatasetSchemaForm = ({
           <fieldset>
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
-                className={
-                  !isEmpty(touched)
-                    ? isEmpty(errors)
-                      ? styles.primaryButton
-                      : styles.disabledButton
-                    : styles.disabledButton
-                }
+                className={styles.primaryButton}
                 disabled={isSubmitting}
                 label={resources.messages['create']}
                 icon="add"

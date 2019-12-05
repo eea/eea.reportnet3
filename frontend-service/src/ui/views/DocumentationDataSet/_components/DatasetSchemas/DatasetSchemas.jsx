@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isUndefined, isNull } from 'lodash';
 
@@ -10,21 +10,23 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
+const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const renderDatasetSchemas = () => {
-    return !isUndefined(designDatasets) && !isNull(designDatasets)
-      ? designDatasets.map((designDataset, i) => {
-          return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
-        })
-      : null;
+    return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+      datasetsSchemas.map((designDataset, i) => {
+        return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
+      })
+    ) : (
+      <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
+    );
   };
 
   const renderToolbar = () => {
-    return (
+    return isCustodian ? (
       <Toolbar>
         <div className="p-toolbar-group-right">
           <Button
@@ -34,12 +36,14 @@ const DatasetSchemas = ({ designDatasets, onLoadDesignDatasets }) => {
             label={resources.messages['refresh']}
             onClick={async () => {
               setIsLoading(true);
-              await onLoadDesignDatasets();
+              await onLoadDatasetsSchemas();
               setIsLoading(false);
             }}
           />
         </div>
       </Toolbar>
+    ) : (
+      <></>
     );
   };
 
