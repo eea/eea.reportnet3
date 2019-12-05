@@ -5,15 +5,15 @@ import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
 import { AccessPoint } from 'ui/views/AccessPoint';
-import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
-import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
+import { Dataflows } from 'ui/views/Dataflows';
+import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
 import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
-import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
+import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
 import { Eulogin } from 'ui/views/Eulogin';
 import { LoadingProvider } from 'ui/views/_components/_provider/LoadingProvider';
 import { Login } from 'ui/views/Login';
 import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
-import { ReportingDataflow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
+import { Dataflow } from 'ui/views/Dataflow/Dataflow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -61,11 +61,11 @@ const App = () => {
                 <Route exact path="/" component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : Login} />
                 <Route exact path={routes.EULOGIN} component={Eulogin} />
                 <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
-                <PrivateRoute exact path={routes.DASHBOARDS} component={DataCustodianDashboards} />
-                <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
-                <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
+                <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
+                <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
                 <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
-                <PrivateRoute exact path={routes.DOCUMENTS} component={DocumentationDataset} />
+                <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
               </Switch>
             </Router>
           </LoadingProvider>

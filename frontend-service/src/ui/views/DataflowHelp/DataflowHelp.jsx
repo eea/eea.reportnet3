@@ -25,7 +25,7 @@ import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 
-export const DocumentationDataset = withRouter(({ match, history }) => {
+export const DataflowHelp = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);

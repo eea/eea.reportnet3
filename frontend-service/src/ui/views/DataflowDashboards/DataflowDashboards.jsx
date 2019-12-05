@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
 
-import styles from './DataCustodianDashboards.module.css';
+import styles from './DataflowDashboards.module.css';
 
 import { routes } from 'ui/routes';
 
@@ -15,11 +15,11 @@ import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { GlobalReleasedDashboard } from 'ui/views/_components/GlobalReleasedDashboard/';
-import { GlobalValidationDashboard } from 'ui/views/_components/GlobalValidationDashboard/';
+import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
+import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
-export const DataCustodianDashboards = withRouter(({ match, history }) => {
+export const DataflowDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashboardInitialValues, setDashboardInitialValues] = useState({});
@@ -129,7 +129,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const onLoadCharts = !isUndefined(dataSchema)
     ? dataSchema.map(schema => {
         return (
-          <GlobalValidationDashboard
+          <DatasetValidationDashboard
             key={schema.datasetSchemaId}
             datasetSchemaId={schema.datasetSchemaId}
             isVisible={chartState[schema.datasetSchemaId]}
@@ -165,7 +165,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       </div>
       <div className={styles.releasedChartWrap}>
         <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
-        <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
+        <ReleasedDatasetsDashboard dataflowId={match.params.dataflowId} />
       </div>
     </>
   );

@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
 
-import styles from './ReportingDataFlow.module.scss';
+import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -33,7 +33,7 @@ import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
-export const ReportingDataflow = withRouter(({ history, match }) => {
+export const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);

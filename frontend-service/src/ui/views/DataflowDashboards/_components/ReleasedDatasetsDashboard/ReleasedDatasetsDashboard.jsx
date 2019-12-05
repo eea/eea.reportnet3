@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 
-import styles from './GlobalReleasedDashboard.module.css';
+import styles from './ReleasedDatasetsDashboard.module.css';
 
 import colors from 'conf/colors.json';
 
@@ -15,7 +15,7 @@ import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatu
 
 import { DataflowService } from 'core/services/DataFlow';
 
-export const GlobalReleasedDashboard = dataflowId => {
+export const ReleasedDatasetsDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();

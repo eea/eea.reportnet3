@@ -2,12 +2,12 @@ import React, { useEffect, useContext, useReducer, useState, useRef } from 'reac
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
-import styles from './GlobalValidationDashboard.module.css';
+import styles from './DatasetValidationDashboard.module.css';
 
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
+import { FilterList } from './_components/FilterList';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -24,7 +24,7 @@ import { ViewUtils } from 'ui/ViewUtils';
   BLOCKER: colors.dashboardBlocker
 }; */
 
-export const GlobalValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
+export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],

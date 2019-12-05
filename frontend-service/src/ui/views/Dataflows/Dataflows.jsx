@@ -3,13 +3,13 @@ import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
 
-import styles from './DataFlowTasks.module.scss';
+import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
-import { DataflowList } from './DataFlowList';
+import { DataflowsList } from './DataflowsList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -19,7 +19,7 @@ import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
-export const DataflowTasks = withRouter(({ match, history }) => {
+export const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -101,14 +101,14 @@ export const DataflowTasks = withRouter(({ match, history }) => {
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
-            <DataflowList
+            <DataflowsList
               listTitle={resources.messages.pendingDataflowTitle}
               listDescription={resources.messages.pendingDataflowText}
               listContent={pendingContent}
               dataFetch={dataFetch}
               listType="pending"
             />
-            <DataflowList
+            <DataflowsList
               listTitle={resources.messages.acceptedDataflowTitle}
               listDescription={resources.messages.acceptedDataflowText}
               listContent={acceptedContent}
@@ -118,7 +118,7 @@ export const DataflowTasks = withRouter(({ match, history }) => {
           </>
         ) : (
           <>
-            <DataflowList
+            <DataflowsList
               listTitle={resources.messages.completedDataflowTitle}
               listDescription={resources.messages.completedDataflowText}
               listContent={completedContent}

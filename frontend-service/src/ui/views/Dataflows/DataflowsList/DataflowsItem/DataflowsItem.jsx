@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import styles from './DataFlowItem.module.scss';
+import styles from './DataflowsItem.module.scss';
 
 import { routes } from 'ui/routes';
 
@@ -13,7 +13,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DataflowService } from 'core/services/DataFlow';
 
-export const DataflowItem = ({ itemContent, listType, dataFetch, position }) => {
+export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) => {
   const resources = useContext(ResourcesContext);
   //position must be removed in def implementation
   const statusArray = ['notStarted', 'delivered', 'drafted'];

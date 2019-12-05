@@ -1,10 +1,10 @@
 import React from 'react';
 
-import styles from './DataFlowList.module.scss';
+import styles from './DataflowsList.module.scss';
 
-import { DataflowItem } from './DataFlowItem';
+import { DataflowsItem } from './DataflowsItem';
 
-export const DataflowList = ({ listTitle, listDescription, listContent, listType, dataFetch }) => {
+export const DataflowsList = ({ listTitle, listDescription, listContent, listType, dataFetch }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
   let counter = 0;
   return (
@@ -15,7 +15,7 @@ export const DataflowList = ({ listTitle, listDescription, listContent, listType
       {listContent.map(item => {
         counter += 1;
         return (
-          <DataflowItem key={item.id} itemContent={item} listType={listType} dataFetch={dataFetch} position={counter} />
+          <DataflowsItem key={item.id} itemContent={item} listType={listType} dataFetch={dataFetch} position={counter} />
         );
       })}
     </div>
