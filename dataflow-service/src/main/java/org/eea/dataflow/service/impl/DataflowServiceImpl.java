@@ -462,16 +462,13 @@ public class DataflowServiceImpl implements DataflowService {
 
 
     // add resource to delete(DATAFLOW PART)
-    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-        .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
 
     // PART OF DELETE ALL THE DATASET we have in the dataflow
     if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
       dataflow.getReportingDatasets().stream().forEach(datasets -> {
         dataSetControllerZuul.deleteDataset(datasets.getId());
-        // add more resource to delete(DATASET PART)
-        resourceCustodian.addAll(resourceManagementControllerZull
-            .getGroupsByIdResourceType(datasets.getId(), ResourceTypeEnum.DATASET));
       });
     }
     // resourceManagementControllerZull.deleteResource(resourceCustodian);

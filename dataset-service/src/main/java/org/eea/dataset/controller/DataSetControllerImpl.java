@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -16,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -24,6 +26,8 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
@@ -78,6 +82,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
@@ -100,19 +105,27 @@ public class DataSetControllerImpl implements DatasetController {
   private DeleteHelper deleteHelper;
 
 
+  /** The data set schema controller zuul. */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
+  /** The record store controller zull. */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
 
+  /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The resource management controller zull. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZull;
 
   /**
    * Gets the data tables values.
@@ -460,10 +473,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
-   *
    * @return the response entity
-   *
-   * @throws Exception the exception
    */
   @Override
   @HystrixCommand
@@ -534,6 +544,11 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetId the dataset id
+   */
   @Override
   @DeleteMapping(value = "/{id}")
   public void deleteDataset(Long datasetId) {
@@ -556,6 +571,10 @@ public class DataSetControllerImpl implements DatasetController {
     datasetMetabaseService.deleteDesignDataset(datasetId);
     recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
+    List<ResourceInfoVO> resourceCustodian = new ArrayList<>();
+    resourceCustodian.addAll(resourceManagementControllerZull.getGroupsByIdResourceType(datasetId,
+        ResourceTypeEnum.DATASET));
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
   }
 
 }
