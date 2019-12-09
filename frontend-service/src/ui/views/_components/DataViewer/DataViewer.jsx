@@ -64,7 +64,6 @@ const DataViewer = withRouter(
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
-    const [exportButtonsList, setExportButtonsList] = useState([]);
     const [exportTableData, setExportTableData] = useState(undefined);
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
@@ -121,14 +120,6 @@ const DataViewer = withRouter(
     }, [datasetContext.isValidationSelected]);
 
     useEffect(() => {
-      setExportButtonsList(
-        config.exportTypes.map(type => ({
-          label: type.text,
-          icon: config.icons['archive'],
-          command: () => onExportTableData(type.code)
-        }))
-      );
-
       let colOptions = [];
       let dropdownFilter = [];
       for (let colSchema of colsSchema) {
@@ -317,6 +308,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
+        console.log(exportTableData);
         DownloadFile(exportTableData, exportTableDataName);
       }
     }, [exportTableData]);
@@ -1281,7 +1273,11 @@ const DataViewer = withRouter(
               }}
             />
             <Menu
-              model={exportButtonsList}
+              model={config.exportTypes.map(type => ({
+                label: type.text,
+                icon: config.icons['archive'],
+                command: () => onExportTableData(type.code)
+              }))}
               popup={true}
               ref={exportMenuRef}
               id="exportTableMenu"
