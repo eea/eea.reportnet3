@@ -592,10 +592,12 @@ export class Dropdown extends Component {
         <label className={className}>
           {label || this.props.placeholder || 'empty'}{' '}
           {selectedOption ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
-              style={{ float: 'right', marginTop: '2px' }}
-            />
+            selectedOption.fieldTypeIcon ? (
+              <FontAwesomeIcon
+                icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
+                style={{ float: 'right', marginTop: '2px' }}
+              />
+            ) : null
           ) : null}
         </label>
       );
