@@ -4,10 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataset.mapper.DesignDatasetMapper;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,20 +23,30 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 
+/**
+ * The Class DesignDatasetServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DesignDatasetServiceTest {
 
 
+  /** The design dataset service. */
   @InjectMocks
   private DesignDatasetServiceImpl designDatasetService;
 
 
+  /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
 
+  /** The design dataset mapper. */
   @Mock
   private DesignDatasetMapper designDatasetMapper;
+
+  /** The file common. */
+  @Mock
+  private FileCommonUtils fileCommon;
 
 
 
@@ -66,6 +81,18 @@ public class DesignDatasetServiceTest {
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
     assertEquals("failed assertion", datasets,
         designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()));
+  }
+
+
+  @Test
+  public void testGetFileName() throws EEAException {
+    DesignDataset dataset = new DesignDataset();
+    when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
+    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
+    when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
+    assertEquals("not equals", "test.csv",
+        designDatasetService.getFileNameDesign("csv", "test", 1L));
   }
 
 }

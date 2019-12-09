@@ -15,6 +15,7 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -22,6 +23,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -56,6 +58,10 @@ public class DataSetControllerImplTest {
    */
   @Mock
   DatasetServiceImpl datasetService;
+
+  /** The design dataset service. */
+  @Mock
+  DesignDatasetServiceImpl designDatasetService;
 
   /** The records. */
   List<RecordVO> records;
@@ -624,10 +630,17 @@ public class DataSetControllerImplTest {
   }
 
   @Test
-  public void exportFile() throws Exception {
+  public void exportFileReporting() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
-    dataSetControllerImpl.exportFile(1L, "id", "csv");
+    dataSetControllerImpl.exportFile(1L, "id", "csv", TypeDatasetEnum.REPORTING);
+  }
+
+  @Test
+  public void exportFileDesign() throws Exception {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("".getBytes());
+    dataSetControllerImpl.exportFile(1L, "id", "csv", TypeDatasetEnum.DESIGN);
   }
 
 

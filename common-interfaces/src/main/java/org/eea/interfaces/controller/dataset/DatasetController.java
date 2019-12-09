@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -180,12 +181,14 @@ public interface DatasetController {
       @PathVariable("idTableSchema") final String idTableSchema);
 
 
+
   /**
    * Export file.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
+   * @param datasetType the dataset type
    * @return the response entity
    * @throws Exception the exception
    */
@@ -193,7 +196,8 @@ public interface DatasetController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) throws Exception;
+      @RequestParam("mimeType") String mimeType,
+      @RequestParam("typeDataset") TypeDatasetEnum datasetType) throws Exception;
 
 
   /**
