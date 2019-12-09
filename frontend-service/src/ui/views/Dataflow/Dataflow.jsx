@@ -290,7 +290,7 @@ export const Dataflow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} disabled />
+            <DropdownButton icon="ellipsis" model={dropDownItems} disabled={false} />
           </div>
         </div>
 
