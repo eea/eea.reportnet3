@@ -461,9 +461,6 @@ public class DataflowServiceImpl implements DataflowService {
     // LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
 
-    // add resource to delete(DATAFLOW PART)
-    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
 
     // PART OF DELETE ALL THE DATASET we have in the dataflow
     if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
@@ -471,10 +468,12 @@ public class DataflowServiceImpl implements DataflowService {
         dataSetControllerZuul.deleteDataset(datasets.getId());
       });
     }
+    LOG.info("Delete full dataset with dataflow id: {}", idDataflow);
+    // add resource to delete(DATAFLOW PART)
+    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
     // resourceManagementControllerZull.deleteResource(resourceCustodian);
     // LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
-
-
 
     // we delete the dataflow in metabase at the end
     // dataflowRepository.deleteById(idDataflow);
