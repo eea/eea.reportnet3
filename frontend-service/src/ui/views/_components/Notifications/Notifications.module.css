@@ -1,0 +1,39 @@
+.notificationWraper {
+  width: 100%;
+  padding: 1rem;
+  display: none;
+}
+.notificationWraper.error {
+  background-color: var(--errors);
+  color: var(--white);
+}
+.notificationWraper.warning {
+  background-color: var(--warning-color);
+}
+
+.notificationWraper.success {
+  background-color: var(--success-color);
+}
+
+.notificationWraper.info {
+  background-color: var(--informative-color);
+}
+.notificationWraper.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.notificationWraper .header {
+  width: 100%;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.notificationWraper .header a {
+  color: var(--white);
+  cursor: pointer;
+}
