@@ -10,7 +10,7 @@ import { routes } from 'ui/routes';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
@@ -95,7 +95,7 @@ export const DataflowDashboards = withRouter(({ match, history }) => {
 
   const chartReducer = (state, { type, payload }) => {
     switch (type) {
-      case 'TOOGLE_SCHEMA_CHART':
+      case 'TOGGLE_SCHEMA_CHART':
         return {
           ...state,
           [payload]: !state[payload]
@@ -120,7 +120,7 @@ export const DataflowDashboards = withRouter(({ match, history }) => {
             key={schema.datasetSchemaId}
             label={schema.datasetSchemaName}
             icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
-            onClick={() => chartDispatch({ type: 'TOOGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
+            onClick={() => chartDispatch({ type: 'TOGGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
           />
         );
       })

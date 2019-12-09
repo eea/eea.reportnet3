@@ -6,7 +6,7 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 const MainLayout = ({ children }) => {

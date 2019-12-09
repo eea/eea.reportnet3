@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 import colors from 'conf/colors.json';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const InfoTableMessages = ({ data, filteredColumns, numRecords }) => {
   const resources = useContext(ResourcesContext);

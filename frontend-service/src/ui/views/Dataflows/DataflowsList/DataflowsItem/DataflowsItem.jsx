@@ -6,7 +6,7 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { Link } from 'react-router-dom';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';

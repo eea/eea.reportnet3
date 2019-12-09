@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import { GlobalLoading } from 'ui/views/_components/GlobalLoading';
-import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 
 const generalLoadingReducer = (state, { type }) => {
   switch (type) {

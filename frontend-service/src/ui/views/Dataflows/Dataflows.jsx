@@ -11,12 +11,12 @@ import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DataflowsList } from './DataflowsList';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataflowService } from 'core/services/Dataflow';
-import { UserContext } from '../_components/_context/UserContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 export const Dataflows = withRouter(({ match, history }) => {

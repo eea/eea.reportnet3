@@ -23,9 +23,9 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
-import { DatasetContext } from 'ui/views/Dataset/_components/_context/DatasetContext';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
+import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';

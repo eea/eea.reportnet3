@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
 
-import styles from './Eulogin.module.css';
+import styles from './EULogin.module.css';
 import logo from 'assets/images/logo-spinner.gif';
 
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 
-export const Eulogin = ({ location, history }) => {
+const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
   const user = useContext(UserContext);
   const onLogin = async () => {
@@ -39,3 +39,5 @@ export const Eulogin = ({ location, history }) => {
     </div>
   );
 };
+
+export { EULogin };

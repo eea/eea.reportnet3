@@ -8,7 +8,7 @@ import { routes } from 'ui/routes';
 
 import { UserCard } from './_components/UserCard';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 

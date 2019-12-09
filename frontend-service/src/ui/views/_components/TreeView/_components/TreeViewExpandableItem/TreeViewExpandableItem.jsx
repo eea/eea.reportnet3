@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react';
 import { isUndefined } from 'lodash';
 
 // import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const TreeViewExpandableItem = ({ expanded = true, title, children }) => {
   const [isOpen, setIsOpen] = useState(expanded);

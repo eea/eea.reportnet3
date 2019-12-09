@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useReducer } from 'react';
 
 import { useSnapshotReducer } from './useSnapshotReducer';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotService } from 'core/services/Snapshot';
 
 const useReporterDataset = (datasetId, dataflowId, growlRef) => {

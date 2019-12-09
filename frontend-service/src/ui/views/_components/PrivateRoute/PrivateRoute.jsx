@@ -7,8 +7,9 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
     <Route
       {...rest}
-      render={props =>
-        userStorage.hasToken() ? (
+      render={props => {
+        debugger;
+        return userStorage.hasToken() ? (
           <Component />
         ) : (
           <Redirect
@@ -17,8 +18,8 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
               state: { from: props.location }
             }}
           />
-        )
-      }
+        );
+      }}
     />
   );
 };

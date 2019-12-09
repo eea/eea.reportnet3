@@ -8,13 +8,13 @@ import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
 import { FilterList } from './_components/FilterList';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { filterReducer } from './_components/_context/filterReducer';
+import { filterReducer } from './_functions/filterReducer';
 
 import { DataflowService } from 'core/services/Dataflow';
-import { ViewUtils } from 'ui/ViewUtils';
+import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 /* const SEVERITY_CODE = {
   CORRECT: colors.dashboardCorrect,
@@ -104,7 +104,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
   };
 
   const getLevelErrorPriority = levelError => {
-    return ViewUtils.getLevelErrorPriorityByLevelError(levelError);
+    return ErrorUtils.getLevelErrorPriorityByLevelError(levelError);
   };
 
   const getDashboardBarsByDataset = (datasets, levelErrors) => {

@@ -13,7 +13,7 @@ import { Column } from 'primereact/column';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ContributorService } from 'core/services/Contributor';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export function ContributorsList({ dataflowId }) {
   const resources = useContext(ResourcesContext);

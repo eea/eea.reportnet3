@@ -9,8 +9,8 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CreateDataflowForm } from './_components/CreateDataflowForm';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { UserService } from 'core/services/User';
 

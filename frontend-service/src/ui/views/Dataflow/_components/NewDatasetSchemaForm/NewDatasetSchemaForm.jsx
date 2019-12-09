@@ -7,8 +7,8 @@ import { isEmpty, isNull } from 'lodash';
 import styles from './NewDatasetSchemaForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 

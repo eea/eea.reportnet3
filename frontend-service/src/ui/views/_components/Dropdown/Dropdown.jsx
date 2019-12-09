@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import classNames from 'classnames';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

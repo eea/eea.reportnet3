@@ -6,7 +6,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { routes } from 'ui/routes';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';

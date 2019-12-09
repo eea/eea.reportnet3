@@ -6,7 +6,7 @@ import styles from './DatasetSchemas.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 

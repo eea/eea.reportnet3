@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react';
+import React, { Component } from 'react';
 import style from '../BigButton.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
@@ -17,7 +17,7 @@ class Menu extends Component {
     });
   }
 
-  hide(event) {
+  hide() {
     if (!this.state.menuClick) {
       this.setState(
         state => {

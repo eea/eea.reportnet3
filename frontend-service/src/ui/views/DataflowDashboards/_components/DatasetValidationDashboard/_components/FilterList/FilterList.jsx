@@ -6,7 +6,7 @@ import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { ReportersListItem } from './_components/ReportersListItem';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 

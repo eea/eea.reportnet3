@@ -4,62 +4,34 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
-import { AccessPoint } from 'ui/views/AccessPoint';
-import { Dataflows } from 'ui/views/Dataflows';
-import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
-import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
-import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
-import { Eulogin } from 'ui/views/Eulogin';
-import { LoadingProvider } from 'ui/views/_components/_provider/LoadingProvider';
-import { Login } from 'ui/views/Login';
-import { Dataset } from 'ui/views/Dataset';
+import { AccessPoint } from 'ui/views/Login/AccessPoint';
 import { Dataflow } from 'ui/views/Dataflow';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
+import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
+import { Dataflows } from 'ui/views/Dataflows';
+import { Dataset } from 'ui/views/Dataset';
+import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
+import { EULogin } from 'ui/views/Login/EULogin';
+import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { userReducer } from 'ui/views/_components/_context/UserReducer';
-
-import langResources from 'conf/messages.en.json';
+import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
+import { ResourcesProvider } from 'ui/views/_functions/Providers/ResourcesProvider';
+import { UserProvider } from 'ui/views/_functions/Providers/UserProvider';
 
 const App = () => {
-  const [resources] = useState({ ...langResources });
-  const [state, dispatch] = useReducer(userReducer, {});
   return (
     <div className={styles.app}>
-      <UserContext.Provider
-        value={{
-          ...state,
-          onLogin: user => {
-            dispatch({
-              type: 'LOGIN',
-              payload: {
-                user
-              }
-            });
-          },
-          onLogout: () => {
-            dispatch({
-              type: 'LOGOUT',
-              payload: {
-                user: {}
-              }
-            });
-          },
-          onTokenRefresh: user => {
-            dispatch({
-              type: 'REFRESH_TOKEN',
-              payload: {
-                user
-              }
-            });
-          }
-        }}>
-        <ResourcesContext.Provider value={resources}>
+      <UserProvider>
+        <ResourcesProvider>
           <LoadingProvider>
             <Router>
               <Switch>
-                <Route exact path="/" component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : Login} />
-                <Route exact path={routes.EULOGIN} component={Eulogin} />
+                <Route
+                  exact
+                  path="/"
+                  component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
+                />
+                <Route exact path={routes.EULOGIN} component={EULogin} />
                 <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
                 <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
                 <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
@@ -69,8 +41,8 @@ const App = () => {
               </Switch>
             </Router>
           </LoadingProvider>
-        </ResourcesContext.Provider>
-      </UserContext.Provider>
+        </ResourcesProvider>
+      </UserProvider>
     </div>
   );
 };

@@ -7,7 +7,7 @@ import styles from './ReleasedDatasetsDashboard.module.css';
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { StatusList } from 'ui/views/_components/StatusList';
 

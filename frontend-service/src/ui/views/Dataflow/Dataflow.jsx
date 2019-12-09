@@ -20,10 +20,10 @@ import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 

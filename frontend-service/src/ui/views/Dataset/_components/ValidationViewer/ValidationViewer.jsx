@@ -11,8 +11,8 @@ import { Column } from 'primereact/column';
 
 import { Button } from 'ui/views/_components/Button';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { DatasetContext } from 'ui/views/Dataset/_components/_context/DatasetContext';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -279,11 +279,7 @@ const ValidationViewer = React.memo(
         case 'RECORD':
           const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
           datasetContext.setIsValidationSelected(true);
-          datasetContext.onSelectValidation(
-            event.data.tableSchemaId,
-            datasetError.position,
-            datasetError.recordId
-          );
+          datasetContext.onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
           datasetContext.onValidationsVisible();
           break;
         case 'TABLE':

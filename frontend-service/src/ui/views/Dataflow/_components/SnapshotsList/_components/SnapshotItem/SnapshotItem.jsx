@@ -5,7 +5,7 @@ import moment from 'moment';
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog, setSnapshotDataToRelease }) => {
   const resources = useContext(ResourcesContext);

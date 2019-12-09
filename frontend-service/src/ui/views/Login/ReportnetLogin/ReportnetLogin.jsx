@@ -4,19 +4,19 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isUndefined } from 'lodash';
 
-import styles from './Login.module.css';
+import styles from './ReportnetLogin.module.css';
 
 import logo from 'assets/images/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 
-const Login = ({ history }) => {
+const ReportnetLogin = ({ history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [loginError, setLoginError] = useState();
@@ -100,4 +100,4 @@ const Login = ({ history }) => {
   );
 };
 
-export { Login };
+export { ReportnetLogin };

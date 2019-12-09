@@ -9,7 +9,7 @@ import styles from './DocumentFileUpload.module.scss';
 import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DocumentService } from 'core/services/Document';
 

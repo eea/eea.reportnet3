@@ -140,8 +140,8 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
     let firstRow = 10000;
     let lastRow = 0;
     let rowHeaders = [];
-    dataColumns.forEach(function(column, i) {
-      column.forEach(function(field, i) {
+    dataColumns.forEach(column => {
+      column.forEach(field => {
         let rowPosition = parseInt(field.rowPosition);
         if (firstRow > rowPosition) {
           firstRow = rowPosition;
@@ -162,7 +162,7 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
   const getMinAndMaxColumns = dataColumns => {
     let firstColumn = 'Z';
     let lastColumn = 'A';
-    dataColumns.forEach(function(column, i) {
+    dataColumns.forEach((_, i) => {
       let columnPosition = dataColumns[i][0].columnPosition;
       if (columnPosition < firstColumn) {
         firstColumn = columnPosition;

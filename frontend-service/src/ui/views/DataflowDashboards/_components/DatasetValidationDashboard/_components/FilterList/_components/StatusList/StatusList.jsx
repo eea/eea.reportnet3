@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import styles from './StatusList.module.scss';
 import colors from 'conf/colors.json';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const StatusList = ({ levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
   const resources = useContext(ResourcesContext);

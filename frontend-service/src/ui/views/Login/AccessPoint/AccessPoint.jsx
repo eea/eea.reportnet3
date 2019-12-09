@@ -6,7 +6,7 @@ import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.
 
 import logo from 'assets/images/logo.png';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const AccessPoint = () => {
   const resources = useContext(ResourcesContext);
