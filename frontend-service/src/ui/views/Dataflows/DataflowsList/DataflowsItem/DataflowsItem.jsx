@@ -1,15 +1,17 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DataflowsItem.module.scss';
 
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { Link } from 'react-router-dom';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -23,6 +25,17 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
   } else {
     status = statusArray[0];
   }
+
+  const crudMenu = [
+    {
+      label: resources.messages['edit'],
+      icon: 'edit'
+    },
+    {
+      label: resources.messages['delete'],
+      icon: 'trash'
+    }
+  ];
 
   const onAccept = async () => {
     try {
@@ -84,6 +97,14 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
 
       <div className={`${styles.deliveryDate}`}>
         <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
+      </div>
+
+      <div className={styles.crud} onClick={e => e.preventDefault()}>
+        <DropdownButton
+          icon="ellipsis"
+          model={crudMenu}
+          buttonStyle={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
+        />
       </div>
 
       <div className={styles.text}>
