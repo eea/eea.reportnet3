@@ -38,18 +38,12 @@ const UserCard = React.memo(() => {
             } catch (error) {
               console.error(error);
             } finally {
-              debugger;
               user.onLogout();
             }
           }}>
           <Icon icon="logout" />
         </a>
       </div>
-      {/* <div className={styles.logOut}>
-                <a href="#logOut" title="Log out">
-                  <Icon icon="logout" />
-                </a>
-            </div> */}
     </div>
   );
 });
