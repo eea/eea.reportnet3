@@ -26,7 +26,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -454,27 +453,27 @@ public class DataflowServiceImpl implements DataflowService {
 
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
-      }
-    }
-    LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
+    // if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
+    // for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+    // dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
+    // }
+    // }
+    // LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
 
     // add resource to delete(DATAFLOW PART)
-    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+        .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
 
-    // // PART OF DELETE ALL THE DATASET we have in the dataflow
-    // if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
-    // dataflow.getReportingDatasets().stream().forEach(datasets -> {
-    // dataSetControllerZuul.deleteDataset(datasets.getId());
-    // // add more resource to delete(DATASET PART)
-    // resourceCustodian.addAll(resourceManagementControllerZull
-    // .getGroupsByIdResourceType(datasets.getId(), ResourceTypeEnum.DATASET));
-    // });
-    // }
+    // PART OF DELETE ALL THE DATASET we have in the dataflow
+    if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
+      dataflow.getReportingDatasets().stream().forEach(datasets -> {
+        dataSetControllerZuul.deleteDataset(datasets.getId());
+        // add more resource to delete(DATASET PART)
+        resourceCustodian.addAll(resourceManagementControllerZull
+            .getGroupsByIdResourceType(datasets.getId(), ResourceTypeEnum.DATASET));
+      });
+    }
     // resourceManagementControllerZull.deleteResource(resourceCustodian);
     // LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 

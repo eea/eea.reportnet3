@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -73,6 +78,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  @Autowired
+  private DatasetSchemaService dataschemaService;
+
   /**
    * The file treatment helper.
    */
@@ -90,6 +98,21 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Autowired
   private DeleteHelper deleteHelper;
+
+
+  @Autowired
+  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
+
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
 
   /**
    * Gets the data tables values.
@@ -514,7 +537,24 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @DeleteMapping(value = "/{id}")
   public void deleteDataset(Long datasetId) {
-    // TODO Auto-generated method stub
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    String schemaId = dataSetSchemaControllerZuul.getDatasetSchemaId(datasetId);
+    if (schemaId.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    // delete the schema snapshots too
+    try {
+      datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+    datasetMetabaseService.deleteDesignDataset(datasetId);
+    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
   }
 
