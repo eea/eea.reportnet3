@@ -98,7 +98,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetSchemaName the dataset schema name
    */
   @Override
-  // @HystrixCommand
+  @HystrixCommand
   @PostMapping(value = "/createEmptyDatasetSchema")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN') AND hasRole('DATA_CUSTODIAN')")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
@@ -193,7 +193,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
