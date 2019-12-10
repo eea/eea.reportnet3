@@ -140,10 +140,9 @@ export const ContributorsList = ({ dataflowId }) => {
   const addContributorValidationSchema = Yup.object().shape({
     addContributorLogin: Yup.string()
       .min(6, resources.messages.contributorLoginValidationMin)
-      .max(50, resources.messages.contributorLoginValidationMax)
-      .required(resources.messages.contributorLoginValidationRequired)
-      .notOneOf(actualContributorsLoginsList, resources.messages.contributorLoginValidationIsInList),
-    newContributorRole: Yup.string().required(resources.messages.contributorRoleValidationIsRequired)
+      .required(' ')
+      .notOneOf(actualContributorsLoginsList, ' '),
+    newContributorRole: Yup.string().required(' ')
   });
 
   return (
