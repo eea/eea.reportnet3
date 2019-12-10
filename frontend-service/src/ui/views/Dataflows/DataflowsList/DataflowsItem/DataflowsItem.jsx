@@ -15,7 +15,16 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowsItem = ({ dataFetch, isCustodian, itemContent, listType, position, showEditForm }) => {
+export const DataflowsItem = ({
+  dataFetch,
+  dataflowDispatch,
+  dataflowId,
+  isCustodian,
+  itemContent,
+  listType,
+  position,
+  showEditForm
+}) => {
   const resources = useContext(ResourcesContext);
 
   //position must be removed in def implementation
@@ -32,13 +41,15 @@ export const DataflowsItem = ({ dataFetch, isCustodian, itemContent, listType, p
       label: resources.messages['edit'],
       icon: 'edit',
       disabled: !isCustodian,
-      command: () => showEditForm()
+      command: () => {
+        showEditForm();
+        dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: dataflowId });
+      }
     },
     {
       label: resources.messages['delete'],
       icon: 'trash',
-      disabled: true,
-      command: () => {}
+      disabled: true
     }
   ];
 

@@ -6,6 +6,7 @@ import { DataflowsItem } from './DataflowsItem';
 
 export const DataflowsList = ({
   dataFetch,
+  dataflowDispatch,
   isCustodian,
   listContent,
   listDescription,
@@ -26,6 +27,8 @@ export const DataflowsList = ({
           <DataflowsItem
             key={item.id}
             dataFetch={dataFetch}
+            dataflowDispatch={dataflowDispatch}
+            dataflowId={item.id}
             isCustodian={isCustodian}
             itemContent={item}
             listType={listType}

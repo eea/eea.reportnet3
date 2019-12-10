@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -29,6 +29,7 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
   const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
+  const [dataflowInitialValues, setDataflowInitialValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
@@ -49,6 +50,20 @@ export const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
+  const dataflowReducer = (state, { type, payload }) => {
+    switch (type) {
+      case 'ON_SELECT_DATAFLOW':
+        return { ...state, selected: state[payload] };
+
+      default:
+        return {
+          ...state
+        };
+    }
+  };
+
+  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialValues);
+
   const dataFetch = async () => {
     setLoading(true);
     try {
@@ -56,6 +71,11 @@ export const Dataflows = withRouter(({ match, history }) => {
       setpendingContent(allDataflows.pending);
       setacceptedContent(allDataflows.accepted);
       setcompletedContent(allDataflows.completed);
+      setDataflowInitialValues(
+        allDataflows.accepted.forEach(element => {
+          dataflowInitialValues[element.id] = { name: element.name, description: element.description };
+        })
+      );
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -147,6 +167,7 @@ export const Dataflows = withRouter(({ match, history }) => {
             />
             <DataflowsList
               dataFetch={dataFetch}
+              dataflowDispatch={dataflowDispatch}
               isCustodian={isCustodian}
               listContent={acceptedContent}
               listDescription={resources.messages.acceptedDataflowText}
@@ -176,6 +197,7 @@ export const Dataflows = withRouter(({ match, history }) => {
         onHide={onHideDialog}
         visible={createDataflowDialogVisible}>
         <DataflowCrudForm
+          dataflowValue={dataflowState.selected}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
           onCreate={onCreateDataflow}

@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull, isPlainObject, isUndefined, sortBy } from 'lodash';
 
 import styles from './DataflowCrudForm.module.css';
 
@@ -11,7 +11,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowCrudForm = ({ isEditForm, isFormReset, onCreate, onCancel }) => {
+export const DataflowCrudForm = ({ dataflowValue, isEditForm, isFormReset, onCreate, onCancel }) => {
+  console.log('RESULT', dataflowValue);
+
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
