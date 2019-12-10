@@ -17,6 +17,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
+import { dataflowReducer } from './_functions/Reducers';
+
 import { DataflowService } from 'core/services/Dataflow';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
@@ -49,18 +51,6 @@ export const Dataflows = withRouter(({ match, history }) => {
     }
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
-
-  const dataflowReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'ON_SELECT_DATAFLOW':
-        return { ...state, selectedDataflow: state[payload], selectedDataflowId: payload };
-
-      default:
-        return {
-          ...state
-        };
-    }
-  };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialValues);
 
