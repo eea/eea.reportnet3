@@ -18,11 +18,25 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
   const [dataProviders, setDataProviders] = useState([]);
+  const [selectedDataProvidersType, setSelectedDataProvidersType] = useState(null);
+  const [representativeList, setRepresentativeList] = useState([]);
 
-  const namesList = [
-    { nameLabel: 'Read only', name: 'read' },
-    { nameLabel: 'Read/Write', name: 'read_write' }
-  ];
+  useEffect(() => {
+    //Need get function on api for representatives list
+    // Http requester......
+    setRepresentativeList([
+      { nameLabel: 'Countries', name: 'countries' },
+      { nameLabel: 'Companies', name: 'companies' }
+    ]);
+  }, []);
+
+  const onSelectProvidersType = e => {
+    setSelectedDataProvidersType(e.value);
+  };
+
+  const getDataProvidersListOfSelectedType = async type => {
+    setDataProviders(await DataProviderService.allProviders(dataflowId));
+  };
 
   const loadDataProvidersList = async () => {
     setDataProviders(await DataProviderService.all(dataflowId));
@@ -44,7 +58,7 @@ const DataProvidersList = ({ dataflowId }) => {
     await DataProviderService.deleteById(dataflowId, dataProviderId);
   };
 
-  const initialState = { name: '', dataProviderId: '' };
+  const initialState = { name: '', email: '', dataProviderId: '' };
 
   const nameReducer = (state, action) => {
     let newState;
@@ -64,14 +78,14 @@ const DataProvidersList = ({ dataflowId }) => {
         return newState;
 
       case 'UPDATE_TO_READ':
-        newState = { name: 'read', dataProviderId: action.payload };
+        newState = { name: 'countries', dataProviderId: action.payload };
 
         onDataProviderRoleUpdate(newState.dataProviderId, newState.name);
 
         return newState;
 
       case 'UPDATE_TO_READ_WRITE':
-        newState = { name: 'read_write', dataProviderId: action.payload };
+        newState = { name: 'companies', dataProviderId: action.payload };
 
         onDataProviderRoleUpdate(newState.dataProviderId, newState.name);
 
@@ -88,7 +102,7 @@ const DataProvidersList = ({ dataflowId }) => {
   }, [dataProviderState]);
 
   const nameDropdownColumnTemplate = rowData => {
-    const getActualRole = () => {
+    const getActualName = () => {
       if (rowData) {
         switch (rowData.name) {
           case 'read':
@@ -97,6 +111,12 @@ const DataProvidersList = ({ dataflowId }) => {
           case 'read_write':
             return { nameLabel: 'Read/Write', name: 'read_write' };
 
+          case 'countries':
+            return { nameLabel: 'Countries', name: 'countries' };
+
+          case 'companies':
+            return { nameLabel: 'Companies', name: 'companies' };
+
           default:
             return { nameLabel: '', name: '' };
         }
@@ -104,51 +124,77 @@ const DataProvidersList = ({ dataflowId }) => {
     };
 
     return (
-      <>
-        <Dropdown
-          optionLabel="nameLabel"
-          value={getActualRole()}
-          options={namesList}
-          placeholder={resources.messages.selectDataProviderRole}
-          onChange={e => {
-            dataProviderDispatcher({ type: `UPDATE_TO_${e.value.name}`.toUpperCase(), payload: rowData.id });
-          }}
-        />
-      </>
+      <Dropdown
+        optionLabel="nameLabel"
+        value={getActualName()}
+        options={representativeList}
+        placeholder={resources.messages.selectDataProviderRole}
+        onChange={e => {
+          dataProviderDispatcher({ type: `UPDATE_TO_${e.value.name}`.toUpperCase(), payload: rowData.id });
+        }}
+      />
     );
   };
 
   const deleteBtnColumnTemplate = rowData => {
     return (
-      <>
-        <Button
-          tooltip={resources.messages.deleteDataProvider}
-          tooltipOptions={{ position: 'right' }}
-          icon="trash"
-          disabled={false}
-          className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
-          onClick={e => {
-            dataProviderDispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
-          }}
-        />
-      </>
+      <Button
+        tooltip={resources.messages.deleteDataProvider}
+        tooltipOptions={{ position: 'right' }}
+        icon="trash"
+        disabled={false}
+        className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
+        onClick={e => {
+          dataProviderDispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
+        }}
+      />
     );
   };
 
-  const actualDataProvidersLoginsList = dataProviders.map(dataProvider => dataProvider.email);
+  const getDataProvidersList = providerType => {};
 
-  const addDataProviderValidationSchema = Yup.object().shape({
+  /* const actualDataProvidersLoginsList = dataProviders.map(dataProvider => dataProvider.email); */
+
+  /*  const addDataProviderValidationSchema = Yup.object().shape({
     addDataProviderLogin: Yup.string()
       .min(6, resources.messages.dataProviderLoginValidationMin)
       .required(' ')
       .notOneOf(actualDataProvidersLoginsList, ' '),
     newDataProviderRole: Yup.string().required(' ')
-  });
+  }); */
 
   return (
     <>
-      <div>
-        {/*   <Formik
+      <div className={styles.selectWrapper}>
+        <div className={styles.title}>Data providers</div>
+
+        <div>
+          <label htmlFor="selectedDataProvidersType">Representative of </label>
+
+          <Dropdown
+            name="selectedDataProvidersType"
+            optionLabel="nameLabel"
+            value={selectedDataProvidersType}
+            options={representativeList}
+            placeholder={'Choose...'}
+            onChange={onSelectProvidersType}
+          />
+        </div>
+      </div>
+
+      <DataTable value={dataProviders} paginator={false} scrollable={true} scrollHeight="60vh">
+        <Column key="email" field="email" header="Email" />
+        <Column body={nameDropdownColumnTemplate} header="Data Provider" />
+        <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+      </DataTable>
+    </>
+  );
+};
+
+export { DataProvidersList };
+
+{
+  /*   <Formik
           initialValues={{ addDataProviderLogin: '' }}
           validationSchema={addDataProviderValidationSchema}
           onSubmit={e => {
@@ -176,7 +222,7 @@ const DataProvidersList = ({ dataflowId }) => {
               <div className={` formField ${!isEmpty(errors.newDataProviderRole) ? ' error' : ''}`}>
                 <Field name="newDataProviderRole" component="select">
                   <option value="">{resources.messages.selectDataProviderRole}</option>
-                  {namesList.map(name => (
+                  {representativesList.map(name => (
                     <option key={name.nameLabel} value={name.name}>
                       {name.nameLabel}
                     </option>
@@ -198,16 +244,5 @@ const DataProvidersList = ({ dataflowId }) => {
               </div>
             </Form>
           )}
-        /> */}
-      </div>
-
-      <DataTable value={dataProviders} paginator={false} scrollable={true} scrollHeight="60vh">
-        <Column key="email" field="email" header="Login" />
-        <Column body={nameDropdownColumnTemplate} header="Role" />
-        <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
-      </DataTable>
-    </>
-  );
-};
-
-export { DataProvidersList };
+        /> */
+}

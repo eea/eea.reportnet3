@@ -13,7 +13,7 @@
     box-shadow: none;
   }
 }
-.addDataProviderButtonWrapper {
+.selectWrapper {
   display: flex;
   justify-items: center;
   align-self: center;
@@ -23,4 +23,7 @@
 
 .addDataProviderButtonWrapper :global .formField {
   width: 42%;
+}
+.title {
+  font-weight: 600;
 }
