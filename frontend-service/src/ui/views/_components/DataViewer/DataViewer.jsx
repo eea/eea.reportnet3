@@ -29,8 +29,8 @@ import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
-import { recordReducer } from './_functions/recordReducer';
-import { sortingReducer } from './_functions/sortingReducer';
+import { recordReducer } from './_functions/Reducers/recordReducer';
+import { sortingReducer } from './_functions/Reducers/sortingReducer';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/Dataset';
@@ -73,7 +73,6 @@ const DataViewer = withRouter(
     const [exportTableData, setExportTableData] = useState(undefined);
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
-    const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
@@ -85,31 +84,30 @@ const DataViewer = withRouter(
     const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
-    const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
-    const [pastedRecords, setPastedRecords] = useState();
     //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
-    const [sortField, setSortField] = useState(undefined);
-    const [sortOrder, setSortOrder] = useState(undefined);
     const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
     const [visibilityColumnIcon, setinvisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
     const [invisibleColumns, setinvisibleColumns] = useState([]);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
-      total: 0,
-      filtered: 0,
+      totalRecords: 0,
+      totalFilteredRecords: 0,
       firstPageRecord: 0,
       recordsPerPage: 10,
       isRecordDeleted: false,
       editedRecord: {},
       selectedRecord: {},
-      newRecord: {}
+      newRecord: {},
+      numCopiedRecords: undefined,
+      pastedRecords: undefined,
+      fetchedDataFirstRecord: []
     });
     const [sorting, dispatchSorting] = useReducer(sortingReducer, {
-      field: undefined,
-      order: undefined
+      sortField: undefined,
+      sortOrder: undefined
     });
 
     const datasetContext = useContext(DatasetContext);
@@ -186,8 +184,7 @@ const DataViewer = withRouter(
         type: 'SET_FIRST_PAGE_RECORD',
         payload: Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage
       });
-      setSortField(undefined);
-      setSortOrder(undefined);
+      dispatchSorting({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
       onFetchData(
         undefined,
         undefined,
@@ -319,7 +316,7 @@ const DataViewer = withRouter(
     };
 
     useEffect(() => {
-      onFetchData(sortField, sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      onFetchData(sorting.sortField, sorting.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
     }, [levelErrorValidations]);
 
     useEffect(() => {
@@ -330,9 +327,9 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (confirmPasteVisible) {
-        if (!isUndefined(pastedRecords)) {
-          if (pastedRecords.length > 0) {
-            setPastedRecords([]);
+        if (!isUndefined(records.pastedRecords)) {
+          if (records.pastedRecords.length > 0) {
+            dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
           }
         }
         // if (confirmPasteVisible) {
@@ -352,7 +349,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sortField, sortOrder, event.first, event.rows, levelErrorValidations);
+      onFetchData(sorting.sortField, sorting.sortOrder, event.first, event.rows, levelErrorValidations);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -371,14 +368,18 @@ const DataViewer = withRouter(
       const recordDeleted = await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
       if (recordDeleted) {
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
+        const page =
+          (calcRecords - 1) / records.recordsPerPage === 1
+            ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
+            : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
+        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       }
     };
 
     const onDeletePastedRecord = recordIndex => {
-      const inmPastedRecords = [...pastedRecords];
-      inmPastedRecords.splice(getRecordIdByIndex(inmPastedRecords, recordIndex), 1);
-      setPastedRecords(inmPastedRecords);
+      dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
     };
 
     const onEditAddFormInput = (property, value) => {
@@ -453,7 +454,8 @@ const DataViewer = withRouter(
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-
+        console.log({ fRow, nRows });
+        console.log(records);
         const tableData = await DatasetService.tableDataById(
           datasetId,
           tableId,
@@ -475,13 +477,13 @@ const DataViewer = withRouter(
               if (tableData.records.length > 0) {
                 dispatchRecords({
                   type: 'SET_NEW_RECORD',
-                  payload: createEmptyObject(colsSchema, tableData.records[0])
+                  payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
                 });
               }
             } else {
               dispatchRecords({
                 type: 'SET_NEW_RECORD',
-                payload: createEmptyObject(colsSchema, undefined)
+                payload: RecordUtils.createEmptyObject(colsSchema, undefined)
               });
             }
           }
@@ -525,18 +527,18 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        setPastedRecords(getClipboardData(pastedData));
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      setPastedRecords(getClipboardData(pastedData));
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
     };
 
     const onPasteAccept = async () => {
       try {
-        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, pastedRecords);
+        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (recordsAdded) {
           growlRef.current.show({
             severity: 'success',
@@ -565,11 +567,17 @@ const DataViewer = withRouter(
     };
 
     const onRefresh = () => {
-      onFetchData(sortField, sortOrder, records.firstPageRecord, records.recordsPerPage, levelErrorValidations);
+      onFetchData(
+        sorting.sortField,
+        sorting.sortOrder,
+        records.firstPageRecord,
+        records.recordsPerPage,
+        levelErrorValidations
+      );
     };
 
     const onPasteCancel = () => {
-      setPastedRecords([]);
+      dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
       setConfirmPasteVisible(false);
     };
 
@@ -625,8 +633,7 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
-      setSortOrder(event.sortOrder);
-      setSortField(event.sortField);
+      dispatchSorting({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
@@ -748,29 +755,6 @@ const DataViewer = withRouter(
     const changeCellValue = (tableData, rowIndex, field, value) => {
       tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
       return tableData;
-    };
-
-    const createEmptyObject = (columnsSchema, data) => {
-      let fields;
-      if (!isUndefined(columnsSchema)) {
-        fields = columnsSchema.map(column => {
-          return {
-            fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
-          };
-        });
-      }
-
-      const obj = {
-        dataRow: fields,
-        recordSchemaId: columnsSchema[0].recordId
-      };
-
-      obj.datasetPartitionId = null;
-      //dataSetPartitionId is needed for checking the rows owned by delegated contributors
-      if (!isUndefined(data) && data.length > 0) {
-        obj.datasetPartitionId = data.datasetPartitionId;
-      }
-      return obj;
     };
 
     const createTableName = (tableName, fileType) => {
@@ -913,7 +897,8 @@ const DataViewer = withRouter(
         return arrayDataAndValidations;
       });
       if (dataFiltered.length > 0) {
-        setFetchedDataFirstRow(dataFiltered[0]);
+        console.log(dataFiltered[0]);
+        dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
       } else {
         setFetchedData([]);
       }
@@ -973,35 +958,6 @@ const DataViewer = withRouter(
       return value.length > 0 ? value[0].fieldData[field] : '';
     };
 
-    const getClipboardData = pastedData => {
-      //Delete double quotes from strings
-      const copiedClipboardRecords = pastedData
-        .split('\r\n')
-        .filter(l => l.length > 0)
-        .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
-      //Maximum number of records to paste should be 500
-      setNumCopiedRecords(copiedClipboardRecords.length);
-      const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
-      copiedClipboardRecords.forEach(row => {
-        let emptyRecord = createEmptyObject(colsSchema, fetchedDataFirstRow);
-        const copiedCols = row.split('\t');
-        emptyRecord.dataRow.forEach((record, i) => {
-          emptyRecord = RecordUtils.changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
-        });
-
-        emptyRecord.dataRow = emptyRecord.dataRow.filter(
-          column =>
-            Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'datasetPartitionId'
-        );
-        emptyRecord.copiedCols = copiedCols.length;
-        copiedBulkRecords.push(emptyRecord);
-      });
-      //Slice to 500 records and renumber de records for delete button
-      return copiedBulkRecords.slice(0, 500).map((record, i) => {
-        return { ...record, recordId: i };
-      });
-    };
-
     const getExportButtonPosition = e => {
       const exportButton = e.currentTarget;
       const left = `${exportButton.offsetLeft}px`;
@@ -1036,14 +992,6 @@ const DataViewer = withRouter(
           return e.recordId;
         })
         .indexOf(record.recordId);
-    };
-
-    const getRecordIdByIndex = (tableData, recordIdx) => {
-      return tableData
-        .map(e => {
-          return e.recordId;
-        })
-        .indexOf(recordIdx);
     };
 
     const isFiltered = (originalFilter, filter) => {
@@ -1430,8 +1378,8 @@ const DataViewer = withRouter(
             scrollHeight="70vh"
             selectionMode="single"
             sortable={true}
-            sortField={sortField}
-            sortOrder={sortOrder}
+            sortField={sorting.sortField}
+            sortOrder={sorting.sortOrder}
             totalRecords={
               !isNull(records.totalFilteredRecords) &&
               !isUndefined(records.totalFilteredRecords) &&
@@ -1501,7 +1449,7 @@ const DataViewer = withRouter(
           divRef={divRef}
           visible={confirmPasteVisible}>
           <InfoTable
-            data={pastedRecords}
+            data={records.pastedRecords}
             filteredColumns={colsSchema.filter(
               column =>
                 column.field !== 'actions' &&
@@ -1509,7 +1457,7 @@ const DataViewer = withRouter(
                 column.field !== 'id' &&
                 column.field !== 'datasetPartitionId'
             )}
-            numCopiedRecords={numCopiedRecords}
+            numCopiedRecords={records.numCopiedRecords}
             onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
           <br />
           <br />

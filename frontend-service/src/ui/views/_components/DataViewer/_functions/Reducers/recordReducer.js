@@ -2,6 +2,14 @@ import { RecordUtils } from 'ui/views/_functions/Utils';
 import { isUndefined } from 'lodash';
 
 export const recordReducer = (state, { type, payload }) => {
+  const getRecordIdByIndex = (tableData, recordIdx) => {
+    return tableData
+      .map(e => {
+        return e.recordId;
+      })
+      .indexOf(recordIdx);
+  };
+
   switch (type) {
     case 'SET_TOTAL':
       return { ...state, totalRecords: payload };
@@ -27,6 +35,29 @@ export const recordReducer = (state, { type, payload }) => {
       }
     case 'IS_RECORD_DELETED':
       return { ...state, isRecordDeleted: payload };
+    case 'COPY_RECORDS':
+      console.log(payload.colsSchema);
+      return {
+        ...state,
+        numCopiedRecords: RecordUtils.getNumCopiedRecords(payload.pastedData),
+        pastedRecords: RecordUtils.getClipboardData(
+          payload.pastedData,
+          !isUndefined(state.pastedRecords) ? [...state.pastedRecords] : [],
+          payload.colsSchema,
+          {
+            ...state.fetchedDataFirstRecord
+          }
+        )
+      };
+    case 'FIRST_FILTERED_RECORD':
+      return { ...state, fetchedDataFirstRecord: payload };
+    case 'EMPTY_PASTED_RECORDS':
+      return { ...state, pastedRecords: [] };
+    case 'DELETE_PASTED_RECORDS': {
+      const inmPastedRecords = [...state.pastedRecords];
+      inmPastedRecords.splice(getRecordIdByIndex(inmPastedRecords, payload.recordIndex), 1);
+      return { ...state, pastedRecords: inmPastedRecords };
+    }
     default:
       return state;
   }

@@ -1,12 +1,11 @@
 export const sortingReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'SET_TOTAL':
+    case 'SORT_TABLE':
       return {
         ...state,
-        totalRecords: payload
+        sortOrder: payload.order,
+        sortField: payload.field
       };
-    case 'SET_FILTERED':
-      return { ...state, totalFilteredRecords: payload };
 
     default:
       return state;
