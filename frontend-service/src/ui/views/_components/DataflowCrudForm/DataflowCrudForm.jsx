@@ -4,14 +4,14 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import { isEmpty } from 'lodash';
 
-import styles from './CreateDataflowForm.module.css';
+import styles from './DataflowCrudForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const CreateDataflowForm = ({ isFormReset, onCreate, onCancel }) => {
+export const DataflowCrudForm = ({ isEditForm, isFormReset, onCreate, onCancel }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
@@ -83,9 +83,9 @@ export const CreateDataflowForm = ({ isFormReset, onCreate, onCancel }) => {
                       : styles.disabledButton
                     : styles.disabledButton
                 }
-                label={resources.messages['create']}
+                label={isEditForm ? resources.messages['save'] : resources.messages['create']}
                 disabled={isSubmitting}
-                icon="add"
+                icon={isEditForm ? 'save' : 'add'}
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button

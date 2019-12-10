@@ -8,8 +8,10 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
+import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
 import { DataflowsList } from './DataflowsList';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -26,7 +28,10 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
+  const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
+  const [isEditForm, setIsEditForm] = useState(false);
+  const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -73,6 +78,37 @@ export const Dataflows = withRouter(({ match, history }) => {
     }
   }, [user]);
 
+  const onCreateDataflow = () => {
+    setCreateDataflowDialogVisible(false);
+    dataFetch();
+    onRefreshToken();
+  };
+
+  const onHideDialog = () => {
+    setCreateDataflowDialogVisible(false);
+    setIsFormReset(false);
+  };
+
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      user.onTokenRefresh(userObject);
+    } catch (error) {
+      await UserService.logout();
+      user.onLogout();
+    }
+  };
+
+  const onShowAddForm = () => {
+    setIsEditForm(false);
+    setCreateDataflowDialogVisible(true);
+  };
+
+  const onShowEditForm = () => {
+    setIsEditForm(true);
+    setCreateDataflowDialogVisible(true);
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -89,11 +125,11 @@ export const Dataflows = withRouter(({ match, history }) => {
   return layout(
     <div className="rep-row">
       <LeftSideBar
-        navTitle={resources.messages['dataflowList']}
-        components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
+        components={['search', 'createDataflow']}
         isCustodian={isCustodian}
-        onFetchData={dataFetch}
+        navTitle={resources.messages['dataflowList']}
+        onShowAddForm={onShowAddForm}
         subscribeButtonTitle={resources.messages['subscribeButton']}
         style={{ textAlign: 'left' }}
       />
@@ -102,32 +138,50 @@ export const Dataflows = withRouter(({ match, history }) => {
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
             <DataflowsList
-              listTitle={resources.messages.pendingDataflowTitle}
-              listDescription={resources.messages.pendingDataflowText}
-              listContent={pendingContent}
               dataFetch={dataFetch}
+              isCustodian={isCustodian}
+              listContent={pendingContent}
+              listDescription={resources.messages.pendingDataflowText}
+              listTitle={resources.messages.pendingDataflowTitle}
               listType="pending"
             />
             <DataflowsList
-              listTitle={resources.messages.acceptedDataflowTitle}
-              listDescription={resources.messages.acceptedDataflowText}
-              listContent={acceptedContent}
               dataFetch={dataFetch}
+              isCustodian={isCustodian}
+              listContent={acceptedContent}
+              listDescription={resources.messages.acceptedDataflowText}
+              listTitle={resources.messages.acceptedDataflowTitle}
               listType="accepted"
+              showEditForm={onShowEditForm}
             />
           </>
         ) : (
           <>
             <DataflowsList
-              listTitle={resources.messages.completedDataflowTitle}
-              listDescription={resources.messages.completedDataflowText}
-              listContent={completedContent}
               dataFetch={dataFetch}
+              isCustodian={isCustodian}
+              listContent={completedContent}
+              listDescription={resources.messages.completedDataflowText}
+              listTitle={resources.messages.completedDataflowTitle}
               listType="completed"
             />
           </>
         )}
       </div>
+
+      <Dialog
+        className={styles.dialog}
+        dismissableMask={false}
+        header={resources.messages['createNewDataflow']}
+        onHide={onHideDialog}
+        visible={createDataflowDialogVisible}>
+        <DataflowCrudForm
+          isEditForm={isEditForm}
+          isFormReset={isFormReset}
+          onCreate={onCreateDataflow}
+          onCancel={onHideDialog}
+        />
+      </Dialog>
     </div>
   );
 });

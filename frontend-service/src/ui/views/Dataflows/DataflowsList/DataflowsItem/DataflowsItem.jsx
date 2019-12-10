@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,8 +15,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) => {
+export const DataflowsItem = ({ dataFetch, isCustodian, itemContent, listType, position, showEditForm }) => {
   const resources = useContext(ResourcesContext);
+
   //position must be removed in def implementation
   const statusArray = ['notStarted', 'delivered', 'drafted'];
   let status = 1;
@@ -29,11 +30,15 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
   const crudMenu = [
     {
       label: resources.messages['edit'],
-      icon: 'edit'
+      icon: 'edit',
+      disabled: !isCustodian,
+      command: () => showEditForm()
     },
     {
       label: resources.messages['delete'],
-      icon: 'trash'
+      icon: 'trash',
+      disabled: true,
+      command: () => {}
     }
   ];
 
@@ -49,6 +54,7 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
       console.error('AcceptDataflow error: ', error);
     }
   };
+
   const onReject = async () => {
     try {
       const status = await DataflowService.reject(itemContent.requestId);
