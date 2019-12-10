@@ -319,6 +319,23 @@ public class DataSetSchemaControllerImplTest {
   }
 
   @Test
+  public void deleteDatasetSchemaSuccess2Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
+    doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
+    doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
+    DataFlowVO df = new DataFlowVO();
+    df.setId(1L);
+    df.setStatus(TypeStatusEnum.ACCEPTED);
+    when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
+    dataSchemaControllerImpl.deleteDatasetSchema(1L);
+
+    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
+  }
+
+  @Test
   public void deleteDatasetSchemaException3Test() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
