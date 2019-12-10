@@ -2,6 +2,7 @@ import { Accept } from './Accept';
 import { Create } from './Create';
 import { CreateDatasetSchema } from './CreateDatasetSchema';
 import { dataflowRepository } from 'core/domain/model/Dataflow/DataflowRepository';
+import { Delete } from './Delete';
 import { GetPending } from './GetPending';
 import { GetAccepted } from './GetAccepted';
 import { GetAll } from './GetAll';
@@ -22,6 +23,7 @@ export const DataflowService = {
   dataflowDetails: GetDetails({ dataflowRepository }),
   datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
   datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
+  deleteById: Delete({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),

@@ -102,6 +102,18 @@ export const apiDataflow = {
     return response.data;
     // return metadataJson;
   },
+  deleteById: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(DataflowConfig.createDataflow),
+      data: { dataflowId },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

@@ -299,6 +299,10 @@ const dataflowDetails = async dataflowId => {
   return dataflowDetails;
 };
 
+const deleteById = async dataflowId => {
+  return await apiDataflow.deleteById(dataflowId);
+};
+
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
   return newEmptyDatasetSchemaResponse;
@@ -349,6 +353,7 @@ export const ApiDataflowRepository = {
   dataflowDetails,
   datasetsValidationStatistics,
   datasetsReleasedStatus,
+  deleteById,
   newEmptyDatasetSchema,
   pending,
   reject,

@@ -49,7 +49,8 @@ export const DataflowsItem = ({
     {
       label: resources.messages['delete'],
       icon: 'trash',
-      disabled: true
+      disabled: true,
+      command: () => onDeleteDataflow()
     }
   ];
 
@@ -63,6 +64,19 @@ export const DataflowsItem = ({
       }
     } catch (error) {
       console.error('AcceptDataflow error: ', error);
+    }
+  };
+
+  const onDeleteDataflow = async () => {
+    try {
+      const status = await DataflowService.deleteById(itemContent.id);
+      if (status >= 200 && status <= 299) {
+        dataFetch();
+      } else {
+        console.log('Delete dataflow error with this status: ', status);
+      }
+    } catch (error) {
+      console.log('error', error);
     }
   };
 
