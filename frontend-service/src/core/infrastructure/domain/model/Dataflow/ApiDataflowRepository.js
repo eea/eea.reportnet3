@@ -320,6 +320,12 @@ const reporting = async dataflowId => {
   return dataflow;
 };
 
+const update = async (name, description, dataflowId) => {
+  const updatedDataflow = await apiDataflow.update(name, description, dataflowId);
+  console.log(updatedDataflow);
+  return updatedDataflow;
+};
+
 const accept = async dataflowId => {
   const status = await apiDataflow.accept(dataflowId);
   return status;
@@ -346,5 +352,6 @@ export const ApiDataflowRepository = {
   newEmptyDatasetSchema,
   pending,
   reject,
-  reporting
+  reporting,
+  update
 };

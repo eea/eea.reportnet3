@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { isEmpty, isNull, isPlainObject, isUndefined, sortBy } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './DataflowCrudForm.module.css';
 
@@ -11,7 +11,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowCrudForm = ({ dataflowValue, isDialogVisible, isEditForm, isFormReset, onCreate, onCancel }) => {
+export const DataflowCrudForm = ({
+  dataflowId,
+  dataflowValue,
+  isDialogVisible,
+  isEditForm,
+  isFormReset,
+  onCreate,
+  onCancel
+}) => {
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
@@ -26,11 +34,11 @@ export const DataflowCrudForm = ({ dataflowValue, isDialogVisible, isEditForm, i
   }, [isDialogVisible]);
 
   const dataflowCrudValidation = Yup.object().shape({
-    dataflowName: Yup.string().required(),
-    dataflowDescription: Yup.string().required()
+    name: Yup.string().required(),
+    description: Yup.string().required()
   });
 
-  if (!isFormReset) {
+  if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
   }
 
@@ -49,7 +57,10 @@ export const DataflowCrudForm = ({ dataflowValue, isDialogVisible, isEditForm, i
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        const response = await DataflowService.create(values.dataflowName, values.dataflowDescription);
+        const response = !isEditForm
+          ? await DataflowService.create(values.name, values.description)
+          : await DataflowService.update(values.name, values.description, dataflowId);
+
         if (response.status >= 200 && response.status <= 299) {
           onCreate();
         } else {
@@ -60,21 +71,18 @@ export const DataflowCrudForm = ({ dataflowValue, isDialogVisible, isEditForm, i
       {({ isSubmitting, errors, touched, values }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.dataflowName) && touched.dataflowName ? ' error' : ''}`}>
+            <div className={`formField${!isEmpty(errors.name) && touched.name ? ' error' : ''}`}>
               <Field
                 innerRef={inputRef}
-                name="dataflowName"
+                name="name"
                 placeholder={resources.messages['createDataflowName']}
                 type="text"
                 value={values.name}
               />
             </div>
-            <div
-              className={`formField${
-                !isEmpty(errors.dataflowDescription) && touched.dataflowDescription ? ' error' : ''
-              }`}>
+            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
-                name="dataflowDescription"
+                name="description"
                 component="textarea"
                 placeholder={resources.messages['createDataflowDescription']}
                 value={values.description}

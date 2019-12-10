@@ -11,6 +11,7 @@ import { GetDetails } from './GetDetails';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Reject } from './Reject';
+import { Update } from './Update';
 
 export const DataflowService = {
   accept: Accept({ dataflowRepository }),
@@ -24,5 +25,6 @@ export const DataflowService = {
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
-  reject: Reject({ dataflowRepository })
+  reject: Reject({ dataflowRepository }),
+  update: Update({ dataflowRepository })
 };

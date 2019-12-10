@@ -53,7 +53,7 @@ export const Dataflows = withRouter(({ match, history }) => {
   const dataflowReducer = (state, { type, payload }) => {
     switch (type) {
       case 'ON_SELECT_DATAFLOW':
-        return { ...state, selected: state[payload] };
+        return { ...state, selectedDataflow: state[payload], selectedDataflowId: payload };
 
       default:
         return {
@@ -193,11 +193,12 @@ export const Dataflows = withRouter(({ match, history }) => {
       <Dialog
         className={styles.dialog}
         dismissableMask={false}
-        header={resources.messages['createNewDataflow']}
+        header={isEditForm ? 'edit' : resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowCrudForm
-          dataflowValue={dataflowState.selected}
+          dataflowId={dataflowState.selectedDataflowId}
+          dataflowValue={dataflowState.selectedDataflow}
           isDialogVisible={isDataflowDialogVisible}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
