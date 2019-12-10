@@ -450,12 +450,9 @@ const DataViewer = withRouter(
       setIsLoading(true);
       try {
         let fields;
-
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-        console.log({ fRow, nRows });
-        console.log(records);
         const tableData = await DatasetService.tableDataById(
           datasetId,
           tableId,
@@ -470,22 +467,19 @@ const DataViewer = withRouter(
             onLoadTableData(true);
           }
         }
-
-        if (!isUndefined(colsSchema)) {
-          if (!isUndefined(tableData)) {
-            if (!isUndefined(tableData.records)) {
-              if (tableData.records.length > 0) {
-                dispatchRecords({
-                  type: 'SET_NEW_RECORD',
-                  payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
-                });
-              }
-            } else {
+        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
+          if (!isUndefined(tableData.records)) {
+            if (tableData.records.length > 0) {
               dispatchRecords({
                 type: 'SET_NEW_RECORD',
-                payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
               });
             }
+          } else {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
           }
         }
         if (!isUndefined(tableData.records)) {
@@ -897,7 +891,6 @@ const DataViewer = withRouter(
         return arrayDataAndValidations;
       });
       if (dataFiltered.length > 0) {
-        console.log(dataFiltered[0]);
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
       } else {
         setFetchedData([]);
