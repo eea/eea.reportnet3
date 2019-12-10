@@ -231,7 +231,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
             ResourceGroupEnum.DATASCHEMA_PROVIDER);
 
       } else {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             EEAErrorMessage.NOT_ENOUGH_PERMISSION);
       }
     } catch (EEAException e) {
