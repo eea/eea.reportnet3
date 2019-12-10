@@ -28,9 +28,9 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
-  const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
   const [dataflowInitialValues, setDataflowInitialValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
+  const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -99,13 +99,13 @@ export const Dataflows = withRouter(({ match, history }) => {
   }, [user]);
 
   const onCreateDataflow = () => {
-    setCreateDataflowDialogVisible(false);
+    setIsDataflowDialogVisible(false);
     dataFetch();
     onRefreshToken();
   };
 
   const onHideDialog = () => {
-    setCreateDataflowDialogVisible(false);
+    setIsDataflowDialogVisible(false);
     setIsFormReset(false);
   };
 
@@ -121,12 +121,12 @@ export const Dataflows = withRouter(({ match, history }) => {
 
   const onShowAddForm = () => {
     setIsEditForm(false);
-    setCreateDataflowDialogVisible(true);
+    setIsDataflowDialogVisible(true);
   };
 
   const onShowEditForm = () => {
     setIsEditForm(true);
-    setCreateDataflowDialogVisible(true);
+    setIsDataflowDialogVisible(true);
   };
 
   const layout = children => {
@@ -195,9 +195,10 @@ export const Dataflows = withRouter(({ match, history }) => {
         dismissableMask={false}
         header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
-        visible={createDataflowDialogVisible}>
+        visible={isDataflowDialogVisible}>
         <DataflowCrudForm
           dataflowValue={dataflowState.selected}
+          isDialogVisible={isDataflowDialogVisible}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
           onCreate={onCreateDataflow}

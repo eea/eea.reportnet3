@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
@@ -11,13 +11,21 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowCrudForm = ({ dataflowValue, isEditForm, isFormReset, onCreate, onCancel }) => {
-  console.log('RESULT', dataflowValue);
+export const DataflowCrudForm = ({ dataflowValue, isDialogVisible, isEditForm, isFormReset, onCreate, onCancel }) => {
+  const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
-  const resources = useContext(ResourcesContext);
-  const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
-  const createDataflowValidationSchema = Yup.object().shape({
+  const inputRef = useRef();
+
+  useEffect(() => {
+    if (isDialogVisible) {
+      if (!isUndefined(inputRef)) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isDialogVisible]);
+
+  const dataflowCrudValidation = Yup.object().shape({
     dataflowName: Yup.string().required(),
     dataflowDescription: Yup.string().required()
   });
@@ -26,11 +34,19 @@ export const DataflowCrudForm = ({ dataflowValue, isEditForm, isFormReset, onCre
     form.current.resetForm();
   }
 
+  const buildFormikValues = selectedValues => {
+    const formValues = isEditForm ? selectedValues : { name: '', description: '' };
+    return formValues;
+  };
+
+  const initialValues = buildFormikValues(dataflowValue);
+
   return (
     <Formik
       ref={form}
+      enableReinitialize={true}
       initialValues={initialValues}
-      validationSchema={createDataflowValidationSchema}
+      validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         const response = await DataflowService.create(values.dataflowName, values.dataflowDescription);
@@ -41,11 +57,17 @@ export const DataflowCrudForm = ({ dataflowValue, isEditForm, isFormReset, onCre
         }
         setSubmitting(false);
       }}>
-      {({ isSubmitting, errors, touched }) => (
+      {({ isSubmitting, errors, touched, values }) => (
         <Form>
           <fieldset>
             <div className={`formField${!isEmpty(errors.dataflowName) && touched.dataflowName ? ' error' : ''}`}>
-              <Field name="dataflowName" type="text" placeholder={resources.messages['createDataflowName']} />
+              <Field
+                innerRef={inputRef}
+                name="dataflowName"
+                placeholder={resources.messages['createDataflowName']}
+                type="text"
+                value={values.name}
+              />
             </div>
             <div
               className={`formField${
@@ -55,6 +77,7 @@ export const DataflowCrudForm = ({ dataflowValue, isEditForm, isFormReset, onCre
                 name="dataflowDescription"
                 component="textarea"
                 placeholder={resources.messages['createDataflowDescription']}
+                value={values.description}
               />
             </div>
             <div className={styles.search}>
