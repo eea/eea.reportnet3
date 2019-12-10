@@ -3,8 +3,6 @@ import React, { useState, useEffect, useContext, useRef, useReducer } from 'reac
 import { withRouter } from 'react-router-dom';
 import { capitalize, isEmpty, isUndefined, isNull, isEqual } from 'lodash';
 
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
-
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
 
@@ -15,22 +13,19 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
-import { Menu } from 'primereact/menu';
-import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
-import { sortingReducer } from './_functions/Reducers/sortingReducer';
+import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/Dataset';
@@ -38,6 +33,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 import { routes } from 'ui/routes';
+import { DataViewerToolbar } from './_components/DataViewerToolbar/DataViewerToolbar';
 
 const DataViewer = withRouter(
   ({
@@ -70,33 +66,29 @@ const DataViewer = withRouter(
     // const [datasetHasData, setDatasetHasData] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
-    const [exportTableData, setExportTableData] = useState(undefined);
-    const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
-    const [initialRecordValue, setInitialRecordValue] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
     //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
     const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
-    const [visibilityColumnIcon, setinvisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
-    const [invisibleColumns, setinvisibleColumns] = useState([]);
+    const [invisibleColumns, setInvisibleColumns] = useState([]);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       totalRecords: 0,
       totalFilteredRecords: 0,
       firstPageRecord: 0,
       recordsPerPage: 10,
+      initialRecordValue: undefined,
       isRecordDeleted: false,
       editedRecord: {},
       selectedRecord: {},
@@ -105,7 +97,7 @@ const DataViewer = withRouter(
       pastedRecords: undefined,
       fetchedDataFirstRecord: []
     });
-    const [sorting, dispatchSorting] = useReducer(sortingReducer, {
+    const [sort, dispatchSort] = useReducer(sortReducer, {
       sortField: undefined,
       sortOrder: undefined
     });
@@ -116,10 +108,7 @@ const DataViewer = withRouter(
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
-    let exportMenuRef = useRef();
     let divRef = useRef();
-    let dropdownFilterRef = useRef();
-    let filterMenuRef = useRef();
     let growlRef = useRef();
 
     useEffect(() => {
@@ -184,7 +173,7 @@ const DataViewer = withRouter(
         type: 'SET_FIRST_PAGE_RECORD',
         payload: Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage
       });
-      dispatchSorting({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
+      dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
       onFetchData(
         undefined,
         undefined,
@@ -279,21 +268,6 @@ const DataViewer = withRouter(
       // }
     }, [colsSchema, columnOptions, records.selectedRecord, records.editedRecord, initialCellValue]);
 
-    const showFilters = columnKeys => {
-      const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
-      const currentinvisibleColumns = originalColumns.filter(
-        column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
-      );
-      setColumns(currentinvisibleColumns);
-      setinvisibleColumns(currentinvisibleColumns);
-
-      if (isFiltered(originalColumns, currentinvisibleColumns)) {
-        setinvisibleColumnIcon('eye-slash');
-      } else {
-        setinvisibleColumnIcon('eye');
-      }
-    };
-
     const getLevelErrorFilters = () => {
       let filters = [];
       levelErrorTypesWithCorrects.forEach(value => {
@@ -316,14 +290,8 @@ const DataViewer = withRouter(
     };
 
     useEffect(() => {
-      onFetchData(sorting.sortField, sorting.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
     }, [levelErrorValidations]);
-
-    useEffect(() => {
-      if (!isUndefined(exportTableData)) {
-        DownloadFile(exportTableData, exportTableDataName);
-      }
-    }, [exportTableData]);
 
     useEffect(() => {
       if (confirmPasteVisible) {
@@ -349,7 +317,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sorting.sortField, sorting.sortOrder, event.first, event.rows, levelErrorValidations);
+      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -431,18 +399,6 @@ const DataViewer = withRouter(
       setInitialCellValue(value);
       if (!isEditing) {
         setIsEditing(true);
-      }
-    };
-
-    const onExportTableData = async fileType => {
-      setIsLoadingFile(true);
-      try {
-        setExportTableDataName(createTableName(tableName, fileType));
-        setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoadingFile(false);
       }
     };
 
@@ -562,8 +518,8 @@ const DataViewer = withRouter(
 
     const onRefresh = () => {
       onFetchData(
-        sorting.sortField,
-        sorting.sortOrder,
+        sort.sortField,
+        sort.sortOrder,
         records.firstPageRecord,
         records.recordsPerPage,
         levelErrorValidations
@@ -577,8 +533,7 @@ const DataViewer = withRouter(
 
     const onSelectRecord = val => {
       setIsNewRecord(false);
-      dispatchRecords({ type: 'SET_EDITED_RECORD', payload: { ...val } });
-      setInitialRecordValue(getInitialRecordValues(val));
+      dispatchRecords({ type: 'SET_EDITED_RECORD', payload: { record: { ...val }, colsSchema } });
     };
 
     const onSaveRecord = async record => {
@@ -622,12 +577,20 @@ const DataViewer = withRouter(
       }
     };
 
+    const onSetColumns = currentColumns => {
+      setColumns(currentColumns);
+    };
+
+    const onSetInvisibleColumns = currentInvisibleColumns => {
+      setInvisibleColumns(currentInvisibleColumns);
+    };
+
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
     };
 
     const onSort = event => {
-      dispatchSorting({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
+      dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
@@ -734,11 +697,14 @@ const DataViewer = withRouter(
 
     const changeRecordInTable = (tableData, rowIndex) => {
       let record = tableData[rowIndex];
-      const recordFiltered = getInitialRecordValues(record);
-      if (!isEqual(recordFiltered.flat(), initialRecordValue.flat())) {
-        console.log({ initialRecordValue });
-        for (let i = 0; i < initialRecordValue.length; i++) {
-          record = RecordUtils.changeRecordValue(record, initialRecordValue[i][0], initialRecordValue[i][1]);
+      const recordFiltered = RecordUtils.getInitialRecordValues(record, colsSchema);
+      if (!isEqual(recordFiltered.flat(), records.initialRecordValue.flat())) {
+        for (let i = 0; i < records.initialRecordValue.length; i++) {
+          record = RecordUtils.changeRecordValue(
+            record,
+            records.initialRecordValue[i][0],
+            records.initialRecordValue[i][1]
+          );
         }
 
         tableData[rowIndex] = record;
@@ -749,10 +715,6 @@ const DataViewer = withRouter(
     const changeCellValue = (tableData, rowIndex, field, value) => {
       tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
       return tableData;
-    };
-
-    const createTableName = (tableName, fileType) => {
-      return `${tableName}.${fileType}`;
     };
 
     const orderValidationsByLevelError = validations => {
@@ -951,48 +913,12 @@ const DataViewer = withRouter(
       return value.length > 0 ? value[0].fieldData[field] : '';
     };
 
-    const getExportButtonPosition = e => {
-      const exportButton = e.currentTarget;
-      const left = `${exportButton.offsetLeft}px`;
-      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-      const top = `${topValue}px `;
-      const menu = exportButton.nextElementSibling;
-      menu.style.top = top;
-      menu.style.left = left;
-    };
-
-    const getInitialRecordValues = record => {
-      const initialValues = [];
-      const filteredColumns = colsSchema.filter(
-        column =>
-          column.key !== 'actions' &&
-          column.key !== 'recordValidation' &&
-          column.key !== 'id' &&
-          column.key !== 'datasetPartitionId'
-      );
-      filteredColumns.forEach(column => {
-        if (!isUndefined(record.dataRow)) {
-          const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          initialValues.push([column.field, field.fieldData[column.field]]);
-        }
-      });
-      return initialValues;
-    };
-
     const getRecordId = (tableData, record) => {
       return tableData
         .map(e => {
           return e.recordId;
         })
         .indexOf(record.recordId);
-    };
-
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
-        return true;
-      } else {
-        return false;
-      }
     };
 
     const newRecordForm = colsSchema.map((column, i) => {
@@ -1202,122 +1128,30 @@ const DataViewer = withRouter(
         }
       }
     };
+
     return (
       <SnapshotContext.Provider>
-        <Toolbar className={styles.dataViewerToolbar}>
-          <div className="p-toolbar-group-left">
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR}
-              icon={'export'}
-              label={resources.messages['import']}
-              onClick={() => setImportDialogVisible(true)}
-            />
-
-            <Button
-              disabled={!hasWritePermissions}
-              id="buttonExportTable"
-              className={`p-button-rounded p-button-secondary`}
-              icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
-              label={resources.messages['exportTable']}
-              onClick={event => {
-                exportMenuRef.current.show(event);
-              }}
-            />
-            <Menu
-              model={config.exportTypes.map(type => ({
-                label: type.text,
-                icon: config.icons['archive'],
-                command: () => onExportTableData(type.code)
-              }))}
-              popup={true}
-              ref={exportMenuRef}
-              id="exportTableMenu"
-              onShow={e => getExportButtonPosition(e)}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords)}
-              icon={'trash'}
-              label={resources.messages['deleteTable']}
-              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={false}
-              icon={visibilityColumnIcon}
-              label={resources.messages['showHideColumns']}
-              onClick={event => {
-                dropdownFilterRef.current.show(event);
-              }}
-            />
-            <DropdownFilter
-              filters={visibilityDropdownFilter}
-              popup={true}
-              ref={dropdownFilterRef}
-              id="exportTableMenu"
-              showFilters={showFilters}
-              onShow={e => {
-                getExportButtonPosition(e);
-              }}
-            />
-
-            <Button
-              className={'p-button-rounded p-button-secondary'}
-              disabled={!tableHasErrors}
-              icon="filter"
-              iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
-              label={resources.messages['validationFilter']}
-              onClick={event => {
-                filterMenuRef.current.show(event);
-              }}
-            />
-            <DropdownFilter
-              disabled={isLoading}
-              filters={validationDropdownFilter}
-              popup={true}
-              ref={filterMenuRef}
-              id="exportTableMenu"
-              showFilters={showValidationFilter}
-              onShow={e => {
-                getExportButtonPosition(e);
-              }}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'groupBy'}
-              label={resources.messages['groupBy']}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'sort'}
-              label={resources.messages['sort']}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon="filter"
-              label={resources.messages['filters']}
-              onClick={() => {}}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={() => onRefresh()}
-            />
-          </div>
-        </Toolbar>
+        <DataViewerToolbar
+          datasetId={datasetId}
+          hasWritePermissions={hasWritePermissions}
+          isFilterValidationsActive={isFilterValidationsActive}
+          isWebFormMMR={isWebFormMMR}
+          isLoading={isLoading}
+          onRefresh={onRefresh}
+          onSetColumns={onSetColumns}
+          onSetInvisibleColumns={onSetInvisibleColumns}
+          onSetVisible={onSetVisible}
+          originalColumns={originalColumns}
+          records={records}
+          setDeleteDialogVisible={setDeleteDialogVisible}
+          setImportDialogVisible={setImportDialogVisible}
+          showValidationFilter={showValidationFilter}
+          tableHasErrors={tableHasErrors}
+          tableId={tableId}
+          tableName={tableName}
+          validationDropdownFilter={validationDropdownFilter}
+          visibilityDropdownFilter={visibilityDropdownFilter}
+        />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
@@ -1371,8 +1205,8 @@ const DataViewer = withRouter(
             scrollHeight="70vh"
             selectionMode="single"
             sortable={true}
-            sortField={sorting.sortField}
-            sortOrder={sorting.sortOrder}
+            sortField={sort.sortField}
+            sortOrder={sort.sortOrder}
             totalRecords={
               !isNull(records.totalFilteredRecords) &&
               !isUndefined(records.totalFilteredRecords) &&

@@ -16,7 +16,6 @@ export const RecordUtils = {
       .filter(l => l.length > 0)
       .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
     //Maximum number of records to paste should be 500
-    console.log({ pastedRecords });
     const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
     copiedClipboardRecords.forEach(row => {
       let emptyRecord = RecordUtils.createEmptyObject(colsSchema, fetchedDataFirstRow);
@@ -35,6 +34,23 @@ export const RecordUtils = {
     return copiedBulkRecords.slice(0, 500).map((record, i) => {
       return { ...record, recordId: i };
     });
+  },
+  getInitialRecordValues: (record, colsSchema) => {
+    const initialValues = [];
+    const filteredColumns = colsSchema.filter(
+      column =>
+        column.key !== 'actions' &&
+        column.key !== 'recordValidation' &&
+        column.key !== 'id' &&
+        column.key !== 'datasetPartitionId'
+    );
+    filteredColumns.forEach(column => {
+      if (!isUndefined(record.dataRow)) {
+        const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+        initialValues.push([column.field, field.fieldData[column.field]]);
+      }
+    });
+    return initialValues;
   },
   getNumCopiedRecords: pastedData => {
     if (!isUndefined(pastedData)) {

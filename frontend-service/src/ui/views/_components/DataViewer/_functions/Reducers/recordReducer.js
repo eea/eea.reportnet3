@@ -24,7 +24,12 @@ export const recordReducer = (state, { type, payload }) => {
         let updatedRecord = RecordUtils.changeRecordValue({ ...state.editedRecord }, payload.property, payload.value);
         return { ...state, editedRecord: updatedRecord };
       } else {
-        return { ...state, editedRecord: payload, selectedRecord: payload };
+        return {
+          ...state,
+          editedRecord: payload.record,
+          selectedRecord: payload.record,
+          initialRecordValue: RecordUtils.getInitialRecordValues(payload.record, payload.colsSchema)
+        };
       }
     case 'SET_NEW_RECORD':
       if (!isUndefined(payload.property)) {
