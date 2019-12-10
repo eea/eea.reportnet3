@@ -32,25 +32,23 @@ const FilterList = ({
   });
 
   const filterByReporters = () => {
-    if (labels.length > 0) {
-      return (
-        <AccordionTab header={resources.messages['filterByDataset']}>
-          <ul className={styles.list}>
-            {labels.map(item => (
-              <ReportersListItem
-                key={item}
-                datasetSchemaId={datasetSchemaId}
-                filterDispatch={filterDispatch}
-                item={item}
-                reporterFilters={reporterFilters}
-              />
-            ))}
-          </ul>
-        </AccordionTab>
-      );
-    } else {
-      return <AccordionTab header={resources.messages['filterByDataset']} disabled={true} />;
-    }
+    return labels.length > 0 ? (
+      <AccordionTab header={resources.messages['filterByDataset']}>
+        <ul className={styles.list}>
+          {labels.map(item => (
+            <ReportersListItem
+              key={item}
+              datasetSchemaId={datasetSchemaId}
+              filterDispatch={filterDispatch}
+              item={item}
+              reporterFilters={reporterFilters}
+            />
+          ))}
+        </ul>
+      </AccordionTab>
+    ) : (
+      <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
+    );
   };
 
   const filterByTables = () => {
