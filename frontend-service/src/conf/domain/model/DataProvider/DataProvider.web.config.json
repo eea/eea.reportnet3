@@ -1,0 +1,7 @@
+{   
+    "all": "/dataProvider/{:dataflowId}",
+    "create": "/dataProvider?dataflowId={:dataflowId}",
+    "deleteById":"/dataProvider/{:dataProviderId}",
+    "update":"/dataProvider"
+
+}

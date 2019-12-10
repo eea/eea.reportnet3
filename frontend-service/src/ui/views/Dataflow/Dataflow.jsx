@@ -16,6 +16,7 @@ import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
+import { DataProvidersList } from './_components/DataProvidersList';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
@@ -46,7 +47,7 @@ export const Dataflow = withRouter(({ history, match }) => {
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
+  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(true);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
@@ -517,7 +518,7 @@ export const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <ContributorsList dataflowId={dataflowData.id} />
+          <DataProvidersList dataflowId={dataflowData.id} />
         </Dialog>
 
         <Dialog
