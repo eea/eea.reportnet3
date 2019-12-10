@@ -280,6 +280,19 @@ public class DatasetSnapshotServiceTest {
   }
 
 
+  @Test
+  public void testDeleteAllSnapshots() throws Exception {
+
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    snapshots.add(snap);
+    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
+    datasetSnapshotService.deleteAllSnapshots(1L);
+    Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
+  }
+
+
 
   @After
   public void afterTests() {

@@ -112,4 +112,12 @@ public interface DatasetSnapshotService {
    */
   void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException;
 
+  /**
+   * Delete all snapshots.
+   *
+   * @param idDataset the id dataset
+   * @throws EEAException the EEA exception
+   */
+  void deleteAllSnapshots(Long idDataset) throws EEAException;
+
 }
