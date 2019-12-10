@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import style from '../BigButton.module.css';
+import styles from './Menu.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
 class Menu extends Component {
@@ -89,13 +89,13 @@ class Menu extends Component {
     const { model } = this.props;
     if (model) {
       return (
-        <div className={`${style.dropDownMenu} p-menu-overlay-visible`} style={this.state.style}>
+        <div className={`${styles.dropDownMenu} p-menu-overlay-visible`} style={this.state.style}>
           <ul>
             {model ? (
               model.map((item, i) => (
                 <li key={i}>
                   <a
-                    className={item.disabled ? style.menuItemDisabled : null}
+                    className={item.disabled ? styles.menuItemDisabled : null}
                     onClick={e => {
                       e.preventDefault();
                       if (!item.disabled) item.command();

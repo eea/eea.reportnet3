@@ -174,7 +174,7 @@ const ValidationViewer = React.memo(
 
       setLevelErrorsFilter(levelErrorsDeselected);
 
-      setIsFilteredLevelErrors(isFiltered(allLevelErrorsFilter, levelErrorsDeselected));
+      setIsFilteredLevelErrors(levelErrorsDeselected.length > 0);
 
       if (levelErrorsDeselected.length <= 0) {
         checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
@@ -197,7 +197,7 @@ const ValidationViewer = React.memo(
         setAreActiveFilters(true);
       }
       setTypeEntitiesFilter(typeEntitiesDeselected);
-      setIsFilteredTypeEntities(isFiltered(allTypeEntitiesFilter, typeEntitiesDeselected));
+      setIsFilteredTypeEntities(typeEntitiesDeselected.length > 0);
       onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
       setFirstRow(0);
     };
@@ -209,7 +209,7 @@ const ValidationViewer = React.memo(
       } else {
         setAreActiveFilters(true);
       }
-      setIsFilteredOrigins(isFiltered(allOriginsFilter, originsDeselected));
+      setIsFilteredOrigins(originsDeselected.length > 0);
       onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
       setFirstRow(0);
     };
@@ -247,16 +247,8 @@ const ValidationViewer = React.memo(
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length > 0) {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    const checkActiveFilters = (originsFilterParam, levelErrorsFilterParam, typeEntitiesFilterParam) => {
-      if (originsFilterParam || levelErrorsFilterParam || typeEntitiesFilterParam) {
+    const checkActiveFilters = (originsFilter, levelErrorsFilter, typeEntitiesFilter) => {
+      if (originsFilter || levelErrorsFilter || typeEntitiesFilter) {
         setAreActiveFilters(true);
       } else {
         setAreActiveFilters(false);
@@ -291,7 +283,7 @@ const ValidationViewer = React.memo(
       }
     };
 
-    const totalCount = () => {
+    const totalCountWithoutFilters = () => {
       return (
         <span>
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
@@ -313,7 +305,7 @@ const ValidationViewer = React.memo(
       );
     };
 
-    const filteredCountSameValue = () => {
+    const filteredCountWithSameAsTotalValue = () => {
       return (
         <span>
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
@@ -326,7 +318,9 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
+        return areActiveFilters && totalFilteredRecords !== 0
+          ? filteredCountWithSameAsTotalValue()
+          : totalCountWithoutFilters();
       } else {
         return filteredCount();
       }
