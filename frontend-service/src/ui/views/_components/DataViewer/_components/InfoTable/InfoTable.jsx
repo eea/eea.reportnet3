@@ -12,7 +12,7 @@ import { InfoTableMessages } from './_components/InfoTableMessages';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const InfoTable = ({ data, filteredColumns, numRecords, onDeletePastedRecord }) => {
+export const InfoTable = ({ data, filteredColumns, numCopiedRecords, onDeletePastedRecord }) => {
   const resources = useContext(ResourcesContext);
 
   const actionTemplate = record => {
@@ -73,7 +73,7 @@ export const InfoTable = ({ data, filteredColumns, numRecords, onDeletePastedRec
 
   const totalCount = (
     <span>
-      {resources.messages['totalPastedRecords']} {!isUndefined(numRecords) ? data.length : 0}{' '}
+      {resources.messages['totalPastedRecords']} {!isUndefined(numCopiedRecords) ? data.length : 0}{' '}
     </span>
   );
 
@@ -92,7 +92,7 @@ export const InfoTable = ({ data, filteredColumns, numRecords, onDeletePastedRec
 
   return (
     <React.Fragment>
-      <InfoTableMessages data={data} filteredColumns={filteredColumns} numRecords={numRecords} />
+      <InfoTableMessages data={data} filteredColumns={filteredColumns} numCopiedRecords={numCopiedRecords} />
       <hr />
       <br />
       {!isUndefined(data) && data.length > 0 ? (
@@ -104,7 +104,7 @@ export const InfoTable = ({ data, filteredColumns, numRecords, onDeletePastedRec
           paginatorRight={totalCount}
           rowsPerPageOptions={[5, 10]}
           rows={5}
-          totalRecords={numRecords}>
+          totalRecords={numCopiedRecords}>
           {getColumns()}
         </DataTable>
       ) : (
