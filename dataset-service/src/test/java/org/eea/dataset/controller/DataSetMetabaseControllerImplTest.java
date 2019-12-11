@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -175,5 +176,9 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(datasetMetabaseService, times(1)).getGlobalStatistics(Mockito.any());
   }
 
-
+  @Test
+  public void getReportingsIdBySchemaIdTest() {
+    Mockito.when(reportingDatasetService.getDataSetIdBySchemaId(Mockito.any())).thenReturn(null);
+    Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
+  }
 }

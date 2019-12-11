@@ -91,7 +91,6 @@ public interface DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
-   * @throws EEAException
    */
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);

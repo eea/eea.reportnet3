@@ -33,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -197,8 +196,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -411,25 +409,29 @@ public class DataSetControllerImpl implements DatasetController {
   /**
    * Delete import table.
    *
-   * @param dataSetId the data set id
-   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
    */
+  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
-  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
-      @PathVariable("idTableSchema") final String idTableSchema) {
-    if (dataSetId == null || dataSetId < 1) {
+  public void deleteImportTable(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
+      @LockCriteria(
+          name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+    if (datasetId == null || datasetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (idTableSchema == null) {
+    } else if (tableSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    LOG.info("Executing delete table value with id {} from dataset {}", idTableSchema, dataSetId);
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
-      deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
+      // This method will release the lock
+      deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

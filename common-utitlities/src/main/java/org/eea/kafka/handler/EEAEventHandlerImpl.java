@@ -4,6 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.factory.EEAEventCommandFactory;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,10 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
   public void processMessage(EEAEventVO message) throws EEAException {
     EEAEventHandlerCommand command = eeaEentCommandFactory.getEventCommand(message);
     if (null != command) {
+      if (message.getData().containsKey("user")) {
+        String user = String.valueOf(message.getData().get("user"));
+        ThreadPropertiesManager.setVariable("user", user);
+      }
       command.execute(message);
     }
   }

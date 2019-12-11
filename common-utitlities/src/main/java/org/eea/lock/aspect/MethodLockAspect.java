@@ -14,9 +14,8 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,10 +40,10 @@ public class MethodLockAspect {
   public Object addLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
     Object rtn = null;
-    Authentication aux = SecurityContextHolder.getContext().getAuthentication();
+    Object aux = ThreadPropertiesManager.getVariable("user");
 
     LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint));
+        aux != null ? (String) aux : null, LockType.METHOD, getLockCriteria(joinPoint));
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();

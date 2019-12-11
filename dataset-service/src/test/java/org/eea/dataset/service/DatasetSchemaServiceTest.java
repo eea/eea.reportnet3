@@ -37,6 +37,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +134,7 @@ public class DatasetSchemaServiceTest {
    */
   @Before
   public void initMocks() {
-
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -513,7 +514,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());

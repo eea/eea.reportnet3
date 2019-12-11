@@ -30,13 +30,13 @@ public interface DocumentController {
    * Upload document .
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the dataflow id
    * @param description the description
    * @param language the language
    * @param isPublic the is public
    */
-  @PostMapping(value = "/upload/{dataFlowId}")
-  void uploadDocument(final MultipartFile file, @PathVariable("dataFlowId") final Long dataFlowId,
+  @PostMapping(value = "/upload/{dataflowId}")
+  void uploadDocument(final MultipartFile file, @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic);

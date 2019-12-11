@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,16 +64,17 @@ public class DocumentControllerImpl implements DocumentController {
    * Upload document.
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the dataflow id
    * @param description the description
    * @param language the language
    * @param isPublic the is public
    */
   @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @HystrixCommand
-  @PostMapping(value = "/upload/{dataFlowId}")
+  @PostMapping(value = "/upload/{dataflowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId,
+      @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic) {
@@ -80,13 +82,13 @@ public class DocumentControllerImpl implements DocumentController {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
-    if (dataFlowId == null) {
+    if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
       DocumentVO documentVO = new DocumentVO();
-      documentVO.setDataflowId(dataFlowId);
+      documentVO.setDataflowId(dataflowId);
       documentVO.setDescription(description);
       documentVO.setLanguage(language);
       documentVO.setIsPublic(isPublic);
