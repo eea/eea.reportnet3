@@ -634,6 +634,8 @@ public class DataSetControllerImplTest {
         .thenReturn("".getBytes());
     Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
     dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(datasetService, times(1)).getFileName(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   @Test
@@ -642,6 +644,8 @@ public class DataSetControllerImplTest {
         .thenReturn("".getBytes());
     Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(false);
     dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(designDatasetService, times(1)).getFileNameDesign(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 
