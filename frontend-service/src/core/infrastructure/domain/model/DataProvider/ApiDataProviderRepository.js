@@ -7,6 +7,10 @@ const all = async dataflowId => {
     dataProviderDTO => new DataProvider(dataProviderDTO.id, dataProviderDTO.email, dataProviderDTO.name)
   );
 };
+const allRepresentativesOf = async type => {
+  const representativesDTO = await apiDataProvider.allRepresentativesOf(type);
+  return representativesDTO;
+};
 
 const add = async (dataflowId, email, name) => {
   return await apiDataProvider.add(dataflowId, email, name);
@@ -23,6 +27,7 @@ const update = async (dataflowId, dataProviderId, dataProviderEmail, dataProvide
 
 export const ApiDataProviderRepository = {
   all,
+  allRepresentativesOf,
   add,
   deleteById,
   update
