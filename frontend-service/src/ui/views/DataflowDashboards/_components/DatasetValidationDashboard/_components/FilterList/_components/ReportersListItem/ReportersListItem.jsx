@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from './ReportersListItem.module.scss';
 
-export const ReportersListItem = ({ datasetSchemaId, filterDispatch, item, reporterFilters }) => {
+const ReportersListItem = ({ datasetSchemaId, filterDispatch, item, reporterFilters }) => {
   return (
     <li className={styles.listItem}>
       <input
@@ -23,3 +23,5 @@ export const ReportersListItem = ({ datasetSchemaId, filterDispatch, item, repor
     </li>
   );
 };
+
+export { ReportersListItem };

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { uniqBy } from 'lodash';
 
@@ -7,6 +7,7 @@ import styles from './FilterList.module.scss';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { ReportersListItem } from './_components/ReportersListItem';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
@@ -21,6 +22,7 @@ const FilterList = ({
   tableFilters
 }) => {
   const resources = useContext(ResourcesContext);
+  const [selectAllReporters, setSelectAllReporters] = useState(true);
 
   const tables = [];
   const allTables = uniqBy(datasets, 'tableId');
@@ -44,6 +46,13 @@ const FilterList = ({
               reporterFilters={reporterFilters}
             />
           ))}
+          <SelectAllFilters
+            datasetSchemaId={datasetSchemaId}
+            filterDispatch={filterDispatch}
+            reporterFilters={reporterFilters}
+            labels={labels}
+            setSelectAllReporters={selectAllReporters}
+          />
         </ul>
       </AccordionTab>
     ) : (

@@ -5,7 +5,7 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const StatusList = ({ levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
+const StatusList = ({ levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
@@ -31,3 +31,5 @@ export const StatusList = ({ levelErrors, filterDispatch, statusFilters, dataset
   });
   return <ul className={styles.list}>{errorListFilters}</ul>;
 };
+
+export { StatusList };

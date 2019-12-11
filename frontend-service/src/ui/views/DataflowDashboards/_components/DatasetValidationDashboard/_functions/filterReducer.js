@@ -83,6 +83,31 @@ export const filterReducer = (state, { type, payload }) => {
         reporterFilter: reportersLabels,
         data: filteredTableData
       };
+
+    case 'REPORTER_CHECKBOX_SELECT_ALL_ON':
+      // console.log('ALL', payload.allFilters);
+      // console.log('FILTERED', payload.reportersNotSelected);
+
+      // reportersLabels = [...state.reporterFilter, payload.label];
+
+      // filteredTableData = onFilteringData(state.originalData, state.tableFilter, reportersLabels, state.statusFilter);
+
+      return {
+        ...state,
+        reporterFilter: [],
+        data: state.originalData
+      };
+
+    case 'REPORTER_CHECKBOX_SELECT_ALL_OFF':
+      // msgStatusTypes = state.statusFilter.filter(status => status !== payload.msg);
+      // console.log(state, payload);
+      // filteredTableData = onFilteringData(state.originalData, state.tableFilter, state.reporterFilter, msgStatusTypes);
+      return {
+        ...state,
+        statusFilter: msgStatusTypes,
+        data: []
+      };
+
     case 'STATUS_FILTER_ON':
       msgStatusTypes = state.statusFilter.filter(status => status !== payload.msg);
 
@@ -93,6 +118,7 @@ export const filterReducer = (state, { type, payload }) => {
         statusFilter: msgStatusTypes,
         data: filteredTableData
       };
+
     case 'STATUS_FILTER_OFF':
       msgStatusTypes = [...state.statusFilter, payload.msg];
       filteredTableData = onFilteringData(state.originalData, state.tableFilter, state.reporterFilter, msgStatusTypes);

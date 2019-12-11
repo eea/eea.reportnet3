@@ -194,7 +194,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
       {isVisible ? (
         <div className={`rep-row ${styles.chart_released}`}>
           <h3 className={styles.dashboardName}>{datasetSchemaName}</h3>
-          {!isEmpty(filterState.data) ? (
+          {filterState.data ? (
             <>
               <FilterList
                 datasetSchemaId={datasetSchemaId}
