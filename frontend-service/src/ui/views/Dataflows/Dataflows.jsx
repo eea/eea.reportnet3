@@ -31,7 +31,6 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
   const [dataflowInitialValues, setDataflowInitialValues] = useState({});
-  const [dataflowNewValues, setDataflowNewValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
@@ -95,9 +94,12 @@ export const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
-  const onEditDataflow = (newName, newDescription, id) => {
+  const onEditDataflow = (id, newName, newDescription) => {
     setIsDataflowDialogVisible(false);
-    setDataflowNewValues({ name: newName, description: newDescription, id: id });
+    dataflowDispatch({
+      type: 'ON_EDIT_DATAFLOW',
+      payload: { id: id, name: newName, description: newDescription }
+    });
   };
 
   const onHideDialog = () => {
@@ -164,7 +166,7 @@ export const Dataflows = withRouter(({ match, history }) => {
             <DataflowsList
               dataFetch={dataFetch}
               dataflowDispatch={dataflowDispatch}
-              dataflowNewValues={dataflowNewValues}
+              dataflowNewValues={dataflowState.selectedDataflow}
               isCustodian={isCustodian}
               listContent={acceptedContent}
               listDescription={resources.messages.acceptedDataflowText}
