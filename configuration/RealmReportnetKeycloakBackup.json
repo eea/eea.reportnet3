@@ -486,6 +486,42 @@
       "subGroups": []
     },
     {
+      "id": "a44611f9-2560-4086-a2f4-80acc69bb33b",
+      "name": "Dataflow-6-DATA_CUSTODIAN",
+      "path": "/Dataflow-6-DATA_CUSTODIAN",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "id": "acf64f3f-8c3c-4b8a-b876-34e8754a4529",
+      "name": "Dataschema-381-DATA_CUSTODIAN",
+      "path": "/Dataschema-381-DATA_CUSTODIAN",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "id": "07877c67-e9ca-4269-be85-12f14c9a4589",
+      "name": "Dataschema-383-DATA_CUSTODIAN",
+      "path": "/Dataschema-383-DATA_CUSTODIAN",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "id": "e55cc884-baec-42f0-bf9e-4c6d72120f5c",
+      "name": "Dataschema-385-DATA_CUSTODIAN",
+      "path": "/Dataschema-385-DATA_CUSTODIAN",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
       "id": "99d46303-7ad8-49e3-a854-90f82b0ff83b",
       "name": "Dataset-1-DATA_CUSTODIAN",
       "path": "/Dataset-1-DATA_CUSTODIAN",
@@ -2034,6 +2070,17 @@
     "offline_access",
     "uma_authorization"
   ],
+  "defaultGroups": [
+    "/Dataset-71-DATA_CUSTODIAN",
+    "/Dataset-70-DATA_CUSTODIAN",
+    "/Dataset-72-DATA_CUSTODIAN",
+    "/Dataflow-5-DATA_CUSTODIAN",
+    "/Dataset-75-DATA_CUSTODIAN",
+    "/Dataset-74-DATA_CUSTODIAN",
+    "/Dataflow-2-DATA_PROVIDER",
+    "/Dataset-73-DATA_CUSTODIAN",
+    "/Dataflow-3-DATA_PROVIDER"
+  ],
   "requiredCredentials": [
     "password"
   ],
@@ -2537,7 +2584,17 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
+            }
+          },
+          {
+            "id": "d9d85233-7bdc-4e41-8552-47d638588a57",
+            "name": "ROLE_READ_LEGAL_INSTRUMENT",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2552,13 +2609,13 @@
             }
           },
           {
-            "id": "d9d85233-7bdc-4e41-8552-47d638588a57",
-            "name": "ROLE_READ_LEGAL_INSTRUMENT",
+            "id": "7b9a9f53-e8a4-4294-99eb-10004b080448",
+            "name": "ROLE_MANAGE_SUBMISSION_AGREEMENT",
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
             }
           },
           {
@@ -2569,17 +2626,17 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
             }
           },
           {
-            "id": "7b9a9f53-e8a4-4294-99eb-10004b080448",
-            "name": "ROLE_MANAGE_SUBMISSION_AGREEMENT",
+            "id": "2569dcbe-8a72-45f6-a861-7084f912f138",
+            "name": "ROLE_READ_SUBMISSION_AGREEMENT",
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2590,17 +2647,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "2569dcbe-8a72-45f6-a861-7084f912f138",
-            "name": "ROLE_READ_SUBMISSION_AGREEMENT",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
             }
           },
           {
@@ -2610,7 +2657,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2620,7 +2667,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2630,7 +2677,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2640,7 +2687,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2650,7 +2697,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DELEGATE_DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DELEGATE_DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2670,7 +2717,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2680,7 +2727,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DELEGATE_DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"DELEGATE_DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2700,7 +2747,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2720,7 +2767,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2760,7 +2807,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2770,7 +2817,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_REQUESTER\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_REQUESTER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2780,7 +2827,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false}]"
             }
           },
           {
@@ -2800,7 +2847,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_PROVIDER\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
             }
           },
           {
@@ -2820,7 +2867,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
             }
           },
           {
@@ -2840,7 +2887,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"DATA_CUSTODIAN\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
+              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_CUSTODIAN\",\"required\":false}]"
             }
           },
           {
@@ -2850,7 +2897,7 @@
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "roles": "[{\"id\":\"reportnet/uma_protection\",\"required\":false},{\"id\":\"DATA_STEWARD\",\"required\":false}]"
+              "roles": "[{\"id\":\"DATA_STEWARD\",\"required\":false},{\"id\":\"reportnet/uma_protection\",\"required\":false}]"
             }
           },
           {
@@ -2887,18 +2934,6 @@
             }
           },
           {
-            "id": "d3366d48-3a3b-473b-8cac-a7c2dbf8f5a9",
-            "name": "Default Permission",
-            "description": "A permission that applies to the default resource type",
-            "type": "resource",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "defaultResourceType": "urn:reportnet:resources:default",
-              "applyPolicies": "[\"Default Policy\"]"
-            }
-          },
-          {
             "id": "e6497e8a-8f69-45bf-9ab4-285397323b8c",
             "name": "DELETE_DATAFLOW",
             "type": "scope",
@@ -2908,6 +2943,18 @@
               "resources": "[\"Dataflow\"]",
               "scopes": "[\"MANAGE\"]",
               "applyPolicies": "[\"ROLE_MANAGE_DATAFLOW\"]"
+            }
+          },
+          {
+            "id": "d3366d48-3a3b-473b-8cac-a7c2dbf8f5a9",
+            "name": "Default Permission",
+            "description": "A permission that applies to the default resource type",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "urn:reportnet:resources:default",
+              "applyPolicies": "[\"Default Policy\"]"
             }
           },
           {
@@ -3817,13 +3864,13 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
+            "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
             "saml-user-property-mapper",
             "saml-user-attribute-mapper",
             "saml-role-list-mapper",
-            "oidc-address-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-full-name-mapper",
+            "oidc-address-mapper",
             "oidc-sha256-pairwise-sub-mapper"
           ]
         }
@@ -3876,14 +3923,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-usermodel-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
             "saml-role-list-mapper",
+            "oidc-address-mapper",
             "saml-user-attribute-mapper",
+            "oidc-usermodel-property-mapper",
             "saml-user-property-mapper",
-            "oidc-address-mapper"
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-full-name-mapper"
           ]
         }
       }
@@ -3933,7 +3980,7 @@
   ],
   "authenticationFlows": [
     {
-      "id": "ed37545b-bf00-4e3a-9ed4-f3312ae6308b",
+      "id": "8183f3e0-ee3d-4be6-8c06-77e82a555535",
       "alias": "Handle Existing Account",
       "description": "Handle what to do if there is existing account with same email/username like authenticated identity provider",
       "providerId": "basic-flow",
@@ -3964,7 +4011,7 @@
       ]
     },
     {
-      "id": "08f2e42f-fa00-4a7a-ac60-1218f91c7f15",
+      "id": "2228374c-8b96-4f6b-9f44-cde29407c86e",
       "alias": "Verify Existing Account by Re-authentication",
       "description": "Reauthentication of existing account",
       "providerId": "basic-flow",
@@ -3988,7 +4035,7 @@
       ]
     },
     {
-      "id": "e4cff355-3235-4adc-bc40-165efe5794f1",
+      "id": "0e774b0f-97da-4ed4-b656-8640fce8e53b",
       "alias": "browser",
       "description": "browser based authentication",
       "providerId": "basic-flow",
@@ -4026,7 +4073,7 @@
       ]
     },
     {
-      "id": "791fc255-545c-4b2b-8b21-08e15d1151a7",
+      "id": "31dd8e1e-caf5-401f-8f60-089f49151518",
       "alias": "clients",
       "description": "Base authentication for clients",
       "providerId": "client-flow",
@@ -4064,7 +4111,7 @@
       ]
     },
     {
-      "id": "19435e5a-7324-402a-811a-4acccdf083dc",
+      "id": "415fb310-2745-4bd3-a87f-51ca32b0c825",
       "alias": "direct grant",
       "description": "OpenID Connect Resource Owner Grant",
       "providerId": "basic-flow",
@@ -4095,7 +4142,7 @@
       ]
     },
     {
-      "id": "60c1c546-02d4-4080-abb3-c4e294a5f636",
+      "id": "68f851d9-4dc6-4ece-82ee-9c985949b7be",
       "alias": "docker auth",
       "description": "Used by Docker clients to authenticate against the IDP",
       "providerId": "basic-flow",
@@ -4112,7 +4159,7 @@
       ]
     },
     {
-      "id": "fb0650bc-699b-43b5-bc84-c0278f93b0a5",
+      "id": "f6ec91e8-4604-4ed4-80d9-88e27edd02fb",
       "alias": "first broker login",
       "description": "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
       "providerId": "basic-flow",
@@ -4145,7 +4192,7 @@
       ]
     },
     {
-      "id": "79a67614-692c-4261-9366-46eeabdb1947",
+      "id": "c045817a-7879-482d-afc2-e2f127b1a60e",
       "alias": "forms",
       "description": "Username, password, otp and other auth forms.",
       "providerId": "basic-flow",
@@ -4169,7 +4216,7 @@
       ]
     },
     {
-      "id": "b0f5fed1-992d-4474-b5c2-a055b6b551c1",
+      "id": "585bd029-2ff9-42ff-83f6-385ff6d58100",
       "alias": "http challenge",
       "description": "An authentication flow based on challenge-response HTTP Authentication Schemes",
       "providerId": "basic-flow",
@@ -4207,7 +4254,7 @@
       ]
     },
     {
-      "id": "5e3a00fe-5fe0-4f24-b1dd-b85832765381",
+      "id": "c9456d8a-7065-4a8f-a874-ee2c17704d22",
       "alias": "registration",
       "description": "registration flow",
       "providerId": "basic-flow",
@@ -4225,7 +4272,7 @@
       ]
     },
     {
-      "id": "706e0774-47fa-46ba-b3f8-632f131909f5",
+      "id": "70021e24-51fc-462a-a470-f86db0597727",
       "alias": "registration form",
       "description": "registration form",
       "providerId": "form-flow",
@@ -4263,7 +4310,7 @@
       ]
     },
     {
-      "id": "0a127d23-aeaa-4e7a-9faf-ad16ce611590",
+      "id": "7b16d7f8-c3ea-417c-a73f-4e11be317e64",
       "alias": "reset credentials",
       "description": "Reset credentials for a user if they forgot their password or something",
       "providerId": "basic-flow",
@@ -4301,7 +4348,7 @@
       ]
     },
     {
-      "id": "8a40b342-b3b8-4b5b-83da-db383ca09e35",
+      "id": "fb331cb8-8359-4564-9f8e-3b67de36c058",
       "alias": "saml ecp",
       "description": "SAML ECP Profile Authentication Flow",
       "providerId": "basic-flow",
@@ -4320,14 +4367,14 @@
   ],
   "authenticatorConfig": [
     {
-      "id": "04c6c4c9-dd5e-4c95-bf5b-76e6e375ae64",
+      "id": "dcc214af-8c91-4653-aaec-4e6f3da9200b",
       "alias": "create unique user config",
       "config": {
         "require.password.update.after.registration": "false"
       }
     },
     {
-      "id": "8ee05603-f190-45c5-b180-bcfe77b4374f",
+      "id": "4e11cd90-bbf1-48d7-8f2f-3bf3e05bf535",
       "alias": "review profile config",
       "config": {
         "update.profile.on.first.login": "missing"
