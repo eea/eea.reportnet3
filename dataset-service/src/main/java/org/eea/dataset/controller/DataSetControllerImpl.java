@@ -9,6 +9,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -41,7 +42,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -109,6 +109,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
+  /** The design dataset service. */
+  @Autowired
+  private DesignDatasetService designDatasetService;
   /** The record store controller zull. */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
@@ -208,7 +211,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
@@ -227,8 +230,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -262,7 +264,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadDatasetSchema")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
@@ -372,7 +374,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
@@ -397,7 +399,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final Long recordId) {
     if (datasetId == null || recordId == null) {
@@ -423,7 +425,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
@@ -441,30 +443,35 @@ public class DataSetControllerImpl implements DatasetController {
   /**
    * Delete import table.
    *
-   * @param dataSetId the data set id
-   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
    */
+  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
-      @PathVariable("idTableSchema") final String idTableSchema) {
-    if (dataSetId == null || dataSetId < 1) {
+  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
+  public void deleteImportTable(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
+      @LockCriteria(
+          name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+    if (datasetId == null || datasetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (idTableSchema == null) {
+    } else if (tableSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    LOG.info("Executing delete table value with id {} from dataset {}", idTableSchema, dataSetId);
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
-      deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
+      // This method will release the lock
+      deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
+
 
 
   /**
@@ -473,13 +480,14 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
+   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTER'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) {
@@ -489,7 +497,15 @@ public class DataSetControllerImpl implements DatasetController {
       file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
 
       // set file name and content type
-      String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+      // Depending on the dataset type (REPORTING/DESIGN) one method or another is used to get the
+      // fileName
+      String filename = "";
+      if (datasetService.isReportingDataset(datasetId)) {
+        filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+      } else {
+        filename = designDatasetService.getFileNameDesign(mimeType, idTableSchema, datasetId);
+      }
+
 
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
@@ -530,7 +546,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (datasetId == null || field == null) {

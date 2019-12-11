@@ -19,7 +19,10 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -82,6 +85,9 @@ public class DataSetSchemaControllerImplTest {
   /** The dataset snapshot service. */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Inits the mocks.
@@ -303,9 +309,31 @@ public class DataSetSchemaControllerImplTest {
     doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
     doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
+    DataFlowVO df = new DataFlowVO();
+    df.setId(1L);
+    df.setStatus(TypeStatusEnum.DESIGN);
+    when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
+  }
+
+  @Test
+  public void deleteDatasetSchemaException4Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+
+    DataFlowVO df = new DataFlowVO();
+    df.setId(1L);
+    df.setStatus(TypeStatusEnum.DRAFT);
+    when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
+    try {
+      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("The dataflow is not in the correct status", HttpStatus.FORBIDDEN,
+          e.getStatus());
+    }
   }
 
   @Test
@@ -313,6 +341,10 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+    DataFlowVO df = new DataFlowVO();
+    df.setId(1L);
+    df.setStatus(TypeStatusEnum.DESIGN);
+    when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
     try {
