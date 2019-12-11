@@ -15,6 +15,7 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -56,6 +57,10 @@ public class DataSetControllerImplTest {
    */
   @Mock
   DatasetServiceImpl datasetService;
+
+  /** The design dataset service. */
+  @Mock
+  DesignDatasetServiceImpl designDatasetService;
 
   /** The records. */
   List<RecordVO> records;
@@ -624,10 +629,23 @@ public class DataSetControllerImplTest {
   }
 
   @Test
-  public void exportFile() throws Exception {
+  public void exportFileReporting() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
     dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(datasetService, times(1)).getFileName(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void exportFileDesign() throws Exception {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("".getBytes());
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(false);
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(designDatasetService, times(1)).getFileNameDesign(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 
