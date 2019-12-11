@@ -9,21 +9,24 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
-export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
+export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
+  const [initialTableDescription, setInitialTableDescription] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
+  const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
 
@@ -77,6 +80,15 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
 
   const onFieldDragAndDropStart = draggedFieldIdx => {
     setinitialFieldIndexDragged(draggedFieldIdx);
+  };
+
+  const onKeyChange = event => {
+    if (event.key === 'Escape') {
+      setTableDescriptionValue(initialTableDescription);
+    } else if (event.key == 'Enter') {
+      event.preventDefault();
+      //API CALL
+    }
   };
 
   const onShowDialogError = (message, title) => {
@@ -190,11 +202,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
         isWebFormMMR={false}
-        // buttonsList={[]}
         key={table.id}
         levelErrorTypes={levelErrorTypes}
         tableId={table.tableSchemaId}
-        tableName={table}
+        tableName={table.tableSchemaName}
         tableSchemaColumns={tableSchemaColumns}
       />
     ) : (
@@ -325,9 +336,20 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
   //return fieldsSchema.map(field => {
   return (
     <React.Fragment>
-      <div className={styles.InputSwitchContainer}>
-        <div className={styles.InputSwitchDiv}>
-          <span className={styles.InputSwitchText}>{resources.messages['design']}</span>
+      <div className={styles.switchDivInput}>
+        <InputText
+          className={styles.tableDescriptionInput}
+          key="tableDescription"
+          onChange={e => setTableDescriptionValue(e.target.value)}
+          onFocus={e => {
+            setInitialTableDescription(e.target.value);
+          }}
+          onKeyDown={e => onKeyChange(e)}
+          placeholder={resources.messages['newTableDescriptionPlaceHolder']}
+          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : tableDescription}
+        />
+        <div className={styles.switchDiv}>
+          <span className={styles.switchTextInput}>{resources.messages['design']}</span>
           <InputSwitch
             checked={isPreviewModeOn}
             // disabled={true}
@@ -336,7 +358,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields }) => {
               setIsPreviewModeOn(e.value);
             }}
           />
-          <span className={styles.InputSwitchText}>{resources.messages['preview']}</span>
+          <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
       <div className={styles.fieldsWrapper}>{renderAllFields()}</div>

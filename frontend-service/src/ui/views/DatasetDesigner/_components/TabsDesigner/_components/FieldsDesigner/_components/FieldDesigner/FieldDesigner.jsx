@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
@@ -17,6 +18,7 @@ export const FieldDesigner = ({
   checkDuplicates,
   datasetId,
   fieldId,
+  fieldDescription,
   fieldName,
   fieldType,
   index,
@@ -64,7 +66,9 @@ export const FieldDesigner = ({
   const [animation] = useState('');
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+  const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [initialFieldValue, setInitialFieldValue] = useState();
+  const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -282,12 +286,14 @@ export const FieldDesigner = ({
     // setPosition(fieldRef.current.getBoundingClientRect());
   };
 
-  const onKeyChange = event => {
+  const onKeyChange = (event, input) => {
     if (event.key === 'Escape') {
-      setFieldValue(initialFieldValue);
+      input === 'NAME' ? setFieldValue(initialFieldValue) : setFieldDescriptionValue(initialDescriptionValue);
     } else if (event.key == 'Enter') {
       event.preventDefault();
-      onBlurFieldName(event.target.value);
+      if (input === 'NAME') {
+        onBlurFieldName(event.target.value);
+      }
     }
   };
 
@@ -386,7 +392,7 @@ export const FieldDesigner = ({
             setInitialFieldValue(e.target.value);
             setIsEditing(true);
           }}
-          onKeyDown={e => onKeyChange(e, index)}
+          onKeyDown={e => onKeyChange(e, 'NAME')}
           placeholder={resources.messages['newFieldPlaceHolder']}
           inputRef={inputRef}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
@@ -409,6 +415,23 @@ export const FieldDesigner = ({
           scrollHeight="450px"
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
+        <InputText
+          autoFocus={false}
+          className={styles.inputFieldDescription}
+          key={fieldId}
+          onBlur={e => {
+            setIsEditing(false);
+          }}
+          onChange={e => setFieldDescriptionValue(e.target.value)}
+          onFocus={e => {
+            setInitialDescriptionValue(e.target.value);
+            setIsEditing(true);
+          }}
+          onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
+          placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
+          value={!isUndefined(fieldDescriptionValue) ? fieldDescriptionValue : fieldDescription}
+        />
+        {/* <InputTextarea autoResize={true} rows={2} cols={10} /> */}
         {!addField ? (
           <a
             draggable={true}

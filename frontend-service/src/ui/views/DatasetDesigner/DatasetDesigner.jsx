@@ -9,6 +9,7 @@ import { config } from 'conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
+import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -33,9 +34,11 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,6 +120,15 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setDataflowName(dataflowData.name);
   };
 
+  const onKeyChange = event => {
+    if (event.key === 'Escape') {
+      setDatasetDescription(initialDatasetDescription);
+    } else if (event.key == 'Enter') {
+      event.preventDefault();
+      //API CALL
+    }
+  };
+
   const onLoadDatasetSchemaName = async () => {
     setIsLoading(true);
     try {
@@ -158,6 +170,17 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         iconSize="3.4rem"
       />
       <div className={styles.ButtonsBar}>
+        <InputText
+          className={styles.datasetDescription}
+          key="datasetDescription"
+          onChange={e => setDatasetDescription(e.target.value)}
+          onFocus={e => {
+            setInitialDatasetDescription(e.target.value);
+          }}
+          onKeyDown={e => onKeyChange(e)}
+          placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
+          value={datasetDescription}
+        />
         <Toolbar>
           <div className="p-toolbar-group-right">
             <Button

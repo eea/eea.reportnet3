@@ -57,10 +57,9 @@ const DataViewerToolbar = ({
   let dropdownFilterRef = useRef();
 
   useEffect(() => {
-    const dropdownFilter = [];
-    for (let colSchema of colsSchema) {
-      dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
-    }
+    const dropdownFilter = colsSchema.map(colSchema => {
+      return { label: colSchema.header, key: colSchema.field };
+    });
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -72,6 +71,7 @@ const DataViewerToolbar = ({
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
+      console.log({ exportTableDataName });
       DownloadFile(exportTableData, exportTableDataName);
     }
   }, [exportTableData]);
