@@ -16,10 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -113,21 +111,14 @@ public class DocumentControllerImpl implements DocumentController {
   @GetMapping(value = "/{documentId}")
   @HystrixCommand
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
+  public Resource getDocument(@PathVariable("documentId") final Long documentId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
-      HttpHeaders header = new HttpHeaders();
-      header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
-      header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-      header.add("Pragma", "no-cache");
-      header.add("Expires", "0");
-      ByteArrayResource resource = new ByteArrayResource(file.getBytes());
-      return ResponseEntity.ok().headers(header).contentLength(file.getBytes().length)
-          .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+      return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
