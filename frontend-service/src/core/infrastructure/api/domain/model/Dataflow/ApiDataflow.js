@@ -106,7 +106,7 @@ export const apiDataflow = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { dataflowId },
+      data: { id: dataflowId },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
