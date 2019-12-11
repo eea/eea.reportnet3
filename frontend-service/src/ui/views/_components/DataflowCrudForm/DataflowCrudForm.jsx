@@ -18,7 +18,8 @@ export const DataflowCrudForm = ({
   isEditForm,
   isFormReset,
   onCreate,
-  onCancel
+  onCancel,
+  onEdit
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -62,7 +63,7 @@ export const DataflowCrudForm = ({
           : await DataflowService.update(values.name, values.description, dataflowId);
 
         if (response.status >= 200 && response.status <= 299) {
-          onCreate();
+          isEditForm ? onEdit(values.name, values.description, dataflowId) : onCreate();
         } else {
           console.error(`Error in the creation of dataflow`);
         }

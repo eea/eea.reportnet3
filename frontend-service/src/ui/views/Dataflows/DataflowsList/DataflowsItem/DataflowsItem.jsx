@@ -1,6 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { isEmpty, isNull, isUndefined } from 'lodash';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -18,14 +20,28 @@ import { DataflowService } from 'core/services/Dataflow';
 export const DataflowsItem = ({
   dataFetch,
   dataflowDispatch,
+  dataflowNewValues,
   dataflowId,
   isCustodian,
   itemContent,
   listType,
   position,
+  selectedDataflowId,
   showEditForm
 }) => {
   const resources = useContext(ResourcesContext);
+
+  let dataflowTitles = {
+    name: itemContent.name,
+    description: itemContent.description,
+    id: itemContent.id
+  };
+
+  if (!isUndefined(selectedDataflowId)) {
+    if (dataflowTitles.id === selectedDataflowId && !isEmpty(dataflowNewValues)) {
+      dataflowTitles = dataflowNewValues;
+    }
+  }
 
   //position must be removed in def implementation
   const statusArray = ['notStarted', 'delivered', 'drafted'];
@@ -139,9 +155,9 @@ export const DataflowsItem = ({
       </div>
 
       <div className={styles.text}>
-        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
+        <h3 className={`${styles.title}`}>{dataflowTitles.name}</h3>
 
-        <p>{itemContent.description}</p>
+        <p>{dataflowTitles.description}</p>
       </div>
       <div className={styles.status}>
         <p>
