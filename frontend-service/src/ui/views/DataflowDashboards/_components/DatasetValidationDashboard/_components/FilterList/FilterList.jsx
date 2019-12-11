@@ -51,7 +51,7 @@ const FilterList = ({
             filterDispatch={filterDispatch}
             reporterFilters={reporterFilters}
             labels={labels}
-            setSelectAllReporters={selectAllReporters}
+            onSelectAllReporters={setSelectAllReporters}
           />
         </ul>
       </AccordionTab>
