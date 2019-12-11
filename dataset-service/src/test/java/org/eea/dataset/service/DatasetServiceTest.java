@@ -1371,4 +1371,11 @@ public class DatasetServiceTest {
     datasetService.deleteAllTableValues(1L);
     Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
   }
+
+  @Test
+  public void testIsReportingDataset() {
+    datasetService.isReportingDataset(1L);
+    Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
+  }
+
 }

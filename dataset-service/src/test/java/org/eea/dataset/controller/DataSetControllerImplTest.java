@@ -23,7 +23,6 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -633,14 +632,16 @@ public class DataSetControllerImplTest {
   public void exportFileReporting() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
-    dataSetControllerImpl.exportFile(1L, "id", "csv", TypeDatasetEnum.REPORTING);
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
   }
 
   @Test
   public void exportFileDesign() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
-    dataSetControllerImpl.exportFile(1L, "id", "csv", TypeDatasetEnum.DESIGN);
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(false);
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
   }
 
 

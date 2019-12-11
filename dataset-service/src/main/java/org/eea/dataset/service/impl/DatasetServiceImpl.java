@@ -1328,4 +1328,16 @@ public class DatasetServiceImpl implements DatasetService {
     tableRepository.removeTableData(datasetId);
   }
 
+
+  /**
+   * Checks if is reporting dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is reporting dataset
+   */
+  @Override
+  public boolean isReportingDataset(Long datasetId) {
+    return reportingDatasetRepository.existsById(datasetId);
+  }
+
 }

@@ -17,7 +17,6 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -179,7 +178,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
@@ -233,7 +232,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadDatasetSchema")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
@@ -343,7 +342,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
@@ -368,7 +367,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final Long recordId) {
     if (datasetId == null || recordId == null) {
@@ -394,7 +393,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
@@ -418,7 +417,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#dataSetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
@@ -445,19 +444,16 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
-   * @param datasetType the dataset type
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTER'))"
-      + " OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType,
-      @RequestParam("typeDataset") TypeDatasetEnum datasetType) {
+      @RequestParam("mimeType") String mimeType) {
     LOG.info("Init the export controller");
     byte[] file;
     try {
@@ -467,10 +463,10 @@ public class DataSetControllerImpl implements DatasetController {
       // Depending on the dataset type (REPORTING/DESIGN) one method or another is used to get the
       // fileName
       String filename = "";
-      if (TypeDatasetEnum.DESIGN == datasetType) {
-        filename = designDatasetService.getFileNameDesign(mimeType, idTableSchema, datasetId);
-      } else {
+      if (datasetService.isReportingDataset(datasetId)) {
         filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+      } else {
+        filename = designDatasetService.getFileNameDesign(mimeType, idTableSchema, datasetId);
       }
 
 
@@ -513,7 +509,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (datasetId == null || field == null) {
