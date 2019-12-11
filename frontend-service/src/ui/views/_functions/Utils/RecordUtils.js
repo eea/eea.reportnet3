@@ -63,6 +63,14 @@ export const RecordUtils = {
       return 0;
     }
   },
+  getTextWidth: (text, font) => {
+    const canvas =
+      RecordUtils.getTextWidth.canvas || (RecordUtils.getTextWidth.canvas = document.createElement('canvas'));
+    const context = canvas.getContext('2d');
+    context.font = font;
+    const metrics = context.measureText(text);
+    return Number(metrics.width);
+  },
   createEmptyObject: (columnsSchema, data) => {
     let fields;
     if (!isUndefined(columnsSchema)) {

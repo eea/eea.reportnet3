@@ -41,7 +41,6 @@ export const recordReducer = (state, { type, payload }) => {
     case 'IS_RECORD_DELETED':
       return { ...state, isRecordDeleted: payload };
     case 'COPY_RECORDS':
-      console.log(payload.colsSchema);
       return {
         ...state,
         numCopiedRecords: RecordUtils.getNumCopiedRecords(payload.pastedData),

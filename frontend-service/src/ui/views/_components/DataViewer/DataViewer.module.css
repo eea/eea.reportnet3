@@ -22,9 +22,6 @@
   flex-direction: row;
   justify-content: center;
 }
-.filterInactive {
-  opacity: 0.5;
-}
 .validationCol {
   width: 15px;
 }

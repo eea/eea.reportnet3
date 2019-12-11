@@ -8,3 +8,6 @@
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
 }
+.filterInactive {
+  opacity: 0.5;
+}

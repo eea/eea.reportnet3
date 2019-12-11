@@ -57,13 +57,11 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
-    const [allLevelErrorWithValidations, setAllLevelErrorWithValidations] = useState(levelErrorTypesWithCorrects);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-    // const [datasetHasData, setDatasetHasData] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [fetchedData, setFetchedData] = useState([]);
@@ -79,8 +77,6 @@ const DataViewer = withRouter(
     const [originalColumns, setOriginalColumns] = useState([]);
     //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
-    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
-    const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
     const [invisibleColumns, setInvisibleColumns] = useState([]);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
@@ -112,15 +108,6 @@ const DataViewer = withRouter(
     let growlRef = useRef();
 
     useEffect(() => {
-      if (datasetContext.isValidationSelected) {
-        setValidationDropdownFilter(getLevelErrorFilters());
-        setIsFilterValidationsActive(false);
-        setLevelErrorValidations(levelErrorTypesWithCorrects);
-        datasetContext.setIsValidationSelected(false);
-      }
-    }, [datasetContext.isValidationSelected]);
-
-    useEffect(() => {
       let colOptions = [];
       let dropdownFilter = [];
       for (let colSchema of colsSchema) {
@@ -128,14 +115,20 @@ const DataViewer = withRouter(
         dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
       }
       setColumnOptions(colOptions);
-      setVisibilityDropdownFilter(dropdownFilter);
-      setValidationDropdownFilter(getLevelErrorFilters());
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
     }, []);
+
+    useEffect(() => {
+      if (datasetContext.isValidationSelected) {
+        setIsFilterValidationsActive(false);
+        setLevelErrorValidations(levelErrorTypesWithCorrects);
+        datasetContext.setIsValidationSelected(false);
+      }
+    }, [datasetContext.isValidationSelected]);
 
     useEffect(() => {
       setMenu([
@@ -183,14 +176,6 @@ const DataViewer = withRouter(
       );
     }, [recordPositionId]);
 
-    const getTextWidth = (text, font) => {
-      const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
-      const context = canvas.getContext('2d');
-      context.font = font;
-      const metrics = context.measureText(text);
-      return Number(metrics.width);
-    };
-
     useEffect(() => {
       const maxWidths = [];
       // if (!isEditing) {
@@ -207,7 +192,7 @@ const DataViewer = withRouter(
       // });
 
       //Calculate the max width of data column
-      const textMaxWidth = colsSchema.map(col => getTextWidth(col.header, '14pt Open Sans'));
+      const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
       const maxWidth = Math.max(...textMaxWidth) + 30;
       let columnsArr = colsSchema.map((column, i) => {
         let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
@@ -267,20 +252,6 @@ const DataViewer = withRouter(
       }
       // }
     }, [colsSchema, columnOptions, records.selectedRecord, records.editedRecord, initialCellValue]);
-
-    const getLevelErrorFilters = () => {
-      let filters = [];
-      levelErrorTypesWithCorrects.forEach(value => {
-        if (!isUndefined(value) && !isNull(value)) {
-          let filter = {
-            label: capitalize(value),
-            key: capitalize(value)
-          };
-          filters.push(filter);
-        }
-      });
-      return filters;
-    };
 
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
@@ -1132,11 +1103,13 @@ const DataViewer = withRouter(
     return (
       <SnapshotContext.Provider>
         <DataViewerToolbar
+          colsSchema={colsSchema}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
           isWebFormMMR={isWebFormMMR}
           isLoading={isLoading}
+          levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
           onSetColumns={onSetColumns}
           onSetInvisibleColumns={onSetInvisibleColumns}
@@ -1149,8 +1122,6 @@ const DataViewer = withRouter(
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
-          validationDropdownFilter={validationDropdownFilter}
-          visibilityDropdownFilter={visibilityDropdownFilter}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>

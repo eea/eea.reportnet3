@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { isUndefined } from 'lodash';
+import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
+import { isUndefined, isNull, capitalize } from 'lodash';
 
 import { config } from 'conf';
 
@@ -11,16 +11,21 @@ import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { Menu } from 'primereact/menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { DatasetService } from 'core/services/Dataset';
 
 const DataViewerToolbar = ({
+  colsSchema,
   datasetId,
   hasWritePermissions,
   isFilterValidationsActive,
   isWebFormMMR,
   isLoading,
+  levelErrorTypesWithCorrects,
   onRefresh,
   onSetColumns,
   onSetInvisibleColumns,
@@ -32,20 +37,38 @@ const DataViewerToolbar = ({
   showValidationFilter,
   tableHasErrors,
   tableId,
-  tableName,
-  validationDropdownFilter,
-  visibilityDropdownFilter
+  tableName
 }) => {
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
-  const [visibilityColumnIcon, setVisibilityColumnIcon] = useState('eye');
 
+  const [filter, dispatchFilter] = useReducer(filterReducer, {
+    validationDropdown: [],
+    visibilityDropdown: [],
+    visibilityColumnIcon: 'eye'
+  });
+
+  const datasetContext = useContext(DatasetContext);
   const resources = useContext(ResourcesContext);
 
   let exportMenuRef = useRef();
   let filterMenuRef = useRef();
   let dropdownFilterRef = useRef();
+
+  useEffect(() => {
+    const dropdownFilter = [];
+    for (let colSchema of colsSchema) {
+      dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
+    }
+    dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
+  }, []);
+
+  useEffect(() => {
+    if (datasetContext.isValidationSelected) {
+      dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
+    }
+  }, [datasetContext.isValidationSelected]);
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
@@ -79,12 +102,18 @@ const DataViewerToolbar = ({
     menu.style.left = left;
   };
 
-  const isFiltered = (originalFilter, filter) => {
-    if (filter.length < originalFilter.length) {
-      return true;
-    } else {
-      return false;
-    }
+  const getLevelErrorFilters = () => {
+    let filters = [];
+    levelErrorTypesWithCorrects.forEach(value => {
+      if (!isUndefined(value) && !isNull(value)) {
+        let filter = {
+          label: capitalize(value),
+          key: capitalize(value)
+        };
+        filters.push(filter);
+      }
+    });
+    return filters;
   };
 
   const showFilters = columnKeys => {
@@ -98,12 +127,7 @@ const DataViewerToolbar = ({
     if (!isUndefined(onSetColumns)) {
       onSetInvisibleColumns(currentinvisibleColumns);
     }
-
-    if (isFiltered(originalColumns, currentinvisibleColumns)) {
-      setVisibilityColumnIcon('eye-slash');
-    } else {
-      setVisibilityColumnIcon('eye');
-    }
+    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentinvisibleColumns } });
   };
 
   return (
@@ -150,17 +174,17 @@ const DataViewerToolbar = ({
         <Button
           className={`p-button-rounded p-button-secondary`}
           disabled={false}
-          icon={visibilityColumnIcon}
+          icon={filter.visibilityColumnIcon}
           label={resources.messages['showHideColumns']}
           onClick={event => {
             dropdownFilterRef.current.show(event);
           }}
         />
         <DropdownFilter
-          filters={visibilityDropdownFilter}
+          filters={filter.visibilityDropdown}
           popup={true}
           ref={dropdownFilterRef}
-          id="exportTableMenu"
+          id="dropdownFilterMenu"
           showFilters={showFilters}
           onShow={e => {
             getExportButtonPosition(e);
@@ -179,10 +203,10 @@ const DataViewerToolbar = ({
         />
         <DropdownFilter
           disabled={isLoading}
-          filters={validationDropdownFilter}
+          filters={filter.validationDropdown}
           popup={true}
           ref={filterMenuRef}
-          id="exportTableMenu"
+          id="filterValidationDropdown"
           showFilters={showValidationFilter}
           onShow={e => {
             getExportButtonPosition(e);
