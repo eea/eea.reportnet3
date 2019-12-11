@@ -2,7 +2,6 @@ package org.eea.interfaces.controller.document;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +47,7 @@ public interface DocumentController {
    * @return the document
    */
   @GetMapping(value = "/{documentId}")
-  ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId);
+  Resource getDocument(@PathVariable("documentId") final Long documentId);
 
   /**
    * Delete document.
