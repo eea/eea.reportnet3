@@ -68,6 +68,7 @@
 		"deadline": "Deadline",
 		"delete": "Delete",
 		"deleteContributor":"Delete contributor",
+		"deleteDataflowConfirm": "Are you sure you want to delete the dataflow?",
 		"deleteDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a snapshot before.",
 		"deleteDatasetData": "Delete dataset data",
 		"deleteDatasetHeader": "Delete dataset data",

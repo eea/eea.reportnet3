@@ -11,6 +11,7 @@ import styles from './DataflowsItem.module.scss';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -30,6 +31,8 @@ export const DataflowsItem = ({
   showEditForm
 }) => {
   const resources = useContext(ResourcesContext);
+
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
 
   let dataflowTitles = {
     name: itemContent.name,
@@ -66,7 +69,7 @@ export const DataflowsItem = ({
       label: resources.messages['delete'],
       icon: 'trash',
       disabled: true,
-      command: () => onDeleteDataflow()
+      command: () => setIsDeleteDialogVisible(true)
     }
   ];
 
@@ -201,6 +204,16 @@ export const DataflowsItem = ({
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        header={resources.messages['delete']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onDeleteDataflow()}
+        onHide={() => setIsDeleteDialogVisible(false)}
+        visible={isDeleteDialogVisible}>
+        {resources.messages['deleteDataflowConfirm']}
+      </ConfirmDialog>
     </>
   );
 };
