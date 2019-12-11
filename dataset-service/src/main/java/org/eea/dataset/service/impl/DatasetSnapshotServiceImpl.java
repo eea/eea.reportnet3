@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +79,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The schema repository. */
   @Autowired
   private SchemasRepository schemaRepository;
-
-
 
   /**
    * The record store controller zull.
@@ -213,16 +212,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        TypeDatasetEnum.REPORTING);
-
-    // Release the lock manually
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
-    criteria.add(idDataset);
-    lockService.removeLockByCriteria(criteria);
-
-    LOG.info("Snapshot {} restored", idSnapshot);
-
+        TypeDatasetEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"));
   }
 
 
@@ -313,12 +303,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Snapshot schema {} data files created", idSnapshot);
   }
 
-
   /**
    * Restore schema snapshot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param user the user
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -327,32 +317,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
-    try {
-      // Get the schema document to mapper it to DataSchema class
-      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    // Get the schema document to mapper it to DataSchema class
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
 
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
-      DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-      LOG.info("Schema class recovered");
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
+    DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+    LOG.info("Schema class recovered");
 
-      // Replace the schema: delete the older and save the new we have already recovered on step
-      // Also in the service we call the recordstore to do the restore of the dataset_X data
-      schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot);
+    // Replace the schema: delete the older and save the new we have already recovered on step
+    // Also in the service we call the recordstore to do the restore of the dataset_X data
+    schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
+        idSnapshot);
 
-      LOG.info("Schema Snapshot {} totally restored", idSnapshot);
-    } finally {
-      // Remove the lock
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
-      criteria.add(idDataset);
-      lockService.removeLockByCriteria(criteria);
-    }
-
-
-
+    LOG.info("Schema Snapshot {} totally restored", idSnapshot);
   }
 
   /**

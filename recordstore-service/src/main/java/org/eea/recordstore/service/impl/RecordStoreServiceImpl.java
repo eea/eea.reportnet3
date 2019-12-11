@@ -327,8 +327,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
-
-
   /**
    * Restore data snapshot.
    *
@@ -336,13 +334,15 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType) throws SQLException, IOException, RecordStoreAccessException {
+      TypeDatasetEnum datasetType, Boolean isSchemaSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 

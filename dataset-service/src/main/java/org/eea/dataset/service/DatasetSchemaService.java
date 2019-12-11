@@ -72,7 +72,6 @@ public interface DatasetSchemaService {
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
-
   /**
    * Replace schema.
    *

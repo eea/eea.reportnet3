@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CleanKyebaseCommand.class);
   /**
    * The Constant LOG_ERROR.
@@ -39,11 +40,11 @@ public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
     return EventType.COMMAND_CLEAN_KYEBASE;
   }
 
-
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
+   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {

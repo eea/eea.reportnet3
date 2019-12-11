@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,12 +107,12 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DatasetSchemaService schemaService;
 
-
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 

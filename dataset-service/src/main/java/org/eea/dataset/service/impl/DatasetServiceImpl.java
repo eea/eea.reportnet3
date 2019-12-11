@@ -257,12 +257,11 @@ public class DatasetServiceImpl implements DatasetService {
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
       // Get the dataFlowId from the metabase
-      final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
+      final Long dataflowId = getDataFlowIdById(datasetId);
 
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
-      final DataSetVO datasetVO =
-          context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
+      final DataSetVO datasetVO = context.parse(is, dataflowId, partition.getId(), idTableSchema);
 
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -1148,11 +1147,11 @@ public class DatasetServiceImpl implements DatasetService {
     // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
     // Get the dataFlowId from the metabase
-    final DataSetMetabase datasetMetabase = obtainReportingDataset(datasetId);
+    Long idDataflow = getDataFlowIdById(datasetId);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(datasetMetabase.getDataflowId(), datasetId, idTableSchema);
+    return context.fileWriter(idDataflow, datasetId, idTableSchema);
 
   }
 
@@ -1327,6 +1326,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteAllTableValues(Long datasetId) {
     tableRepository.removeTableData(datasetId);
+  }
+
+
+  /**
+   * Checks if is reporting dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is reporting dataset
+   */
+  @Override
+  public boolean isReportingDataset(Long datasetId) {
+    return reportingDatasetRepository.existsById(datasetId);
   }
 
 }

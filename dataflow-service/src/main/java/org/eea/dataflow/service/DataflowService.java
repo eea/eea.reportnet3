@@ -109,8 +109,17 @@ public interface DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
    */
   void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
+
+  /**
+   * Update data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
   /**
    * Gets the reporting datasets id.

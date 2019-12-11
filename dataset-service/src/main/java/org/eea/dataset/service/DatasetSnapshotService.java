@@ -37,8 +37,6 @@ public interface DatasetSnapshotService {
    */
   void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
-
-
   /**
    * Restore snapshot.
    *

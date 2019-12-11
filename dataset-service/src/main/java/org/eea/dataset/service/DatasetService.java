@@ -320,4 +320,13 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteAllTableValues(@DatasetId Long datasetId);
+
+
+  /**
+   * Checks if is reporting dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is reporting dataset
+   */
+  boolean isReportingDataset(Long datasetId);
 }

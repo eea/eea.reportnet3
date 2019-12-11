@@ -1,5 +1,8 @@
 package org.eea.kafka.handler;
 
+import static org.mockito.Mockito.times;
+import java.util.HashMap;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -25,11 +28,16 @@ public class EEAEventHandlerImplTest {
   @Mock
   private EEAEventCommandFactory eeaEentCommandFactory;
 
-  /**
-   * Inits the mocks.
-   */
+  @Mock
+  private EEAEventHandlerCommand eeaEventHandlerCommand;
+
+  private EEAEventVO event;
+
   @Before
   public void initMocks() {
+    event = new EEAEventVO();
+    Map<String, Object> data = new HashMap<>();
+    event.setData(data);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -43,59 +51,27 @@ public class EEAEventHandlerImplTest {
     Assert.assertEquals(eeaEventHandler.getType(), EEAEventVO.class);
   }
 
-  /**
-   * Process message.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
-  public void processMessage() throws EEAException {
-    EEAEventHandlerCommand eeaEventHandlerCommand = Mockito.mock(EEAEventHandlerCommand.class);
-    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any(EEAEventVO.class)))
+  public void processMessageTest1() throws EEAException {
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any()))
         .thenReturn(eeaEventHandlerCommand);
-    EEAEventVO vo = new EEAEventVO();
-    eeaEventHandler.processMessage(vo);
-    Mockito.verify(eeaEentCommandFactory, Mockito.times(1)).getEventCommand(vo);
-    Mockito.verify(eeaEventHandlerCommand, Mockito.times(1)).execute(vo);
+    event.getData().put("user", "user");
+    eeaEventHandler.processMessage(event);
+    Mockito.verify(eeaEentCommandFactory, times(1)).getEventCommand(Mockito.any());
   }
 
-  /**
-   * Process message.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
-  public void processError() throws EEAException {
-    EEAEventHandlerCommand eeaEventHandlerCommand = Mockito.mock(EEAEventHandlerCommand.class);
-    Mockito.doThrow(new EEAException("test")).when(eeaEventHandlerCommand)
-        .execute(Mockito.any(EEAEventVO.class));
-    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any(EEAEventVO.class)))
+  public void processMessageTest2() throws EEAException {
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any()))
         .thenReturn(eeaEventHandlerCommand);
-    EEAEventVO vo = new EEAEventVO();
-    try {
-      eeaEventHandler.processMessage(vo);
-    } catch (EEAException e) {
-      Mockito.verify(eeaEentCommandFactory, Mockito.times(1)).getEventCommand(vo);
-      Mockito.verify(eeaEventHandlerCommand, Mockito.times(1)).execute(vo);
-      Assert.assertEquals("Wrong exception caught", "test", e.getMessage());
-    }
+    eeaEventHandler.processMessage(event);
+    Mockito.verify(eeaEentCommandFactory, times(1)).getEventCommand(Mockito.any());
   }
 
-
-  /**
-   * Process error 2.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
-  public void processError2() throws EEAException {
-    EEAEventHandlerCommand eeaEventHandlerCommand = Mockito.mock(EEAEventHandlerCommand.class);
-    Mockito.doThrow(new EEAException("test")).when(eeaEventHandlerCommand)
-        .execute(Mockito.any(EEAEventVO.class));
-    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any(EEAEventVO.class)))
-        .thenReturn(null);
-    EEAEventVO vo = new EEAEventVO();
-    eeaEventHandler.processMessage(vo);
-    Mockito.verify(eeaEventHandlerCommand, Mockito.times(0)).execute(vo);
+  public void processMessageTest3() throws EEAException {
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any())).thenReturn(null);
+    eeaEventHandler.processMessage(event);
+    Mockito.verify(eeaEentCommandFactory, times(1)).getEventCommand(Mockito.any());
   }
 }

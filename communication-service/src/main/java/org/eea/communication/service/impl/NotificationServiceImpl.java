@@ -38,7 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public boolean send(String user, EventType type, Map<?, ?> notification) {
     if (user != null && !user.isEmpty() && notification != null) {
-      logger.info("Notification sent to user: userId={}, type={}, message={}", user, type,
+      logger.info("Notification sent to user: user={}, type={}, message={}", user, type,
           notification);
       template.convertAndSendToUser(user, "/queue/notifications",
           new Notification(type, notification));
