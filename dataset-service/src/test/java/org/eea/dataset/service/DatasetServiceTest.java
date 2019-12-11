@@ -39,6 +39,7 @@ import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -120,6 +121,10 @@ public class DatasetServiceTest {
   /** The reporting dataset repository. */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The design dataset repository. */
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
 
   /** The kafka sender utils. */
   @Mock
@@ -341,8 +346,6 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(reportingDatasetRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
@@ -406,21 +409,6 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
-  /**
-   * Test process file empty metabase.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileEmptyMetabase() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
 
 
   /**
@@ -435,8 +423,7 @@ public class DatasetServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(reportingDatasetRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new ReportingDataset()));
+
     when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
@@ -1200,7 +1187,7 @@ public class DatasetServiceTest {
     // partition.setId(1L);
     // when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
     // Mockito.any())).thenReturn(Optional.of(partition));
-    when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
+    // when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(expectedResult);
@@ -1221,6 +1208,20 @@ public class DatasetServiceTest {
         .thenReturn(new DataSetSchemaVO());
     when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
+  }
+
+  /**
+   * Test get file name exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetFileNameException() throws EEAException {
+
+    thrown.expectMessage(EEAErrorMessage.DATASET_NOTFOUND);
+    datasetService.getFileName("csv", "test", null);
+
+
   }
 
   /**
@@ -1370,4 +1371,11 @@ public class DatasetServiceTest {
     datasetService.deleteAllTableValues(1L);
     Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
   }
+
+  @Test
+  public void testIsReportingDataset() {
+    datasetService.isReportingDataset(1L);
+    Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
+  }
+
 }

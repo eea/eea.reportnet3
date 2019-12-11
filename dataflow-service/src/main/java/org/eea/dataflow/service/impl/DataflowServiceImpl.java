@@ -320,6 +320,7 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
       dataflowVO.setCreationDate(new Date());
+      dataflowVO.setStatus(TypeStatusEnum.DRAFT);
       dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
       LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
     }
@@ -332,6 +333,25 @@ public class DataflowServiceImpl implements DataflowService {
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
 
+
+  /**
+   * Update data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
+
+    // we find if the name of this dataflow exist
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
+      throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    } else {
+      Dataflow dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
+      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+    }
+  }
 
   /**
    * Creates the group.
@@ -395,5 +415,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowVO;
   }
+
+
 
 }
