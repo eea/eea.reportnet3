@@ -26,6 +26,8 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -446,21 +448,19 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    // for (DocumentVO document : dataflow.getDocuments()) {
-    // documentControllerZuul.deleteDocument(document.getId());
-    // }
-    // LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
+    for (DocumentVO document : dataflow.getDocuments()) {
+      documentControllerZuul.deleteDocument(document.getId());
+    }
+    LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
 
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    // if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
-    // for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-    // dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
-    // }
-    // }
-    // LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
-
-
+    if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
+      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
+      }
+    }
+    LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
     // PART OF DELETE ALL THE DATASET we have in the dataflow
     if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
@@ -470,14 +470,14 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full dataset with dataflow id: {}", idDataflow);
     // add resource to delete(DATAFLOW PART)
-    // List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-    // .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
-    // resourceManagementControllerZull.deleteResource(resourceCustodian);
-    // LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+        .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
+    LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
     // we delete the dataflow in metabase at the end
-    // dataflowRepository.deleteById(idDataflow);
-    // LOG.info("Delete full dataflow with id: {}", idDataflow);
+    dataflowRepository.deleteById(idDataflow);
+    LOG.info("Delete full dataflow with id: {}", idDataflow);
 
   }
 

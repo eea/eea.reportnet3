@@ -563,7 +563,7 @@ public class DataSetControllerImpl implements DatasetController {
 
     // delete the schema snapshots too
     try {
-      datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+      datasetSnapshotService.deleteAllSnapshots(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
