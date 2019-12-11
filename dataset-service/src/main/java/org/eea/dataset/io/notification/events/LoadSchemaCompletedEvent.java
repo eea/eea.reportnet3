@@ -1,9 +1,9 @@
-package org.eea.validation.io.notification.events;
+package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ValidationFinishedEvent.
+ * The Class LoadDataCompletedEvent.
  */
 @Component
-public class ValidationFinishedEvent implements NotificableEventHandler {
+public class LoadSchemaCompletedEvent implements NotificableEventHandler {
 
-  /** The dataset controller zuul. */
+  /** The dataset service. */
   @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
+  private DatasetService datasetService;
 
   /**
    * Gets the event type.
@@ -27,7 +27,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.VALIDATION_FINISHED_EVENT;
+    return EventType.LOAD_SCHEMA_COMPLETED_EVENT;
   }
 
   /**
@@ -44,7 +44,9 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("dataflowId",
         notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-            : datasetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId()));
+            : datasetService.getDataFlowIdById(notificationVO.getDatasetId()));
+    notification.put("tableSchemaId", notificationVO.getTableSchemaId());
+    notification.put("fileName", notificationVO.getFileName());
     return notification;
   }
 }

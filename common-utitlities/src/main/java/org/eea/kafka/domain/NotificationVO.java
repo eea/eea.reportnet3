@@ -16,6 +16,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Builder
+/**
+ * The class that works as interface to fulfill notifiable events
+ */
 public class NotificationVO implements Serializable {
 
   /** The Constant serialVersionUID. */

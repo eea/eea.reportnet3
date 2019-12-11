@@ -64,6 +64,10 @@ public class DeleteHelper {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
 
+    EventType eventType =
+        datasetService.isReportingDataset(datasetId) ? EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT
+            : EventType.DELETE_TABLE_COMPLETED_EVENT;
+
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
     criteria.add(tableSchemaId);
@@ -78,7 +82,6 @@ public class DeleteHelper {
             .datasetId(datasetId).tableSchemaId(tableSchemaId).build();
     value.put("dataset_id", datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_TABLE_COMPLETED_EVENT, value,
-        notificationVO);
+    kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
   }
 }
