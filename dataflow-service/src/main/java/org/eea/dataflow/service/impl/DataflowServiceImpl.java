@@ -440,7 +440,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
-
   public void deleteDataFlow(Long idDataflow) throws Exception {
 
     // LOAD DATAFLOW DATA
@@ -454,7 +453,6 @@ public class DataflowServiceImpl implements DataflowService {
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
-
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
@@ -470,15 +468,15 @@ public class DataflowServiceImpl implements DataflowService {
       });
     }
     LOG.info("Delete full dataset with dataflow id: {}", idDataflow);
+    // we delete the dataflow in metabase at the end
+    dataflowRepository.deleteDataflow(idDataflow);
+    LOG.info("Delete full dataflow with id: {}", idDataflow);
+
     // add resource to delete(DATAFLOW PART)
     List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
         .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
     resourceManagementControllerZull.deleteResource(resourceCustodian);
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
-
-    // we delete the dataflow in metabase at the end
-    dataflowRepository.deleteById(idDataflow);
-    LOG.info("Delete full dataflow with id: {}", idDataflow);
 
   }
 
