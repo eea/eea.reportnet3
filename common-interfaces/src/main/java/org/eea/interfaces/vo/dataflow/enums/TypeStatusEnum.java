@@ -5,16 +5,14 @@ package org.eea.interfaces.vo.dataflow.enums;
  */
 public enum TypeStatusEnum {
 
+
+
+  /** The design. */
+  DESIGN("DESIGN"),
+
+
   /** The draft. */
-  DRAFT("DRAFT"),
-
-
-  /** The accepted. */
-  ACCEPTED("ACCEPTED"),
-
-
-  /** The completed. */
-  COMPLETED("COMPLETED");
+  DRAFT("DRAFT");
 
 
   /** The value. */

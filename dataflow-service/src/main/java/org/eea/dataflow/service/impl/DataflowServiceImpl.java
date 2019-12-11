@@ -320,7 +320,7 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
       dataflowVO.setCreationDate(new Date());
-      dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+      dataflowVO.setStatus(TypeStatusEnum.DESIGN);
       dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
       LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
     }

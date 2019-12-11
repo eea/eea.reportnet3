@@ -216,7 +216,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
-      if (TypeStatusEnum.DRAFT == dataflow.getStatus()) {
+      if (TypeStatusEnum.DESIGN == dataflow.getStatus()) {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
