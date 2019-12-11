@@ -440,7 +440,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
-  @Transactional
+
   public void deleteDataFlow(Long idDataflow) throws Exception {
 
     // LOAD DATAFLOW DATA
@@ -448,11 +448,12 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    for (DocumentVO document : dataflow.getDocuments()) {
-      documentControllerZuul.deleteDocument(document.getId());
+    if (null != dataflow.getDocuments() || !dataflow.getDocuments().isEmpty()) {
+      for (DocumentVO document : dataflow.getDocuments()) {
+        documentControllerZuul.deleteDocument(document.getId());
+      }
+      LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
-    LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
-
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
