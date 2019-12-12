@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
+import { isNull } from 'lodash';
+
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import classNames from 'classnames';
@@ -46,7 +49,8 @@ export class Dropdown extends Component {
     onChange: null,
     onMouseDown: null,
     onContextMenu: null,
-    onEmptyList: null
+    onEmptyList: null,
+    required: false
   };
 
   static propTypes = {
@@ -83,7 +87,8 @@ export class Dropdown extends Component {
     onChange: PropTypes.func,
     onMouseDown: PropTypes.func,
     onContextMenu: PropTypes.func,
-    onEmptyList: PropTypes.func
+    onEmptyList: PropTypes.func,
+    required: PropTypes.bool
   };
 
   constructor(props) {
@@ -589,8 +594,14 @@ export class Dropdown extends Component {
       });
 
       return (
-        <label className={className}>
-          {label || this.props.placeholder || 'empty'}{' '}
+        <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
+          {label || `${this.props.placeholder}` || 'empty'}{' '}
+          {this.props.required && isNull(selectedOption) ? (
+            <FontAwesomeIcon
+              icon={AwesomeIcons('infoCircle')}
+              style={{ float: 'right', marginTop: '2px', color: 'var(--errors)' }}
+            />
+          ) : null}
           {selectedOption ? (
             <FontAwesomeIcon
               icon={AwesomeIcons(selectedOption.fieldTypeIcon)}

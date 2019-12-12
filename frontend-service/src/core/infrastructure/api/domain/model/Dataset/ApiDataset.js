@@ -2,6 +2,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import { async } from 'q';
 
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
@@ -454,6 +455,31 @@ export const apiDataset = {
       }
     });
     return response.status;
+  },
+  updateTableDescriptionDesign: async (tableSchemaId, tableSchemaDescription, datasetId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/tableSchema`
+          : getUrl(DatasetConfig.updateTableDescriptionDesign, {
+              datasetId
+            }),
+        data: {
+          idTableSchema: tableSchemaId,
+          descriptionTableSchema: tableSchemaDescription
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset design name: ${error}`);
+      return false;
+    }
   },
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
     const tokens = userStorage.get();

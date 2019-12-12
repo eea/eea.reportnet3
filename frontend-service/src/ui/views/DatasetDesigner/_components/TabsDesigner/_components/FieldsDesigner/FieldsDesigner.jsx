@@ -9,7 +9,7 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
-import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -88,6 +88,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
     } else if (event.key == 'Enter') {
       event.preventDefault();
       //API CALL
+      updateTableDescriptionDesign();
     }
   };
 
@@ -333,14 +334,26 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
     }
   };
 
-  //return fieldsSchema.map(field => {
+  const updateTableDescriptionDesign = async () => {
+    try {
+      const tableUpdated = await DatasetService.updateTableDescriptionDesign(datasetId, tableDescriptionValue);
+      if (!tableUpdated) {
+        console.error('Error during table description update');
+      }
+    } catch (error) {
+      console.error(`Error during table description update: ${error}`);
+    }
+  };
+
   return (
     <React.Fragment>
       <div className={styles.switchDivInput}>
-        <InputText
+        <InputTextarea
           className={styles.tableDescriptionInput}
+          expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
+          onBlur={() => updateTableDescriptionDesign()}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -366,6 +379,5 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       {!isErrorDialogVisible ? renderConfirmDialog() : null}
     </React.Fragment>
   );
-  // });
 };
 FieldsDesigner.propTypes = {};

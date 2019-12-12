@@ -135,7 +135,7 @@ export const FieldDesigner = ({
     if (fieldId === '-1') {
       if (type !== '') {
         if (!isUndefined(fieldValue) && fieldValue !== '') {
-          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue);
+          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
         }
       }
     } else {
@@ -160,7 +160,7 @@ export const FieldDesigner = ({
             // if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
             if (!checkDuplicates(name, fieldId)) {
               if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
-                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
               }
             } else {
               onShowDialogError(
@@ -192,12 +192,13 @@ export const FieldDesigner = ({
     }
   };
 
-  const onFieldAdd = async (recordId, type, value) => {
+  const onFieldAdd = async (recordId, type, value, description) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
         name: value,
-        type: type
+        type,
+        description
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -383,6 +384,7 @@ export const FieldDesigner = ({
           autoFocus={false}
           className={styles.inputField}
           key={fieldId}
+          ref={inputRef}
           onBlur={e => {
             setIsEditing(false);
             onBlurFieldName(e.target.value);
@@ -394,7 +396,7 @@ export const FieldDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e, 'NAME')}
           placeholder={resources.messages['newFieldPlaceHolder']}
-          inputRef={inputRef}
+          required={!isUndefined(fieldValue) ? fieldValue === '' : fieldName === ''}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
         />
         <Dropdown
@@ -410,13 +412,15 @@ export const FieldDesigner = ({
           }}
           optionLabel="fieldType"
           options={fieldTypes}
+          required={true}
           placeholder={resources.messages['newFieldTypePlaceHolder']}
           // showClear={true}
           scrollHeight="450px"
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
-        <InputText
+        <InputTextarea
           autoFocus={false}
+          expandableOnClick={true}
           className={styles.inputFieldDescription}
           key={fieldId}
           onBlur={e => {

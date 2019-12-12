@@ -509,6 +509,15 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
   return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 };
 
+const updateTableDescriptionDesign = async (tableSchemaId, tableSchemaDescription, datasetId) => {
+  const tableSchemaDescriptionUpdated = await apiDataset.updateTableDescriptionDesign(
+    tableSchemaId,
+    tableSchemaDescription,
+    datasetId
+  );
+  return tableSchemaDescriptionUpdated;
+};
+
 const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
   const tableSchemaUpdated = await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
   return tableSchemaUpdated;
@@ -553,6 +562,7 @@ export const ApiDatasetRepository = {
   updateRecordFieldDesign,
   updateRecordsById,
   updateSchemaNameById,
+  updateTableDescriptionDesign,
   updateTableNameDesign,
   validateDataById,
   webFormDataById

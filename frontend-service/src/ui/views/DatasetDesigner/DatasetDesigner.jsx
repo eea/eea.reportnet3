@@ -9,7 +9,7 @@ import { config } from 'conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
-import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -170,8 +170,9 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         iconSize="3.4rem"
       />
       <div className={styles.ButtonsBar}>
-        <InputText
+        <InputTextarea
           className={styles.datasetDescription}
+          expandableOnClick={true}
           key="datasetDescription"
           onChange={e => setDatasetDescription(e.target.value)}
           onFocus={e => {
