@@ -1,9 +1,11 @@
 import React, { useReducer } from 'react';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
-import { NotificationService } from 'core/services/Notification';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
+import { NotificationService } from 'core/services/Notification';
+
 const notificationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD':

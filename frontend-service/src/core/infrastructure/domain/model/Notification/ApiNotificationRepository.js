@@ -1,7 +1,8 @@
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { isUndefined } from 'lodash';
+
 import { apiNotification } from 'core/infrastructure/api/domain/model/Notification';
 import { Notification } from 'core/domain/model/Notification/Notification';
-import { isUndefined } from 'lodash';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 const all = async () => {};
 const removeById = async () => {};
@@ -13,11 +14,11 @@ const parse = ({ type, content, message, config, routes }) => {
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
     if (notificationTypeConfig) {
-      const { key, fixed, lifTime, downloadLinkSchema } = notificationGeneralTypeConfig;
+      const { key, fixed, lifeTime, downloadLinkSchema } = notificationGeneralTypeConfig;
       notificationDTO.message = message;
       notificationDTO.type = key;
       notificationDTO.fixed = notificationTypeConfig.fixed || fixed;
-      notificationDTO.lifTime = notificationTypeConfig.lifTime || lifTime;
+      notificationDTO.lifeTime = notificationTypeConfig.lifeTime || lifeTime;
       if (!isUndefined(notificationTypeConfig.navigateTo)) {
         const urlParameters = {};
         notificationTypeConfig.navigateTo.parameters.forEach(parameter => {

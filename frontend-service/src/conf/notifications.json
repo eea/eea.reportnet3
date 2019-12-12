@@ -1,7 +1,7 @@
  [
     {
       "key":"error",
-      "lifTime":0,
+      "lifeTime":0,
       "fixed":true,
       "types":[
         {
@@ -56,7 +56,7 @@
     },
     {
       "key":"success",
-      "lifTime":5000,
+      "lifeTime":5000,
       "fixed":false,
       "types":[
         {
@@ -120,7 +120,7 @@
     },
     {
       "key":"info",
-      "lifTime":5000,
+      "lifeTime":5000,
       "fixed":false,
       "types":[{
         "key": "DATASET_DATA_LOADING_INIT",
