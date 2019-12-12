@@ -13,14 +13,14 @@ const parse = ({ type, content, message, config, routes }) => {
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
     if (notificationTypeConfig) {
-      const { key, fixed, lifTime, navigateTo, downloadLinkSchema } = notificationGeneralTypeConfig;
+      const { key, fixed, lifTime, downloadLinkSchema } = notificationGeneralTypeConfig;
       notificationDTO.message = message;
       notificationDTO.type = key;
       notificationDTO.fixed = notificationTypeConfig.fixed || fixed;
       notificationDTO.lifTime = notificationTypeConfig.lifTime || lifTime;
-      if (!isUndefined(navigateTo)) {
+      if (!isUndefined(notificationTypeConfig.navigateTo)) {
         const urlParameters = {};
-        navigateTo.parameters.forEach(parameter => {
+        notificationTypeConfig.navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
         notificationDTO.redirectionUrl = getUrl(routes[(notificationTypeConfig.section, urlParameters)]);
@@ -34,7 +34,6 @@ const parse = ({ type, content, message, config, routes }) => {
           downloadLink: notificationDTO.downloadLink
         });
       }
-      console.log('content', content);
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
     }
   });
