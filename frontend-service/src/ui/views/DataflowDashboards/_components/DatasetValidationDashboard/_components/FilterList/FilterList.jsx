@@ -21,60 +21,54 @@ const FilterList = ({
   tableFilters
 }) => {
   const resources = useContext(ResourcesContext);
-  const createTableCheckBoxObject = dataset => {
-    return { tableName: dataset.tableName, tableId: dataset.tableId };
-  };
 
-  const tableNamesIdsArray = [];
-  const uniqDatasets = uniqBy(datasets, 'tableId');
-
-  uniqDatasets.forEach(dataset => {
-    const datasetObject = createTableCheckBoxObject(dataset);
-    tableNamesIdsArray.push(datasetObject);
+  const tables = [];
+  const allTables = uniqBy(datasets, 'tableId');
+  allTables.forEach(dataset => {
+    const table = {};
+    table.tableName = dataset.tableName;
+    table.tableId = dataset.tableId;
+    tables.push(table);
   });
 
   const filterByReporters = () => {
-    if (labels.length > 0) {
-      return (
-        <AccordionTab header={resources.messages['filterByDataset']}>
-          <ul className={styles.list}>
-            {labels.map(item => (
-              <ReportersListItem
-                key={item}
-                datasetSchemaId={datasetSchemaId}
-                filterDispatch={filterDispatch}
-                item={item}
-                reporterFilters={reporterFilters}
-              />
-            ))}
-          </ul>
-        </AccordionTab>
-      );
-    } else {
-      return <AccordionTab header={resources.messages['filterByDataset']} disabled={true} />;
-    }
+    return labels.length > 0 ? (
+      <AccordionTab header={resources.messages['filterByDataset']}>
+        <ul className={styles.list}>
+          {labels.map(item => (
+            <ReportersListItem
+              key={item}
+              datasetSchemaId={datasetSchemaId}
+              filterDispatch={filterDispatch}
+              item={item}
+              reporterFilters={reporterFilters}
+            />
+          ))}
+        </ul>
+      </AccordionTab>
+    ) : (
+      <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
+    );
   };
 
   const filterByTables = () => {
-    if (tableNamesIdsArray.length > 0) {
-      return (
-        <AccordionTab header={resources.messages['filterByTable']}>
-          <ul className={styles.list}>
-            {tableNamesIdsArray.map(item => (
-              <TableListItem
-                key={item.tableId}
-                datasetSchemaId={datasetSchemaId}
-                filterDispatch={filterDispatch}
-                item={item}
-                tableFilters={tableFilters}
-              />
-            ))}
-          </ul>
-        </AccordionTab>
-      );
-    } else {
-      return <AccordionTab header={resources.messages['filterByTable']} disabled={true} />;
-    }
+    return tables.length > 0 ? (
+      <AccordionTab header={resources.messages['filterByTable']}>
+        <ul className={styles.list}>
+          {tables.map(table => (
+            <TableListItem
+              key={table.id}
+              datasetSchemaId={datasetSchemaId}
+              filterDispatch={filterDispatch}
+              item={table}
+              tableFilters={tableFilters}
+            />
+          ))}
+        </ul>
+      </AccordionTab>
+    ) : (
+      <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
+    );
   };
 
   return (
