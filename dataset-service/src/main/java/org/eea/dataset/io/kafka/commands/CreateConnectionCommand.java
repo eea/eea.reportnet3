@@ -18,18 +18,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
 
-
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
 
   /**
    * Gets the event type.
@@ -48,7 +45,6 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-
 
     // When there is a new dataset created, if there is idSchema in the event, call to
     // datasetService.insertSchema
@@ -75,23 +71,14 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
                 LOG_ERROR.error("Error saving the statistics. Error message: {}", e.getMessage(),
                     e);
               }
-
             }
-
           }).start();
-
         } catch (EEAException e) {
           LOG_ERROR.error(
               "Error executing the processes after creating a new empty dataset. Error message: {}",
               e.getMessage(), e);
         }
       }
-
     }
-
-
   }
-
-
-
 }

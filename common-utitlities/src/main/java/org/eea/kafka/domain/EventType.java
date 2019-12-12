@@ -35,6 +35,16 @@ public enum EventType {
   LOAD_DATA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_data_failed_key", true),
 
   /**
+   * The load schema completed event.
+   */
+  LOAD_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_schema_completed_key", true),
+
+  /**
+   * The load schema failed event.
+   */
+  LOAD_SCHEMA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_schema_failed_key", true),
+
+  /**
    * The load record completed event.
    */
   RECORD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_record_completed_key", true),
@@ -53,6 +63,12 @@ public enum EventType {
    * The delete table completed event.
    */
   DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+
+  /**
+   * The delete table schema completed event.
+   */
+  DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",
+      true),
 
   /**
    * The field updated completed event.
