@@ -311,7 +311,7 @@ public class DataSetSchemaControllerImplTest {
     doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
-    df.setStatus(TypeStatusEnum.DRAFT);
+    df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
@@ -326,7 +326,7 @@ public class DataSetSchemaControllerImplTest {
 
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
-    df.setStatus(TypeStatusEnum.ACCEPTED);
+    df.setStatus(TypeStatusEnum.DRAFT);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     try {
       dataSchemaControllerImpl.deleteDatasetSchema(1L);
@@ -343,7 +343,7 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
-    df.setStatus(TypeStatusEnum.DRAFT);
+    df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
