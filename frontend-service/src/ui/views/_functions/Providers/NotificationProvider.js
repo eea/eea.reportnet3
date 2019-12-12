@@ -19,7 +19,6 @@ const notificationReducer = (state, { type, payload }) => {
         all: [...state.all, payload]
       };
     case 'REMOVE':
-      const newMessages = state.messages.filter(message => message.errorId !== payload.errorId);
       return {
         toShow: [...state.toShow, payload],
         all: [...state.all, payload]
