@@ -5,8 +5,8 @@ export const NotificationRepository = {
   parse: () => '[NotificationRepository#parse] must be implemented',
   removeAll: () => Promise.reject('[NotificationRepository#removeAll] must be implemented'),
   removeById: () => Promise.reject('[NotificationRepository#removeById] must be implemented'),
-  readedAll: () => Promise.reject('[NotificationRepository#readedAll] must be implemented'),
-  readedById: () => Promise.reject('[NotificationRepository#readedById] must be implemented')
+  readAll: () => Promise.reject('[NotificationRepository#readAll] must be implemented'),
+  ReadById: () => Promise.reject('[NotificationRepository#ReadById] must be implemented')
 };
 
 export const notificationRepository = Object.assign({}, NotificationRepository, ApiNotificationRepository);

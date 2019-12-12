@@ -1,1 +1,2 @@
-export const Parse = ({ notificationRepository }) => notification => notificationRepository.parse(notification);
+export const Parse = ({ notificationRepository }) => (notification, config, routes) =>
+  notificationRepository.parse(notification, config, routes);

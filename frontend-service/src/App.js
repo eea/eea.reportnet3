@@ -22,9 +22,9 @@ import { UserProvider } from 'ui/views/_functions/Providers/UserProvider';
 const App = () => {
   return (
     <div className={styles.app}>
-      <NotificationProvider>
+      <ResourcesProvider>
         <UserProvider>
-          <ResourcesProvider>
+          <NotificationProvider>
             <LoadingProvider>
               <Router>
                 <Switch>
@@ -43,9 +43,9 @@ const App = () => {
                 </Switch>
               </Router>
             </LoadingProvider>
-          </ResourcesProvider>
+          </NotificationProvider>
         </UserProvider>
-      </NotificationProvider>
+      </ResourcesProvider>
     </div>
   );
 };

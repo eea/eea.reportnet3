@@ -3,6 +3,7 @@ import countryCode from './countries.code.json';
 import languageCode from './language.code.json';
 import exportTypeCode from './exportType.code.json';
 import permissions from './permissions';
+import notifications from './notifications';
 
 const config = {};
 const { icons } = primeIcons;
@@ -15,5 +16,6 @@ config.countries = countries;
 config.languages = languages;
 config.exportTypes = exportTypes;
 config.permissions = permissions;
+config.notifications = notifications;
 
 export { config };

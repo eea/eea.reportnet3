@@ -1,7 +1,9 @@
 import React, { useReducer } from 'react';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
-
+import { NotificationService } from 'core/services/Notification';
+import { config } from 'conf';
+import { routes } from 'ui/routes';
 const notificationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD':
@@ -40,7 +42,12 @@ const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider
       value={{
         ...state,
-        add: notification => {
+        add: notificationDTO => {
+          const notification = NotificationService.parse({
+            ...notificationDTO,
+            config: config.notifications,
+            routes
+          });
           dispatch({
             type: 'ADD',
             payload: notification

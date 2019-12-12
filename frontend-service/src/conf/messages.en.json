@@ -264,6 +264,8 @@
 		"warning": "Warning",
 		"webLinks": "Web links",
 		"webForm": "Webform",
-		"yes": "Yes"
+		"yes": "Yes",
+		"loadDataCompletedEventMessage":"Dataset data loaded sussccesfully see at <a href='{:navigateTo}'>Go to</a>",
+		"datasetDataLoadingInit":"<span>{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}"
 	}
 }
