@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './DataProvidersList.module.scss';
 
@@ -15,58 +15,48 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
-  const [dataProviders, setDataProviders] = useState([]);
-  const [representatives, setRepresentatives] = useState([]);
+  const [posibleDataProvidersList, setPosibleDataProvidersList] = useState([]);
   const [representativesTypesList, setRepresentativesTypesList] = useState([]);
-  const [selectedDataProvidersType, setSelectedDataProvidersType] = useState(null);
+  const [selectedDataProvider, setSelectedDataProvider] = useState(null);
 
-  useEffect(() => {
-    loadDataProvidersList();
-  }, []);
-
-  useEffect(() => {
-    setRepresentatives([
-      { nameLabel: 'Spain', name: 'Es' },
-      { nameLabel: 'Germany', name: 'De' }
-    ]);
-    //Need get function on api for that list
-    // Http requester......
-    setRepresentativesTypesList([
-      { nameLabel: 'Countries', name: 'countries' },
-      { nameLabel: 'Companies', name: 'companies' }
-    ]);
-  }, []);
-
-  const onSelectProvidersType = e => {
-    setSelectedDataProvidersType(e.value);
+  const initialState = {
+    emptyInput: { dataProviderId: '', email: '', name: '' },
+    dataProviders: [],
+    selectedRepresentativeType: null
   };
 
-  const loadDataProvidersList = async () => {
-    setDataProviders(await DataProviderService.all(dataflowId));
-  };
-
-  const onDataProviderAdd = async (email, name) => {
-    await DataProviderService.add(dataflowId, email, name);
-  };
-
-  const onDataProviderDelete = async dataProviderId => {
-    await DataProviderService.deleteById(dataflowId, dataProviderId);
-  };
-
-  const initialState = { name: '', email: '', dataProviderId: '' };
-
-  const nameReducer = (state, action) => {
+  const reducer = (state, { type, payload }) => {
     let newState;
-    switch (action.type) {
+    switch (type) {
+      case 'INITIAL_LOAD':
+        return {
+          ...state,
+          dataProviders: payload.dataProviders,
+          selectedRepresentativeType: payload.representativesOf
+        };
+      case 'SELECT_REPRESENTATIVE_TYPE':
+        console.log('SELECT_REPRESENTATIVE_TYPE', payload);
+        return {
+          ...state,
+          selectedRepresentativeType: payload
+        };
+
+      case 'ON_EMAIL_CHANGE':
+        console.log('ON_EMAIL_CHANGE', payload);
+        return {
+          ...state,
+          input: payload
+        };
+
       case 'ADD_DATAPROVIDER':
-        newState = { ...state, name: action.payload.name, email: action.payload.email };
+        newState = { ...state, name: payload.name, email: payload.email };
 
         onDataProviderAdd(newState.email, newState.name);
 
         return newState;
 
       case 'DELETE_DATAPROVIDER':
-        newState = { ...state, name: '', dataProviderId: action.payload };
+        newState = { ...state, name: '', dataProviderId: payload };
 
         onDataProviderDelete(newState.dataProviderId);
 
@@ -76,80 +66,114 @@ const DataProvidersList = ({ dataflowId }) => {
         return state;
     }
   };
-  const [dataProviderState, dataProviderDispatcher] = useReducer(nameReducer, initialState);
+  const [reducerState, dispatcher] = useReducer(reducer, initialState);
+
+  /*   const onPageLoad = async () => {
+    const loadedData = await DataProviderService.all(dataflowId);
+
+    return loadedData;
+  }; */
+  const onPageLoad = () => {
+    const loadedData = {
+      representativesOf: 'countries',
+      dataProviders: [
+        { dataProviderId: '1111', email: 'spain@es.es', name: 'Es' },
+        { dataProviderId: '2222', email: 'germany@de.de', name: 'De' },
+        { dataProviderId: '3333', email: 'greatbr@uk.uk', name: 'UK' },
+        { dataProviderId: '4444', email: 'france@fr.fr', name: 'Fr' },
+        { dataProviderId: '5555', email: 'italy@it.it', name: 'It' }
+      ]
+    };
+
+    return loadedData;
+  };
 
   useEffect(() => {
-    loadDataProvidersList();
-  }, [dataProviderState]);
+    const loadedData = onPageLoad();
+
+    dispatcher({
+      type: 'INITIAL_LOAD',
+      payload: loadedData
+    });
+  }, []);
+
+  useEffect(() => {
+    //Need get function on api for that list
+    // Http requester......
+    setRepresentativesTypesList([
+      { nameLabel: 'Countries', name: 'countries' },
+      { nameLabel: 'Companies', name: 'companies' }
+    ]);
+  }, []);
+
+  useEffect(() => {
+    setPosibleDataProvidersList([
+      { nameLabel: 'Select...', name: '' },
+      { nameLabel: 'Spain', name: 'Es' },
+      { nameLabel: 'Germany', name: 'De' },
+      { nameLabel: 'Uk', name: 'UK' },
+      { nameLabel: 'France', name: 'Fr' },
+      { nameLabel: 'Italy', name: 'It' }
+    ]);
+  }, []);
+
+  //EliminaMe
+  useEffect(() => {
+    console.log('representativesTypesList', representativesTypesList);
+  }, [representativesTypesList]);
+
+  //EliminaMe
+  useEffect(() => {
+    console.log('posibleDataProvidersList', posibleDataProvidersList);
+  }, [posibleDataProvidersList]);
+
+  //EliminaMe
+  useEffect(() => {
+    console.log('selectedDataProvider', selectedDataProvider);
+  }, [selectedDataProvider]);
+
+  const onDataProviderAdd = async (email, name) => {
+    await DataProviderService.add(dataflowId, email, name);
+  };
+
+  const onDataProviderDelete = async dataProviderId => {
+    await DataProviderService.deleteById(dataflowId, dataProviderId);
+  };
 
   const getDataProvidersListOfSelectedType = async type => {
     return await DataProviderService.allRepresentativesOf(type);
   };
 
   const emailInputColumnTemplate = rowData => {
+    /*    console.log('emailInputColumnTemplate', rowData); */
     return (
       <input
         value={rowData.email}
         placeholder={'Data Providers email...'}
-        onChange={e => {
-          /* dataProviderDispatcher({ type: `UPDATE_TO_${e.value.name}`.toUpperCase(), payload: rowData.id }); */
-        }}
+        onChange={e => dispatcher({ type: 'ON_EMAIL_CHANGE', payload: e.target.value })}
       />
     );
   };
 
   const nameDropdownColumnTemplate = rowData => {
-    if (selectedDataProvidersType !== null) {
-      getDataProvidersListOfSelectedType(selectedDataProvidersType).then(result => result);
-    }
-
-    const getActualName = () => {
-      if (rowData) {
-        switch (rowData.name) {
-          case 'Es':
-            return { nameLabel: 'Spain', name: 'Es' };
-
-          case 'It':
-            return { nameLabel: 'Italy', name: 'It' };
-
-          case 'Fr':
-            return { nameLabel: 'France', name: 'Fr' };
-
-          case 'UK':
-            return { nameLabel: 'Britain', name: 'UK' };
-
-          default:
-            return { nameLabel: 'Choose one...', name: '' };
-        }
-      }
-    };
-
     return (
       <>
-        {/* <Dropdown
-          // appendTo={document.body}
-          optionLabel="nameLabel"
-          options={representatives}
-          placeholder={'select'}
-          onChange={e => {
-            // dataProviderDispatcher({ type: `UPDATE_TO_${e.value.name}`.toUpperCase(), payload: rowData.id });
-          }}
-        /> */}
         <select
           className="p-dropdown p-component"
-          required
           onChange={e => {
-            console.log('provider', e.target.value);
-            // dataProviderDispatcher({ type: `UPDATE_TO_${e.value.name}`.toUpperCase(), payload: rowData.id });
+            setSelectedDataProvider(e.target.value);
           }}>
-          {representatives.map(provider => (
-            <option
-              key={provider.name}
-              className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
-              value={provider.name}>
-              {provider.nameLabel}
-            </option>
-          ))}
+          {posibleDataProvidersList.map(provider => {
+            console.log('provider', provider);
+            return (
+              <option
+                key={provider.name}
+                className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
+                value={provider.name}>
+                {provider.nameLabel}
+              </option>
+            );
+          })}
         </select>
       </>
     );
@@ -163,8 +187,8 @@ const DataProvidersList = ({ dataflowId }) => {
         icon="trash"
         disabled={false}
         className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
-        onClick={e => {
-          dataProviderDispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
+        onClick={() => {
+          dispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
         }}
       />
     );
@@ -176,20 +200,24 @@ const DataProvidersList = ({ dataflowId }) => {
         <div className={styles.title}>Data providers</div>
 
         <div>
-          <label htmlFor="selectedDataProvidersType">Representative of </label>
+          <label htmlFor="selectedDataProvider">Representative of </label>
 
           <Dropdown
-            name="selectedDataProvidersType"
+            name="selectedDataProvider"
             optionLabel="nameLabel"
             placeholder="Select..."
-            value={selectedDataProvidersType}
+            value={reducerState.selectedRepresentativeType}
             options={representativesTypesList}
-            onChange={onSelectProvidersType}
+            onChange={e => dispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value })}
           />
         </div>
       </div>
 
-      <DataTable value={dataProviders} paginator={false} scrollable={true} scrollHeight="60vh">
+      <DataTable
+        value={!isUndefined(reducerState) ? reducerState.dataProviders : []}
+        paginator={false}
+        scrollable={true}
+        scrollHeight="100vh">
         <Column body={emailInputColumnTemplate} header="Email" />
         <Column body={nameDropdownColumnTemplate} header="Data Provider" />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />

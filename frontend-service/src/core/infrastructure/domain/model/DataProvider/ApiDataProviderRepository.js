@@ -3,10 +3,18 @@ import { DataProvider } from 'core/domain/model/DataProvider/DataProvider';
 
 const all = async dataflowId => {
   const dataProvidersDTO = await apiDataProvider.all(dataflowId);
-  return dataProvidersDTO.map(
+
+  const dataProvidersList = dataProvidersDTO.dataProviders.map(
     dataProviderDTO => new DataProvider(dataProviderDTO.id, dataProviderDTO.email, dataProviderDTO.name)
   );
+
+  const dataToConsume = { representativesOf: dataProvidersDTO.representativesOf, dataProviders: dataProvidersList };
+
+  console.log('dataToConsume', dataToConsume);
+
+  return dataToConsume;
 };
+
 const allRepresentativesOf = async type => {
   const representativesDTO = await apiDataProvider.allRepresentativesOf(type);
   return representativesDTO;
