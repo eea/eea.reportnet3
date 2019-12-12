@@ -23,7 +23,7 @@
 .switchDivInput {
   display: flex;
   align-items: center;
-  margin: 0 0 2vw 2vw;
+  margin: 0 0 2vw 1vw;
 }
 .switchDiv {
   display: flex;
