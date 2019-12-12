@@ -5,9 +5,8 @@ import { uniqBy } from 'lodash';
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { ReportersListItem } from './_components/ReportersListItem';
+import { ReportersList } from './_components/ReportersList';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
 
@@ -22,7 +21,6 @@ const FilterList = ({
   tableFilters
 }) => {
   const resources = useContext(ResourcesContext);
-  const [selectAllReporters, setSelectAllReporters] = useState(true);
 
   const tables = [];
   const allTables = uniqBy(datasets, 'tableId');
@@ -36,14 +34,21 @@ const FilterList = ({
   const filterByReporters = () => {
     return labels.length > 0 ? (
       <AccordionTab header={resources.messages['filterByDataset']}>
-        <ul className={styles.list}>
+        <ReportersList
+          datasetSchemaId={datasetSchemaId}
+          filterDispatch={filterDispatch}
+          reporterFilters={reporterFilters}
+          labels={labels}
+        />
+        {/* <ul className={styles.list}>
           {labels.map(item => (
-            <ReportersListItem
+            <ReportersList
               key={item}
               datasetSchemaId={datasetSchemaId}
               filterDispatch={filterDispatch}
               item={item}
               reporterFilters={reporterFilters}
+              selectedAllReporters={selectedAllReporters}
             />
           ))}
           <SelectAllFilters
@@ -53,7 +58,7 @@ const FilterList = ({
             labels={labels}
             onSelectAllReporters={setSelectAllReporters}
           />
-        </ul>
+        </ul> */}
       </AccordionTab>
     ) : (
       <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
