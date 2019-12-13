@@ -18,7 +18,6 @@ import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Growl } from 'primereact/growl';
 
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -27,8 +26,9 @@ import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { DatasetService } from 'core/services/Dataset';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
@@ -99,13 +99,13 @@ const DataViewer = withRouter(
     });
 
     const datasetContext = useContext(DatasetContext);
+    const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
     let divRef = useRef();
-    let growlRef = useRef();
 
     useEffect(() => {
       let colOptions = [];
@@ -461,18 +461,24 @@ const DataViewer = withRouter(
       try {
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (recordsAdded) {
-          growlRef.current.show({
-            severity: 'success',
-            summary: resources.messages['dataPasted'],
-            life: '3000'
+          notificationContext.add({
+            type: 'ADD_RECORDS_BY_ID_SUCCESS',
+            message: resources.messages['dataPasted'],
+            content: {
+              dataflowId,
+              datasetId
+            }
           });
           onRefresh();
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } else {
-          growlRef.current.show({
-            severity: 'error',
-            summary: resources.messages['dataPastedError'],
-            life: '3000'
+          notificationContext.add({
+            type: 'ADD_RECORDS_BY_ID_ERROR',
+            message: resources.messages['dataPastedError'],
+            content: {
+              dataflowId,
+              datasetId
+            }
           });
         }
       } catch (error) {
@@ -568,20 +574,14 @@ const DataViewer = withRouter(
 
     const onUpload = () => {
       setImportDialogVisible(false);
-
-      const detailContent = (
-        <span>
-          {resources.messages['datasetLoadingMessage']}
-          <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-          {resources.messages['datasetLoading']}
-        </span>
-      );
-
-      growlRef.current.show({
-        severity: 'info',
-        summary: resources.messages['datasetLoadingTitle'],
-        detail: detailContent,
-        life: '5000'
+      notificationContext.add({
+        type: 'DATASET_DATA_LOADING_INIT',
+        message: resources.messages['datasetDataLoadingInit'],
+        content: {
+          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+          title: editLargeStringWithDots(tableName, 22),
+          datasetLoading: resources.messages['datasetLoading']
+        }
       });
     };
 
@@ -1192,7 +1192,6 @@ const DataViewer = withRouter(
             {columns}
           </DataTable>
         </div>
-        <Growl ref={growlRef} />
         <Dialog
           className={styles.Dialog}
           dismissableMask={false}

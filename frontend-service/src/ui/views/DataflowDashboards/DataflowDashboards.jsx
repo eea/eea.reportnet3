@@ -17,7 +17,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DataflowService } from 'core/services/Dataflow';
 import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
 import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
