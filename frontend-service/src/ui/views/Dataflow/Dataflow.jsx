@@ -32,7 +32,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
