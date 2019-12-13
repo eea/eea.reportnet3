@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { includes, isUndefined, isEmpty } from 'lodash';
 
 import styles from './DataProvidersList.module.scss';
 
@@ -13,6 +13,55 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DataProviderService } from 'core/services/DataProvider';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+const reducer = (state, { type, payload }) => {
+  const emptyField = { dataProviderId: '', email: '', name: '' };
+  let newState = {};
+  switch (type) {
+    case 'INITIAL_LOAD':
+      if (!includes(state.dataProviders, emptyField)) {
+        payload.dataProviders.push(emptyField);
+      }
+
+      newState = {
+        ...state,
+        dataProviders: payload.dataProviders,
+        selectedRepresentativeType: payload.representativesOf
+      };
+      return newState;
+
+    case 'SELECT_REPRESENTATIVE_TYPE':
+      console.log('SELECT_REPRESENTATIVE_TYPE', payload);
+      return {
+        ...state,
+        selectedRepresentativeType: payload
+      };
+
+    case 'ON_LOGIN_CHANGE':
+      console.log('ON_LOGIN_CHANGE', payload);
+      return {
+        ...state,
+        input: payload
+      };
+
+    /* case 'ADD_DATAPROVIDER':
+      newState = { ...state, name: payload.name, email: payload.email };
+
+      onDataProviderAdd(newState.email, newState.name);
+
+      return newState;
+
+    case 'DELETE_DATAPROVIDER':
+      newState = { ...state, name: '', dataProviderId: payload };
+
+      onDataProviderDelete(newState.dataProviderId);
+
+      return newState;
+*/
+    default:
+      return state;
+  }
+};
+
 const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
   const [posibleDataProvidersList, setPosibleDataProvidersList] = useState([]);
@@ -20,60 +69,18 @@ const DataProvidersList = ({ dataflowId }) => {
   const [selectedDataProvider, setSelectedDataProvider] = useState(null);
 
   const initialState = {
-    emptyInput: { dataProviderId: '', email: '', name: '' },
     dataProviders: [],
     selectedRepresentativeType: null
   };
 
-  const reducer = (state, { type, payload }) => {
-    let newState;
-    switch (type) {
-      case 'INITIAL_LOAD':
-        return {
-          ...state,
-          dataProviders: payload.dataProviders,
-          selectedRepresentativeType: payload.representativesOf
-        };
-      case 'SELECT_REPRESENTATIVE_TYPE':
-        console.log('SELECT_REPRESENTATIVE_TYPE', payload);
-        return {
-          ...state,
-          selectedRepresentativeType: payload
-        };
-
-      case 'ON_EMAIL_CHANGE':
-        console.log('ON_EMAIL_CHANGE', payload);
-        return {
-          ...state,
-          input: payload
-        };
-
-      case 'ADD_DATAPROVIDER':
-        newState = { ...state, name: payload.name, email: payload.email };
-
-        onDataProviderAdd(newState.email, newState.name);
-
-        return newState;
-
-      case 'DELETE_DATAPROVIDER':
-        newState = { ...state, name: '', dataProviderId: payload };
-
-        onDataProviderDelete(newState.dataProviderId);
-
-        return newState;
-
-      default:
-        return state;
-    }
-  };
-  const [reducerState, dispatcher] = useReducer(reducer, initialState);
+  const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   /*   const onPageLoad = async () => {
     const loadedData = await DataProviderService.all(dataflowId);
 
     return loadedData;
   }; */
-  const onPageLoad = () => {
+  const onPageLoad = cb => {
     const loadedData = {
       representativesOf: 'countries',
       dataProviders: [
@@ -85,15 +92,19 @@ const DataProvidersList = ({ dataflowId }) => {
       ]
     };
 
-    return loadedData;
+    return cb(null, loadedData);
   };
 
   useEffect(() => {
-    const loadedData = onPageLoad();
+    console.log('INIT_USEEFFECT');
 
-    dispatcher({
-      type: 'INITIAL_LOAD',
-      payload: loadedData
+    onPageLoad((error, success) => {
+      if (!error) {
+        formDispatcher({
+          type: 'INITIAL_LOAD',
+          payload: success
+        });
+      }
     });
   }, []);
 
@@ -116,7 +127,7 @@ const DataProvidersList = ({ dataflowId }) => {
       { nameLabel: 'Italy', name: 'It' }
     ]);
   }, []);
-
+  /* 
   //EliminaMe
   useEffect(() => {
     console.log('representativesTypesList', representativesTypesList);
@@ -131,7 +142,7 @@ const DataProvidersList = ({ dataflowId }) => {
   useEffect(() => {
     console.log('selectedDataProvider', selectedDataProvider);
   }, [selectedDataProvider]);
-
+ */
   const onDataProviderAdd = async (email, name) => {
     await DataProviderService.add(dataflowId, email, name);
   };
@@ -150,7 +161,7 @@ const DataProvidersList = ({ dataflowId }) => {
       <input
         value={rowData.email}
         placeholder={'Data Providers email...'}
-        onChange={e => dispatcher({ type: 'ON_EMAIL_CHANGE', payload: e.target.value })}
+        onChange={e => formDispatcher({ type: 'ON_LOGIN_CHANGE', payload: e.target.value })}
       />
     );
   };
@@ -164,7 +175,6 @@ const DataProvidersList = ({ dataflowId }) => {
             setSelectedDataProvider(e.target.value);
           }}>
           {posibleDataProvidersList.map(provider => {
-            console.log('provider', provider);
             return (
               <option
                 key={provider.name}
@@ -180,7 +190,7 @@ const DataProvidersList = ({ dataflowId }) => {
   };
 
   const deleteBtnColumnTemplate = rowData => {
-    return (
+    return rowData.dataProviderId !== '' ? (
       <Button
         tooltip={resources.messages.deleteDataProvider}
         tooltipOptions={{ position: 'right' }}
@@ -188,9 +198,11 @@ const DataProvidersList = ({ dataflowId }) => {
         disabled={false}
         className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
         onClick={() => {
-          dispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
+          formDispatcher({ type: 'DELETE_DATAPROVIDER', payload: rowData.id });
         }}
       />
+    ) : (
+      <></>
     );
   };
 
@@ -206,15 +218,15 @@ const DataProvidersList = ({ dataflowId }) => {
             name="selectedDataProvider"
             optionLabel="nameLabel"
             placeholder="Select..."
-            value={reducerState.selectedRepresentativeType}
+            value={formState.selectedRepresentativeType}
             options={representativesTypesList}
-            onChange={e => dispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value })}
+            onChange={e => formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value })}
           />
         </div>
       </div>
 
       <DataTable
-        value={!isUndefined(reducerState) ? reducerState.dataProviders : []}
+        value={!isUndefined(formState) ? formState.dataProviders : []}
         paginator={false}
         scrollable={true}
         scrollHeight="100vh">

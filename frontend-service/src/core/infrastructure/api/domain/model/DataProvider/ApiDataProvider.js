@@ -8,13 +8,6 @@ const apiDataProvider = {
         { dataProviderId: '3333', email: 'greatbr@uk.uk', name: 'UK' },
         { dataProviderId: '4444', email: 'france@fr.fr', name: 'Fr' },
         { dataProviderId: '5555', email: 'italy@it.it', name: 'It' }
-        /*       { dataProviderId: '7777', email: 'sony@sony.net', name: 'read_write' },
-      { dataProviderId: '8888', email: 'sega@sega.net', name: 'read_write' },
-      { dataProviderId: '9999', email: 'play@play.net', name: 'read_write' },
-      { dataProviderId: '1010', email: 'sudo@sudo.net', name: 'read_write' },
-      { dataProviderId: '0101', email: 'bash@bash.net', name: 'read_write' },
-      { dataProviderId: '0000', email: 'pong@pong.net', name: 'read' } */
-        /* { dataProviderId: '', email: '', name: '' } */
       ]
     };
 
