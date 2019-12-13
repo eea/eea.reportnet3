@@ -149,6 +149,29 @@ export const FieldDesigner = ({
     }
   };
 
+  const onBlurFieldDescription = description => {
+    if (!isUndefined(description)) {
+      if (!isDragging) {
+        //New field
+        if (fieldId === '-1') {
+          if (
+            !isUndefined(fieldTypeValue) &&
+            !isNull(fieldTypeValue) &&
+            (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+            !isNull(fieldValue) &&
+            fieldValue !== ''
+          ) {
+            onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
+          }
+        } else {
+          if (description !== initialDescriptionValue) {
+            fieldUpdate(recordId, fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, description);
+          }
+        }
+      }
+    }
+  };
+
   const onBlurFieldName = name => {
     if (!isUndefined(name)) {
       if (!isDragging) {
@@ -321,13 +344,14 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (recordId, fieldSchemaId, type, value) => {
+  const fieldUpdate = async (recordId, fieldSchemaId, type, value, description) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         recordId,
         fieldSchemaId,
         name: value,
-        type: type
+        type: type,
+        description
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
@@ -383,7 +407,7 @@ export const FieldDesigner = ({
         <InputText
           autoFocus={false}
           className={styles.inputField}
-          key={fieldId}
+          key={`${fieldId}_${index}`}
           ref={inputRef}
           onBlur={e => {
             setIsEditing(false);
@@ -425,6 +449,8 @@ export const FieldDesigner = ({
           key={fieldId}
           onBlur={e => {
             setIsEditing(false);
+            onBlurFieldDescription(e.target.value);
+            //API CALL
           }}
           onChange={e => setFieldDescriptionValue(e.target.value)}
           onFocus={e => {
