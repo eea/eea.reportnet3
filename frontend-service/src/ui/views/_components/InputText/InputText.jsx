@@ -50,6 +50,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import Tooltip from 'primereact/tooltip';
+import { relative } from 'path';
 
 export class InputText extends Component {
   static defaultProps = {
@@ -78,8 +79,6 @@ export class InputText extends Component {
 
   constructor(props) {
     super(props);
-    this.onBlur = this.onBlur.bind(this);
-    this.onFocus = this.onFocus.bind(this);
     this.onInput = this.onInput.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
   }
@@ -91,24 +90,6 @@ export class InputText extends Component {
 
     if (this.props.keyfilter) {
       KeyFilter.onKeyPress(event, this.props.keyfilter, this.props.validateOnly);
-    }
-  }
-
-  onBlur(event) {
-    console.log(this.element);
-    if (this.props.expandable) {
-      this.element.style.height = '24px';
-      this.element.style.position = 'relative';
-    }
-  }
-
-  onFocus(event) {
-    if (this.props.expandable) {
-      this.element.style.height = '100px';
-      this.element.style.position = 'absolute';
-      this.element.style.zIndex = '9999';
-      this.element.style.maxWidth = this.element.clientWidth;
-      this.element.style.wordBreak = 'break-word';
     }
   }
 
@@ -172,27 +153,20 @@ export class InputText extends Component {
           ref={el => (this.element = el)}
           {...inputProps}
           className={`${className}${this.props.required ? ` ${styles.required}` : ''}`}
-          onBlur={this.onBlur}
-          onFocus={this.onFocus}
           onInput={this.onInput}
           onKeyPress={this.onKeyPress}
-          // style={{
-          //   // background: this.props.required ? `url(${logo}) no-repeat scroll 7px 7px !important;` : ''
-          //   backgroundImage: `url(${logo})`
-          // }}
         />
         {this.props.required ? (
-          <FontAwesomeIcon
-            icon={AwesomeIcons('infoCircle')}
-            style={{
-              float: 'right',
-              marginTop: '2px',
-              color: 'var(--errors)',
-              position: 'absolute',
-              left: this.element ? this.element.clientWidth : '',
-              top: this.element ? this.element.offsetHeight : ''
-            }}
-          />
+          <div style={{ position: relative, width: 0, height: 0 }}>
+            <FontAwesomeIcon
+              icon={AwesomeIcons('infoCircle')}
+              style={{
+                color: 'var(--errors)',
+                position: 'relative',
+                right: '40px'
+              }}
+            />
+          </div>
         ) : null}
       </React.Fragment>
     );

@@ -597,16 +597,10 @@ export class Dropdown extends Component {
         <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
           {label || `${this.props.placeholder}` || 'empty'}{' '}
           {this.props.required && isNull(selectedOption) ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons('infoCircle')}
-              style={{ float: 'right', marginTop: '2px', color: 'var(--errors)' }}
-            />
+            <FontAwesomeIcon icon={AwesomeIcons('infoCircle')} style={{ float: 'right', color: 'var(--errors)' }} />
           ) : null}
           {selectedOption ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
-              style={{ float: 'right', marginTop: '2px' }}
-            />
+            <FontAwesomeIcon icon={AwesomeIcons(selectedOption.fieldTypeIcon)} style={{ float: 'right' }} />
           ) : null}
         </label>
       );
