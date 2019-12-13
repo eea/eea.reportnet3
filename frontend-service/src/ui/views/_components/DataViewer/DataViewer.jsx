@@ -534,7 +534,6 @@ const DataViewer = withRouter(
         if (recordsAdded) {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_SUCCESS',
-            message: resources.messages['dataPasted'],
             content: {
               dataflowId,
               datasetId
@@ -545,7 +544,6 @@ const DataViewer = withRouter(
         } else {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            message: resources.messages['dataPastedError'],
             content: {
               dataflowId,
               datasetId
@@ -636,7 +634,6 @@ const DataViewer = withRouter(
       setImportDialogVisible(false);
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
-        message: resources.messages['datasetDataLoadingInit'],
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
           title: editLargeStringWithDots(tableName, 22),

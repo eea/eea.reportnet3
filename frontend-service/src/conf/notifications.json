@@ -51,6 +51,10 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key":"USER_LOGOUT_ERROR",
+          "refresh":false
         }
       ]
     },

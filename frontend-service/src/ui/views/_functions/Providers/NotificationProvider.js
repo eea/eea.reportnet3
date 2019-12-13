@@ -1,9 +1,12 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useContext } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
+import { camelCase } from 'lodash';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationService } from 'core/services/Notification';
 
 const notificationReducer = (state, { type, payload }) => {
@@ -38,14 +41,18 @@ const notificationReducer = (state, { type, payload }) => {
 
 const NotificationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [] });
+  const resources = useContext(ResourcesContext);
 
   return (
     <NotificationContext.Provider
       value={{
         ...state,
         add: notificationDTO => {
+          const { key, content = {} } = notificationDTO;
           const notification = NotificationService.parse({
-            ...notificationDTO,
+            key,
+            content,
+            message: resources.messages(camelCase(key)),
             config: config.notifications,
             routes
           });
