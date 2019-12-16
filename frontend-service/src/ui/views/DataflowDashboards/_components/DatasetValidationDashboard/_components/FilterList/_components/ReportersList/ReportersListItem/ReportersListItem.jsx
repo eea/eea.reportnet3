@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 import styles from './ReportersListItem.module.scss';
 
-const ReportersListItem = ({ datasetSchemaId, filterDispatch, filter, reporterFilters, selectedAllFilterState }) => {
+const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
   const [selectedAll, setSelectedAll] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
 
@@ -16,7 +16,7 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, filter, reporterFi
   const getStateBySelectionAndByReporter = () => {
     let state = areAllSelectedOrDeselected();
     if (state === '') {
-      return reporterFilters.includes(filter) ? false : true;
+      return reporterFilters.includes(reporter) ? false : true;
     } else {
       return state;
     }
@@ -40,7 +40,7 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, filter, reporterFi
     return (
       <>
         <input
-          id={`${filter}_${datasetSchemaId}`}
+          id={`${reporter}_${datasetSchemaId}`}
           className={styles.checkbox}
           type="checkbox"
           defaultChecked={true}
@@ -49,12 +49,12 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, filter, reporterFi
             setIsChecked(e.target.checked);
             filterDispatch({
               type: e.target.checked ? 'REPORTER_CHECKBOX_ON' : 'REPORTER_CHECKBOX_OFF',
-              payload: { label: filter }
+              payload: { label: reporter }
             });
           }}
         />
-        <label htmlFor={`${filter}_${datasetSchemaId}`} className={styles.labelItem}>
-          {filter}
+        <label htmlFor={`${reporter}_${datasetSchemaId}`} className={styles.labelItem}>
+          {reporter}
         </label>
       </>
     );
