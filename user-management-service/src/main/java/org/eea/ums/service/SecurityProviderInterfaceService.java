@@ -2,12 +2,12 @@ package org.eea.ums.service;
 
 
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.vo.UserVO;
 
 /**
@@ -128,4 +128,15 @@ public interface SecurityProviderInterfaceService {
    * @return the resource details
    */
   ResourceInfoVO getResourceDetails(String groupId);
+
+
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   * @return the groups by id resource type
+   */
+  List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource, ResourceTypeEnum resourceType);
 }

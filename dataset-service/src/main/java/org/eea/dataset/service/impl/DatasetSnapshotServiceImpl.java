@@ -186,7 +186,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     // Remove from the metabase
     snapshotRepository.deleteById(idSnapshot);
@@ -249,6 +248,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotSchemaMapper.entityListToClass(schemaSnapshots);
 
   }
+
 
 
   /**
@@ -378,6 +378,29 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG_ERROR.error("Error deleting the schema snapshot " + s.getId(), e.getMessage(), e);
       }
     });
+  }
+
+
+  /**
+   * Delete all snapshots.
+   *
+   * @param idDataset the id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void deleteAllSnapshots(Long idDataset) throws EEAException {
+
+    LOG.info("Deleting all snapshots when the dataset it's going to be deleted");
+    List<SnapshotVO> snapshots = getSnapshotsByIdDataset(idDataset);
+    snapshots.stream().forEach(s -> {
+      try {
+        removeSnapshot(idDataset, s.getId());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error deleting the snapshot {}, {} , {}", s.getId(), e.getMessage(), e);
+      }
+    });
+
   }
 
 
