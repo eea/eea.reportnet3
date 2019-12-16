@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { capitalize, isEmpty, isUndefined, isNull, isEqual } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -13,6 +13,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+import { DataForm } from './_components/DataForm';
 import { Footer } from './_components/Footer';
 import { ActionsColumn } from './_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
@@ -40,7 +41,6 @@ import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
-    buttonsList = undefined,
     correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isPreviewModeOn = false,
@@ -78,7 +78,6 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
-    //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
     const [invisibleColumns, setInvisibleColumns] = useState([]);
 
@@ -449,18 +448,7 @@ const DataViewer = withRouter(
     const onPasteAccept = async () => {
       try {
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
-        if (recordsAdded) {
-          notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_SUCCESS',
-            message: resources.messages['dataPasted'],
-            content: {
-              dataflowId,
-              datasetId
-            }
-          });
-          onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        } else {
+        if (!recordsAdded) {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
             message: resources.messages['dataPastedError'],
@@ -510,7 +498,6 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
-          setAddDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
@@ -521,13 +508,13 @@ const DataViewer = withRouter(
             history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
+          setAddDialogVisible(false);
           setIsLoading(false);
         }
       } else {
         try {
           await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
-          setEditDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -593,6 +580,9 @@ const DataViewer = withRouter(
     );
 
     const cellDataEditor = (cells, record) => {
+      // console.log({ cells, record });
+      // let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData;
+      // console.log(field.type);
       return (
         <InputText
           type="text"
@@ -642,35 +632,6 @@ const DataViewer = withRouter(
       }
     };
 
-    const editRecordForm = colsSchema.map((column, i) => {
-      //Avoid row id Field and dataSetPartitionId
-      if (editDialogVisible) {
-        if (i < colsSchema.length - 2) {
-          if (!isUndefined(records.editedRecord.dataRow)) {
-            const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-            return (
-              <React.Fragment key={column.field}>
-                <div className="p-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor={column.field}>{column.header}</label>
-                </div>
-                <div className="p-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id={column.field}
-                    value={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
-                    onChange={e => onEditAddFormInput(column.field, e.target.value)}
-                  />
-                </div>
-              </React.Fragment>
-            );
-          }
-        }
-      }
-    });
-
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -698,82 +659,15 @@ const DataViewer = withRouter(
       setFetchedData(dataFiltered);
     };
 
-    const newRecordForm = colsSchema.map((column, i) => {
-      if (addDialogVisible) {
-        if (i < colsSchema.length - 2) {
-          if (!isUndefined(records.newRecord.dataRow)) {
-            const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-            return (
-              <React.Fragment key={column.field}>
-                <div className="p-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor={column.field}>{column.header}</label>
-                </div>
-                <div className="p-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id={column.field}
-                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
-                  />
-                </div>
-              </React.Fragment>
-            );
-          }
-        }
-      }
-    });
-
-    const getRecordValidationByErrorAndMessage = (levelError, message) => {
-      return DatasetService.createValidation('RECORD', 0, levelError, message);
-    };
-
     //Template for Record validation
     const validationsTemplate = recordData => {
-      let validations = [];
-      if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-        validations = [...recordData.recordValidations];
-      }
-
-      const recordsWithFieldValidations = recordData.dataRow.filter(
-        row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+      const validationsGroup = DataViewerUtils.groupValidations(
+        recordData,
+        resources.messages['recordBlockers'],
+        resources.messages['recordErrors'],
+        resources.messages['recordWarnings'],
+        resources.messages['recordInfos']
       );
-
-      const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
-      if (!isEmpty(recordsWithFieldValidations)) {
-        const filterFieldValidation = (errorType, errorMessage) => {
-          const filteredFieldValidationsWithErrorType = filteredFieldValidations.filter(
-            filteredFieldValidation => filteredFieldValidation.levelError === errorType
-          );
-          if (!isEmpty(filteredFieldValidationsWithErrorType)) {
-            validations.push(getRecordValidationByErrorAndMessage(errorType, errorMessage));
-          }
-        };
-        filterFieldValidation('BLOCKER', resources.messages['recordBlockers']);
-        filterFieldValidation('ERROR', resources.messages['recordErrors']);
-        filterFieldValidation('WARNING', resources.messages['recordWarnings']);
-        filterFieldValidation('INFO', resources.messages['recordInfos']);
-      }
-
-      const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
-      const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
-      const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
-      const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
-
-      const getMessages = validationsType => {
-        let messageType = '';
-        validationsType.forEach(validation =>
-          validation.message ? (messageType += '- ' + capitalize(validation.message) + '\n') : ''
-        );
-        return messageType;
-      };
-
-      const validationsGroup = {};
-      validationsGroup.blockers = blockerValidations;
-      validationsGroup.errors = errorValidations;
-      validationsGroup.warnings = warningValidations;
-      validationsGroup.infos = infoValidations;
-      validationsGroup.messageBlockers = getMessages(blockerValidations);
-      validationsGroup.messageErrors = getMessages(errorValidations);
-      validationsGroup.messageWarnings = getMessages(warningValidations);
-      validationsGroup.messageInfos = getMessages(infoValidations);
       return getIconsValidationsErrors(validationsGroup);
     };
 
@@ -1018,7 +912,15 @@ const DataViewer = withRouter(
           onHide={() => setAddDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
           visible={addDialogVisible}>
-          <div className="p-grid p-fluid">{newRecordForm}</div>
+          <div className="p-grid p-fluid">
+            <DataForm
+              colsSchema={colsSchema}
+              formType="NEW"
+              addDialogVisible={addDialogVisible}
+              onChangeForm={onEditAddFormInput}
+              records={records}
+            />
+          </div>
         </Dialog>
         <Dialog
           className="edit-table"
@@ -1031,7 +933,15 @@ const DataViewer = withRouter(
           onHide={() => setEditDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
           visible={editDialogVisible}>
-          <div className="p-grid p-fluid">{editRecordForm}</div>
+          <div className="p-grid p-fluid">
+            <DataForm
+              colsSchema={colsSchema}
+              formType="EDIT"
+              editDialogVisible={editDialogVisible}
+              onChangeForm={onEditAddFormInput}
+              records={records}
+            />
+          </div>
         </Dialog>
       </SnapshotContext.Provider>
     );

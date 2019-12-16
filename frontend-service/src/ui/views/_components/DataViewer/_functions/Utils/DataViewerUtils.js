@@ -1,4 +1,6 @@
-import { capitalize } from 'lodash';
+import { capitalize, isUndefined, isNull, isEmpty } from 'lodash';
+
+import { DatasetService } from 'core/services/Dataset';
 
 export const DataViewerUtils = {
   parseData: data =>
@@ -97,5 +99,60 @@ export const DataViewerUtils = {
       message += '- ' + error + capitalize(validation.message) + '\n';
     });
     return message;
+  },
+  groupValidations: (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
+    let validations = [];
+    if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
+      validations = [...recordData.recordValidations];
+    }
+
+    const recordsWithFieldValidations = recordData.dataRow.filter(
+      row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+    );
+
+    const getRecordValidationByErrorAndMessage = (levelError, message) => {
+      return DatasetService.createValidation('RECORD', 0, levelError, message);
+    };
+
+    const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+    if (!isEmpty(recordsWithFieldValidations)) {
+      const filterFieldValidation = (errorType, errorMessage) => {
+        const filteredFieldValidationsWithErrorType = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === errorType
+        );
+        if (!isEmpty(filteredFieldValidationsWithErrorType)) {
+          validations.push(getRecordValidationByErrorAndMessage(errorType, errorMessage));
+        }
+      };
+      filterFieldValidation('BLOCKER', blockerMessage);
+      filterFieldValidation('ERROR', errorMessage);
+      filterFieldValidation('WARNING', warningMessage);
+      filterFieldValidation('INFO', infoMessage);
+    }
+
+    const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
+    const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
+    const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
+    const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
+
+    const getMessages = validationsType => {
+      let messageType = '';
+      validationsType.forEach(validation =>
+        validation.message ? (messageType += '- ' + capitalize(validation.message) + '\n') : ''
+      );
+      return messageType;
+    };
+
+    const validationsGroup = {
+      blockers: blockerValidations,
+      errors: errorValidations,
+      warnings: warningValidations,
+      infos: infoValidations,
+      messageBlockers: getMessages(blockerValidations),
+      messageErrors: getMessages(errorValidations),
+      messageWarnings: getMessages(warningValidations),
+      messageInfos: getMessages(infoValidations)
+    };
+    return validationsGroup;
   }
 };
