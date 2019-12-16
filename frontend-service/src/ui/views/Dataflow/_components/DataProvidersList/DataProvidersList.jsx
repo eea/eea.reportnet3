@@ -17,55 +17,78 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const reducer = (state, { type, payload }) => {
   const emptyField = { dataProviderId: '', email: '', name: '' };
 
-  let newState = {};
-
+  let updatedList = [];
   switch (type) {
+    case 'ADD_DATAPROVIDER':
+      // await DataProviderService.add(dataflowId, email, name);
+      return state;
     case 'INITIAL_LOAD':
       if (!includes(state.dataProviders, emptyField)) {
         payload.dataProviders.push(emptyField);
       }
 
-      newState = {
+      return {
         ...state,
         dataProviders: payload.dataProviders,
         selectedRepresentativeType: payload.representativesOf
       };
-      return newState;
 
     case 'SELECT_REPRESENTATIVE_TYPE':
+      console.log('SELECT_REPRESENTATIVE_TYPE ', payload);
       return {
         ...state,
         selectedRepresentativeType: payload
       };
 
-    case 'ON_LOGIN_CHANGE':
-      const updatedList = state.dataProviders.map(dataProvider => {
+    case 'ON_EMAIL_CHANGE':
+      updatedList = state.dataProviders.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
           dataProvider.email = payload.input;
-          return dataProvider;
-        } else {
-          return dataProvider;
         }
+        return dataProvider;
       });
+
       return {
         ...state,
         dataProviders: updatedList
       };
+
+    case 'ON_PROVIDER_CHANGE':
+      updatedList = state.dataProviders.map(dataProvider => {
+        if (dataProvider.dataProviderId === payload.dataProviderId) {
+          dataProvider.name = payload.name;
+        }
+        return dataProvider;
+      });
+
+      return {
+        ...state,
+        dataProviders: updatedList
+      };
+
     case 'DELETE_DATAPROVIDER':
-      console.log('Delete Provider with id :', payload.dataProviderId);
+      console.log('Delete Provider with id :', state.dataProviderIdToDelete);
 
-      /* onDataProviderDelete(payload.dataProviderId); */
+      /* await DataProviderService.delete(dataProviderId); */
 
-      return state;
-    /* case 'ADD_DATAPROVIDER':
-      newState = { ...state, name: payload.name, email: payload.email };
+      return {
+        ...state,
+        confirmDeleteVisible: false
+      };
 
-      onDataProviderAdd(newState.email, newState.name);
+    case 'SHOW_CONFIRM_DIALOG':
+      return {
+        ...state,
+        confirmDeleteVisible: true,
+        dataProviderIdToDelete: payload.dataProviderId
+      };
+    case 'HIDE_CONFIRM_DIALOG':
+      return {
+        ...state,
+        confirmDeleteVisible: false,
+        dataProviderIdToDelete: ''
+      };
 
-      return newState;
-
-    
-*/
     default:
       return state;
   }
@@ -73,16 +96,30 @@ const reducer = (state, { type, payload }) => {
 
 const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
+  // const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+  const [dataProviderIdToDelete, setDataProviderIdToDelete] = useState();
   const [possibleDataProvidersList, setPossibleDataProvidersList] = useState([]);
   const [representativesTypesList, setRepresentativesTypesList] = useState([]);
-  const [dataProviderIdToDelete, setDataProviderIdToDelete] = useState();
-  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [selectedDataProvider, setSelectedDataProvider] = useState(null);
+  const [selectedRepresentativeType, setSelectedRepresentativeType] = useState(null);
 
   const initialState = {
+    confirmDeleteVisible: false,
+    dataProviderIdToDelete: '',
     dataProviders: [],
-    selectedRepresentativeType: null
+    possibleDataProvidersList: [],
+    representativesTypesList: [],
+    selectedDataProvider: null,
+    selectedRepresentativeType: ''
   };
+
+  useEffect(() => {
+    console.log('selectedRepresentativeType', selectedRepresentativeType);
+  }, [selectedRepresentativeType]);
+
+  useEffect(() => {
+    console.log('selectedDataProvider', selectedDataProvider);
+  }, [selectedDataProvider]);
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
@@ -123,40 +160,31 @@ const DataProvidersList = ({ dataflowId }) => {
   }, []);
 
   useEffect(() => {
-    setPossibleDataProvidersList([
-      { nameLabel: 'Select...', name: '' },
-      { nameLabel: 'Spain', name: 'Es' },
-      { nameLabel: 'Germany', name: 'De' },
-      { nameLabel: 'Uk', name: 'UK' },
-      { nameLabel: 'France', name: 'Fr' },
-      { nameLabel: 'Italy', name: 'It' }
-    ]);
+    getDataProvidersListOfSelectedType(selectedRepresentativeType);
   }, []);
 
   const onDataProviderAdd = async (email, name) => {
     await DataProviderService.add(dataflowId, email, name);
   };
 
-  const onDeleteBtnPressed = dataProviderId => {
-    setConfirmDeleteVisible(true);
-    setDataProviderIdToDelete(dataProviderId);
-  };
-
-  const onHideConfirmDeleteDialog = () => {
-    setConfirmDeleteVisible(false);
-  };
-
-  const onDeleteDataProvider = async dataProviderId => {
-    console.log('deleting ', dataProviderId);
-    /* await DataProviderService.delete(dataProviderId); */
-  };
-
   const onConfirmDeleteDataProvider = () => {
-    onDeleteDataProvider(dataProviderIdToDelete);
-    onHideConfirmDeleteDialog();
+    /* onDeleteDataProvider(dataProviderIdToDelete); */
+    formDispatcher({
+      type: 'DELETE_DATAPROVIDER',
+      payload: { dataProviderId: dataProviderIdToDelete }
+    });
   };
   const getDataProvidersListOfSelectedType = async type => {
-    return await DataProviderService.allRepresentativesOf(type);
+    // const dataResponse = await DataProviderService.allRepresentativesOf(type);
+    const dataResponse = [
+      { nameLabel: 'Select...', name: '' },
+      { nameLabel: 'Spain', name: 'Es' },
+      { nameLabel: 'Germany', name: 'De' },
+      { nameLabel: 'Uk', name: 'UK' },
+      { nameLabel: 'France', name: 'Fr' },
+      { nameLabel: 'Italy', name: 'It' }
+    ];
+    setPossibleDataProvidersList(dataResponse);
   };
 
   const emailInputColumnTemplate = rowData => {
@@ -168,7 +196,7 @@ const DataProvidersList = ({ dataflowId }) => {
         placeholder={'Data Providers email...'}
         onChange={e =>
           formDispatcher({
-            type: 'ON_LOGIN_CHANGE',
+            type: 'ON_EMAIL_CHANGE',
             payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
           })
         }
@@ -182,16 +210,18 @@ const DataProvidersList = ({ dataflowId }) => {
         <select
           className="p-dropdown p-component"
           onChange={e => {
-            setSelectedDataProvider(e.target.value);
-          }}>
+            formDispatcher({
+              type: 'ON_PROVIDER_CHANGE',
+              payload: { name: e.target.value, dataProviderId: rowData.dataProviderId }
+            });
+          }}
+          value={rowData.name}>
           {possibleDataProvidersList.map(provider => {
-            let selected = provider.name === rowData.name ? 'selected' : '';
             return (
               <option
                 key={provider.name}
                 className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
-                selected={selected}
-                value={rowData.name}>
+                value={provider.name}>
                 {provider.nameLabel}
               </option>
             );
@@ -210,7 +240,7 @@ const DataProvidersList = ({ dataflowId }) => {
         disabled={false}
         className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
         onClick={() => {
-          onDeleteBtnPressed(rowData.dataProviderId);
+          formDispatcher({ type: 'SHOW_CONFIRM_DIALOG', payload: { dataProviderId: rowData.dataProviderId } });
         }}
       />
     ) : (
@@ -218,6 +248,7 @@ const DataProvidersList = ({ dataflowId }) => {
     );
   };
 
+  console.log('formState.selectedRepresentativeType', representativesTypesList);
   return (
     <>
       <div className={styles.selectWrapper}>
@@ -230,10 +261,12 @@ const DataProvidersList = ({ dataflowId }) => {
             name="selectedDataProvider"
             optionLabel="nameLabel"
             placeholder="Select..."
-            defaultValue={formState.selectedRepresentativeType}
             value={formState.selectedRepresentativeType}
             options={representativesTypesList}
-            onChange={e => formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value })}
+            onChange={e => {
+              setSelectedRepresentativeType(e.target.value);
+              return formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value });
+            }}
           />
         </div>
       </div>
@@ -244,9 +277,9 @@ const DataProvidersList = ({ dataflowId }) => {
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
       <ConfirmDialog
-        onConfirm={onConfirmDeleteDataProvider}
-        onHide={onHideConfirmDeleteDialog}
-        visible={confirmDeleteVisible}
+        onConfirm={() => onConfirmDeleteDataProvider()}
+        onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+        visible={formState.confirmDeleteVisible}
         header={'Delete data provider'}
         labelConfirm={resources.messages['yes']}
         labelCancel={resources.messages['no']}>

@@ -19,6 +19,8 @@ const useSocket = () => {
     const token = UserService.getToken();
     const ws = new WebSocket(socket_url);
     const stompClient = Stomp.over(ws);
+    stompClient.heartbeat.incoming = 0;
+    stompClient.heartbeat.outgoing = 0;
 
     stompClient.connect({ token }, frame => {
       stompClient.subscribe('/user/queue/notifications', notification => {
