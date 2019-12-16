@@ -2,7 +2,6 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -27,8 +26,6 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
-import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
@@ -559,38 +556,4 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
-
-  /**
-   * Delete dataset.
-   *
-   * @param datasetId the dataset id
-   */
-  @Override
-  @DeleteMapping(value = "/{id}")
-  public void deleteDataset(Long datasetId) {
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    String schemaId = dataSetSchemaControllerZuul.getDatasetSchemaId(datasetId);
-    if (schemaId.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
-    }
-
-    // delete the schema snapshots too
-    try {
-      datasetSnapshotService.deleteAllSnapshots(datasetId);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
-    }
-    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-    datasetMetabaseService.deleteDesignDataset(datasetId);
-    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-
-    List<ResourceInfoVO> resourceCustodian = new ArrayList<>();
-    resourceCustodian.addAll(resourceManagementControllerZull.getGroupsByIdResourceType(datasetId,
-        ResourceTypeEnum.DATASET));
-    resourceManagementControllerZull.deleteResource(resourceCustodian);
-  }
-
 }

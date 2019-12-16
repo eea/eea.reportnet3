@@ -461,13 +461,6 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
-    // PART OF DELETE ALL THE DATASET we have in the dataflow
-    if (null != dataflow.getReportingDatasets() || !dataflow.getReportingDatasets().isEmpty()) {
-      dataflow.getReportingDatasets().stream().forEach(datasets -> {
-        dataSetControllerZuul.deleteDataset(datasets.getId());
-      });
-    }
-    LOG.info("Delete full dataset with dataflow id: {}", idDataflow);
     // we delete the dataflow in metabase at the end
     dataflowRepository.deleteNativeDataflow(idDataflow);
     LOG.info("Delete full dataflow with id: {}", idDataflow);
