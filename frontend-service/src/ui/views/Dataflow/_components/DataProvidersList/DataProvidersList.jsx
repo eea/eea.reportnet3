@@ -25,7 +25,7 @@ const reducer = (state, { type, payload }) => {
       return state;
 
     case 'GET_DATA_PROVIDERS_LIST_OF_SELECTED_TYPE':
-      // const dataResponse = await DataProviderService.allRepresentativesOf(type);
+      // const dataResponse = await DataProviderService.allRepresentativesOf(payload.type);
       const dataResponse = [
         { nameLabel: 'Select...', name: '' },
         { nameLabel: 'Spain', name: 'Es' },
@@ -128,7 +128,7 @@ const DataProvidersList = ({ dataflowId }) => {
     dataProviders: [],
     possibleDataProvidersList: [],
     representativesTypesList: [],
-    selectedDataProvider: null,
+    representativesDropdown: null,
     selectedRepresentativeType: ''
   };
 
@@ -141,7 +141,7 @@ const DataProvidersList = ({ dataflowId }) => {
   }; */
   const onPageLoad = () => {
     const loadedData = {
-      representativesOf: 'countries',
+      representativesOf: { nameLabel: 'Countries', name: 'countries' },
       dataProviders: [
         { dataProviderId: '1111', email: 'spain@es.es', name: 'Es' },
         { dataProviderId: '2222', email: 'germany@de.de', name: 'De' },
@@ -233,46 +233,49 @@ const DataProvidersList = ({ dataflowId }) => {
   };
 
   return (
-    <>
-      <div className={styles.selectWrapper}>
-        <div className={styles.title}>Data providers</div>
+    formState.selectedRepresentativeType && (
+      <>
+        <div className={styles.selectWrapper}>
+          <div className={styles.title}>Data providers</div>
 
-        <div>
-          <label htmlFor="selectedDataProvider">Representative of </label>
-
-          <Dropdown
-            name="selectedDataProvider"
-            optionLabel="nameLabel"
-            placeholder="Select..."
-            value={formState.selectedRepresentativeType}
-            options={formState.representativesTypesList}
-            onChange={e => {
-              return formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value });
-            }}
-          />
+          <div>
+            <label htmlFor="representativesDropdown">Representative of </label>
+            {console.log('formState.selectedRepresentativeType', formState.selectedRepresentativeType)}
+            <Dropdown
+              disabled={true}
+              name="representativesDropdown"
+              optionLabel="nameLabel"
+              placeholder="Select..."
+              value={formState.selectedRepresentativeType}
+              options={formState.representativesTypesList}
+              onChange={e => {
+                return formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value });
+              }}
+            />
+          </div>
         </div>
-      </div>
 
-      <DataTable value={formState.dataProviders} paginator={false} scrollable={true} scrollHeight="100vh">
-        <Column body={emailInputColumnTemplate} header="Email" />
-        <Column body={nameDropdownColumnTemplate} header="Data Provider" />
-        <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
-      </DataTable>
-      <ConfirmDialog
-        onConfirm={() =>
-          formDispatcher({
-            type: 'DELETE_DATA_PROVIDER',
-            payload: { dataProviderId: formState.dataProviderIdToDelete }
-          })
-        }
-        onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-        visible={formState.confirmDeleteVisible}
-        header={'Delete data provider'}
-        labelConfirm={resources.messages['yes']}
-        labelCancel={resources.messages['no']}>
-        {'Do you really want to delete this data provider?'}
-      </ConfirmDialog>
-    </>
+        <DataTable value={formState.dataProviders} scrollable={true} scrollHeight="100vh">
+          <Column body={emailInputColumnTemplate} header="Email" />
+          <Column body={nameDropdownColumnTemplate} header="Data Provider" />
+          <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+        </DataTable>
+        <ConfirmDialog
+          onConfirm={() =>
+            formDispatcher({
+              type: 'DELETE_DATA_PROVIDER',
+              payload: { dataProviderId: formState.dataProviderIdToDelete }
+            })
+          }
+          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+          visible={formState.confirmDeleteVisible}
+          header={'Delete data provider'}
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
+          {'Do you really want to delete this data provider?'}
+        </ConfirmDialog>
+      </>
+    )
   );
 };
 
