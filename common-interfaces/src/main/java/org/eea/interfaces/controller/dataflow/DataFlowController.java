@@ -126,7 +126,6 @@ public interface DataFlowController {
   void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
 
-
   /**
    * Update data flow.
    *
@@ -139,11 +138,11 @@ public interface DataFlowController {
    * Gets the metabase by id.
    *
    * @param id the id
+   *
    * @return the metabase by id
    */
   @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("id") Long id);
-
 
 
   /**
@@ -152,5 +151,5 @@ public interface DataFlowController {
    * @param idDataflow the id dataflow
    */
   @DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDataFlow(@QueryParam("idDataflow") Long idDataflow);
+  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
 }
