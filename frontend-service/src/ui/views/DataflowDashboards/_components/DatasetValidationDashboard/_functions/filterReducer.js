@@ -96,7 +96,7 @@ export const filterReducer = (state, { type, payload }) => {
       filteredTableData = onFilteringData(state.originalData, state.tableFilter, reportersLabels, state.statusFilter);
       return {
         ...state,
-        reporterFilter: reportersLabels,
+        reporterFilter: reportersLabels[0],
         data: []
       };
 

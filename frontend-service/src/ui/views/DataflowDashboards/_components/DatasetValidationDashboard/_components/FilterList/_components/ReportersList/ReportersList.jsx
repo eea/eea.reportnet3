@@ -6,17 +6,7 @@ import { ReportersListItem } from './ReportersListItem';
 import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
 
 const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, labels }) => {
-  const [selectedAllReporters, setSelectAllReporters] = useState('checked');
-
-  const onSelectAllFilter = () => {
-    let checkboxListStyles = '';
-    if (selectedAllReporters === 'unchecked') {
-      checkboxListStyles = styles.unchecked;
-    } else {
-      checkboxListStyles = styles.neutral;
-    }
-    return checkboxListStyles;
-  };
+  const [selectedAllFilterState, setSelectedAllFilterState] = useState('');
 
   return (
     <ul className={styles.list}>
@@ -28,7 +18,7 @@ const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, label
             filterDispatch={filterDispatch}
             filter={label}
             reporterFilters={reporterFilters}
-            selectedAllFiltersState={selectedAllReporters}
+            selectedAllFilterState={selectedAllFilterState}
           />
         </li>
       ))}
@@ -37,7 +27,7 @@ const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, label
         filterDispatch={filterDispatch}
         reporterFilters={reporterFilters}
         labels={labels}
-        onSelectAllReporters={setSelectAllReporters}
+        selectedAllFilter={setSelectedAllFilterState}
       />
     </ul>
   );
