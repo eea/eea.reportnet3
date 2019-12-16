@@ -82,7 +82,7 @@ public class LockServiceImplTest {
     try {
       lockServiceImpl.createLock(new Timestamp(1L), null, LockType.METHOD, lockCriteria);
     } catch (EEAException e) {
-      Assert.assertEquals(lockVO.getId().toString(), e.getMessage());
+      Assert.assertEquals("Method locked: " + lockVO, e.getMessage());
     }
   }
 
