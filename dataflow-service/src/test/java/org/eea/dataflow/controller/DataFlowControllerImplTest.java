@@ -557,6 +557,35 @@ public class DataFlowControllerImplTest {
     }
   }
 
+  /**
+   * Delete dataflow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteDataflowThrow() throws Exception {
+    EEAException Exception = new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    doThrow(Exception).when(dataflowService).deleteDataFlow(Mockito.anyLong());
+    try {
+      dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  /**
+   * Delete dataflow.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDataflow() throws Exception {
+    dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
+    Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
+  }
+
 
 }
 

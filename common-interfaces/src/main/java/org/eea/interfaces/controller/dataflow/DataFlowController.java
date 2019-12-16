@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.dataflow;
 
 
 import java.util.List;
+import javax.ws.rs.QueryParam;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -125,7 +126,6 @@ public interface DataFlowController {
   void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
 
-
   /**
    * Update data flow.
    *
@@ -138,10 +138,18 @@ public interface DataFlowController {
    * Gets the metabase by id.
    *
    * @param id the id
+   *
    * @return the metabase by id
    */
   @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("id") Long id);
 
 
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
 }
