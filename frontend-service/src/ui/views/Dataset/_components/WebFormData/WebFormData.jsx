@@ -8,7 +8,7 @@ import styles from './WebFormData.module.css';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { DatasetService } from 'core/services/Dataset';
 import { routes } from 'ui/routes';
 
