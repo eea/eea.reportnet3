@@ -442,7 +442,6 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public void deleteDataFlow(Long idDataflow) throws Exception {
-
     // LOAD DATAFLOW DATA
     final DataFlowVO dataflow = getById(idDataflow);
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
@@ -470,7 +469,7 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full dataset with dataflow id: {}", idDataflow);
     // we delete the dataflow in metabase at the end
-    dataflowRepository.deleteDataflow(idDataflow);
+    dataflowRepository.deleteNativeDataflow(idDataflow);
     LOG.info("Delete full dataflow with id: {}", idDataflow);
 
     // add resource to delete(DATAFLOW PART)

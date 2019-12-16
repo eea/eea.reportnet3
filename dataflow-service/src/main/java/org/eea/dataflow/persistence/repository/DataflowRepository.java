@@ -72,14 +72,14 @@ public interface DataflowRepository
   Dataflow findDataflowByWeblinks_Id(Long idLink);
 
   /**
-   * Delete dataflow.
+   * Delete a single dataflow record using native query.
    *
    * @param idDataflow the id dataflow
    */
   @Transactional
   @Modifying
   @Query(nativeQuery = true, value = "delete from  dataflow  where id = :idDataflow ")
-  void deleteDataflow(@Param("idDataflow") Long idDataflow);
+  void deleteNativeDataflow(@Param("idDataflow") Long idDataflow);
 
 
 
