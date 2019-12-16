@@ -442,14 +442,19 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public void deleteDataFlow(Long idDataflow) throws Exception {
-    // LOAD DATAFLOW DATA
     final DataFlowVO dataflow = getById(idDataflow);
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
     if (null != dataflow && null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
       for (DocumentVO document : dataflow.getDocuments()) {
-        documentControllerZuul.deleteDocument(document.getId());
+        try {
+          documentControllerZuul.deleteDocument(document.getId());
+        } catch (EEAException e) {
+          LOG.error("Error deleting document with id {}", document.getId());
+          throw new EEAException(new StringBuilder().append("Error Deleting document ")
+              .append(document.getName()).append(" with ").append(document.getId()).toString(), e);
+        }
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
@@ -457,19 +462,37 @@ public class DataflowServiceImpl implements DataflowService {
     if (null != dataflow && null != dataflow.getDesignDatasets()
         && !dataflow.getDesignDatasets().isEmpty()) {
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
+        try {
+          dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
+        } catch (Exception e) {
+
+          LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId());
+          throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
+              .append(designDatasetVO.getDataSetName()).append(" with ")
+              .append(designDatasetVO.getId()).toString(), e);
+        }
       }
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
     // we delete the dataflow in metabase at the end
-    dataflowRepository.deleteNativeDataflow(idDataflow);
+    try {
+      dataflowRepository.deleteNativeDataflow(idDataflow);
+    } catch (Exception e) {
+      LOG.error("Error deleting dataflow: {}", idDataflow);
+      throw new EEAException("Error Deleting dataflow ", e);
+    }
     LOG.info("Delete full dataflow with id: {}", idDataflow);
 
     // add resource to delete(DATAFLOW PART)
     List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
         .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
-    resourceManagementControllerZull.deleteResource(resourceCustodian);
+    try {
+      resourceManagementControllerZull.deleteResource(resourceCustodian);
+    } catch (Exception e) {
+      LOG.error("Error deleting resource in keycloack: {}", resourceCustodian);
+      throw new EEAException("Error deleting resource in keycloack ", e);
+    }
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
   }
