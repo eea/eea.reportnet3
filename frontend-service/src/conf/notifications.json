@@ -55,6 +55,30 @@
         {
           "key":"USER_LOGOUT_ERROR",
           "refresh":false
+        },
+        {
+          "key":"TOKEN_REFRESH_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DATAFLOW_CREATION_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_CREATION_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_DELETE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },

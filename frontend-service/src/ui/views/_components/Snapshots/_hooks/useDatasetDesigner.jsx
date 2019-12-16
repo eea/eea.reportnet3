@@ -3,8 +3,10 @@ import { useState, useContext, useEffect, useReducer } from 'react';
 import { useSnapshotReducer } from './useSnapshotReducer';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotService } from 'core/services/Snapshot';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-const useDatasetDesigner = (datasetId, datasetSchemaId, growlRef) => {
+const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
@@ -33,27 +35,61 @@ const useDatasetDesigner = (datasetId, datasetSchemaId, growlRef) => {
   };
 
   const onCreateSnapshot = async () => {
-    const snapshotToCreate = await SnapshotService.createByIdDesigner(
-      datasetId,
-      datasetSchemaId,
-      snapshotState.description
-    );
-
-    if (snapshotToCreate.isCreated) {
-      onLoadSnapshotList();
+    try {
+      const snapshotToCreate = await SnapshotService.createByIdDesigner(
+        datasetId,
+        datasetSchemaId,
+        snapshotState.description
+      );
+      if (snapshotToCreate.status >= 200 && snapshotToCreate.status <= 299) {
+        onLoadSnapshotList();
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_CREATION_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'SNAPSHOT_CREATION_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onDeleteSnapshot = async () => {
-    const snapshotToDelete = await SnapshotService.deleteByIdDesigner(datasetId, snapshotState.snapShotId);
-
-    if (snapshotToDelete.isDeleted) {
-      onLoadSnapshotList();
+    try {
+      const snapshotToDelete = await SnapshotService.deleteByIdDesigner(datasetId, snapshotState.snapShotId);
+      if (snapshotToDelete.status >= 200 && snapshotToDelete.status <= 299) {
+        onLoadSnapshotList();
+      } else {
+        NotificationContext.add({
+          type: 'SNAPSHOT_DELETE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
+    } catch (error) {
+      NotificationContext.add({
+        type: 'SNAPSHOT_DELETE_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onLoadSnapshotList = async () => {

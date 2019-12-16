@@ -48,14 +48,18 @@ const NotificationProvider = ({ children }) => {
       value={{
         ...state,
         add: notificationDTO => {
-          const { key, content = {} } = notificationDTO;
+          console.log('notificationDTO', notificationDTO);
+          const { type, content = {} } = notificationDTO;
+          console.log('camelCase(key', camelCase(type));
+          console.log('resources.messages[camelCase(type)]', resources.messages[camelCase(type)]);
           const notification = NotificationService.parse({
-            key,
+            type,
             content,
-            message: resources.messages(camelCase(key)),
+            message: resources.messages[camelCase(type)],
             config: config.notifications,
             routes
           });
+          console.log('notification', notification);
           dispatch({
             type: 'ADD',
             payload: notification

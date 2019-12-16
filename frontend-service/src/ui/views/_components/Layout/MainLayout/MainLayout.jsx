@@ -7,11 +7,14 @@ import styles from './MainLayout.module.css';
 import { Navigation } from './_components';
 import { Footer } from './_components';
 import { Notifications } from 'ui/views/_components/Notifications';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
+  const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
   useEffect(() => {
     async function fetchData() {
@@ -20,6 +23,10 @@ const MainLayout = ({ children }) => {
           const userObject = await UserService.refreshToken();
           user.onTokenRefresh(userObject);
         } catch (error) {
+          notifications.add({
+            key: 'TOKEN_REFRESH_ERROR',
+            content: {}
+          });
           await UserService.logout();
           user.onLogout();
         }

@@ -13,11 +13,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { UserService } from 'core/services/User';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const LeftSideBar = withRouter(
   ({ components = [], createDataflowButtonTitle, onFetchData, isCustodian, navTitle, style, subscribeButtonTitle }) => {
     const resources = useContext(ResourcesContext);
     const user = useContext(UserContext);
+    const notificationContext = useContext(NotificationContext);
     const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
     const [isFormReset, setIsFormReset] = useState(true);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
@@ -41,6 +43,10 @@ const LeftSideBar = withRouter(
         const userObject = await UserService.refreshToken();
         user.onTokenRefresh(userObject);
       } catch (error) {
+        notificationContext.add({
+          type: 'TOKEN_REFRESH_ERROR',
+          content: {}
+        });
         await UserService.logout();
         user.onLogout();
       }

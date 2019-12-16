@@ -7,13 +7,15 @@ import { isEmpty } from 'lodash';
 import styles from './CreateDataflowForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { DataflowService } from 'core/services/Dataflow';
 
 export const CreateDataflowForm = ({ isFormReset, onCreate, onCancel }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
+  const notification = useContext(NotificationContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
   const createDataflowValidationSchema = Yup.object().shape({
     dataflowName: Yup.string().required(),
@@ -31,11 +33,21 @@ export const CreateDataflowForm = ({ isFormReset, onCreate, onCancel }) => {
       validationSchema={createDataflowValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        const response = await DataflowService.create(values.dataflowName, values.dataflowDescription);
-        if (response.status >= 200 && response.status <= 299) {
-          onCreate();
-        } else {
-          console.error(`Error in the creation of dataflow`);
+        try {
+          const response = await DataflowService.create(values.dataflowName, values.dataflowDescription);
+          if (response.status >= 200 && response.status <= 299) {
+            onCreate();
+          } else {
+            notification.add({
+              key: 'DATAFLOW_CREATION_ERROR',
+              content: {}
+            });
+          }
+        } catch (error) {
+          notification.add({
+            key: 'DATAFLOW_CREATION_ERROR',
+            content: {}
+          });
         }
         setSubmitting(false);
       }}>

@@ -156,7 +156,7 @@
 		"info": "Info",
 		"language": "Language",
 		"levelError": "Level error",
-		"loadDataCompletedEvent":"Dataset data loaded sussccesfully see at <a href='{:navigateTo}'>Go to</a>",
+		"loadDataCompletedEvent":"Dataset data loaded successfully see at <a href='{:navigateTo}'>Go to</a>",
 		"loadDataFailedEvent":"Dataset data failed see at <a href='{:navigateTo}'>Go to</a>",
 		"loading": "Loading...",
 		"login": "Login",
@@ -277,6 +277,10 @@
 		"restoreDatasetSnapshotCompletedEvent":"dataset restored successfully at <a href='{:navigateTo}'>Dataset</a>",
 		"restoreDatasetschemaSnapshotCompletedEvent":"dataset schema restored successfully at <a href='{:navigateTo}'>Dataset</a>",
 		"documentUploadCompletedEvent":"Document upload complete successfully at <a href='{:navigateTo}'>Dataflow</a>",
-		"documentDeleteCompletedEvent":"Document deleted successfully at <a href='{:navigateTo}'>Dataflow</a>"
+		"documentDeleteCompletedEvent":"Document deleted successfully at <a href='{:navigateTo}'>Dataflow</a>",
+		"tokenRefreshError":"Error on token refresh process",
+		"dataflowCreationError":"Dataflow creation error",
+		"snapshotCreationError":"Snapshot creation error at <a href='{:navigateTo}'>Dataset</a>",
+		"snapshotDeleteError":"Snapshot delete error at <a href='{:navigateTo}'>Dataset</a>"
 	}
 }

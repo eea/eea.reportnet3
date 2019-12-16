@@ -51,7 +51,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
+  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId, growlRef);
 
   useEffect(() => {
     try {
