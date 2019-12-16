@@ -8,7 +8,7 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import { ReporterList } from './_components/ReporterList';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { StatusList } from './_components/StatusList';
-import { TableListItem } from './_components/TableListItem';
+import { TableList } from './_components/TableList';
 
 const FilterList = ({
   datasetSchemaId,
@@ -49,17 +49,12 @@ const FilterList = ({
   const filterByTables = () => {
     return tables.length > 0 ? (
       <AccordionTab header={resources.messages['filterByTable']}>
-        <ul className={styles.list}>
-          {tables.map(table => (
-            <TableListItem
-              key={table.id}
-              datasetSchemaId={datasetSchemaId}
-              filterDispatch={filterDispatch}
-              item={table}
-              tableFilters={tableFilters}
-            />
-          ))}
-        </ul>
+        <TableList
+          datasetSchemaId={datasetSchemaId}
+          filterDispatch={filterDispatch}
+          tableFilters={tableFilters}
+          tables={tables}
+        />
       </AccordionTab>
     ) : (
       <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
