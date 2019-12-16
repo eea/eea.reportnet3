@@ -73,7 +73,7 @@ const reducer = (state, { type, payload }) => {
 
 const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
-  const [possibleDataProvidersList, setPosibleDataProvidersList] = useState([]);
+  const [possibleDataProvidersList, setPossibleDataProvidersList] = useState([]);
   const [representativesTypesList, setRepresentativesTypesList] = useState([]);
   const [dataProviderIdToDelete, setDataProviderIdToDelete] = useState();
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -123,7 +123,7 @@ const DataProvidersList = ({ dataflowId }) => {
   }, []);
 
   useEffect(() => {
-    setPosibleDataProvidersList([
+    setPossibleDataProvidersList([
       { nameLabel: 'Select...', name: '' },
       { nameLabel: 'Spain', name: 'Es' },
       { nameLabel: 'Germany', name: 'De' },
@@ -250,7 +250,7 @@ const DataProvidersList = ({ dataflowId }) => {
         header={'Delete data provider'}
         labelConfirm={resources.messages['yes']}
         labelCancel={resources.messages['no']}>
-        {'Do you realy want to delete this data provider?'}
+        {'Do you really want to delete this data provider?'}
       </ConfirmDialog>
     </>
   );
