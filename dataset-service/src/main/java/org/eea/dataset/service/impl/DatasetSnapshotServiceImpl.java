@@ -397,7 +397,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       try {
         removeSnapshot(idDataset, s.getId());
       } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting the snapshot " + s.getId(), e.getMessage(), e);
+        LOG_ERROR.error("Error deleting the snapshot {}, {} , {}", s.getId(), e.getMessage(), e);
       }
     });
 
