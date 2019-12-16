@@ -96,6 +96,16 @@ public interface DatasetSchemaController {
   void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);
 
   /**
+   * Update dataset schema description.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
+  @PutMapping("/{datasetId}/datasetSchema")
+  void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("description") String description);
+
+  /**
    * Creates the table schema.
    *
    * @param datasetId the dataset id

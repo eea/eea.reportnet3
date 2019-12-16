@@ -13,15 +13,19 @@ import lombok.ToString;
 /**
  * The Class TableSchema.
  */
-
 @Getter
 @Setter
 @ToString
 public class TableSchema {
+
   /** The id table schema. */
   @Id
   @Field(value = "_id")
   private ObjectId idTableSchema;
+
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The name table schema. */
   @Field(value = "nameTableSchema")
@@ -30,7 +34,6 @@ public class TableSchema {
   /** The Id data set. */
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
-
 
   /** The record schema. */
   @Field(value = "recordSchema")
@@ -46,8 +49,8 @@ public class TableSchema {
    * @return the string
    */
   public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idTableSchema + "\"}, \"nameTableSchema\": \""
-        + nameTableSchema + "\""
+    return "{\"_id\": {\"$oid\":\"" + idTableSchema + "\"}, \"description\": \"" + description
+        + "\", \"nameTableSchema\": \"" + nameTableSchema + "\""
         + (recordSchema != null ? (",\"recordSchema\":" + recordSchema.toJSON()) : "") + "}";
   }
 
@@ -58,7 +61,8 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, ruleTable);
+    return Objects.hash(idDataSet, description, idTableSchema, nameTableSchema, recordSchema,
+        ruleTable);
   }
 
   /**
@@ -77,11 +81,10 @@ public class TableSchema {
     }
     TableSchema other = (TableSchema) obj;
     return Objects.equals(idDataSet, other.idDataSet)
+        && Objects.equals(description, other.description)
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
         && Objects.equals(ruleTable, other.ruleTable);
   }
-
-
 }

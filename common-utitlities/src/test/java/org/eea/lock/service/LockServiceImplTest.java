@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.mapper.LockMapper;
@@ -60,9 +61,11 @@ public class LockServiceImplTest {
 
   /**
    * Creates the lock test 1.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void createLockTest1() {
+  public void createLockTest1() throws EEAException {
     Mockito.when(lockMapper.classToEntity(Mockito.any())).thenReturn(new Lock());
     Mockito.when(lockRepository.saveIfAbsent(Mockito.any(), Mockito.any())).thenReturn(true);
     Assert.assertEquals(lockVO.getId(),
@@ -76,8 +79,11 @@ public class LockServiceImplTest {
   public void createLockTest2() {
     Mockito.when(lockMapper.classToEntity(Mockito.any())).thenReturn(new Lock());
     Mockito.when(lockRepository.saveIfAbsent(Mockito.any(), Mockito.any())).thenReturn(false);
-    Assert.assertNull(
-        lockServiceImpl.createLock(new Timestamp(1L), null, LockType.METHOD, lockCriteria));
+    try {
+      lockServiceImpl.createLock(new Timestamp(1L), null, LockType.METHOD, lockCriteria);
+    } catch (EEAException e) {
+      Assert.assertEquals(lockVO.getId().toString(), e.getMessage());
+    }
   }
 
   /**

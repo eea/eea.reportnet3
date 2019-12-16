@@ -9,6 +9,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
@@ -16,7 +17,9 @@ import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class MethodLockAspect.
@@ -39,25 +42,27 @@ public class MethodLockAspect {
   @Around("@annotation(org.eea.lock.annotation.LockMethod)")
   public Object addLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
-    Object rtn = null;
     Object aux = ThreadPropertiesManager.getVariable("user");
 
-    LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        aux != null ? (String) aux : null, LockType.METHOD, getLockCriteria(joinPoint));
+    try {
+      LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
+          aux != null ? (String) aux : null, LockType.METHOD, getLockCriteria(joinPoint));
 
-    MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-    Method method = signature.getMethod();
+      MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+      Method method = signature.getMethod();
 
-    LockMethod lockMethod = method.getAnnotation(LockMethod.class);
+      LockMethod lockMethod = method.getAnnotation(LockMethod.class);
 
-    if (lockVO != null) {
-      rtn = joinPoint.proceed();
+      Object rtn = joinPoint.proceed();
       if (lockMethod.removeWhenFinish()) {
         lockService.removeLock(lockVO.getId());
       }
-    }
 
-    return rtn;
+      return rtn;
+
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage());
+    }
   }
 
   /**

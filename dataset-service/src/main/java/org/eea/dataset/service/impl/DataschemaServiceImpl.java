@@ -763,4 +763,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     return false;
   }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the boolean
+   */
+  @Override
+  public Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description) {
+    return schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description)
+        .getModifiedCount() == 1;
+  }
 }
