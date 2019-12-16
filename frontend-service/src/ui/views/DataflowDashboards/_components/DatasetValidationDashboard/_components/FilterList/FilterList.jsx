@@ -40,25 +40,6 @@ const FilterList = ({
           reporterFilters={reporterFilters}
           labels={labels}
         />
-        {/* <ul className={styles.list}>
-          {labels.map(item => (
-            <ReportersList
-              key={item}
-              datasetSchemaId={datasetSchemaId}
-              filterDispatch={filterDispatch}
-              item={item}
-              reporterFilters={reporterFilters}
-              selectedAllReporters={selectedAllReporters}
-            />
-          ))}
-          <SelectAllFilters
-            datasetSchemaId={datasetSchemaId}
-            filterDispatch={filterDispatch}
-            reporterFilters={reporterFilters}
-            labels={labels}
-            onSelectAllReporters={setSelectAllReporters}
-          />
-        </ul> */}
       </AccordionTab>
     ) : (
       <AccordionTab header={resources.messages['filterByTable']} disabled={true} />

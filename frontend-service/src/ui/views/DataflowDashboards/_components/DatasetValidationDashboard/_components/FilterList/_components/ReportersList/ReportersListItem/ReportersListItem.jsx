@@ -36,31 +36,27 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporter
     return checked;
   };
 
-  const ReporterItem = () => {
-    return (
-      <>
-        <input
-          id={`${reporter}_${datasetSchemaId}`}
-          className={styles.checkbox}
-          type="checkbox"
-          defaultChecked={true}
-          checked={isChecked}
-          onChange={e => {
-            setIsChecked(e.target.checked);
-            filterDispatch({
-              type: e.target.checked ? 'REPORTER_CHECKBOX_ON' : 'REPORTER_CHECKBOX_OFF',
-              payload: { label: reporter }
-            });
-          }}
-        />
-        <label htmlFor={`${reporter}_${datasetSchemaId}`} className={styles.labelItem}>
-          {reporter}
-        </label>
-      </>
-    );
-  };
-
-  return <ReporterItem />;
+  return (
+    <>
+      <input
+        id={`${reporter}_${datasetSchemaId}`}
+        className={styles.checkbox}
+        type="checkbox"
+        defaultChecked={true}
+        checked={isChecked}
+        onChange={e => {
+          setIsChecked(e.target.checked);
+          filterDispatch({
+            type: e.target.checked ? 'REPORTER_CHECKBOX_ON' : 'REPORTER_CHECKBOX_OFF',
+            payload: { label: reporter }
+          });
+        }}
+      />
+      <label htmlFor={`${reporter}_${datasetSchemaId}`} className={styles.labelItem}>
+        {reporter}
+      </label>
+    </>
+  );
 };
 
 export { ReportersListItem };

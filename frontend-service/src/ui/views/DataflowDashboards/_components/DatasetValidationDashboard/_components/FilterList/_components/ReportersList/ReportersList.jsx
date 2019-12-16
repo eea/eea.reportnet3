@@ -25,7 +25,7 @@ const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, label
       <SelectAllFilters
         datasetSchemaId={datasetSchemaId}
         filterDispatch={filterDispatch}
-        reporterFilters={reporterFilters}
+        filters={reporterFilters}
         labels={labels}
         selectedAllFilter={setSelectedAllFilterState}
       />
