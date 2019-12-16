@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class LockServiceImpl implements LockService {
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger("error_logger");
 
   /** The lock repository. */
   @Autowired
@@ -58,7 +58,7 @@ public class LockServiceImpl implements LockService {
     }
 
     LOG.info("Already locked: {}", lockVO.getId());
-    throw new EEAException(lockVO.getId().toString());
+    throw new EEAException("Method locked: " + lockVO);
   }
 
   /**
@@ -70,7 +70,7 @@ public class LockServiceImpl implements LockService {
   @Override
   public Boolean removeLock(Integer lockId) {
     Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
-    LOG.info("Lock removed: {} - {}", lockId, isRemoved);
+    LOG.error("Lock removed: {} - {}", lockId, isRemoved);
     return isRemoved;
   }
 

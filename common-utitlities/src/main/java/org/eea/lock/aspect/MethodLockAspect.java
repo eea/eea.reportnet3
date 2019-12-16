@@ -61,7 +61,7 @@ public class MethodLockAspect {
       return rtn;
 
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
     }
   }
 
