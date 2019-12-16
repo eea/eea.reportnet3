@@ -1,1 +1,0 @@
-export { ReportersList } from './ReportersList';

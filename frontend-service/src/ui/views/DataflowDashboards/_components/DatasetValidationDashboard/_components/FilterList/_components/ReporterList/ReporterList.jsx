@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 
 import styles from '../../FilterList.module.scss';
 
-import { ReportersListItem } from './ReportersListItem';
+import { ReporterListItem } from './ReporterListItem';
 import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
 
-const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, labels }) => {
+const ReporterList = ({ datasetSchemaId, filterDispatch, reporterFilters, labels }) => {
   const [selectedAllFilterState, setSelectedAllFilterState] = useState('');
 
   return (
     <ul className={styles.list}>
       {labels.map(label => (
         <li className={styles.listItem}>
-          <ReportersListItem
+          <ReporterListItem
             key={label}
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}
@@ -33,4 +33,4 @@ const ReportersList = ({ datasetSchemaId, filterDispatch, reporterFilters, label
   );
 };
 
-export { ReportersList };
+export { ReporterList };

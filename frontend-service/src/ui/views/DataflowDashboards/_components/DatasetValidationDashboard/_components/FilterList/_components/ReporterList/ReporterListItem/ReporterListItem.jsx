@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { isUndefined } from 'lodash';
 
-import styles from './ReportersListItem.module.scss';
+import styles from './ReporterListItem.module.scss';
 
-const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
+const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
   const [selectedAll, setSelectedAll] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
 
@@ -15,7 +15,7 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporter
 
   const getStateBySelectionAndByReporter = () => {
     let state = areAllSelectedOrDeselected();
-    if (state === '') {
+    if (state === 'indeterminate') {
       return reporterFilters.includes(reporter) ? false : true;
     } else {
       return state;
@@ -23,17 +23,17 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporter
   };
 
   const areAllSelectedOrDeselected = () => {
-    let checked;
+    let isChecked;
     if (!isUndefined(selectedAllFilterState)) {
       if (selectedAllFilterState === 'checked') {
-        checked = true;
+        isChecked = true;
       } else if (selectedAllFilterState === 'unchecked') {
-        checked = false;
+        isChecked = false;
       } else if (selectedAllFilterState === 'indeterminate') {
-        checked = '';
+        isChecked = 'indeterminate';
       }
     }
-    return checked;
+    return isChecked;
   };
 
   return (
@@ -59,4 +59,4 @@ const ReportersListItem = ({ datasetSchemaId, filterDispatch, reporter, reporter
   );
 };
 
-export { ReportersListItem };
+export { ReporterListItem };

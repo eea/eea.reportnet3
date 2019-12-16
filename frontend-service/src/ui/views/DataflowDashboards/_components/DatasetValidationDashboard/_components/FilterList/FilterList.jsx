@@ -5,7 +5,7 @@ import { uniqBy } from 'lodash';
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { ReportersList } from './_components/ReportersList';
+import { ReporterList } from './_components/ReporterList';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { StatusList } from './_components/StatusList';
 import { TableListItem } from './_components/TableListItem';
@@ -34,7 +34,7 @@ const FilterList = ({
   const filterByReporters = () => {
     return labels.length > 0 ? (
       <AccordionTab header={resources.messages['filterByDataset']}>
-        <ReportersList
+        <ReporterList
           datasetSchemaId={datasetSchemaId}
           filterDispatch={filterDispatch}
           reporterFilters={reporterFilters}
