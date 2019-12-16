@@ -1,6 +1,10 @@
-import { isUndefined, isNull, isString, isEmpty, capitalize } from 'lodash';
+import { isUndefined, isNull, isString, isEqual, capitalize } from 'lodash';
 
 export const RecordUtils = {
+  changeCellValue: (tableData, rowIndex, field, value) => {
+    tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
+    return tableData;
+  },
   changeRecordValue: (recordData, field, value) => {
     //Delete \r and \n values for tabular paste
     if (!isUndefined(value) && !isNull(value) && isString(value)) {
@@ -8,6 +12,29 @@ export const RecordUtils = {
     }
     recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
     return recordData;
+  },
+  changeRecordInTable: (tableData, rowIndex, colsSchema, records) => {
+    let record = tableData[rowIndex];
+    const recordFiltered = RecordUtils.getInitialRecordValues(record, colsSchema);
+    if (!isEqual(recordFiltered.flat(), records.initialRecordValue.flat())) {
+      for (let i = 0; i < records.initialRecordValue.length; i++) {
+        record = RecordUtils.changeRecordValue(
+          record,
+          records.initialRecordValue[i][0],
+          records.initialRecordValue[i][1]
+        );
+      }
+      tableData[rowIndex] = record;
+      return tableData;
+    }
+  },
+  getCellId: (tableData, field) => {
+    const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+    return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
+  },
+  getCellValue: (tableData, field) => {
+    const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
+    return value.length > 0 ? value[0].fieldData[field] : '';
   },
   getClipboardData: (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow) => {
     //Delete double quotes from strings
@@ -62,6 +89,13 @@ export const RecordUtils = {
     } else {
       return 0;
     }
+  },
+  getRecordId: (tableData, record) => {
+    return tableData
+      .map(e => {
+        return e.recordId;
+      })
+      .indexOf(record.recordId);
   },
   getTextWidth: (text, font) => {
     const canvas =

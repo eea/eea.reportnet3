@@ -3,7 +3,7 @@ import { isUndefined, isNull, capitalize } from 'lodash';
 
 import { config } from 'conf';
 
-import styles from './DataViewerToolbar.module.css';
+import styles from './ActionsToolbar.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -18,7 +18,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { DatasetService } from 'core/services/Dataset';
 
-const DataViewerToolbar = ({
+const ActionsToolbar = ({
   colsSchema,
   datasetId,
   hasWritePermissions,
@@ -131,7 +131,7 @@ const DataViewerToolbar = ({
   };
 
   return (
-    <Toolbar className={styles.dataViewerToolbar}>
+    <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
         <Button
           className={`p-button-rounded p-button-secondary`}
@@ -248,4 +248,4 @@ const DataViewerToolbar = ({
   );
 };
 
-export { DataViewerToolbar };
+export { ActionsToolbar };
