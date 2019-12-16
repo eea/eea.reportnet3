@@ -447,14 +447,15 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow.getDocuments() || !dataflow.getDocuments().isEmpty()) {
+    if (null != dataflow && null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
       for (DocumentVO document : dataflow.getDocuments()) {
         documentControllerZuul.deleteDocument(document.getId());
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflow.getDesignDatasets() || !dataflow.getDesignDatasets().isEmpty()) {
+    if (null != dataflow && null != dataflow.getDesignDatasets()
+        && !dataflow.getDesignDatasets().isEmpty()) {
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
         dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
       }

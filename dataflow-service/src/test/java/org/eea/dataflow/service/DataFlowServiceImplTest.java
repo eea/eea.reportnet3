@@ -24,12 +24,15 @@ import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.junit.Before;
@@ -113,6 +116,13 @@ public class DataFlowServiceImplTest {
   @Mock
   private DocumentMapper documentMapper;
 
+  /** The data set schema controller zuul. */
+  @Mock
+  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+
+  /** The document controller zuul. */
+  @Mock
+  private DocumentControllerZuul documentControllerZuul;
   /**
    * The dataflows.
    */
@@ -500,4 +510,67 @@ public class DataFlowServiceImplTest {
     Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
+
+  /**
+   * Delete data flow.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDataFlow() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+    doNothing().when(documentControllerZuul).deleteDocument(1L);
+    doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+
+    dataflowServiceImpl.deleteDataFlow(1L);
+
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
+  }
+
+  /**
+   * Delete data flow empty.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDataFlowEmpty() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<>());
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+
+    dataflowServiceImpl.deleteDataFlow(1L);
+
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
+  }
 }
