@@ -77,6 +77,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_EMAIL_CHANGE':
+      console.log('payload', payload);
       updatedList = state.dataProviders.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
           dataProvider.email = payload.input;
@@ -88,6 +89,13 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         dataProviders: updatedList
       };
+    case 'UPDATE_EMAIL':
+      console.log('payload', payload);
+      console.log('updatedList', state.dataProviders);
+
+      //api call to update email
+
+      return state;
 
     case 'ON_PROVIDER_CHANGE':
       console.log('ON_PROVIDER_CHANGE', payload.dataProviderId);

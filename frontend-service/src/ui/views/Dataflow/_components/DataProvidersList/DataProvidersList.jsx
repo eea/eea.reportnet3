@@ -33,10 +33,10 @@ const DataProvidersList = ({ dataflowId }) => {
     const loadedData = {
       representativesOf: { nameLabel: 'Countries', name: 'countries' },
       dataProviders: [
-        { dataProviderId: '1111', email: 'spain@es.es', id: 1 },
-        { dataProviderId: '2222', email: 'germany@de.de', id: 2 },
+        { dataProviderId: 1111, email: 'spain@es.es', id: 1 },
+        { dataProviderId: 2222, email: 'germany@de.de', id: 2 },
         {
-          dataProviderId: '3333',
+          dataProviderId: 3333,
           email: 'greatbr@uk.uk',
           id: 3
         } /* ,
@@ -74,11 +74,16 @@ const DataProvidersList = ({ dataflowId }) => {
     return (
       <input
         defaultValue={inputData}
-        value={formState.dat}
         placeholder={'Data Providers email...'}
         onChange={e =>
           formDispatcher({
             type: 'ON_EMAIL_CHANGE',
+            payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
+          })
+        }
+        onBlur={e =>
+          formDispatcher({
+            type: 'UPDATE_EMAIL',
             payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
           })
         }
@@ -87,7 +92,6 @@ const DataProvidersList = ({ dataflowId }) => {
   };
 
   const nameDropdownColumnTemplate = rowData => {
-    // get option corresponding to this rowData
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(option => option.id === rowData.id);
 
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
