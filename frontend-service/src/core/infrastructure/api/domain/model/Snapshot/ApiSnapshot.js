@@ -6,21 +6,17 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 export const apiSnapshot = {
   allDesigner: async datasetSchemaId => {
     const tokens = userStorage.get();
-    try {
-      const response = await HTTPRequester.get({
-        url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, {
-          datasetSchemaId: datasetSchemaId
-        }),
-        queryString: {},
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error getting the snapshots: ${error}`);
-      return false;
-    }
+
+    const response = await HTTPRequester.get({
+      url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, {
+        datasetSchemaId: datasetSchemaId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
   },
   createByIdDesigner: async (datasetId, datasetSchemaId, description) => {
     const tokens = userStorage.get();
@@ -78,24 +74,20 @@ export const apiSnapshot = {
   },
   releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const tokens = userStorage.get();
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
-          datasetSchemaId: datasetSchemaId,
-          snapshotId: snapshotId
-        }),
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`
-        },
-        data: {
-          snapshotId
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error releasing the snapshot: ${error}`);
-      return false;
-    }
+
+    const response = await HTTPRequester.update({
+      url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
+        datasetSchemaId: datasetSchemaId,
+        snapshotId: snapshotId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: {
+        snapshotId
+      }
+    });
+    return response;
   },
 
   allReporter: async datasetId => {

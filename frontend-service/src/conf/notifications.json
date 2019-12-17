@@ -79,6 +79,30 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key":"SNAPSHOT_ALL_DESIGNER_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_RELEASE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_RESTORING_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },
@@ -138,6 +162,14 @@
         },
         {
           "key":"ADD_RECORDS_BY_ID_SUCCESS",
+          "navigateTo":{
+            "section": "DATASET",
+            "parameters":["dataflowId", "datasetId"]
+          },
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_RESTORING_SUCCESS",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]

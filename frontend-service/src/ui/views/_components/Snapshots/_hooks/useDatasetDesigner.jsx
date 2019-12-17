@@ -93,9 +93,8 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) =>
   };
 
   const onLoadSnapshotList = async () => {
+    setIsLoadingSnapshotListData(true);
     try {
-      setIsLoadingSnapshotListData(true);
-
       //Settimeout for avoiding the overlaping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allDesigner(datasetId);
@@ -105,35 +104,69 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) =>
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
+      notificationContext.add({
+        type: 'SNAPSHOT_ALL_DESIGNER_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
+    } finally {
       setIsLoadingSnapshotListData(false);
     }
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotToRelease = await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
-
-    if (snapshotToRelease.isReleased) {
-      onLoadSnapshotList();
+    try {
+      const snapshotToRelease = await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
+      if (snapshotToRelease.status >= 200 && snapshotToRelease.status <= 299) {
+        onLoadSnapshotList();
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_RELEASE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'SNAPSHOT_RELEASE_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onRestoreSnapshot = async () => {
-    const snapshotToRestore = await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
-
-    if (snapshotToRestore.isRestored) {
-      snapshotDispatch({ type: 'mark_as_restored', payload: {} });
-
-      onGrowlAlert({
-        severity: 'info',
-        summary: resources.messages.snapshotItemRestoreProcessSummary,
-        detail: resources.messages.snapshotItemRestoreProcessDetail,
-        life: '5000'
+    try {
+      const snapshotToRestore = await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
+      if (snapshotToRestore.isRestored) {
+        snapshotDispatch({ type: 'mark_as_restored', payload: {} });
+        notificationContext.add({
+          type: 'SNAPSHOT_RESTORING_SUCCESS',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'SNAPSHOT_RESTORING_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
       });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const { snapshotReducer } = useSnapshotReducer(

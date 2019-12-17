@@ -281,6 +281,10 @@
 		"tokenRefreshError":"Error on token refresh process",
 		"dataflowCreationError":"Dataflow creation error",
 		"snapshotCreationError":"Snapshot creation error at <a href='{:navigateTo}'>Dataset</a>",
-		"snapshotDeleteError":"Snapshot delete error at <a href='{:navigateTo}'>Dataset</a>"
+		"snapshotDeleteError":"Snapshot delete error at <a href='{:navigateTo}'>Dataset</a>",
+		"snapshotAllDesignerError":"Snapshot listing error at <a href='{:navigateTo}'>Dataset</a>",
+		"snapshotReleaseError":"Snapshot release error at <a href='{:navigateTo}'>Dataset</a>",
+		"snapshotRestoringSuccess":"Snapshot restoring success at <a href='{:navigateTo}'>Dataset</a>",
+		"snapshotRestoringError":"Snapshot restoring error at <a href='{:navigateTo}'>Dataset</a>"
 	}
 }
