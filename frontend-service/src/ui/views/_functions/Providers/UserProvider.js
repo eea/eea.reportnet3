@@ -11,8 +11,6 @@ const userReducer = (state, { type, payload }) => {
     case 'LOGOUT':
       return {};
     case 'ADD_SOCKET':
-      console.log('ADD_SOCKET', payload);
-
       return {
         ...state,
         socket: payload
