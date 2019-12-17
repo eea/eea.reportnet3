@@ -174,4 +174,12 @@ public interface DatasetSchemaService {
   Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
 
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the boolean
+   */
+  Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
 }

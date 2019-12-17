@@ -124,15 +124,17 @@ public class FileTreatmentHelper {
    */
   private void releaseSuccessEvents(String user, Long datasetId, String tableSchemaId,
       String fileName) {
+    EventType eventType =
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_SCHEMA_COMPLETED_EVENT
+            : EventType.LOAD_DATA_COMPLETED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, value,
-          NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
-              .fileName(fileName).build());
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, NotificationVO.builder()
+          .user(user).datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(fileName).build());
     } catch (EEAException e) {
-      LOG.error("Error realeasing event " + EventType.LOAD_DATA_COMPLETED_EVENT, e);
+      LOG.error("Error realeasing event " + eventType, e);
     }
   }
 
@@ -147,14 +149,17 @@ public class FileTreatmentHelper {
    */
   private void releaseFailEvents(String user, Long datasetId, String tableSchemaId, String fileName,
       String error) {
+    EventType eventType =
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_SCHEMA_FAILED_EVENT
+            : EventType.LOAD_DATA_FAILED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LOAD_DATA_FAILED_EVENT, value,
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
           NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
               .fileName(fileName).error(error).build());
     } catch (EEAException e) {
-      LOG.error("Error realeasing event " + EventType.LOAD_DATA_FAILED_EVENT, e);
+      LOG.error("Error realeasing event " + eventType, e);
     }
   }
 

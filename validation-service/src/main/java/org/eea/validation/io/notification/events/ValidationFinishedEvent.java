@@ -10,9 +10,13 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class ValidationFinishedEvent.
+ */
 @Component
 public class ValidationFinishedEvent implements NotificableEventHandler {
 
+  /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
