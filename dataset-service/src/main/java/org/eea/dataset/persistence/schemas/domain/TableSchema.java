@@ -49,8 +49,9 @@ public class TableSchema {
    * @return the string
    */
   public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idTableSchema + "\"}, \"description\": \"" + description
-        + "\", \"nameTableSchema\": \"" + nameTableSchema + "\""
+    return "{\"_id\": {\"$oid\":\"" + idTableSchema + "\"}"
+        + (description != null ? (",\"description\":\"" + description + "\"") : "")
+        + (nameTableSchema != null ? (",\"nameTableSchema\":\"" + nameTableSchema + "\"") : "")
         + (recordSchema != null ? (",\"recordSchema\":" + recordSchema.toJSON()) : "") + "}";
   }
 
