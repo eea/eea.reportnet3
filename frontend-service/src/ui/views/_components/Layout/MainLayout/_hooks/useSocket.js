@@ -14,9 +14,7 @@ const useSocket = () => {
   const socket_url = window.env.WEBSOCKET_URL;
   React.useEffect(() => {
     if (userContext.socket) {
-      userContext.socket.disconnect(() => {
-        console.log('previous socket close');
-      });
+      userContext.socket.disconnect(() => {});
     }
     const token = UserService.getToken();
     const ws = new WebSocket(socket_url);
@@ -29,8 +27,6 @@ const useSocket = () => {
 
     stompClient.connect({ token }, frame => {
       stompClient.subscribe('/user/queue/notifications', notification => {
-        console.log('notification', notification);
-
         const { type, content } = JSON.parse(notification.body);
         notificationContext.add({ type, content });
       });
