@@ -3,7 +3,7 @@ import { includes } from 'lodash';
 import { DataProviderService } from 'core/services/DataProvider';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyField = { representativeId: '', dataProviderId: '', providerAccount: '' };
+  const emptyField = { representativeId: null, dataProviderId: '', providerAccount: '' };
 
   let updatedList = [];
   switch (type) {
@@ -11,6 +11,29 @@ export const reducer = (state, { type, payload }) => {
       // await DataProviderService.add(dataflowId, providerAccount, name);
       console.log('On add dataProvider', payload.dataflowId, payload.providerAccount);
       return state;
+
+    case 'CREATE_UNUSED_OPTIONS_LIST':
+      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
+        let result = true;
+
+        for (let index = 0; index < state.dataProviders.length; index++) {
+          if (state.dataProviders[index].dataProviderId === possibleProvider.dataProviderId) {
+            result = false;
+          }
+        }
+
+        return result;
+      });
+      return { ...state, unusedDataProvidersOptions };
+
+    case 'DELETE_DATA_PROVIDER':
+      console.log('Delete Provider with representativeId :', state.representativeIdToDelete);
+      /* await DataProviderService.delete(dataProviderId); */
+
+      return {
+        ...state,
+        isVisibleConfirmDeleteDialog: false
+      };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_TYPE':
       // const dataResponse = await DataProviderService.allRepresentativesOf(payload.type);
@@ -35,34 +58,11 @@ export const reducer = (state, { type, payload }) => {
 
       return { ...state, representativesTypesList: response };
 
-    case 'DELETE_DATA_PROVIDER':
-      console.log('Delete Provider with dataProviderId :', state.dataProviderIdToDelete);
-      /* await DataProviderService.delete(dataProviderId); */
-
-      return {
-        ...state,
-        isVisibleConfirmDeleteDialog: false
-      };
-
-    case 'CREATE_UNUSED_OPTIONS_LIST':
-      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
-        let result = true;
-
-        for (let index = 0; index < state.dataProviders.length; index++) {
-          if (state.dataProviders[index].dataProviderId === possibleProvider.dataProviderId) {
-            result = false;
-          }
-        }
-
-        return result;
-      });
-      return { ...state, unusedDataProvidersOptions };
-
     case 'HIDE_CONFIRM_DIALOG':
       return {
         ...state,
         isVisibleConfirmDeleteDialog: false,
-        dataProviderIdToDelete: ''
+        representativeIdToDelete: ''
       };
 
     case 'INITIAL_LOAD':
@@ -123,7 +123,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisibleConfirmDeleteDialog: true,
-        dataProviderIdToDelete: payload.dataProviderId
+        representativeIdToDelete: payload.representativeId
       };
 
     default:

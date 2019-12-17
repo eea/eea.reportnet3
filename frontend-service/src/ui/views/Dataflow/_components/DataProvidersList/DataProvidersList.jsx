@@ -127,7 +127,7 @@ const DataProvidersList = ({ dataflowId }) => {
         disabled={false}
         className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
         onClick={() => {
-          formDispatcher({ type: 'SHOW_CONFIRM_DIALOG', payload: { dataProviderId: rowData.dataProviderId } });
+          formDispatcher({ type: 'SHOW_CONFIRM_DIALOG', payload: { representativeId: rowData.representativeId } });
         }}
       />
     ) : (
