@@ -2,7 +2,7 @@ import React, { useContext, forwardRef } from 'react';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const ConfirmDialog = forwardRef((props, _) => {
   const {

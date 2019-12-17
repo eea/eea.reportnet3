@@ -5,8 +5,8 @@ import moment from 'moment';
 import styles from './Snapshots.module.scss';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 
 const Snapshots = ({

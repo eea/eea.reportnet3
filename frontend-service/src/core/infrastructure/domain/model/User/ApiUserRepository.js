@@ -98,11 +98,16 @@ const userRole = (user, entity) => {
   return;
 };
 
+const getToken = () => {
+  return userStorage.get().accessToken;
+};
+
 export const ApiUserRepository = {
   login,
   logout,
   oldLogin,
   refreshToken,
   hasPermission,
+  getToken,
   userRole
 };

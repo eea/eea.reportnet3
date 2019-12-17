@@ -9,7 +9,7 @@ import styles from './UserCard.module.css';
 
 import { Icon } from 'ui/views/_components/Icon';
 
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 const UserCard = React.memo(() => {
@@ -44,11 +44,6 @@ const UserCard = React.memo(() => {
           <Icon icon="logout" />
         </a>
       </div>
-      {/* <div className={styles.logOut}>
-                <a href="#logOut" title="Log out">
-                  <Icon icon="logout" />
-                </a>
-            </div> */}
     </div>
   );
 });

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { InputText } from 'primereact/inputtext';
 import classNames from 'classnames';
 import { RowCheckbox } from 'ui/views/_components/DataTable/_components/RowCheckbox';
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class HeaderCell extends Component {
   constructor(props) {
