@@ -292,4 +292,18 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     return null;
   }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the update result
+   */
+  @Override
+  public UpdateResult updateDatasetSchemaDescription(String datasetSchemaId, String description) {
+    return mongoDatabase.getCollection("DataSetSchema").updateOne(
+        new Document("_id", new ObjectId(datasetSchemaId)),
+        new Document("$set", new Document("description", description)));
+  }
 }

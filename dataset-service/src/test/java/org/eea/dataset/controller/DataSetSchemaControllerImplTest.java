@@ -55,6 +55,7 @@ public class DataSetSchemaControllerImplTest {
   @InjectMocks
   private DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
+  /** The expected ex. */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
@@ -86,6 +87,7 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
+  /** The dataflow controller zuul. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
@@ -318,6 +320,11 @@ public class DataSetSchemaControllerImplTest {
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
 
+  /**
+   * Delete dataset schema exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteDatasetSchemaException4Test() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
@@ -336,6 +343,11 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
+  /**
+   * Delete dataset schema exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteDatasetSchemaException3Test() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
@@ -622,6 +634,54 @@ public class DataSetSchemaControllerImplTest {
       assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
+  }
 
+  /**
+   * Update dataset schema description test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+    Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Update dataset schema description test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    try {
+      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+  }
+
+  /**
+   * Update dataset schema description test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest3() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
+    try {
+      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.SCHEMA_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
   }
 }

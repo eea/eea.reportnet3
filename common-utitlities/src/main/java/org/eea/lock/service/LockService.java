@@ -3,6 +3,7 @@ package org.eea.lock.service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 
@@ -19,9 +20,10 @@ public interface LockService {
    * @param lockType the lock type
    * @param lockCriteria the lock criteria
    * @return the lock VO
+   * @throws EEAException
    */
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<String, Object> lockCriteria);
+      Map<String, Object> lockCriteria) throws EEAException;
 
   /**
    * Removes the lock.

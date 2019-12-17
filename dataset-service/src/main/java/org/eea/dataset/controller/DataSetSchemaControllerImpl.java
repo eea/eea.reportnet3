@@ -434,4 +434,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           e);
     }
   }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PutMapping("/{datasetId}/datasetSchema")
+  public void updateDatasetSchemaDescription(Long datasetId, String description) {
+    try {
+      if (!dataschemaService.updateDatasetSchemaDescription(
+          dataschemaService.getDatasetSchemaId(datasetId), description)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+          e);
+    }
+  }
 }
