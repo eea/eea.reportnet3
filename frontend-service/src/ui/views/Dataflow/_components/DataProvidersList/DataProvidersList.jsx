@@ -17,7 +17,7 @@ const DataProvidersList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
-    confirmDeleteVisible: false,
+    isVisibleConfirmDeleteDialog: false,
     dataProviderIdToDelete: '',
     dataProviders: [],
     allPossibleDataProviders: [],
@@ -67,6 +67,10 @@ const DataProvidersList = ({ dataflowId }) => {
 
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_OF_SELECTED_TYPE'
+    });
+
+    formDispatcher({
+      type: 'FILTER_CHOSEN_OPTIONS'
     });
   }, []);
 
@@ -173,7 +177,7 @@ const DataProvidersList = ({ dataflowId }) => {
           })
         }
         onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-        visible={formState.confirmDeleteVisible}
+        visible={formState.isVisibleConfirmDeleteDialog}
         header={'Delete data provider'}
         labelConfirm={resources.messages['yes']}
         labelCancel={resources.messages['no']}>

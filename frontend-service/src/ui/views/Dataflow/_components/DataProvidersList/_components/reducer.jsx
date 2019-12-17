@@ -41,9 +41,9 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        confirmDeleteVisible: false
+        isVisibleConfirmDeleteDialog: false
       };
-
+    /* 
     case 'SET_CHOSEN_OPTIONS':
       console.log('FILTER :', payload.name);
       let chosenOption = state.allPossibleDataProviders.filter(dataProvider => dataProvider.name === payload.name);
@@ -52,12 +52,15 @@ export const reducer = (state, { type, payload }) => {
       let updatedChosenOptionsList = Array.from(new Set(chosenOptionsList));
       console.log('listWithUniqueValues :', updatedChosenOptionsList);
       // return { ...state, chosenDataProviders: updatedChosenOptionsList };
+      return state; */
+    case 'FILTER_CHOSEN_OPTIONS':
+      console.log('FILTER_CHOSEN_OPTIONS state', state);
       return state;
 
     case 'HIDE_CONFIRM_DIALOG':
       return {
         ...state,
-        confirmDeleteVisible: false,
+        isVisibleConfirmDeleteDialog: false,
         dataProviderIdToDelete: ''
       };
 
@@ -108,7 +111,7 @@ export const reducer = (state, { type, payload }) => {
     case 'SHOW_CONFIRM_DIALOG':
       return {
         ...state,
-        confirmDeleteVisible: true,
+        isVisibleConfirmDeleteDialog: true,
         dataProviderIdToDelete: payload.dataProviderId
       };
 
