@@ -137,7 +137,14 @@ public enum EventType {
   /**
    * The unlock entity.
    */
-  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true);
+  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true),
+
+  /** The command execute new design field propagation. */
+  COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",
+      false),
+
+  /** The command new design field propagation. */
+  COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false);
 
   /**
    * The topic.

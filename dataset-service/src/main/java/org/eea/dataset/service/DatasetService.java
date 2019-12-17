@@ -11,8 +11,10 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
@@ -329,4 +331,10 @@ public interface DatasetService {
    * @return true, if is reporting dataset
    */
   boolean isReportingDataset(Long datasetId);
+
+  void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException;
+
+  void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Integer numPag,
+      String idFieldSchema, TypeData typeField);
 }

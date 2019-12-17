@@ -77,6 +77,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /*
+   * @Autowired private UpdateRecordHelper updateRecordHelper;
+   */
+
+
+
   /**
    * Creates the data schema.
    *
@@ -327,10 +333,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
       String response;
+
       if (StringUtils.isBlank(response = dataschemaService
           .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      // propagate the new field to the existing records in the dataset value
+      datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
