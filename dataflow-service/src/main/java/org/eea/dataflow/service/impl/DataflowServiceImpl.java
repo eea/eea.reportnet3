@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -361,13 +362,19 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
+    Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
     // we find if the name of this dataflow exist
-    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+    if (dataflow.isPresent() && dataflow.get().getId() != dataflowVO.getId()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
-      Dataflow dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
-      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+      Optional<Dataflow> dataflowSave = dataflowRepository.findById(dataflowVO.getId());
+      if (dataflowSave.isPresent()) {
+        dataflowSave.get().setName(dataflowVO.getName());
+        dataflowSave.get().setDescription(dataflowVO.getDescription());
+        dataflowRepository.save(dataflowSave.get());
+        LOG.info("The dataflow {} has been saved.", dataflowSave.get().getName());
+      }
     }
   }
 
