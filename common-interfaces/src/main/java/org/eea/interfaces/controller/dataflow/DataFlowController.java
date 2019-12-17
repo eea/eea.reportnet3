@@ -2,7 +2,6 @@ package org.eea.interfaces.controller.dataflow;
 
 
 import java.util.List;
-import javax.ws.rs.QueryParam;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -151,6 +150,6 @@ public interface DataFlowController {
    *
    * @param idDataflow the id dataflow
    */
-  @DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDataFlow(@QueryParam("idDataflow") Long idDataflow);
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
 }

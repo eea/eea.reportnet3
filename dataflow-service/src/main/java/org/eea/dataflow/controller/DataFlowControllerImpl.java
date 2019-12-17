@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.QueryParam;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -340,9 +339,9 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param idDataflow the id dataflow
    */
   @Override
-  @DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_CUSTODIAN')")
-  public void deleteDataFlow(@QueryParam("idDataflow") Long idDataflow) {
+  public void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow) {
     try {
       dataflowService.deleteDataFlow(idDataflow);
     } catch (Exception e) {
