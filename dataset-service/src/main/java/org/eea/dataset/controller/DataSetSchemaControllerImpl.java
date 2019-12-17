@@ -65,7 +65,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -80,7 +82,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
@@ -160,6 +164,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset schema id
    */
   @Override
@@ -177,6 +182,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema with no rules by dataset id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -196,6 +202,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException
    */
   @Override
@@ -246,6 +253,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   *
    * @return the table VO
    */
   @Override
@@ -337,6 +345,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the string
    */
   @Override
@@ -445,7 +454,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/{datasetId}/datasetSchema")
-  public void updateDatasetSchemaDescription(Long datasetId, String description) {
+  public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("description") String description) {
     try {
       if (!dataschemaService.updateDatasetSchemaDescription(
           dataschemaService.getDatasetSchemaId(datasetId), description)) {
