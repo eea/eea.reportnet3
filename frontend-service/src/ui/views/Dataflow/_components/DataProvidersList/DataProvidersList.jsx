@@ -38,12 +38,12 @@ const DataProvidersList = ({ dataflowId }) => {
     const loadedData = {
       representativesOf: { nameLabel: 'Countries', name: 'countries' },
       dataProviders: [
-        { dataProviderId: '1111', email: 'spain@es.es', name: 'Es' },
-        { dataProviderId: '2222', email: 'germany@de.de', name: 'De' },
+        { dataProviderId: '1111', email: 'spain@es.es', id: 1 },
+        { dataProviderId: '2222', email: 'germany@de.de', id: 2 },
         {
           dataProviderId: '3333',
           email: 'greatbr@uk.uk',
-          name: 'UK'
+          id: 3
         } /* ,
         { dataProviderId: '4444', email: 'france@fr.fr', name: 'Fr' },
         { dataProviderId: '5555', email: 'italy@it.it', name: 'It' } */
@@ -66,7 +66,7 @@ const DataProvidersList = ({ dataflowId }) => {
     });
 
     formDispatcher({
-      type: 'GET_DATA_PROVIDERS_LIST_OF_SELECTED_TYPE'
+      type: 'GET_DATA_PROVIDERS_LIST_BY_TYPE'
     });
 
     formDispatcher({
@@ -99,22 +99,22 @@ const DataProvidersList = ({ dataflowId }) => {
           onChange={e => {
             formDispatcher({
               type: 'ON_PROVIDER_CHANGE',
-              payload: { name: e.target.value, dataProviderId: rowData.dataProviderId }
+              payload: { label: e.target.value, dataProviderId: rowData.dataProviderId }
             });
           }}
-          value={rowData.name}>
+          value={rowData.id}>
           {formState.allPossibleDataProviders.map(provider => {
             /* formDispatcher({
               type: 'SET_CHOSEN_OPTIONS',
-              payload: { name: rowData.name }
+              payload: { id: rowData.id }
             }); */
 
             return (
               <option
-                key={provider.name}
+                key={provider.id}
                 className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
-                value={provider.name}>
-                {provider.nameLabel}
+                value={provider.id}>
+                {provider.label}
               </option>
             );
           })}

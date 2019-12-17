@@ -1,10 +1,7 @@
 import React, { useContext } from 'react';
 
-import { camelCase, isUndefined } from 'lodash';
+import { camelCase } from 'lodash';
 import { Stomp } from '@stomp/stompjs';
-
-import { config } from 'conf';
-import { routes } from 'ui/routes';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 

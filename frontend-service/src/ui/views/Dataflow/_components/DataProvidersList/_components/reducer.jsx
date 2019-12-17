@@ -3,24 +3,24 @@ import { includes } from 'lodash';
 import { DataProviderService } from 'core/services/DataProvider';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyField = { dataProviderId: '', email: '', name: '' };
+  const emptyField = { dataProviderId: '', email: '', id: '' };
 
   let updatedList = [];
   switch (type) {
     case 'ADD_DATAPROVIDER':
       // await DataProviderService.add(dataflowId, email, name);
-      console.log('On add dataProvider', payload.dataflowId, payload.email, payload.name);
+      console.log('On add dataProvider', payload.dataflowId, payload.email, payload.id);
       return state;
 
-    case 'GET_DATA_PROVIDERS_LIST_OF_SELECTED_TYPE':
+    case 'GET_DATA_PROVIDERS_LIST_BY_TYPE':
       // const dataResponse = await DataProviderService.allRepresentativesOf(payload.type);
       const dataResponse = [
-        { nameLabel: 'Select...', name: '' },
-        { nameLabel: 'Spain', name: 'Es' },
-        { nameLabel: 'Germany', name: 'De' },
-        { nameLabel: 'Uk', name: 'UK' },
-        { nameLabel: 'France', name: 'Fr' },
-        { nameLabel: 'Italy', name: 'It' }
+        { id: '', label: 'Select...' },
+        { id: 1, label: 'Spain' },
+        { id: 2, label: 'Germany' },
+        { id: 3, label: 'United Kingdom' },
+        { id: 4, label: 'France' },
+        { id: 5, label: 'Italy' }
       ];
 
       return { ...state, allPossibleDataProviders: dataResponse };
@@ -54,7 +54,9 @@ export const reducer = (state, { type, payload }) => {
       // return { ...state, chosenDataProviders: updatedChosenOptionsList };
       return state; */
     case 'FILTER_CHOSEN_OPTIONS':
-      console.log('FILTER_CHOSEN_OPTIONS state', state);
+      console.log('FILTER_CHOSEN_OPTIONS state.allPossibleDataProviders', state.allPossibleDataProviders);
+      console.log('state.dataProviders', state.dataProviders);
+
       return state;
 
     case 'HIDE_CONFIRM_DIALOG':
@@ -89,9 +91,10 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_PROVIDER_CHANGE':
+      console.log('ON_PROVIDER_CHANGE', payload.dataProviderId);
       updatedList = state.dataProviders.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
-          dataProvider.name = payload.name;
+          dataProvider.id = payload.id;
         }
         return dataProvider;
       });
