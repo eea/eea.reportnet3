@@ -5,7 +5,7 @@ import { isUndefined, isNull } from 'lodash';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { routes } from 'ui/routes';
 import { Spinner } from 'ui/views/_components/Spinner';
