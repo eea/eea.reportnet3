@@ -46,7 +46,7 @@ pipeline {
                 }
             }
         }
-        stage('Static Code Analysis') {
+      /*  stage('Static Code Analysis') {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
@@ -93,7 +93,7 @@ pipeline {
                     slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                 }
             }
-        }
+        } */
         
         stage('Install in Nexus') {
             when {
