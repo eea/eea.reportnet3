@@ -52,9 +52,11 @@ import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 export class InputTextarea extends Component {
   static defaultProps = {
     autoResize: false,
+    collapsedHeight: 30,
+    cols: 10,
+    displayedHeight: 100,
     expandableOnClick: false,
     onInput: null,
-    cols: 10,
     rows: 1,
     tooltip: null,
     tooltipOptions: null
@@ -88,7 +90,7 @@ export class InputTextarea extends Component {
     }
 
     if (this.props.expandableOnClick) {
-      this.element.style.height = '100px';
+      this.element.style.height = `${this.props.displayedHeight}px`;
       this.element.style.boxShadow = '0 10px 6px -6px rgba(var(--blue-120-hex), 0.2)';
     }
   }
@@ -103,7 +105,7 @@ export class InputTextarea extends Component {
     }
 
     if (this.props.expandableOnClick) {
-      this.element.style.height = '30px';
+      this.element.style.height = `${this.props.collapsedHeight}px`;
       this.element.style.position = 'relative';
       this.element.style.boxShadow = '0px 0px';
     }
@@ -163,6 +165,7 @@ export class InputTextarea extends Component {
     if (this.props.autoResize) {
       this.resize();
     }
+    this.element.style.height = `${this.props.collapsedHeight}px`;
   }
 
   componentDidUpdate(prevProps) {

@@ -22,9 +22,9 @@ export const DatasetRepository = {
   updateFieldById: () => Promise.reject('[DatasetRepository#updateFieldById] must be implemented'),
   updateRecordsById: () => Promise.reject('[DatasetRepository#updateRecordsById] must be implemented'),
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
-  updateTableDescriptionDesign: () =>
-    Promise.reject('[DatasetRepository#updateTableDescriptionDesign] must be implemented'),
-  updateTableNameDesign: () => Promise.reject('[DatasetRepository#updateTableNameDesign] must be implemented'),
+  updateDatasetSchemaDescriptionDesign: () =>
+    Promise.reject('[DatasetRepository#updateDatasetSchemaDescriptionDesign] must be implemented'),
+  updateTableDesign: () => Promise.reject('[DatasetRepository#updateTableDesign] must be implemented'),
   validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented'),
   webFormDataById: () => Promise.reject('[DatasetRepository#webFormDataById] must be implemented')
 };

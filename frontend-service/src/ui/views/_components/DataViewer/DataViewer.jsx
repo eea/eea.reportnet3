@@ -8,20 +8,20 @@ import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
 
+import { ActionsColumn } from './_components/ActionsColumn';
+import { ActionsToolbar } from './_components/ActionsToolbar';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
-import { Footer } from './_components/Footer';
-import { ActionsColumn } from './_components/ActionsColumn';
-import { ActionsToolbar } from './_components/ActionsToolbar';
-import { IconTooltip } from './_components/IconTooltip';
-import { InfoTable } from './_components/InfoTable';
-import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FieldEditor } from './_components/FieldEditor';
+import { Footer } from './_components/Footer';
+import { IconTooltip } from './_components/IconTooltip';
+import { InfoTable } from './_components/InfoTable';
 
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -110,6 +110,7 @@ const DataViewer = withRouter(
     let divRef = useRef();
 
     useEffect(() => {
+      console.log({ tableSchemaColumns });
       let colOptions = [];
       let dropdownFilter = [];
       for (let colSchema of colsSchema) {
@@ -119,8 +120,10 @@ const DataViewer = withRouter(
       setColumnOptions(colOptions);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
-      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
+      if (!isEmpty(inmTableSchemaColumns)) {
+        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
+        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
+      }
       setColsSchema(inmTableSchemaColumns);
     }, []);
 
@@ -547,7 +550,7 @@ const DataViewer = withRouter(
         message: resources.messages['datasetDataLoadingInit'],
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          title: editLargeStringWithDots(tableName, 22),
+          title: DataViewerUtils.editLargeStringWithDots(tableName, 22),
           datasetLoading: resources.messages['datasetLoading']
         }
       });
@@ -580,20 +583,17 @@ const DataViewer = withRouter(
     );
 
     const cellDataEditor = (cells, record) => {
-      // console.log({ cells, record });
+      console.log({ cells, record });
       // let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData;
       // console.log(field.type);
       return (
-        <InputText
-          type="text"
-          value={RecordUtils.getCellValue(cells, cells.field)}
-          onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-          onChange={e => onEditorValueChange(cells, e.target.value)}
-          onFocus={e => {
-            e.preventDefault();
-            onEditorValueFocus(cells, e.target.value);
-          }}
-          onKeyDown={e => onEditorKeyChange(cells, e, record)}
+        <FieldEditor
+          cells={cells}
+          record={record}
+          onEditorSubmitValue={onEditorSubmitValue}
+          onEditorValueChange={onEditorValueChange}
+          onEditorValueFocus={onEditorValueFocus}
+          onEditorKeyChange={onEditorKeyChange}
         />
       );
     };
@@ -621,14 +621,6 @@ const DataViewer = withRouter(
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
         );
-      }
-    };
-
-    const editLargeStringWithDots = (string, length) => {
-      if (string.length > length) {
-        return string.substring(0, length).concat('...');
-      } else {
-        return string;
       }
     };
 

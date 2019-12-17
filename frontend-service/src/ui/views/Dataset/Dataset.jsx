@@ -262,6 +262,7 @@ export const Dataset = withRouter(({ match, history }) => {
         })
       );
       setTableSchemaNames(tableSchemaNamesList);
+      console.log(datasetSchema.tables);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {

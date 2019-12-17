@@ -19,11 +19,11 @@
     "orderFieldSchemaDesign":"/dataschema/{:datasetId}/fieldSchema/order",
     "orderTableSchemaDesign":"/dataschema/{:datasetId}/tableSchema/order",
     "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
+    "updateDatasetSchemaDescriptionDesign":"/dataschema/{:datasetId}/datasetSchema?description={:datasetSchemaDescription}",
     "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
-    "updateTableDescriptionDesign": "/dataschema/{:datasetId}/tableSchema",
-    "updateTableNameDesign": "/dataschema/{:datasetId}/tableSchema",
+    "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",
     "validateDataset": "/validation/dataset/{:datasetId}",
     "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
     "webFormDataViewer":"/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"

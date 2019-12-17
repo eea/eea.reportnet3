@@ -216,6 +216,7 @@ export const FieldDesigner = ({
   };
 
   const onFieldAdd = async (recordId, type, value, description) => {
+    console.log({ recordId, type, value, description });
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
@@ -346,6 +347,7 @@ export const FieldDesigner = ({
 
   const fieldUpdate = async (recordId, fieldSchemaId, type, value, description) => {
     try {
+      console.log({ recordId, fieldSchemaId, type, value, description });
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         recordId,
         fieldSchemaId,
@@ -444,13 +446,13 @@ export const FieldDesigner = ({
         />
         <InputTextarea
           autoFocus={false}
+          collapsedHeight={30}
           expandableOnClick={true}
           className={styles.inputFieldDescription}
           key={fieldId}
           onBlur={e => {
             setIsEditing(false);
             onBlurFieldDescription(e.target.value);
-            //API CALL
           }}
           onChange={e => setFieldDescriptionValue(e.target.value)}
           onFocus={e => {

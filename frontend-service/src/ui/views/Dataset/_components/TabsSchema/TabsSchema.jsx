@@ -27,33 +27,38 @@ export const TabsSchema = ({
   if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
     tableHasErrors = tables[activeIndex].hasErrors;
   }
-  let tabs =
-    tables && tableSchemaColumns
-      ? tables.map(table => {
-          return (
-            <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
-              <div className={styles.TabsSchema}>
-                <DataViewer
-                  buttonsList={buttonsList}
-                  levelErrorTypes={levelErrorTypes}
-                  hasWritePermissions={hasWritePermissions}
-                  isWebFormMMR={isWebFormMMR}
-                  key={table.id}
-                  onLoadTableData={onLoadTableData}
-                  tableHasErrors={tableHasErrors}
-                  tableId={table.id}
-                  tableName={table.name}
-                  tableSchemaColumns={
-                    tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
-                  }
-                  recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
-                />
-              </div>
-            </TabPanel>
-          );
-        })
-      : null;
+  console.log({ tableSchemaColumns });
+  let tabs = tables
+    ? tables.map(table => {
+        console.log({ table });
+        return (
+          <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
+            <div className={styles.tabsSchema}>
+              <DataViewer
+                buttonsList={buttonsList}
+                levelErrorTypes={levelErrorTypes}
+                hasWritePermissions={hasWritePermissions}
+                isWebFormMMR={isWebFormMMR}
+                key={table.id}
+                onLoadTableData={onLoadTableData}
+                tableHasErrors={tableHasErrors}
+                tableId={table.id}
+                tableName={table.name}
+                tableSchemaColumns={
+                  !isUndefined(tableSchemaColumns)
+                    ? tableSchemaColumns
+                        .map(tab => tab.filter(t => t.table === table.name))
+                        .filter(f => f.length > 0)[0]
+                    : []
+                }
+                recordPositionId={table.id === activeIndex ? recordPositionId : -1}
+                selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
+              />
+            </div>
+          </TabPanel>
+        );
+      })
+    : null;
   const filterActiveIndex = tableSchemaId => {
     //TODO: Refactorizar este apaño y CUIDADO con activeIndex (integer cuando es manual, idTable cuando es por validación).
     if (Number.isInteger(tableSchemaId)) {

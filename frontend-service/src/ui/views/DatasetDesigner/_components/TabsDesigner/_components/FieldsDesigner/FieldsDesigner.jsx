@@ -15,6 +15,8 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
+
 export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
@@ -38,6 +40,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       !isNull(table.records[0].fields)
     ) {
       setFields(table.records[0].fields);
+    }
+    console.log({ table });
+    if (!isUndefined(table)) {
+      setTableDescriptionValue(table.description);
     }
   }, []);
 
@@ -66,7 +72,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
 
   const onFieldUpdate = (fieldId, fieldName, fieldType) => {
     const inmFields = [...fields];
-    const fieldIndex = getIndexByFieldId(fieldId, inmFields);
+    const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
     if (fieldIndex > -1) {
       inmFields[fieldIndex].name = fieldName;
       inmFields[fieldIndex].type = fieldType;
@@ -95,46 +101,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
   const onShowDialogError = (message, title) => {
     setErrorMessageAndTitle({ title, message });
     setIsErrorDialogVisible(true);
-  };
-
-  const arrayShift = (arr, initialIdx, endIdx) => {
-    const element = arr[initialIdx];
-    if (endIdx === -1) {
-      arr.splice(initialIdx, 1);
-      arr.splice(arr.length, 0, element);
-    } else {
-      if (Math.abs(endIdx - initialIdx) > 1) {
-        arr.splice(initialIdx, 1);
-        if (initialIdx < endIdx) {
-          arr.splice(endIdx - 1, 0, element);
-        } else {
-          arr.splice(endIdx, 0, element);
-        }
-      } else {
-        if (endIdx === 0) {
-          arr.splice(initialIdx, 1);
-          arr.splice(0, 0, element);
-        } else {
-          arr.splice(initialIdx, 1);
-          if (initialIdx < endIdx) {
-            arr.splice(endIdx - 1, 0, element);
-          } else {
-            arr.splice(endIdx, 0, element);
-          }
-        }
-      }
-    }
-    return arr;
-  };
-
-  const checkDuplicates = (name, fieldId) => {
-    if (!isUndefined(fields) && !isNull(fields)) {
-      const inmFields = [...fields];
-      const repeteadElements = inmFields.filter(field => name.toLowerCase() === field.name.toLowerCase());
-      return repeteadElements.length > 0 && fieldId !== repeteadElements[0].fieldId;
-    } else {
-      return false;
-    }
   };
 
   const deleteField = async deletedFieldIndx => {
@@ -167,22 +133,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       />
     </div>
   );
-
-  const getIndexByFieldName = (fieldName, fieldsArray) => {
-    return fieldsArray
-      .map(field => {
-        return field.name;
-      })
-      .indexOf(fieldName);
-  };
-
-  const getIndexByFieldId = (fieldId, fieldsArray) => {
-    return fieldsArray
-      .map(field => {
-        return field.fieldId;
-      })
-      .indexOf(fieldId);
-  };
 
   const previewData = () => {
     const tableSchemaColumns =
@@ -264,7 +214,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       <div className={styles.fieldDesignerWrapper} key="0">
         <FieldDesigner
           addField={true}
-          checkDuplicates={checkDuplicates}
+          checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
@@ -288,7 +238,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
         fields.map((field, index) => (
           <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
             <FieldDesigner
-              checkDuplicates={checkDuplicates}
+              checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
               datasetId={datasetId}
               fieldId={field.fieldId}
               fieldName={field.name}
@@ -316,7 +266,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
   const reorderField = async (draggedFieldIdx, droppedFieldName) => {
     try {
       const inmFields = [...fields];
-      const droppedFieldIdx = getIndexByFieldName(droppedFieldName, inmFields);
+      const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
       const fieldOrdered = await DatasetService.orderRecordFieldDesign(
         datasetId,
         droppedFieldIdx === -1
@@ -327,7 +277,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
         inmFields[draggedFieldIdx].fieldId
       );
       if (fieldOrdered) {
-        setFields([...arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+        setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
       }
     } catch (error) {
       console.error(`There has been an error during the field reorder: ${error}`);
@@ -336,7 +286,12 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
 
   const updateTableDescriptionDesign = async () => {
     try {
-      const tableUpdated = await DatasetService.updateTableDescriptionDesign(datasetId, tableDescriptionValue);
+      const tableUpdated = await DatasetService.updateTableDesign(
+        table.tableSchemaId,
+        table.header,
+        tableDescriptionValue,
+        datasetId
+      );
       if (!tableUpdated) {
         console.error('Error during table description update');
       }
@@ -350,6 +305,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       <div className={styles.switchDivInput}>
         <InputTextarea
           className={styles.tableDescriptionInput}
+          collapsedHeight={40}
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}

@@ -61,7 +61,8 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-
+        console.log({ dataset });
+        setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
       };
       getDatasetSchemaId();
@@ -120,12 +121,20 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setDataflowName(dataflowData.name);
   };
 
+  const onBlurDescription = description => {
+    console.log({ datasetDescription });
+    if (description !== initialDatasetDescription) {
+      console.log({ description });
+      onUpdateDescription(description);
+    }
+  };
+
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setDatasetDescription(initialDatasetDescription);
     } else if (event.key == 'Enter') {
       event.preventDefault();
-      //API CALL
+      onBlurDescription(event.target.value);
     }
   };
 
@@ -138,6 +147,18 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       console.error(`Error while getting datasetSchemaName: ${error}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onUpdateDescription = async description => {
+    try {
+      const response = await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      if (response.status < 200 || response.status > 299) {
+        console.error('Error during datasetSchema Description update');
+      }
+    } catch (error) {
+      console.error('Error during datasetSchema Description update: ', error);
+    } finally {
     }
   };
 
@@ -172,8 +193,10 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       <div className={styles.ButtonsBar}>
         <InputTextarea
           className={styles.datasetDescription}
+          collapsedHeight={40}
           expandableOnClick={true}
           key="datasetDescription"
+          onBlur={e => onBlurDescription(e.target.value)}
           onChange={e => setDatasetDescription(e.target.value)}
           onFocus={e => {
             setInitialDatasetDescription(e.target.value);
