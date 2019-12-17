@@ -31,7 +31,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -40,6 +40,7 @@ export const Dataflow = withRouter(({ history, match }) => {
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
+  const [dataflowStatus, setDataflowStatus] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -102,6 +103,7 @@ export const Dataflow = withRouter(({ history, match }) => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
+      setDataflowStatus(dataflow.status);
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -347,6 +349,7 @@ export const Dataflow = withRouter(({ history, match }) => {
                     <BigButton
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
+                      dataflowStatus={dataflowStatus}
                       datasetSchemaInfo={updatedDatasetSchema}
                       handleRedirect={() => {
                         handleRedirect(
@@ -392,7 +395,8 @@ export const Dataflow = withRouter(({ history, match }) => {
                         },
                         {
                           label: resources.messages['rename'],
-                          icon: 'pencil'
+                          icon: 'pencil',
+                          disabled: dataflowStatus !== config.dataflowStatus['DESIGN']
                         },
                         {
                           label: resources.messages['duplicate'],
@@ -402,7 +406,7 @@ export const Dataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
-                          disabled: true,
+                          disabled: dataflowStatus !== config.dataflowStatus['DESIGN'],
                           command: () => getDeleteSchemaIndex(newDatasetSchema.index)
                         },
                         {

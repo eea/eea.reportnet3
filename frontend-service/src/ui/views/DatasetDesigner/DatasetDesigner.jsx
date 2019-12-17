@@ -18,7 +18,7 @@ import { TabsDesigner } from './_components/TabsDesigner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { Title } from 'ui/views/_components/Title';
 

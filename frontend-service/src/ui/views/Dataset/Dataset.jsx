@@ -34,7 +34,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
