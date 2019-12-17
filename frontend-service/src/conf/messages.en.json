@@ -108,6 +108,7 @@
 		"drafted":"Drafted",
 		"duplicate": "Duplicate",
 		"duplicateSchemaError": "The schema name already exists, Please choose another one.",
+		"duplicatedDataflow": "The dataflow name already exists, please choose another one.",
 		"duplicatedTabHeader": "Duplicated table name",
 		"duplicatedFieldMessage":"Duplicated field name, please enter another one.",
 		"duplicatedFieldTitle":"Duplicated field name",

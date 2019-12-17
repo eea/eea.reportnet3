@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './DataflowCrudForm.module.css';
@@ -13,13 +13,14 @@ import { DataflowService } from 'core/services/Dataflow';
 
 export const DataflowCrudForm = ({
   dataflowId,
-  dataflowValue,
+  dataflowValues,
   isDialogVisible,
   isEditForm,
   isFormReset,
   onCreate,
   onCancel,
-  onEdit
+  onEdit,
+  selectedDataflow
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -35,7 +36,31 @@ export const DataflowCrudForm = ({
   }, [isDialogVisible]);
 
   const dataflowCrudValidation = Yup.object().shape({
-    name: Yup.string().required(),
+    name: isEditForm
+      ? Yup.string()
+          .required(' ')
+          .test('isEditFormDuplicated', resources.messages['duplicatedDataflow'], value => {
+            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
+              const repeatedResults = Object.keys(dataflowValues)
+                .filter(key => dataflowValues[key].id != dataflowId)
+                .map(key => dataflowValues[key].name)
+                .filter(item => typeof item === 'string')
+                .some(item => item.toLowerCase() === value.toLowerCase());
+              return !repeatedResults;
+            }
+          })
+      : Yup.string()
+          .required(' ')
+          .test('isNewFormDuplicated', resources.messages['duplicatedDataflow'], value => {
+            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
+              const isRepeat = Object.keys(dataflowValues).some(
+                key => dataflowValues[key].name.toLowerCase() === value.toLowerCase()
+              );
+              return !isRepeat;
+            } else {
+              return true;
+            }
+          }),
     description: Yup.string().required()
   });
 
@@ -48,7 +73,7 @@ export const DataflowCrudForm = ({
     return formValues;
   };
 
-  const initialValues = buildFormikValues(dataflowValue);
+  const initialValues = buildFormikValues(selectedDataflow);
 
   return (
     <Formik
@@ -58,9 +83,9 @@ export const DataflowCrudForm = ({
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        const response = !isEditForm
-          ? await DataflowService.create(values.name, values.description)
-          : await DataflowService.update(values.name, values.description, dataflowId);
+        const response = isEditForm
+          ? await DataflowService.update(values.name, values.description, dataflowId)
+          : await DataflowService.create(values.name, values.description);
 
         if (response.status >= 200 && response.status <= 299) {
           isEditForm ? onEdit(dataflowId, values.name, values.description) : onCreate();
@@ -80,6 +105,7 @@ export const DataflowCrudForm = ({
                 type="text"
                 value={values.name}
               />
+              <ErrorMessage className="error" name="name" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field

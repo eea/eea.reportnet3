@@ -63,7 +63,7 @@ export const Dataflows = withRouter(({ match, history }) => {
       setcompletedContent(allDataflows.completed);
       setDataflowInitialValues(
         allDataflows.accepted.forEach(element => {
-          dataflowInitialValues[element.id] = { name: element.name, description: element.description };
+          dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
         })
       );
     } catch (error) {
@@ -198,13 +198,14 @@ export const Dataflows = withRouter(({ match, history }) => {
         visible={isDataflowDialogVisible}>
         <DataflowCrudForm
           dataflowId={dataflowState.selectedDataflowId}
-          dataflowValue={dataflowState.selectedDataflow}
+          dataflowValues={dataflowState}
           isDialogVisible={isDataflowDialogVisible}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
           onCreate={onCreateDataflow}
           onCancel={onHideDialog}
           onEdit={onEditDataflow}
+          selectedDataflow={dataflowState.selectedDataflow}
         />
       </Dialog>
     </div>
