@@ -21,7 +21,7 @@ const DataProvidersList = ({ dataflowId }) => {
     dataProviderIdToDelete: '',
     dataProviders: [],
     allPossibleDataProviders: [],
-    chosenDataProviders: [],
+    unusedDataProvidersOptions: [],
     representativesTypesList: [],
     representativesDropdown: null,
     selectedRepresentativeType: null
@@ -29,11 +29,6 @@ const DataProvidersList = ({ dataflowId }) => {
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
-  /*   const onPageLoad = async () => {
-    const loadedData = await DataProviderService.all(dataflowId);
-
-    return loadedData;
-  }; */
   const onPageLoad = () => {
     const loadedData = {
       representativesOf: { nameLabel: 'Countries', name: 'countries' },
@@ -45,8 +40,8 @@ const DataProvidersList = ({ dataflowId }) => {
           email: 'greatbr@uk.uk',
           id: 3
         } /* ,
-        { dataProviderId: '4444', email: 'france@fr.fr', name: 'Fr' },
-        { dataProviderId: '5555', email: 'italy@it.it', name: 'It' } */
+        { dataProviderId: '4444', email: 'france@fr.fr', id: 4 },
+        { dataProviderId: '5555', email: 'italy@it.it', id: 5 } */
       ]
     };
 
@@ -70,7 +65,7 @@ const DataProvidersList = ({ dataflowId }) => {
     });
 
     formDispatcher({
-      type: 'FILTER_CHOSEN_OPTIONS'
+      type: 'CREATE_UNUSED_OPTIONS_LIST'
     });
   }, []);
 
@@ -92,6 +87,11 @@ const DataProvidersList = ({ dataflowId }) => {
   };
 
   const nameDropdownColumnTemplate = rowData => {
+    // get option corresponding to this rowData
+    const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(option => option.id === rowData.id);
+
+    const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
+
     return (
       <>
         <select
@@ -103,12 +103,7 @@ const DataProvidersList = ({ dataflowId }) => {
             });
           }}
           value={rowData.id}>
-          {formState.allPossibleDataProviders.map(provider => {
-            /* formDispatcher({
-              type: 'SET_CHOSEN_OPTIONS',
-              payload: { id: rowData.id }
-            }); */
-
+          {remainingOptionsAndSelectedOption.map(provider => {
             return (
               <option
                 key={provider.id}

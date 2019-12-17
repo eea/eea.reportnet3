@@ -43,21 +43,20 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         isVisibleConfirmDeleteDialog: false
       };
-    /* 
-    case 'SET_CHOSEN_OPTIONS':
-      console.log('FILTER :', payload.name);
-      let chosenOption = state.allPossibleDataProviders.filter(dataProvider => dataProvider.name === payload.name);
-      let chosenOptionsList = state.chosenDataProviders;
-      chosenOptionsList.push(chosenOption[0]);
-      let updatedChosenOptionsList = Array.from(new Set(chosenOptionsList));
-      console.log('listWithUniqueValues :', updatedChosenOptionsList);
-      // return { ...state, chosenDataProviders: updatedChosenOptionsList };
-      return state; */
-    case 'FILTER_CHOSEN_OPTIONS':
-      console.log('FILTER_CHOSEN_OPTIONS state.allPossibleDataProviders', state.allPossibleDataProviders);
-      console.log('state.dataProviders', state.dataProviders);
 
-      return state;
+    case 'CREATE_UNUSED_OPTIONS_LIST':
+      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
+        let result = true;
+
+        for (let index = 0; index < state.dataProviders.length; index++) {
+          if (state.dataProviders[index].id === possibleProvider.id) {
+            result = false;
+          }
+        }
+
+        return result;
+      });
+      return { ...state, unusedDataProvidersOptions };
 
     case 'HIDE_CONFIRM_DIALOG':
       return {
