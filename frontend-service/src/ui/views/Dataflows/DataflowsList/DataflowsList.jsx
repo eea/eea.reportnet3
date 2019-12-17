@@ -14,6 +14,7 @@ export const DataflowsList = ({
   listTitle,
   listType,
   selectedDataflowId,
+  showDeleteDialog,
   showEditForm
 }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
@@ -37,6 +38,7 @@ export const DataflowsList = ({
             listType={listType}
             position={counter}
             selectedDataflowId={selectedDataflowId}
+            showDeleteDialog={showDeleteDialog}
             showEditForm={showEditForm}
           />
         );

@@ -8,6 +8,7 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -33,6 +34,7 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [dataflowInitialValues, setDataflowInitialValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -94,6 +96,20 @@ export const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
+  const onDeleteDataflow = async () => {
+    try {
+      const status = await DataflowService.deleteById(dataflowState.selectedDataflowId);
+      if (status >= 200 && status <= 299) {
+        dataFetch();
+        setIsDeleteDialogVisible(false);
+      } else {
+        console.log('Delete dataflow error with this status: ', status);
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
   const onEditDataflow = (id, newName, newDescription) => {
     setIsDataflowDialogVisible(false);
     dataflowDispatch({
@@ -120,6 +136,10 @@ export const Dataflows = withRouter(({ match, history }) => {
   const onShowAddForm = () => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
+  };
+
+  const onShowDeleteDialog = () => {
+    setIsDeleteDialogVisible(true);
   };
 
   const onShowEditForm = () => {
@@ -173,6 +193,7 @@ export const Dataflows = withRouter(({ match, history }) => {
               listTitle={resources.messages.acceptedDataflowTitle}
               listType="accepted"
               selectedDataflowId={dataflowState.selectedDataflowId}
+              showDeleteDialog={onShowDeleteDialog}
               showEditForm={onShowEditForm}
             />
           </>
@@ -208,6 +229,16 @@ export const Dataflows = withRouter(({ match, history }) => {
           selectedDataflow={dataflowState.selectedDataflow}
         />
       </Dialog>
+
+      <ConfirmDialog
+        header={resources.messages['delete']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onDeleteDataflow()}
+        onHide={e => setIsDeleteDialogVisible(false)}
+        visible={isDeleteDialogVisible}>
+        {resources.messages['deleteDataflowConfirm']}
+      </ConfirmDialog>
     </div>
   );
 });

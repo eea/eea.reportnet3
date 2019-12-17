@@ -11,7 +11,6 @@ import styles from './DataflowsItem.module.scss';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -28,11 +27,10 @@ export const DataflowsItem = ({
   listType,
   position,
   selectedDataflowId,
+  showDeleteDialog,
   showEditForm
 }) => {
   const resources = useContext(ResourcesContext);
-
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
 
   let dataflowTitles = {
     name: itemContent.name,
@@ -68,8 +66,11 @@ export const DataflowsItem = ({
     {
       label: resources.messages['delete'],
       icon: 'trash',
-      disabled: true,
-      command: () => setIsDeleteDialogVisible(true)
+      disabled: false,
+      command: () => {
+        dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: dataflowId });
+        showDeleteDialog();
+      }
     }
   ];
 
@@ -83,19 +84,6 @@ export const DataflowsItem = ({
       }
     } catch (error) {
       console.error('AcceptDataflow error: ', error);
-    }
-  };
-
-  const onDeleteDataflow = async () => {
-    try {
-      const status = await DataflowService.deleteById(itemContent.id);
-      if (status >= 200 && status <= 299) {
-        dataFetch();
-      } else {
-        console.log('Delete dataflow error with this status: ', status);
-      }
-    } catch (error) {
-      console.log('error', error);
     }
   };
 
@@ -204,16 +192,6 @@ export const DataflowsItem = ({
           </>
         )}
       </div>
-
-      <ConfirmDialog
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteDataflow()}
-        onHide={() => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteDataflowConfirm']}
-      </ConfirmDialog>
     </>
   );
 };
