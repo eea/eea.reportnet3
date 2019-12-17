@@ -105,8 +105,7 @@ export const apiDataflow = {
   deleteById: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
-      url: getUrl(DataflowConfig.createDataflow),
-      data: { id: dataflowId },
+      url: getUrl(DataflowConfig.createDataflow, { dataflowId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
