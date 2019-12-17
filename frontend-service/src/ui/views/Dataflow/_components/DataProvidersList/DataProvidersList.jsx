@@ -31,17 +31,11 @@ const DataProvidersList = ({ dataflowId }) => {
 
   const onPageLoad = () => {
     const loadedData = {
-      representativesOf: { nameLabel: 'Countries', name: 'countries' },
+      representativesOf: { label: 'Countries', dataProviderGroupId: 123456 },
       dataProviders: [
-        { dataProviderId: 1111, email: 'spain@es.es', id: 1 },
-        { dataProviderId: 2222, email: 'germany@de.de', id: 2 },
-        {
-          dataProviderId: 3333,
-          email: 'greatbr@uk.uk',
-          id: 3
-        } /* ,
-        { dataProviderId: '4444', email: 'france@fr.fr', id: 4 },
-        { dataProviderId: '5555', email: 'italy@it.it', id: 5 } */
+        { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
+        { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
+        { representativeId: 33, dataProviderId: 3, providerAccount: 'greatbr@uk.uk' }
       ]
     };
 
@@ -69,12 +63,12 @@ const DataProvidersList = ({ dataflowId }) => {
     });
   }, []);
 
-  const emailInputColumnTemplate = rowData => {
-    let inputData = rowData.email;
+  const providerAccountInputColumnTemplate = rowData => {
+    let inputData = rowData.providerAccount;
     return (
       <input
         defaultValue={inputData}
-        placeholder={'Data Providers email...'}
+        placeholder={'Data Providers providerAccount...'}
         onChange={e =>
           formDispatcher({
             type: 'ON_EMAIL_CHANGE',
@@ -92,7 +86,9 @@ const DataProvidersList = ({ dataflowId }) => {
   };
 
   const nameDropdownColumnTemplate = rowData => {
-    const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(option => option.id === rowData.id);
+    const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
+      option => option.dataProviderId === rowData.dataProviderId
+    );
 
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
 
@@ -103,16 +99,16 @@ const DataProvidersList = ({ dataflowId }) => {
           onChange={e => {
             formDispatcher({
               type: 'ON_PROVIDER_CHANGE',
-              payload: { label: e.target.value, dataProviderId: rowData.dataProviderId }
+              payload: { dataProviderId: e.target.value, representativeId: rowData.representativeId }
             });
           }}
-          value={rowData.id}>
+          value={rowData.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
               <option
-                key={provider.id}
+                key={provider.dataProviderId}
                 className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
-                value={provider.id}>
+                value={provider.dataProviderId}>
                 {provider.label}
               </option>
             );
@@ -152,7 +148,7 @@ const DataProvidersList = ({ dataflowId }) => {
               formState.selectedRepresentativeType !== null && formState.representativesTypesList !== [] ? true : false
             }
             name="representativesDropdown"
-            optionLabel="nameLabel"
+            optionLabel="label"
             placeholder="Select..."
             value={formState.selectedRepresentativeType}
             options={formState.representativesTypesList}
@@ -164,7 +160,7 @@ const DataProvidersList = ({ dataflowId }) => {
       </div>
 
       <DataTable value={formState.dataProviders} scrollable={true} scrollHeight="100vh">
-        <Column body={emailInputColumnTemplate} header="Email" />
+        <Column body={providerAccountInputColumnTemplate} header="Email" />
         <Column body={nameDropdownColumnTemplate} header="Data Provider" />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>

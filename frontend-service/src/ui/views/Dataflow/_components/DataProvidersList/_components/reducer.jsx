@@ -3,24 +3,24 @@ import { includes } from 'lodash';
 import { DataProviderService } from 'core/services/DataProvider';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyField = { dataProviderId: '', email: '', id: '' };
+  const emptyField = { representativeId: '', dataProviderId: '', providerAccount: '' };
 
   let updatedList = [];
   switch (type) {
     case 'ADD_DATAPROVIDER':
-      // await DataProviderService.add(dataflowId, email, name);
-      console.log('On add dataProvider', payload.dataflowId, payload.email, payload.id);
+      // await DataProviderService.add(dataflowId, providerAccount, name);
+      console.log('On add dataProvider', payload.dataflowId, payload.providerAccount);
       return state;
 
     case 'GET_DATA_PROVIDERS_LIST_BY_TYPE':
       // const dataResponse = await DataProviderService.allRepresentativesOf(payload.type);
       const dataResponse = [
-        { id: '', label: 'Select...' },
-        { id: 1, label: 'Spain' },
-        { id: 2, label: 'Germany' },
-        { id: 3, label: 'United Kingdom' },
-        { id: 4, label: 'France' },
-        { id: 5, label: 'Italy' }
+        { dataProviderId: '', label: 'Select...' },
+        { dataProviderId: 1, label: 'Spain' },
+        { dataProviderId: 2, label: 'Germany' },
+        { dataProviderId: 3, label: 'United Kingdom' },
+        { dataProviderId: 4, label: 'France' },
+        { dataProviderId: 5, label: 'Italy' }
       ];
 
       return { ...state, allPossibleDataProviders: dataResponse };
@@ -29,14 +29,14 @@ export const reducer = (state, { type, payload }) => {
       //Need get function on api for that list
       // Http requester......
       const response = [
-        { nameLabel: 'Countries', name: 'countries' },
-        { nameLabel: 'Companies', name: 'companies' }
+        { label: 'Countries', dataProviderGroupId: 123456 },
+        { label: 'Companies', dataProviderGroupId: 654123 }
       ];
 
       return { ...state, representativesTypesList: response };
 
     case 'DELETE_DATA_PROVIDER':
-      console.log('Delete Provider with id :', state.dataProviderIdToDelete);
+      console.log('Delete Provider with dataProviderId :', state.dataProviderIdToDelete);
       /* await DataProviderService.delete(dataProviderId); */
 
       return {
@@ -49,7 +49,7 @@ export const reducer = (state, { type, payload }) => {
         let result = true;
 
         for (let index = 0; index < state.dataProviders.length; index++) {
-          if (state.dataProviders[index].id === possibleProvider.id) {
+          if (state.dataProviders[index].dataProviderId === possibleProvider.dataProviderId) {
             result = false;
           }
         }
@@ -80,7 +80,7 @@ export const reducer = (state, { type, payload }) => {
       console.log('payload', payload);
       updatedList = state.dataProviders.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
-          dataProvider.email = payload.input;
+          dataProvider.providerAccount = payload.input;
         }
         return dataProvider;
       });
@@ -93,15 +93,16 @@ export const reducer = (state, { type, payload }) => {
       console.log('payload', payload);
       console.log('updatedList', state.dataProviders);
 
-      //api call to update email
+      //api call to update providerAccount
 
       return state;
 
     case 'ON_PROVIDER_CHANGE':
-      console.log('ON_PROVIDER_CHANGE', payload.dataProviderId);
+      console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
       updatedList = state.dataProviders.map(dataProvider => {
-        if (dataProvider.dataProviderId === payload.dataProviderId) {
-          dataProvider.id = payload.id;
+        console.log('dataProvider', dataProvider);
+        if (dataProvider.representativeId === payload.representativeId) {
+          dataProvider.dataProviderId = payload.dataProviderId;
         }
         return dataProvider;
       });
