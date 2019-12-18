@@ -5,6 +5,7 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 
+import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
@@ -15,6 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const BigButton = ({
   caption,
+  dataflowStatus,
   datasetSchemaInfo,
   handleRedirect,
   index,
@@ -196,7 +198,9 @@ export const BigButton = ({
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p className={styles.caption} onDoubleClick={onEnableSchemaNameEdit}>
+        <p
+          className={styles.caption}
+          onDoubleClick={dataflowStatus === config.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
