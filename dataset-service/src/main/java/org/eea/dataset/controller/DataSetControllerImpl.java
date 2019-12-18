@@ -79,7 +79,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
@@ -102,28 +104,40 @@ public class DataSetControllerImpl implements DatasetController {
   private DeleteHelper deleteHelper;
 
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Autowired
   private DesignDatasetService designDatasetService;
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
@@ -136,6 +150,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
+   *
    * @return the data tables values
    */
   @Override
@@ -212,7 +227,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+      name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -361,7 +376,6 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-
   /**
    * Update records.
    *
@@ -447,7 +461,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
       @LockCriteria(
@@ -468,7 +482,6 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
-
 
 
   /**
@@ -502,7 +515,6 @@ public class DataSetControllerImpl implements DatasetController {
       } else {
         filename = designDatasetService.getFileNameDesign(mimeType, idTableSchema, datasetId);
       }
-
 
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
