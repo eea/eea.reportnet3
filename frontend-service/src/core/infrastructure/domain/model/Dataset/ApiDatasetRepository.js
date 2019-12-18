@@ -482,6 +482,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.type = record.type;
+  datasetTableFieldDesign.description = record.description;
 
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
