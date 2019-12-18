@@ -14,6 +14,13 @@ export const dataflowReducer = (state, { type, payload }) => {
         selectedDataflow: { name: payload.name, description: payload.description }
       };
 
+    case 'ON_RESET_DATAFLOW_DATA':
+      delete state.selectedDataflow;
+      delete state.selectedDataflowId;
+      return {
+        ...state
+      };
+
     default:
       return {
         ...state

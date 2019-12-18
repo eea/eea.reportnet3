@@ -136,6 +136,9 @@ export const Dataflows = withRouter(({ match, history }) => {
   const onShowAddForm = () => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
+    dataflowDispatch({
+      type: 'ON_RESET_DATAFLOW_DATA'
+    });
   };
 
   const onShowDeleteDialog = () => {
