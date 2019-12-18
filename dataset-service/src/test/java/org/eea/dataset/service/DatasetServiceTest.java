@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -44,6 +45,8 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -65,6 +68,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
@@ -267,6 +271,7 @@ public class DatasetServiceTest {
     tableValue = new TableValue();
     tableValue.setId(1L);
     tableValue.setTableValidations(new ArrayList<>());
+    tableValue.setRecords(Arrays.asList(recordValue));
     recordValue.setTableValue(tableValue);
     recordValues.add(recordValue);
     datasetValue = new DatasetValue();
@@ -1379,11 +1384,57 @@ public class DatasetServiceTest {
   }
 
   @Test
-  public void testsaveNewFieldPropagation() {
+  public void testSaveNewFieldPropagation() {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     datasetService.saveNewFieldPropagation(1L, "5cf0e9b3b793310e9ceca190", pageable,
         "5cf0e9b3b793310e9ceca190", TypeData.TEXT);
+  }
+
+  @Test
+  public void testPrepareNewFieldPropagation() throws EEAException {
+
+    FieldSchemaVO fs = new FieldSchemaVO();
+    fs.setId("5cf0e9b3b793310e9ceca190");
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema));
+    tableSchema.setRecordSchema(recordSchema);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    schema.setTableSchemas(tableSchemas);
+    Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.prepareNewFieldPropagation(1L, fs);
+  }
+
+  @Test
+  public void testPrepareNewFieldPropagationException() throws EEAException {
+
+    FieldSchemaVO fs = new FieldSchemaVO();
+    fs.setId("5cf0e9b3b793310e9ceca190");
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema));
+    tableSchema.setRecordSchema(recordSchema);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    schema.setTableSchemas(tableSchemas);
+    try {
+      datasetService.prepareNewFieldPropagation(2L, fs);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATASET_NOTFOUND, e.getMessage());
+    }
   }
 
 }

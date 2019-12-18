@@ -1,7 +1,6 @@
 package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class SaveStatisticsCommandTest.
@@ -53,6 +53,7 @@ public class ExecutePropagateNewFieldCommandTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+    ReflectionTestUtils.setField(executePropagateCommand, "fieldBatchSize", 1);
   }
 
 
@@ -71,18 +72,38 @@ public class ExecutePropagateNewFieldCommandTest {
     data.put("sizeRecords", 1);
     data.put("idTableSchema", "5cf0e9b3b793310e9ceca190");
     data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
+    data.put("uuId", "1");
     data.put("typeField", TypeData.TEXT);
+    data.put("numPag", 1);
     eeaEventVO.setData(data);
 
-    doNothing().when(datasetService).saveNewFieldPropagation(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
-
     ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<String, Integer>();
-    processesMap.put("test", 1);
+    processesMap.put("1", 1);
     when(updateRecordHelper.getProcessesMap()).thenReturn(processesMap);
     executePropagateCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveNewFieldPropagation(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(updateRecordHelper, times(1)).getProcessesMap();
+
+  }
+
+  @Test
+  public void testExecute2() throws EEAException {
+
+    eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION);
+    data = new HashMap<>();
+    data.put("dataset_id", 1L);
+    data.put("sizeRecords", 1);
+    data.put("idTableSchema", "5cf0e9b3b793310e9ceca190");
+    data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
+    data.put("typeField", TypeData.TEXT);
+    data.put("uuId", "1");
+    eeaEventVO.setData(data);
+
+    ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<String, Integer>();
+    processesMap.put("1", 1);
+    when(updateRecordHelper.getProcessesMap()).thenReturn(processesMap);
+    executePropagateCommand.execute(eeaEventVO);
+    Mockito.verify(updateRecordHelper, times(1)).getProcessesMap();
 
   }
 
