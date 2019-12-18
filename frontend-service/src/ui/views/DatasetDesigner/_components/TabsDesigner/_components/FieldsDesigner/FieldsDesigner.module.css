@@ -1,3 +1,6 @@
+.descriptionLabel {
+  margin: 0.5vw 0 0.5vw 1vw;
+}
 .fieldDesignerWrapper {
   display: flex;
   flex-direction: row;

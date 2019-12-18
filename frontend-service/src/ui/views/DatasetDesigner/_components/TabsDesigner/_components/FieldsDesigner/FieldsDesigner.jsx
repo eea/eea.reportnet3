@@ -17,7 +17,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescription }) => {
+export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
@@ -57,9 +57,15 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
     return datasetSchema.levelErrorTypes;
   };
 
-  const onFieldAdd = (fieldId, fieldName, recordId, fieldType) => {
+  const onFieldAdd = (fieldId, fieldName, recordId, fieldType, fieldDescription) => {
     const inmFields = [...fields];
-    inmFields.splice(inmFields.length, 0, { fieldId, name: fieldName, recordId, type: fieldType });
+    inmFields.splice(inmFields.length, 0, {
+      fieldId,
+      name: fieldName,
+      recordId,
+      type: fieldType,
+      description: fieldDescription
+    });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
   };
@@ -69,12 +75,13 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = (fieldId, fieldName, fieldType) => {
+  const onFieldUpdate = (fieldId, fieldName, fieldType, fieldDescription) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
     if (fieldIndex > -1) {
       inmFields[fieldIndex].name = fieldName;
       inmFields[fieldIndex].type = fieldType;
+      inmFields[fieldIndex].description = fieldDescription;
       setFields(inmFields);
     }
   };
@@ -293,6 +300,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
       );
       if (!tableUpdated) {
         console.error('Error during table description update');
+      } else {
+        onChangeTableDescription(table.tableSchemaId, tableDescriptionValue);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);
@@ -301,6 +310,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
 
   return (
     <React.Fragment>
+      <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.switchDivInput}>
         <InputTextarea
           className={styles.tableDescriptionInput}
@@ -314,7 +324,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : tableDescription}
+          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>
           <span className={styles.switchTextInput}>{resources.messages['design']}</span>

@@ -15,6 +15,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
+  datasetTableFieldDesign.description = datasetTableRecordField.description;
 
   const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordsAdded;

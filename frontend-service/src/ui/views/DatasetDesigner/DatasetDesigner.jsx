@@ -187,6 +187,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         icon="pencilRuler"
         iconSize="3.4rem"
       />
+      <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
       <div className={styles.ButtonsBar}>
         <InputTextarea
           className={styles.datasetDescription}

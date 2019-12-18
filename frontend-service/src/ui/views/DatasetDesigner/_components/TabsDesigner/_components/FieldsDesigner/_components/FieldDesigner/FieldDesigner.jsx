@@ -228,7 +228,8 @@ export const FieldDesigner = ({
       } else {
         setFieldValue('');
         setFieldTypeValue('');
-        onNewFieldAdd(response.data, value, recordId, type);
+        setFieldDescriptionValue('');
+        onNewFieldAdd(response.data, value, recordId, type, description);
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
@@ -356,7 +357,7 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type);
+        onFieldUpdate(fieldId, value, type, description);
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -460,7 +461,6 @@ export const FieldDesigner = ({
           placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
           value={!isUndefined(fieldDescriptionValue) ? fieldDescriptionValue : fieldDescription}
         />
-        {/* <InputTextarea autoResize={true} rows={2} cols={10} /> */}
         {!addField ? (
           <a
             draggable={true}

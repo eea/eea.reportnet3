@@ -24,7 +24,6 @@ const FieldEditor = ({
     switch (type) {
       case 'NUMBER':
       case 'POINT':
-        return 'pint';
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';

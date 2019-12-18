@@ -71,7 +71,6 @@ const ActionsToolbar = ({
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
-      console.log({ exportTableDataName });
       DownloadFile(exportTableData, exportTableDataName);
     }
   }, [exportTableData]);
