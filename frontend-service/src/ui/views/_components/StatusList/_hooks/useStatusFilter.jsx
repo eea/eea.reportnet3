@@ -17,12 +17,12 @@ const useStatusFilter = dataArray => {
     return !array.includes(item);
   };
 
-  const onFilteringData = (originalData, payloadDataArray) => {
+  const onFilteringData = (originalData, payload) => {
     if (isEmpty(originalData)) {
       return;
     }
 
-    const capitalizedArray = payloadDataArray.map(label => capitalize(label));
+    const capitalizedArray = payload.map(label => capitalize(label));
     let tablesData = originalData.datasets.filter(table => showArrayItem(capitalizedArray, capitalize(table.label)));
 
     return { labels: originalData.labels, datasets: tablesData };

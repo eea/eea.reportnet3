@@ -23,6 +23,7 @@ const ReporterList = ({ datasetSchemaId, filterDispatch, reporterFilters, labels
         </li>
       ))}
       <SelectAllFilters
+        id={'reporter'}
         datasetSchemaId={datasetSchemaId}
         filterDispatch={filterDispatch}
         filters={reporterFilters}

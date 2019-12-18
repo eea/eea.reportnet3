@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 const cleanOutFilteredTableData = (tablesData, labelsPositionsInFilteredLabels) => {
   return tablesData.map(table => ({
@@ -16,24 +16,56 @@ const filterItem = (filter, item) => {
   return !filter.includes(item);
 };
 
-const onFilteringData = (originalData, datasetsIds, reportersLabels, msgStatusTypes) => {
+const onFilteringReporters = (originalData, tableIds, reporters, status) => {
   if (isEmpty(originalData)) {
     return;
   }
+  let tablesData = [];
+  if (isUndefined(tableIds)) {
+    return tablesData;
+  }
+  tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
 
-  let tablesData = originalData.datasets.filter(table => filterItem(datasetsIds, table.tableId));
-  const labels = originalData.labels.filter(label => filterItem(reportersLabels, label));
-  const labelsPositionsInFilteredLabels = reportersLabels.map(label => getLabelIndex(originalData, label));
+  const labels = originalData.labels.filter(label => filterItem(reporters, label));
+  const labelsPositionsInFilteredLabels = reporters.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabels);
-  tablesData = tablesData.filter(table => filterItem(msgStatusTypes, table.label));
+  tablesData = tablesData.filter(table => filterItem(status, table.label));
+  return { labels: labels, datasets: tablesData };
+};
+
+const onFilteringTables = (originalData, tableIds, reporters, status) => {
+  if (isEmpty(originalData)) {
+    return;
+  }
+  let tablesData = [];
+  if (isUndefined(reporters)) {
+    return tablesData;
+  }
+  tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
+  tablesData = tablesData.filter(table => filterItem(status, table.label));
+  const labels = originalData.labels.filter(label => filterItem(reporters, label));
+  return { labels: labels, datasets: tablesData };
+};
+
+const onFilteringStatus = (originalData, status, reporters, tableIds) => {
+  if (isEmpty(originalData)) {
+    return;
+  }
+  let tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
+
+  const labels = originalData.labels.filter(label => filterItem(reporters, label));
+  const labelsPositionsInFilteredLabels = reporters.map(label => getLabelIndex(originalData, label));
+
+  tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabels);
+  tablesData = tablesData.filter(table => filterItem(status, table.label));
   return { labels: labels, datasets: tablesData };
 };
 
 export const filterReducer = (state, { type, payload }) => {
-  let reportersLabels = [];
+  let reporters = [];
   let tablesIds = [];
-  let msgStatusTypes = [];
+  let status = [];
   let filteredTableData;
   switch (type) {
     case 'INIT_DATA':
@@ -44,7 +76,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'TABLE_CHECKBOX_ON':
       tablesIds = state.tableFilter.filter(table => table !== payload.tableId);
-      filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
 
       return {
         ...state,
@@ -54,8 +86,7 @@ export const filterReducer = (state, { type, payload }) => {
 
     case 'TABLE_CHECKBOX_OFF':
       tablesIds = [...state.tableFilter, payload.tableId];
-
-      filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
 
       return {
         ...state,
@@ -63,60 +94,77 @@ export const filterReducer = (state, { type, payload }) => {
         data: filteredTableData
       };
 
-    case 'REPORTER_CHECKBOX_ON':
-      reportersLabels = state.reporterFilter.filter(label => label !== payload.label);
+    case 'TABLE_CHECKBOX_SELECT_ALL_ON':
+      filteredTableData = onFilteringTables(state.originalData, [], state.reporterFilter, state.statusFilter);
+      return {
+        ...state,
+        tableFilter: [],
+        data: filteredTableData
+      };
 
-      filteredTableData = onFilteringData(state.originalData, state.tableFilter, reportersLabels, state.statusFilter);
+    case 'TABLE_CHECKBOX_SELECT_ALL_OFF':
+      tablesIds = [...state.tableFilter, payload.tableId];
+      return {
+        ...state,
+        tableFilter: tablesIds[0],
+        data: []
+      };
+
+    case 'REPORTER_CHECKBOX_ON':
+      reporters = state.reporterFilter.filter(label => label !== payload.label);
+      filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
 
       return {
         ...state,
-        reporterFilter: reportersLabels,
+        reporterFilter: reporters,
         data: filteredTableData
       };
 
     case 'REPORTER_CHECKBOX_OFF':
-      reportersLabels = [...state.reporterFilter, payload.label];
+      reporters = [...state.reporterFilter, payload.label];
+      filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
 
-      filteredTableData = onFilteringData(state.originalData, state.tableFilter, reportersLabels, state.statusFilter);
       return {
         ...state,
-        reporterFilter: reportersLabels,
+        reporterFilter: reporters,
         data: filteredTableData
       };
 
     case 'REPORTER_CHECKBOX_SELECT_ALL_ON':
+      filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
+
       return {
         ...state,
         reporterFilter: [],
-        data: state.originalData
+        data: filteredTableData
       };
 
     case 'REPORTER_CHECKBOX_SELECT_ALL_OFF':
-      reportersLabels = [...state.reporterFilter, payload.allFilters];
-      filteredTableData = onFilteringData(state.originalData, state.tableFilter, reportersLabels, state.statusFilter);
+      reporters = [...state.reporterFilter, payload.allFilters];
+      filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
+
       return {
         ...state,
-        reporterFilter: reportersLabels[0],
+        reporterFilter: reporters[0],
         data: []
       };
 
     case 'STATUS_FILTER_ON':
-      msgStatusTypes = state.statusFilter.filter(status => status !== payload.msg);
-
-      filteredTableData = onFilteringData(state.originalData, state.tableFilter, state.reporterFilter, msgStatusTypes);
+      status = state.statusFilter.filter(status => status !== payload.msg);
+      filteredTableData = onFilteringStatus(state.originalData, status, state.reporterFilter, state.tableFilter);
 
       return {
         ...state,
-        statusFilter: msgStatusTypes,
+        statusFilter: status,
         data: filteredTableData
       };
 
     case 'STATUS_FILTER_OFF':
-      msgStatusTypes = [...state.statusFilter, payload.msg];
-      filteredTableData = onFilteringData(state.originalData, state.tableFilter, state.reporterFilter, msgStatusTypes);
+      status = [...state.statusFilter, payload.msg];
+      filteredTableData = onFilteringStatus(state.originalData, status, state.reporterFilter, state.tableFilter);
       return {
         ...state,
-        statusFilter: msgStatusTypes,
+        statusFilter: status,
         data: filteredTableData
       };
 

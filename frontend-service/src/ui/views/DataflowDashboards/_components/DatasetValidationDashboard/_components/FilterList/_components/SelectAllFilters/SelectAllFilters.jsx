@@ -6,7 +6,7 @@ import styles from './SelectAllFilters.module.css';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, labels, selectedAllFilter }) => {
+const SelectAllFilters = ({ id, datasetSchemaId, filterDispatch, filters, labels, selectedAllFilter }) => {
   const [checkboxState, setCheckboxState] = useState('checked');
   const [isClickedFilter, setIsClickedFilter] = useState('');
   const resources = useContext(ResourcesContext);
@@ -61,7 +61,7 @@ const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, labels, se
     <>
       <li className={styles.listItem}>
         <input
-          id={`${'selectAll'}_${datasetSchemaId}`}
+          id={`${id}_${'selectAll'}_${datasetSchemaId}`}
           className={styles.checkbox}
           type="checkbox"
           defaultChecked={true}
@@ -69,12 +69,14 @@ const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, labels, se
           onChange={e => {
             setIsClickedFilter(e.target.checked ? 'checked' : 'unchecked');
             filterDispatch({
-              type: e.target.checked ? 'REPORTER_CHECKBOX_SELECT_ALL_ON' : 'REPORTER_CHECKBOX_SELECT_ALL_OFF',
+              type: e.target.checked
+                ? id.toString().toUpperCase() + '_CHECKBOX_SELECT_ALL_ON'
+                : id.toString().toUpperCase() + '_CHECKBOX_SELECT_ALL_OFF',
               payload: { allFilters: labels, reportersNotSelected: filters }
             });
           }}
         />
-        <label htmlFor={`${'selectAll'}_${datasetSchemaId}`} className={styles.labelItem}>
+        <label htmlFor={`${id}_${'selectAll'}_${datasetSchemaId}`} className={styles.labelItem}>
           {resources.messages['selectAll']}
         </label>
       </li>
