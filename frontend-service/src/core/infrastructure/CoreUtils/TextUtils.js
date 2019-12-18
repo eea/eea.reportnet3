@@ -1,6 +1,6 @@
 import isObject from 'lodash/isObject';
 
-const parseText = (rawText, param = {}) => {
+const parseText = (rawText = '', param = {}) => {
   let text = rawText;
   if (isObject(param)) {
     Object.keys(param).forEach(key => {
