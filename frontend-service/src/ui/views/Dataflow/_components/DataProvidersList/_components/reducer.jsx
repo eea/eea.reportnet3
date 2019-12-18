@@ -13,6 +13,7 @@ export const reducer = (state, { type, payload }) => {
       return state;
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
+      console.log('CREATE_UNUSED_OPTIONS_LIST');
       let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
         let result = true;
 
@@ -26,8 +27,8 @@ export const reducer = (state, { type, payload }) => {
       });
       return { ...state, unusedDataProvidersOptions };
 
-    case 'DELETE_DATA_PROVIDER':
-      console.log('Delete Provider with representativeId :', state.representativeIdToDelete);
+    case 'DELETE_REPRESENTATIVE':
+      console.log('Delete REPRESTNTATIVE with representativeId :', state.representativeIdToDelete);
       /* await DataProviderService.delete(dataProviderId); */
 
       return {
@@ -35,7 +36,9 @@ export const reducer = (state, { type, payload }) => {
         isVisibleConfirmDeleteDialog: false
       };
 
-    case 'GET_DATA_PROVIDERS_LIST_BY_TYPE':
+    case 'GET_REPRESENTATIVES_LIST_BY_TYPE':
+      console.log('GET_REPRESENTATIVES_LIST_BY_TYPE');
+
       // const dataResponse = await DataProviderService.allDataProviders(payload.type);
       const dataResponse = [
         { dataProviderId: '', label: 'Select...' },
@@ -48,7 +51,7 @@ export const reducer = (state, { type, payload }) => {
 
       return { ...state, allPossibleDataProviders: dataResponse };
 
-    case 'GET_REPRESENTATIVES_TYPES_LIST':
+    case 'GET_PROVIDERS_TYPES_LIST':
       //Need get function on api for that list
       // Http requester......
       const response = [
@@ -56,9 +59,10 @@ export const reducer = (state, { type, payload }) => {
         { label: 'Companies', dataProviderGroupId: 654123 }
       ];
 
-      return { ...state, representativesTypesList: response };
+      return { ...state, dataProvidersTypesList: response };
 
     case 'HIDE_CONFIRM_DIALOG':
+      console.log('HIDE_CONFIRM_DIALOG');
       return {
         ...state,
         isVisibleConfirmDeleteDialog: false,
@@ -66,6 +70,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
+      console.log('INITIAL_LOAD');
       if (!includes(state.representatives, emptyField)) {
         payload.representatives.push(emptyField);
       }
@@ -73,11 +78,11 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedRepresentativeType: payload.representativesOf
+        selectedDataProviderType: payload.group
       };
 
     case 'UPDATE_EMAIL':
-      console.log('payload', payload);
+      console.log('UPDATE_EMAIL payload', payload);
       console.log('updatedList', state.representatives);
 
       //api call to update providerAccount
@@ -85,7 +90,7 @@ export const reducer = (state, { type, payload }) => {
       return state;
 
     case 'ON_EMAIL_CHANGE':
-      console.log('payload', payload);
+      console.log('ON_EMAIL_CHANGE payload', payload);
       updatedList = state.representatives.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
           dataProvider.providerAccount = payload.input;
@@ -100,12 +105,12 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_PROVIDER_CHANGE':
       console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
-      updatedList = state.representatives.map(dataProvider => {
-        console.log('dataProvider', dataProvider);
-        if (dataProvider.representativeId === payload.representativeId) {
-          dataProvider.dataProviderId = payload.dataProviderId;
+      updatedList = state.representatives.map(representative => {
+        console.log('representative', representative);
+        if (representative.representativeId === payload.representativeId) {
+          representative.dataProviderId = payload.dataProviderId;
         }
-        return dataProvider;
+        return representative;
       });
 
       return {
@@ -113,11 +118,11 @@ export const reducer = (state, { type, payload }) => {
         representatives: updatedList
       };
 
-    case 'SELECT_REPRESENTATIVE_TYPE':
-      console.log('SELECT_REPRESENTATIVE_TYPE ', payload);
+    case 'SELECT_PROVIDERS_TYPE':
+      console.log('SELECT_PROVIDERS_TYPE ', payload);
       return {
         ...state,
-        selectedRepresentativeType: payload
+        selectedDataProviderType: payload
       };
 
     case 'SHOW_CONFIRM_DIALOG':

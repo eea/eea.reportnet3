@@ -22,9 +22,9 @@ const DataProvidersList = ({ dataflowId }) => {
     representatives: [],
     allPossibleDataProviders: [],
     unusedDataProvidersOptions: [],
-    dataProviderTypesList: [],
+    dataProvidersTypesList: [],
     dataProvidersDropdown: null,
-    selectedRepresentativeType: null
+    selectedDataProviderType: null
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -34,7 +34,7 @@ const DataProvidersList = ({ dataflowId }) => {
     //(async)  await DataProviderService.allDataProviders(dataflowId)
 
     const loadedData = {
-      representativesOf: { label: 'Countries', dataProviderGroupId: 123456 },
+      group: { label: 'Countries', dataProviderGroupId: 123456 },
       representatives: [
         { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
         { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
@@ -54,11 +54,11 @@ const DataProvidersList = ({ dataflowId }) => {
 
   useEffect(() => {
     formDispatcher({
-      type: 'GET_REPRESENTATIVES_TYPES_LIST'
+      type: 'GET_PROVIDERS_TYPES_LIST'
     });
 
     formDispatcher({
-      type: 'GET_DATA_PROVIDERS_LIST_BY_TYPE'
+      type: 'GET_REPRESENTATIVES_LIST_BY_TYPE'
     });
 
     formDispatcher({
@@ -88,7 +88,7 @@ const DataProvidersList = ({ dataflowId }) => {
     );
   };
 
-  const nameDropdownColumnTemplate = rowData => {
+  const dropdownColumnTemplate = rowData => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
       option => option.dataProviderId === rowData.dataProviderId
     );
@@ -148,15 +148,15 @@ const DataProvidersList = ({ dataflowId }) => {
 
           <Dropdown
             disabled={
-              formState.selectedRepresentativeType !== null && formState.dataProviderTypesList !== [] ? true : false
+              formState.selectedDataProviderType !== null && formState.dataProvidersTypesList !== [] ? true : false
             }
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder="Select..."
-            value={formState.selectedRepresentativeType}
-            options={formState.dataProviderTypesList}
+            value={formState.selectedDataProviderType}
+            options={formState.dataProvidersTypesList}
             onChange={e => {
-              return formDispatcher({ type: 'SELECT_REPRESENTATIVE_TYPE', payload: e.target.value });
+              return formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: e.target.value });
             }}
           />
         </div>
@@ -164,13 +164,13 @@ const DataProvidersList = ({ dataflowId }) => {
 
       <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
         <Column body={providerAccountInputColumnTemplate} header="Data provider account" />
-        <Column body={nameDropdownColumnTemplate} header="Data Provider" />
+        <Column body={dropdownColumnTemplate} header="Data Provider" />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
       <ConfirmDialog
         onConfirm={() =>
           formDispatcher({
-            type: 'DELETE_DATA_PROVIDER',
+            type: 'DELETE_REPRESENTATIVE',
             payload: { dataProviderId: formState.representativeIdToDelete }
           })
         }
