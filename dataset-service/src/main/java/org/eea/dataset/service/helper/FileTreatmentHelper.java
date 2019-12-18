@@ -125,8 +125,8 @@ public class FileTreatmentHelper {
   private void releaseSuccessEvents(String user, Long datasetId, String tableSchemaId,
       String fileName) {
     EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_SCHEMA_COMPLETED_EVENT
-            : EventType.LOAD_DATA_COMPLETED_EVENT;
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_DATA_COMPLETED_EVENT
+            : EventType.LOAD_SCHEMA_COMPLETED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
@@ -150,8 +150,8 @@ public class FileTreatmentHelper {
   private void releaseFailEvents(String user, Long datasetId, String tableSchemaId, String fileName,
       String error) {
     EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_SCHEMA_FAILED_EVENT
-            : EventType.LOAD_DATA_FAILED_EVENT;
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_DATA_FAILED_EVENT
+            : EventType.LOAD_SCHEMA_FAILED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
