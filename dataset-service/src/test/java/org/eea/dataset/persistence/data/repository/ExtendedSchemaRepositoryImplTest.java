@@ -61,11 +61,11 @@ public class ExtendedSchemaRepositoryImplTest {
 
   /** The field schema. */
   @Mock
-  private FieldSchema fieldSchema;
+  private Document fieldSchema;
 
   /** The table schema. */
   @Mock
-  private TableSchema tableSchema;
+  private Document tableSchema;
 
   /** The find. */
   @Mock
@@ -152,7 +152,6 @@ public class ExtendedSchemaRepositoryImplTest {
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
-    Mockito.when(fieldSchema.toJSON()).thenReturn("{\"_id\":\"sampleId\"}");
     Mockito.when(
         mongoCollection.updateMany(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
@@ -213,7 +212,6 @@ public class ExtendedSchemaRepositoryImplTest {
     Mockito.when(
         mongoCollection.updateOne(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Mockito.when(tableSchema.toJSON()).thenReturn("{\"key\":\"value\"}");
     Assert.assertEquals(UpdateResult.acknowledged(1L, 1L, null),
         extendedSchemaRepositoryImpl.updateTableSchema("5dd285cde8fd9d1ea8c42b1b", tableSchema));
   }
@@ -229,7 +227,6 @@ public class ExtendedSchemaRepositoryImplTest {
     Mockito.when(
         mongoCollection.updateOne(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenThrow(IllegalArgumentException.class);
-    Mockito.when(tableSchema.toJSON()).thenReturn("{\"key\":\"value\"}");
     expectedEx.expect(EEAException.class);
     expectedEx.expectCause(IsInstanceOf.<Throwable>instanceOf(IllegalArgumentException.class));
     extendedSchemaRepositoryImpl.updateTableSchema("5dd285cde8fd9d1ea8c42b1b", tableSchema);

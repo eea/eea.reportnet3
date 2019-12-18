@@ -44,18 +44,6 @@ public class TableSchema {
   private List<RuleTable> ruleTable;
 
   /**
-   * To JSON.
-   *
-   * @return the string
-   */
-  public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idTableSchema + "\"}"
-        + (description != null ? (",\"description\":\"" + description + "\"") : "")
-        + (nameTableSchema != null ? (",\"nameTableSchema\":\"" + nameTableSchema + "\"") : "")
-        + (recordSchema != null ? (",\"recordSchema\":" + recordSchema.toJSON()) : "") + "}";
-  }
-
-  /**
    * Hash code.
    *
    * @return the int
