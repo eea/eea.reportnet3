@@ -14,8 +14,8 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 const UserCard = React.memo(() => {
-  const user = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
+  const userContext = useContext(UserContext);
   return (
     <div id="userProfile" className={styles.userProfileCard}>
       <div className={styles.userProfile}>
@@ -27,7 +27,7 @@ const UserCard = React.memo(() => {
           }}>
           <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>
-            {!isUndefined(user.preferredUsername) ? user.preferredUsername : user.name}
+            {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
           </h5>
         </a>
         <a
@@ -35,6 +35,7 @@ const UserCard = React.memo(() => {
           title="logout"
           onClick={async e => {
             e.preventDefault();
+            userContext.socket.disconnect(() => {});
             try {
               await UserService.logout();
             } catch (error) {
@@ -42,7 +43,7 @@ const UserCard = React.memo(() => {
                 type: 'USER_LOGOUT_ERROR'
               });
             } finally {
-              user.onLogout();
+              userContext.onLogout();
             }
           }}>
           <Icon icon="logout" />
