@@ -1,5 +1,6 @@
 {   
-    "all": "/dataProvider/{:dataflowId}",
+    "allDataProviders": "/dataProvider/datafolow/{:dataflowId}",
+    "allRepresentatives": "/dataProvider/datafolow/{:dataflowId}",
     "create": "/dataProvider?dataflowId={:dataflowId}",
     "deleteById":"/dataProvider/{:dataProviderId}",
     "update":"/dataProvider"

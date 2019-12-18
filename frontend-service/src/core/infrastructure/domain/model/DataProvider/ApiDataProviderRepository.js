@@ -1,7 +1,7 @@
 import { apiDataProvider } from 'core/infrastructure/api/domain/model/DataProvider';
 import { DataProvider } from 'core/domain/model/DataProvider/DataProvider';
 
-const all = async dataflowId => {
+const allRepresentatives = async dataflowId => {
   const dataProvidersDTO = await apiDataProvider.all(dataflowId);
 
   const dataProvidersList = dataProvidersDTO.dataProviders.map(
@@ -15,8 +15,8 @@ const all = async dataflowId => {
   return dataToConsume;
 };
 
-const allRepresentativesOf = async type => {
-  const representativesDTO = await apiDataProvider.allRepresentativesOf(type);
+const allDataProviders = async type => {
+  const representativesDTO = await apiDataProvider.allDataProviders(type);
   return representativesDTO;
 };
 
@@ -34,8 +34,8 @@ const update = async (dataflowId, dataProviderId, dataProviderEmail, dataProvide
 };
 
 export const ApiDataProviderRepository = {
-  all,
-  allRepresentativesOf,
+  allRepresentatives,
+  allDataProviders,
   add,
   deleteById,
   update

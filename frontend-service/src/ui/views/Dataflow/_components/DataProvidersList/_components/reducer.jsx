@@ -36,7 +36,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_TYPE':
-      // const dataResponse = await DataProviderService.allRepresentativesOf(payload.type);
+      // const dataResponse = await DataProviderService.allDataProviders(payload.type);
       const dataResponse = [
         { dataProviderId: '', label: 'Select...' },
         { dataProviderId: 1, label: 'Spain' },
@@ -76,6 +76,14 @@ export const reducer = (state, { type, payload }) => {
         selectedRepresentativeType: payload.representativesOf
       };
 
+    case 'UPDATE_EMAIL':
+      console.log('payload', payload);
+      console.log('updatedList', state.dataProviders);
+
+      //api call to update providerAccount
+
+      return state;
+
     case 'ON_EMAIL_CHANGE':
       console.log('payload', payload);
       updatedList = state.dataProviders.map(dataProvider => {
@@ -89,13 +97,6 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         dataProviders: updatedList
       };
-    case 'UPDATE_EMAIL':
-      console.log('payload', payload);
-      console.log('updatedList', state.dataProviders);
-
-      //api call to update providerAccount
-
-      return state;
 
     case 'ON_PROVIDER_CHANGE':
       console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
