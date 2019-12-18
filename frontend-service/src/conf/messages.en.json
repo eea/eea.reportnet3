@@ -266,6 +266,25 @@
 		"warning": "Warning",
 		"webLinks": "Web links",
 		"webForm": "Webform",
-		"yes": "Yes"
+		"yes": "Yes",
+		"deleteTableCompletedEvent":"Table delete success at <a href='{:navigateTo}'>dataset</a>",
+		"deleteTableSchemaCompletedEvent":"Table schema delete success",
+		"documentDeleteCompletedEvent":"Document delete success",
+		"documentDeleteFailedEvent":"Document delete error",
+		"documentUploadCompletedEvent":"Document upload success",
+		"documentUploadFailedEvent":"Document upload error",
+		"loadDataCompletedEvent":"Load data success",
+		"loadDataFailedEvent":"Load data error",
+		"loadSchemaCompletedEvent":"Load schema completed success",
+		"loadSchemaFailedEvent":"Load schema error",
+		"restoreDatasetSnapshotCompletedEvent":"Restore dataset snapshot success",
+		"restoreDatasetSnapshotFailedEvent":"Restore dataset snapshot error",
+		"restoreDatasetschemaSnapshotCompletedEvent":"Restore dataset schema success",
+		"restoreDatasetschemaSnapshotFailedEvent":"Restore dataset schema error",
+		"validationFinishedEvent":"Validaton finished"
+
+
+
+
 	}
 }
