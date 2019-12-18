@@ -7,8 +7,11 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -62,7 +65,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -82,6 +87,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
 
 
+
+  /**
+   * The dataflow controller zuul.
+   */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Creates the data schema.
@@ -159,6 +170,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset schema id
    */
   @Override
@@ -176,6 +188,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema with no rules by dataset id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -195,6 +208,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException
    */
   @Override
@@ -210,20 +224,33 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    // delete the schema snapshots too
+    // Check if the dataflow its on the correct state to allow delete design datasets
     try {
-      datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+
+      if (TypeStatusEnum.DESIGN == dataflow.getStatus()) {
+        // delete the schema snapshots too
+        datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+
+        // delete the metabase
+        dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+        datasetMetabaseService.deleteDesignDataset(datasetId);
+        // delete the schema
+        recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+
+        // delete the group in keycloak
+        dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
+            ResourceGroupEnum.DATASCHEMA_PROVIDER);
+
+      } else {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            EEAErrorMessage.NOT_ENOUGH_PERMISSION);
+      }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
 
-
-    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-    datasetMetabaseService.deleteDesignDataset(datasetId);
-    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-
-    dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
-        ResourceGroupEnum.DATASCHEMA_PROVIDER);
 
   }
 
@@ -232,6 +259,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   *
    * @return the table VO
    */
   @Override
@@ -323,6 +351,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the string
    */
   @Override
@@ -417,6 +446,29 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           dataschemaService.orderFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
               orderVO.getId(), orderVO.getPosition()))) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+          e);
+    }
+  }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PutMapping("/{datasetId}/datasetSchema")
+  public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("description") String description) {
+    try {
+      if (!dataschemaService.updateDatasetSchemaDescription(
+          dataschemaService.getDatasetSchemaId(datasetId), description)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -59,6 +60,7 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @CacheEvict(value = {"cacheStatistics_" + "#datasetId"})
   public void validateDataSetData(@PathVariable("id") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

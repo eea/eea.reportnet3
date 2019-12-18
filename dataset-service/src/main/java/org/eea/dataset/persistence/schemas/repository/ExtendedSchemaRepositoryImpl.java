@@ -84,6 +84,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @return the update result
+   * @throws EEAException the EEA exception
    */
   @Override
   public UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
@@ -111,17 +112,17 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @throws EEAException the EEA exception
    */
   @Override
-  public UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
+  public UpdateResult updateFieldSchema(String datasetSchemaId, Document fieldSchema)
       throws EEAException {
     try {
       return mongoDatabase.getCollection("DataSetSchema").updateMany(
           new Document("_id", new ObjectId(datasetSchemaId))
-              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.getIdFieldSchema()),
+              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.get("_id")),
           new Document("$set",
               new Document("tableSchemas.$.recordSchema.fieldSchemas.$[fieldSchemaId]",
-                  Document.parse(fieldSchema.toJSON()))),
+                  fieldSchema)),
           new UpdateOptions().arrayFilters(
-              Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+              Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.get("_id")))));
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("error updating field: ", e);
       throw new EEAException(e);
@@ -132,7 +133,6 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * Creates the field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaId the table schema id
    * @param fieldSchema the field schema
    * @return the update result
    * @throws EEAException the EEA exception
@@ -161,16 +161,15 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @throws EEAException the EEA exception
    */
   @Override
-  public UpdateResult updateTableSchema(String datasetSchemaId, TableSchema tableSchema)
+  public UpdateResult updateTableSchema(String datasetSchemaId, Document tableSchema)
       throws EEAException {
     try {
       return mongoDatabase.getCollection("DataSetSchema").updateOne(
           new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
-              tableSchema.getIdTableSchema()),
-          new Document("$set",
-              new Document("tableSchemas.$[tableSchemaId]", Document.parse(tableSchema.toJSON()))),
+              tableSchema.get("_id")),
+          new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
           new UpdateOptions().arrayFilters(
-              Arrays.asList(new Document("tableSchemaId._id", tableSchema.getIdTableSchema()))));
+              Arrays.asList(new Document("tableSchemaId._id", tableSchema.get("_id")))));
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("error updating table: ", e);
       throw new EEAException(e);
@@ -181,8 +180,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * Insert table in position.
    *
    * @param idDatasetSchema the id dataset schema
-   * @param classToEntity the class to entity
-   * @param newPosition the new position
+   * @param tableSchema the table schema
+   * @param position the position
    * @return the update result
    * @throws EEAException the EEA exception
    */
@@ -291,5 +290,19 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     }
 
     return null;
+  }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the update result
+   */
+  @Override
+  public UpdateResult updateDatasetSchemaDescription(String datasetSchemaId, String description) {
+    return mongoDatabase.getCollection("DataSetSchema").updateOne(
+        new Document("_id", new ObjectId(datasetSchemaId)),
+        new Document("$set", new Document("description", description)));
   }
 }

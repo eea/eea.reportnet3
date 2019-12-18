@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
 /**
  * The Class FieldSchemaVO.
  */
@@ -19,6 +18,9 @@ public class FieldSchemaVO {
 
   /** The id. */
   private String id;
+
+  /** The description. */
+  private String description;
 
   /** The id record. */
   private String idRecord;
@@ -39,7 +41,7 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, idRecord, name, ruleField, type);
+    return Objects.hash(id, description, idRecord, name, ruleField, type);
   }
 
   /**
@@ -58,10 +60,7 @@ public class FieldSchemaVO {
     }
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
-        && Objects.equals(name, other.name) && Objects.equals(ruleField, other.ruleField)
-        && Objects.equals(type, other.type);
+        && Objects.equals(description, other.description) && Objects.equals(name, other.name)
+        && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type);
   }
-
-
-
 }

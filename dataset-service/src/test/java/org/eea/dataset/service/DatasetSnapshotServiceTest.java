@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,12 +107,12 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DatasetSchemaService schemaService;
 
-
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -277,6 +278,19 @@ public class DatasetSnapshotServiceTest {
     datasetSnapshotService.deleteAllSchemaSnapshots(1L);
     Mockito.verify(snapshotSchemaRepository, times(1))
         .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
+  }
+
+
+  @Test
+  public void testDeleteAllSnapshots() throws Exception {
+
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    snapshots.add(snap);
+    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
+    datasetSnapshotService.deleteAllSnapshots(1L);
+    Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
   }
 
 

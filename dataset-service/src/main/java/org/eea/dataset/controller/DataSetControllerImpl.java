@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -12,6 +15,9 @@ import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -33,7 +39,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,6 +79,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The dataschema service. */
+  @Autowired
+  private DatasetSchemaService dataschemaService;
+
   /**
    * The file treatment helper.
    */
@@ -93,9 +102,30 @@ public class DataSetControllerImpl implements DatasetController {
   private DeleteHelper deleteHelper;
 
 
+  /** The data set schema controller zuul. */
+  @Autowired
+  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+
   /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
+  /** The record store controller zull. */
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
+
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
+
+  /** The resource management controller zull. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZull;
 
   /**
    * Gets the data tables values.
@@ -197,8 +227,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -411,25 +440,29 @@ public class DataSetControllerImpl implements DatasetController {
   /**
    * Delete import table.
    *
-   * @param dataSetId the data set id
-   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
    */
+  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
-  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
-      @PathVariable("idTableSchema") final String idTableSchema) {
-    if (dataSetId == null || dataSetId < 1) {
+  public void deleteImportTable(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
+      @LockCriteria(
+          name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+    if (datasetId == null || datasetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (idTableSchema == null) {
+    } else if (tableSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    LOG.info("Executing delete table value with id {} from dataset {}", idTableSchema, dataSetId);
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
-      deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
+      // This method will release the lock
+      deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -444,6 +477,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
+   *
    * @return the response entity
    */
   @Override
@@ -522,5 +556,4 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
-
 }

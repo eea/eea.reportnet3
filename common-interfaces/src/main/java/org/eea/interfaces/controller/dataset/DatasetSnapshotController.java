@@ -123,7 +123,7 @@ public interface DatasetSnapshotController {
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
-   * @throws Exception
+   * @throws Exception the exception
    */
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
   void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,

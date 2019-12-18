@@ -44,6 +44,7 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -576,7 +577,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .findAny().orElse(null);
   }
 
-
   /**
    * Replace schema.
    *
@@ -593,15 +593,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L,
-        TypeDatasetEnum.DESIGN);
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+        (String) ThreadPropertiesManager.getVariable("user"));
   }
 
   /**
    * Creates the table schema.
    *
    * @param id the id
-   * @param tableSchema the table schema
+   * @param tableSchemaVO the table schema VO
    * @param datasetId the dataset id
    * @return the table schema VO
    */
@@ -627,22 +627,37 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Update table schema.
    *
-   * @param datasetSchemaid the dataset schemaid
+   * @param datasetSchemaId the dataset schemaid
    * @param tableSchemaVO the table schema VO
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchemaVO)
+  public void updateTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO)
       throws EEAException {
     try {
-      if (schemasRepository
-          .updateTableSchema(datasetSchemaid, tableSchemaMapper.classToEntity(tableSchemaVO))
-          .getModifiedCount() == 0) {
-        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      // Recuperar el TableSchema de MongoDB
+      Document tableSchema =
+          schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
+
+      if (tableSchema != null) {
+        // Modificarlo en función de lo que contiene el TableSchemaVO recibido
+        if (tableSchemaVO.getDescription() != null) {
+          tableSchema.put("description", tableSchemaVO.getDescription());
+        }
+        if (tableSchemaVO.getNameTableSchema() != null) {
+          tableSchema.put("nameTableSchema", tableSchemaVO.getNameTableSchema());
+        }
+
+        // Guardar el TableSchema modificado en MongoDB
+        if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
+            .getModifiedCount() == 1) {
+          return;
+        }
       }
+      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      throw new EEAException(e);
     }
   }
 
@@ -713,18 +728,45 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return the fieldSchema type if the operation worked, null if not
+   * @return the string
    * @throws EEAException the EEA exception
    */
   @Override
   public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
+    boolean typeModified = false;
     try {
-      return (schemasRepository
-          .updateFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
-          .getModifiedCount() == 1) ? fieldSchemaVO.getType().getValue() : null;
+      // Recuperar el FieldSchema de MongoDB
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+
+      if (fieldSchema != null) {
+        // Modificarlo en función de lo que contiene el FieldSchemaVO recibido
+        if (fieldSchemaVO.getType() != null
+            && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
+                .equals(fieldSchemaVO.getType().getValue())) {
+          typeModified = true;
+        }
+        if (fieldSchemaVO.getDescription() != null) {
+          fieldSchema.put("description", fieldSchemaVO.getDescription());
+        }
+        if (fieldSchemaVO.getName() != null) {
+          fieldSchema.put("nameTableSchema", fieldSchemaVO.getName());
+        }
+
+        // Guardar el FieldSchema modificado en MongoDB
+        if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
+            .getModifiedCount() == 1) {
+          if (typeModified) {
+            return fieldSchemaVO.getType().getValue();
+          }
+          return null;
+        }
+      }
+      LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      throw new EEAException(e);
     }
   }
 
@@ -747,7 +789,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Order field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchemaId the field schema id
    * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception
@@ -762,5 +804,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           .getModifiedCount() == 1;
     }
     return false;
+  }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the boolean
+   */
+  @Override
+  public Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description) {
+    return schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description)
+        .getModifiedCount() == 1;
   }
 }

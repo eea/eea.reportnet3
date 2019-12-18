@@ -1,6 +1,5 @@
 package org.eea.dataset.persistence.schemas.domain;
 
-
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
@@ -22,11 +21,14 @@ import lombok.ToString;
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
 
-
   /** The id. */
   @Id
   @Field(value = "_id")
   private ObjectId idDataSetSchema;
+
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The idDataFlow. */
   @Field(value = "idDataFlow")
@@ -47,7 +49,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, ruleDataSet, tableSchemas);
+    return Objects.hash(idDataFlow, description, idDataSetSchema, ruleDataSet, tableSchemas);
   }
 
   /**
@@ -66,10 +68,9 @@ public class DataSetSchema {
     }
     DataSetSchema other = (DataSetSchema) obj;
     return Objects.equals(idDataFlow, other.idDataFlow)
+        && Objects.equals(description, other.description)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(ruleDataSet, other.ruleDataSet)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }
-
-
 }

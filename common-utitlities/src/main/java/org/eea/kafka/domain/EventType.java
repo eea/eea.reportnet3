@@ -35,6 +35,16 @@ public enum EventType {
   LOAD_DATA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_data_failed_key", true),
 
   /**
+   * The load schema completed event.
+   */
+  LOAD_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_schema_completed_key", true),
+
+  /**
+   * The load schema failed event.
+   */
+  LOAD_SCHEMA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_schema_failed_key", true),
+
+  /**
    * The load record completed event.
    */
   RECORD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_record_completed_key", true),
@@ -50,9 +60,15 @@ public enum EventType {
   RECORD_DELETED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key", true),
 
   /**
-   * The deleted table.
+   * The delete table completed event.
    */
-  DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table", true),
+  DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+
+  /**
+   * The delete table schema completed event.
+   */
+  DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",
+      true),
 
   /**
    * The field updated completed event.
@@ -62,7 +78,26 @@ public enum EventType {
   /**
    * The snapshot restored event.
    */
-  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key", true),
+  RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore dataset snapshot failed event.
+   */
+  RESTORE_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_failed_key", true),
+
+  /**
+   * The restore datasetschema snapshot completed event.
+   */
+  RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "datasetschema_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore datasetschema snapshot failed event.
+   */
+  RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "datasetchema_snapshot_restored_failed_key", true),
 
   /**
    * The command execute validation.
@@ -138,6 +173,26 @@ public enum EventType {
    * The unlock entity.
    */
   UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true),
+
+  /**
+   * The document upload completed event.
+   */
+  DOCUMENT_UPLOAD_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_upload_completed_event", true),
+
+  /**
+   * The document upload failed event.
+   */
+  DOCUMENT_UPLOAD_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_upload_failed_event", true),
+
+  /**
+   * The document delete completed event.
+   */
+  DOCUMENT_DELETE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_delete_completed_event", true),
+
+  /**
+   * The document delete failed event.
+   */
+  DOCUMENT_DELETE_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_delete_failed_event", true),
 
   /** The command execute new design field propagation. */
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",

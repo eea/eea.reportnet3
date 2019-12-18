@@ -17,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,7 @@ public class DocumentServiceImplTest {
    */
   @Before
   public void initMocks() throws RepositoryException {
+    ThreadPropertiesManager.setVariable("user", "user");
     fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     documentVO = new DocumentVO();
     MockitoAnnotations.initMocks(this);

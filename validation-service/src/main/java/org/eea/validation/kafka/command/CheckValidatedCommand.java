@@ -19,9 +19,8 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
   @Autowired
   private ValidationHelper validationHelper;
 
-
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
    * @throws EEAException the EEA exception

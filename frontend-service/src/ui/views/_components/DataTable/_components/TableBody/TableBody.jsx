@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { BodyRow } from './_components/BodyRow';
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 export class TableBody extends Component {
   constructor(props) {

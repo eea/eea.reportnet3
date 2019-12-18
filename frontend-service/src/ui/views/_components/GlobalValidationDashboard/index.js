@@ -1,1 +1,0 @@
-export { GlobalValidationDashboard } from './GlobalValidationDashboard';
