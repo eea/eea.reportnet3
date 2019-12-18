@@ -52,18 +52,6 @@ public class FieldSchema {
   private List<RuleField> ruleField;
 
   /**
-   * To JSON.
-   *
-   * @return the string
-   */
-  public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idFieldSchema + "\"}"
-        + (description != null ? (",\"description\":\"" + description + "\"") : "")
-        + "\", \"idRecord\": {\"$oid\":\"" + idRecord + "\"}, \"typeData\": \"" + type.getValue()
-        + "\", \"headerName\": \"" + headerName + "\", \"rules\": []}";
-  }
-
-  /**
    * Hash code.
    *
    * @return the int

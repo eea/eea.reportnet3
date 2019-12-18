@@ -50,8 +50,7 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
-      throws EEAException;
+  UpdateResult updateFieldSchema(String datasetSchemaId, Document fieldSchema) throws EEAException;
 
   /**
    * Creates the field schema.
@@ -72,8 +71,7 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult updateTableSchema(String datasetSchemaId, TableSchema tableSchema)
-      throws EEAException;
+  UpdateResult updateTableSchema(String datasetSchemaId, Document tableSchema) throws EEAException;
 
   /**
    * Insert field in position.
