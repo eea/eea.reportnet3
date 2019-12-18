@@ -97,16 +97,16 @@ export const Dataflows = withRouter(({ match, history }) => {
   };
 
   const onDeleteDataflow = async () => {
+    setIsDeleteDialogVisible(false);
     try {
-      const status = await DataflowService.deleteById(dataflowState.selectedDataflowId);
-      if (status >= 200 && status <= 299) {
+      const response = await DataflowService.deleteById(dataflowState.selectedDataflowId);
+      if (response.status >= 200 && response.status <= 299) {
         dataFetch();
-        setIsDeleteDialogVisible(false);
       } else {
-        console.log('Delete dataflow error with this status: ', status);
+        console.log('Delete dataflow error with this status: ', response);
       }
     } catch (error) {
-      console.log('error', error);
+      console.log('Error: ', error);
     }
   };
 
