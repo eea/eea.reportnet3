@@ -110,7 +110,6 @@ const DataViewer = withRouter(
     let divRef = useRef();
 
     useEffect(() => {
-      console.log({ tableSchemaColumns });
       let colOptions = [];
       let dropdownFilter = [];
       for (let colSchema of colsSchema) {
@@ -583,9 +582,6 @@ const DataViewer = withRouter(
     );
 
     const cellDataEditor = (cells, record) => {
-      console.log({ cells, record });
-      // let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData;
-      // console.log(field.type);
       return (
         <FieldEditor
           cells={cells}

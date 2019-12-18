@@ -41,7 +41,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
     ) {
       setFields(table.records[0].fields);
     }
-    console.log({ table });
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description);
     }
@@ -241,6 +240,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
               checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
               datasetId={datasetId}
               fieldId={field.fieldId}
+              fieldDescription={field.description}
               fieldName={field.name}
               fieldType={field.type}
               fieldValue={field.value}
@@ -286,9 +286,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, tableDescript
 
   const updateTableDescriptionDesign = async () => {
     try {
-      const tableUpdated = await DatasetService.updateTableDesign(
+      const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         table.tableSchemaId,
-        table.header,
         tableDescriptionValue,
         datasetId
       );

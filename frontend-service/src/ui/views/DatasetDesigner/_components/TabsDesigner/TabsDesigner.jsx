@@ -44,7 +44,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
 
   useEffect(() => {
     if (!isUndefined(datasetSchema)) {
-      console.log(datasetSchema.tables);
       setTabs(datasetSchema.tables);
     }
   }, [datasetSchema]);
@@ -137,7 +136,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
         if (tabs[tabIndex].newTab) {
           addTable(header, tabIndex);
         } else {
-          updateTableName(tabs[tabIndex].tableSchemaId, header, tabs[tabIndex].tableSchemaDescription);
+          updateTableName(tabs[tabIndex].tableSchemaId, header);
         }
       }
     }
@@ -365,14 +364,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     }
   };
 
-  const updateTableName = async (tableSchemaId, tableSchemaName, tableSchemaDescription) => {
-    console.log({ tableSchemaId, tableSchemaName, tableSchemaDescription, datasetId });
-    const tableUpdated = await DatasetService.updateTableDesign(
-      tableSchemaId,
-      tableSchemaName,
-      tableSchemaDescription,
-      datasetId
-    );
+  const updateTableName = async (tableSchemaId, tableSchemaName) => {
+    const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
     if (tableUpdated) {
       const inmTabs = [...tabs];
       inmTabs[getIndexByTableSchemaId(tableSchemaId, inmTabs)].header = tableSchemaName;

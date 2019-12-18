@@ -61,7 +61,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-        console.log({ dataset });
         setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
       };
@@ -122,9 +121,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   };
 
   const onBlurDescription = description => {
-    console.log({ datasetDescription });
     if (description !== initialDatasetDescription) {
-      console.log({ description });
       onUpdateDescription(description);
     }
   };

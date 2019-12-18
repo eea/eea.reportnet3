@@ -479,7 +479,7 @@ export const apiDataset = {
     });
     return response.status;
   },
-  updateTableDesign: async (tableSchemaId, tableSchemaName, tableSchemaDescription, datasetId) => {
+  updateTableDescriptionDesign: async (tableSchemaId, tableSchemaDescription, datasetId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -490,8 +490,32 @@ export const apiDataset = {
             }),
         data: {
           idTableSchema: tableSchemaId,
-          nameTableSchema: tableSchemaName,
           description: tableSchemaDescription
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset design name: ${error}`);
+      return false;
+    }
+  },
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/tableSchema`
+          : getUrl(DatasetConfig.updateTableDesign, {
+              datasetId
+            }),
+        data: {
+          idTableSchema: tableSchemaId,
+          nameTableSchema: tableSchemaName
         },
         queryString: {},
         headers: {

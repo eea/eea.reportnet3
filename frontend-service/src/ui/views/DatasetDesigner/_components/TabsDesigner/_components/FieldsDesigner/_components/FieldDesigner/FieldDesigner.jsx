@@ -140,7 +140,7 @@ export const FieldDesigner = ({
       }
     } else {
       if (type !== '' && type !== fieldValue) {
-        fieldUpdate(recordId, fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+        fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
       } else {
         if (type !== '') {
           onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
@@ -165,7 +165,7 @@ export const FieldDesigner = ({
           }
         } else {
           if (description !== initialDescriptionValue) {
-            fieldUpdate(recordId, fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, description);
+            fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, description);
           }
         }
       }
@@ -200,7 +200,7 @@ export const FieldDesigner = ({
           } else {
             if (name !== initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate(recordId, fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
               } else {
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
@@ -216,7 +216,6 @@ export const FieldDesigner = ({
   };
 
   const onFieldAdd = async (recordId, type, value, description) => {
-    console.log({ recordId, type, value, description });
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
@@ -345,11 +344,9 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (recordId, fieldSchemaId, type, value, description) => {
+  const fieldUpdate = async (fieldSchemaId, type, value, description) => {
     try {
-      console.log({ recordId, fieldSchemaId, type, value, description });
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
-        recordId,
         fieldSchemaId,
         name: value,
         type: type,

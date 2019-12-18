@@ -288,7 +288,11 @@ const schemaById = async datasetId => {
                   DataTableFieldDTO.id,
                   DataTableFieldDTO.idRecord,
                   DataTableFieldDTO.name,
-                  DataTableFieldDTO.type
+                  DataTableFieldDTO.type,
+                  null,
+                  null,
+                  null,
+                  DataTableFieldDTO.description
                 );
               })
             : null;
@@ -296,7 +300,6 @@ const schemaById = async datasetId => {
         })
       : null;
     const datasetTable = new DatasetTable();
-    console.log({ datasetTableDTO });
     datasetTable.tableSchemaId = datasetTableDTO.idTableSchema;
     datasetTable.tableSchemaDescription = datasetTableDTO.description;
     datasetTable.tableSchemaName = datasetTableDTO.nameTableSchema;
@@ -479,7 +482,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   const datasetTableFieldDesign = new DatasetTableField();
 
   datasetTableFieldDesign.id = record.fieldSchemaId;
-  datasetTableFieldDesign.idRecord = record.recordId;
+  // datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
@@ -517,13 +520,17 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
   return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 };
 
-const updateTableDesign = async (tableSchemaId, tableSchemaName, tableSchemaDescription, datasetId) => {
-  const tableSchemaUpdated = await apiDataset.updateTableDesign(
+const updateTableDescriptionDesign = async (tableSchemaId, tableSchemaDescription, datasetId) => {
+  const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaId,
-    tableSchemaName,
     tableSchemaDescription,
     datasetId
   );
+  return tableSchemaUpdated;
+};
+
+const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
+  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
   return tableSchemaUpdated;
 };
 
@@ -567,7 +574,8 @@ export const ApiDatasetRepository = {
   updateRecordsById,
   updateDatasetDescriptionDesign,
   updateSchemaNameById,
-  updateTableDesign,
+  updateTableDescriptionDesign,
+  updateTableNameDesign,
   validateDataById,
   webFormDataById
 };

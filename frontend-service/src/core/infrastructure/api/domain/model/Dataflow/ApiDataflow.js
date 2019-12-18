@@ -56,7 +56,6 @@ export const apiDataflow = {
     return response.data;
   },
   create: async (name, description) => {
-    console.log(name, description);
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON ? '/dataflow' : getUrl(DataflowConfig.createDataflow),

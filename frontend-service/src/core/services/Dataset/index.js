@@ -26,7 +26,8 @@ import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
 import { UpdateSchemaName } from './UpdateSchemaName';
-import { UpdateTableDesign } from './UpdateTableDesign';
+import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
+import { UpdateTableNameDesign } from './UpdateTableNameDesign';
 import { ValidateData } from './ValidateData';
 
 export const DatasetService = {
@@ -55,7 +56,8 @@ export const DatasetService = {
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
-  updateTableDesign: UpdateTableDesign({ datasetRepository }),
+  updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
+  updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),
   validateDataById: ValidateData({ datasetRepository }),
   webFormDataById: GetWebFormData({ datasetRepository })
 };

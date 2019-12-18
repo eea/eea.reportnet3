@@ -49,8 +49,7 @@ export class Dropdown extends Component {
     onChange: null,
     onMouseDown: null,
     onContextMenu: null,
-    onEmptyList: null,
-    required: false
+    onEmptyList: null
   };
 
   static propTypes = {
@@ -87,8 +86,7 @@ export class Dropdown extends Component {
     onChange: PropTypes.func,
     onMouseDown: PropTypes.func,
     onContextMenu: PropTypes.func,
-    onEmptyList: PropTypes.func,
-    required: PropTypes.bool
+    onEmptyList: PropTypes.func
   };
 
   constructor(props) {
