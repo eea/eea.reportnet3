@@ -78,7 +78,6 @@ import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -237,10 +236,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
-
-  /** The field batch size. */
-  @Value("${dataset.propagation.fieldBatchSize}")
-  private int fieldBatchSize;
 
 
 
@@ -1385,28 +1380,10 @@ public class DatasetServiceImpl implements DatasetService {
         Optional<TableValue> table = dataset.get().getTableValues().stream()
             .filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
 
-
         if (table.isPresent()) {
-          // List<FieldValue> fields = new ArrayList<>();
+
           sizeRecords = table.get().getRecords().size();
 
-          /*
-           * Pageable pageable = PageRequest.of(0, 1000); List<RecordValue> recordsPaginated =
-           * recordRepository.findByTableValue_IdTableSchema(idTableSchema, pageable);
-           * 
-           * for (RecordValue r : recordsPaginated) { FieldValue field = new FieldValue();
-           * field.setIdFieldSchema(fieldSchemaVO.getId()); field.setType(fieldSchemaVO.getType());
-           * RecordValue recordAux = new RecordValue(); recordAux.setId(r.getId());
-           * field.setRecord(recordAux);
-           * 
-           * fields.add(field); }
-           */
-
-
-          // fieldRepository.saveAll(fields);
-
-
-          // if (sizeRecords > 1000) {
           Map<String, Object> value = new HashMap<>();
           value.put("dataset_id", datasetId);
           value.put("sizeRecords", sizeRecords);
@@ -1414,7 +1391,6 @@ public class DatasetServiceImpl implements DatasetService {
           value.put("idFieldSchema", fieldSchemaVO.getId());
           value.put("typeField", fieldSchemaVO.getType());
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_NEW_DESIGN_FIELD_PROPAGATION, value);
-          // }
 
         }
       }
@@ -1425,21 +1401,21 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
    * Save new field propagation.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
-   * @param numPag the num pag
+   * @param pageable the pageable
    * @param idFieldSchema the id field schema
    * @param typeField the type field
    */
   @Override
   @Transactional
-  public void saveNewFieldPropagation(Long datasetId, String idTableSchema, Integer numPag,
+  public void saveNewFieldPropagation(Long datasetId, String idTableSchema, Pageable pageable,
       String idFieldSchema, TypeData typeField) {
 
-    Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
     List<RecordValue> recordsPaginated =
         recordRepository.findByTableValue_IdTableSchema(idTableSchema, pageable);
 

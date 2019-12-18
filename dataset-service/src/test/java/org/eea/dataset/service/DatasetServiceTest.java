@@ -1378,4 +1378,12 @@ public class DatasetServiceTest {
     Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
   }
 
+  @Test
+  public void testsaveNewFieldPropagation() {
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    datasetService.saveNewFieldPropagation(1L, "5cf0e9b3b793310e9ceca190", pageable,
+        "5cf0e9b3b793310e9ceca190", TypeData.TEXT);
+  }
+
 }

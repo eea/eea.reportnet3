@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 
@@ -42,6 +45,10 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
+  /** The field batch size. */
+  @Value("${dataset.propagation.fieldBatchSize}")
+  private int fieldBatchSize;
+
 
   /**
    * Gets the event type.
@@ -69,8 +76,9 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
     final String uuid = (String) eeaEventVO.getData().get("uuId");
 
     try {
+      Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       TenantResolver.setTenantName("dataset_" + datasetId);
-      datasetService.saveNewFieldPropagation(datasetId, idTableSchema, numPag, idFieldSchema,
+      datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, idFieldSchema,
           typeField);
 
     } catch (Exception e) {

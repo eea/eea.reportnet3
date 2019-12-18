@@ -332,9 +332,25 @@ public interface DatasetService {
    */
   boolean isReportingDataset(Long datasetId);
 
+  /**
+   * Prepare new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
   void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
       throws EEAException;
 
-  void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Integer numPag,
+  /**
+   * Save new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
       String idFieldSchema, TypeData typeField);
 }
