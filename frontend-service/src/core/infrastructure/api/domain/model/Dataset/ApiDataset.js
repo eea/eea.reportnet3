@@ -2,7 +2,6 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { async } from 'q';
 
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
