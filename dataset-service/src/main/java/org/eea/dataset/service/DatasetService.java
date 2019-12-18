@@ -11,8 +11,10 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
@@ -329,4 +331,26 @@ public interface DatasetService {
    * @return true, if is reporting dataset
    */
   boolean isReportingDataset(Long datasetId);
+
+  /**
+   * Prepare new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
+  void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException;
+
+  /**
+   * Save new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
+      String idFieldSchema, TypeData typeField);
 }

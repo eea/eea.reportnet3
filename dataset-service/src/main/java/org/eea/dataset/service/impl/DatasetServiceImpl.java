@@ -65,11 +65,15 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,6 +231,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private StatisticsRepository statisticsRepository;
+
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
 
   /**
@@ -1301,7 +1311,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteFieldValues(Long datasetId, String fieldSchemaId) {
-    fieldRepository.deleteByIdFieldSchema(fieldSchemaId);
+    fieldRepository.deleteByIdFieldSchemaNative(fieldSchemaId);
   }
 
   /**
@@ -1339,5 +1349,94 @@ public class DatasetServiceImpl implements DatasetService {
   public boolean isReportingDataset(Long datasetId) {
     return reportingDatasetRepository.existsById(datasetId);
   }
+
+
+  /**
+   * Prepare new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void prepareNewFieldPropagation(Long datasetId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException {
+
+    // Find, from the idFieldSchema, the idTableSchema to know the table and the records containing
+    // it to propagate
+    Integer sizeRecords = 0;
+    Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
+    if (dataset.isPresent()) {
+      String idDatasetSchema = dataset.get().getIdDatasetSchema();
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+
+      Optional<TableSchema> tableSchema = schema.getTableSchemas().stream()
+          .filter(t -> t.getRecordSchema().getFieldSchema().stream()
+              .anyMatch(f -> f.getIdFieldSchema().equals(new ObjectId(fieldSchemaVO.getId()))))
+          .findFirst();
+
+      if (tableSchema.isPresent()) {
+        String idTableSchema = tableSchema.get().getIdTableSchema().toString();
+
+        Optional<TableValue> table = dataset.get().getTableValues().stream()
+            .filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
+
+        if (table.isPresent()) {
+
+          sizeRecords = table.get().getRecords().size();
+
+          Map<String, Object> value = new HashMap<>();
+          value.put("dataset_id", datasetId);
+          value.put("sizeRecords", sizeRecords);
+          value.put("idTableSchema", idTableSchema);
+          value.put("idFieldSchema", fieldSchemaVO.getId());
+          value.put("typeField", fieldSchemaVO.getType());
+          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_NEW_DESIGN_FIELD_PROPAGATION, value);
+
+        }
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+  }
+
+
+
+  /**
+   * Save new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  @Override
+  @Transactional
+  public void saveNewFieldPropagation(Long datasetId, String idTableSchema, Pageable pageable,
+      String idFieldSchema, TypeData typeField) {
+
+    List<RecordValue> recordsPaginated =
+        recordRepository.findByTableValue_IdTableSchema(idTableSchema, pageable);
+
+    List<FieldValue> fields = new ArrayList<>();
+    for (RecordValue r : recordsPaginated) {
+      FieldValue field = new FieldValue();
+      field.setIdFieldSchema(idFieldSchema);
+      field.setType(typeField);
+      RecordValue recordAux = new RecordValue();
+      recordAux.setId(r.getId());
+      field.setRecord(recordAux);
+
+      fields.add(field);
+    }
+
+    fieldRepository.saveAll(fields);
+
+  }
+
+
 
 }
