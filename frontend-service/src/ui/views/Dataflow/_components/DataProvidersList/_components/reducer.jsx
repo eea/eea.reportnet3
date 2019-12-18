@@ -16,8 +16,8 @@ export const reducer = (state, { type, payload }) => {
       let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
         let result = true;
 
-        for (let index = 0; index < state.dataProviders.length; index++) {
-          if (state.dataProviders[index].dataProviderId === possibleProvider.dataProviderId) {
+        for (let index = 0; index < state.representatives.length; index++) {
+          if (state.representatives[index].dataProviderId === possibleProvider.dataProviderId) {
             result = false;
           }
         }
@@ -66,19 +66,19 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
-      if (!includes(state.dataProviders, emptyField)) {
-        payload.dataProviders.push(emptyField);
+      if (!includes(state.representatives, emptyField)) {
+        payload.representatives.push(emptyField);
       }
 
       return {
         ...state,
-        dataProviders: payload.dataProviders,
+        representatives: payload.representatives,
         selectedRepresentativeType: payload.representativesOf
       };
 
     case 'UPDATE_EMAIL':
       console.log('payload', payload);
-      console.log('updatedList', state.dataProviders);
+      console.log('updatedList', state.representatives);
 
       //api call to update providerAccount
 
@@ -86,7 +86,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_EMAIL_CHANGE':
       console.log('payload', payload);
-      updatedList = state.dataProviders.map(dataProvider => {
+      updatedList = state.representatives.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
           dataProvider.providerAccount = payload.input;
         }
@@ -95,12 +95,12 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        dataProviders: updatedList
+        representatives: updatedList
       };
 
     case 'ON_PROVIDER_CHANGE':
       console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
-      updatedList = state.dataProviders.map(dataProvider => {
+      updatedList = state.representatives.map(dataProvider => {
         console.log('dataProvider', dataProvider);
         if (dataProvider.representativeId === payload.representativeId) {
           dataProvider.dataProviderId = payload.dataProviderId;
@@ -110,7 +110,7 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        dataProviders: updatedList
+        representatives: updatedList
       };
 
     case 'SELECT_REPRESENTATIVE_TYPE':
