@@ -1363,6 +1363,8 @@ public class DatasetServiceImpl implements DatasetService {
   public void prepareNewFieldPropagation(Long datasetId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
 
+    // Find, from the idFieldSchema, the idTableSchema to know the table and the records containing
+    // it to propagate
     Integer sizeRecords = 0;
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
