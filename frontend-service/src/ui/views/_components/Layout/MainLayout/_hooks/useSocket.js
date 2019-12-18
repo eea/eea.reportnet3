@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { camelCase, isUndefined } from 'lodash';
+import { isUndefined } from 'lodash';
 import { Stomp } from '@stomp/stompjs';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -9,8 +9,8 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 const useSocket = () => {
-  const notificationContext = React.useContext(NotificationContext);
-  const userContext = React.useContext(UserContext);
+  const notificationContext = useContext(NotificationContext);
+  const userContext = useContext(UserContext);
   const socket_url = window.env.WEBSOCKET_URL;
   React.useEffect(() => {
     console.log('userContext.socket', userContext.socket);
