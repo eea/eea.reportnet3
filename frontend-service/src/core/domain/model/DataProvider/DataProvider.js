@@ -1,7 +1,7 @@
 export class DataProvider {
-  constructor(id, email, name) {
-    this.email = email;
-    this.name = name;
-    this.id = id;
+  constructor(id, account, providerId) {
+    this.representativeId = id;
+    this.account = account;
+    this.providerId = providerId;
   }
 }
