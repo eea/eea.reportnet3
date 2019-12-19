@@ -67,8 +67,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       return representativeService.insertRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
-          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
   }
 
@@ -118,8 +118,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND,
-          e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
     return representativeVOs;
   }
