@@ -1,1 +1,0 @@
-export { apiDataProvider } from './ApiDataProvider';

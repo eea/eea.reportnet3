@@ -1,6 +1,6 @@
 import { includes } from 'lodash';
 
-import { DataProviderService } from 'core/services/DataProvider';
+import { RepresentativeService } from 'core/services/Representative';
 
 export const reducer = (state, { type, payload }) => {
   const emptyField = { representativeId: null, dataProviderId: '', providerAccount: '' };
@@ -8,8 +8,8 @@ export const reducer = (state, { type, payload }) => {
   let updatedList = [];
   switch (type) {
     case 'ADD_DATAPROVIDER':
-      // await DataProviderService.add(dataflowId, providerAccount, name);
-      console.log('On add dataProvider', payload.dataflowId, payload.providerAccount);
+      // await RepresentativeService.add(dataflowId, providerAccount, dataProviderId);
+      console.log('On add dataProvider', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       return state;
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
@@ -29,7 +29,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'DELETE_REPRESENTATIVE':
       console.log('Delete REPRESTNTATIVE with representativeId :', state.representativeIdToDelete);
-      /* await DataProviderService.delete(dataProviderId); */
+      /* await RepresentativeService.delete(dataProviderId); */
 
       return {
         ...state,
@@ -39,7 +39,7 @@ export const reducer = (state, { type, payload }) => {
     case 'GET_REPRESENTATIVES_LIST_BY_TYPE':
       console.log('GET_REPRESENTATIVES_LIST_BY_TYPE');
 
-      // const dataResponse = await DataProviderService.allDataProviders(payload.type);
+      // const dataResponse = await RepresentativeService.allDataProviders(payload.type);
       const dataResponse = [
         { dataProviderId: '', label: 'Select...' },
         { dataProviderId: 1, label: 'Spain' },

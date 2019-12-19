@@ -1,4 +1,4 @@
-export class DataProvider {
+export class Representative {
   constructor(id, account, providerId) {
     this.representativeId = id;
     this.account = account;
