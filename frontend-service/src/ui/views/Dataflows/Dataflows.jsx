@@ -23,7 +23,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
-export const Dataflows = withRouter(({ match, history }) => {
+const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -195,3 +195,5 @@ export const Dataflows = withRouter(({ match, history }) => {
     </div>
   );
 });
+
+export { Dataflows };

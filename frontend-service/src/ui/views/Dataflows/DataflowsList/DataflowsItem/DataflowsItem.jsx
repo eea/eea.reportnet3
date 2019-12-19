@@ -16,7 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, selectedDataflowId, type }) => {
+const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, selectedDataflowId, type }) => {
   const resources = useContext(ResourcesContext);
 
   let dataflowTitles = {
@@ -153,3 +153,5 @@ export const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, posit
     </>
   );
 };
+
+export { DataflowsItem };

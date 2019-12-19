@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const NewDatasetSchemaForm = ({
+const NewDatasetSchemaForm = ({
   dataflowId,
   datasetSchemaInfo,
   isFormReset,
@@ -105,3 +105,5 @@ export const NewDatasetSchemaForm = ({
     </Formik>
   );
 };
+
+export { NewDatasetSchemaForm };

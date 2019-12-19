@@ -4,15 +4,7 @@ import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './DataflowsItem';
 
-export const DataflowsList = ({
-  dataFetch,
-  dataflowNewValues,
-  content,
-  description,
-  title,
-  type,
-  selectedDataflowId
-}) => {
+const DataflowsList = ({ dataFetch, dataflowNewValues, content, description, title, type, selectedDataflowId }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
   let counter = 0;
   return (
@@ -37,3 +29,5 @@ export const DataflowsList = ({
     </div>
   );
 };
+
+export { DataflowsList };

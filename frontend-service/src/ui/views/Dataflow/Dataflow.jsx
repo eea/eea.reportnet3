@@ -40,7 +40,7 @@ import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const Dataflow = withRouter(({ history, match }) => {
+const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -815,3 +815,5 @@ export const Dataflow = withRouter(({ history, match }) => {
     </div>
   );
 });
+
+export { Dataflow };

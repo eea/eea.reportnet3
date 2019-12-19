@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowManagementForm = ({
+const DataflowManagementForm = ({
   dataflowId,
   dataflowValues,
   isDialogVisible,
@@ -161,3 +161,5 @@ export const DataflowManagementForm = ({
     </Formik>
   );
 };
+
+export { DataflowManagementForm };
