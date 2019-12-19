@@ -38,6 +38,7 @@ export const WebLinks = ({
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
+      .lowercase()
       .matches(
         /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
         resources.messages['urlError']
@@ -136,7 +137,7 @@ export const WebLinks = ({
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={e => {
+          onClick={_ => {
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
         />
