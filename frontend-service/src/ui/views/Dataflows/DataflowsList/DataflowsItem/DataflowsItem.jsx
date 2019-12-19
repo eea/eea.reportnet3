@@ -1,20 +1,36 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+
+import { isEmpty, isUndefined } from 'lodash';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DataflowsItem.module.scss';
 
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { Link } from 'react-router-dom';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) => {
+const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, selectedDataflowId, type }) => {
   const resources = useContext(ResourcesContext);
+
+  let dataflowTitles = {
+    name: itemContent.name,
+    description: itemContent.description,
+    id: itemContent.id
+  };
+
+  if (!isUndefined(selectedDataflowId)) {
+    if (dataflowTitles.id === selectedDataflowId && !isEmpty(dataflowNewValues)) {
+      dataflowTitles = dataflowNewValues;
+    }
+  }
+
   //position must be removed in def implementation
   const statusArray = ['notStarted', 'delivered', 'drafted'];
   let status = 1;
@@ -36,6 +52,7 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
       console.error('AcceptDataflow error: ', error);
     }
   };
+
   const onReject = async () => {
     try {
       const status = await DataflowService.reject(itemContent.requestId);
@@ -53,11 +70,11 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
     return (
       <div
         className={
-          listType === 'accepted' || listType === 'completed'
+          type === 'accepted' || type === 'completed'
             ? `${styles.container} ${styles.accepted} ${styles[status]}`
             : `${styles.container} ${styles[status]}`
         }>
-        {listType === 'accepted' ? (
+        {type === 'accepted' ? (
           <Link
             className={`${styles.containerLink}`}
             to={getUrl(
@@ -87,9 +104,9 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
       </div>
 
       <div className={styles.text}>
-        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
+        <h3 className={`${styles.title}`}>{dataflowTitles.name}</h3>
 
-        <p>{itemContent.description}</p>
+        <p>{dataflowTitles.description}</p>
       </div>
       <div className={styles.status}>
         <p>
@@ -98,7 +115,7 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
       </div>
 
       <div className={`${styles.toolbar}`}>
-        {listType === 'pending' ? (
+        {type === 'pending' ? (
           <>
             <Button
               layout="simple"
@@ -136,3 +153,5 @@ export const DataflowsItem = ({ itemContent, listType, dataFetch, position }) =>
     </>
   );
 };
+
+export { DataflowsItem };
