@@ -2,18 +2,24 @@ package org.eea.ums.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +50,15 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Autowired
   private BackupManagmentService backupManagmentControlerService;
+
+
+  /** The keycloak connector service. */
+  @Autowired
+  private KeycloakConnectorService keycloakConnectorService;
+
+  /** The user representation mapper. */
+  @Autowired
+  private UserRepresentationMapper userRepresentationMapper;
 
   /**
    * The Constant LOG_ERROR.
@@ -238,5 +253,22 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   }
 
+
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
+  public List<UserRepresentationVO> getUsers() {
+
+    UserRepresentation[] a = keycloakConnectorService.getUsers();
+
+    ArrayList<UserRepresentation> arrayList = new ArrayList<>(Arrays.asList(a));
+
+    return userRepresentationMapper.entityListToClass(arrayList);
+  }
 
 }

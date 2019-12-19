@@ -30,12 +30,6 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
@@ -89,6 +83,10 @@ public class Dataflow {
   @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
   private Set<UserRequest> userRequests;
+
+  /** The dataflow representatives. */
+  @OneToMany(mappedBy = "dataflow")
+  private Set<Representative> representatives;
 
   /**
    * Equals.

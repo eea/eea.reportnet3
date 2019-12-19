@@ -175,8 +175,24 @@ CREATE TABLE public."statistics" (
 	CONSTRAINT statistics_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE public.data_provider (
+	id int8 NOT NULL,
+	"label" varchar(255) NULL,
+	"type" varchar(255) NULL,
+	code varchar NULL,
+	group_id int8 NULL,
+	CONSTRAINT representative_pk PRIMARY KEY (id)
+);
 
-
+CREATE TABLE public.representative (
+	id int8 NOT NULL,
+	data_provider_id int8 NULL,
+	dataflow_id int8 NULL,
+	user_id varchar(255) NULL,
+	user_mail varchar(255) NULL,
+	CONSTRAINT data_provider_pk FOREIGN KEY (data_provider_id) REFERENCES data_provider(id),
+	CONSTRAINT dataflow_id FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
+);
 
 --GRANTS
 
@@ -224,6 +240,10 @@ ALTER TABLE public.snapshot_schema OWNER TO testuser;
 GRANT ALL ON TABLE public.snapshot_schema TO testuser;
 ALTER TABLE public.statistics OWNER TO testuser;
 GRANT ALL ON TABLE public.statistics TO testuser;
+ALTER TABLE public.representative OWNER TO testuser;
+GRANT ALL ON TABLE public.representative TO testuser;
+ALTER TABLE public.data_provider OWNER TO testuser;
+GRANT ALL ON TABLE public.data_provider TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);

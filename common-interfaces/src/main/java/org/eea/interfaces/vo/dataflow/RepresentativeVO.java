@@ -1,0 +1,28 @@
+package org.eea.interfaces.vo.dataflow;
+
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+public class RepresentativeVO implements Serializable {
+
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = -6924509754041958192L;
+
+  /** The id. */
+  private Long id;
+
+  /** The data provider id. */
+  private Long dataProviderId;
+
+  /** The provider account. */
+  private String providerAccount;
+
+  /** The data provider group id. */
+  private Long dataProviderGroupId;
+
+}
