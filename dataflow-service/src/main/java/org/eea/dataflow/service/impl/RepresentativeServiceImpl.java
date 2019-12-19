@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.util.List;
 import javax.transaction.Transactional;
+import org.eea.dataflow.mapper.DataProviderCodeMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
@@ -41,6 +42,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The data provider mapper. */
   @Autowired
   private DataProviderMapper dataProviderMapper;
+
+  /** The data provider code mapper. */
+  @Autowired
+  private DataProviderCodeMapper dataProviderCodeMapper;
 
   /**
    * The Constant LOG.
@@ -130,7 +135,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getAllDataProviderTypes() {
     LOG.info("obtaining the distinct representative types");
-    return dataProviderRepository.findDistinctCode();
+    return dataProviderCodeMapper.entityListToClass(dataProviderRepository.findDistinctCode());
   }
 
   /**

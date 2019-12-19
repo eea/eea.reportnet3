@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.eea.dataflow.mapper.DataProviderCodeMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.Representative;
@@ -45,6 +46,9 @@ public class RepresentativeServiceImplTest {
   /** The data provider mapper. */
   @Mock
   private DataProviderMapper dataProviderMapper;
+
+  @Mock
+  private DataProviderCodeMapper dataProviderCodeMapper;
 
   /** The representative. */
   private Representative representative;
@@ -197,6 +201,7 @@ public class RepresentativeServiceImplTest {
   @Test
   public void getAllDataProviderTypesSuccessTest() throws EEAException {
     when(dataProviderRepository.findDistinctCode()).thenReturn(new ArrayList<>());
+    when(dataProviderCodeMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     assertEquals("error in the message", new ArrayList<>(),
         representativeServiceImpl.getAllDataProviderTypes());
   }

@@ -13,15 +13,15 @@ import lombok.ToString;
 public class UserRepresentationVO {
 
   /** The username. */
-  String username;
+  private String username;
 
   /** The email. */
-  String email;
+  private String email;
 
   /** The first name. */
-  String firstName;
+  private String firstName;
 
   /** The last name. */
-  String lastName;
+  private String lastName;
 
 }

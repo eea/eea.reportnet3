@@ -1,23 +1,22 @@
 package org.eea.interfaces.vo.dataflow;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
- * The Interface DataProviderCodeVO.
+ * The class DataProviderCodeVO.
  */
-public interface DataProviderCodeVO extends Serializable {
+@Getter
+@Setter
+@ToString
+public class DataProviderCodeVO {
 
-  /**
-   * Gets the data provider group id.
-   *
-   * @return the data provider group id
-   */
-  String getDataProviderGroupId();
 
-  /**
-   * Gets the label.
-   *
-   * @return the label
-   */
-  String getLabel();
+  /** The data provider group id. */
+  private String dataProviderGroupId;
+
+
+  /** The label. */
+  private String label;
 }
