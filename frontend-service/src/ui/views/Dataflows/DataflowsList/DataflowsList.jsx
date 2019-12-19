@@ -4,20 +4,30 @@ import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './DataflowsItem';
 
-export const DataflowsList = ({ listTitle, listDescription, listContent, listType, dataFetch }) => {
+const DataflowsList = ({ dataFetch, dataflowNewValues, content, description, title, type, selectedDataflowId }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
   let counter = 0;
   return (
     <div className={styles.wrap}>
-      <h2>{listTitle}</h2>
-      <p>{listDescription}</p>
+      <h2>{title}</h2>
+      <p>{description}</p>
 
-      {listContent.map(item => {
+      {content.map(item => {
         counter += 1;
         return (
-          <DataflowsItem key={item.id} itemContent={item} listType={listType} dataFetch={dataFetch} position={counter} />
+          <DataflowsItem
+            key={item.id}
+            dataFetch={dataFetch}
+            dataflowNewValues={dataflowNewValues}
+            itemContent={item}
+            type={type}
+            position={counter}
+            selectedDataflowId={selectedDataflowId}
+          />
         );
       })}
     </div>
   );
 };
+
+export { DataflowsList };

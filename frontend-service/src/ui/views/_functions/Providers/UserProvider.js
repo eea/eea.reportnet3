@@ -10,6 +10,11 @@ const userReducer = (state, { type, payload }) => {
       };
     case 'LOGOUT':
       return {};
+    case 'ADD_SOCKET':
+      return {
+        ...state,
+        socket: payload
+      };
     case 'REFRESH_TOKEN':
       return {
         ...state,
@@ -34,6 +39,12 @@ export const UserProvider = ({ children }) => {
             payload: {
               user
             }
+          });
+        },
+        onAddSocket: socket => {
+          dispatch({
+            type: 'ADD_SOCKET',
+            payload: socket
           });
         },
         onLogout: () => {
