@@ -8,7 +8,6 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -31,10 +30,8 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
-  // const [dataflowInitialValues, setDataflowInitialValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -99,28 +96,6 @@ export const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
-  const onDeleteDataflow = async () => {
-    setIsDeleteDialogVisible(false);
-    try {
-      const response = await DataflowService.deleteById(dataflowState.selectedDataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        dataFetch();
-      } else {
-        console.log('Delete dataflow error with this status: ', response);
-      }
-    } catch (error) {
-      console.log('Error: ', error);
-    }
-  };
-
-  const onEditDataflow = (id, newName, newDescription) => {
-    setIsDataflowDialogVisible(false);
-    dataflowDispatch({
-      type: 'ON_EDIT_DATAFLOW',
-      payload: { id: id, name: newName, description: newDescription }
-    });
-  };
-
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsFormReset(false);
@@ -142,15 +117,6 @@ export const Dataflows = withRouter(({ match, history }) => {
     dataflowDispatch({
       type: 'ON_RESET_DATAFLOW_DATA'
     });
-  };
-
-  const onShowDeleteDialog = () => {
-    setIsDeleteDialogVisible(true);
-  };
-
-  const onShowEditForm = () => {
-    setIsEditForm(true);
-    setIsDataflowDialogVisible(true);
   };
 
   const layout = children => {
@@ -191,16 +157,12 @@ export const Dataflows = withRouter(({ match, history }) => {
             />
             <DataflowsList
               dataFetch={dataFetch}
-              dataflowDispatch={dataflowDispatch}
               dataflowNewValues={dataflowState.selectedDataflow}
-              isCustodian={isCustodian}
               listContent={acceptedContent}
               listDescription={resources.messages.acceptedDataflowText}
               listTitle={resources.messages.acceptedDataflowTitle}
               listType="accepted"
               selectedDataflowId={dataflowState.selectedDataflowId}
-              showDeleteDialog={onShowDeleteDialog}
-              showEditForm={onShowEditForm}
             />
           </>
         ) : (
@@ -224,27 +186,12 @@ export const Dataflows = withRouter(({ match, history }) => {
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowCrudForm
-          dataflowId={dataflowState.selectedDataflowId}
-          dataflowValues={dataflowState}
           isDialogVisible={isDataflowDialogVisible}
-          isEditForm={isEditForm}
           isFormReset={isFormReset}
           onCreate={onCreateDataflow}
           onCancel={onHideDialog}
-          onEdit={onEditDataflow}
-          selectedDataflow={dataflowState.selectedDataflow}
         />
       </Dialog>
-
-      <ConfirmDialog
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteDataflow()}
-        onHide={e => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteDataflowConfirm']}
-      </ConfirmDialog>
     </div>
   );
 });

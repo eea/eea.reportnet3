@@ -394,8 +394,8 @@ export const Dataflow = withRouter(({ history, match }) => {
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />{' '}
-              {!isUndefined(dataflowState[match.params.dataflowId].name)
+              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />
+              {!isUndefined(dataflowState[match.params.dataflowId])
                 ? dataflowState[match.params.dataflowId].name
                 : null}
               {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
@@ -723,7 +723,11 @@ export const Dataflow = withRouter(({ history, match }) => {
           visible={isActivePropertiesDialog}
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
-          <div className="description">{dataflowState[match.params.dataflowId].description}</div>
+          <div className="description">
+            {!isUndefined(dataflowState[match.params.dataflowId])
+              ? dataflowState[match.params.dataflowId].description
+              : null}
+          </div>
           <div className="features">
             <ul>
               <li>
@@ -785,7 +789,7 @@ export const Dataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
           onConfirm={() => onDeleteDataflow()}
           onHide={onHideDeleteDataflowDialog}
           styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}

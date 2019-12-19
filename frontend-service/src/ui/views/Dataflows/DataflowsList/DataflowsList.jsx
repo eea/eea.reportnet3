@@ -6,16 +6,12 @@ import { DataflowsItem } from './DataflowsItem';
 
 export const DataflowsList = ({
   dataFetch,
-  dataflowDispatch,
   dataflowNewValues,
-  isCustodian,
   listContent,
   listDescription,
   listTitle,
   listType,
-  selectedDataflowId,
-  showDeleteDialog,
-  showEditForm
+  selectedDataflowId
 }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
   let counter = 0;
@@ -30,16 +26,11 @@ export const DataflowsList = ({
           <DataflowsItem
             key={item.id}
             dataFetch={dataFetch}
-            dataflowDispatch={dataflowDispatch}
             dataflowNewValues={dataflowNewValues}
-            dataflowId={item.id}
-            isCustodian={isCustodian}
             itemContent={item}
             listType={listType}
             position={counter}
             selectedDataflowId={selectedDataflowId}
-            showDeleteDialog={showDeleteDialog}
-            showEditForm={showEditForm}
           />
         );
       })}

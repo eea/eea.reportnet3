@@ -1,18 +1,16 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { config } from 'conf';
 
 import styles from './DataflowsItem.module.scss';
 
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -20,16 +18,11 @@ import { DataflowService } from 'core/services/Dataflow';
 
 export const DataflowsItem = ({
   dataFetch,
-  dataflowDispatch,
   dataflowNewValues,
-  dataflowId,
-  isCustodian,
   itemContent,
   listType,
   position,
-  selectedDataflowId,
-  showDeleteDialog,
-  showEditForm
+  selectedDataflowId
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -53,30 +46,6 @@ export const DataflowsItem = ({
   } else {
     status = statusArray[0];
   }
-
-  const crudMenu = isCustodian
-    ? // && dataflowStatus === config.dataflowStatus['DESIGN']
-      [
-        {
-          label: resources.messages['edit'],
-          icon: 'edit',
-          disabled: !isCustodian,
-          command: () => {
-            showEditForm();
-            dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: dataflowId });
-          }
-        },
-        {
-          label: resources.messages['delete'],
-          icon: 'trash',
-          disabled: false,
-          command: () => {
-            dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: dataflowId });
-            showDeleteDialog();
-          }
-        }
-      ]
-    : null;
 
   const onAccept = async () => {
     try {
@@ -139,14 +108,6 @@ export const DataflowsItem = ({
 
       <div className={`${styles.deliveryDate}`}>
         <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
-      </div>
-
-      <div className={styles.crud} onClick={e => e.preventDefault()}>
-        <DropdownButton
-          icon="pencil"
-          model={crudMenu}
-          buttonStyle={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
-        />
       </div>
 
       <div className={styles.text}>
