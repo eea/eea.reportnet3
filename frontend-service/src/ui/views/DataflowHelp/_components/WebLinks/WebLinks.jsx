@@ -137,7 +137,7 @@ export const WebLinks = ({
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={e => {
+          onClick={_ => {
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
         />
