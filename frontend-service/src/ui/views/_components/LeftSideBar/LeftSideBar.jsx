@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
-
-import { isUndefined } from 'lodash';
 
 import styles from './LeftSideBar.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { CreateDataflowForm } from './_components/CreateDataflowForm';
-import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-
-import { UserService } from 'core/services/User';
 
 const LeftSideBar = withRouter(
-  ({ components = [], createDataflowButtonTitle, onFetchData, isCustodian, navTitle, style, subscribeButtonTitle }) => {
+  ({
+    components = [],
+    createDataflowButtonTitle,
+    isCustodian,
+    navTitle,
+    onShowAddForm,
+    style,
+    subscribeButtonTitle
+  }) => {
     const resources = useContext(ResourcesContext);
-    const user = useContext(UserContext);
-    const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
-    const [isFormReset, setIsFormReset] = useState(true);
+
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
 
     const setVisibleHandler = (fnUseState, visible) => {
@@ -28,27 +27,6 @@ const LeftSideBar = withRouter(
 
     const onConfirmSubscribeHandler = () => {
       setSubscribeDialogVisible(false);
-    };
-
-    const onCreateDataflow = () => {
-      setCreateDataflowDialogVisible(false);
-      onFetchData();
-      onRefreshToken();
-    };
-
-    const onRefreshToken = async () => {
-      try {
-        const userObject = await UserService.refreshToken();
-        user.onTokenRefresh(userObject);
-      } catch (error) {
-        await UserService.logout();
-        user.onLogout();
-      }
-    };
-
-    const onHideDialog = () => {
-      setCreateDataflowDialogVisible(false);
-      setIsFormReset(false);
     };
 
     return (
@@ -71,10 +49,7 @@ const LeftSideBar = withRouter(
               className={`${styles.columnButton} p-button-primary`}
               icon="plus"
               label={createDataflowButtonTitle}
-              onClick={() => {
-                setCreateDataflowDialogVisible(true);
-                setIsFormReset(true);
-              }}
+              onClick={() => onShowAddForm()}
               style={{ textAlign: 'left' }}
             />
           ) : null}
@@ -90,18 +65,6 @@ const LeftSideBar = withRouter(
             disabled
           />
         </div>
-
-        <Dialog
-          header={resources.messages['createNewDataflow']}
-          visible={createDataflowDialogVisible}
-          className={styles.dialog}
-          dismissableMask={false}
-          onHide={onHideDialog}>
-          <CreateDataflowForm
-            isFormReset={isFormReset}
-            onCreate={onCreateDataflow}
-            onCancel={onHideDialog}></CreateDataflowForm>
-        </Dialog>
 
         <ConfirmDialog
           header={resources.messages['subscribeButtonTitle']}
