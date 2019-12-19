@@ -22,24 +22,24 @@ const apiRepresentative = {
     return response;
   },
 
-  allDataProviders: async type => {
-    let hardcodedResponseExample = [
-      { label: 'United Kingdom', dataProviderId: 2 },
-      { label: 'Germany', dataProviderId: 3 },
-      { label: 'Spain', dataProviderId: 1 },
-      { label: 'France', dataProviderId: 5 },
-      { label: 'Italy', dataProviderId: 6 }
-    ];
-
-    let result = hardcodedResponseExample;
-
-    return result;
+  allDataProviders: async dataProviderGroupId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(RepresentativeConfig.allDataProviders, {
+        dataProviderGroupId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   },
 
   allRepresentatives: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.all, {
+      url: getUrl(RepresentativeConfig.allRepresentatives, {
         dataflowId: dataflowId
       }),
       queryString: {},
@@ -47,7 +47,7 @@ const apiRepresentative = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    return response.data;
+    return response;
   },
 
   deleteById: async representativeId => {

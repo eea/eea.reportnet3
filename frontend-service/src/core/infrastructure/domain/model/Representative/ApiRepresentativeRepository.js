@@ -14,15 +14,16 @@ const allRepresentatives = async dataflowId => {
   );
 
   const dataToConsume = {
-    group: representativesDTO.groupId,
+    group: representativesDTO.dataProviderGroupId,
     representatives: representativesList
   };
 
   return dataToConsume;
 };
 
-const allDataProviders = async type => {
-  const dataProvidersDTO = await apiRepresentative.allDataProviders(type);
+const allDataProviders = async dataProviderGroupId => {
+  //use with
+  const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroupId);
   return dataProvidersDTO;
 };
 

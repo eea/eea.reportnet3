@@ -7,18 +7,18 @@ export const reducer = (state, { type, payload }) => {
 
   let updatedList = [];
   switch (type) {
-    case 'ADD_DATAPROVIDER':
-      // await RepresentativeService.add(dataflowId, providerAccount, dataProviderId);
-      console.log('On add dataProvider', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
+    case 'ADD_DATA_PROVIDER':
+      // await RepresentativeService.add( payload.dataflowId, payload.providerAccount, payload.dataProviderId);
+      console.log('ADD_DATA_PROVIDER', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       return state;
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
       console.log('CREATE_UNUSED_OPTIONS_LIST');
-      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(possibleProvider => {
+      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
         let result = true;
 
         for (let index = 0; index < state.representatives.length; index++) {
-          if (state.representatives[index].dataProviderId === possibleProvider.dataProviderId) {
+          if (state.representatives[index].dataProviderId === dataProviderOption.dataProviderId) {
             result = false;
           }
         }
@@ -28,18 +28,19 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      console.log('Delete REPRESTNTATIVE with representativeId :', state.representativeIdToDelete);
-      /* await RepresentativeService.delete(dataProviderId); */
+      // await RepresentativeService.deleteById( state.representativeIdToDelete);
+      console.log('Delete REPRESENTATIVE with representativeId :', state.representativeIdToDelete);
 
       return {
         ...state,
         isVisibleConfirmDeleteDialog: false
       };
 
-    case 'GET_REPRESENTATIVES_LIST_BY_TYPE':
-      console.log('GET_REPRESENTATIVES_LIST_BY_TYPE');
+    case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
+      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', state.selectedDataProviderGroupId);
 
-      // const dataResponse = await RepresentativeService.allDataProviders(payload.type);
+      // const dataResponse = await RepresentativeService.allDataProviders(state.selectedGroupId);
+
       const dataResponse = [
         { dataProviderId: '', label: 'Select...' },
         { dataProviderId: 1, label: 'Spain' },
@@ -52,8 +53,10 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, allPossibleDataProviders: dataResponse };
 
     case 'GET_PROVIDERS_TYPES_LIST':
-      //Need get function on api for that list
-      // Http requester......
+      console.log('GET_PROVIDERS_TYPES_LIST');
+
+      //const response = await RepresentativeService.getProviderTypes();
+
       const response = [
         { label: 'Countries', dataProviderGroupId: 123456 },
         { label: 'Companies', dataProviderGroupId: 654123 }
@@ -78,7 +81,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedDataProviderType: payload.group
+        selectedDataProviderGroupId: payload.group
       };
 
     case 'UPDATE_EMAIL':
@@ -122,7 +125,7 @@ export const reducer = (state, { type, payload }) => {
       console.log('SELECT_PROVIDERS_TYPE ', payload);
       return {
         ...state,
-        selectedDataProviderType: payload
+        selectedDataProviderGroupId: payload
       };
 
     case 'SHOW_CONFIRM_DIALOG':

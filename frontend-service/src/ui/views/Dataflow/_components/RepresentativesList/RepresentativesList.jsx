@@ -24,14 +24,14 @@ const RepresentativesList = ({ dataflowId }) => {
     unusedDataProvidersOptions: [],
     dataProvidersTypesList: [],
     dataProvidersDropdown: null,
-    selectedDataProviderType: null
+    selectedDataProviderGroupId: null
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   const onPageLoad = dataflowId => {
     console.log('dataflowId', dataflowId);
-    //(async)  await RepresentativeService.allDataProviders(dataflowId)
+    //(async)  await RepresentativeService.allRepresentatives(dataflowId)
 
     const loadedData = {
       group: { label: 'Countries', dataProviderGroupId: 123456 },
@@ -56,9 +56,11 @@ const RepresentativesList = ({ dataflowId }) => {
     formDispatcher({
       type: 'GET_PROVIDERS_TYPES_LIST'
     });
+  }, []);
 
+  useEffect(() => {
     formDispatcher({
-      type: 'GET_REPRESENTATIVES_LIST_BY_TYPE'
+      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID'
     });
 
     formDispatcher({
@@ -148,12 +150,12 @@ const RepresentativesList = ({ dataflowId }) => {
 
           <Dropdown
             disabled={
-              formState.selectedDataProviderType !== null && formState.dataProvidersTypesList !== [] ? true : false
+              formState.selectedDataProviderGroupId !== null && formState.dataProvidersTypesList !== [] ? true : false
             }
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder="Select..."
-            value={formState.selectedDataProviderType}
+            value={formState.selectedDataProviderGroupId}
             options={formState.dataProvidersTypesList}
             onChange={e => {
               return formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: e.target.value });

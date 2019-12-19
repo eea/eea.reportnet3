@@ -1,2 +1,2 @@
-export const AllDataProviders = ({ representativeRepository }) => async groupId =>
-  representativeRepository.allDataProviders(groupId);
+export const AllDataProviders = ({ representativeRepository }) => async dataProviderGroupId =>
+  representativeRepository.allDataProviders(dataProviderGroupId);
