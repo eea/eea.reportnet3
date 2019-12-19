@@ -323,9 +323,8 @@ const reporting = async dataflowId => {
   return dataflow;
 };
 
-const update = async (name, description, dataflowId) => {
-  const updatedDataflow = await apiDataflow.update(name, description, dataflowId);
-  console.log(updatedDataflow);
+const update = async (dataflowId, name, description) => {
+  const updatedDataflow = await apiDataflow.update(dataflowId, name, description);
   return updatedDataflow;
 };
 

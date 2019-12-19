@@ -84,7 +84,7 @@ export const DataflowCrudForm = ({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         const response = isEditForm
-          ? await DataflowService.update(values.name, values.description, dataflowId)
+          ? await DataflowService.update(dataflowId, values.name, values.description)
           : await DataflowService.create(values.name, values.description);
 
         if (response.status >= 200 && response.status <= 299) {

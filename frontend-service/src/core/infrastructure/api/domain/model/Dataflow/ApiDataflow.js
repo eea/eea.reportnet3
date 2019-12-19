@@ -166,12 +166,12 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  update: async (name, description, dataflowId) => {
+  update: async (dataflowId, name, description) => {
     console.log(name, description);
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { name, description, id: dataflowId },
+      data: { id: dataflowId, name, description },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
