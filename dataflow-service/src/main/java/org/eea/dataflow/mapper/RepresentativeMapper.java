@@ -6,9 +6,8 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-
 /**
- * The Interface DataflowRepresentativeMapper.
+ * The Interface RepresentativeMapper.
  */
 @Mapper(componentModel = "spring")
 public interface RepresentativeMapper extends IMapper<Representative, RepresentativeVO> {
@@ -17,7 +16,7 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
    * Entity to class.
    *
    * @param entity the entity
-   * @return the dataflow representative VO
+   * @return the representative VO
    */
   @Override
   @Mapping(source = "userMail", target = "providerAccount")
@@ -25,12 +24,11 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
   @Mapping(source = "dataProvider.id", target = "dataProviderId")
   RepresentativeVO entityToClass(Representative entity);
 
-
   /**
    * Class to entity.
    *
    * @param model the model
-   * @return the dataflow representative
+   * @return the representative
    */
   @Override
   @Mapping(source = "providerAccount", target = "userMail")

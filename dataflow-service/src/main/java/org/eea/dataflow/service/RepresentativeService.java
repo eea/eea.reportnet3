@@ -7,15 +7,15 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 
 /**
- * The Interface DataflowWebLinkService.
+ * The Interface RepresentativeService.
  */
 public interface RepresentativeService {
 
   /**
-   * Insert dataflow representative.
+   * Insert representative.
    *
    * @param dataflowId the dataflow id
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    * @throws EEAException the EEA exception
    */
@@ -25,7 +25,7 @@ public interface RepresentativeService {
   /**
    * Delete dataflow representative.
    *
-   * @param dataflowRepresentativeId the dataflow representative id
+   * @param representativeId the representative id
    * @throws EEAException the EEA exception
    */
   void deleteDataflowRepresentative(final Long representativeId) throws EEAException;
@@ -33,32 +33,32 @@ public interface RepresentativeService {
   /**
    * Update dataflow representative.
    *
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long updateDataflowRepresentative(final RepresentativeVO representativeVO) throws EEAException;
 
   /**
-   * Gets the all representative types.
+   * Gets the all data provider types.
    *
-   * @return the all representative types
+   * @return the all data provider types
    */
   List<DataProviderCodeVO> getAllDataProviderTypes();
 
   /**
-   * Gets the all representative by type.
+   * Gets the all data provider by group id.
    *
-   * @param type the type
-   * @return the all representative by type
+   * @param groupId the group id
+   * @return the all data provider by group id
    */
   List<DataProviderVO> getAllDataProviderByGroupId(Long groupId);
 
   /**
-   * Gets the dataflow represetatives by id data flow.
+   * Gets the represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
-   * @return the dataflow represetatives by id data flow
+   * @return the represetatives by id data flow
    * @throws EEAException the EEA exception
    */
   List<RepresentativeVO> getRepresetativesByIdDataFlow(final Long dataflowId) throws EEAException;

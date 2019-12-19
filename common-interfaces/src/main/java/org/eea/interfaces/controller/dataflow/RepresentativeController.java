@@ -14,14 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 /**
- * The Interface DataFlowRepresentativeController.
+ * The Interface RepresentativeController.
  */
 public interface RepresentativeController {
 
   /**
-   * The Interface DataFlowRepresentativeControllerZuul.
+   * The Interface RepresentativeControllerZuul.
    */
   @FeignClient(value = "dataflow", contextId = "representative", path = "/representative")
   interface RepresentativeControllerZuul extends RepresentativeController {
@@ -32,33 +31,32 @@ public interface RepresentativeController {
    * Insert representative.
    *
    * @param dataflowId the dataflow id
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    */
   @PostMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   Long insertRepresentative(@PathVariable("dataflowId") final Long dataflowId,
       @RequestBody RepresentativeVO representativeVO);
 
-
   /**
-   * Gets the all representative by type.
+   * Find all data provider by group id.
    *
-   * @param code the code
-   * @return the all representative by type
+   * @param groupId the group id
+   * @return the list
    */
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderVO> findAllDataProviderByGroupId(@PathVariable("groupId") Long groupId);
 
   /**
-   * Gets the all representative types.
+   * Find all data provider types.
    *
-   * @return the all representative types
+   * @return the list
    */
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderTypes();
 
   /**
-   * Find dataflow represetatives by id data flow.
+   * Find represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
    * @return the list
@@ -74,7 +72,6 @@ public interface RepresentativeController {
    */
   @PutMapping(value = "/update")
   void updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
-
 
   /**
    * Delete representative.

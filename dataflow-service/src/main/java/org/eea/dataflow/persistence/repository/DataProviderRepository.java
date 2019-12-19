@@ -6,15 +6,13 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-
-
 /**
- * The Interface DataflowRepresentativeRepository.
+ * The Interface DataProviderRepository.
  */
 public interface DataProviderRepository extends CrudRepository<DataProvider, Long> {
 
   /**
-   * Find distinct type.
+   * Find distinct code.
    *
    * @return the list
    */

@@ -21,24 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The Class DataflowServiceImpl.
+ * The Class RepresentativeServiceImpl.
  */
 @Service("dataflowRepresentativeService")
 public class RepresentativeServiceImpl implements RepresentativeService {
 
-  /** The dataflow representative repository. */
+  /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
-  /** The representative repository. */
+  /** The data provider repository. */
   @Autowired
   private DataProviderRepository dataProviderRepository;
 
-  /** The dataflow representative mapper. */
+  /** The representative mapper. */
   @Autowired
   private RepresentativeMapper representativeMapper;
 
-  /** The representative mapper. */
+  /** The data provider mapper. */
   @Autowired
   private DataProviderMapper dataProviderMapper;
 
@@ -48,10 +48,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   private static final Logger LOG = LoggerFactory.getLogger(RepresentativeServiceImpl.class);
 
   /**
-   * Insert dataflow representative.
+   * Insert representative.
    *
    * @param dataflowId the dataflow id
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    * @throws EEAException the EEA exception
    */
@@ -92,7 +92,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * Update dataflow representative.
    *
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    * @throws EEAException the EEA exception
    */
@@ -123,9 +123,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Gets the all representative types.
+   * Gets the all data provider types.
    *
-   * @return the all representative types
+   * @return the all data provider types
    */
   @Override
   public List<DataProviderCodeVO> getAllDataProviderTypes() {
@@ -134,10 +134,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Gets the dataflow represetatives by id data flow.
+   * Gets the represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
-   * @return the dataflow represetatives by id data flow
+   * @return the represetatives by id data flow
    * @throws EEAException the EEA exception
    */
   @Override
@@ -151,10 +151,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Gets the all representative by type.
+   * Gets the all data provider by group id.
    *
-   * @param code the code
-   * @return the all representative by type
+   * @param groupId the group id
+   * @return the all data provider by group id
    */
   @Override
   public List<DataProviderVO> getAllDataProviderByGroupId(Long groupId) {

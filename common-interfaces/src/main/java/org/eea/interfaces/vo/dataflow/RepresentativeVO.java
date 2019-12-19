@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class RepresentativeVO.
+ */
 @Getter
 @Setter
 @ToString

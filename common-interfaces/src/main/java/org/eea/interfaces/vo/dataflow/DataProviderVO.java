@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class DataflowRepresentativeVO.
+ * The Class DataProviderVO.
  */
 @Getter
 @Setter
