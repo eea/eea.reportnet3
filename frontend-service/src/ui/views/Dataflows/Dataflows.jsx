@@ -8,7 +8,7 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
+import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
@@ -17,7 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowCrudForm/_functions/Reducers';
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -185,7 +185,7 @@ export const Dataflows = withRouter(({ match, history }) => {
         header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
-        <DataflowCrudForm
+        <DataflowManagementForm
           isDialogVisible={isDataflowDialogVisible}
           isFormReset={isFormReset}
           onCreate={onCreateDataflow}

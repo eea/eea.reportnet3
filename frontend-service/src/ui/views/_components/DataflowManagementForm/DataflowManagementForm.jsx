@@ -4,14 +4,14 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
-import styles from './DataflowCrudForm.module.css';
+import styles from './DataflowManagementForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowCrudForm = ({
+export const DataflowManagementForm = ({
   dataflowId,
   dataflowValues,
   isDialogVisible,

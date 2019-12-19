@@ -17,7 +17,7 @@ import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
-import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
+import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
@@ -27,7 +27,7 @@ import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowCrudForm/_functions/Reducers';
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
@@ -775,7 +775,7 @@ export const Dataflow = withRouter(({ history, match }) => {
           header={isEditForm ? resources.messages['updateDataflow'] : resources.messages['createNewDataflow']}
           onHide={onHideDialog}
           visible={isDataflowDialogVisible}>
-          <DataflowCrudForm
+          <DataflowManagementForm
             dataflowId={match.params.dataflowId}
             dataflowValues={dataflowState}
             isDialogVisible={isDataflowDialogVisible}
