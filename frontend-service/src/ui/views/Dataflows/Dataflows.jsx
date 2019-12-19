@@ -148,32 +148,32 @@ export const Dataflows = withRouter(({ match, history }) => {
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
             <DataflowsList
+              content={pendingContent}
               dataFetch={dataFetch}
+              description={resources.messages.pendingDataflowText}
               isCustodian={isCustodian}
-              listContent={pendingContent}
-              listDescription={resources.messages.pendingDataflowText}
-              listTitle={resources.messages.pendingDataflowTitle}
-              listType="pending"
+              title={resources.messages.pendingDataflowTitle}
+              type="pending"
             />
             <DataflowsList
+              content={acceptedContent}
               dataFetch={dataFetch}
               dataflowNewValues={dataflowState.selectedDataflow}
-              listContent={acceptedContent}
-              listDescription={resources.messages.acceptedDataflowText}
-              listTitle={resources.messages.acceptedDataflowTitle}
-              listType="accepted"
+              description={resources.messages.acceptedDataflowText}
               selectedDataflowId={dataflowState.selectedDataflowId}
+              title={resources.messages.acceptedDataflowTitle}
+              type="accepted"
             />
           </>
         ) : (
           <>
             <DataflowsList
+              content={completedContent}
               dataFetch={dataFetch}
+              description={resources.messages.completedDataflowText}
               isCustodian={isCustodian}
-              listContent={completedContent}
-              listDescription={resources.messages.completedDataflowText}
-              listTitle={resources.messages.completedDataflowTitle}
-              listType="completed"
+              title={resources.messages.completedDataflowTitle}
+              type="completed"
             />
           </>
         )}

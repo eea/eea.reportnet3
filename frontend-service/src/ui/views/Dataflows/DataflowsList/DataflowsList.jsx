@@ -7,20 +7,20 @@ import { DataflowsItem } from './DataflowsItem';
 export const DataflowsList = ({
   dataFetch,
   dataflowNewValues,
-  listContent,
-  listDescription,
-  listTitle,
-  listType,
+  content,
+  description,
+  title,
+  type,
   selectedDataflowId
 }) => {
   //position property and counter are only for presentation purpouse and must be removed in def implementation
   let counter = 0;
   return (
     <div className={styles.wrap}>
-      <h2>{listTitle}</h2>
-      <p>{listDescription}</p>
+      <h2>{title}</h2>
+      <p>{description}</p>
 
-      {listContent.map(item => {
+      {content.map(item => {
         counter += 1;
         return (
           <DataflowsItem
@@ -28,7 +28,7 @@ export const DataflowsList = ({
             dataFetch={dataFetch}
             dataflowNewValues={dataflowNewValues}
             itemContent={item}
-            listType={listType}
+            type={type}
             position={counter}
             selectedDataflowId={selectedDataflowId}
           />

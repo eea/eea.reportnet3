@@ -16,14 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const DataflowsItem = ({
-  dataFetch,
-  dataflowNewValues,
-  itemContent,
-  listType,
-  position,
-  selectedDataflowId
-}) => {
+export const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, selectedDataflowId, type }) => {
   const resources = useContext(ResourcesContext);
 
   let dataflowTitles = {
@@ -77,11 +70,11 @@ export const DataflowsItem = ({
     return (
       <div
         className={
-          listType === 'accepted' || listType === 'completed'
+          type === 'accepted' || type === 'completed'
             ? `${styles.container} ${styles.accepted} ${styles[status]}`
             : `${styles.container} ${styles[status]}`
         }>
-        {listType === 'accepted' ? (
+        {type === 'accepted' ? (
           <Link
             className={`${styles.containerLink}`}
             to={getUrl(
@@ -122,7 +115,7 @@ export const DataflowsItem = ({
       </div>
 
       <div className={`${styles.toolbar}`}>
-        {listType === 'pending' ? (
+        {type === 'pending' ? (
           <>
             <Button
               layout="simple"
