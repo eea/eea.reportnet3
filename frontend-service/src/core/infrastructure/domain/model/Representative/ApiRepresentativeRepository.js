@@ -22,9 +22,17 @@ const allRepresentatives = async dataflowId => {
 };
 
 const allDataProviders = async dataProviderGroupId => {
-  //use with
   const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroupId);
+  //TODO Object to Entity parsing
+
   return dataProvidersDTO;
+};
+
+const getProviderTypes = async () => {
+  const dataProviderTypesDTO = await apiRepresentative.getProviderTypes();
+  //TODO Object to Consumable obj parsing
+
+  return dataProviderTypesDTO;
 };
 
 const add = async (dataflowId, providerAccount, dataProviderId) => {
