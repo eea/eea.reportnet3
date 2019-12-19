@@ -1,1 +1,1 @@
-export { DataProvidersList } from './DataProvidersList';
+export { RepresentativesList } from './RepresentativesList';

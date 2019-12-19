@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import styles from './DataProvidersList.module.scss';
+import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_components/reducer.jsx';
 import { Button } from 'ui/views/_components/Button';
@@ -10,10 +10,10 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
-import { DataProviderService } from 'core/services/DataProvider';
+import { RepresentativeService } from 'core/services/Representative';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataProvidersList = ({ dataflowId }) => {
+const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -31,7 +31,7 @@ const DataProvidersList = ({ dataflowId }) => {
 
   const onPageLoad = dataflowId => {
     console.log('dataflowId', dataflowId);
-    //(async)  await DataProviderService.allDataProviders(dataflowId)
+    //(async)  await RepresentativeService.allDataProviders(dataflowId)
 
     const loadedData = {
       group: { label: 'Countries', dataProviderGroupId: 123456 },
@@ -185,4 +185,4 @@ const DataProvidersList = ({ dataflowId }) => {
   );
 };
 
-export { DataProvidersList };
+export { RepresentativesList };
