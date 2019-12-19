@@ -402,13 +402,13 @@ export const Dataset = withRouter(({ match, history }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
-            <Button
+            {/* <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
-            />
+            /> */}
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}

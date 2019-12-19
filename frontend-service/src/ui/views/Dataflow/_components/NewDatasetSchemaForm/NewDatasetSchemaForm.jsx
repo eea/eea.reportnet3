@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const NewDatasetSchemaForm = ({
+const NewDatasetSchemaForm = ({
   dataflowId,
   datasetSchemaInfo,
   isFormReset,
@@ -30,7 +30,7 @@ export const NewDatasetSchemaForm = ({
     datasetSchemaName: Yup.string()
       .required(' ')
       .test('', resources.messages['duplicateSchemaError'], value => {
-        if (value !== undefined && !isEmpty(datasetSchemaInfo)) {
+        if (!isUndefined(value) && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
           const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
           return isRepeat.length === schemas.length;
@@ -105,3 +105,5 @@ export const NewDatasetSchemaForm = ({
     </Formik>
   );
 };
+
+export { NewDatasetSchemaForm };
