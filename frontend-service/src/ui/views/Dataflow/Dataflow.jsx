@@ -27,7 +27,7 @@ import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { dataflowReducer } from 'ui/views/Dataflows/_functions/Reducers';
+import { dataflowReducer } from 'ui/views/_components/DataflowCrudForm/_functions/Reducers';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
