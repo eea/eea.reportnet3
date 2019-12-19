@@ -211,8 +211,7 @@ const ActionsToolbar = ({
             getExportButtonPosition(e);
           }}
         />
-
-        <Button
+        {/* <Button
           className={`p-button-rounded p-button-secondary`}
           disabled={true}
           icon={'groupBy'}
@@ -231,17 +230,17 @@ const ActionsToolbar = ({
           disabled={true}
           icon="filter"
           label={resources.messages['filters']}
-          onClick={() => {}}
-        />
+          onClick={() => {}
+          /> */}
       </div>
       <div className="p-toolbar-group-right">
-        <Button
+        {/* <Button
           className={`p-button-rounded p-button-secondary`}
           disabled={true}
           icon={'refresh'}
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
-        />
+        /> */}
       </div>
     </Toolbar>
   );

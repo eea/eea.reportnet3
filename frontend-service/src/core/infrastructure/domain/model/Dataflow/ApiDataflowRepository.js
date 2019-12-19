@@ -298,6 +298,10 @@ const dataflowDetails = async dataflowId => {
   return dataflowDetails;
 };
 
+const deleteById = async dataflowId => {
+  return await apiDataflow.deleteById(dataflowId);
+};
+
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
   return newEmptyDatasetSchemaResponse;
@@ -317,6 +321,11 @@ const reporting = async dataflowId => {
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
   return dataflow;
+};
+
+const update = async (dataflowId, name, description) => {
+  const updatedDataflow = await apiDataflow.update(dataflowId, name, description);
+  return updatedDataflow;
 };
 
 const accept = async dataflowId => {
@@ -342,8 +351,10 @@ export const ApiDataflowRepository = {
   dataflowDetails,
   datasetsValidationStatistics,
   datasetsReleasedStatus,
+  deleteById,
   newEmptyDatasetSchema,
   pending,
   reject,
-  reporting
+  reporting,
+  update
 };
