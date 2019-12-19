@@ -15,6 +15,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
+  datasetTableFieldDesign.description = datasetTableRecordField.description;
 
   const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordsAdded;
@@ -275,6 +276,7 @@ const findObjects = (obj, targetProp, finalResults) => {
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   const dataset = new Dataset();
+  dataset.datasetSchemaDescription = datasetSchemaDTO.description;
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
   dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
@@ -287,7 +289,11 @@ const schemaById = async datasetId => {
                   DataTableFieldDTO.id,
                   DataTableFieldDTO.idRecord,
                   DataTableFieldDTO.name,
-                  DataTableFieldDTO.type
+                  DataTableFieldDTO.type,
+                  null,
+                  null,
+                  null,
+                  DataTableFieldDTO.description
                 );
               })
             : null;
@@ -296,6 +302,7 @@ const schemaById = async datasetId => {
       : null;
     const datasetTable = new DatasetTable();
     datasetTable.tableSchemaId = datasetTableDTO.idTableSchema;
+    datasetTable.tableSchemaDescription = datasetTableDTO.description;
     datasetTable.tableSchemaName = datasetTableDTO.nameTableSchema;
     datasetTable.records = records;
     datasetTable.recordSchemaId = !isNull(datasetTableDTO.recordSchema)
@@ -476,9 +483,10 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   const datasetTableFieldDesign = new DatasetTableField();
 
   datasetTableFieldDesign.id = record.fieldSchemaId;
-  datasetTableFieldDesign.idRecord = record.recordId;
+  // datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.type = record.type;
+  datasetTableFieldDesign.description = record.description;
 
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
@@ -505,8 +513,21 @@ const updateRecordsById = async (datasetId, record) => {
   return recordAdded;
 };
 
+const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) => {
+  return await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
+};
+
 const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
   return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
+};
+
+const updateTableDescriptionDesign = async (tableSchemaId, tableSchemaDescription, datasetId) => {
+  const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+    tableSchemaId,
+    tableSchemaDescription,
+    datasetId
+  );
+  return tableSchemaUpdated;
 };
 
 const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
@@ -552,7 +573,9 @@ export const ApiDatasetRepository = {
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
+  updateDatasetDescriptionDesign,
   updateSchemaNameById,
+  updateTableDescriptionDesign,
   updateTableNameDesign,
   validateDataById,
   webFormDataById

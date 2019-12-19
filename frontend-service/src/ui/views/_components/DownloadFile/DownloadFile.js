@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const DownloadFile = (data, fileName) => {
   const url = window.URL.createObjectURL(new Blob([data], { type: 'application/octet-stream' }));
 
