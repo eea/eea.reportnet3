@@ -569,21 +569,6 @@ const Dataflow = withRouter(({ history, match }) => {
                               icon: 'cloudUpload',
                               command: () => showReleaseSnapshotDialog(dataset.datasetId),
                               disabled: false
-                            },
-                            {
-                              label: resources.messages['importFromFile'],
-                              icon: 'export',
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['duplicate'],
-                              icon: 'clone',
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['properties'],
-                              icon: 'info',
-                              disabled: true
                             }
                           ]
                         : [
@@ -791,7 +776,7 @@ const Dataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
+          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
           onConfirm={() => onDeleteDataflow()}
           onHide={onHideDeleteDataflowDialog}
           styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
