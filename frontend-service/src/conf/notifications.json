@@ -69,8 +69,7 @@
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
           },
-          "refresh":false,
-          "fixed":true
+          "refresh":false
         },
         {
           "key":"DELETE_TABLE_COMPLETED_EVENT",
