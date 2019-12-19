@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.mapper.LockMapper;
@@ -25,6 +26,9 @@ public class LockServiceImpl implements LockService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The lock repository. */
   @Autowired
   private LockRepository lockRepository;
@@ -41,10 +45,11 @@ public class LockServiceImpl implements LockService {
    * @param lockType the lock type
    * @param lockCriteria the lock criteria
    * @return the lock VO
+   * @throws EEAException
    */
   @Override
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<String, Object> lockCriteria) {
+      Map<String, Object> lockCriteria) throws EEAException {
 
     LockVO lockVO = new LockVO(createDate, createdBy, lockType,
         generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())),
@@ -55,8 +60,8 @@ public class LockServiceImpl implements LockService {
       return lockVO;
     }
 
-    LOG.info("Already locked: {}", lockVO.getId());
-    return null;
+    LOG_ERROR.error("Already locked: {}", lockVO.getId());
+    throw new EEAException("Method locked: " + lockVO);
   }
 
   /**

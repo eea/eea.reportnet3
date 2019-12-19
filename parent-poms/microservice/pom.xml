@@ -129,6 +129,11 @@
       <artifactId>sentry-logback</artifactId>
       <version>1.7.22</version>
     </dependency>
+    <!--<dependency>-->
+    <!--<groupId>de.siegmar</groupId>-->
+    <!--<artifactId>logback-gelf</artifactId>-->
+    <!--<version>2.2.0</version>-->
+    <!--</dependency>-->
 
     <!-- Lombook -->
     <dependency>
@@ -308,6 +313,7 @@
           **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/validation/util/**,
           **/org/eea/ums/service/keycloak/model/**,**/org/eea/indexsearch/io/kafka/domain/**
         </sonar.coverage.exclusions>
+        <sonar.java.source>1.8</sonar.java.source>
       </properties>
       <build>
         <plugins>

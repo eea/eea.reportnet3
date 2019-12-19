@@ -6,8 +6,10 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { Notifications } from 'ui/views/_components/Notifications';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
   const user = useContext(UserContext);
@@ -27,9 +29,11 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
   }, []);
+  useSocket();
   return (
     <Fragment>
       <Navigation />
+      <Notifications />
       {/* <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
         {resources.messages['disclaimerTitle']}

@@ -17,11 +17,19 @@ else
     KEYCLOAK_JSON=$(jq -n --arg keycloak $KEYCLOAK '$keycloak')
 fi
  
+if [ -z "${WEBSOCKET_URL:-}" ]; then
+    WEBSOCKET_URL_JSON=undefined
+else
+    WEBSOCKET_URL_JSON=$(jq -n --arg websocketUrl $WEBSOCKET_URL '$websocketUrl')
+fi
+
+
 cat <<EOF
 window.env = {
 	  REACT_APP_BACKEND: $BACKEND_JSON,
 	  EULOGIN_URL: $EULOGIN_JSON,
-	  REACT_APP_EULOGIN: $KEYCLOAK_JSON
+	  REACT_APP_EULOGIN: $KEYCLOAK_JSON,
+	  WEBSOCKET_URL: $WEBSOCKET_URL_JSON
 };
 
 EOF

@@ -192,7 +192,14 @@ public enum EventType {
   /**
    * The document delete failed event.
    */
-  DOCUMENT_DELETE_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_delete_failed_event", true);
+  DOCUMENT_DELETE_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_delete_failed_event", true),
+
+  /** The command execute new design field propagation. */
+  COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",
+      false),
+
+  /** The command new design field propagation. */
+  COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false);
 
   /**
    * The topic.

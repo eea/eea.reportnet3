@@ -13,8 +13,8 @@ import { TableLoadingBody } from './_components/TableLoadingBody';
 
 import classNames from 'classnames';
 
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import PropTypes from 'prop-types';
 
 export class DataTable extends Component {

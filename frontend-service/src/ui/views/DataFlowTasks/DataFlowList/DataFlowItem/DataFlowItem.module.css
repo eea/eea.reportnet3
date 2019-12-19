@@ -1,4 +1,0 @@
-.card_component_content_title {
-  composes: heading-3 from global;
-  color: var(--gray-75);
-}

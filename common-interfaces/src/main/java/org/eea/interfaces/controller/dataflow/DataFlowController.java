@@ -144,4 +144,12 @@ public interface DataFlowController {
   DataFlowVO getMetabaseById(@PathVariable("id") Long id);
 
 
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
 }

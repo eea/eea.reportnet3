@@ -333,4 +333,21 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_CUSTODIAN')")
+  public void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow) {
+    try {
+      dataflowService.deleteDataFlow(idDataflow);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 }

@@ -65,8 +65,8 @@ public class DeleteHelper {
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
 
     EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT
-            : EventType.DELETE_TABLE_COMPLETED_EVENT;
+        datasetService.isReportingDataset(datasetId) ? EventType.DELETE_TABLE_COMPLETED_EVENT
+            : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 function useSnapshotReducer(
   setIsSnapshotDialogVisible,

@@ -52,7 +52,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
@@ -68,15 +70,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
-  /** The snapshot schema repository. */
+  /**
+   * The snapshot schema repository.
+   */
   @Autowired
   private SnapshotSchemaRepository snapshotSchemaRepository;
 
-  /** The snapshot schema mapper. */
+  /**
+   * The snapshot schema mapper.
+   */
   @Autowired
   private SnapshotSchemaMapper snapshotSchemaMapper;
 
-  /** The schema repository. */
+  /**
+   * The schema repository.
+   */
   @Autowired
   private SchemasRepository schemaRepository;
 
@@ -86,25 +94,35 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The schema service. */
+  /**
+   * The schema service.
+   */
   @Autowired
   private DatasetSchemaService schemaService;
 
-  /** The metabase repository. */
+  /**
+   * The metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository metabaseRepository;
 
 
-  /** The Constant FILE_PATTERN_NAME. */
+  /**
+   * The Constant FILE_PATTERN_NAME.
+   */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
   /**
@@ -186,7 +204,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     // Remove from the metabase
     snapshotRepository.deleteById(idSnapshot);
@@ -216,7 +233,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
-
   /**
    * Release snapshot.
    *
@@ -237,7 +253,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * Gets the schema snapshots by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the schema snapshots by id dataset
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -257,6 +275,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idDatasetSchema the id dataset schema
    * @param description the description
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -274,7 +293,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     snap.setDesignDataset(designDataset);
     snap.setDataSetName("snapshot schema from design dataset_" + idDataset);
 
-
     snapshotSchemaRepository.save(snap);
     LOG.info("Snapshot schema {} created into the metabase", snap.getId());
 
@@ -287,7 +305,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     objectMapper.writeValue(outStream, schema);
     documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
         nameFile);
-
 
     // 3. Create the data file of the snapshot, calling to recordstore-service
     // we need the partitionId. By now only consider the user root
@@ -309,6 +326,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param user the user
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -339,6 +357,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws Exception the exception
    */
   @Override
@@ -358,11 +377,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
-
   /**
    * Delete all schema snapshots.
    *
    * @param idDesignDataset the id design dataset
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -378,6 +397,31 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG_ERROR.error("Error deleting the schema snapshot " + s.getId(), e.getMessage(), e);
       }
     });
+  }
+
+
+  /**
+   * Delete all snapshots.
+   *
+   * @param idDataset the id dataset
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void deleteAllSnapshots(Long idDataset) throws EEAException {
+
+    LOG.info("Deleting all snapshots when the dataset it's going to be deleted");
+    List<SnapshotVO> snapshots = getSnapshotsByIdDataset(idDataset);
+    snapshots.stream().forEach(s -> {
+      try {
+        removeSnapshot(idDataset, s.getId());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error deleting the snapshot with id {} due to reason {} ", s.getId(),
+            e.getMessage(), e);
+      }
+    });
+
   }
 
 

@@ -65,7 +65,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -80,7 +82,15 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The dataflow controller zuul. */
+  /*
+   * @Autowired private UpdateRecordHelper updateRecordHelper;
+   */
+
+
+
+  /**
+   * The dataflow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
@@ -160,6 +170,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset schema id
    */
   @Override
@@ -177,6 +188,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema with no rules by dataset id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -196,6 +208,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException
    */
   @Override
@@ -246,6 +259,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   *
    * @return the table VO
    */
   @Override
@@ -337,6 +351,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the string
    */
   @Override
@@ -347,10 +362,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
       String response;
+
       if (StringUtils.isBlank(response = dataschemaService
           .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      // propagate the new field to the existing records in the dataset value
+      datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -428,6 +446,29 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           dataschemaService.orderFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
               orderVO.getId(), orderVO.getPosition()))) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+          e);
+    }
+  }
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PutMapping("/{datasetId}/datasetSchema")
+  public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("description") String description) {
+    try {
+      if (!dataschemaService.updateDatasetSchemaDescription(
+          dataschemaService.getDatasetSchemaId(datasetId), description)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,

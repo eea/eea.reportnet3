@@ -9,7 +9,7 @@ import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class CustomFileUpload extends Component {
   static defaultProps = {
