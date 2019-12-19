@@ -32,7 +32,7 @@ export const TabsSchema = ({
       ? tables.map(table => {
           return (
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
-              <div className={styles.TabsSchema}>
+              <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
                   levelErrorTypes={levelErrorTypes}
@@ -44,7 +44,11 @@ export const TabsSchema = ({
                   tableId={table.id}
                   tableName={table.name}
                   tableSchemaColumns={
-                    tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
+                    !isUndefined(tableSchemaColumns)
+                      ? tableSchemaColumns
+                          .map(tab => tab.filter(t => t.table === table.name))
+                          .filter(f => f.length > 0)[0]
+                      : []
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}

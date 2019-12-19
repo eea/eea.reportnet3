@@ -6,7 +6,7 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const InfoTableMessages = ({ data, filteredColumns, numRecords }) => {
+export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) => {
   const resources = useContext(ResourcesContext);
 
   const checkPastedColumnsErrors = () => {
@@ -23,7 +23,7 @@ export const InfoTableMessages = ({ data, filteredColumns, numRecords }) => {
               <p style={{ fontWeight: 'bold', color: colors.errors }}>
                 {resources.messages['pasteColumnWarningMessage']}
               </p>
-              {numRecords > 500 ? (
+              {numCopiedRecords > 500 ? (
                 <p style={{ fontWeight: 'bold', color: colors.errors }}>
                   {resources.messages['pasteRecordsWarningMessage']}
                 </p>
