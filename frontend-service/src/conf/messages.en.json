@@ -70,7 +70,7 @@
 		"delete": "Delete",
 		"deleteContributor":"Delete contributor",
 		"deleteDataflow": "This action cannot be undone. This will permanently delete the dataflow, datasets and dataschemas. Are you sure you want to delete the dataflow?",
-		"deleteDataflowConfirm": "Please type dataflows name to confirm",
+		"deleteDataflowConfirm": "Please type dataflow title: <strong>{:dataflowName}</strong> to confirm",
 		"deleteDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a snapshot before.",
 		"deleteDatasetData": "Delete dataset data",
 		"deleteDatasetHeader": "Delete dataset data",

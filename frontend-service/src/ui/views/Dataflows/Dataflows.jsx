@@ -182,7 +182,7 @@ export const Dataflows = withRouter(({ match, history }) => {
       <Dialog
         className={styles.dialog}
         dismissableMask={false}
-        header={isEditForm ? 'edit' : resources.messages['createNewDataflow']}
+        header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowCrudForm

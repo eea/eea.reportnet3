@@ -22,15 +22,17 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
-import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from 'ui/views/Dataflows/_functions/Reducers';
+import { TextUtils } from 'ui/views/_functions/Utils';
+
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -134,6 +136,10 @@ export const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
+    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+  }
+
   const onEditDataflow = (id, newName, newDescription) => {
     setIsDataflowDialogVisible(false);
     dataflowDispatch({
@@ -141,10 +147,6 @@ export const Dataflow = withRouter(({ history, match }) => {
       payload: { id: id, name: newName, description: newDescription }
     });
   };
-
-  if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
-    document.getElementsByClassName('p-inputtext p-component')[0].focus();
-  }
 
   const onLoadDataflowsData = async () => {
     try {
@@ -795,7 +797,12 @@ export const Dataflow = withRouter(({ history, match }) => {
           styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
           visible={isDeleteDialogVisible}>
           <p>{resources.messages['deleteDataflow']}</p>
-          <p>{resources.messages['deleteDataflowConfirm']} </p>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+                dataflowName: dataflowState[match.params.dataflowId].name
+              })
+            }}></p>
           <p>
             <InputText
               autoFocus={true}
