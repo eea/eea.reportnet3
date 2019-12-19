@@ -23,12 +23,10 @@ const DocumentFileUpload = ({
   isEditForm = false,
   isUploadDialogVisible
 }) => {
-  const form = useRef(null);
-  const inputRef = useRef();
-
   const resources = useContext(ResourcesContext);
 
-  const initialValues = { description: '', lang: '', uploadFile: {} };
+  const form = useRef(null);
+  const inputRef = useRef();
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),

@@ -101,6 +101,17 @@ export const apiDataflow = {
     return response.data;
     // return metadataJson;
   },
+  deleteById: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
@@ -154,5 +165,18 @@ export const apiDataflow = {
       }
     });
     return response.data;
+  },
+  update: async (dataflowId, name, description) => {
+    console.log(name, description);
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(DataflowConfig.createDataflow),
+      data: { id: dataflowId, name, description },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   }
 };
