@@ -16,7 +16,7 @@ import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
-import { DataProvidersList } from './_components/DataProvidersList';
+import { RepresentativesList } from './_components/RepresentativesList';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
@@ -517,12 +517,12 @@ export const Dataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages['dataProviderManageContributorsDialogTitle']} "${dataflowData.name}"`}
+          header={`${resources.messages['RepresentativeManageContributorsDialogTitle']} "${dataflowData.name}"`}
           visible={isActiveContributorsDialog}
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <DataProvidersList dataflowId={dataflowData.id} />
+          <RepresentativesList dataflowId={dataflowData.id} />
         </Dialog>
 
         <Dialog
