@@ -132,7 +132,6 @@ const accepted = async () => {
 
 const create = async (name, description) => {
   const createdDataflow = await apiDataflow.create(name, description);
-  console.log(createdDataflow);
   return createdDataflow;
 };
 
