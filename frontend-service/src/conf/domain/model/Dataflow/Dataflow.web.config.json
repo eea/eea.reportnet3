@@ -3,6 +3,7 @@
     "createDataflow": "/dataflow",
     "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
     "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
+    "deleteDataflow": "/dataflow/{:dataflowId}",
     "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
     "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
     "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",

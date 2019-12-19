@@ -1805,7 +1805,6 @@ textarea {
 
 textarea {
   /* min-height: 5rem; */
-  height: 30px;
   font-family: arial;
   resize: none;
 }
