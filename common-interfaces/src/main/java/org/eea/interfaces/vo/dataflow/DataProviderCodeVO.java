@@ -3,7 +3,7 @@ package org.eea.interfaces.vo.dataflow;
 import java.io.Serializable;
 
 /**
- * The Interface RepresentativeCodeVO.
+ * The Interface DataProviderCodeVO.
  */
 public interface DataProviderCodeVO extends Serializable {
 
@@ -13,7 +13,6 @@ public interface DataProviderCodeVO extends Serializable {
    * @return the data provider group id
    */
   String getDataProviderGroupId();
-
 
   /**
    * Gets the label.

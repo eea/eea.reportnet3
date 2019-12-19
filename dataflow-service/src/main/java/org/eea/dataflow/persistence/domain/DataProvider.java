@@ -15,7 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Representative.
+ * The Class DataProvider.
  */
 @Entity
 @Getter
@@ -44,10 +44,11 @@ public class DataProvider {
   @Column(name = "code")
   private String code;
 
+  /** The group id. */
   @Column(name = "group_id")
   private Long groupId;
 
-  /** The dataflow representatives. */
+  /** The representatives. */
   @OneToMany(mappedBy = "dataProvider")
   private Set<Representative> representatives;
 

@@ -14,7 +14,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class DataflowRepresentative.
+ * The Class Representative.
  */
 @Entity
 @Getter
@@ -36,7 +36,7 @@ public class Representative {
   @JoinColumn(name = "dataflow_id")
   private Dataflow dataflow;
 
-  /** The representative. */
+  /** The dataProvider. */
   @ManyToOne
   @JoinColumn(name = "data_provider_id")
   private DataProvider dataProvider;

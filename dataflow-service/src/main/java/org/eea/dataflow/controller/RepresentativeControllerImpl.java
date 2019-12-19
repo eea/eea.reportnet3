@@ -25,23 +25,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-
 /**
- * The Class DataFlowDocumentControllerImpl.
+ * The Class RepresentativeControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/representative")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /**
-   * The dataflow service.
-   */
+  /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
   /** The user management controller zull. */
   @Autowired
-  UserManagementControllerZull userManagementControllerZull;
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
    * The Constant LOG.
@@ -52,7 +49,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Insert representative.
    *
    * @param dataflowId the dataflow id
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    * @return the long
    */
   @Override
@@ -76,9 +73,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
-   * Find all representative by type.
+   * Find all data provider by group id.
    *
-   * @param type the type
+   * @param groupId the group id
    * @return the list
    */
   @Override
@@ -93,7 +90,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
-   * Find all representative types.
+   * Find all data provider types.
    *
    * @return the list
    */
@@ -105,7 +102,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
-   * Find dataflow represetatives by id data flow.
+   * Find represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
    * @return the list
@@ -130,7 +127,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /**
    * Update representative.
    *
-   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @param representativeVO the representative VO
    */
   @Override
   @HystrixCommand
