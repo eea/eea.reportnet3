@@ -21,10 +21,12 @@ import { GetStatistics } from './GetStatistics';
 import { GetWebFormData } from './GetWebFormData';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
+import { UpdateDatasetDescriptionDesign } from './UpdateDatasetDescriptionDesign';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
 import { UpdateSchemaName } from './UpdateSchemaName';
+import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
 import { UpdateTableNameDesign } from './UpdateTableNameDesign';
 import { ValidateData } from './ValidateData';
 
@@ -49,10 +51,12 @@ export const DatasetService = {
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
   tableDataById: GetData({ datasetRepository }),
+  updateDatasetDescriptionDesign: UpdateDatasetDescriptionDesign({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
+  updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),
   validateDataById: ValidateData({ datasetRepository }),
   webFormDataById: GetWebFormData({ datasetRepository })

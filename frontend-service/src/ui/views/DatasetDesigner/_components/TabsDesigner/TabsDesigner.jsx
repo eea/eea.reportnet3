@@ -67,6 +67,13 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     }
   };
 
+  const onChangeTableDescription = (tableSchemaId, tableSchemaDescription) => {
+    const inmTabs = [...tabs];
+    const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
+    inmTabs[tabIdx].description = tableSchemaDescription;
+    setTabs(inmTabs);
+  };
+
   const onLoadSchema = async datasetId => {
     try {
       setIsLoading(true);
@@ -74,6 +81,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       const inmDatasetSchema = { ...datasetSchemaDTO };
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
+        table.description = table.tableSchemaDescription;
         table.addTab = false;
         table.newTab = false;
         table.index = idx;
@@ -328,6 +336,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         key={tab.index}
                         onChangeFields={onChangeFields}
+                        onChangeTableDescription={onChangeTableDescription}
                         table={tabs[i]}
                       />
                     ) : (
