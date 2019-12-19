@@ -1,8 +1,8 @@
 {   
-    "allDataProviders": "/represetnative/datafolow/{:dataflowId}",
-    "allRepresentatives": "/represetnative/datafolow/{:dataflowId}",
-    "create": "/represetnative?dataflowId={:dataflowId}",
-    "deleteById":"/represetnative/{:represetnativeId}",
-    "update":"/represetnative"
+    "add": "/representative/{:dataflowId}",
+    "allDataProviders": "/representative/datafolow/{:dataflowId}",
+    "allRepresentatives": "/representative/datafolow/{:dataflowId}",
+    "deleteById":"/representative/{:representativeId}",
+    "update":"/representative/update"
 
 }

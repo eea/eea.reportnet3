@@ -30,8 +30,8 @@ const add = async (dataflowId, providerAccount, dataProviderId) => {
   return await apiRepresentative.add(dataflowId, providerAccount, dataProviderId);
 };
 
-const deleteById = async (dataflowId, representativeId) => {
-  const dataDeleted = await apiRepresentative.deleteById(dataflowId, representativeId);
+const deleteById = async representativeId => {
+  const dataDeleted = await apiRepresentative.deleteById(representativeId);
   return dataDeleted;
 };
 

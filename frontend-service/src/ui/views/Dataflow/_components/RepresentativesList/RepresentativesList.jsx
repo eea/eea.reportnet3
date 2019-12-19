@@ -71,7 +71,7 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <input
         defaultValue={inputData}
-        placeholder={'Data Providers providerAccount...'}
+        placeholder={'Data provider account...'}
         onChange={e =>
           formDispatcher({
             type: 'ON_EMAIL_CHANGE',

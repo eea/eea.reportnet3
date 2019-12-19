@@ -4,18 +4,22 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const apiRepresentative = {
-  allRepresentatives: async dataflowId => {
+  add: async (dataflowId, providerAccount, dataProviderId) => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.all, {
-        dataflowId: dataflowId
+
+    const response = await HTTPRequester.post({
+      url: getUrl(RepresentativeConfig.add, {
+        dataflowId
       }),
-      queryString: {},
+      data: {
+        dataProviderId,
+        providerAccount
+      },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    return response.data;
+    return response;
   },
 
   allDataProviders: async type => {
@@ -32,26 +36,82 @@ const apiRepresentative = {
     return result;
   },
 
-  add: (dataflowId, providerAccount, dataProviderId) => {
-    console.log(
-      'Adding Representative to dataflowId: ',
-      dataflowId,
-      ' providerAccount:',
-      providerAccount,
-      ' dataProviderId:',
-      dataProviderId
-    );
+  allRepresentatives: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(RepresentativeConfig.all, {
+        dataflowId: dataflowId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
   },
 
-  deleteById: (dataflowId, representativeId) => {
-    console.log('Deliting Representative from dataflowId: ', dataflowId, ' representativeId', representativeId);
+  deleteById: async representativeId => {
+    const tokens = userStorage.get();
+
+    const response = await HTTPRequester.delete({
+      url: getUrl(RepresentativeConfig.delete, {
+        representativeId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response;
   },
 
-  update: (dataflowId, representativeId, providerAccount, dataProviderId) => {
-    console.log(
-      `Updating Representative from dataflowId: ${dataflowId}, dataProvider Id: ${representativeId}, new Role: ${(providerAccount,
-      dataProviderId)}`
-    );
+  update: async (representativeId, providerAccount, dataProviderId) => {
+    const tokens = userStorage.get();
+
+    const response = await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.update, {}),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: {
+        dataProviderId,
+        id: representativeId,
+        providerAccount
+      }
+    });
+    return response;
+  },
+
+  updateProviderAccount: async (representativeId, providerAccount) => {
+    const tokens = userStorage.get();
+
+    const response = await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.update, {}),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: {
+        id: representativeId,
+        providerAccount
+      }
+    });
+    return response;
+  },
+
+  updateProviderAccount: async (representativeId, dataProviderId) => {
+    const tokens = userStorage.get();
+
+    const response = await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.update, {}),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: {
+        dataProviderId,
+        id: representativeId
+      }
+    });
+    return response;
   }
 };
 
