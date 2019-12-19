@@ -569,21 +569,6 @@ const Dataflow = withRouter(({ history, match }) => {
                               icon: 'cloudUpload',
                               command: () => showReleaseSnapshotDialog(dataset.datasetId),
                               disabled: false
-                            },
-                            {
-                              label: resources.messages['importFromFile'],
-                              icon: 'export',
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['duplicate'],
-                              icon: 'clone',
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['properties'],
-                              icon: 'info',
-                              disabled: true
                             }
                           ]
                         : [
