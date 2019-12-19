@@ -14,6 +14,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     header,
     iconCancel,
     iconConfirm,
+    disabledConfirm,
     labelCancel,
     labelConfirm,
     maximizable,
@@ -21,6 +22,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     onHide,
     onPaste,
     onPasteAsync,
+    styleConfirm,
     visible
   } = props;
   const resources = useContext(ResourcesContext);
@@ -66,7 +68,13 @@ export const ConfirmDialog = forwardRef((props, _) => {
           tooltip={!isChrome() ? resources.messages['pasteDisableButtonMessage'] : null}
         />
       ) : null}
-      <Button label={labelConfirm} icon={iconConfirm ? iconConfirm : 'check'} onClick={onConfirm} />
+      <Button
+        label={labelConfirm}
+        icon={iconConfirm ? iconConfirm : 'check'}
+        onClick={onConfirm}
+        disabled={disabledConfirm}
+        style={styleConfirm}
+      />
       <Button
         className="p-button-secondary"
         icon={iconCancel ? iconCancel : 'cancel'}

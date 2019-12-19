@@ -31,7 +31,7 @@ export const Dataflows = withRouter(({ match, history }) => {
   const [acceptedContent, setacceptedContent] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
-  const [dataflowInitialValues, setDataflowInitialValues] = useState({});
+  // const [dataflowInitialValues, setDataflowInitialValues] = useState({});
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -54,7 +54,7 @@ export const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialValues);
+  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
 
   const dataFetch = async () => {
     setLoading(true);
@@ -63,11 +63,14 @@ export const Dataflows = withRouter(({ match, history }) => {
       setpendingContent(allDataflows.pending);
       setacceptedContent(allDataflows.accepted);
       setcompletedContent(allDataflows.completed);
-      setDataflowInitialValues(
-        allDataflows.accepted.forEach(element => {
-          dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-        })
-      );
+      const dataflowInitialValues = {};
+      allDataflows.accepted.forEach(element => {
+        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
+      });
+      dataflowDispatch({
+        type: 'ON_INIT_DATA',
+        payload: dataflowInitialValues
+      });
     } catch (error) {
       console.error('dataFetch error: ', error);
     }

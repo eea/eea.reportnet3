@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
+import colors from 'conf/colors.json';
 import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
@@ -16,8 +17,10 @@ import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
+import { DataflowCrudForm } from 'ui/views/_components/DataflowCrudForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
+import { InputText } from 'ui/views/_components/InputText';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -26,6 +29,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { dataflowReducer } from 'ui/views/Dataflows/_functions/Reducers';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -52,14 +57,21 @@ export const Dataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
+  const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
+  const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
+  const [onConfirmDelete, setOnConfirmDelete] = useState();
+
+  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -99,6 +111,57 @@ export const Dataflow = withRouter(({ history, match }) => {
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
+  useEffect(() => {
+    setLoading(true);
+    onLoadReportingDataflow();
+    onLoadDataflowsData();
+  }, [match.params.dataflowId, isDataUpdated]);
+
+  const onDeleteDataflow = async () => {
+    setIsDeleteDialogVisible(false);
+    showLoading();
+    try {
+      const response = await DataflowService.deleteById(match.params.dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        history.push(getUrl(routes.DATAFLOWS));
+      } else {
+        console.log('Delete dataflow error with this status: ', response);
+      }
+    } catch (error) {
+      console.log('Error: ', error);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const onEditDataflow = (id, newName, newDescription) => {
+    setIsDataflowDialogVisible(false);
+    dataflowDispatch({
+      type: 'ON_EDIT_DATAFLOW',
+      payload: { id: id, name: newName, description: newDescription }
+    });
+  };
+
+  if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
+    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+  }
+
+  const onLoadDataflowsData = async () => {
+    try {
+      const allDataflows = await DataflowService.all();
+      const dataflowInitialValues = {};
+      allDataflows.accepted.forEach(element => {
+        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
+      });
+      dataflowDispatch({
+        type: 'ON_INIT_DATA',
+        payload: dataflowInitialValues
+      });
+    } catch (error) {
+      console.error('dataFetch error: ', error);
+    }
+  };
+
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
@@ -128,33 +191,77 @@ export const Dataflow = withRouter(({ history, match }) => {
     setSnapshotsListData(await SnapshotService.allReporter(datasetId));
   };
 
-  useEffect(() => {
-    setLoading(true);
-    onLoadReportingDataflow();
-  }, [match.params.dataflowId, isDataUpdated]);
-
   const handleRedirect = target => {
     history.push(target);
   };
 
-  const dropDownItems = [
-    {
-      label: resources.messages['manageRoles'],
-      icon: 'users',
-      show: hasWritePermissions,
-      command: () => {
-        showContributorsDialog();
-      }
-    },
-    {
-      label: resources.messages['properties'],
-      icon: 'settings',
-      show: true,
-      command: e => {
-        setIsActivePropertiesDialog(true);
-      }
-    }
-  ];
+  const onHideDeleteDataflowDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setIsActivePropertiesDialog(true);
+  };
+
+  const onHideDialog = () => {
+    setIsDataflowDialogVisible(false);
+    setIsDataflowFormReset(false);
+  };
+
+  const onShowEditForm = () => {
+    setIsEditForm(true);
+    setIsDataflowDialogVisible(true);
+  };
+
+  const onShowDeleteDataflowDialog = () => {
+    setIsActivePropertiesDialog(false);
+    setIsDeleteDialogVisible(true);
+  };
+
+  const dropDownItems =
+    isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
+      ? [
+          {
+            label: resources.messages['edit'],
+            icon: 'edit',
+            disabled: !isCustodian,
+            command: () => {
+              onShowEditForm();
+              dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
+            }
+          },
+          {
+            label: resources.messages['manageRoles'],
+            icon: 'users',
+            show: hasWritePermissions,
+            command: () => {
+              showContributorsDialog();
+            }
+          },
+          {
+            label: resources.messages['properties'],
+            icon: 'settings',
+            show: true,
+            command: e => {
+              setIsActivePropertiesDialog(true);
+            }
+          }
+        ]
+      : [
+          {
+            label: resources.messages['manageRoles'],
+            icon: 'users',
+            show: hasWritePermissions,
+            command: () => {
+              showContributorsDialog();
+            }
+          },
+          {
+            label: resources.messages['properties'],
+            icon: 'settings',
+            show: true,
+            command: e => {
+              setIsActivePropertiesDialog(true);
+            }
+          }
+        ];
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -287,12 +394,15 @@ export const Dataflow = withRouter(({ history, match }) => {
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
+              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />{' '}
+              {!isUndefined(dataflowState[match.params.dataflowId].name)
+                ? dataflowState[match.params.dataflowId].name
+                : null}
               {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} disabled />
+            <DropdownButton icon="ellipsis" model={dropDownItems} />
           </div>
         </div>
 
@@ -587,11 +697,21 @@ export const Dataflow = withRouter(({ history, match }) => {
         </Dialog>
 
         <Dialog
-          header={dataflowData.name}
+          header={resources.messages['properties']}
           footer={
             <>
-              <Button className="p-button-text-only" label="Generate new API-key" />
-              <Button className="p-button-text-only" label="Open Metadata" />
+              <div className="p-toolbar-group-left">
+                {isCustodian && dataflowStatus === config.dataflowStatus['DESIGN'] ? (
+                  <Button
+                    className="p-button-text-only"
+                    label="Delete this dataflow"
+                    style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
+                    onClick={() => onShowDeleteDataflowDialog()}
+                  />
+                ) : null}
+              </div>
+              <Button className="p-button-text-only" label="Generate new API-key" disabled />
+              <Button className="p-button-text-only" label="Open Metadata" disabled />
               <Button
                 className="p-button-secondary"
                 icon="cancel"
@@ -603,7 +723,7 @@ export const Dataflow = withRouter(({ history, match }) => {
           visible={isActivePropertiesDialog}
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
-          <div className="description">{dataflowData.description}</div>
+          <div className="description">{dataflowState[match.params.dataflowId].description}</div>
           <div className="features">
             <ul>
               <li>
@@ -642,6 +762,44 @@ export const Dataflow = withRouter(({ history, match }) => {
             </li>
           </ul>
         </Dialog>
+
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={isEditForm ? resources.messages['updateDataflow'] : resources.messages['createNewDataflow']}
+          onHide={onHideDialog}
+          visible={isDataflowDialogVisible}>
+          <DataflowCrudForm
+            dataflowId={match.params.dataflowId}
+            dataflowValues={dataflowState}
+            isDialogVisible={isDataflowDialogVisible}
+            isEditForm={isEditForm}
+            isFormReset={isDataflowFormReset}
+            onCancel={onHideDialog}
+            onEdit={onEditDataflow}
+            selectedDataflow={dataflowState.selectedDataflow}
+          />
+        </Dialog>
+
+        <ConfirmDialog
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+          onConfirm={() => onDeleteDataflow()}
+          onHide={onHideDeleteDataflowDialog}
+          styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
+          visible={isDeleteDialogVisible}>
+          <p>{resources.messages['deleteDataflow']}</p>
+          <p>{resources.messages['deleteDataflowConfirm']} </p>
+          <p>
+            <InputText
+              autoFocus={true}
+              className={`${styles.inputText}`}
+              onChange={e => setOnConfirmDelete(e.target.value)}
+            />
+          </p>
+        </ConfirmDialog>
       </div>
     </div>
   );
