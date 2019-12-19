@@ -20,7 +20,7 @@ export const apiWebLink = {
     });
     return response.data.weblinks;
   },
-  create: async (dataflowId, weblinkToCreate) => {
+  create: async (dataflowId, weblink) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
@@ -28,8 +28,8 @@ export const apiWebLink = {
           dataflowId
         }),
         data: {
-          description: weblinkToCreate.description,
-          url: weblinkToCreate.url
+          description: weblink.description,
+          url: weblink.url.toString().toLowerCase()
         },
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
