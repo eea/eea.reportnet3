@@ -6,14 +6,15 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.eea.dataflow.mapper.DataProviderCodeMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
+import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +47,6 @@ public class RepresentativeServiceImplTest {
   /** The data provider mapper. */
   @Mock
   private DataProviderMapper dataProviderMapper;
-
-  @Mock
-  private DataProviderCodeMapper dataProviderCodeMapper;
 
   /** The representative. */
   private Representative representative;
@@ -200,9 +198,26 @@ public class RepresentativeServiceImplTest {
    */
   @Test
   public void getAllDataProviderTypesSuccessTest() throws EEAException {
-    when(dataProviderRepository.findDistinctCode()).thenReturn(new ArrayList<>());
-    when(dataProviderCodeMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    assertEquals("error in the message", new ArrayList<>(),
+    List<DataProviderCode> dataProviderCodes = new ArrayList<>();
+    dataProviderCodes.add(new DataProviderCode() {
+
+      @Override
+      public String getLabel() {
+        return "Country";
+      }
+
+      @Override
+      public Long getDataProviderGroupId() {
+        return 1L;
+      }
+    });
+    List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
+    DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
+    dataProviderCodeVO.setDataProviderGroupId(1L);
+    dataProviderCodeVO.setLabel("Country");
+    dataProviderCodeVOs.add(dataProviderCodeVO);
+    when(dataProviderRepository.findDistinctCode()).thenReturn(dataProviderCodes);
+    assertEquals("error in the message", dataProviderCodeVOs,
         representativeServiceImpl.getAllDataProviderTypes());
   }
 

@@ -1,51 +1,21 @@
 package org.eea.dataflow.persistence.domain;
 
-import java.util.Objects;
-import javax.persistence.Entity;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 /**
- * The Class DataProviderCode.
+ * The interface DataProviderCode.
  */
-@Entity
-@Getter
-@Setter
-@ToString
-public class DataProviderCode {
-
-  /** The data provider group id. */
-  private Long dataProviderGroupId;
-
-  /** The label. */
-  private String label;
+public interface DataProviderCode {
 
   /**
-   * Equals.
+   * Gets the data provider group id.
    *
-   * @param o the o
-   * @return true, if successful
+   * @return the data provider group id
    */
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    final DataProviderCode dataProviderCode = (DataProviderCode) o;
-    return dataProviderGroupId.equals(dataProviderCode.dataProviderGroupId);
-  }
+  Long getDataProviderGroupId();
 
   /**
-   * Hash code.
+   * Gets the label.
    *
-   * @return the int
+   * @return the label
    */
-  @Override
-  public int hashCode() {
-    return Objects.hash(dataProviderGroupId, label);
-  }
+  String getLabel();
 }

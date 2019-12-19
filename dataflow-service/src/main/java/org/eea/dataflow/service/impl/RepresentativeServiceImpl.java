@@ -1,11 +1,12 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
-import org.eea.dataflow.mapper.DataProviderCodeMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
+import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
@@ -42,10 +43,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The data provider mapper. */
   @Autowired
   private DataProviderMapper dataProviderMapper;
-
-  /** The data provider code mapper. */
-  @Autowired
-  private DataProviderCodeMapper dataProviderCodeMapper;
 
   /**
    * The Constant LOG.
@@ -135,7 +132,15 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getAllDataProviderTypes() {
     LOG.info("obtaining the distinct representative types");
-    return dataProviderCodeMapper.entityListToClass(dataProviderRepository.findDistinctCode());
+    List<DataProviderCode> dataProviderCodes = dataProviderRepository.findDistinctCode();
+    List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
+    for (DataProviderCode dataProviderCode : dataProviderCodes) {
+      DataProviderCodeVO item = new DataProviderCodeVO();
+      item.setDataProviderGroupId(dataProviderCode.getDataProviderGroupId());
+      item.setLabel(dataProviderCode.getLabel());
+      dataProviderCodeVOs.add(item);
+    }
+    return dataProviderCodeVOs;
   }
 
   /**
