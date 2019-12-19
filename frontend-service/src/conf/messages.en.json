@@ -276,8 +276,8 @@
 		"documentDeleteFailedEvent":"Document delete error",
 		"documentUploadCompletedEvent":"Document upload success",
 		"documentUploadFailedEvent":"Document upload error",
-		"loadDataCompletedEvent":"Load data success",
-		"loadDataFailedEvent":"Load data error",
+		"loadDataCompletedEvent":"Load data success at <a href='{:navigateTo}'>dataset</a>",
+		"loadDataFailedEvent":"Load data error at <a href='{:navigateTo}'>dataset</a>",
 		"loadSchemaCompletedEvent":"Load schema completed success",
 		"loadSchemaFailedEvent":"Load schema error",
 		"restoreDatasetSnapshotCompletedEvent":"Restore dataset snapshot success",
@@ -285,9 +285,5 @@
 		"restoreDatasetschemaSnapshotCompletedEvent":"Restore dataset schema success",
 		"restoreDatasetschemaSnapshotFailedEvent":"Restore dataset schema error",
 		"validationFinishedEvent":"Validaton finished"
-
-
-
-
 	}
 }
