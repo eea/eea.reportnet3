@@ -34,17 +34,23 @@ const onFilteringReporters = (originalData, tableIds, reporters, status) => {
   return { labels: labels, datasets: tablesData };
 };
 
-const onFilteringTables = (originalData, tableIds, reporters, status) => {
-  if (isEmpty(originalData)) {
-    return;
-  }
+const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
   let tablesData = [];
-  if (isUndefined(reporters)) {
-    return tablesData;
+  let labels = [];
+  console.log({ reporterFilters });
+  // if (isUndefined(tableIds)) {
+  // }
+  if (isEmpty(originalData) || reporterFilters.length == originalData.labels.length) {
+    console.log('tests');
+    tablesData = [];
+    labels = [];
+  } else {
+    tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
+    tablesData = tablesData.filter(table => filterItem(status, table.label));
+    labels = originalData.labels.filter(label => filterItem(reporterFilters, label));
   }
-  tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
-  tablesData = tablesData.filter(table => filterItem(status, table.label));
-  const labels = originalData.labels.filter(label => filterItem(reporters, label));
+  console.log({ labels });
+  console.log({ tablesData });
   return { labels: labels, datasets: tablesData };
 };
 
@@ -75,9 +81,11 @@ export const filterReducer = (state, { type, payload }) => {
         data: payload
       };
     case 'TABLE_CHECKBOX_ON':
-      tablesIds = state.tableFilter.filter(table => table !== payload.tableId);
+      console.log(state);
+      tablesIds = !isUndefined(state.tableFilter) ? state.tableFilter.filter(table => table !== payload.tableId) : [];
       filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-
+      console.log({ tablesIds });
+      console.log({ filteredTableData });
       return {
         ...state,
         tableFilter: tablesIds,
