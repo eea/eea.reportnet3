@@ -776,7 +776,7 @@ const Dataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
+          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
           onConfirm={() => onDeleteDataflow()}
           onHide={onHideDeleteDataflowDialog}
           styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
