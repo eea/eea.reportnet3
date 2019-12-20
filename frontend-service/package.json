@@ -35,7 +35,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "sonar-scanner": "sonar-scanner"
   },
   "eslintConfig": {
     "extends": "react-app"
