@@ -65,6 +65,18 @@ const apiRepresentative = {
     return response;
   },
 
+  getProviderTypes: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(RepresentativeConfig.getProviderTypes, {}),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
   update: async (representativeId, providerAccount, dataProviderId) => {
     const tokens = userStorage.get();
 

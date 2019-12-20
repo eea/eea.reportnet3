@@ -53,5 +53,6 @@ export const ApiRepresentativeRepository = {
   allDataProviders,
   add,
   deleteById,
+  getProviderTypes,
   update
 };
