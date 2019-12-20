@@ -239,7 +239,6 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void deleteDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
@@ -258,7 +257,6 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void deleteDocumentException2Test() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
