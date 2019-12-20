@@ -87,6 +87,25 @@ const Codelists = withRouter(({ match, history }) => {
                       'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
                   }
                 ]
+              },
+              {
+                name: 'BWDStatus',
+                description: '(Bathing water quality) ',
+                version: '3.1',
+                status: 'Design',
+                items: [
+                  {
+                    code: 0,
+                    label: 'Not classified',
+                    definition: 'Bathing water quality cannot be assessed and classified.'
+                  },
+                  {
+                    code: 1,
+                    label: 'Excellent',
+                    definition:
+                      'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
+                  }
+                ]
               }
             ]
           }
@@ -132,11 +151,11 @@ const Codelists = withRouter(({ match, history }) => {
             className={styles.categoryExpandable}
             expanded={true}
             items={[category.name, category.description]}>
-            <ul className={styles.codelists}>
+            <div className={styles.codelists}>
               {category.codelists.map(codelist => {
                 return <Codelist codelist={codelist} />;
               })}
-            </ul>
+            </div>
           </TreeViewExpandableItem>
         );
       })}

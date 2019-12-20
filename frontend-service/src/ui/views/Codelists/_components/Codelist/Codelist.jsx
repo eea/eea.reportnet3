@@ -34,8 +34,11 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
       <DataTable
         autoLayout={true}
         className={styles.itemTable}
+        editMode="row"
         footer={isDataCustodian ? renderFooter() : null}
+        onRowEditInit={() => {}}
         value={items}>
+        <Column rowEditor={true} style={{ width: '70px', textAlign: 'center' }}></Column>
         <Column field="code" header="Code" sortable={true} />
         <Column field="label" header="Label" sortable={true} />
         <Column field="definition" header="Definition" sortable={true} />
