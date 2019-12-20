@@ -112,7 +112,7 @@ public class LockServiceImplTest {
   public void findLockTest1() {
     Mockito.when(lockRepository.findById(Mockito.any())).thenReturn(Optional.of(new Lock()));
     Mockito.when(lockMapper.entityToClass(Mockito.any())).thenReturn(new LockVO());
-    Assert.assertNotNull(lockServiceImpl.findLock(1));
+    Assert.assertNotNull(lockServiceImpl.findById(1));
   }
 
   /**
@@ -121,7 +121,7 @@ public class LockServiceImplTest {
   @Test
   public void findLockTest2() {
     Mockito.when(lockRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    Assert.assertNull(lockServiceImpl.findLock(1));
+    Assert.assertNull(lockServiceImpl.findById(1));
   }
 
   /**

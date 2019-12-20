@@ -116,6 +116,9 @@ public final class EEAErrorMessage {
   /** The Constant NOT_ENOUGH_PERMISSION. */
   public static final String NOT_ENOUGH_PERMISSION = "Not enough permission to perform";
 
+  /** The Constant METHOD_LOCKED. */
+  public static final String METHOD_LOCKED = "Method locked";
+
   /**
    * Instantiates a new EEA error message.
    */

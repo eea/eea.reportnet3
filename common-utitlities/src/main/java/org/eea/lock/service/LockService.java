@@ -20,7 +20,7 @@ public interface LockService {
    * @param lockType the lock type
    * @param lockCriteria the lock criteria
    * @return the lock VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
       Map<String, Object> lockCriteria) throws EEAException;
@@ -42,12 +42,12 @@ public interface LockService {
   public Boolean removeLockByCriteria(List<Object> args);
 
   /**
-   * Find lock.
+   * Find by id.
    *
    * @param lockId the lock id
    * @return the lock VO
    */
-  public LockVO findLock(Integer lockId);
+  public LockVO findById(Integer lockId);
 
   /**
    * Find all.
@@ -55,4 +55,12 @@ public interface LockService {
    * @return the list
    */
   public List<LockVO> findAll();
+
+  /**
+   * Find by criteria.
+   *
+   * @param lockCriteria the lock criteria
+   * @return the lock VO
+   */
+  public LockVO findByCriteria(Map<String, Object> lockCriteria);
 }

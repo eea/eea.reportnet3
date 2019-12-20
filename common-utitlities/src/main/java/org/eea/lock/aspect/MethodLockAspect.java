@@ -42,16 +42,14 @@ public class MethodLockAspect {
   @Around("@annotation(org.eea.lock.annotation.LockMethod)")
   public Object addLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
-    Object aux = ThreadPropertiesManager.getVariable("user");
+    MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+    Method method = signature.getMethod();
+    LockMethod lockMethod = method.getAnnotation(LockMethod.class);
 
     try {
+      Object user = ThreadPropertiesManager.getVariable("user");
       LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          aux != null ? (String) aux : null, LockType.METHOD, getLockCriteria(joinPoint));
-
-      MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-      Method method = signature.getMethod();
-
-      LockMethod lockMethod = method.getAnnotation(LockMethod.class);
+          user != null ? (String) user : null, LockType.METHOD, getLockCriteria(joinPoint));
 
       Object rtn = joinPoint.proceed();
       if (lockMethod.removeWhenFinish()) {
@@ -61,7 +59,10 @@ public class MethodLockAspect {
       return rtn;
 
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
+      if (lockMethod.isController()) {
+        throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
+      }
+      throw e;
     }
   }
 
@@ -76,14 +77,13 @@ public class MethodLockAspect {
       throws NoSuchMethodException {
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-    String methodName = signature.getMethod().getName();
     Class<?>[] parameterTypes = signature.getMethod().getParameterTypes();
     Annotation[][] annotations = joinPoint.getTarget().getClass()
-        .getMethod(methodName, parameterTypes).getParameterAnnotations();
+        .getMethod(signature.getMethod().getName(), parameterTypes).getParameterAnnotations();
 
     Object[] arguments = joinPoint.getArgs();
     HashMap<String, Object> criteria = new HashMap<>();
-    criteria.put("signature", joinPoint.getSignature().toShortString());
+    criteria.put("signature", signature.toShortString());
     for (int i = 0; i < annotations.length; i++) {
       // annotated parameter, search @LockCriteria annotated parameter if any
       if (annotations[i].length > 0) {

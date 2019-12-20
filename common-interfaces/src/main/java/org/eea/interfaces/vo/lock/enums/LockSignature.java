@@ -5,6 +5,9 @@ package org.eea.interfaces.vo.lock.enums;
  */
 public enum LockSignature {
 
+  /** The empty. */
+  EMPTY(""),
+
   /**
    * DataSetSnapshotControllerImpl.createSnapshot(..)
    */
@@ -21,9 +24,14 @@ public enum LockSignature {
   LOAD_TABLE("DataSetControllerImpl.loadTableData(..)"),
 
   /**
-   * ExecuteValidationCommand.execute(..)
+   * ValidationHelper.executeValidation(..)
    */
-  EXECUTE_VALIDATION("ExecuteValidationCommand.execute(..)"),
+  EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
+
+  /**
+   * The force execute validation.
+   */
+  FORCE_EXECUTE_VALIDATION("ValidationControllerImpl.validateDataSetData(..)"),
 
   /**
    * The create schema snapshot.
