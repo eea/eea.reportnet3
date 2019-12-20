@@ -11,9 +11,11 @@ export class Dataset {
     tableStatisticPercentages,
     tableStatisticValues,
     isReleased,
-    levelErrorTypes
+    levelErrorTypes,
+    datasetSchemaDescription
   ) {
     this.datasetId = datasetId;
+    this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;
     this.errors = errors;

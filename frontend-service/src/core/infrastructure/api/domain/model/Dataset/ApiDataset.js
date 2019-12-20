@@ -441,6 +441,29 @@ export const apiDataset = {
       return false;
     }
   },
+  updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/${datasetId}/datasetSchema/updateDatasetSchemaDescription`
+          : getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
+              datasetId,
+              datasetSchemaDescription
+            }),
+        data: {},
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset design name: ${error}`);
+      return false;
+    }
+  },
   updateSchemaNameById: async (datasetId, datasetSchemaName) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
@@ -455,13 +478,38 @@ export const apiDataset = {
     });
     return response.status;
   },
+  updateTableDescriptionDesign: async (tableSchemaId, tableSchemaDescription, datasetId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/tableSchema`
+          : getUrl(DatasetConfig.updateTableDesign, {
+              datasetId
+            }),
+        data: {
+          idTableSchema: tableSchemaId,
+          description: tableSchemaDescription
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset design name: ${error}`);
+      return false;
+    }
+  },
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/dataschema/${datasetId}/tableSchema`
-          : getUrl(DatasetConfig.updateTableNameDesign, {
+          : getUrl(DatasetConfig.updateTableDesign, {
               datasetId
             }),
         data: {

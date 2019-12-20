@@ -1804,7 +1804,7 @@ textarea {
 }
 
 textarea {
-  min-height: 5rem;
+  /* min-height: 5rem; */
   font-family: arial;
   resize: none;
 }
