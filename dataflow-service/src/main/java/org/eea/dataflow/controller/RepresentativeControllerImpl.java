@@ -32,11 +32,15 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/representative")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /** The representative service. */
+  /**
+   * The representative service.
+   */
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -50,6 +54,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
+   *
    * @return the long
    */
   @Override
@@ -76,6 +81,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find all data provider by group id.
    *
    * @param groupId the group id
+   *
    * @return the list
    */
   @Override
@@ -105,6 +111,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
    */
   @Override
@@ -114,7 +121,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    List<RepresentativeVO> representativeVOs;
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {

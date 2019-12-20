@@ -83,7 +83,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The dataset controller. */
+  /**
+   * The dataset controller.
+   */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
   /**
@@ -93,15 +95,21 @@ public class DataflowServiceImpl implements DataflowService {
   private UserManagementControllerZull userManagementControllerZull;
 
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
@@ -153,8 +161,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
-   *
-   *
    *
    * @return the by status
    *
@@ -327,6 +333,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -357,6 +364,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Update data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -364,7 +372,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
     // we find if the name of this dataflow exist
-    if (dataflow.isPresent() && dataflow.get().getId() != dataflowVO.getId()) {
+    if (dataflow.isPresent() && !dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
@@ -384,6 +392,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -398,7 +407,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the datasets id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -445,6 +456,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
+   *
    * @throws Exception the exception
    */
   @Override
@@ -466,7 +478,7 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflow && null != dataflow.getDesignDatasets()
+    if (null != dataflow.getDesignDatasets()
         && !dataflow.getDesignDatasets().isEmpty()) {
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
         try {
@@ -503,7 +515,6 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
   }
-
 
 
 }
