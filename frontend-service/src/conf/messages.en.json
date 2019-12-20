@@ -229,7 +229,8 @@
 		"selectAll":"Select All",		
 		"selectContributorRole":"Select Role",	
 		"selectFile": "Select or drag here your dataset (.csv)",
-		"selectLang": "Select language",	
+		"selectLang": "Select language",
+		"settings": "Settings",
 		"showHideColumns": "Show/Hide columns",
 		"showValidations": "Show validations",
 		"snapshots": "Save copy",
@@ -275,6 +276,21 @@
 		"warning": "Warning",
 		"webLinks": "Web links",
 		"webForm": "Webform",
-		"yes": "Yes"
+		"yes": "Yes",
+		"deleteTableCompletedEvent": "The table was deleted at <a href='{:navigateTo}'>dataset</a>",
+		"deleteTableSchemaCompletedEvent": "The table schema was deleted",
+		"documentDeleteCompletedEvent": "The document was deleted",
+		"documentDeleteFailedEvent": "Document deletion failed",
+		"documentUploadCompletedEvent": "The document was uploaded",
+		"documentUploadFailedEvent": "Document upload failed",
+		"loadDataCompletedEvent": "Loaded data completed at <a href='{:navigateTo}'>dataset</a>",
+		"loadDataFailedEvent": "Failed loading data at <a href='{:navigateTo}'>dataset</a>",
+		"loadSchemaCompletedEvent": "Loaded schema completed",
+		"loadSchemaFailedEvent": "Failed loading schema",
+		"restoreDatasetSnapshotCompletedEvent": "Restored snapshot",
+		"restoreDatasetSnapshotFailedEvent": "Snapshot restoration failed",
+		"restoreDatasetschemaSnapshotCompletedEvent": "Restored snapshot",
+		"restoreDatasetschemaSnapshotFailedEvent": "Snapshot restoration failed",
+		"validationFinishedEvent": "Validaton finished"
 	}
 }
