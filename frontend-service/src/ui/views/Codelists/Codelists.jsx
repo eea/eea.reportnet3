@@ -1,0 +1,141 @@
+import React, { useEffect, useContext, useState } from 'react';
+import { withRouter } from 'react-router-dom';
+
+import styles from './Codelists.module.css';
+
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Codelist } from './_components/Codelist';
+import { InputText } from 'ui/views/_components/InputText';
+import { MainLayout } from 'ui/views/_components/Layout';
+import { Spinner } from 'ui/views/_components/Spinner';
+import { Title } from 'ui/views/_components/Title';
+import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
+
+const Codelists = withRouter(({ match, history }) => {
+  const resources = useContext(ResourcesContext);
+
+  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      onLoadCategories();
+    } catch (error) {
+      console.error(error.response);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setBreadCrumbItems([{ label: resources.messages['codelists'], icon: 'home' }]);
+  }, [history, resources.messages]);
+
+  const onFilter = filter => {
+    // const inmCategories =
+  };
+
+  const onLoadCategories = async () => {
+    try {
+      let loadedCategories = {
+        categories: [
+          {
+            name: 'wise',
+            description: '(WISE - Water Information System of Europe)',
+            codelists: [
+              {
+                name: 'BWDObservationStatus',
+                description: '(Bathing water observation status)',
+                version: '1.0',
+                status: 'Ready',
+                items: [
+                  {
+                    code: 'confirmedValue',
+                    label: 'Confirmed value',
+                    definition: 'Status flag to confirm that the reported observation value is...'
+                  },
+                  {
+                    code: 'limitOfDetectionValue',
+                    label: 'Limit of detection value',
+                    definition: 'Status flag to inform that a specific observed...'
+                  }
+                ]
+              },
+              {
+                name: 'BWDStatus',
+                description: '(Bathing water quality) ',
+                version: '3.0',
+                status: 'Design',
+                items: [
+                  {
+                    code: 0,
+                    label: 'Not classified',
+                    definition: 'Bathing water quality cannot be assessed and classified.'
+                  },
+                  {
+                    code: 1,
+                    label: 'Excellent',
+                    definition:
+                      'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      };
+      // await Categorieservice.all(`${match.params.dataflowId}`);
+      // loadedCategories = sortBy(loadedCategories, ['Document', 'id']);
+      setCategories(loadedCategories);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.CODELISTS));
+        console.error('error', error.response);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const layout = children => {
+    return (
+      <MainLayout>
+        <BreadCrumb model={breadCrumbItems} />
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
+  };
+
+  if (isLoading) {
+    return layout(<Spinner />);
+  }
+
+  return layout(
+    <React.Fragment>
+      <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
+      <InputText onKeyDown={e => onFilter(e.target.value)} />
+      {console.log({ categories })}
+      {categories.categories.map(category => {
+        return (
+          <TreeViewExpandableItem title={`${category.name} ${category.description}`} expanded={true}>
+            <ul className={styles.codelists}>
+              {category.codelists.map(codelist => {
+                return <Codelist codelist={codelist} />;
+              })}
+            </ul>
+          </TreeViewExpandableItem>
+        );
+      })}
+    </React.Fragment>
+  );
+});
+
+export { Codelists };

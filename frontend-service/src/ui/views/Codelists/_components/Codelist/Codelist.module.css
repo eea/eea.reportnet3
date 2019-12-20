@@ -1,0 +1,12 @@
+.codelistItem {
+  font-size: 12pt;
+  cursor: pointer;
+}
+
+.codelistItem span {
+  width: 25%;
+  display: inline-block;
+}
+.itemTable {
+  margin: 0 0 0 1rem;
+}

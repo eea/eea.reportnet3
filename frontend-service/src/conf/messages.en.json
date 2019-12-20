@@ -16,6 +16,8 @@
 		"chooseChartColor": "Choose your dashboard color",
 		"cleanFilters": "Clean filters",
 		"close": "Close",
+		"codelist": "Codelist",
+		"codelists": "Codelists",
 		"completedDataflowText": "These are the completed dataflows",
 		"completedDataflowTitle": "Completed dataflows",
 		"confirmDeleteRow": "Are you sure you want to delete this row?",

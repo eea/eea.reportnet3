@@ -2,6 +2,7 @@ export const routes = {
   ACCESS_POINT: '/',
   EULOGIN: '/eulogin',
   LOGIN: '/',
+  CODELISTS: '/codelists',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATAFLOWS: '/dataflows',

@@ -1,0 +1,19 @@
+.codelists {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  list-style: none;
+}
+
+.codelists li {
+  height: 2vw;
+  margin: 0.5rem 0 0.5rem 1rem;
+  padding: 1rem 0 2rem 1rem;
+  border-top: 1px solid var(--gray-75);
+  border-bottom: 1px solid var(--gray-75);
+  background-color: var(--gray-5);
+}
+
+.codelists li:hover {
+  background-color: var(--gray-25);
+}
