@@ -3,7 +3,7 @@
 }
 .inputFieldDescription {
   margin-left: 0.4rem !important;
-  width: 40vw;
+  width: 30vw;
 }
 .draggableFieldDiv {
   display: flex;
@@ -27,7 +27,7 @@
 
 .dropdownFieldType {
   margin-left: 0.4rem;
-  width: 15vw%;
+  width: 20vw;
 }
 
 .deleteButton {

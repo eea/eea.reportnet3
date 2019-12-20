@@ -238,7 +238,7 @@ const Dataflow = withRouter(({ history, match }) => {
             }
           },
           {
-            label: resources.messages['properties'],
+            label: resources.messages['settings'],
             icon: 'settings',
             show: true,
             command: e => {
@@ -256,7 +256,7 @@ const Dataflow = withRouter(({ history, match }) => {
             }
           },
           {
-            label: resources.messages['properties'],
+            label: resources.messages['settings'],
             icon: 'settings',
             show: true,
             command: e => {
