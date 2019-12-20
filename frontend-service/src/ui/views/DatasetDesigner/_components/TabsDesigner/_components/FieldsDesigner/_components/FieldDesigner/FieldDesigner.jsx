@@ -315,7 +315,6 @@ export const FieldDesigner = ({
     if (event.key === 'Escape') {
       input === 'NAME' ? setFieldValue(initialFieldValue) : setFieldDescriptionValue(initialDescriptionValue);
     } else if (event.key == 'Enter') {
-      event.preventDefault();
       if (input === 'NAME') {
         onBlurFieldName(event.target.value);
       }
@@ -423,25 +422,6 @@ export const FieldDesigner = ({
           required={!isUndefined(fieldValue) ? fieldValue === '' : fieldName === ''}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
         />
-        <Dropdown
-          className={styles.dropdownFieldType}
-          // filter={true}
-          // filterBy="fieldType,value"
-          // filterPlaceholder={resources.messages['newFieldTypePlaceHolder']}
-          itemTemplate={fieldTypeTemplate}
-          onChange={e => onChangeFieldType(e.target.value)}
-          onMouseDown={event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          optionLabel="fieldType"
-          options={fieldTypes}
-          required={true}
-          placeholder={resources.messages['newFieldTypePlaceHolder']}
-          // showClear={true}
-          scrollHeight="450px"
-          value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
-        />
         <InputTextarea
           autoFocus={false}
           collapsedHeight={30}
@@ -460,6 +440,25 @@ export const FieldDesigner = ({
           onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
           placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
           value={!isUndefined(fieldDescriptionValue) ? fieldDescriptionValue : fieldDescription}
+        />
+        <Dropdown
+          className={styles.dropdownFieldType}
+          // filter={true}
+          // filterBy="fieldType,value"
+          // filterPlaceholder={resources.messages['newFieldTypePlaceHolder']}
+          itemTemplate={fieldTypeTemplate}
+          onChange={e => onChangeFieldType(e.target.value)}
+          onMouseDown={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          optionLabel="fieldType"
+          options={fieldTypes}
+          required={true}
+          placeholder={resources.messages['newFieldTypePlaceHolder']}
+          // showClear={true}
+          scrollHeight="450px"
+          value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
         {!addField ? (
           <a

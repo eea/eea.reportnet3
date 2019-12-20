@@ -8,6 +8,7 @@ import { camelCase } from 'lodash';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationService } from 'core/services/Notification';
+import { ResourcesContext } from '../Contexts/ResourcesContext';
 
 const notificationReducer = (state, { type, payload }) => {
   switch (type) {
@@ -41,21 +42,18 @@ const notificationReducer = (state, { type, payload }) => {
 
 const NotificationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [] });
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   return (
     <NotificationContext.Provider
       value={{
         ...state,
         add: notificationDTO => {
-          console.log('notificationDTO', notificationDTO);
-          const { type, content = {} } = notificationDTO;
-          console.log('camelCase(key', camelCase(type));
-          console.log('resources.messages[camelCase(type)]', resources.messages[camelCase(type)]);
+          const { type, content } = notificationDTO;
           const notification = NotificationService.parse({
             type,
             content,
-            message: resources.messages[camelCase(type)],
+            message: resourcesContext.messages[camelCase(type)],
             config: config.notifications,
             routes
           });
