@@ -16,6 +16,7 @@ import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -544,7 +545,7 @@ public class DataFlowServiceImplTest {
     resourceList.add(resource);
 
 
-    doNothing().when(documentControllerZuul).deleteDocument(1L);
+
     doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
@@ -553,10 +554,10 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
-
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
   }
 
   /**
@@ -574,10 +575,10 @@ public class DataFlowServiceImplTest {
         .thenReturn(new ArrayList<>());
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(new ArrayList<>());
-
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
   }
 
   /**
@@ -588,6 +589,13 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void deleteDataFlowThrowsDocuments() throws Exception {
 
+    Dataflow dataflow = new Dataflow();
+    List<Document> listDocu = new ArrayList<>();
+    Document docus = new Document();
+    docus.setId(1L);
+    listDocu.add(docus);
+    dataflow.setId(1L);
+    dataflow.setDocuments(listDocu);
     DataFlowVO dataFlowVO = new DataFlowVO();
     ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
     reportingDatasetVO.setId(1L);
@@ -609,7 +617,7 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-    doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L);
+    doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L, Boolean.FALSE);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -617,6 +625,8 @@ public class DataFlowServiceImplTest {
         .thenReturn(new ArrayList<>());
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findById(1L)).thenReturn(Optional.of(dataflow));
+
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {
@@ -654,8 +664,6 @@ public class DataFlowServiceImplTest {
     resourceList.add(resource);
 
 
-
-    doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -663,7 +671,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
-
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     doThrow(MockitoException.class).when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
@@ -701,9 +709,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
-
-    doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -711,8 +716,9 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
-
-    doThrow(MockitoException.class).when(dataflowRepository).deleteNativeDataflow(1L);
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.deleteDataFlow(1L);
+    doThrow(MockitoException.class).when(dataflowRepository).delete(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {
@@ -750,8 +756,6 @@ public class DataFlowServiceImplTest {
     resourceList.add(resource);
 
 
-
-    doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -759,7 +763,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
-
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     doThrow(MockitoException.class).when(resourceManagementControllerZull)
         .deleteResource(Mockito.any());
     try {

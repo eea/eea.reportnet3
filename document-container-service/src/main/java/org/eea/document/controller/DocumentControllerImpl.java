@@ -129,22 +129,26 @@ public class DocumentControllerImpl implements DocumentController {
 
 
   /**
-   * Delete document.
+   * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
+   * your own
    *
    * @param documentId the document id
-   *
+   * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
-  public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
+  public void deleteDocument(@PathVariable("documentId") final Long documentId,
+      @RequestParam(value = "deleteMetabase", required = false,
+          defaultValue = "true") final Boolean deleteMetabase)
+      throws Exception {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      documentService.deleteDocument(documentId, document.getDataflowId());
+      documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
     } catch (final FeignException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {
@@ -295,6 +299,7 @@ public class DocumentControllerImpl implements DocumentController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
 
 
 }

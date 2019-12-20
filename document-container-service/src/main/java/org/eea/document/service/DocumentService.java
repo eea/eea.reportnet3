@@ -44,7 +44,8 @@ public interface DocumentService {
    * @param dataFlowId the data flow id
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final Long documentId, final Long dataFlowId) throws EEAException;
+  void deleteDocument(final Long documentId, final Long dataFlowId, final Boolean deleteMetabase)
+      throws EEAException;
 
   /**
    * Upload schema snapshot.

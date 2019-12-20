@@ -234,7 +234,7 @@ public class DocumentControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionNullTest() throws Exception {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
-    documentController.deleteDocument(1L);
+    documentController.deleteDocument(1L, null);
   }
 
   /**
@@ -246,8 +246,8 @@ public class DocumentControllerImplTest {
   public void deleteDocumentExceptionTest() throws Exception {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
-        .deleteDocument(Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L);
+        .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteDocument(1L, null);
   }
 
   /**
@@ -259,8 +259,8 @@ public class DocumentControllerImplTest {
   public void deleteDocumentException2Test() throws Exception {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
-        .deleteDocument(Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L);
+        .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteDocument(1L, null);
   }
 
   /**
@@ -271,7 +271,7 @@ public class DocumentControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException3Test() throws Exception {
     doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
-    documentController.deleteDocument(1L);
+    documentController.deleteDocument(1L, null);
   }
 
   /**
@@ -284,9 +284,10 @@ public class DocumentControllerImplTest {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
-    doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L);
-    Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any());
+    doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteDocument(1L, null);
+    Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
