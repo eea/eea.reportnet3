@@ -246,7 +246,7 @@ public class DocumentServiceImplTest {
     doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
   }
 
   /**
@@ -265,7 +265,7 @@ public class DocumentServiceImplTest {
     doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
   }
 
   /**
@@ -283,7 +283,7 @@ public class DocumentServiceImplTest {
         Mockito.any());
     doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.TRUE);
     Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
   }
 

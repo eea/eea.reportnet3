@@ -11,10 +11,12 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
+import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -28,7 +30,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -113,6 +114,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
+
+  @Autowired
+  private WebLinkRepository webLinkRepository;
   /**
    * The Constant LOG.
    */
@@ -161,6 +165,8 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
+   *
    *
    * @return the by status
    *
@@ -333,7 +339,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -364,7 +369,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Update data flow.
    *
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -392,7 +396,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
-   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -407,9 +410,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param dataschemaId the dataschema id
-   *
    * @return the datasets id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -456,19 +457,23 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   *
    * @throws Exception the exception
    */
   @Override
   public void deleteDataFlow(Long idDataflow) throws Exception {
-    final DataFlowVO dataflow = getById(idDataflow);
+    // take the jpa entity
+    final DataFlowVO dataflowVO = getById(idDataflow);
+    // use it to take all datasets Desing
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow && null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
-      for (DocumentVO document : dataflow.getDocuments()) {
+    if (null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
+      for (Document document : dataflow.getDocuments()) {
         try {
-          documentControllerZuul.deleteDocument(document.getId());
+          // we pass bolean to say dont delete metabase because jpa entiti will be delete the
+          // property document
+          documentControllerZuul.deleteDocument(document.getId(), Boolean.FALSE);
         } catch (EEAException e) {
           LOG.error("Error deleting document with id {}", document.getId());
           throw new EEAException(new StringBuilder().append("Error Deleting document ")
@@ -477,10 +482,11 @@ public class DataflowServiceImpl implements DataflowService {
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
+
+
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflow.getDesignDatasets()
-        && !dataflow.getDesignDatasets().isEmpty()) {
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+    if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
+      for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
         try {
           dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
         } catch (Exception e) {
@@ -494,9 +500,8 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
-    // we delete the dataflow in metabase at the end
     try {
-      dataflowRepository.deleteNativeDataflow(idDataflow);
+      dataflowRepository.deleteById(idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
@@ -515,6 +520,7 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
   }
+
 
 
 }

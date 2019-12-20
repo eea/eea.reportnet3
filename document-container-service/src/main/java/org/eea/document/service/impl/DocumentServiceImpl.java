@@ -206,17 +206,21 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentId the document id
    * @param dataFlowId the data flow id
-   *
+   * @param deleteMetabase the delete metabase
    * @throws EEAException the EEA exception
    */
   @Override
   @Modified
   @Async
-  public void deleteDocument(Long documentId, Long dataFlowId) throws EEAException {
+  public void deleteDocument(Long documentId, Long dataFlowId, Boolean deleteMetabase)
+      throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
-      dataflowController.deleteDocument(documentId);
+      if (Boolean.TRUE.equals(deleteMetabase)) {
+        dataflowController.deleteDocument(documentId);
+
+      }
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);

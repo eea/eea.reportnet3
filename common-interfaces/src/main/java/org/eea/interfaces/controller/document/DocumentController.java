@@ -50,13 +50,17 @@ public interface DocumentController {
   Resource getDocument(@PathVariable("documentId") final Long documentId);
 
   /**
-   * Delete document.
+   * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
+   * your own
    *
    * @param documentId the document id
+   * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
   @DeleteMapping(value = "/{documentId}")
-  void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
+  void deleteDocument(@PathVariable("documentId") final Long documentId,
+      @RequestParam("deleteMetabase") final Boolean deleteMetabase) throws Exception;
+
 
   /**
    * Update document.
