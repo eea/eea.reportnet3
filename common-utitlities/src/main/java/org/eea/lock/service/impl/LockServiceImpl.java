@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -45,7 +46,7 @@ public class LockServiceImpl implements LockService {
    * @param lockType the lock type
    * @param lockCriteria the lock criteria
    * @return the lock VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
@@ -61,7 +62,7 @@ public class LockServiceImpl implements LockService {
     }
 
     LOG_ERROR.error("Already locked: {}", lockVO.getId());
-    throw new EEAException("Method locked: " + lockVO);
+    throw new EEAException(EEAErrorMessage.METHOD_LOCKED + ": " + lockVO);
   }
 
   /**
@@ -89,13 +90,13 @@ public class LockServiceImpl implements LockService {
   }
 
   /**
-   * Find lock.
+   * Find by id.
    *
    * @param lockId the lock id
    * @return the lock VO
    */
   @Override
-  public LockVO findLock(Integer lockId) {
+  public LockVO findById(Integer lockId) {
     Lock lock = lockRepository.findById(lockId).orElse(null);
     if (lock != null) {
       return lockMapper.entityToClass(lock);
@@ -123,5 +124,16 @@ public class LockServiceImpl implements LockService {
    */
   private Integer generateHashCode(List<Object> args) {
     return args.hashCode();
+  }
+
+  /**
+   * Find by criteria.
+   *
+   * @param lockCriteria the lock criteria
+   * @return the lock VO
+   */
+  @Override
+  public LockVO findByCriteria(Map<String, Object> lockCriteria) {
+    return findById(generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())));
   }
 }

@@ -131,9 +131,8 @@ public class ValidationHelperTest {
     ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<>();;
     processesMap.put("uuid", 0);
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     validationHelper.checkFinishedValidations(1L, "uuid");
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
 }
