@@ -376,7 +376,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
     // we find if the name of this dataflow exist
-    if (dataflow.isPresent() && dataflow.get().getId().equals(dataflowVO.getId())) {
+    if (dataflow.isPresent() && !dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
@@ -468,7 +468,7 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow && null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
+    if (null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
       for (Document document : dataflow.getDocuments()) {
         try {
           // we pass bolean to say dont delete metabase because jpa entiti will be delete the
@@ -485,8 +485,7 @@ public class DataflowServiceImpl implements DataflowService {
 
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflowVO && null != dataflowVO.getDesignDatasets()
-        && !dataflowVO.getDesignDatasets().isEmpty()) {
+    if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
       for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
         try {
           dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
