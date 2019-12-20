@@ -493,9 +493,8 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
-    // we delete the dataflow in metabase at the end
     try {
-      dataflowRepository.delete(dataflow);
+      dataflowRepository.deleteById(idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
