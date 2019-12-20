@@ -119,6 +119,12 @@ public final class EEAErrorMessage {
   /** The Constant METHOD_LOCKED. */
   public static final String METHOD_LOCKED = "Method locked";
 
+  /** The Constant REPRESENTATIVE_TYPE_INCORRECT. */
+  public static final String REPRESENTATIVE_TYPE_INCORRECT = "Representative type incorrect";
+
+  /** The Constant REPRESENTATIVE_NOT_FOUND. */
+  public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
+
   /**
    * Instantiates a new EEA error message.
    */

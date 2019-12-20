@@ -41,7 +41,7 @@ class DropdownFilter extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { filters } = this.props;
-    if (prevProps.filters !== filters) {
+    if (filters && prevProps.filters !== filters) {
       const fields = filters.map(column => ({
         checked: true,
         label: column.label,

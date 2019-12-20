@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -109,7 +110,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
   /**
@@ -118,11 +121,15 @@ public class DataFlowServiceImplTest {
   @Mock
   private DocumentMapper documentMapper;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Mock
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Mock
   private DocumentControllerZuul documentControllerZuul;
   /**
@@ -428,8 +435,10 @@ public class DataFlowServiceImplTest {
   public void updateDataFlowExist() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataFlowVO.setId(1L);
+    Dataflow dataflowResponse = new Dataflow();
+    dataflowResponse.setId(2l);
     when(dataflowRepository.findByName(dataFlowVO.getName()))
-        .thenReturn(Optional.of(new Dataflow()));
+        .thenReturn(Optional.of(dataflowResponse));
     try {
       dataflowServiceImpl.updateDataFlow(dataFlowVO);
     } catch (EEAException ex) {
@@ -543,7 +552,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
     doNothing().when(documentControllerZuul).deleteDocument(1L);
     doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
@@ -653,8 +661,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
-
     doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
@@ -701,8 +707,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
-
     doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
@@ -748,8 +752,6 @@ public class DataFlowServiceImplTest {
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
     resourceList.add(resource);
-
-
 
     doNothing().when(documentControllerZuul).deleteDocument(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
