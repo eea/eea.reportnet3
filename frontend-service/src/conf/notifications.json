@@ -45,6 +45,10 @@
           "refresh":false
         },
         {
+          "key":"LOAD_SCHEMA_FAILED_EVENT",
+          "refresh":false
+        },
+        {
           "key":"ADD_RECORDS_BY_ID_ERROR",
           "navigateTo":{
             "section": "DATASET",
@@ -65,8 +69,7 @@
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
           },
-          "refresh":false,
-          "fixed":true
+          "refresh":false
         },
         {
           "key":"DELETE_TABLE_COMPLETED_EVENT",
@@ -106,6 +109,22 @@
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
           },
+          "refresh":false
+        },
+        {
+          "key":"LOAD_SCHEMA_COMPLETED_EVENT",
+          "refresh":false
+        },
+        {
+          "key":"VALIDATION_FINISHED_EVENT",
+          "navigateTo":{
+            "section": "DOCUMENTS",
+            "parameters":["dataflowId", "datasetId"]
+          },
+          "refresh":false
+        },
+        {
+          "key":"DELETE_TABLE_SCHEMA_COMPLETED_EVENT",
           "refresh":false
         },
         {
