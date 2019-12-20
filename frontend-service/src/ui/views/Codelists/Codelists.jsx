@@ -121,11 +121,17 @@ const Codelists = withRouter(({ match, history }) => {
   return layout(
     <React.Fragment>
       <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
-      <InputText onKeyDown={e => onFilter(e.target.value)} />
-      {console.log({ categories })}
+      <span className="p-float-label">
+        <InputText id="filterInput" onKeyDown={e => onFilter(e.target.value)} />
+        <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
+      </span>
+      <hr />
       {categories.categories.map(category => {
         return (
-          <TreeViewExpandableItem title={`${category.name} ${category.description}`} expanded={true}>
+          <TreeViewExpandableItem
+            className={styles.categoryExpandable}
+            expanded={true}
+            items={[category.name, category.description]}>
             <ul className={styles.codelists}>
               {category.codelists.map(codelist => {
                 return <Codelist codelist={codelist} />;

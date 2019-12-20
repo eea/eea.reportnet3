@@ -149,6 +149,7 @@
 		"fileDescription": "File description",
 		"fileTitle":"File title",
 		"filter": "Filter",
+		"filterCodelists":"Filter codelists",
 		"filtered": "Filtered",
 		"filters": "Filters",
 		"filterByDataset": "Filter by dataset",

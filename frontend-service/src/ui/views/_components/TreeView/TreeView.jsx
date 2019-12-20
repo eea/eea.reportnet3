@@ -30,7 +30,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem
-              title={!Number.isInteger(Number(propertyName)) ? camelCaseToNormal(propertyName) : ''}
+              items={!Number.isInteger(Number(propertyName)) ? [camelCaseToNormal(propertyName)] : []}
               expanded={true}>
               {groupableProperties.indexOf(propertyName.toLowerCase()) > -1
                 ? groupFields(property)

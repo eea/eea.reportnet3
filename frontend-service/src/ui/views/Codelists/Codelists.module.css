@@ -5,15 +5,13 @@
   list-style: none;
 }
 
-.codelists li {
-  height: 2vw;
-  margin: 0.5rem 0 0.5rem 1rem;
+.categoryExpandable {
+  height: 1vw;
   padding: 1rem 0 2rem 1rem;
-  border-top: 1px solid var(--gray-75);
-  border-bottom: 1px solid var(--gray-75);
-  background-color: var(--gray-5);
+  /* background-color: var(--gray-5); */
+  display: flex;
 }
 
-.codelists li:hover {
+/* .codelists li:hover {
   background-color: var(--gray-25);
-}
+} */

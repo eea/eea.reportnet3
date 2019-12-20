@@ -44,7 +44,8 @@ import {
   faHome,
   faCloudUploadAlt,
   faThList,
-  faMinus
+  faMinus,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -56,7 +57,8 @@ import {
   faQuestionCircle as farQuestionCircle,
   faCircle,
   faMinusSquare,
-  faPlusSquare
+  faPlusSquare,
+  faEyeSlash
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -157,6 +159,10 @@ export const AwesomeIcons = icon => {
       return faTrashAlt;
     case 'dropDown':
       return faCaretDown;
+    case 'eye':
+      return faEye;
+    case 'eyeSlash':
+      return faEyeSlash;
     case 'barChart':
       return faChartBar;
     case 'dataset':

@@ -1,12 +1,27 @@
 .codelistItem {
   font-size: 12pt;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
-.codelistItem span {
-  width: 25%;
-  display: inline-block;
+.codelistItem {
+  margin: 0 1.5rem 0 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--gray-25);
+  display: flex;
+  /* border-bottom: 1px solid var(--gray-25); */
 }
+.codelistItem span {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .itemTable {
-  margin: 0 0 0 1rem;
+  margin: 0 0 1rem 1rem;
+}
+.codelistExpandable {
+  height: 1vw;
+  padding: 1rem 0 2rem 1rem;
+  /* background-color: var(--gray-5); */
+  display: flex;
 }

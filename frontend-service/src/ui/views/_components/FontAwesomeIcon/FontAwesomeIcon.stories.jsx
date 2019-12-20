@@ -138,5 +138,13 @@ storiesOf('Used fontawesome icons', module).add('UsedIcons', () => (
       icon={AwesomeIcons('plusSquare')}
       style={{ fontSize: '1.6rem', marginRight: '1rem', marginTop: '1rem' }}
     />
+    <FontAwesomeIcon
+      icon={AwesomeIcons('eyeSlash')}
+      style={{ fontSize: '1.6rem', marginRight: '1rem', marginTop: '1rem' }}
+    />
+    <FontAwesomeIcon
+      icon={AwesomeIcons('eye')}
+      style={{ fontSize: '1.6rem', marginRight: '1rem', marginTop: '1rem' }}
+    />
   </div>
 ));
