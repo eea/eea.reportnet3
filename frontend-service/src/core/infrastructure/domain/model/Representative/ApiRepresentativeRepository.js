@@ -3,6 +3,7 @@ import { Representative } from 'core/domain/model/Representative/Representative'
 
 const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
+  console.log('representativesDTO', representativesDTO);
 
   const representativesList = representativesDTO.Representatives.map(
     representativeDTO =>
@@ -18,6 +19,7 @@ const allRepresentatives = async dataflowId => {
     representatives: representativesList
   };
 
+  console.log('dataToConsume', dataToConsume);
   return dataToConsume;
 };
 
@@ -31,7 +33,6 @@ const allDataProviders = async dataProviderGroupId => {
 const getProviderTypes = async () => {
   const dataProviderTypesDTO = await apiRepresentative.getProviderTypes();
   //TODO Object to Consumable obj parsing
-
   return dataProviderTypesDTO;
 };
 
