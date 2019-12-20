@@ -84,7 +84,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The dataset controller. */
+  /**
+   * The dataset controller.
+   */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
   /**
@@ -94,15 +96,21 @@ public class DataflowServiceImpl implements DataflowService {
   private UserManagementControllerZull userManagementControllerZull;
 
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
@@ -368,7 +376,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
     // we find if the name of this dataflow exist
-    if (dataflow.isPresent() && dataflow.get().getId() != dataflowVO.getId()) {
+    if (dataflow.isPresent() && dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {

@@ -110,7 +110,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
   /**
@@ -119,11 +121,15 @@ public class DataFlowServiceImplTest {
   @Mock
   private DocumentMapper documentMapper;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Mock
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Mock
   private DocumentControllerZuul documentControllerZuul;
   /**
@@ -429,8 +435,10 @@ public class DataFlowServiceImplTest {
   public void updateDataFlowExist() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataFlowVO.setId(1L);
+    Dataflow dataflowResponse = new Dataflow();
+    dataflowResponse.setId(2l);
     when(dataflowRepository.findByName(dataFlowVO.getName()))
-        .thenReturn(Optional.of(new Dataflow()));
+        .thenReturn(Optional.of(dataflowResponse));
     try {
       dataflowServiceImpl.updateDataFlow(dataFlowVO);
     } catch (EEAException ex) {
