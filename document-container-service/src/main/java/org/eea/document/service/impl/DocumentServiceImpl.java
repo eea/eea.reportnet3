@@ -366,10 +366,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteFileNode(session,
           PATH_DELIMITER_SNAPSHOT_DELETE + designDatasetId.toString(), documentName);
       LOG.info("File deleted...");
-
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
-
-
     } catch (Exception e) {
       LOG_ERROR.error("Error in deleteSnapshotDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
