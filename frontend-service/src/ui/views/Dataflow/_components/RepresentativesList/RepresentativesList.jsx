@@ -52,13 +52,13 @@ const RepresentativesList = ({ dataflowId }) => {
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
       payload: response
     });
-
     formDispatcher({
       type: 'CREATE_UNUSED_OPTIONS_LIST'
     });
   }, []);
 
   const providerAccountInputColumnTemplate = rowData => {
+    console.log('rowData', rowData);
     let inputData = rowData.providerAccount;
     return (
       <input
@@ -66,14 +66,14 @@ const RepresentativesList = ({ dataflowId }) => {
         placeholder={'Data provider account...'}
         onChange={e =>
           formDispatcher({
-            type: 'ON_EMAIL_CHANGE',
+            type: 'ON_ACCOUNT_CHANGE',
             payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
           })
         }
         onBlur={e =>
           formDispatcher({
-            type: 'UPDATE_EMAIL',
-            payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
+            type: rowData.representativeId !== null ? 'UPDATE_ACCOUNT' : 'ADD_DATA_PROVIDER',
+            payload: { dataflowId, providerAccount: e.target.value, dataProviderId: parseInt(rowData.dataProviderId) }
           })
         }
       />

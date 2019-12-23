@@ -1,14 +1,16 @@
 import { includes } from 'lodash';
 
 import { RepresentativeService } from 'core/services/Representative';
+import { Representative } from 'core/domain/model/Representative/Representative';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyField = { representativeId: null, dataProviderId: '', providerAccount: '' };
+  const emptyRepresentative = new Representative(null, '', '');
 
   let updatedList = [];
   switch (type) {
     case 'ADD_DATA_PROVIDER':
-      // await RepresentativeService.add( payload.dataflowId, payload.providerAccount, payload.dataProviderId);
+      // RepresentativeService.add( payload.dataflowId, payload.providerAccount, payload.dataProviderId);
+      RepresentativeService.add(payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       console.log('ADD_DATA_PROVIDER', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       return state;
 
@@ -30,8 +32,8 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      // await RepresentativeService.deleteById( formState.representativeIdToDelete);
       console.log('Delete REPRESENTATIVE with representativeId :', state.representativeIdToDelete);
+      RepresentativeService.deleteById(state.representativeIdToDelete);
 
       return {
         ...state,
@@ -40,13 +42,6 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
       console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', payload);
-
-      /*    const dataResponse = [
-        { dataProviderId: '', label: 'Select...' },
-        { dataProviderId: 1, label: 'Spain' },
-        { dataProviderId: 2, label: 'Germany' },
-        { dataProviderId: 5, label: 'Italy' }
-      ]; */
 
       return { ...state, allPossibleDataProviders: payload };
 
@@ -65,8 +60,8 @@ export const reducer = (state, { type, payload }) => {
 
     case 'INITIAL_LOAD':
       console.log('INITIAL_LOAD');
-      if (!includes(state.representatives, emptyField)) {
-        payload.representatives.push(emptyField);
+      if (!includes(state.representatives, emptyRepresentative)) {
+        payload.representatives.push(emptyRepresentative);
       }
 
       return {
@@ -75,19 +70,19 @@ export const reducer = (state, { type, payload }) => {
         selectedDataProviderGroupId: payload.group
       };
 
-    case 'UPDATE_EMAIL':
-      console.log('UPDATE_EMAIL payload', payload);
+    case 'UPDATE_ACCOUNT':
+      console.log('UPDATE_ACCOUNT payload', payload);
       console.log('updatedList', state.representatives);
 
       //api call to update providerAccount
 
       return state;
 
-    case 'ON_EMAIL_CHANGE':
-      console.log('ON_EMAIL_CHANGE payload', payload);
+    case 'ON_ACCOUNT_CHANGE':
+      console.log('ON_ACCOUNT_CHANGE payload', payload);
       updatedList = state.representatives.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
-          dataProvider.providerAccount = payload.input;
+          dataProvider.providerAccount = payload.providerAccount;
         }
         return dataProvider;
       });
@@ -99,6 +94,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_PROVIDER_CHANGE':
       console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
+
       updatedList = state.representatives.map(representative => {
         console.log('representative', representative);
         if (representative.representativeId === payload.representativeId) {
