@@ -55,6 +55,66 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key":"USER_LOGOUT_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"TOKEN_REFRESH_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DATAFLOW_CREATION_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_CREATION_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_DELETE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_ALL_DESIGNER_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_RELEASE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DATASET_SCHEMA_CREATION_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
+        },
+        {
+          "key":"DATAFLOW_DELETE_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
         }
       ]
     },
@@ -129,6 +189,14 @@
         },
         {
           "key":"ADD_RECORDS_BY_ID_SUCCESS",
+          "navigateTo":{
+            "section": "DATASET",
+            "parameters":["dataflowId", "datasetId"]
+          },
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_RESTORING_SUCCESS",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]

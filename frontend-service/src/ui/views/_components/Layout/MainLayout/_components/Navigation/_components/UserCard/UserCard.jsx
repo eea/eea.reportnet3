@@ -9,10 +9,12 @@ import styles from './UserCard.module.css';
 
 import { Icon } from 'ui/views/_components/Icon';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 const UserCard = React.memo(() => {
+  const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   return (
     <div id="userProfile" className={styles.userProfileCard}>
@@ -37,7 +39,9 @@ const UserCard = React.memo(() => {
             try {
               await UserService.logout();
             } catch (error) {
-              console.error(error);
+              notificationContext.add({
+                type: 'USER_LOGOUT_ERROR'
+              });
             } finally {
               userContext.onLogout();
             }
