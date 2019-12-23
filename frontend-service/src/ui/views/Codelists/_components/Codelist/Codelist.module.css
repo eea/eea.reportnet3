@@ -1,3 +1,13 @@
+.codelistInput {
+  margin: 1.5rem 0 0 2rem;
+  width: 33%;
+}
+
+.codelistInputTextarea {
+  margin: 1.5rem 0 0 2rem;
+  width: 66%;
+}
+
 .codelistItem {
   font-size: 12pt;
   /* cursor: pointer; */
@@ -17,11 +27,29 @@
 }
 
 .itemTable {
-  margin: 0 0 1rem 1rem;
+  margin: 1.5rem 0 1rem 2rem;
 }
 .codelistExpandable {
   height: 1vw;
   padding: 1rem 0 2rem 1rem;
   /* background-color: var(--gray-5); */
   display: flex;
+}
+
+.footerWrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.footerWrap input {
+  margin-right: 1rem;
+}
+
+.footerWrap input:nth-last-child(2) {
+  margin-left: auto;
+}
+
+.inputsWrapper {
+  display: flex;
+  flex-direction: column;
 }

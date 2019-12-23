@@ -14,14 +14,12 @@ const TreeViewExpandableItem = ({ expanded = true, children, items, className })
   const resources = useContext(ResourcesContext);
 
   const renderHeader = () => {
-    console.log({ items });
     const width = 90 / items.length;
     return items.map(item => <span style={{ width: `${width}%` }}>{item}</span>);
   };
 
   return (
     <React.Fragment>
-      {console.log(className)}
       <div className={!isUndefined(className) ? className : styles.defaultExpandable}>
         {!isUndefined(items) & (items.length > 0) ? (
           isOpen ? (
