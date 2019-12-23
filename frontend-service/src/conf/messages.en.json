@@ -8,7 +8,7 @@
 		"addContributor": "Add contributor",
 		"addContributorPlaceholder": "Contributor",
 		"addNewRow": "Add new record",
-		"addRecordsByIdError": "There has been an error pasting your data",			
+		"addRecordsByIdError": "There has been an error pasting your data <a href='{:navigateTo}'>dataset</a>",			
 		"addRecordsByIdSuccess": "Data has been successfully pasted",
 		"appName": "Reportnet 3.0",
 		"associatedObligation": "Associated obligation",
@@ -282,7 +282,7 @@
 		"restoreDatasetSnapshotCompletedEvent":"dataset restored successfully at <a href='{:navigateTo}'>Dataset</a>",
 		"restoreDatasetschemaSnapshotCompletedEvent":"dataset schema restored successfully at <a href='{:navigateTo}'>Dataset</a>",
 		"documentUploadCompletedEvent":"Document upload complete successfully at <a href='{:navigateTo}'>Dataflow</a>",
-		"documentDeleteCompletedEvent":"Document deleted successfully at <a href='{:navigateTo}'>Dataflow</a>",
+		"documentDeleteCompletedEvent":"Document deleted at <a href='{:navigateTo}'>Dataflow</a>",
 		"tokenRefreshError":"Error on token refresh process",
 		"dataflowCreationError":"Dataflow creation error",
 		"snapshotCreationError":"Snapshot creation error at <a href='{:navigateTo}'>Dataset</a>",
@@ -295,8 +295,10 @@
 		"deleteTableSchemaCompletedEvent": "The table schema was deleted",
 		"loadDataCompletedEvent": "Loaded data completed at <a href='{:navigateTo}'>dataset</a>",
 		"loadDataFailedEvent": "Failed loading data at <a href='{:navigateTo}'>dataset</a>",
-		"loadSchemaCompletedEvent": "Loaded schema completed",
+		"loadSchemaCompletedEvent": "Schema is loaded",
 		"loadSchemaFailedEvent": "Failed loading schema",
-		"validationFinishedEvent": "Validaton finished"
+		"validationFinishedEvent": "Validaton finished",
+		"datasetSchemaCreationError":"Dataset schema creation error at <a href='{:navigateTo}'>dataFlow</a>",
+		"dataflowDeleteByIdError":"Dataflow delete error"
 	}
 }

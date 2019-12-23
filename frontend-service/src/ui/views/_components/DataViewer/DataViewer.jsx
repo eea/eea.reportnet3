@@ -449,18 +449,8 @@ const DataViewer = withRouter(
 
     const onPasteAccept = async () => {
       try {
-        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, pastedRecords);
-        if (recordsAdded) {
-          notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_SUCCESS',
-            content: {
-              dataflowId,
-              datasetId
-            }
-          });
-          onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        } else {
+        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
+        if (!recordsAdded) {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
             content: {
@@ -470,12 +460,13 @@ const DataViewer = withRouter(
           });
         }
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-        }
+        notificationContext.add({
+          type: 'ADD_RECORDS_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
       } finally {
         setConfirmPasteVisible(false);
       }

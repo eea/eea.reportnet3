@@ -39,11 +39,13 @@ import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const notificationContext = useContext(NotificationContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
@@ -127,10 +129,15 @@ const Dataflow = withRouter(({ history, match }) => {
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
       } else {
-        console.log('Delete dataflow error with this status: ', response);
+        throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
       }
     } catch (error) {
-      console.log('Error: ', error);
+      notificationContext.add({
+        type: 'DATAFLOW_DELETE_BY_ID_ERROR',
+        content: {
+          dataflowId: match.params.dataflowId
+        }
+      });
     } finally {
       hideLoading();
     }

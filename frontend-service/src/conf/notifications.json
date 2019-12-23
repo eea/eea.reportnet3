@@ -101,11 +101,19 @@
           }
         },
         {
-          "key":"SNAPSHOT_RESTORING_ERROR",
+          "key":"DATASET_SCHEMA_CREATION_ERROR",
           "refresh":false,
           "navigateTo":{
-            "section":"DATASET",
-            "parameters":["dataflowId","datasetId"]
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
+        },
+        {
+          "key":"DATAFLOW_DELETE_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
           }
         }
       ]
