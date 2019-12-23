@@ -6,6 +6,10 @@ import styles from './LeftSideBar.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { UserService } from 'core/services/User';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const LeftSideBar = withRouter(
   ({
@@ -18,6 +22,10 @@ const LeftSideBar = withRouter(
     subscribeButtonTitle
   }) => {
     const resources = useContext(ResourcesContext);
+    const user = useContext(UserContext);
+    const notificationContext = useContext(NotificationContext);
+    const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
+    const [isFormReset, setIsFormReset] = useState(true);
 
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
 

@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
+
+import { capitalize } from 'lodash';
 
 import { Growl } from 'primereact/growl';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-import { TextUtils } from 'ui/views/_functions/Utils';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const Notifications = ({ show = false, level, text, notificationId }) => {
-  const [showNotification, setShowNotification] = useState(false);
+const Notifications = () => {
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
 
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
   let growlRef = useRef();
 
   useEffect(() => {
@@ -24,7 +23,7 @@ const Notifications = ({ show = false, level, text, notificationId }) => {
       );
       growlRef.current.show({
         severity: notification.type,
-        summary: notification.type,
+        summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
         detail: message,
         life: notification.lifeTime,
         sticky: notification.fixed

@@ -63,7 +63,7 @@ const DocumentFileUpload = ({
     document.querySelector('.uploadFile').value = '';
   }
 
-  const Checkbox = ({ field, type, checked }) => {
+  const IsPublicCheckbox = ({ field, type, checked }) => {
     return (
       <>
         <input id="isPublic" {...field} type={type} checked={checked} />
@@ -75,26 +75,26 @@ const DocumentFileUpload = ({
   };
 
   const buildInitialValue = documentInitialValues => {
-    let initiaValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
+    let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
       const langField = {
         lang: config.languages
           .filter(language => language.name == documentInitialValues.language)
           .map(country => country.code)
       };
-      initiaValues = Object.assign({}, documentInitialValues, langField);
-      initiaValues.uploadFile = {};
+      initialValues = Object.assign({}, documentInitialValues, langField);
+      initialValues.uploadFile = {};
     }
-    return initiaValues;
+    return initialValues;
   };
 
-  const initiaValueslWithLangField = buildInitialValue(documentInitialValues);
+  const initialValueslWithLangField = buildInitialValue(documentInitialValues);
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initiaValueslWithLangField}
+      initialValues={initialValueslWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
@@ -184,8 +184,8 @@ const DocumentFileUpload = ({
             </div>
           </fieldset>
           <fieldset>
-            <div className={styles.checkboxIsPublick}>
-              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={Checkbox} />
+            <div className={styles.checkboxIsPublic}>
+              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={IsPublicCheckbox} />
             </div>
           </fieldset>
           <fieldset>
