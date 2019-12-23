@@ -58,7 +58,6 @@ const RepresentativesList = ({ dataflowId }) => {
   }, []);
 
   const providerAccountInputColumnTemplate = rowData => {
-    console.log('rowData', rowData);
     let inputData = rowData.providerAccount;
     return (
       <input
@@ -139,9 +138,9 @@ const RepresentativesList = ({ dataflowId }) => {
           <label htmlFor="dataProvidersDropdown">Representative of </label>
 
           <Dropdown
-            disabled={
+            /* disabled={
               formState.selectedDataProviderGroupId !== null && formState.dataProvidersTypesList !== [] ? true : false
-            }
+            } */
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder="Select..."
