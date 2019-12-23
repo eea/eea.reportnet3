@@ -28,46 +28,17 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
-  /*   const onPageLoad = async dataflowId => {
-    
-    const data = await RepresentativeService.allRepresentatives(dataflowId);
-
-    const loadedData = {
-      group: { label: 'Country', dataProviderGroupId: 1 },
-      representatives: [
-        { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
-        { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
-        { representativeId: 33, dataProviderId: 3, providerAccount: 'greatbr@uk.uk' }
-      ]
-    };
-
-    return loadedData;
-  };
- */
   useEffect(async () => {
     const response = await RepresentativeService.getProviderTypes();
 
     formDispatcher({
       type: 'GET_PROVIDERS_TYPES_LIST',
-      payload: response.data
+      payload: response
     });
   }, []);
 
   useEffect(async () => {
     const response = await RepresentativeService.allRepresentatives(dataflowId);
-
-    console.log('RepresentativeService.allRepresentatives', response.group.dataProviderGroupId);
-
-    console.log('formState', formState);
-
-    /*  const loadedData = {
-      group: { label: 'Country', dataProviderGroupId: 1 },
-      representatives: [
-        { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
-        { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
-        { representativeId: 33, dataProviderId: 3, providerAccount: 'greatbr@uk.uk' }
-      ]
-    }; */
 
     formDispatcher({
       type: 'INITIAL_LOAD',
@@ -75,9 +46,11 @@ const RepresentativesList = ({ dataflowId }) => {
     });
   }, []);
 
-  useEffect(() => {
+  useEffect(async () => {
+    const response = await RepresentativeService.allDataProviders(formState.selectedGroupId);
     formDispatcher({
-      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID'
+      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
+      payload: response
     });
 
     formDispatcher({

@@ -17,12 +17,6 @@ const allRepresentatives = async dataflowId => {
       dataProviderId: 2,
       providerAccount: 'igor@amo.puto',
       dataProviderGroupId: 1
-    },
-    {
-      id: 3,
-      dataProviderId: 3,
-      providerAccount: 'miguel@amo.puto',
-      dataProviderGroupId: 1
     }
   ];
 
@@ -60,20 +54,21 @@ const allRepresentatives = async dataflowId => {
 };
 
 const allDataProviders = async dataProviderGroupId => {
-  const dataProvidersDTO = await apiRepresentative.allDataProviders(1);
-  // const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroupId);
+  const dataProvidersDTO = await apiRepresentative.allDataProviders(1); // hard coded dataProviderGroupId
 
-  console.log('!!!! dataProvidersDTO', dataProvidersDTO);
-  //TODO Object to Entity parsing
+  const response = dataProvidersDTO.data.map(dataProvider => {
+    return { dataProviderId: dataProvider.id, label: dataProvider.label };
+  });
 
-  return dataProvidersDTO;
+  response.unshift({ dataProviderId: '', label: 'Select...' });
+
+  return response;
 };
 
 const getProviderTypes = async () => {
   const dataProviderTypesDTO = await apiRepresentative.getProviderTypes();
-  //TODO Object to Consumable obj parsing
 
-  return dataProviderTypesDTO;
+  return dataProviderTypesDTO.data;
 };
 
 const add = async (dataflowId, providerAccount, dataProviderId) => {

@@ -14,6 +14,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
       console.log('CREATE_UNUSED_OPTIONS_LIST');
+
       let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
         let result = true;
 
@@ -25,10 +26,11 @@ export const reducer = (state, { type, payload }) => {
 
         return result;
       });
+
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      // await RepresentativeService.deleteById( state.representativeIdToDelete);
+      // await RepresentativeService.deleteById( formState.representativeIdToDelete);
       console.log('Delete REPRESENTATIVE with representativeId :', state.representativeIdToDelete);
 
       return {
@@ -37,20 +39,16 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', state.selectedDataProviderGroupId);
+      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', payload);
 
-      // const dataResponse = await RepresentativeService.allDataProviders(state.selectedGroupId);
-
-      const dataResponse = [
+      /*    const dataResponse = [
         { dataProviderId: '', label: 'Select...' },
         { dataProviderId: 1, label: 'Spain' },
         { dataProviderId: 2, label: 'Germany' },
-        { dataProviderId: 3, label: 'United Kingdom' },
-        { dataProviderId: 4, label: 'France' },
         { dataProviderId: 5, label: 'Italy' }
-      ];
+      ]; */
 
-      return { ...state, allPossibleDataProviders: dataResponse };
+      return { ...state, allPossibleDataProviders: payload };
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');
