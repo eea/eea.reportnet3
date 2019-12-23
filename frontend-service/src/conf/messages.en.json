@@ -9,7 +9,7 @@
 		"addContributorPlaceholder": "Contributor",
 		"addNewRow": "Add new record",
 		"addRecordsByIdError": "There has been an error pasting your data <a href='{:navigateTo}'>dataset</a>",			
-		"addRecordsByIdSuccess": "Data has been successfully pasted",
+		"addRecordsByIdSuccess": "The records have been added",
 		"appName": "Reportnet 3.0",
 		"associatedObligation": "Associated obligation",
 		"blocker": "Blocker",
