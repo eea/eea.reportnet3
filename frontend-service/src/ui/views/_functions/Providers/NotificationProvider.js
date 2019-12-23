@@ -6,8 +6,9 @@ import { routes } from 'ui/routes';
 import { camelCase } from 'lodash';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { NotificationService } from 'core/services/Notification';
-import { ResourcesContext } from '../Contexts/ResourcesContext';
 
 const notificationReducer = (state, { type, payload }) => {
   switch (type) {
@@ -56,6 +57,7 @@ const NotificationProvider = ({ children }) => {
             config: config.notifications,
             routes
           });
+          console.log('notification', notification);
           dispatch({
             type: 'ADD',
             payload: notification

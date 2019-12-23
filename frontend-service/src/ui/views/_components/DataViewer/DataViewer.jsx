@@ -453,7 +453,6 @@ const DataViewer = withRouter(
         if (!recordsAdded) {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            message: resources.messages['dataPastedError'],
             content: {
               dataflowId,
               datasetId
@@ -461,12 +460,13 @@ const DataViewer = withRouter(
           });
         }
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-        }
+        notificationContext.add({
+          type: 'ADD_RECORDS_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
       } finally {
         setConfirmPasteVisible(false);
       }
@@ -546,7 +546,6 @@ const DataViewer = withRouter(
       setImportDialogVisible(false);
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
-        message: resources.messages['datasetDataLoadingInit'],
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
           title: DataViewerUtils.editLargeStringWithDots(tableName, 22),
