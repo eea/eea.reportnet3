@@ -17,14 +17,13 @@ const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
+    allPossibleDataProviders: [],
+    dataProvidersTypesList: [],
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
     representatives: [],
-    allPossibleDataProviders: [],
-    unusedDataProvidersOptions: [],
-    dataProvidersTypesList: [],
-    dataProvidersDropdown: null,
-    selectedDataProviderGroupId: null
+    selectedDataProviderGroupId: null,
+    unusedDataProvidersOptions: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -34,7 +33,7 @@ const RepresentativesList = ({ dataflowId }) => {
     //(async)  await RepresentativeService.allRepresentatives(dataflowId)
 
     const loadedData = {
-      group: { label: 'Countries', dataProviderGroupId: 123456 },
+      group: { label: 'Country', dataProviderGroupId: 1 },
       representatives: [
         { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
         { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
@@ -45,16 +44,21 @@ const RepresentativesList = ({ dataflowId }) => {
     return loadedData;
   };
 
-  useEffect(() => {
+  useEffect(async () => {
+    const response = await RepresentativeService.getProviderTypes();
+
+    console.log('response', response.data);
+
     formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: onPageLoad(dataflowId)
+      type: 'GET_PROVIDERS_TYPES_LIST',
+      payload: response.data
     });
   }, []);
 
   useEffect(() => {
     formDispatcher({
-      type: 'GET_PROVIDERS_TYPES_LIST'
+      type: 'INITIAL_LOAD',
+      payload: onPageLoad(dataflowId)
     });
   }, []);
 

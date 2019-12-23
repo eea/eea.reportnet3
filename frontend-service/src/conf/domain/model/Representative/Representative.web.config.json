@@ -1,7 +1,7 @@
 {   
     "add": "/representative/{:dataflowId}",
     "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
-    "allRepresentatives": "/representative/datafolow/{:dataflowId}",
+    "allRepresentatives": "/representative/dataflow/{:dataflowId}",
     "deleteById":"/representative/{:representativeId}",
     "getProviderTypes": "/representative/dataProvider/types",
     "update":"/representative/update"

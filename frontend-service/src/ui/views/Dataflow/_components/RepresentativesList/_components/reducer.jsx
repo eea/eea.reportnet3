@@ -54,15 +54,9 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');
+      console.log('GET_PROVIDERS_TYPES_LIST payload', payload);
 
-      //const response = await RepresentativeService.getProviderTypes();
-
-      const response = [
-        { label: 'Countries', dataProviderGroupId: 123456 },
-        { label: 'Companies', dataProviderGroupId: 654123 }
-      ];
-
-      return { ...state, dataProvidersTypesList: response };
+      return { ...state, dataProvidersTypesList: payload };
 
     case 'HIDE_CONFIRM_DIALOG':
       console.log('HIDE_CONFIRM_DIALOG');
