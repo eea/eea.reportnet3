@@ -22,6 +22,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 import feign.FeignException;
 
@@ -49,11 +52,21 @@ public class DocumentControllerImplTest {
   @Mock
   private DataFlowDocumentControllerZuul dataflowController;
 
+  /** The security context. */
+  SecurityContext securityContext;
+
+  /** The authentication. */
+  Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     emptyFileMock = new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
     MockitoAnnotations.initMocks(this);
@@ -66,6 +79,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       documentController.uploadDocument(null, 1L, "ES", "desc", true);
     } catch (ResponseStatusException e) {
@@ -81,6 +96,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException1() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       documentController.uploadDocument(emptyFileMock, 1L, "ES", "desc", true);
     } catch (ResponseStatusException e) {
@@ -96,6 +113,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException2() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       documentController.uploadDocument(fileMock, null, "ES", "desc", true);
     } catch (ResponseStatusException e) {
@@ -112,6 +131,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException3() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     try {
@@ -129,6 +150,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException4() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
@@ -147,6 +170,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentSuccessTest() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
     documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
@@ -233,6 +258,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionNullTest() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     documentController.deleteDocument(1L, null);
   }
@@ -244,6 +271,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionTest() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
@@ -257,6 +286,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException2Test() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
@@ -270,6 +301,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException3Test() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
     documentController.deleteDocument(1L, null);
   }
@@ -281,6 +314,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void deleteDocumentSuccessTest() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -297,6 +332,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentExceptionTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       documentController.updateDocument(fileMock, null, "ES", "desc", 1L, true);
     } catch (ResponseStatusException e) {
@@ -313,6 +350,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentException2Test() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -331,6 +370,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentException3Test() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -350,6 +391,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccessTest() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -366,6 +409,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccess2Test() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).updateDocument(Mockito.any());
     documentController.updateDocument(null, 1L, "ES", "desc", 1L, true);
@@ -380,6 +425,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccess3Test() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).updateDocument(Mockito.any());
     documentController.updateDocument(emptyFileMock, 1L, "ES", "desc", 1L, true);
@@ -394,6 +441,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void testUploadSnapshotSuccess() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadSchemaSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
     documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc.json");
@@ -408,7 +457,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException() throws EEAException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     documentController.uploadSchemaSnapshotDocument(null, 1L, "desc");
 
   }
@@ -422,7 +472,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException2() throws EEAException, IOException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), null, "desc");
   }
 
@@ -436,6 +487,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException3() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadSchemaSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc");
@@ -450,6 +503,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testUploadSnapshotException4() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .uploadSchemaSnapshot(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc");
@@ -520,6 +575,8 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void testDeleteSnapshotSuccess() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     doNothing().when(documentService).deleteSnapshotDocument(Mockito.any(), Mockito.any());
@@ -534,7 +591,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotExceptionNull() throws Exception {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     documentController.deleteSnapshotSchemaDocument(null, "test");
   }
 
@@ -546,7 +604,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void tetsDeleteSnapshotException() throws Exception {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteSnapshotDocument(Mockito.any(), Mockito.any());
     documentController.deleteSnapshotSchemaDocument(1L, "test");
@@ -560,7 +619,8 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotException2() throws Exception {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteSnapshotDocument(Mockito.any(), Mockito.any());
     documentController.deleteSnapshotSchemaDocument(1L, "test");
