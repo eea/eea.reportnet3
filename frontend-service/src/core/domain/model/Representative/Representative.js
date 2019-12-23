@@ -1,7 +1,7 @@
 export class Representative {
-  constructor(id, account, providerId) {
+  constructor(id, providerAccount, dataProviderId) {
     this.representativeId = id;
-    this.account = account;
-    this.providerId = providerId;
+    this.providerAccount = providerAccount;
+    this.dataProviderId = dataProviderId;
   }
 }

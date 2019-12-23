@@ -54,7 +54,6 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');
-      console.log('GET_PROVIDERS_TYPES_LIST payload', payload);
 
       return { ...state, dataProvidersTypesList: payload };
 

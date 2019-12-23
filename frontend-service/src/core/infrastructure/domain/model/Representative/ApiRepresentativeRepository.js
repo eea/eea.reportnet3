@@ -1,20 +1,58 @@
 import { apiRepresentative } from 'core/infrastructure/api/domain/model/Representative';
 import { Representative } from 'core/domain/model/Representative/Representative';
+import { isEmpty } from 'lodash';
 
 const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
 
-  const representativesList = representativesDTO.Representatives.map(
-    representativeDTO =>
-      new Representative(
-        representativeDTO.representativesId,
-        representativeDTO.providerAccount,
-        representativeDTO.dataProviderId
-      )
-  );
+  const objectExampleDTO = [
+    {
+      id: 1,
+      dataProviderId: 5,
+      providerAccount: 'pablo@amo.puto',
+      dataProviderGroupId: 1
+    },
+    {
+      id: 2,
+      dataProviderId: 2,
+      providerAccount: 'igor@amo.puto',
+      dataProviderGroupId: 1
+    },
+    {
+      id: 3,
+      dataProviderId: 3,
+      providerAccount: 'miguel@amo.puto',
+      dataProviderGroupId: 1
+    }
+  ];
 
+  const representativesList = !isEmpty(representativesDTO)
+    ? objectExampleDTO.map(
+        representativeDTO =>
+          new Representative(representativeDTO.id, representativeDTO.providerAccount, representativeDTO.dataProviderId)
+      )
+    : [];
+  /*   const representativesList = !isEmpty(representativesDTO.data)
+    ? representativesDTO.data.map(
+        representativeDTO =>
+          new Representative(
+            representativeDTO.representativesId,
+            representativeDTO.providerAccount,
+            representativeDTO.dataProviderId
+          )
+      )
+    : []; */
+
+  /*  const dataToConsume = {
+    group: !isEmpty(representativesDTO.data)
+      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
+      : { dataProviderGroupId: null },
+    representatives: representativesList
+  }; */
   const dataToConsume = {
-    group: representativesDTO.dataProviderGroupId,
+    group: !isEmpty(objectExampleDTO)
+      ? { dataProviderGroupId: objectExampleDTO[0].dataProviderGroupId, label: 'Country' }
+      : { dataProviderGroupId: null },
     representatives: representativesList
   };
 
@@ -22,7 +60,10 @@ const allRepresentatives = async dataflowId => {
 };
 
 const allDataProviders = async dataProviderGroupId => {
-  const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroupId);
+  const dataProvidersDTO = await apiRepresentative.allDataProviders(1);
+  // const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroupId);
+
+  console.log('!!!! dataProvidersDTO', dataProvidersDTO);
   //TODO Object to Entity parsing
 
   return dataProvidersDTO;
