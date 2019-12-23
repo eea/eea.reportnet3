@@ -51,6 +51,7 @@ import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 export class InputTextarea extends Component {
   static defaultProps = {
+    autoFocus: false,
     autoResize: false,
     collapsedHeight: 30,
     cols: 10,
@@ -212,6 +213,7 @@ export class InputTextarea extends Component {
     return (
       <textarea
         {...textareaProps}
+        autoFocus={this.props.autoFocus}
         className={className}
         ref={input => (this.element = input)}
         onFocus={this.onFocus}
