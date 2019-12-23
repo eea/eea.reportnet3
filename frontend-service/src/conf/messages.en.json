@@ -302,6 +302,11 @@
 		"loadSchemaFailedEvent": "Failed loading schema",
 		"validationFinishedEvent": "Validaton finished",
 		"datasetSchemaCreationError":"Dataset schema creation error at <a href='{:navigateTo}'>dataFlow</a>",
-		"dataflowDeleteByIdError":"Dataflow delete error"
+		"dataflowDeleteByIdError":"Dataflow delete error",
+		"exportTableDataByIdError":"Failed exporting data",
+		"deleteRecordByIdError":"Failed deleting record",
+		"updateFieldByIdError":"Failed updating field",
+		"tableDataByIdError":"Failed loading data",
+		"updateRecordsByIdError":"Failed updating record"
 	}
 }

@@ -115,6 +115,50 @@
             "section":"DATAFLOW",
             "parameters":["dataflowId"]
           }
+        },
+        {
+          "key":"EXPORT_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DELETE_RECORD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_FIELD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_RECORDS_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },
