@@ -35,23 +35,20 @@ const RepresentativesList = ({ dataflowId }) => {
       type: 'GET_PROVIDERS_TYPES_LIST',
       payload: response
     });
-  }, []);
 
-  useEffect(async () => {
-    const response = await RepresentativeService.allRepresentatives(dataflowId);
+    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: response
+      payload: responseAllRepresentatives
     });
-  }, []);
 
-  useEffect(async () => {
-    const response = await RepresentativeService.allDataProviders(formState.selectedGroupId);
+    const responseAllDataProviders = await RepresentativeService.allDataProviders(formState.selectedGroupId);
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: response
+      payload: responseAllDataProviders
     });
+
     formDispatcher({
       type: 'CREATE_UNUSED_OPTIONS_LIST'
     });

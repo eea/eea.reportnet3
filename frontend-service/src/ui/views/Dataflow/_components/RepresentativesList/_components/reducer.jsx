@@ -9,7 +9,6 @@ export const reducer = (state, { type, payload }) => {
   let updatedList = [];
   switch (type) {
     case 'ADD_DATA_PROVIDER':
-      // RepresentativeService.add( payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       RepresentativeService.add(payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       console.log('ADD_DATA_PROVIDER', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
       return state;
@@ -60,6 +59,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'INITIAL_LOAD':
       console.log('INITIAL_LOAD');
+
       if (!includes(state.representatives, emptyRepresentative)) {
         payload.representatives.push(emptyRepresentative);
       }
@@ -80,6 +80,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_ACCOUNT_CHANGE':
       console.log('ON_ACCOUNT_CHANGE payload', payload);
+
       updatedList = state.representatives.map(dataProvider => {
         if (dataProvider.dataProviderId === payload.dataProviderId) {
           dataProvider.providerAccount = payload.providerAccount;
@@ -96,7 +97,6 @@ export const reducer = (state, { type, payload }) => {
       console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
 
       updatedList = state.representatives.map(representative => {
-        console.log('representative', representative);
         if (representative.representativeId === payload.representativeId) {
           representative.dataProviderId = payload.dataProviderId;
         }
