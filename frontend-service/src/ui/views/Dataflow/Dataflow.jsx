@@ -141,7 +141,7 @@ const Dataflow = withRouter(({ history, match }) => {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
   }
 
-  const onChangeValue = event => {
+  const onChangeDataflowName = event => {
     setOnConfirmDelete(event.target.value);
     setDataflowTitle(event.target.value);
   };
@@ -799,7 +799,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <InputText
               autoFocus={true}
               className={`${styles.inputText}`}
-              onChange={e => onChangeValue(e)}
+              onChange={e => onChangeDataflowName(e)}
               value={dataflowTitle}
             />
           </p>
