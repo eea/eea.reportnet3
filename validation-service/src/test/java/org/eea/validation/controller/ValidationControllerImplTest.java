@@ -23,6 +23,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -59,11 +62,21 @@ public class ValidationControllerImplTest {
   /** The failed validations dataset VO. */
   private FailedValidationsDatasetVO failedValidationsDatasetVO;
 
+  /** The security context. */
+  SecurityContext securityContext;
+
+  /** The authentication. */
+  Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     failedValidationsDatasetVO = new FailedValidationsDatasetVO();
     MockitoAnnotations.initMocks(this);
   }
@@ -75,6 +88,8 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest1() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       validationController.validateDataSetData(null);
     } catch (ResponseStatusException e) {
@@ -90,6 +105,8 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest2() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     validationController.validateDataSetData(1L);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
   }
@@ -101,6 +118,8 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest3() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       validationController.validateDataSetData(1L);
     } catch (ResponseStatusException e) {

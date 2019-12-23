@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -15,9 +12,6 @@ import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
-import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -28,6 +22,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,12 +56,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The Constant LOG.
@@ -78,12 +72,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
-  /**
-   * The dataschema service.
-   */
-  @Autowired
-  private DatasetSchemaService dataschemaService;
 
   /**
    * The file treatment helper.
@@ -103,43 +91,11 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DeleteHelper deleteHelper;
 
-
-  /**
-   * The data set schema controller zuul.
-   */
-  @Autowired
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
-
   /**
    * The design dataset service.
    */
   @Autowired
   private DesignDatasetService designDatasetService;
-  /**
-   * The record store controller zull.
-   */
-  @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
-
-
-  /**
-   * The dataset metabase service.
-   */
-  @Autowired
-  private DatasetMetabaseService datasetMetabaseService;
-
-
-  /**
-   * The dataset snapshot service.
-   */
-  @Autowired
-  private DatasetSnapshotService datasetSnapshotService;
-
-  /**
-   * The resource management controller zull.
-   */
-  @Autowired
-  private ResourceManagementControllerZull resourceManagementControllerZull;
 
   /**
    * Gets the data tables values.
@@ -208,7 +164,6 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-
     }
   }
 
@@ -227,7 +182,11 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-      name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -466,6 +425,10 @@ public class DataSetControllerImpl implements DatasetController {
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
       @LockCriteria(
           name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     if (datasetId == null || datasetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -524,7 +487,6 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
-
 
   /**
    * Insert id data schema.

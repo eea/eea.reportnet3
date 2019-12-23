@@ -73,7 +73,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-
     // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
@@ -136,7 +135,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
-
     try {
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
