@@ -48,6 +48,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
+  const [dataflowTitle, setDataflowTitle] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -140,6 +141,11 @@ const Dataflow = withRouter(({ history, match }) => {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
   }
 
+  const onChangeDataflowName = event => {
+    setOnConfirmDelete(event.target.value);
+    setDataflowTitle(event.target.value);
+  };
+
   const onEditDataflow = (id, newName, newDescription) => {
     setIsDataflowDialogVisible(false);
     dataflowDispatch({
@@ -200,6 +206,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onHideDeleteDataflowDialog = () => {
     setIsDeleteDialogVisible(false);
     setIsActivePropertiesDialog(true);
+    setDataflowTitle('');
   };
 
   const onHideDialog = () => {
@@ -792,7 +799,8 @@ const Dataflow = withRouter(({ history, match }) => {
             <InputText
               autoFocus={true}
               className={`${styles.inputText}`}
-              onChange={e => setOnConfirmDelete(e.target.value)}
+              onChange={e => onChangeDataflowName(e)}
+              value={dataflowTitle}
             />
           </p>
         </ConfirmDialog>
