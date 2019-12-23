@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import styles from './RepresentativesList.module.scss';
 
@@ -15,7 +15,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
-  // const [providerList, setProviderList] = useState([]);
 
   const initialState = {
     isVisibleConfirmDeleteDialog: false,
@@ -32,46 +31,30 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const onPageLoad = dataflowId => {
     console.log('dataflowId', dataflowId);
-    //(async)
-    // const loadedData = await RepresentativeService.allRepresentatives(dataflowId);
-    // console.log('PAGELOAD: ', loadedData);
+    //(async)  await RepresentativeService.allRepresentatives(dataflowId)
 
     const loadedData = {
-      group: {
-        // label: 'Countries', dataProviderGroupId: 123456
-      },
+      group: { label: 'Countries', dataProviderGroupId: 123456 },
       representatives: [
-        // { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
-        // { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
-        // { representativeId: 33, dataProviderId: 3, providerAccount: 'greatbr@uk.uk' }
+        { representativeId: 11, dataProviderId: 1, providerAccount: 'spain@es.es' },
+        { representativeId: 22, dataProviderId: 2, providerAccount: 'germany@de.de' },
+        { representativeId: 33, dataProviderId: 3, providerAccount: 'greatbr@uk.uk' }
       ]
     };
 
     return loadedData;
   };
 
-  const onGetProviderTypes = async () => {
-    try {
-      const response = await RepresentativeService.getProviderTypes();
-      // if (response.status >= 200 && response.status <= 299) {
-      console.log('DATA: ', response.data);
-      return response;
-      // } else {
-      //   throw new Error({ response });
-      // }
-    } catch (error) {
-      console.log('Error: ', error);
-    }
-  };
-
-  useEffect(async () => {
-    const dataProvidersTypesList = await onGetProviderTypes();
-    const initData = onPageLoad(dataflowId);
-    console.log('initData', initData);
-
+  useEffect(() => {
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { ...initData, dataProvidersTypesList }
+      payload: onPageLoad(dataflowId)
+    });
+  }, []);
+
+  useEffect(() => {
+    formDispatcher({
+      type: 'GET_PROVIDERS_TYPES_LIST'
     });
   }, []);
 
@@ -166,9 +149,9 @@ const RepresentativesList = ({ dataflowId }) => {
           <label htmlFor="dataProvidersDropdown">Representative of </label>
 
           <Dropdown
-            // disabled={
-            //   formState.selectedDataProviderGroupId !== null && formState.dataProvidersTypesList !== [] ? true : false
-            // }
+            disabled={
+              formState.selectedDataProviderGroupId !== null && formState.dataProvidersTypesList !== [] ? true : false
+            }
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder="Select..."

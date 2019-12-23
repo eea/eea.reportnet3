@@ -40,7 +40,7 @@ const apiRepresentative = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allRepresentatives, {
-        dataflowId
+        dataflowId: dataflowId
       }),
       queryString: {},
       headers: {
@@ -52,6 +52,7 @@ const apiRepresentative = {
 
   deleteById: async representativeId => {
     const tokens = userStorage.get();
+
     const response = await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.delete, {
         representativeId
@@ -60,6 +61,7 @@ const apiRepresentative = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response;
   },
 
@@ -72,12 +74,12 @@ const apiRepresentative = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    console.log('1 RES', response);
-    return response.data;
+    return response;
   },
 
   update: async (representativeId, providerAccount, dataProviderId) => {
     const tokens = userStorage.get();
+
     const response = await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.update, {}),
       headers: {
@@ -94,6 +96,7 @@ const apiRepresentative = {
 
   updateProviderAccount: async (representativeId, providerAccount) => {
     const tokens = userStorage.get();
+
     const response = await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.update, {}),
       headers: {

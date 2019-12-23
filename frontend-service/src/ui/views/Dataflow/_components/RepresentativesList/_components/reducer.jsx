@@ -1,7 +1,8 @@
 import { includes } from 'lodash';
 
+import { RepresentativeService } from 'core/services/Representative';
+
 export const reducer = (state, { type, payload }) => {
-  // console.log('payload', payload);
   const emptyField = { representativeId: null, dataProviderId: '', providerAccount: '' };
 
   let updatedList = [];
@@ -51,18 +52,17 @@ export const reducer = (state, { type, payload }) => {
 
       return { ...state, allPossibleDataProviders: dataResponse };
 
-    // case 'GET_PROVIDERS_TYPES_LIST':
-    //   console.log('GET_PROVIDERS_TYPES_LIST');
-    //   // await RepresentativeService.getProviderTypes();
+    case 'GET_PROVIDERS_TYPES_LIST':
+      console.log('GET_PROVIDERS_TYPES_LIST');
 
-    //   // const response = [
-    //   //   { label: 'Countries', dataProviderGroupId: 123456 },
-    //   //   { label: 'Companies', dataProviderGroupId: 654123 }
-    //   // ];
+      //const response = await RepresentativeService.getProviderTypes();
 
-    //   console.log('payload', payload);
+      const response = [
+        { label: 'Countries', dataProviderGroupId: 123456 },
+        { label: 'Companies', dataProviderGroupId: 654123 }
+      ];
 
-    //   return { ...state, dataProvidersTypesList: payload };
+      return { ...state, dataProvidersTypesList: response };
 
     case 'HIDE_CONFIRM_DIALOG':
       console.log('HIDE_CONFIRM_DIALOG');
@@ -81,7 +81,6 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        dataProvidersTypesList: payload.dataProvidersTypesList,
         selectedDataProviderGroupId: payload.group
       };
 
