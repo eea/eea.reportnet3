@@ -31,9 +31,9 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     version: codelist.version,
     status: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
     description: codelist.description,
-    items: [...codelist.items]
+    items: { ...codelist }.items
   };
-  console.log(codelist.items[0].label, codelist.version, initialCodelistState.items[0]);
+  console.log(codelist.items[0].label, codelist.version, initialCodelistState);
 
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
 
