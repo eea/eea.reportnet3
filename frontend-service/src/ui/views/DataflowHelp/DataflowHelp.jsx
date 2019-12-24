@@ -25,9 +25,12 @@ import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
 export const DataflowHelp = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const notificationContext = useContext(NotificationContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
@@ -86,7 +89,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
-  useEffect(() => {
+  const fetchDocumentsData = () => {
     setIsLoading(true);
     try {
       getDataflowName();
@@ -98,7 +101,21 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchDocumentsData();
   }, [isCustodian]);
+
+  useEffect(() => {
+    const refresh = notificationContext.toShow.find(
+      notification =>
+        notification.key === 'DOCUMENT_UPLOAD_COMPLETED_EVENT' || notification.key === 'DOCUMENT_DELETE_COMPLETED_EVENT'
+    );
+    if (refresh) {
+      fetchDocumentsData();
+    }
+  }, [notificationContext]);
 
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);

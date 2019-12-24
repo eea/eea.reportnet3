@@ -302,6 +302,21 @@
 		"loadSchemaFailedEvent": "Failed loading schema",
 		"validationFinishedEvent": "Validation finished",
 		"datasetSchemaCreationError":"Dataset schema creation error at <a href='{:navigateTo}'>dataFlow</a>",
-		"dataflowDeleteByIdError":"Dataflow delete error"
+		"dataflowDeleteByIdError":"Dataflow delete error",
+		"exportTableDataByIdError":"Failed exporting data",
+		"deleteRecordByIdError":"Failed deleting record",
+		"updateFieldByIdError":"Failed updating field",
+		"tableDataByIdError":"Failed loading data",
+		"updateRecordsByIdError":"Failed updating record",
+		"documentUploadingInitInfo":"Uploading document...",
+		"documentEditingError":"Failed editing document",
+		"documentUploadingError":"Failed uploading document",
+		"deleteDocumentInitInfo":"Document deleting...",
+		"deleteDocumentError":"Document deleting error",
+		"createByIdReporterError":"Failed creating snapshot",
+		"deletedByIdReporterError":"Failed deleting snapshot",
+		"allReporterError":"Failed loading snapshot list",
+		"releasedByIdReporterError":"Failed releasing snapshot",
+		"restoredByIdReporterError":"Failed restoring snapshot"
 	}
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -14,12 +14,13 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
-import { Growl } from 'primereact/growl';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DocumentService } from 'core/services/Document';
 
@@ -33,6 +34,7 @@ const Documents = ({
   sortOrderDocuments,
   setSortOrderDocuments
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -46,17 +48,11 @@ const Documents = ({
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
-  const growlRef = useRef();
-
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
       DownloadFile(fileToDownload, fileName);
     }
   }, [fileToDownload]);
-
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
 
   const onUploadDocument = () => {
     setIsUploadDialogVisible(false);
@@ -69,13 +65,17 @@ const Documents = ({
 
   const onDeleteDocument = async documentData => {
     setDeleteDialogVisible(false);
+    notificationContext.add({
+      type: 'DELETE_DOCUMENT_INIT_INFO',
+      content: {}
+    });
     try {
-      const response = await DocumentService.deleteDocument(documentData.id);
-      if (response >= 200 && response <= 299) {
-        documents.filter(document => document.id !== documentData.id);
-      }
+      await DocumentService.deleteDocument(documentData.id);
     } catch (error) {
-      console.error(error.response);
+      notificationContext.add({
+        type: 'DELETE_DOCUMENT_ERROR',
+        content: {}
+      });
     }
   };
 
@@ -179,7 +179,6 @@ const Documents = ({
 
   return (
     <>
-      <Growl ref={growlRef} />
       {isCustodian ? (
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -306,7 +305,6 @@ const Documents = ({
         <DocumentFileUpload
           dataflowId={match.params.dataflowId}
           onUpload={onUploadDocument}
-          onGrowlAlert={onGrowlAlert}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
           documentInitialValues={documentInitialValues}
