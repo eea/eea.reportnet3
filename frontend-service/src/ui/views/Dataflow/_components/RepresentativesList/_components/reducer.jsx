@@ -40,7 +40,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', payload);
+      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', state.selectedDataProviderGroup);
 
       return { ...state, allPossibleDataProviders: payload };
 
@@ -58,7 +58,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
-      console.log('INITIAL_LOAD');
+      console.log('INITIAL_LOAD', payload.group);
 
       if (!includes(state.representatives, emptyRepresentative)) {
         payload.representatives.push(emptyRepresentative);
@@ -67,7 +67,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedDataProviderGroupId: payload.group
+        selectedDataProviderGroup: payload.group
       };
 
     case 'UPDATE_ACCOUNT':
@@ -112,7 +112,7 @@ export const reducer = (state, { type, payload }) => {
       console.log('SELECT_PROVIDERS_TYPE ', payload);
       return {
         ...state,
-        selectedDataProviderGroupId: payload
+        selectedDataProviderGroup: payload
       };
 
     case 'SHOW_CONFIRM_DIALOG':

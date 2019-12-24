@@ -22,7 +22,7 @@ const RepresentativesList = ({ dataflowId }) => {
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
     representatives: [],
-    selectedDataProviderGroupId: null,
+    selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
 
@@ -43,7 +43,9 @@ const RepresentativesList = ({ dataflowId }) => {
       payload: responseAllRepresentatives
     });
 
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(formState.selectedGroupId);
+    console.log('formState.selectedDataProviderGroup', formState.selectedDataProviderGroup);
+
+    const responseAllDataProviders = await RepresentativeService.allDataProviders(formState.selectedDataProviderGroup);
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
       payload: responseAllDataProviders
@@ -136,12 +138,12 @@ const RepresentativesList = ({ dataflowId }) => {
 
           <Dropdown
             /* disabled={
-              formState.selectedDataProviderGroupId !== null && formState.dataProvidersTypesList !== [] ? true : false
+              formState.selectedDataProviderGroup !== null && formState.dataProvidersTypesList !== [] ? true : false
             } */
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder="Select..."
-            value={formState.selectedDataProviderGroupId}
+            value={formState.selectedDataProviderGroup}
             options={formState.dataProvidersTypesList}
             onChange={e => {
               return formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: e.target.value });
