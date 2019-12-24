@@ -406,7 +406,7 @@ export const FieldDesigner = ({
         <InputText
           autoFocus={false}
           className={styles.inputField}
-          key={`${fieldId}_${index}`}
+          // key={`${fieldId}_${index}`} --> Problem with DOM modification
           ref={inputRef}
           onBlur={e => {
             setIsEditing(false);

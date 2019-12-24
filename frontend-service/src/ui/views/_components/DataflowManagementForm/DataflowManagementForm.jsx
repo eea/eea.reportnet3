@@ -8,6 +8,7 @@ import styles from './DataflowManagementForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -22,6 +23,7 @@ const DataflowManagementForm = ({
   onEdit,
   selectedDataflow
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
@@ -83,16 +85,19 @@ const DataflowManagementForm = ({
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        const response = isEditForm
-          ? await DataflowService.update(dataflowId, values.name, values.description)
-          : await DataflowService.create(values.name, values.description);
-
-        if (response.status >= 200 && response.status <= 299) {
+        try {
+          const response = isEditForm
+            ? await DataflowService.update(dataflowId, values.name, values.description)
+            : await DataflowService.create(values.name, values.description);
           isEditForm ? onEdit(dataflowId, values.name, values.description) : onCreate();
-        } else {
-          console.error(`Error in the creation of dataflow`);
+        } catch (error) {
+          notificationContext.add({
+            type: 'DATAFLOW_CREATION_ERROR',
+            content: {}
+          });
+        } finally {
+          setSubmitting(false);
         }
-        setSubmitting(false);
       }}>
       {({ isSubmitting, errors, touched, values }) => (
         <Form>
