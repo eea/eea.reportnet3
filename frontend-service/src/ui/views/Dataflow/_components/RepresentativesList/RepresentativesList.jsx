@@ -144,12 +144,9 @@ const RepresentativesList = ({ dataflowId }) => {
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
       <ConfirmDialog
-        onConfirm={() =>
-          formDispatcher({
-            type: 'DELETE_REPRESENTATIVE',
-            payload: { dataProviderId: formState.representativeIdToDelete }
-          })
-        }
+        onConfirm={() => {
+          onDeleteConfirm(formDispatcher, formState);
+        }}
         onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
         visible={formState.isVisibleConfirmDeleteDialog}
         header={'Delete data provider'}
@@ -189,3 +186,10 @@ const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) =>
     payload: responseAllDataProviders
   });
 };
+async function onDeleteConfirm(formDispatcher, formState) {
+  formDispatcher({
+    type: 'DELETE_REPRESENTATIVE',
+    payload: { dataProviderId: formState.representativeIdToDelete }
+  });
+  await RepresentativeService.deleteById(formState.representativeIdToDelete);
+}

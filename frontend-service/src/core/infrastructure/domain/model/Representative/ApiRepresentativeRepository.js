@@ -8,17 +8,13 @@ const allRepresentatives = async dataflowId => {
   const representativesList = !isEmpty(representativesDTO.data)
     ? representativesDTO.data.map(
         representativeDTO =>
-          new Representative(
-            representativeDTO.representativesId,
-            representativeDTO.providerAccount,
-            representativeDTO.dataProviderId
-          )
+          new Representative(representativeDTO.id, representativeDTO.providerAccount, representativeDTO.dataProviderId)
       )
     : [];
 
   const dataToConsume = {
     group: !isEmpty(representativesDTO.data)
-      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId, label: 'Country' }
+      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId, label: 'Country' } // !solve label problem
       : { dataProviderGroupId: null },
     representatives: representativesList
   };

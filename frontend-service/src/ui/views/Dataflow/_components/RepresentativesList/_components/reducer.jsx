@@ -32,7 +32,6 @@ export const reducer = (state, { type, payload }) => {
 
     case 'DELETE_REPRESENTATIVE':
       console.log('Delete REPRESENTATIVE with representativeId :', state.representativeIdToDelete);
-      RepresentativeService.deleteById(state.representativeIdToDelete);
 
       return {
         ...state,
@@ -116,6 +115,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'SHOW_CONFIRM_DIALOG':
+      console.log('SHOW_CONFIRM_DIALOG', payload.representativeId);
       return {
         ...state,
         isVisibleConfirmDeleteDialog: true,

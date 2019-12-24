@@ -54,7 +54,7 @@ const apiRepresentative = {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.delete({
-      url: getUrl(RepresentativeConfig.delete, {
+      url: getUrl(RepresentativeConfig.deleteById, {
         representativeId
       }),
       headers: {

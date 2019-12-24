@@ -11,7 +11,7 @@ export const RepresentativeService = {
   allRepresentatives: AllRepresentatives({ representativeRepository }),
   allDataProviders: AllDataProviders({ representativeRepository }),
   add: Add({ representativeRepository }),
-  delete: Delete({ representativeRepository }),
+  deleteById: Delete({ representativeRepository }),
   getProviderTypes: GetProviderTypes({ representativeRepository }),
   update: Update({ representativeRepository })
 };
