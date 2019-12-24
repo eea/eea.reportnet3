@@ -45,11 +45,151 @@
           "refresh":false
         },
         {
+          "key":"LOAD_SCHEMA_FAILED_EVENT",
+          "refresh":false
+        },
+        {
           "key":"ADD_RECORDS_BY_ID_ERROR",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
           },
+          "refresh":false
+        },
+        {
+          "key":"USER_LOGOUT_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"TOKEN_REFRESH_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DATAFLOW_CREATION_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_CREATION_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_DELETE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_ALL_DESIGNER_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"SNAPSHOT_RELEASE_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DATASET_SCHEMA_CREATION_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
+        },
+        {
+          "key":"DATAFLOW_DELETE_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
+        },
+        {
+          "key":"EXPORT_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DELETE_RECORD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_FIELD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_RECORDS_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DOCUMENT_EDITING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DOCUMENT_UPLOADING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_DOCUMENT_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"CREATE_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "ALL_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RELEASED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RESTORED_BY_ID_REPORTER_ERROR",
           "refresh":false
         }
       ]
@@ -65,8 +205,7 @@
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
           },
-          "refresh":false,
-          "fixed":true
+          "refresh":false
         },
         {
           "key":"DELETE_TABLE_COMPLETED_EVENT",
@@ -109,7 +248,31 @@
           "refresh":false
         },
         {
+          "key":"LOAD_SCHEMA_COMPLETED_EVENT",
+          "refresh":false
+        },
+        {
+          "key":"VALIDATION_FINISHED_EVENT",
+          "navigateTo":{
+            "section": "DOCUMENTS",
+            "parameters":["dataflowId", "datasetId"]
+          },
+          "refresh":false
+        },
+        {
+          "key":"DELETE_TABLE_SCHEMA_COMPLETED_EVENT",
+          "refresh":false
+        },
+        {
           "key":"ADD_RECORDS_BY_ID_SUCCESS",
+          "navigateTo":{
+            "section": "DATASET",
+            "parameters":["dataflowId", "datasetId"]
+          },
+          "refresh":false
+        },
+        {
+          "key":"SNAPSHOT_RESTORING_SUCCESS",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
@@ -122,11 +285,20 @@
       "key":"info",
       "lifeTime":5000,
       "fixed":false,
-      "types":[{
-        "key": "DATASET_DATA_LOADING_INIT",
-        "refresh":false
-      }]
+      "types":[
+        {
+          "key": "DATASET_DATA_LOADING_INIT",
+          "refresh":false
+        },
+        {
+          "key": "DOCUMENT_UPLOADING_INIT_INFO",
+          "refresh":false
+        },
+        {
+          "key": "DELETE_DOCUMENT_INIT_INFO",
+          "refresh":false
+        }
+      ]
     }
-
   ]
     

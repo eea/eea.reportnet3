@@ -80,7 +80,7 @@ const getFieldTypeValue = value => {
 const groupFields = fields => {
   if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
     return (
-      <DataTable value={fields} style={{ width: '50%', marginTop: '1rem', marginBottom: '1rem' }}>
+      <DataTable value={fields} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }}>
         {renderColumns(fields)}
       </DataTable>
     );
@@ -100,7 +100,7 @@ const renderColumns = fields =>
       filterMatchMode="contains"
       header={capitalize(field)}
       sortable={true}
-      style={{ width: '150px' }}
+      style={{ width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%' }}
     />
   ));
 
