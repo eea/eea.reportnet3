@@ -42,7 +42,7 @@
 		"createDataflowDescription": "Dataflow description",
 		"createDataflowName": "Dataflow name",
 		"createDatasetName": "Dataset name",
-		"createdatasetSchemaName": "Dataset schema name",
+		"createDatasetSchemaName": "Dataset schema name",
 		"createSnapshotMessage": "Save copy",
 		"createSnapshotPlaceholder": "Description",
 		"createSnapshotTitle": "Save copy",
@@ -54,7 +54,7 @@
 		"dataflowCompletedTab": "Completed",
 		"dataflowHelp": "Dataflow help",
 		"dataflowList": "Dataflows",
-		"dataProviderManageContributorsDialogTitle": "Manage roles for dataflow",
+		"manageRolesDialogTitle": "Manage roles for dataflow",
 		"dataset": "Dataset",
 		"datasetDataLoadingInit":"<span>{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}",
 		"datasetDesigner": "Dataset designer",
@@ -300,7 +300,7 @@
 		"loadDataFailedEvent": "Failed loading data at <a href='{:navigateTo}'>dataset</a>",
 		"loadSchemaCompletedEvent": "Schema is loaded",
 		"loadSchemaFailedEvent": "Failed loading schema",
-		"validationFinishedEvent": "Validaton finished",
+		"validationFinishedEvent": "Validation finished",
 		"datasetSchemaCreationError":"Dataset schema creation error at <a href='{:navigateTo}'>dataFlow</a>",
 		"dataflowDeleteByIdError":"Dataflow delete error"
 	}

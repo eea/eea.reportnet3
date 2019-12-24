@@ -57,7 +57,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(true);
+  const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(true);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
@@ -341,7 +341,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const showContributorsDialog = () => {
-    setIsActiveContributorsDialog(true);
+    setIsActiveManageRolesDialog(true);
   };
 
   const showNewDatasetDialog = () => {
@@ -627,9 +627,9 @@ const Dataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages['RepresentativeManageContributorsDialogTitle']} "${dataflowData.name}"`}
-          visible={isActiveContributorsDialog}
-          onHide={() => setIsActiveContributorsDialog(false)}
+          header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          visible={isActiveManageRolesDialog}
+          onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
           <RepresentativesList dataflowId={dataflowData.id} />

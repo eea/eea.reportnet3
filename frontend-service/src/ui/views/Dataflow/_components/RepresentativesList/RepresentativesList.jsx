@@ -37,6 +37,9 @@ const RepresentativesList = ({ dataflowId }) => {
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     }
+    formDispatcher({
+      type: 'CREATE_UNUSED_OPTIONS_LIST'
+    });
   }, [formState.selectedDataProviderGroup]);
 
   const providerAccountInputColumnTemplate = rowData => {
