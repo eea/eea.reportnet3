@@ -23,6 +23,7 @@ const RepresentativesList = ({ dataflowId }) => {
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
     representatives: [],
+    responseStatus: null,
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
@@ -34,12 +35,15 @@ const RepresentativesList = ({ dataflowId }) => {
   }, []);
 
   useEffect(() => {
+    getInitialData(formDispatcher, dataflowId, formState);
+  }, [formState.responseStatus]);
+
+  useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     }
-    formDispatcher({
-      type: 'CREATE_UNUSED_OPTIONS_LIST'
-    });
+
+    createUnusedOptionsList(formDispatcher);
   }, [formState.selectedDataProviderGroup]);
 
   const providerAccountInputColumnTemplate = rowData => {
@@ -161,24 +165,15 @@ const RepresentativesList = ({ dataflowId }) => {
 export { RepresentativesList };
 
 const getInitialData = async (formDispatcher, dataflowId, formState) => {
-  const response = await RepresentativeService.getProviderTypes();
-  formDispatcher({
-    type: 'GET_PROVIDERS_TYPES_LIST',
-    payload: response
-  });
+  await getProviderTypes(formDispatcher);
 
-  const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-  formDispatcher({
-    type: 'INITIAL_LOAD',
-    payload: responseAllRepresentatives
-  });
+  await getAllRepresentatives(dataflowId, formDispatcher);
 
   await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
 
-  formDispatcher({
-    type: 'CREATE_UNUSED_OPTIONS_LIST'
-  });
+  createUnusedOptionsList(formDispatcher);
 };
+
 const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
   const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
   formDispatcher({
@@ -186,10 +181,34 @@ const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) =>
     payload: responseAllDataProviders
   });
 };
-async function onDeleteConfirm(formDispatcher, formState) {
+
+const onDeleteConfirm = async (formDispatcher, formState) => {
+  const responseStatus = await RepresentativeService.deleteById(formState.representativeIdToDelete);
+
   formDispatcher({
     type: 'DELETE_REPRESENTATIVE',
-    payload: { dataProviderId: formState.representativeIdToDelete }
+    payload: responseStatus.status
   });
-  await RepresentativeService.deleteById(formState.representativeIdToDelete);
-}
+};
+
+const createUnusedOptionsList = formDispatcher => {
+  formDispatcher({
+    type: 'CREATE_UNUSED_OPTIONS_LIST'
+  });
+};
+
+const getAllRepresentatives = async (dataflowId, formDispatcher) => {
+  const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+  formDispatcher({
+    type: 'INITIAL_LOAD',
+    payload: responseAllRepresentatives
+  });
+};
+
+const getProviderTypes = async formDispatcher => {
+  const response = await RepresentativeService.getProviderTypes();
+  formDispatcher({
+    type: 'GET_PROVIDERS_TYPES_LIST',
+    payload: response
+  });
+};

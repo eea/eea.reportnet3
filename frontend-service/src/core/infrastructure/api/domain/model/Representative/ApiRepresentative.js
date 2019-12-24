@@ -110,7 +110,7 @@ const apiRepresentative = {
     return response;
   },
 
-  updateProviderAccount: async (representativeId, dataProviderId) => {
+  updateDataProvider: async (representativeId, dataProviderId) => {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.update({
@@ -119,8 +119,8 @@ const apiRepresentative = {
         Authorization: `Bearer ${tokens.accessToken}`
       },
       data: {
-        dataProviderId,
-        id: representativeId
+        id: representativeId,
+        dataProviderId
       }
     });
     return response;

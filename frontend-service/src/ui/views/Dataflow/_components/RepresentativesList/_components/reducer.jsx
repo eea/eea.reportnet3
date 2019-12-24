@@ -7,6 +7,7 @@ export const reducer = (state, { type, payload }) => {
   const emptyRepresentative = new Representative(null, '', '');
 
   let updatedList = [];
+
   switch (type) {
     case 'ADD_DATA_PROVIDER':
       RepresentativeService.add(payload.dataflowId, payload.providerAccount, payload.dataProviderId);
@@ -31,11 +32,11 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      console.log('Delete REPRESENTATIVE with representativeId :', state.representativeIdToDelete);
-
+      console.log('payload', payload);
       return {
         ...state,
-        isVisibleConfirmDeleteDialog: false
+        isVisibleConfirmDeleteDialog: false,
+        responseStatus: payload
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
