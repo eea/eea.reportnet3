@@ -115,10 +115,6 @@ const Codelists = withRouter(({ match, history }) => {
       // loadedCategories = sortBy(loadedCategories, ['Document', 'id']);
       setCategories(loadedCategories);
     } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(routes.CODELISTS));
-        console.error('error', error.response);
-      }
     } finally {
       setIsLoading(false);
     }

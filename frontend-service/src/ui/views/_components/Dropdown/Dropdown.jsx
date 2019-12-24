@@ -598,7 +598,9 @@ export class Dropdown extends Component {
             <FontAwesomeIcon icon={AwesomeIcons('infoCircle')} style={{ float: 'right', color: 'var(--errors)' }} />
           ) : null}
           {selectedOption ? (
-            <FontAwesomeIcon icon={AwesomeIcons(selectedOption.fieldTypeIcon)} style={{ float: 'right' }} />
+            selectedOption.fieldTypeIcon ? (
+              <FontAwesomeIcon icon={AwesomeIcons(selectedOption.fieldTypeIcon)} style={{ float: 'right' }} />
+            ) : null
           ) : null}
         </label>
       );

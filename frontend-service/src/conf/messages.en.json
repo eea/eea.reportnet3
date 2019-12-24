@@ -20,7 +20,7 @@
 		"codelistName": "Name",
 		"codelists": "Codelists",
 		"codelistVersion": "Version",
-		"codelistState": "State",
+		"codelistStatus": "Status",
 		"codelistDescription": "Description",
 		"completedDataflowText": "These are the completed dataflows",
 		"completedDataflowTitle": "Completed dataflows",

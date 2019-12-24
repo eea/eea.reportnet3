@@ -8,6 +8,13 @@
   width: 66%;
 }
 
+.codelistDropdown {
+  margin: 0.5rem 0 0 2rem;
+  width: 16%;
+  display: flex;
+  flex-direction: column;
+}
+
 .codelistItem {
   font-size: 12pt;
   /* cursor: pointer; */
@@ -26,9 +33,16 @@
   text-overflow: ellipsis;
 }
 
-.itemTable {
-  margin: 1.5rem 0 1rem 2rem;
+.codelistStatus {
+  font-size: 12px;
+  font-weight: normal;
+  pointer-events: none;
+  color: var(--gray-65);
+  line-height: 1;
+  margin-left: 0.25rem;
+  margin-bottom: 0.15rem;
 }
+
 .codelistExpandable {
   height: 1vw;
   padding: 1rem 0 2rem 1rem;
@@ -52,4 +66,8 @@
 .inputsWrapper {
   display: flex;
   flex-direction: column;
+}
+
+.itemTable {
+  margin: 1.5rem 0 1rem 2rem;
 }
