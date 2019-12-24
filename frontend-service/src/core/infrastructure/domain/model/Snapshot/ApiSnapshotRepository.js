@@ -15,23 +15,11 @@ const allDesigner = async datasetSchemaId => {
 };
 
 const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {
-  const isCreated = await apiSnapshot.createByIdDesigner(datasetId, datasetSchemaId, description);
-
-  const snapshotToCreate = new Snapshot();
-  snapshotToCreate.description = description;
-  snapshotToCreate.isCreated = isCreated;
-
-  return snapshotToCreate;
+  return await apiSnapshot.createByIdDesigner(datasetId, datasetSchemaId, description);
 };
 
 const deleteByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  const isDeleted = await apiSnapshot.deleteByIdDesigner(datasetSchemaId, snapshotId);
-
-  const snapshotToDelete = new Snapshot();
-  snapshotToDelete.id = snapshotId;
-  snapshotToDelete.isDeleted = isDeleted;
-
-  return snapshotToDelete;
+  return await apiSnapshot.deleteByIdDesigner(datasetSchemaId, snapshotId);
 };
 
 const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {

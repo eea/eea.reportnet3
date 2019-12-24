@@ -307,6 +307,11 @@
 		"deleteRecordByIdError":"Failed deleting record",
 		"updateFieldByIdError":"Failed updating field",
 		"tableDataByIdError":"Failed loading data",
-		"updateRecordsByIdError":"Failed updating record"
+		"updateRecordsByIdError":"Failed updating record",
+		"documentUploadingInitInfo":"Uploading document...",
+		"documentEditingError":"Failed editing document",
+		"documentUploadingError":"Failed uploading document",
+		"deleteDocumentInitInfo":"Document deleting...",
+		"deleteDocumentError":"Document deleting error"
 	}
 }

@@ -159,6 +159,18 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key":"DOCUMENT_EDITING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DOCUMENT_UPLOADING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_DOCUMENT_ERROR",
+          "refresh":false
         }
       ]
     },
@@ -253,11 +265,20 @@
       "key":"info",
       "lifeTime":5000,
       "fixed":false,
-      "types":[{
-        "key": "DATASET_DATA_LOADING_INIT",
-        "refresh":false
-      }]
+      "types":[
+        {
+          "key": "DATASET_DATA_LOADING_INIT",
+          "refresh":false
+        },
+        {
+          "key": "DOCUMENT_UPLOADING_INIT_INFO",
+          "refresh":false
+        },
+        {
+          "key": "DELETE_DOCUMENT_INIT_INFO",
+          "refresh":false
+        }
+      ]
     }
-
   ]
     
