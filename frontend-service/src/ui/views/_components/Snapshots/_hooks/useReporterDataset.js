@@ -1,11 +1,13 @@
 import { useState, useContext, useEffect, useReducer } from 'react';
 
 import { useSnapshotReducer } from './useSnapshotReducer';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { SnapshotService } from 'core/services/Snapshot';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const useReporterDataset = (datasetId, dataflowId, growlRef) => {
-  const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
+
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [isSnapshotDialogVisible, setIsSnapshotDialogVisible] = useState(false);
@@ -28,28 +30,32 @@ const useReporterDataset = (datasetId, dataflowId, growlRef) => {
     }
   }, [isSnapshotsBarVisible]);
 
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
-
   const onCreateSnapshot = async () => {
-    const snapshotToCreate = await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
-
-    if (snapshotToCreate.isCreated) {
+    try {
+      await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
       onLoadSnapshotList();
+    } catch (error) {
+      notificationContext.add({
+        type: 'CREATE_BY_ID_REPORTER_ERROR',
+        content: {}
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onDeleteSnapshot = async () => {
-    const snapshotToDelete = await SnapshotService.deleteByIdReporter(datasetId, snapshotState.snapShotId);
-
-    if (snapshotToDelete.isDeleted) {
+    try {
+      await SnapshotService.deleteByIdReporter(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
+    } catch (error) {
+      notificationContext.add({
+        type: 'DELETED_BY_ID_REPORTER_ERROR',
+        content: {}
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onLoadSnapshotList = async () => {
@@ -65,43 +71,40 @@ const useReporterDataset = (datasetId, dataflowId, growlRef) => {
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
+      notificationContext.add({
+        type: 'ALL_REPORTER_ERROR',
+        content: {}
+      });
       setIsLoadingSnapshotListData(false);
     }
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotToRelease = await SnapshotService.releaseByIdReporter(
-      dataflowId,
-      datasetId,
-      snapshotState.snapShotId
-    );
-
-    if (snapshotToRelease.isReleased) {
+    try {
+      await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
+    } catch (error) {
+      notificationContext.add({
+        type: 'RELEASED_BY_ID_REPORTER_ERROR',
+        content: {}
+      });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const onRestoreSnapshot = async () => {
-    const snapshotToRestore = await SnapshotService.restoreByIdReporter(
-      dataflowId,
-      datasetId,
-      snapshotState.snapShotId
-    );
-
-    if (snapshotToRestore.isRestored) {
+    try {
+      await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
-
-      onGrowlAlert({
-        severity: 'info',
-        summary: resources.messages.snapshotItemRestoreProcessSummary,
-        detail: resources.messages.snapshotItemRestoreProcessDetail,
-        life: '5000'
+    } catch (error) {
+      notificationContext.add({
+        type: 'RESTORED_BY_ID_REPORTER_ERROR',
+        content: {}
       });
+    } finally {
+      setIsSnapshotDialogVisible(false);
     }
-
-    setIsSnapshotDialogVisible(false);
   };
 
   const { snapshotReducer } = useSnapshotReducer(

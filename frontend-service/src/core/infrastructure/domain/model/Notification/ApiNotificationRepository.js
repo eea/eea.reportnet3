@@ -19,6 +19,7 @@ const parse = ({ type, content, message, config, routes }) => {
       notificationDTO.type = key;
       notificationDTO.fixed = notificationTypeConfig.fixed || fixed;
       notificationDTO.lifeTime = notificationTypeConfig.lifeTime || lifeTime;
+      notificationDTO.key = type;
       if (!isUndefined(notificationTypeConfig.navigateTo)) {
         const urlParameters = {};
         notificationTypeConfig.navigateTo.parameters.forEach(parameter => {
@@ -40,6 +41,7 @@ const parse = ({ type, content, message, config, routes }) => {
   });
   return new Notification(
     notificationDTO.id,
+    notificationDTO.key,
     notificationDTO.message,
     notificationDTO.redirectionUrl,
     notificationDTO.downloadLink,
