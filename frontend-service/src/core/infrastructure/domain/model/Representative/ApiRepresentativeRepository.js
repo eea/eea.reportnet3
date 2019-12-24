@@ -53,7 +53,8 @@ const allRepresentatives = async dataflowId => {
   return dataToConsume;
 };
 
-const allDataProviders = async dataProviderGroupId => {
+const allDataProviders = async dataProviderGroup => {
+  console.log('Recived Group', dataProviderGroup);
   const dataProvidersDTO = await apiRepresentative.allDataProviders(1); // hard coded dataProviderGroupId
 
   const response = dataProvidersDTO.data.map(dataProvider => {

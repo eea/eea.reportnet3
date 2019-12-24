@@ -40,7 +40,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID', state.selectedDataProviderGroup);
+      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID');
 
       return { ...state, allPossibleDataProviders: payload };
 
@@ -58,7 +58,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
-      console.log('INITIAL_LOAD', payload.group);
+      console.log('INITIAL_LOAD');
 
       if (!includes(state.representatives, emptyRepresentative)) {
         payload.representatives.push(emptyRepresentative);

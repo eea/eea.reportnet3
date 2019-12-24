@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
+import { isNull } from 'lodash';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_components/reducer.jsx';
@@ -28,33 +29,15 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
-  useEffect(async () => {
-    const response = await RepresentativeService.getProviderTypes();
-
-    formDispatcher({
-      type: 'GET_PROVIDERS_TYPES_LIST',
-      payload: response
-    });
-
-    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-
-    formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: responseAllRepresentatives
-    });
-
-    console.log('formState.selectedDataProviderGroup', formState.selectedDataProviderGroup);
-
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(formState.selectedDataProviderGroup);
-    formDispatcher({
-      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: responseAllDataProviders
-    });
-
-    formDispatcher({
-      type: 'CREATE_UNUSED_OPTIONS_LIST'
-    });
+  useEffect(() => {
+    getInitialData(formDispatcher, dataflowId, formState);
   }, []);
+
+  useEffect(() => {
+    if (!isNull(formState.selectedDataProviderGroup)) {
+      getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+    }
+  }, [formState.selectedDataProviderGroup]);
 
   const providerAccountInputColumnTemplate = rowData => {
     let inputData = rowData.providerAccount;
@@ -176,3 +159,30 @@ const RepresentativesList = ({ dataflowId }) => {
 };
 
 export { RepresentativesList };
+
+const getInitialData = async (formDispatcher, dataflowId, formState) => {
+  const response = await RepresentativeService.getProviderTypes();
+  formDispatcher({
+    type: 'GET_PROVIDERS_TYPES_LIST',
+    payload: response
+  });
+
+  const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+  formDispatcher({
+    type: 'INITIAL_LOAD',
+    payload: responseAllRepresentatives
+  });
+
+  await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+
+  formDispatcher({
+    type: 'CREATE_UNUSED_OPTIONS_LIST'
+  });
+};
+const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
+  const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+  formDispatcher({
+    type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
+    payload: responseAllDataProviders
+  });
+};
