@@ -88,18 +88,8 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) =>
 
   const onReleaseSnapshot = async () => {
     try {
-      const snapshotToRelease = await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
-      if (snapshotToRelease.status >= 200 && snapshotToRelease.status <= 299) {
-        onLoadSnapshotList();
-      } else {
-        notificationContext.add({
-          type: 'SNAPSHOT_RELEASE_ERROR',
-          content: {
-            dataflowId,
-            datasetId
-          }
-        });
-      }
+      await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
+      onLoadSnapshotList();
     } catch (error) {
       notificationContext.add({
         type: 'SNAPSHOT_RELEASE_ERROR',
@@ -115,17 +105,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) =>
 
   const onRestoreSnapshot = async () => {
     try {
-      const snapshotToRestore = await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
-      if (snapshotToRestore.isRestored) {
-        snapshotDispatch({ type: 'mark_as_restored', payload: {} });
-        notificationContext.add({
-          type: 'SNAPSHOT_RESTORING_SUCCESS',
-          content: {
-            dataflowId,
-            datasetId
-          }
-        });
-      }
+      await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {
       notificationContext.add({
         type: 'SNAPSHOT_RESTORING_ERROR',

@@ -312,6 +312,11 @@
 		"documentEditingError":"Failed editing document",
 		"documentUploadingError":"Failed uploading document",
 		"deleteDocumentInitInfo":"Document deleting...",
-		"deleteDocumentError":"Document deleting error"
+		"deleteDocumentError":"Document deleting error",
+		"createByIdReporterError":"Failed creating snapshot",
+		"deletedByIdReporterError":"Failed deleting snapshot",
+		"allReporterError":"Failed loading snapshot list",
+		"releasedByIdReporterError":"Failed releasing snapshot",
+		"restoredByIdReporterError":"Failed restoring snapshot"
 	}
 }

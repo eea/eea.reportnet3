@@ -171,6 +171,26 @@
         {
           "key":"DELETE_DOCUMENT_ERROR",
           "refresh":false
+        },
+        {
+          "key":"CREATE_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "ALL_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RELEASED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RESTORED_BY_ID_REPORTER_ERROR",
+          "refresh":false
         }
       ]
     },
