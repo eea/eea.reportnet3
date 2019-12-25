@@ -21,8 +21,9 @@ pipeline {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                            mvn cobertura:cobertura -Dcobertura.report.format=xml -Denforcer.skip=true
+                            
                         '''
+                        // mvn cobertura:cobertura -Dcobertura.report.format=xml -Denforcer.skip=true
                     }
                     post {
                         failure {
