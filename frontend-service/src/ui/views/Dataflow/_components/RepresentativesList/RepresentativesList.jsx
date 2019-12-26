@@ -36,8 +36,6 @@ const RepresentativesList = ({ dataflowId }) => {
   }, [formState.refresher]);
 
   useEffect(() => {
-    console.log('formState.selectedDataProviderGroup', formState.selectedDataProviderGroup);
-    console.log('formState.representatives', formState.representatives);
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     }
@@ -95,8 +93,6 @@ const RepresentativesList = ({ dataflowId }) => {
       </>
     );
   };
-
-  console.log('formState', formState.representatives);
 
   const deleteBtnColumnTemplate = representative => {
     return !isNull(representative.representativeId) ? (
@@ -174,9 +170,11 @@ const getInitialData = async (formDispatcher, dataflowId, formState) => {
 
   await getAllRepresentatives(dataflowId, formDispatcher);
 
-  await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+  if (!isEmpty(formState.representatives)) {
+    await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
 
-  createUnusedOptionsList(formDispatcher);
+    createUnusedOptionsList(formDispatcher);
+  }
 };
 
 const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {

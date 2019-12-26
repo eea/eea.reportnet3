@@ -25,22 +25,15 @@ const allRepresentatives = async dataflowId => {
 const allDataProviders = async dataProviderGroup => {
   let response = [];
 
-  if (!isNull(dataProviderGroup)) {
-    const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroup.dataProviderGroupId);
+  const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroup.dataProviderGroupId);
 
-    response = dataProvidersDTO.data.map(dataProvider => {
-      return { dataProviderId: dataProvider.id, label: dataProvider.label };
-    });
+  response = dataProvidersDTO.data.map(dataProvider => {
+    return { dataProviderId: dataProvider.id, label: dataProvider.label };
+  });
 
-    response.unshift({ dataProviderId: '', label: 'Select...' });
-  } else {
-    console.log('dataProviderGroup', dataProviderGroup);
-    const dataProvidersDTO = await apiRepresentative.allDataProviders(1); //hardcoded
+  response.unshift({ dataProviderId: '', label: 'Select...' });
 
-    response = dataProvidersDTO.data.map(dataProvider => {
-      return { dataProviderId: dataProvider.id, label: dataProvider.label };
-    });
-  }
+  console.log('allDataProviders response', response);
 
   return response;
 };
