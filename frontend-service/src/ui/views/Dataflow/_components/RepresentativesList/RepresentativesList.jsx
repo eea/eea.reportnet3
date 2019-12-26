@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
 import styles from './RepresentativesList.module.scss';
@@ -53,14 +53,15 @@ const RepresentativesList = ({ dataflowId }) => {
       <input
         autoFocus
         defaultValue={inputData}
-        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+        onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
         onChange={e =>
           formDispatcher({
             type: 'ON_ACCOUNT_CHANGE',
             payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
           })
         }
-        onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
+        onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
       />
     );
   };
@@ -80,6 +81,7 @@ const RepresentativesList = ({ dataflowId }) => {
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative);
           }}
+          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
@@ -218,13 +220,6 @@ const getProviderTypes = async formDispatcher => {
   });
 };
 
-// const addRepresentative = async (formDispatcher, formState, representative, dataflowId, inputValue) => {
-//   const responseStatus = await RepresentativeService.add(
-//     dataflowId,
-//     inputValue,
-//     parseInt(representative.dataProviderId))
-//   }
-
 const addRepresentative = async (formDispatcher, representatives, dataflowId, inputValue) => {
   console.log('add ON ADD PROVIDER representatives', representatives);
   const newRepresentative = representatives.filter(representative => representative.representativeId == null);
@@ -280,15 +275,13 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
 };
 
 const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
-  console.log('add dataflowid 2: ', dataflowId);
-  console.log('add formState', formState);
   isNull(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
     : updateRepresentative(formDispatcher, formState, representative, dataflowId);
 };
 
-// onBlur={event =>
-//   isNull(representative.representativeId)
-//     ? addRepresentative(formDispatcher, formState, representative, dataflowId, event.target.value)
-//     : updateRepresentative(formDispatcher, representative, dataflowId, event.target.value)
-// }
+const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
+  if (event.key === 'Enter') {
+    onAddProvider(formDispatcher, formState, representative, dataflowId);
+  }
+};
