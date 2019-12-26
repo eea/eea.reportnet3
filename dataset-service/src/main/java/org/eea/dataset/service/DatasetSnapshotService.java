@@ -24,9 +24,8 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param description the description
-   * @throws EEAException the EEA exception
    */
-  void addSnapshot(Long idDataset, String description) throws EEAException;
+  void addSnapshot(Long idDataset, String description);
 
   /**
    * Removes the snapshot.
@@ -71,11 +70,8 @@ public interface DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idDatasetSchema the id dataset schema
    * @param description the description
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
-  void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description)
-      throws EEAException, IOException;
+  void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description);
 
   /**
    * Restore schema snapshot.

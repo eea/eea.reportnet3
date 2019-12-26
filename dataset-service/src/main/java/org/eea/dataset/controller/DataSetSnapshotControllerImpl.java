@@ -78,7 +78,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
   }
 
-
   /**
    * Creates the snapshot.
    *
@@ -97,21 +96,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      // This method will release the lock
-      datasetSnapshotService.addSnapshot(datasetId, description);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
+    // This method will release the lock
+    datasetSnapshotService.addSnapshot(datasetId, description);
   }
-
 
   /**
    * Delete snapshot.
@@ -228,9 +215,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG_ERROR.error(e.getMessage());
     }
     return snapshots;
-
   }
-
 
   /**
    * Creates the schema snapshot.
@@ -253,20 +238,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      // This method will release the lock
-      datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
-    } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
+    // This method will release the lock
+    datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
   }
-
 
   /**
    * Restore schema snapshot.
