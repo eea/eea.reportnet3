@@ -171,8 +171,6 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param status the status
    *
-   *
-   *
    * @return the by status
    *
    * @throws EEAException the EEA exception
@@ -297,7 +295,7 @@ public class DataflowServiceImpl implements DataflowService {
         for (Dataflow df : ur.getDataflows()) {
           dataflowId = df.getId();
         }
-        userManagementControllerZull.addContributorToResource(dataflowId,
+        userManagementControllerZull.addUserToResource(dataflowId,
             ResourceGroupEnum.DATAFLOW_PROVIDER);
         LOG.info("The dataflow {} has been added into keycloak", dataflowId);
       }
@@ -344,6 +342,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -365,7 +364,7 @@ public class DataflowServiceImpl implements DataflowService {
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
     // // with that service we assing the group created to a user who create it
-    userManagementControllerZull.addContributorToResource(dataFlowSaved.getId(),
+    userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
 
@@ -374,6 +373,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Update data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -401,6 +401,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -415,7 +416,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the datasets id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -462,6 +465,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
+   *
    * @throws Exception the exception
    */
   @Override
@@ -487,7 +491,6 @@ public class DataflowServiceImpl implements DataflowService {
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
-
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
@@ -525,7 +528,6 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
   }
-
 
 
 }

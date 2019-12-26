@@ -52,11 +52,15 @@ public class UserManagementControllerImpl implements UserManagementController {
   private BackupManagmentService backupManagmentControlerService;
 
 
-  /** The keycloak connector service. */
+  /**
+   * The keycloak connector service.
+   */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
-  /** The user representation mapper. */
+  /**
+   * The user representation mapper.
+   */
   @Autowired
   private UserRepresentationMapper userRepresentationMapper;
 
@@ -213,8 +217,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resourceGroupEnum the resource group enum
    */
   @Override
-  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
-  public void addContributorToResource(@RequestParam("idResource") Long idResource,
+  @RequestMapping(value = "/add_user_to_resource", method = RequestMethod.PUT)
+  public void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -269,6 +273,14 @@ public class UserManagementControllerImpl implements UserManagementController {
     ArrayList<UserRepresentation> arrayList = new ArrayList<>(Arrays.asList(a));
 
     return userRepresentationMapper.entityListToClass(arrayList);
+  }
+
+  @Override
+  @RequestMapping(value = "/add_contributor_to_resource", method = RequestMethod.PUT)
+  public void addContributorToResource(Long idResource, ResourceGroupEnum resourceGroupEnum,
+      String userMail) {
+    securityProviderInterfaceService.addContributorToUserGroup(userMail,
+        resourceGroupEnum.getGroupName(idResource));
   }
 
 }

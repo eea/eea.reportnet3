@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -340,7 +341,7 @@ public class DataFlowServiceImplTest {
     ur.get().setDataflows(dfs);
 
     when(userRequestRepository.findById(Mockito.anyLong())).thenReturn(ur);
-    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
         Mockito.any());
 
     dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
@@ -419,7 +420,7 @@ public class DataFlowServiceImplTest {
     Dataflow dataflow = new Dataflow();
     when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+    doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
         Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
@@ -552,8 +553,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
-
     doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
@@ -671,7 +670,6 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -762,7 +760,6 @@ public class DataFlowServiceImplTest {
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
     resourceList.add(resource);
-
 
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
