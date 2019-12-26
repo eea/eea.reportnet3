@@ -176,18 +176,30 @@ pipeline {
                 }
             }
             parallel {
-                stage('Build Core Platform') {
+                stage('Build Microservices') {
                     steps {
                         script {
                             echo 'Dataflow Service'
                             def app
                             app = docker.build("k8s-swi001:5000/dataflow-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
-                            app.push()                    
+                            app.push()
                         }
                         script {
                             echo 'Dataset Service'
                             def app
                             app = docker.build("k8s-swi001:5000/dataset-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 -f ./Dockerfile ./dataset-service")
+                            app.push()
+                        }
+                        script {
+                            echo 'API Gateway'
+                            def app
+                            app = docker.build("k8s-swi001:5000/api-gateway:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 -f ./Dockerfile ./api-gateway ")
+                            app.push()
+                        }
+                        script {
+                            echo 'Inspire Harvester'
+                            def app
+                            app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
                             app.push()
                         }
                         script {
@@ -209,39 +221,21 @@ pipeline {
                             app.push()
                         }
                         script {
-                            echo 'Document Container Service'
-                            def app
-                            app = docker.build("k8s-swi001:5000/document-container-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 -f ./Dockerfile ./document-container-service")
-                            app.push()
-                        }
-
-                    }
-                 }
-
-                stage('Build Integration Layer') {
-                  steps{
-                        script {
-                            echo 'API Gateway'
-                            def app
-                            app = docker.build("k8s-swi001:5000/api-gateway:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 -f ./Dockerfile ./api-gateway ")
-                            app.push()                    
-                        }
-                        script {
-                            echo 'Inspire Harvester'
-                            def app
-                            app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
-                            app.push()
-                        }
-                         script {
                             echo 'Communication Service'
                             def app
                             app = docker.build("k8s-swi001:5000/communication-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 -f ./Dockerfile ./communication-service")
                             app.push()
-                         }
+                        }
                         script {
                             echo 'IndexSearch Service'
                             def app
                             app = docker.build("k8s-swi001:5000/indexsearch-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 -f ./Dockerfile ./indexsearch-service")
+                            app.push()
+                        }
+                        script {
+                            echo 'Document Container Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/document-container-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 -f ./Dockerfile ./document-container-service")
                             app.push()
                         }
                         script {
@@ -250,12 +244,8 @@ pipeline {
                             app = docker.build("k8s-swi001:5000/user-management-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 -f ./Dockerfile ./user-management-service")
                             app.push()
                         }
-
-
-                  }
+                    }
                 }
-
-
                 stage('Build Frontend') {
                     steps {
                         script {
