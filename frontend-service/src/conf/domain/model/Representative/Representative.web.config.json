@@ -3,7 +3,8 @@
     "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
     "allRepresentatives": "/representative/dataflow/{:dataflowId}",
     "deleteById":"/representative/{:representativeId}",
-    "getProviderTypes": "/representative/dataProvider/types",
-    "update":"/representative/update"
+    "getProviderTypes": "/representative/dataProvider/types",    
+    "updateDataProviderId":"/representative/update",
+    "updateProviderAccount":"/representative/update"
 
 }
