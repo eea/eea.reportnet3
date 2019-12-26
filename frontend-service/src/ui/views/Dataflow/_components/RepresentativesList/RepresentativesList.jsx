@@ -35,11 +35,9 @@ const RepresentativesList = ({ dataflowId }) => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
 
-  /*   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
-  }, [formState.refresher]); */
-
   useEffect(() => {
+    console.log('formState.selectedDataProviderGroup', formState.selectedDataProviderGroup);
+    console.log('formState.representatives', formState.representatives);
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     }
