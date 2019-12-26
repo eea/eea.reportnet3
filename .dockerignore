@@ -1,0 +1,10 @@
+!dataflow-service/target/*.jar
+!dataset-service/target/*.jar
+!api-gateway/target/*.jar
+!inspire-harvester/target/*.jar
+!recordstore-service/target/*.jar
+!validation-service/target/*.jar
+!communication-service/target/*.jar
+!indexsearch-service/target/*.jar
+!document-container-service/target/*.jar
+!user-management-service/target/*.jar
