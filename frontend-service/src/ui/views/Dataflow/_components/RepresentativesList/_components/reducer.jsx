@@ -1,6 +1,5 @@
 import { includes } from 'lodash';
 
-import { RepresentativeService } from 'core/services/Representative';
 import { Representative } from 'core/domain/model/Representative/Representative';
 
 export const reducer = (state, { type, payload }) => {
@@ -10,10 +9,12 @@ export const reducer = (state, { type, payload }) => {
 
   switch (type) {
     case 'ADD_DATA_PROVIDER':
-      RepresentativeService.add(payload.dataflowId, payload.providerAccount, payload.dataProviderId);
-      console.log('ADD_DATA_PROVIDER', payload.dataflowId, payload.providerAccount, payload.dataProviderId);
-      return state;
-
+      console.log('ADD_DATA_PROVIDER');
+      return {
+        ...state,
+        responseStatus: payload,
+        refresher: !state.refresher
+      };
     case 'CREATE_UNUSED_OPTIONS_LIST':
       console.log('CREATE_UNUSED_OPTIONS_LIST');
 
@@ -32,11 +33,21 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      console.log('payload', payload);
+      console.log('state.representatives', state.representatives);
+
+      updatedList = state.representatives.map(representative => {
+        if (representative.representativeId === null) {
+          representative.providerAccount = '';
+        }
+        return representative;
+      });
+
       return {
         ...state,
+        representatives: updatedList,
         isVisibleConfirmDeleteDialog: false,
-        responseStatus: payload
+        responseStatus: payload,
+        refresher: !state.refresher
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
@@ -80,12 +91,13 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_ACCOUNT_CHANGE':
       console.log('ON_ACCOUNT_CHANGE payload', payload);
+      console.log('ON_ACCOUNT_CHANGE state.representatives', state.representatives);
 
-      updatedList = state.representatives.map(dataProvider => {
-        if (dataProvider.dataProviderId === payload.dataProviderId) {
-          dataProvider.providerAccount = payload.providerAccount;
+      updatedList = state.representatives.map(representative => {
+        if (representative.dataProviderId === payload.dataProviderId) {
+          representative.providerAccount = payload.providerAccount;
         }
-        return dataProvider;
+        return representative;
       });
 
       return {
@@ -116,7 +128,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'SHOW_CONFIRM_DIALOG':
-      console.log('SHOW_CONFIRM_DIALOG', payload.representativeId);
+      console.log('SHOW_CONFIRM_DIALOG');
       return {
         ...state,
         isVisibleConfirmDeleteDialog: true,

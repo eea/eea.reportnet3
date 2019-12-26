@@ -4,11 +4,11 @@ import { isNull } from 'lodash';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_components/reducer.jsx';
-import { Button } from 'ui/views/_components/Button';
-import { DataTable } from 'ui/views/_components/DataTable';
 
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { RepresentativeService } from 'core/services/Representative';
@@ -24,6 +24,7 @@ const RepresentativesList = ({ dataflowId }) => {
     representativeIdToDelete: '',
     representatives: [],
     responseStatus: null,
+    refresher: false,
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
@@ -36,7 +37,8 @@ const RepresentativesList = ({ dataflowId }) => {
 
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
-  }, [formState.responseStatus]);
+    console.log('CHANGED STATUS', formState.responseStatus); //doesn't update if response is the same as the one before
+  }, [formState.responseStatus, formState.refresher]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -51,18 +53,17 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <input
         defaultValue={inputData}
-        placeholder={'Data provider account...'}
+        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
         onChange={e =>
           formDispatcher({
             type: 'ON_ACCOUNT_CHANGE',
             payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
           })
         }
-        onBlur={e =>
-          formDispatcher({
-            type: rowData.representativeId !== null ? 'UPDATE_ACCOUNT' : 'ADD_DATA_PROVIDER',
-            payload: { dataflowId, providerAccount: e.target.value, dataProviderId: parseInt(rowData.dataProviderId) }
-          })
+        onBlur={event =>
+          isNull(rowData.representativeId)
+            ? addRepresentative(formDispatcher, formState, rowData, dataflowId, event.target.value)
+            : updateRepresentative(formDispatcher, rowData, dataflowId, event.target.value)
         }
       />
     );
@@ -104,7 +105,7 @@ const RepresentativesList = ({ dataflowId }) => {
   const deleteBtnColumnTemplate = rowData => {
     return rowData.dataProviderId !== '' ? (
       <Button
-        tooltip={resources.messages.deleteDataProvider}
+        tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
         tooltipOptions={{ position: 'right' }}
         icon="trash"
         disabled={false}
@@ -121,18 +122,17 @@ const RepresentativesList = ({ dataflowId }) => {
   return (
     <>
       <div className={styles.selectWrapper}>
-        <div className={styles.title}>Data providers</div>
+        <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
         <div>
-          <label htmlFor="dataProvidersDropdown">Representative of </label>
-
+          <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             /* disabled={
               formState.selectedDataProviderGroup !== null && formState.dataProvidersTypesList !== [] ? true : false
             } */
             name="dataProvidersDropdown"
             optionLabel="label"
-            placeholder="Select..."
+            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
             value={formState.selectedDataProviderGroup}
             options={formState.dataProvidersTypesList}
             onChange={e => {
@@ -142,21 +142,27 @@ const RepresentativesList = ({ dataflowId }) => {
         </div>
       </div>
 
+      {formState.representatives.length > 1 && !isNull(formState.selectedDataProviderGroup)}
+
       <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
-        <Column body={providerAccountInputColumnTemplate} header="Data provider account" />
-        <Column body={dropdownColumnTemplate} header="Data Provider" />
+        <Column
+          body={providerAccountInputColumnTemplate}
+          header={resources.messages['manageRolesDialogAccoutColumn']}
+        />
+        <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
+
       <ConfirmDialog
         onConfirm={() => {
           onDeleteConfirm(formDispatcher, formState);
         }}
         onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
         visible={formState.isVisibleConfirmDeleteDialog}
-        header={'Delete data provider'}
+        header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
         labelConfirm={resources.messages['yes']}
         labelCancel={resources.messages['no']}>
-        {'Do you really want to delete this data provider?'}
+        {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
       </ConfirmDialog>
     </>
   );
@@ -210,5 +216,24 @@ const getProviderTypes = async formDispatcher => {
   formDispatcher({
     type: 'GET_PROVIDERS_TYPES_LIST',
     payload: response
+  });
+};
+
+const addRepresentative = async (formDispatcher, formState, rowData, dataflowId, inputValue) => {
+  console.log('ON ADD PROVIDER formState.representatives', formState.representatives);
+  const responseStatus = await RepresentativeService.add(dataflowId, inputValue, parseInt(rowData.dataProviderId));
+
+  formDispatcher({
+    type: 'ADD_DATA_PROVIDER',
+    payload: responseStatus.status
+  });
+};
+
+const updateRepresentative = async (formDispatcher, rowData, dataflowId, inputValue) => {
+  const responseStatus = await RepresentativeService.add(dataflowId, inputValue, parseInt(rowData.dataProviderId));
+
+  formDispatcher({
+    type: 'UPDATE_ACCOUNT',
+    payload: responseStatus.status
   });
 };
