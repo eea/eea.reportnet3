@@ -59,14 +59,12 @@ const deleteById = async representativeId => {
   return dataDeleted;
 };
 
-const update = async (dataflowId, representativeId, providerAccount, dataProviderId) => {
-  return await apiRepresentative.update(dataflowId, representativeId, providerAccount, dataProviderId);
-};
 const updateProviderAccount = async (representativeId, providerAccount) => {
-  return await apiRepresentative.update(representativeId, providerAccount);
+  return await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
 };
+
 const updateDataProviderId = async (representativeId, dataProviderId) => {
-  return await apiRepresentative.update(representativeId, dataProviderId);
+  return await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
 };
 
 export const ApiRepresentativeRepository = {
@@ -75,7 +73,6 @@ export const ApiRepresentativeRepository = {
   add,
   deleteById,
   getProviderTypes,
-  update,
   updateProviderAccount,
   updateDataProviderId
 };

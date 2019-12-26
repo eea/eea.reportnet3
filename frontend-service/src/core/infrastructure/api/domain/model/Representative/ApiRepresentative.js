@@ -77,28 +77,11 @@ const apiRepresentative = {
     return response;
   },
 
-  update: async (representativeId, providerAccount, dataProviderId) => {
-    const tokens = userStorage.get();
-
-    const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.update, {}),
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      },
-      data: {
-        dataProviderId,
-        id: representativeId,
-        providerAccount
-      }
-    });
-    return response;
-  },
-
   updateProviderAccount: async (representativeId, providerAccount) => {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.update, {}),
+      url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
@@ -114,7 +97,7 @@ const apiRepresentative = {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.update, {}),
+      url: getUrl(RepresentativeConfig.updateDataProviderId, {}),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
