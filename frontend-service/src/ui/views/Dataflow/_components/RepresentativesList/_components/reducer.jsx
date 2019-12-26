@@ -82,12 +82,13 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'UPDATE_ACCOUNT':
-      console.log('UPDATE_ACCOUNT payload', payload);
-      console.log('updatedList', state.representatives);
+      console.log('UPDATE_ACCOUNT');
 
-      //api call to update providerAccount
-
-      return state;
+      return {
+        ...state,
+        responseStatus: payload,
+        refresher: !state.refresher
+      };
 
     case 'UPDATE_DATA_PROVIDER':
       console.log('UPDATE_DATA_PROVIDER payload');

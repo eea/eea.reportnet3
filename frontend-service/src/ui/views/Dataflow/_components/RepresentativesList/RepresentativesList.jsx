@@ -56,7 +56,7 @@ const RepresentativesList = ({ dataflowId }) => {
         onChange={e =>
           formDispatcher({
             type: 'ON_ACCOUNT_CHANGE',
-            payload: { input: e.target.value, dataProviderId: representative.dataProviderId }
+            payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
           })
         }
         onBlur={event =>
@@ -219,7 +219,6 @@ const getProviderTypes = async formDispatcher => {
 };
 
 const addRepresentative = async (formDispatcher, formState, representative, dataflowId, inputValue) => {
-  console.log('ON ADD PROVIDER formState.representatives', formState.representatives);
   const responseStatus = await RepresentativeService.add(
     dataflowId,
     inputValue,
@@ -260,6 +259,7 @@ const onProviderChange = (formDispatcher, newDataProviderId, representative) => 
   if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
     updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
+    //THIS IS FOR NEW ONE
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
       payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
