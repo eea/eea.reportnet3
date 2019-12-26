@@ -1,6 +1,7 @@
 export class Notification {
-  constructor(notificationId, message, redirectionUrl, downloadLink, type, fixed, lifeTime, read) {
+  constructor(notificationId, key, message, redirectionUrl, downloadLink, type, fixed, lifeTime, read) {
     this.id = notificationId;
+    this.key = key;
     this.downloadLink = downloadLink;
     this.fixed = fixed;
     this.lifeTime = lifeTime;

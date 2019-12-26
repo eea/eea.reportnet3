@@ -10,6 +10,7 @@ import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { DocumentService } from 'core/services/Document';
 
@@ -17,13 +18,13 @@ const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
   onUpload,
-  onGrowlAlert,
   isFormReset,
   setIsUploadDialogVisible,
   isEditForm = false,
   isUploadDialogVisible
 }) => {
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   const form = useRef(null);
   const inputRef = useRef();
@@ -98,47 +99,44 @@ const DocumentFileUpload = ({
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        onGrowlAlert({
-          severity: 'info',
-          summary: resources.messages['documentUploadingGrowlUploadingSummary'],
-          detail: resources.messages['documentUploadingGrowlUploadingDetail'],
-          life: '5000'
+        notificationContext.add({
+          type: 'DOCUMENT_UPLOADING_INIT_INFO',
+          content: {}
         });
-
-        const response = isEditForm
-          ? await DocumentService.editDocument(
+        try {
+          if (isEditForm) {
+            await DocumentService.editDocument(
               dataflowId,
               values.description,
               values.lang,
               values.uploadFile,
               values.isPublic,
               values.id
-            )
-          : await DocumentService.uploadDocument(
+            );
+            onUpload();
+          } else {
+            await DocumentService.uploadDocument(
               dataflowId,
               values.description,
               values.lang,
               values.uploadFile,
               values.isPublic
             );
-
-        onUpload();
-        if (response === 200) {
-          onGrowlAlert({
-            severity: 'success',
-            summary: resources.messages['documentUploadingGrowlSuccessSummary'],
-            detail: resources.messages['documentUploadingGrowlSuccessDetail'],
-            life: '5000'
-          });
-          setSubmitting(false);
-          onUpload();
-        } else {
-          onGrowlAlert({
-            severity: 'error',
-            summary: resources.messages['documentUploadingGrowlErrorSummary'],
-            detail: resources.messages['documentUploadingGrowlErrorDetail'],
-            life: '5000'
-          });
+            onUpload();
+          }
+        } catch (error) {
+          if (isEditForm) {
+            notificationContext.add({
+              type: 'DOCUMENT_EDITING_ERROR',
+              content: {}
+            });
+          } else {
+            notificationContext.add({
+              type: 'DOCUMENT_UPLOADING_ERROR',
+              content: {}
+            });
+          }
+        } finally {
           setSubmitting(false);
         }
       }}>
