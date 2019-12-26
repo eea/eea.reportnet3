@@ -80,7 +80,7 @@ const RepresentativesList = ({ dataflowId }) => {
         <select
           className="p-dropdown p-component"
           onChange={event => {
-            onProviderChange(formDispatcher, event.target.value, representative);
+            onDataProviderIdChange(formDispatcher, event.target.value, representative);
           }}
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
@@ -255,7 +255,7 @@ const updateProviderId = async (formDispatcher, representativeId, newDataProvide
   });
 };
 
-const onProviderChange = (formDispatcher, newDataProviderId, representative) => {
+const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
   if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
     updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
