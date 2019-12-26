@@ -82,12 +82,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /*
-   * @Autowired private UpdateRecordHelper updateRecordHelper;
-   */
-
-
-
   /**
    * The dataflow controller zuul.
    */

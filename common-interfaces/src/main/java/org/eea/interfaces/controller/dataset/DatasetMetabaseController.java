@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -72,6 +73,10 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
+  @GetMapping(value = "/datacollection/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataCollectionVO> findDataCollectionIdByDataflowId(
+      @PathVariable("id") final Long idDataflow);
+
   /**
    * Update dataset name.
    *
@@ -116,6 +121,11 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
+
+
+  @PostMapping(value = "/createDataCollection")
+  void createEmptyDataCollection(@RequestParam(value = "name") String name,
+      @RequestParam(value = "idDataflow", required = true) Long idDataflow);
 
 
 }

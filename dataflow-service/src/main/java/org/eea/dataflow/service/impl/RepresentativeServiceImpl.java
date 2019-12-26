@@ -171,4 +171,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return dataProviderMapper.entityListToClass(dataProviderRepository.findAllByGroupId(groupId));
   }
 
+
+  @Override
+  public DataProviderVO getDataProviderById(Long dataProviderId) {
+    DataProvider dataprovider =
+        dataProviderRepository.findById(dataProviderId).orElse(new DataProvider());
+
+    return dataProviderMapper.entityToClass(dataprovider);
+  }
+
 }

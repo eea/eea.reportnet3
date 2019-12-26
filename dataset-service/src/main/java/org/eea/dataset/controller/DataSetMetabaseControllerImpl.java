@@ -2,12 +2,16 @@ package org.eea.dataset.controller;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -54,6 +58,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  @Autowired
+  private DataCollectionService dataCollectionService;
+
   /**
    * The Constant LOG.
    */
@@ -63,6 +70,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Find data set id by dataflow id.
@@ -219,6 +230,46 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
 
     return statistics;
+  }
+
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/createDataCollection")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void createEmptyDataCollection(@RequestParam(value = "name") String name,
+      @RequestParam(value = "idDataflow", required = true) Long idDataflow) {
+    if (StringUtils.isBlank(name)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    // 1. Get the design datasets
+    List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+    // 2. Get the providers who are going to provide data
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow);
+    // 3. Create reporting datasets as many providers are by design dataset
+    for (DesignDatasetVO design : designs) {
+      for (RepresentativeVO representative : representatives) {
+        this.createEmptyDataSet(
+            TypeDatasetEnum.REPORTING, representativeControllerZuul
+                .findDataProviderById(representative.getDataProviderId()).getLabel(),
+            design.getDatasetSchema(), idDataflow);
+      }
+      // 4.Create one DC per design dataset
+      this.createEmptyDataSet(TypeDatasetEnum.COLLECTION, "nombreDC", design.getDatasetSchema(),
+          idDataflow);
+    }
+
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/datacollection/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataCollectionVO> findDataCollectionIdByDataflowId(Long idDataflow) {
+
+    return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
+
   }
 
 

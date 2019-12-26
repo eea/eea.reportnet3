@@ -156,6 +156,11 @@ public class DataflowServiceImpl implements DataflowService {
         .setDesignDatasets(datasetMetabaseController.findDesignDataSetIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
+    // Add the data collections
+    dataflowVO
+        .setDataCollections(datasetMetabaseController.findDataCollectionIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;

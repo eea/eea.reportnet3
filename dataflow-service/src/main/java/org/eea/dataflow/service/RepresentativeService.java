@@ -62,4 +62,6 @@ public interface RepresentativeService {
    * @throws EEAException the EEA exception
    */
   List<RepresentativeVO> getRepresetativesByIdDataFlow(final Long dataflowId) throws EEAException;
+
+  DataProviderVO getDataProviderById(Long dataProviderId);
 }

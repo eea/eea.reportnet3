@@ -10,11 +10,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
@@ -61,6 +63,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
+
+  @Autowired
+  private DataCollectionRepository dataCollectionRepository;
 
 
   /** The Constant LOG. */
@@ -120,6 +125,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           dataset = new DesignDataset();
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           designDatasetRepository.save((DesignDataset) dataset);
+          break;
+        case COLLECTION:
+          dataset = new DataCollection();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          dataCollectionRepository.save((DataCollection) dataset);
           break;
         default:
           throw new EEAException("Unsupported datasetType: " + datasetType);

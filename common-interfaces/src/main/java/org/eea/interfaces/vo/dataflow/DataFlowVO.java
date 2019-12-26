@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
@@ -35,6 +36,9 @@ public class DataFlowVO implements Serializable {
 
   /** The design datasets. */
   private List<DesignDatasetVO> designDatasets;
+
+  /** The data collections. */
+  private List<DataCollectionVO> dataCollections;
 
   /** The description. */
   private String description;
