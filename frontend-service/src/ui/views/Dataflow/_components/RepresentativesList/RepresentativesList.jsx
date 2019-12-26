@@ -33,12 +33,11 @@ const RepresentativesList = ({ dataflowId }) => {
 
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
-  }, []);
+  }, [formState.refresher]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
-    console.log('CHANGED STATUS', formState.responseStatus); //doesn't update if response is the same as the one before
-  }, [formState.responseStatus, formState.refresher]);
+  }, [formState.refresher]); */
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
