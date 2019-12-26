@@ -100,6 +100,30 @@ public enum EventType {
       "datasetchema_snapshot_restored_failed_key", true),
 
   /**
+   * The add dataset snapshot completed event.
+   */
+  ADD_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_snapshot_completed_event", true),
+
+  /**
+   * The add dataset snapshot failed event.
+   */
+  ADD_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_dataset_snapshot_failed_event",
+      true),
+
+  /**
+   * The add dataset schema snapshot completed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_completed_event", true),
+
+  /**
+   * The add dataset schema snapshot failed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_failed_event", true),
+
+  /**
    * The command execute validation.
    */
   COMMAND_EXECUTE_VALIDATION("COMMAND_TOPIC", "execute_validations_key", false),
