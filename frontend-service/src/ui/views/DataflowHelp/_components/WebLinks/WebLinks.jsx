@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -28,6 +28,7 @@ export const WebLinks = ({
   const resources = useContext(ResourcesContext);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
@@ -38,6 +39,7 @@ export const WebLinks = ({
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
+      .lowercase()
       .matches(
         /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
         resources.messages['urlError']
@@ -45,14 +47,18 @@ export const WebLinks = ({
       .required(' ')
   });
 
-  const resetForm = () => {
-    setWeblinkItem({ id: undefined, description: '', url: '' });
+  if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
-  };
+  }
 
   const onHideAddEditDialog = () => {
     setIsAddOrEditWeblinkDialogVisible(false);
-    resetForm();
+    setIsFormReset(false);
+    onResetValues();
+  };
+
+  const onResetValues = () => {
+    setWeblinkItem({ id: undefined, description: '', url: '' });
   };
 
   const getValidUrl = (url = '') => {
@@ -118,7 +124,8 @@ export const WebLinks = ({
 
   const onHideDeleteDialog = () => {
     setIsConfirmDeleteVisible(false);
-    resetForm();
+    setIsFormReset(false);
+    onResetValues();
   };
 
   useEffect(() => {
@@ -136,7 +143,7 @@ export const WebLinks = ({
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={e => {
+          onClick={_ => {
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
         />

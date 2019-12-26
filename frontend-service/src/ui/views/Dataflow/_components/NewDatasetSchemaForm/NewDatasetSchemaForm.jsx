@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
@@ -11,8 +11,9 @@ import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-export const NewDatasetSchemaForm = ({
+const NewDatasetSchemaForm = ({
   dataflowId,
   datasetSchemaInfo,
   isFormReset,
@@ -30,7 +31,7 @@ export const NewDatasetSchemaForm = ({
     datasetSchemaName: Yup.string()
       .required(' ')
       .test('', resources.messages['duplicateSchemaError'], value => {
-        if (value !== undefined && !isEmpty(datasetSchemaInfo)) {
+        if (!isUndefined(value) && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
           const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
           return isRepeat.length === schemas.length;
@@ -55,18 +56,28 @@ export const NewDatasetSchemaForm = ({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         showLoading();
-        const response = await DataflowService.newEmptyDatasetSchema(
-          dataflowId,
-          encodeURIComponent(values.datasetSchemaName)
-        );
-        onCreate();
-        if (response === 200) {
+        try {
+          const response = await DataflowService.newEmptyDatasetSchema(
+            dataflowId,
+            encodeURIComponent(values.datasetSchemaName)
+          );
+          if (response >= 200 && response <= 200) {
+            onUpdateData();
+            setSubmitting(false);
+          } else {
+            throw new Error('Schema creation error');
+          }
+        } catch (error) {
+          NotificationContext.add({
+            type: 'DATASET_SCHEMA_CREATION_ERROR',
+            content: {
+              dataflowId
+            }
+          });
+        } finally {
           onCreate();
-          onUpdateData();
           setSubmitting(false);
           hideLoading();
-        } else {
-          setSubmitting(false);
         }
       }}>
       {({ errors, isSubmitting, touched }) => (
@@ -105,3 +116,5 @@ export const NewDatasetSchemaForm = ({
     </Formik>
   );
 };
+
+export { NewDatasetSchemaForm };

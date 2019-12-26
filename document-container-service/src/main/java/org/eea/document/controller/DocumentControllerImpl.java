@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,6 +78,9 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     LOG.info("uploadDocument");
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -129,22 +134,29 @@ public class DocumentControllerImpl implements DocumentController {
 
 
   /**
-   * Delete document.
+   * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
+   * your own
    *
    * @param documentId the document id
-   *
+   * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
-  public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
+  public void deleteDocument(@PathVariable("documentId") final Long documentId,
+      @RequestParam(value = "deleteMetabase", required = false,
+          defaultValue = "true") final Boolean deleteMetabase)
+      throws Exception {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      documentService.deleteDocument(documentId, document.getDataflowId());
+      documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
     } catch (final FeignException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {
@@ -174,6 +186,9 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
       @RequestParam("isPublic") final Boolean isPublic) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     LOG.info("updateDocument");
     if (dataFlowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -220,6 +235,9 @@ public class DocumentControllerImpl implements DocumentController {
   public void uploadSchemaSnapshotDocument(@RequestBody final byte[] file,
       @PathVariable("designDatasetId") final Long designDatasetId,
       @RequestParam("fileName") final String fileName) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     if (file == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -283,6 +301,9 @@ public class DocumentControllerImpl implements DocumentController {
   public void deleteSnapshotSchemaDocument(
       @PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName) throws Exception {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     try {
       if (idDesignDataset == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
@@ -295,6 +316,4 @@ public class DocumentControllerImpl implements DocumentController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
-
-
 }

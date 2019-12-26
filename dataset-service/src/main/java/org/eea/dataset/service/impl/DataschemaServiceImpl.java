@@ -613,6 +613,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ObjectId recordSchemaId = new ObjectId();
     recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
+    recordSchema.setFieldSchema(new ArrayList<>());
     TableSchema table = tableSchemaMapper.classToEntity(tableSchemaVO);
     table.setRecordSchema(recordSchema);
     LOG.info("Creating table schema with id {}", tableSchemaId);
@@ -751,7 +752,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchema.put("description", fieldSchemaVO.getDescription());
         }
         if (fieldSchemaVO.getName() != null) {
-          fieldSchema.put("nameTableSchema", fieldSchemaVO.getName());
+          fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
 
         // Guardar el FieldSchema modificado en MongoDB

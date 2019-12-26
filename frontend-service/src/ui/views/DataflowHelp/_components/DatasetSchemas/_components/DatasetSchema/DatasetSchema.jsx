@@ -25,12 +25,14 @@ const DatasetSchema = ({ designDataset, index }) => {
 
 const parseDesignDataset = design => {
   const parsedDataset = {};
+  parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
 
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
+      table.tableSchemaDescription = tableDTO.tableSchemaDescription;
       if (
         !isNull(tableDTO.records) &&
         !isUndefined(tableDTO.records[0].fields) &&
@@ -38,7 +40,11 @@ const parseDesignDataset = design => {
         tableDTO.records[0].fields.length > 0
       ) {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
-          return { name: fieldDTO.name, type: fieldDTO.type };
+          return {
+            name: fieldDTO.name,
+            type: fieldDTO.type,
+            description: !isNull(fieldDTO.description) ? fieldDTO.description : '-'
+          };
         });
         table.fields = fields;
       }

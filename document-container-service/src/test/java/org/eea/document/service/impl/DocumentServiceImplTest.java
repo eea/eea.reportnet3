@@ -239,14 +239,13 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void deleteDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
     doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
   }
 
   /**
@@ -258,14 +257,13 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void deleteDocumentException2Test() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
     doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
   }
 
   /**
@@ -283,7 +281,7 @@ public class DocumentServiceImplTest {
         Mockito.any());
     doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.TRUE);
     Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
   }
 

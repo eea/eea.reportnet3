@@ -9,12 +9,14 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,6 +93,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -150,6 +155,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -163,7 +171,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
   }
 
 
@@ -242,6 +249,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idDatasetSchema") String idDatasetSchema,
       @RequestParam("description") String description) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -255,7 +265,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
   }
 
 
@@ -274,6 +283,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void restoreSchemaSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -287,7 +299,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
   }
 
 
@@ -304,6 +315,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -317,7 +331,4 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
   }
-
-
-
 }

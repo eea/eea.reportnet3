@@ -26,7 +26,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
               <span style={{ color: 'black', fontSize: '14px', fontWeight: 'bold' }}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
-              {property.toString()}
+              {property !== '' ? property.toString() : '-'}
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem

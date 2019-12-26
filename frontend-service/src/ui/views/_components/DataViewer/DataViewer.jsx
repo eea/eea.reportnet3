@@ -1,40 +1,46 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { capitalize, isEmpty, isUndefined, isNull, isString } from 'lodash';
-
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
 
+import { ActionsColumn } from './_components/ActionsColumn';
+import { ActionsToolbar } from './_components/ActionsToolbar';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { IconTooltip } from './_components/IconTooltip';
-import { InfoTable } from './_components/InfoTable';
-import { InputText } from 'ui/views/_components/InputText';
+import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Menu } from 'primereact/menu';
+import { FieldEditor } from './_components/FieldEditor';
+import { Footer } from './_components/Footer';
+import { IconTooltip } from './_components/IconTooltip';
+import { InfoTable } from './_components/InfoTable';
+
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
-import { Toolbar } from 'ui/views/_components/Toolbar';
+
+import { recordReducer } from './_functions/Reducers/recordReducer';
+import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { DatasetService } from 'core/services/Dataset';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
+import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
+import { RecordUtils } from 'ui/views/_functions/Utils';
+
 import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
-    buttonsList = undefined,
     correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isPreviewModeOn = false,
@@ -54,50 +60,45 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
-    const [allLevelErrorWithValidations, setAllLevelErrorWithValidations] = useState(levelErrorTypesWithCorrects);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-    // const [datasetHasData, setDatasetHasData] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-    const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
-    const [exportButtonsList, setExportButtonsList] = useState([]);
-    const [exportTableData, setExportTableData] = useState(undefined);
-    const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
-    const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
-    const [initialRecordValue, setInitialRecordValue] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingFile, setIsLoadingFile] = useState(false);
-    const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
-    const [newRecord, setNewRecord] = useState({});
-    const [numCopiedRecords, setNumCopiedRecords] = useState();
-    const [numRows, setNumRows] = useState(10);
     const [originalColumns, setOriginalColumns] = useState([]);
-    const [pastedRecords, setPastedRecords] = useState();
-    const [selectedRecord, setSelectedRecord] = useState({});
-    //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
-    const [sortField, setSortField] = useState(undefined);
-    const [sortOrder, setSortOrder] = useState(undefined);
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
-    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
-    const [visibilityColumnIcon, setinvisibleColumnIcon] = useState('eye');
-    const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
-    const [invisibleColumns, setinvisibleColumns] = useState([]);
+    const [invisibleColumns, setInvisibleColumns] = useState([]);
+
+    const [records, dispatchRecords] = useReducer(recordReducer, {
+      totalRecords: 0,
+      totalFilteredRecords: 0,
+      firstPageRecord: 0,
+      recordsPerPage: 10,
+      initialRecordValue: undefined,
+      isRecordDeleted: false,
+      editedRecord: {},
+      selectedRecord: {},
+      newRecord: {},
+      numCopiedRecords: undefined,
+      pastedRecords: undefined,
+      fetchedDataFirstRecord: []
+    });
+    const [sort, dispatchSort] = useReducer(sortReducer, {
+      sortField: undefined,
+      sortOrder: undefined
+    });
 
     const datasetContext = useContext(DatasetContext);
     const notificationContext = useContext(NotificationContext);
@@ -106,29 +107,9 @@ const DataViewer = withRouter(
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
-    let exportMenuRef = useRef();
     let divRef = useRef();
-    let dropdownFilterRef = useRef();
-    let filterMenuRef = useRef();
 
     useEffect(() => {
-      if (datasetContext.isValidationSelected) {
-        setValidationDropdownFilter(getLevelErrorFilters());
-        setIsFilterValidationsActive(false);
-        setLevelErrorValidations(levelErrorTypesWithCorrects);
-        datasetContext.setIsValidationSelected(false);
-      }
-    }, [datasetContext.isValidationSelected]);
-
-    useEffect(() => {
-      setExportButtonsList(
-        config.exportTypes.map(type => ({
-          label: type.text,
-          icon: config.icons['archive'],
-          command: () => onExportTableData(type.code)
-        }))
-      );
-
       let colOptions = [];
       let dropdownFilter = [];
       for (let colSchema of colsSchema) {
@@ -136,14 +117,22 @@ const DataViewer = withRouter(
         dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
       }
       setColumnOptions(colOptions);
-      setVisibilityDropdownFilter(dropdownFilter);
-      setValidationDropdownFilter(getLevelErrorFilters());
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
-      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
+      if (!isEmpty(inmTableSchemaColumns)) {
+        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
+        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
+      }
       setColsSchema(inmTableSchemaColumns);
     }, []);
+
+    useEffect(() => {
+      if (datasetContext.isValidationSelected) {
+        setIsFilterValidationsActive(false);
+        setLevelErrorValidations(levelErrorTypesWithCorrects);
+        datasetContext.setIsValidationSelected(false);
+      }
+    }, [datasetContext.isValidationSelected]);
 
     useEffect(() => {
       setMenu([
@@ -160,43 +149,36 @@ const DataViewer = withRouter(
           command: () => setConfirmDeleteVisible(true)
         }
       ]);
-    }, [selectedRecord]);
+    }, [records.selectedRecord]);
 
     useEffect(() => {
-      if (isRecordDeleted) {
+      if (records.isRecordDeleted) {
         onRefresh();
         setConfirmDeleteVisible(false);
       }
-    }, [isRecordDeleted]);
+    }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      setIsRecordDeleted(false);
+      dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
       if (isUndefined(recordPositionId) || recordPositionId === -1) {
         return;
       }
-
-      setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
-      setSortField(undefined);
-      setSortOrder(undefined);
+      dispatchRecords({
+        type: 'SET_FIRST_PAGE_RECORD',
+        payload: Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage
+      });
+      dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
       onFetchData(
         undefined,
         undefined,
-        Math.floor(recordPositionId / numRows) * numRows,
-        numRows,
+        Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage,
+        records.recordsPerPage,
         levelErrorTypesWithCorrects
       );
     }, [recordPositionId]);
-
-    const getTextWidth = (text, font) => {
-      const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
-      const context = canvas.getContext('2d');
-      context.font = font;
-      const metrics = context.measureText(text);
-      return Number(metrics.width);
-    };
 
     useEffect(() => {
       const maxWidths = [];
@@ -212,9 +194,8 @@ const DataViewer = withRouter(
       //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);
       //   }
       // });
-
       //Calculate the max width of data column
-      const textMaxWidth = colsSchema.map(col => getTextWidth(col.header, '14pt Open Sans'));
+      const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
       const maxWidth = Math.max(...textMaxWidth) + 30;
       let columnsArr = colsSchema.map((column, i) => {
         let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
@@ -224,8 +205,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={invisibleColumn}
-            editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, selectedRecord) : null}
-            //editorValidator={requiredValidator}
+            editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
             field={column.field}
             header={column.header}
             key={column.field}
@@ -273,77 +253,42 @@ const DataViewer = withRouter(
         setOriginalColumns(columnsArr);
       }
       // }
-    }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
-
-    const showFilters = columnKeys => {
-      const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
-      const currentinvisibleColumns = originalColumns.filter(
-        column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
-      );
-      setColumns(currentinvisibleColumns);
-      setinvisibleColumns(currentinvisibleColumns);
-
-      if (isFiltered(originalColumns, currentinvisibleColumns)) {
-        setinvisibleColumnIcon('eye-slash');
-      } else {
-        setinvisibleColumnIcon('eye');
-      }
-    };
-
-    const getLevelErrorFilters = () => {
-      let filters = [];
-      levelErrorTypesWithCorrects.forEach(value => {
-        if (!isUndefined(value) && !isNull(value)) {
-          let filter = {
-            label: capitalize(value),
-            key: capitalize(value)
-          };
-          filters.push(filter);
-        }
-      });
-      return filters;
-    };
+    }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
 
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypesWithCorrects.length);
-      setFirstRow(0);
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       setLevelErrorValidations(filteredKeys);
     };
 
     useEffect(() => {
-      onFetchData(sortField, sortOrder, 0, numRows, levelErrorValidations);
+      onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
     }, [levelErrorValidations]);
 
     useEffect(() => {
-      if (!isUndefined(exportTableData)) {
-        DownloadFile(exportTableData, exportTableDataName);
-      }
-    }, [exportTableData]);
-
-    useEffect(() => {
-      if (confirmPasteVisible) {
-        if (!isUndefined(pastedRecords)) {
-          if (pastedRecords.length > 0) {
-            setPastedRecords([]);
-          }
-        }
-        // if (confirmPasteVisible) {
-        //   divRef.current.focus();
-        // }
+      if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
+        dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
       }
     }, [confirmPasteVisible]);
 
     const onCancelRowEdit = () => {
-      let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
+      let updatedValue = RecordUtils.changeRecordInTable(
+        fetchedData,
+        RecordUtils.getRecordId(fetchedData, records.selectedRecord),
+        colsSchema,
+        records
+      );
       setEditDialogVisible(false);
-      setFetchedData(updatedValue);
+      if (!isUndefined(updatedValue)) {
+        setFetchedData(updatedValue);
+      }
     };
 
     const onChangePage = event => {
-      setNumRows(event.rows);
-      setFirstRow(event.first);
-      onFetchData(sortField, sortOrder, event.first, event.rows, levelErrorValidations);
+      dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
+      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -351,45 +296,40 @@ const DataViewer = withRouter(
       const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
       if (dataDeleted) {
         setFetchedData([]);
-        setTotalRecords(0);
-        setTotalFilteredRecords(0);
+        dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
+        dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
 
     const onConfirmDeleteRow = async () => {
       setDeleteDialogVisible(false);
-      const recordDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
+      const recordDeleted = await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
       if (recordDeleted) {
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        setIsRecordDeleted(true);
+        const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
+        const page =
+          (calcRecords - 1) / records.recordsPerPage === 1
+            ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
+            : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
+        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
+        dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       }
     };
 
     const onDeletePastedRecord = recordIndex => {
-      const inmPastedRecords = [...pastedRecords];
-      inmPastedRecords.splice(getRecordIdByIndex(inmPastedRecords, recordIndex), 1);
-      setPastedRecords(inmPastedRecords);
+      dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
     };
 
     const onEditAddFormInput = (property, value) => {
-      let record = {};
-      if (!isNewRecord) {
-        record = { ...editedRecord };
-        let updatedRecord = changeRecordValue(record, property, value);
-        setEditedRecord(updatedRecord);
-      } else {
-        record = { ...newRecord };
-        let updatedRecord = changeRecordValue(record, property, value);
-        setNewRecord(updatedRecord);
-      }
+      dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
     };
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
     const onEditorKeyChange = (props, event, record) => {
       if (event.key === 'Escape') {
-        let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
+        let updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
@@ -404,8 +344,8 @@ const DataViewer = withRouter(
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (
           value !== initialCellValue &&
-          selectedCellId === getCellId(cell, cell.field) &&
-          record.recordId === selectedRecord.recordId
+          selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
+          record.recordId === records.selectedRecord.recordId
         ) {
           //without await. We don't have to wait for the response.
           const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
@@ -421,27 +361,15 @@ const DataViewer = withRouter(
     };
 
     const onEditorValueChange = (props, value) => {
-      const updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
+      const updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
     };
 
     const onEditorValueFocus = (props, value) => {
-      setSelectedCellId(getCellId(props, props.field));
+      setSelectedCellId(RecordUtils.getCellId(props, props.field));
       setInitialCellValue(value);
       if (!isEditing) {
         setIsEditing(true);
-      }
-    };
-
-    const onExportTableData = async fileType => {
-      setIsLoadingFile(true);
-      try {
-        setExportTableDataName(createTableName(tableName, fileType));
-        setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoadingFile(false);
       }
     };
 
@@ -449,11 +377,9 @@ const DataViewer = withRouter(
       setIsLoading(true);
       try {
         let fields;
-
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-
         const tableData = await DatasetService.tableDataById(
           datasetId,
           tableId,
@@ -463,21 +389,22 @@ const DataViewer = withRouter(
           levelErrorValidations
         );
 
-        if (!isEmpty(tableData.records)) {
-          if (!isUndefined(onLoadTableData)) {
-            onLoadTableData(true);
-          }
+        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
+          onLoadTableData(true);
         }
-
-        if (!isUndefined(colsSchema)) {
-          if (!isUndefined(tableData)) {
-            if (!isUndefined(tableData.records)) {
-              if (tableData.records.length > 0) {
-                setNewRecord(createEmptyObject(colsSchema, tableData.records[0]));
-              }
-            } else {
-              setNewRecord(createEmptyObject(colsSchema, undefined));
+        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
+          if (!isUndefined(tableData.records)) {
+            if (tableData.records.length > 0) {
+              dispatchRecords({
+                type: 'SET_NEW_RECORD',
+                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+              });
             }
+          } else {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
           }
         }
         if (!isUndefined(tableData.records)) {
@@ -486,12 +413,12 @@ const DataViewer = withRouter(
           setFetchedData([]);
         }
 
-        if (tableData.totalRecords !== totalRecords) {
-          setTotalRecords(tableData.totalRecords);
+        if (tableData.totalRecords !== records.totalRecords) {
+          dispatchRecords({ type: 'SET_TOTAL', payload: tableData.totalRecords });
         }
 
-        if (tableData.totalFilteredRecords !== totalFilteredRecords) {
-          setTotalFilteredRecords(tableData.totalFilteredRecords);
+        if (tableData.totalFilteredRecords !== records.totalFilteredRecords) {
+          dispatchRecords({ type: 'SET_FILTERED', payload: tableData.totalFilteredRecords });
         }
 
         setIsLoading(false);
@@ -505,47 +432,27 @@ const DataViewer = withRouter(
       } finally {
         setIsLoading(false);
       }
-    };
-
-    const onHide = () => {
-      setImportDialogVisible(false);
-    };
-
-    const onHideConfirmDeleteDialog = () => {
-      setConfirmDeleteVisible(false);
     };
 
     const onPaste = event => {
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        setPastedRecords(getClipboardData(pastedData));
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      setPastedRecords(getClipboardData(pastedData));
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
     };
 
     const onPasteAccept = async () => {
       try {
-        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, pastedRecords);
-        if (recordsAdded) {
-          notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_SUCCESS',
-            message: resources.messages['dataPasted'],
-            content: {
-              dataflowId,
-              datasetId
-            }
-          });
-          onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        } else {
+        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
+        if (!recordsAdded) {
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            message: resources.messages['dataPastedError'],
             content: {
               dataflowId,
               datasetId
@@ -553,31 +460,36 @@ const DataViewer = withRouter(
           });
         }
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-        }
+        notificationContext.add({
+          type: 'ADD_RECORDS_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
       } finally {
         setConfirmPasteVisible(false);
       }
     };
 
     const onRefresh = () => {
-      onFetchData(sortField, sortOrder, firstRow, numRows, levelErrorValidations);
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        records.firstPageRecord,
+        records.recordsPerPage,
+        levelErrorValidations
+      );
     };
 
     const onPasteCancel = () => {
-      setPastedRecords([]);
+      dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
       setConfirmPasteVisible(false);
     };
 
     const onSelectRecord = val => {
       setIsNewRecord(false);
-      setSelectedRecord({ ...val });
-      setEditedRecord({ ...val });
-      setInitialRecordValue(getInitialRecordValues(val));
+      dispatchRecords({ type: 'SET_EDITED_RECORD', payload: { record: { ...val }, colsSchema } });
     };
 
     const onSaveRecord = async record => {
@@ -588,7 +500,6 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
-          setAddDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
@@ -599,13 +510,13 @@ const DataViewer = withRouter(
             history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
+          setAddDialogVisible(false);
           setIsLoading(false);
         }
       } else {
         try {
           await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
-          setEditDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -626,47 +537,29 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
-      setSortOrder(event.sortOrder);
-      setSortField(event.sortField);
-      setFirstRow(0);
-      onFetchData(event.sortField, event.sortOrder, 0, numRows, levelErrorTypesWithCorrects);
+      dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
 
     const onUpload = () => {
       setImportDialogVisible(false);
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
-        message: resources.messages['datasetDataLoadingInit'],
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          title: editLargeStringWithDots(tableName, 22),
+          title: DataViewerUtils.editLargeStringWithDots(tableName, 22),
           datasetLoading: resources.messages['datasetLoading']
         }
       });
     };
 
-    const actionTemplate = () => {
-      return (
-        <div className={styles.actionTemplate}>
-          <Button
-            type="button"
-            icon="edit"
-            className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-            onClick={() => {
-              setEditDialogVisible(true);
-            }}
-          />
-          <Button
-            type="button"
-            icon="trash"
-            className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
-            onClick={() => {
-              setConfirmDeleteVisible(true);
-            }}
-          />
-        </div>
-      );
-    };
+    const actionTemplate = () => (
+      <ActionsColumn
+        onDeleteClick={() => setConfirmDeleteVisible(true)}
+        onEditClick={() => setEditDialogVisible(true)}
+      />
+    );
 
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
@@ -674,7 +567,7 @@ const DataViewer = withRouter(
           label={resources.messages['save']}
           icon="save"
           onClick={() => {
-            onSaveRecord(newRecord);
+            onSaveRecord(records.newRecord);
           }}
         />
         <Button
@@ -687,129 +580,26 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const addRowFooter = (
-      <div className="p-clearfix" style={{ width: '100%' }}>
-        <Button
-          style={{ float: 'left' }}
-          label={resources.messages['add']}
-          icon="add"
-          disabled={!hasWritePermissions}
-          onClick={() => {
-            setIsNewRecord(true);
-            setAddDialogVisible(true);
-          }}
-        />
-        <Button
-          style={{ float: 'right' }}
-          label={resources.messages['pasteRecords']}
-          icon="clipboard"
-          onClick={async () => {
-            setConfirmPasteVisible(true);
-          }}
-        />
-      </div>
-    );
-
     const cellDataEditor = (cells, record) => {
       return (
-        <InputText
-          type="text"
-          value={getCellValue(cells, cells.field)}
-          onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-          onChange={e => onEditorValueChange(cells, e.target.value)}
-          onFocus={e => {
-            e.preventDefault();
-            onEditorValueFocus(cells, e.target.value);
-          }}
-          onKeyDown={e => onEditorKeyChange(cells, e, record)}
+        <FieldEditor
+          cells={cells}
+          record={record}
+          onEditorSubmitValue={onEditorSubmitValue}
+          onEditorValueChange={onEditorValueChange}
+          onEditorValueFocus={onEditorValueFocus}
+          onEditorKeyChange={onEditorKeyChange}
         />
       );
-    };
-
-    const changeRecordInTable = (tableData, rowIndex) => {
-      let record = tableData[rowIndex];
-
-      for (let i = 0; i < initialRecordValue.length; i++) {
-        record = changeRecordValue(record, initialRecordValue[i][0], initialRecordValue[i][1]);
-      }
-
-      tableData[rowIndex] = record;
-      return tableData;
-    };
-
-    const changeCellValue = (tableData, rowIndex, field, value) => {
-      tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
-      return tableData;
-    };
-
-    const changeRecordValue = (recordData, field, value) => {
-      //Delete \r and \n values for tabular paste
-      if (!isUndefined(value) && !isNull(value) && isString(value)) {
-        value = value.replace(`\r`, '').replace(`\n`, '');
-      }
-      recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
-      return recordData;
-    };
-
-    const createEmptyObject = (columnsSchema, data) => {
-      let fields;
-      if (!isUndefined(columnsSchema)) {
-        fields = columnsSchema.map(column => {
-          return {
-            fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
-          };
-        });
-      }
-
-      const obj = {
-        dataRow: fields,
-        recordSchemaId: columnsSchema[0].recordId
-      };
-
-      obj.datasetPartitionId = null;
-      //dataSetPartitionId is needed for checking the rows owned by delegated contributors
-      if (!isUndefined(data) && data.length > 0) {
-        obj.datasetPartitionId = data.datasetPartitionId;
-      }
-      return obj;
-    };
-
-    const createTableName = (tableName, fileType) => {
-      return `${tableName}.${fileType}`;
-    };
-
-    const orderValidationsByLevelError = validations => {
-      return validations
-        .sort((a, b) => {
-          const levelErrorsWithPriority = [
-            { id: 'INFO', index: 1 },
-            { id: 'WARNING', index: 2 },
-            { id: 'ERROR', index: 3 },
-            { id: 'BLOCKER', index: 4 }
-          ];
-          let levelError = levelErrorsWithPriority.filter(priority => a.levelError === priority.id)[0].index;
-          let levelError2 = levelErrorsWithPriority.filter(priority => b.levelError === priority.id)[0].index;
-          return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
-        })
-        .reverse();
     };
 
     //Template for Field validation
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        let message = [];
-        const validations = orderValidationsByLevelError([...field.fieldValidations]);
-        const errorValidations = [...new Set(validations.map(validation => validation.levelError))];
-        validations.forEach(validation => {
-          let error = '';
-          if (errorValidations.length > 1) {
-            error = `${capitalize(validation.levelError)}: `;
-          }
-          message += '- ' + error + capitalize(validation.message) + '\n';
-        });
-
-        const levelError = getLevelError(validations);
+        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+        const message = DataViewerUtils.formatValidations(validations);
+        const levelError = DataViewerUtils.getLevelError(validations);
 
         return (
           <div
@@ -829,44 +619,6 @@ const DataViewer = withRouter(
       }
     };
 
-    const editLargeStringWithDots = (string, length) => {
-      if (string.length > length) {
-        return string.substring(0, length).concat('...');
-      } else {
-        return string;
-      }
-    };
-
-    const editRecordForm = colsSchema.map((column, i) => {
-      //Avoid row id Field and dataSetPartitionId
-      if (editDialogVisible) {
-        if (i < colsSchema.length - 2) {
-          if (!isUndefined(editedRecord.dataRow)) {
-            const field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-            return (
-              <React.Fragment key={column.field}>
-                <div className="p-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor={column.field}>{column.header}</label>
-                </div>
-                <div className="p-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id={column.field}
-                    value={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
-                    onChange={e => onEditAddFormInput(column.field, e.target.value)}
-                  />
-                </div>
-              </React.Fragment>
-            );
-          }
-        }
-      }
-      return null;
-    });
-
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -874,7 +626,7 @@ const DataViewer = withRouter(
           icon="save"
           onClick={() => {
             try {
-              onSaveRecord(editedRecord);
+              onSaveRecord(records.editedRecord);
             } catch (error) {
               console.error(error);
             }
@@ -885,293 +637,25 @@ const DataViewer = withRouter(
     );
 
     const filterDataResponse = data => {
-      const dataFiltered = data.records.map(record => {
-        const datasetPartitionId = record.datasetPartitionId;
-        const recordValidations = record.validations;
-        const recordId = record.recordId;
-        const recordSchemaId = record.recordSchemaId;
-        const arrayDataFields = record.fields.map(field => {
-          return {
-            fieldData: {
-              [field.fieldSchemaId]: field.value,
-              type: field.type,
-              id: field.fieldId,
-              fieldSchemaId: field.fieldSchemaId
-            },
-            fieldValidations: field.validations
-          };
-        });
-        arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
-        arrayDataFields.push({ fieldData: { datasetPartitionId: record.datasetPartitionId }, fieldValidations: null });
-        const arrayDataAndValidations = {
-          dataRow: arrayDataFields,
-          recordValidations,
-          recordId,
-          datasetPartitionId,
-          recordSchemaId
-        };
-        return arrayDataAndValidations;
-      });
+      const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
-        setFetchedDataFirstRow(dataFiltered[0]);
+        dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
       } else {
         setFetchedData([]);
       }
       setFetchedData(dataFiltered);
     };
 
-    const getLevelError = validations => {
-      let levelError = '';
-      let lvlFlag = 0;
-      const errors = [];
-      validations.forEach(validation => {
-        errors.push(validation.levelError);
-      });
-      let differentErrors = [...new Set(errors)];
-
-      if (differentErrors.length > 1) {
-        return 'MULTI';
-      } else {
-        validations.forEach(validation => {
-          if (validation.levelError === 'INFO') {
-            const iNum = 1;
-            if (iNum > lvlFlag) {
-              lvlFlag = iNum;
-              levelError = 'INFO';
-            }
-          } else if (validation.levelError === 'WARNING') {
-            const wNum = 2;
-            if (wNum > lvlFlag) {
-              lvlFlag = wNum;
-              levelError = 'WARNING';
-            }
-          } else if (validation.levelError === 'ERROR') {
-            const eNum = 3;
-            if (eNum > lvlFlag) {
-              lvlFlag = eNum;
-              levelError = 'ERROR';
-            }
-          } else if (validation.levelError === 'BLOCKER') {
-            const bNum = 4;
-            if (bNum > lvlFlag) {
-              lvlFlag = bNum;
-              levelError = 'BLOCKER';
-            }
-          }
-        });
-      }
-      return levelError;
-    };
-
-    const getCellId = (tableData, field) => {
-      const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
-      return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
-    };
-
-    const getCellValue = (tableData, field) => {
-      const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
-      return value.length > 0 ? value[0].fieldData[field] : '';
-    };
-
-    const getClipboardData = pastedData => {
-      //Delete double quotes from strings
-      const copiedClipboardRecords = pastedData
-        .split('\r\n')
-        .filter(l => l.length > 0)
-        .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
-      //Maximum number of records to paste should be 500
-      setNumCopiedRecords(copiedClipboardRecords.length);
-      const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
-      copiedClipboardRecords.forEach(row => {
-        let emptyRecord = createEmptyObject(colsSchema, fetchedDataFirstRow);
-        const copiedCols = row.split('\t');
-        emptyRecord.dataRow.forEach((record, i) => {
-          emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
-        });
-
-        emptyRecord.dataRow = emptyRecord.dataRow.filter(
-          column =>
-            Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'datasetPartitionId'
-        );
-        emptyRecord.copiedCols = copiedCols.length;
-        copiedBulkRecords.push(emptyRecord);
-      });
-      //Slice to 500 records and renumber de records for delete button
-      return copiedBulkRecords.slice(0, 500).map((record, i) => {
-        return { ...record, recordId: i };
-      });
-    };
-
-    const getExportButtonPosition = e => {
-      const exportButton = e.currentTarget;
-      const left = `${exportButton.offsetLeft}px`;
-      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-      const top = `${topValue}px `;
-      const menu = exportButton.nextElementSibling;
-      menu.style.top = top;
-      menu.style.left = left;
-    };
-
-    const getInitialRecordValues = record => {
-      const initialValues = [];
-      const filteredColumns = colsSchema.filter(
-        column =>
-          column.key !== 'actions' &&
-          column.key !== 'recordValidation' &&
-          column.key !== 'id' &&
-          column.key !== 'datasetPartitionId'
-      );
-      filteredColumns.forEach(column => {
-        if (!isUndefined(record.dataRow)) {
-          const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          initialValues.push([column.field, field.fieldData[column.field]]);
-        }
-      });
-      return initialValues;
-    };
-
-    const getRecordId = (tableData, record) => {
-      return tableData
-        .map(e => {
-          return e.recordId;
-        })
-        .indexOf(record.recordId);
-    };
-
-    const getRecordIdByIndex = (tableData, recordIdx) => {
-      return tableData
-        .map(e => {
-          return e.recordId;
-        })
-        .indexOf(recordIdx);
-    };
-
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    const newRecordForm = colsSchema.map((column, i) => {
-      if (addDialogVisible) {
-        if (i < colsSchema.length - 2) {
-          if (!isUndefined(newRecord.dataRow)) {
-            const field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-            return (
-              <React.Fragment key={column.field}>
-                <div className="p-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor={column.field}>{column.header}</label>
-                </div>
-                <div className="p-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id={column.field}
-                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
-                  />
-                </div>
-              </React.Fragment>
-            );
-          }
-        }
-      }
-    });
-
-    // const requiredValidator = props => {
-    //   let value = getCellValue(props, props.field);
-    //   return value && value.length > 0;
-    // };
-
-    const getRecordValidationByErrorAndMessage = (levelError, message) => {
-      return DatasetService.createValidation('RECORD', 0, levelError, message);
-    };
-
     //Template for Record validation
     const validationsTemplate = recordData => {
-      let validations = [];
-      if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-        validations = [...recordData.recordValidations];
-      }
-
-      let hasFieldErrors = false;
-
-      const recordsWithFieldValidations = recordData.dataRow.filter(
-        row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+      const validationsGroup = DataViewerUtils.groupValidations(
+        recordData,
+        resources.messages['recordBlockers'],
+        resources.messages['recordErrors'],
+        resources.messages['recordWarnings'],
+        resources.messages['recordInfos']
       );
-
-      hasFieldErrors = !isEmpty(recordsWithFieldValidations);
-
-      const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
-
-      if (hasFieldErrors) {
-        const filteredFieldValidationsWithBlocker = filteredFieldValidations.filter(
-          filteredFieldValidation => filteredFieldValidation.levelError === 'BLOCKER'
-        );
-        if (!isEmpty(filteredFieldValidationsWithBlocker)) {
-          validations.push(getRecordValidationByErrorAndMessage('BLOCKER', resources.messages['recordBlockers']));
-        }
-
-        const filteredFieldValidationsWithError = filteredFieldValidations.filter(
-          filteredFieldValidation => filteredFieldValidation.levelError === 'ERROR'
-        );
-        if (!isEmpty(filteredFieldValidationsWithError)) {
-          validations.push(getRecordValidationByErrorAndMessage('ERROR', resources.messages['recordErrors']));
-        }
-
-        const filteredFieldValidationsWithWarning = filteredFieldValidations.filter(
-          filteredFieldValidation => filteredFieldValidation.levelError === 'WARNING'
-        );
-        if (!isEmpty(filteredFieldValidationsWithWarning)) {
-          validations.push(getRecordValidationByErrorAndMessage('WARNING', resources.messages['recordWarnings']));
-        }
-
-        const filteredFieldValidationsWithInfo = filteredFieldValidations.filter(
-          filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
-        );
-        if (!isEmpty(filteredFieldValidationsWithInfo)) {
-          validations.push(getRecordValidationByErrorAndMessage('INFO', resources.messages['recordInfos']));
-        }
-      }
-
-      const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
-      const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
-      const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
-      const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
-
-      let messageBlockers = '';
-      let messageErrors = '';
-      let messageWarnings = '';
-      let messageInfos = '';
-
-      blockerValidations.forEach(validation =>
-        validation.message ? (messageBlockers += '- ' + capitalize(validation.message) + '\n') : ''
-      );
-
-      errorValidations.forEach(validation =>
-        validation.message ? (messageErrors += '- ' + capitalize(validation.message) + '\n') : ''
-      );
-
-      warningValidations.forEach(validation =>
-        validation.message ? (messageWarnings += '- ' + capitalize(validation.message) + '\n') : ''
-      );
-
-      infoValidations.forEach(validation =>
-        validation.message ? (messageInfos += '- ' + capitalize(validation.message) + '\n') : ''
-      );
-
-      let validationsGroup = {};
-      validationsGroup.blockers = blockerValidations;
-      validationsGroup.errors = errorValidations;
-      validationsGroup.warnings = warningValidations;
-      validationsGroup.infos = infoValidations;
-
-      validationsGroup.messageBlockers = messageBlockers;
-      validationsGroup.messageErrors = messageErrors;
-      validationsGroup.messageWarnings = messageWarnings;
-      validationsGroup.messageInfos = messageInfos;
-
-      let iconValidaionsCell = getIconsValidationsErrors(validationsGroup);
-      return iconValidaionsCell;
+      return getIconsValidationsErrors(validationsGroup);
     };
 
     const addIconLevelError = (validation, levelError, message) => {
@@ -1190,10 +674,10 @@ const DataViewer = withRouter(
         return icons;
       }
 
-      let blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
-      let errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
-      let warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
-      let infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+      const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+      const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+      const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+      const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
 
       icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
       return <div className={styles.iconTooltipWrapper}>{icons}</div>;
@@ -1205,22 +689,12 @@ const DataViewer = withRouter(
         'p-highlight': id === selectedRecordErrorId,
         'p-highlight-contextmenu': ''
       };
-      // let selected = selectedRecords.filter(record => record.recordId === id);
-      // if (!isUndefined(selected[0])) {
-      //   return {
-      //     'p-highlight': id === selectedRecordErrorId || rowData.recordId === selected[0].recordId
-      //   };
-      // } else {
-      //   return {
-      //     'p-highlight': id === selectedRecordErrorId
-      //   };
-      // }
     };
 
     const totalCount = () => {
       return (
         <span>
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
           {resources.messages['records'].toLowerCase()}
         </span>
       );
@@ -1230,9 +704,12 @@ const DataViewer = withRouter(
       return (
         <span>
           {resources.messages['filtered']}
-          {':'} {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : 0}
+          {':'}{' '}
+          {!isNull(records.totalFilteredRecords) && !isUndefined(records.totalFilteredRecords)
+            ? records.totalFilteredRecords
+            : 0}
           {' | '}
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
           {resources.messages['records'].toLowerCase()}
         </span>
       );
@@ -1241,7 +718,7 @@ const DataViewer = withRouter(
     const filteredCountSameValue = () => {
       return (
         <span>
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
           {resources.messages['records'].toLowerCase()} {'('}
           {resources.messages['filtered'].toLowerCase()}
           {')'}
@@ -1250,137 +727,58 @@ const DataViewer = withRouter(
     };
 
     const getPaginatorRecordsCount = () => {
-      if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
+      if (!isUndefined(records.totalFilteredRecords) || !isUndefined(records.totalRecords)) {
         if (!isFilterValidationsActive) {
           return totalCount();
         } else {
-          return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
+          return records.totalRecords == records.totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
       }
     };
+
     return (
       <SnapshotContext.Provider>
-        <Toolbar className={styles.dataViewerToolbar}>
-          <div className="p-toolbar-group-left">
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR}
-              icon={'export'}
-              label={resources.messages['import']}
-              onClick={() => setImportDialogVisible(true)}
-            />
-
-            <Button
-              disabled={!hasWritePermissions}
-              id="buttonExportTable"
-              className={`p-button-rounded p-button-secondary`}
-              icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
-              label={resources.messages['exportTable']}
-              onClick={event => {
-                exportMenuRef.current.show(event);
-              }}
-            />
-            <Menu
-              model={exportButtonsList}
-              popup={true}
-              ref={exportMenuRef}
-              id="exportTableMenu"
-              onShow={e => getExportButtonPosition(e)}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isWebFormMMR || isUndefined(totalRecords)}
-              icon={'trash'}
-              label={resources.messages['deleteTable']}
-              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={false}
-              icon={visibilityColumnIcon}
-              label={resources.messages['showHideColumns']}
-              onClick={event => {
-                dropdownFilterRef.current.show(event);
-              }}
-            />
-            <DropdownFilter
-              filters={visibilityDropdownFilter}
-              popup={true}
-              ref={dropdownFilterRef}
-              id="exportTableMenu"
-              showFilters={showFilters}
-              onShow={e => {
-                getExportButtonPosition(e);
-              }}
-            />
-
-            <Button
-              className={'p-button-rounded p-button-secondary'}
-              disabled={!tableHasErrors}
-              icon="filter"
-              iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
-              label={resources.messages['validationFilter']}
-              onClick={event => {
-                filterMenuRef.current.show(event);
-              }}
-            />
-            <DropdownFilter
-              disabled={isLoading}
-              filters={validationDropdownFilter}
-              popup={true}
-              ref={filterMenuRef}
-              id="exportTableMenu"
-              showFilters={showValidationFilter}
-              onShow={e => {
-                getExportButtonPosition(e);
-              }}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'groupBy'}
-              label={resources.messages['groupBy']}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'sort'}
-              label={resources.messages['sort']}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon="filter"
-              label={resources.messages['filters']}
-              onClick={() => {}}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={() => onRefresh()}
-            />
-          </div>
-        </Toolbar>
+        <ActionsToolbar
+          colsSchema={colsSchema}
+          datasetId={datasetId}
+          hasWritePermissions={hasWritePermissions}
+          isFilterValidationsActive={isFilterValidationsActive}
+          isWebFormMMR={isWebFormMMR}
+          isLoading={isLoading}
+          levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
+          onRefresh={onRefresh}
+          onSetColumns={currentColumns => setColumns(currentColumns)}
+          onSetInvisibleColumns={currentInvisibleColumns => setInvisibleColumns(currentInvisibleColumns)}
+          onSetVisible={onSetVisible}
+          originalColumns={originalColumns}
+          records={records}
+          setDeleteDialogVisible={setDeleteDialogVisible}
+          setImportDialogVisible={setImportDialogVisible}
+          showValidationFilter={showValidationFilter}
+          tableHasErrors={tableHasErrors}
+          tableId={tableId}
+          tableName={tableName}
+        />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
             // autoLayout={true}
-            //columnsPreviewNumber={columnsPreviewNumber}
-            contextMenuSelection={selectedRecord}
+            contextMenuSelection={records.selectedRecord}
             editable={hasWritePermissions}
-            //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
-            first={firstRow}
-            footer={hasWritePermissions && !isWebFormMMR ? addRowFooter : null}
+            first={records.firstPageRecord}
+            footer={
+              hasWritePermissions && !isWebFormMMR ? (
+                <Footer
+                  hasWritePermissions={hasWritePermissions}
+                  onAddClick={() => {
+                    setIsNewRecord(true);
+                    setAddDialogVisible(true);
+                  }}
+                  onPasteClick={() => setConfirmPasteVisible(true)}
+                />
+              ) : null
+            }
             header={header}
             lazy={true}
             loading={isLoading}
@@ -1392,48 +790,33 @@ const DataViewer = withRouter(
                   }
                 : null
             }
-            onContextMenuSelectionChange={e => {
-              onSelectRecord(e.value);
-            }}
+            onContextMenuSelectionChange={e => onSelectRecord(e.value)}
             onPage={onChangePage}
-            onPaste={e => {
-              onPaste(e);
-            }}
-            //onPasteAccept={onPasteAccept}
-            onRowSelect={e => {
-              onSelectRecord(Object.assign({}, e.data));
-            }}
-            // onSelectionChange={e => {
-            //   setSelectedRecords(e.value);
-            // }}
+            onPaste={e => onPaste(e)}
+            onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             onSort={onSort}
             paginator={true}
             paginatorRight={getPaginatorRecordsCount()}
-            //pasteHeader={resources.messages['pasteRecords']}
-            //pastedRecords={pastedRecords}
-            //recordsPreviewNumber={recordsPreviewNumber}
             ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}
             rowClassName={rowClassName}
-            rows={numRows}
+            rows={records.recordsPerPage}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            //selection={selectedRecords}
             scrollable={true}
             scrollHeight="70vh"
             selectionMode="single"
             sortable={true}
-            sortField={sortField}
-            sortOrder={sortOrder}
+            sortField={sort.sortField}
+            sortOrder={sort.sortOrder}
             totalRecords={
-              !isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) && isFilterValidationsActive
-                ? totalFilteredRecords
-                : totalRecords
+              !isNull(records.totalFilteredRecords) &&
+              !isUndefined(records.totalFilteredRecords) &&
+              isFilterValidationsActive
+                ? records.totalFilteredRecords
+                : records.totalRecords
             }
-            value={fetchedData}
-            //frozenWidth="100px"
-            // unfrozenWidth="600px"
-          >
+            value={fetchedData}>
             {columns}
           </DataTable>
         </div>
@@ -1441,7 +824,7 @@ const DataViewer = withRouter(
           className={styles.Dialog}
           dismissableMask={false}
           header={`${resources.messages['uploadDataset']}${tableName}`}
-          onHide={onHide}
+          onHide={() => setImportDialogVisible(false)}
           visible={importDialogVisible}>
           <CustomFileUpload
             chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
@@ -1470,7 +853,7 @@ const DataViewer = withRouter(
 
         <ConfirmDialog
           onConfirm={onConfirmDeleteRow}
-          onHide={onHideConfirmDeleteDialog}
+          onHide={() => setConfirmDeleteVisible(false)}
           visible={confirmDeleteVisible}
           header={resources.messages['deleteRow']}
           labelConfirm={resources.messages['yes']}
@@ -1491,7 +874,7 @@ const DataViewer = withRouter(
           divRef={divRef}
           visible={confirmPasteVisible}>
           <InfoTable
-            data={pastedRecords}
+            data={records.pastedRecords}
             filteredColumns={colsSchema.filter(
               column =>
                 column.field !== 'actions' &&
@@ -1499,7 +882,7 @@ const DataViewer = withRouter(
                 column.field !== 'id' &&
                 column.field !== 'datasetPartitionId'
             )}
-            numRecords={numCopiedRecords}
+            numCopiedRecords={records.numCopiedRecords}
             onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
           <br />
           <br />
@@ -1516,11 +899,20 @@ const DataViewer = withRouter(
           onHide={() => setAddDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
           visible={addDialogVisible}>
-          <div className="p-grid p-fluid">{newRecordForm}</div>
+          <div className="p-grid p-fluid">
+            <DataForm
+              colsSchema={colsSchema}
+              formType="NEW"
+              addDialogVisible={addDialogVisible}
+              onChangeForm={onEditAddFormInput}
+              records={records}
+            />
+          </div>
         </Dialog>
         <Dialog
           className="edit-table"
           blockScroll={false}
+          closeOnEscape={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
@@ -1528,7 +920,15 @@ const DataViewer = withRouter(
           onHide={() => setEditDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
           visible={editDialogVisible}>
-          <div className="p-grid p-fluid">{editRecordForm}</div>
+          <div className="p-grid p-fluid">
+            <DataForm
+              colsSchema={colsSchema}
+              formType="EDIT"
+              editDialogVisible={editDialogVisible}
+              onChangeForm={onEditAddFormInput}
+              records={records}
+            />
+          </div>
         </Dialog>
       </SnapshotContext.Provider>
     );

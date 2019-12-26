@@ -18,8 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,11 +34,15 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/representative")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /** The representative service. */
+  /**
+   * The representative service.
+   */
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -50,12 +56,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
+   *
    * @return the long
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Long insertRepresentative(Long dataflowId, RepresentativeVO representativeVO) {
+  public Long insertRepresentative(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody RepresentativeVO representativeVO) {
     List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
     UserRepresentationVO userRepresentationVO =
         users.stream().filter(user -> representativeVO.getProviderAccount().equals(user.getEmail()))
@@ -76,12 +84,13 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find all data provider by group id.
    *
    * @param groupId the group id
+   *
    * @return the list
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataProviderVO> findAllDataProviderByGroupId(Long groupId) {
+  public List<DataProviderVO> findAllDataProviderByGroupId(@PathVariable("groupId") Long groupId) {
     if (null == groupId) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REPRESENTATIVE_TYPE_INCORRECT);
@@ -105,16 +114,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find represetatives by id data flow.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<RepresentativeVO> findRepresetativesByIdDataFlow(Long dataflowId) {
+  public List<RepresentativeVO> findRepresetativesByIdDataFlow(
+      @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    List<RepresentativeVO> representativeVOs;
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {
@@ -132,7 +143,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/update")
-  public void updateRepresentative(RepresentativeVO representativeVO) {
+  public void updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()
@@ -159,7 +170,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  public void deleteRepresentative(Long dataflowRepresentativeId) {
+  public void deleteRepresentative(
+      @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId) {
     try {
       representativeService.deleteDataflowRepresentative(dataflowRepresentativeId);
     } catch (EEAException e) {

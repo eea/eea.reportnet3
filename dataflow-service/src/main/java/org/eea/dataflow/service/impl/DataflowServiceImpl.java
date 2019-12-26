@@ -11,10 +11,12 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
+import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -28,7 +30,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -83,7 +84,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The dataset controller. */
+  /**
+   * The dataset controller.
+   */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
   /**
@@ -93,18 +96,27 @@ public class DataflowServiceImpl implements DataflowService {
   private UserManagementControllerZull userManagementControllerZull;
 
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
+
+  @Autowired
+  private WebLinkRepository webLinkRepository;
   /**
    * The Constant LOG.
    */
@@ -364,7 +376,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
     // we find if the name of this dataflow exist
-    if (dataflow.isPresent() && dataflow.get().getId() != dataflowVO.getId()) {
+    if (dataflow.isPresent() && !dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
@@ -449,14 +461,19 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public void deleteDataFlow(Long idDataflow) throws Exception {
-    final DataFlowVO dataflow = getById(idDataflow);
+    // take the jpa entity
+    final DataFlowVO dataflowVO = getById(idDataflow);
+    // use it to take all datasets Desing
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow && null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
-      for (DocumentVO document : dataflow.getDocuments()) {
+    if (null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
+      for (Document document : dataflow.getDocuments()) {
         try {
-          documentControllerZuul.deleteDocument(document.getId());
+          // we pass bolean to say dont delete metabase because jpa entiti will be delete the
+          // property document
+          documentControllerZuul.deleteDocument(document.getId(), Boolean.FALSE);
         } catch (EEAException e) {
           LOG.error("Error deleting document with id {}", document.getId());
           throw new EEAException(new StringBuilder().append("Error Deleting document ")
@@ -465,10 +482,11 @@ public class DataflowServiceImpl implements DataflowService {
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
+
+
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflow && null != dataflow.getDesignDatasets()
-        && !dataflow.getDesignDatasets().isEmpty()) {
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+    if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
+      for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
         try {
           dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId());
         } catch (Exception e) {
@@ -482,9 +500,8 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
-    // we delete the dataflow in metabase at the end
     try {
-      dataflowRepository.deleteNativeDataflow(idDataflow);
+      dataflowRepository.deleteById(idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
