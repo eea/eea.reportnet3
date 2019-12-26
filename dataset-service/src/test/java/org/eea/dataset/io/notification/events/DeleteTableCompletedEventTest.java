@@ -36,12 +36,12 @@ public class DeleteTableCompletedEventTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Assert.assertEquals(4, deleteTableCompletedEvent.getMap(
         NotificationVO.builder().user("user").datasetId(1L).tableSchemaId("tableSchemaId").build())
-        .size());;
+        .size());
   }
 
   @Test
   public void getMapTest2() throws EEAException {
     Assert.assertEquals(4, deleteTableCompletedEvent.getMap(NotificationVO.builder().user("user")
-        .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build()).size());;
+        .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build()).size());
   }
 }

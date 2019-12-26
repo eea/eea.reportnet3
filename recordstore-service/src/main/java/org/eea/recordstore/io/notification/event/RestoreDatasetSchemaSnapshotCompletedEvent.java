@@ -29,7 +29,7 @@ public class RestoreDatasetSchemaSnapshotCompletedEvent implements NotificableEv
    */
   @Override
   public EventType getEventType() {
-    return EventType.RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT;
+    return EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT;
   }
 
   /**
