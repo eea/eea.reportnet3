@@ -1,4 +1,4 @@
-import { includes } from 'lodash';
+import { includes, isUndefined } from 'lodash';
 
 import { Representative } from 'core/domain/model/Representative/Representative';
 
@@ -70,7 +70,9 @@ export const reducer = (state, { type, payload }) => {
 
     case 'INITIAL_LOAD':
       console.log('INITIAL_LOAD');
-
+      const group = state.dataProvidersTypesList.filter(
+        dataProviderType => dataProviderType.dataProviderGroupId === payload.group.dataProviderGroupId
+      );
       if (!includes(state.representatives, emptyRepresentative)) {
         payload.representatives.push(emptyRepresentative);
       }
@@ -78,7 +80,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedDataProviderGroup: payload.group
+        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0]
       };
 
     case 'UPDATE_ACCOUNT':

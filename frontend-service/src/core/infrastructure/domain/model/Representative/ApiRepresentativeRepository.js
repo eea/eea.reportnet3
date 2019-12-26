@@ -14,7 +14,7 @@ const allRepresentatives = async dataflowId => {
 
   const dataToConsume = {
     group: !isEmpty(representativesDTO.data)
-      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId, label: 'Country' } // !solve label problem
+      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
       : { dataProviderGroupId: null },
     representatives: representativesList
   };
@@ -34,6 +34,7 @@ const allDataProviders = async dataProviderGroup => {
 
     response.unshift({ dataProviderId: '', label: 'Select...' });
   } else {
+    console.log('dataProviderGroup', dataProviderGroup);
     const dataProvidersDTO = await apiRepresentative.allDataProviders(1); //hardcoded
 
     response = dataProvidersDTO.data.map(dataProvider => {
