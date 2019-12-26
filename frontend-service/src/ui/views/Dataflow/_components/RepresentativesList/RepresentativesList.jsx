@@ -51,6 +51,7 @@ const RepresentativesList = ({ dataflowId }) => {
     let inputData = rowData.providerAccount;
     return (
       <input
+        autoFocus
         defaultValue={inputData}
         placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
         onChange={e =>
@@ -62,7 +63,7 @@ const RepresentativesList = ({ dataflowId }) => {
         onBlur={event =>
           isNull(rowData.representativeId)
             ? addRepresentative(formDispatcher, formState, rowData, dataflowId, event.target.value)
-            : updateRepresentative(formDispatcher, rowData, dataflowId, event.target.value)
+            : updateRepresentative(formDispatcher, formState, rowData, dataflowId, event.target.value)
         }
       />
     );
@@ -102,7 +103,7 @@ const RepresentativesList = ({ dataflowId }) => {
   };
 
   const deleteBtnColumnTemplate = rowData => {
-    return rowData.dataProviderId !== '' ? (
+    return !isNull(rowData.representativeId) ? (
       <Button
         tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
         tooltipOptions={{ position: 'right' }}
@@ -228,7 +229,8 @@ const addRepresentative = async (formDispatcher, formState, rowData, dataflowId,
   });
 };
 
-const updateRepresentative = async (formDispatcher, rowData, dataflowId, inputValue) => {
+const updateRepresentative = async (formDispatcher, formState, rowData, dataflowId, inputValue) => {
+  console.log('ON UPDATE PROVIDER formState.representatives', formState.representatives);
   const responseStatus = await RepresentativeService.add(dataflowId, inputValue, parseInt(rowData.dataProviderId));
 
   formDispatcher({
