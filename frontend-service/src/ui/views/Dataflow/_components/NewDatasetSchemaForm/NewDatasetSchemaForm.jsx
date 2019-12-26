@@ -88,7 +88,7 @@ const NewDatasetSchemaForm = ({
               <Field
                 id="dataSchemaInput"
                 name="datasetSchemaName"
-                placeholder={resources.messages['createdatasetSchemaName']}
+                placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"
               />
               <ErrorMessage className="error" name="datasetSchemaName" component="div" />

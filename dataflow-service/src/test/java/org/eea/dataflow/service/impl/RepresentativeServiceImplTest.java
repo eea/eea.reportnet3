@@ -264,4 +264,33 @@ public class RepresentativeServiceImplTest {
     assertEquals("error in the message", new ArrayList<>(),
         representativeServiceImpl.getAllDataProviderByGroupId(1L));
   }
+
+  @Test
+  public void existsUserMailException1Test() throws EEAException {
+    try {
+      representativeServiceImpl.existsUserMail(1L, null);
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_NOT_FOUND,
+          e.getMessage());
+    }
+  }
+
+  @Test
+  public void existsUserMailException2Test() throws EEAException {
+    try {
+      representativeServiceImpl.existsUserMail(null, "email");
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_NOT_FOUND,
+          e.getMessage());
+    }
+  }
+
+  @Test
+  public void existsUserMailSuccessTest() throws EEAException {
+    representativeServiceImpl.existsUserMail(1L, "email");
+    when(representativeRepository.existsByDataProviderIdAndUserMail(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    assertEquals("error in the message", true,
+        representativeServiceImpl.existsUserMail(1L, "email"));
+  }
 }
