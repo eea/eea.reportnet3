@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -73,6 +72,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
     try {
+      if (representativeService.existsUserMail(representativeVO.getDataProviderId(),
+          representativeVO.getProviderAccount())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+      }
       return representativeService.insertRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -155,6 +159,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       }
     }
     try {
+      if (representativeService.existsUserMail(representativeVO.getDataProviderId(),
+          representativeVO.getProviderAccount())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+      }
       representativeService.updateDataflowRepresentative(representativeVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

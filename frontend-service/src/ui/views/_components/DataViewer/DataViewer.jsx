@@ -292,28 +292,50 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteTable = async () => {
-      setDeleteDialogVisible(false);
-      const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
-      if (dataDeleted) {
-        setFetchedData([]);
-        dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
-        dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+      try {
+        const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
+        if (dataDeleted) {
+          setFetchedData([]);
+          dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
+          dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        }
+      } catch (error) {
+        notificationContext.add({
+          type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      } finally {
+        setDeleteDialogVisible(false);
       }
     };
 
     const onConfirmDeleteRow = async () => {
-      setDeleteDialogVisible(false);
-      const recordDeleted = await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
-      if (recordDeleted) {
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
-        const page =
-          (calcRecords - 1) / records.recordsPerPage === 1
-            ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
-            : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
-        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
-        dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
+      try {
+        const recordDeleted = await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
+        if (recordDeleted) {
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
+          const page =
+            (calcRecords - 1) / records.recordsPerPage === 1
+              ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
+              : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
+          dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
+          dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
+        }
+      } catch (error) {
+        notificationContext.add({
+          type: 'DELETE_RECORD_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      } finally {
+        setDeleteDialogVisible(false);
       }
     };
 
@@ -347,12 +369,23 @@ const DataViewer = withRouter(
           selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
           record.recordId === records.selectedRecord.recordId
         ) {
-          //without await. We don't have to wait for the response.
-          const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
-          if (!fieldUpdated) {
-            console.error('Error!');
+          try {
+            //without await. We don't have to wait for the response.
+            const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
+            if (!fieldUpdated) {
+              throw new Error('UPDATE_FIELD_BY_ID_ERROR');
+            }
+          } catch (error) {
+            notificationContext.add({
+              type: 'UPDATE_FIELD_BY_ID_ERROR',
+              content: {
+                dataflowId,
+                datasetId
+              }
+            });
+          } finally {
+            snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           }
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
         if (isEditing) {
           setIsEditing(false);
@@ -423,12 +456,13 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
-        console.error('DataViewer error: ', error);
-        const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-        }
+        notificationContext.add({
+          type: 'TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
       } finally {
         setIsLoading(false);
       }
@@ -451,13 +485,7 @@ const DataViewer = withRouter(
       try {
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (!recordsAdded) {
-          notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId
-            }
-          });
+          throw new Error('ADD_RECORDS_BY_ID_ERROR');
         }
       } catch (error) {
         notificationContext.add({
@@ -503,12 +531,13 @@ const DataViewer = withRouter(
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
-          console.error('DataViewer error: ', error);
-          const errorResponse = error.response;
-          console.error('DataViewer errorResponse: ', errorResponse);
-          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-          }
+          notificationContext.add({
+            type: 'ADD_RECORDS_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId
+            }
+          });
         } finally {
           setAddDialogVisible(false);
           setIsLoading(false);
@@ -519,12 +548,13 @@ const DataViewer = withRouter(
           onRefresh();
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
-          console.error('DataViewer error: ', error);
-          const errorResponse = error.response;
-          console.error('DataViewer errorResponse: ', errorResponse);
-          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-          }
+          notificationContext.add({
+            type: 'UPDATE_RECORDS_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId
+            }
+          });
         } finally {
           onCancelRowEdit();
           setIsLoading(false);

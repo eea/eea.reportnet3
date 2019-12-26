@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
@@ -169,6 +170,14 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderVO> getAllDataProviderByGroupId(Long groupId) {
     return dataProviderMapper.entityListToClass(dataProviderRepository.findAllByGroupId(groupId));
+  }
+
+  @Override
+  public boolean existsUserMail(Long dataProviderId, String userMail) throws EEAException {
+    if (StringUtils.isBlank(userMail)) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    return representativeRepository.existsByDataProviderIdAndUserMail(dataProviderId, userMail);
   }
 
 }

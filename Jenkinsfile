@@ -23,7 +23,7 @@ pipeline {
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
                             
                         '''
-                        // mvn cobertura:cobertura -Dcobertura.report.format=xml -Denforcer.skip=true
+
                     }
                     post {
                         failure {
@@ -105,7 +105,11 @@ pipeline {
                             qualitygate =  readJSON text: response2.content
                             echo qualitygate.toString()
                             if ("WARN".equals(qualitygate["projectStatus"]["status"]) || "ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                                emailext body: 'New Build Done - Quality Gate is ' + qualitygate["projectStatus"]["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend", subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
+                                def output = ""
+                                qualitygate["conditions"].each{ gate ->
+                                  output += "\nStatus for " + gate["metricKey"] + " is " + gate["status"]
+                                }
+                                emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
                             }
                         }
                     }

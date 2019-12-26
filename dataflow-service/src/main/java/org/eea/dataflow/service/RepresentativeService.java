@@ -62,4 +62,13 @@ public interface RepresentativeService {
    * @throws EEAException the EEA exception
    */
   List<RepresentativeVO> getRepresetativesByIdDataFlow(final Long dataflowId) throws EEAException;
+
+  /**
+   * Exists user email.
+   *
+   * @param userEmail the user email
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  boolean existsUserMail(final Long dataProviderId, final String userEmail) throws EEAException;
 }

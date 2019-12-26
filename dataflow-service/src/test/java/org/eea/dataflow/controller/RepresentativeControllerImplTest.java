@@ -118,6 +118,23 @@ public class RepresentativeControllerImplTest {
   }
 
   /**
+   * Insert representative exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertRepresentativeException3Test() throws EEAException {
+    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    when(representativeService.existsUserMail(Mockito.any(), Mockito.any())).thenReturn(true);
+    try {
+      representativeControllerImpl.insertRepresentative(1L, representativeVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
+    }
+  }
+
+  /**
    * Find all data provider by group id success test.
    */
   @Test
@@ -249,6 +266,23 @@ public class RepresentativeControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Update representative exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateRepresentativeException3Test() throws EEAException {
+    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    when(representativeService.existsUserMail(Mockito.any(), Mockito.any())).thenReturn(true);
+    try {
+      representativeControllerImpl.updateRepresentative(representativeVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
     }
   }
 
