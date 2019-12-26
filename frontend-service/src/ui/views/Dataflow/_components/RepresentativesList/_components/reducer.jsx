@@ -100,8 +100,8 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_ACCOUNT_CHANGE':
-      console.log('ON_ACCOUNT_CHANGE payload', payload);
-      console.log('ON_ACCOUNT_CHANGE state.representatives', state.representatives);
+      console.log('add ON_ACCOUNT_CHANGE payload', payload);
+      console.log('add ON_ACCOUNT_CHANGE state.representatives', state.representatives);
 
       updatedList = state.representatives.map(representative => {
         if (representative.dataProviderId === payload.dataProviderId) {
@@ -127,8 +127,8 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        representatives: updatedList,
-        refresher: !state.refresher
+        representatives: updatedList
+        // refresher: !state.refresher
       };
 
     case 'SELECT_PROVIDERS_TYPE':

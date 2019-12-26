@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import { isNull, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_components/reducer.jsx';
@@ -60,11 +60,7 @@ const RepresentativesList = ({ dataflowId }) => {
             payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
           })
         }
-        onBlur={event =>
-          isNull(representative.representativeId)
-            ? addRepresentative(formDispatcher, formState, representative, dataflowId, event.target.value)
-            : updateRepresentative(formDispatcher, representative, dataflowId, event.target.value)
-        }
+        onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
       />
     );
   };
@@ -80,6 +76,7 @@ const RepresentativesList = ({ dataflowId }) => {
       <>
         <select
           className="p-dropdown p-component"
+          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onProviderChange(formDispatcher, event.target.value, representative);
           }}
@@ -98,6 +95,8 @@ const RepresentativesList = ({ dataflowId }) => {
       </>
     );
   };
+
+  console.log('formState', formState.representatives);
 
   const deleteBtnColumnTemplate = representative => {
     return !isNull(representative.representativeId) ? (
@@ -219,17 +218,29 @@ const getProviderTypes = async formDispatcher => {
   });
 };
 
-const addRepresentative = async (formDispatcher, formState, representative, dataflowId, inputValue) => {
-  const responseStatus = await RepresentativeService.add(
-    dataflowId,
-    inputValue,
-    parseInt(representative.dataProviderId)
-  );
+// const addRepresentative = async (formDispatcher, formState, representative, dataflowId, inputValue) => {
+//   const responseStatus = await RepresentativeService.add(
+//     dataflowId,
+//     inputValue,
+//     parseInt(representative.dataProviderId))
+//   }
 
-  formDispatcher({
-    type: 'ADD_DATA_PROVIDER',
-    payload: responseStatus.status
-  });
+const addRepresentative = async (formDispatcher, representatives, dataflowId, inputValue) => {
+  console.log('add ON ADD PROVIDER representatives', representatives);
+  const newRepresentative = representatives.filter(representative => representative.representativeId == null);
+
+  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
+    const responseStatus = await RepresentativeService.add(
+      dataflowId,
+      newRepresentative[0].providerAccount,
+      parseInt(newRepresentative[0].dataProviderId)
+    );
+
+    formDispatcher({
+      type: 'ADD_DATA_PROVIDER',
+      payload: responseStatus.status
+    });
+  }
 };
 
 const updateRepresentative = async (formDispatcher, representative, dataflowId, inputValue) => {
@@ -267,3 +278,17 @@ const onProviderChange = (formDispatcher, newDataProviderId, representative) => 
     });
   }
 };
+
+const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
+  console.log('add dataflowid 2: ', dataflowId);
+  console.log('add formState', formState);
+  isNull(representative.representativeId)
+    ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
+    : updateRepresentative(formDispatcher, formState, representative, dataflowId);
+};
+
+// onBlur={event =>
+//   isNull(representative.representativeId)
+//     ? addRepresentative(formDispatcher, formState, representative, dataflowId, event.target.value)
+//     : updateRepresentative(formDispatcher, representative, dataflowId, event.target.value)
+// }
