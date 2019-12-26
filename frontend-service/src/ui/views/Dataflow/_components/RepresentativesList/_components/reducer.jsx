@@ -117,7 +117,8 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        representatives: updatedList
+        representatives: updatedList,
+        refresher: !state.refresher
       };
 
     case 'SELECT_PROVIDERS_TYPE':

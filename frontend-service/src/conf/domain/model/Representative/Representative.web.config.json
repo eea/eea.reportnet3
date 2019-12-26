@@ -4,6 +4,8 @@
     "allRepresentatives": "/representative/dataflow/{:dataflowId}",
     "deleteById":"/representative/{:representativeId}",
     "getProviderTypes": "/representative/dataProvider/types",
-    "update":"/representative/update"
+    "update":"/representative/update",
+    "updateDataProviderId":"/representative/update",
+    "updateProviderAccount":"/representative/update"
 
 }

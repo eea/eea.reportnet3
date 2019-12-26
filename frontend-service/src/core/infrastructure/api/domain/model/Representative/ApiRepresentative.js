@@ -104,13 +104,13 @@ const apiRepresentative = {
       },
       data: {
         id: representativeId,
-        providerAccount
+        providerAccount: providerAccount
       }
     });
     return response;
   },
 
-  updateDataProvider: async (representativeId, dataProviderId) => {
+  updateDataProviderId: async (representativeId, dataProviderId) => {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.update({
@@ -120,7 +120,7 @@ const apiRepresentative = {
       },
       data: {
         id: representativeId,
-        dataProviderId
+        dataProviderId: dataProviderId
       }
     });
     return response;
