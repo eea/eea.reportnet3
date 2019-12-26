@@ -245,16 +245,20 @@ const updateRepresentative = async (formDispatcher, representative, dataflowId, 
   });
 };
 
-const updateProviderId = async (representativeId, newDataProviderId) => {
+const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
   const responseStatus = await RepresentativeService.updateDataProviderId(
     parseInt(representativeId),
     parseInt(newDataProviderId)
   );
+  formDispatcher({
+    type: 'ON_PROVIDER_CHANGE',
+    payload: responseStatus.status
+  });
 };
 
 const onProviderChange = (formDispatcher, newDataProviderId, representative) => {
   if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
-    updateProviderId(representative.representativeId, newDataProviderId);
+    updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',

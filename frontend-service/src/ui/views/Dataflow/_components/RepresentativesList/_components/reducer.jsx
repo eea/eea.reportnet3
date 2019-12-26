@@ -89,6 +89,15 @@ export const reducer = (state, { type, payload }) => {
 
       return state;
 
+    case 'UPDATE_DATA_PROVIDER':
+      console.log('UPDATE_DATA_PROVIDER payload');
+
+      return {
+        ...state,
+        responseStatus: payload,
+        refresher: !state.refresher
+      };
+
     case 'ON_ACCOUNT_CHANGE':
       console.log('ON_ACCOUNT_CHANGE payload', payload);
       console.log('ON_ACCOUNT_CHANGE state.representatives', state.representatives);
