@@ -9,10 +9,10 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class DocumentDeleteFailedEvent.
+ * The Class DocumentDeleteCompletedEvent.
  */
 @Component
-public class DocumentDeleteFailedEvent implements NotificableEventHandler {
+public class DeleteDocumentCompletedEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -21,7 +21,7 @@ public class DocumentDeleteFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DOCUMENT_DELETE_FAILED_EVENT;
+    return EventType.DELETE_DOCUMENT_COMPLETED_EVENT;
   }
 
   /**

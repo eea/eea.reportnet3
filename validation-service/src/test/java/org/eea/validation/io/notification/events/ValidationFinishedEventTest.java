@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class RestoreDatasetSnapshotFailedEventTest {
+public class ValidationFinishedEventTest {
 
   @InjectMocks
   private ValidationFinishedEvent validationFinishedEvent;

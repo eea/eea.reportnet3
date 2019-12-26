@@ -9,10 +9,10 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class DocumentUploadCompletedEvent.
+ * The Class DocumentDeleteFailedEvent.
  */
 @Component
-public class DocumentUploadFailedEvent implements NotificableEventHandler {
+public class DeleteDocumentFailedEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -21,7 +21,7 @@ public class DocumentUploadFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DOCUMENT_UPLOAD_FAILED_EVENT;
+    return EventType.DELETE_DOCUMENT_FAILED_EVENT;
   }
 
   /**
@@ -36,7 +36,8 @@ public class DocumentUploadFailedEvent implements NotificableEventHandler {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", notificationVO.getDataflowId());
-    notification.put("fileName", notificationVO.getFileName());
+    notification.put("error", notificationVO.getError());
     return notification;
   }
+
 }
