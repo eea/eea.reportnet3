@@ -277,7 +277,8 @@ public class RepresentativeControllerImplTest {
   @Test
   public void updateRepresentativeException3Test() throws EEAException {
     when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.existsUserMail(Mockito.any(), Mockito.any())).thenReturn(true);
+    when(representativeService.updateDataflowRepresentative(Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
     try {
       representativeControllerImpl.updateRepresentative(representativeVO);
     } catch (ResponseStatusException e) {

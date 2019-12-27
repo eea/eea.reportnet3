@@ -39,9 +39,11 @@ const RepresentativesList = ({ dataflowId }) => {
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     }
-
-    createUnusedOptionsList(formDispatcher);
   }, [formState.selectedDataProviderGroup]);
+
+  useEffect(() => {
+    createUnusedOptionsList(formDispatcher);
+  }, [formState.allPossibleDataProviders]);
 
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
@@ -72,6 +74,7 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <>
         <select
+          key={Date.now()}
           className="p-dropdown p-component"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
@@ -82,7 +85,7 @@ const RepresentativesList = ({ dataflowId }) => {
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
               <option
-                key={provider.dataProviderId}
+                key={`${provider.dataProviderId}${Date.now()}`}
                 className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
                 value={provider.dataProviderId}>
                 {provider.label}
@@ -115,16 +118,14 @@ const RepresentativesList = ({ dataflowId }) => {
   };
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.selectWrapper}>
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
         <div>
           <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
-            /* disabled={
-              formState.selectedDataProviderGroup !== null && formState.dataProvidersTypesList !== [] ? true : false
-            } */
+            disabled={formState.representatives.length > 1}
             name="dataProvidersDropdown"
             optionLabel="label"
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
@@ -137,16 +138,18 @@ const RepresentativesList = ({ dataflowId }) => {
         </div>
       </div>
 
-      {formState.representatives.length > 1 && !isNull(formState.selectedDataProviderGroup)}
-
-      <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
-        <Column
-          body={providerAccountInputColumnTemplate}
-          header={resources.messages['manageRolesDialogAccoutColumn']}
-        />
-        <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-        <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
-      </DataTable>
+      {!isNull(formState.selectedDataProviderGroup) ? (
+        <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
+          <Column
+            body={providerAccountInputColumnTemplate}
+            header={resources.messages['manageRolesDialogAccoutColumn']}
+          />
+          <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
+          <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+        </DataTable>
+      ) : (
+        <p>Please select provider group</p>
+      )}
 
       <ConfirmDialog
         onConfirm={() => {
@@ -159,7 +162,7 @@ const RepresentativesList = ({ dataflowId }) => {
         labelCancel={resources.messages['no']}>
         {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
       </ConfirmDialog>
-    </>
+    </div>
   );
 };
 
@@ -216,8 +219,7 @@ const getProviderTypes = async formDispatcher => {
   });
 };
 
-const addRepresentative = async (formDispatcher, representatives, dataflowId, inputValue) => {
-  console.log('add ON ADD PROVIDER representatives', representatives);
+const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
   const newRepresentative = representatives.filter(representative => representative.representativeId == null);
 
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
@@ -234,11 +236,10 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, in
   }
 };
 
-const updateRepresentative = async (formDispatcher, representative, dataflowId, inputValue) => {
-  const responseStatus = await RepresentativeService.update(
-    dataflowId,
-    inputValue,
-    parseInt(representative.dataProviderId)
+const updateRepresentative = async (formDispatcher, representative) => {
+  const responseStatus = await RepresentativeService.updateProviderAccount(
+    parseInt(representative.representativeId),
+    representative.providerAccount
   );
 
   formDispatcher({
@@ -262,7 +263,6 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
   if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
     updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
-    //THIS IS FOR NEW ONE
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
       payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
@@ -273,7 +273,7 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
 const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNull(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
-    : updateRepresentative(formDispatcher, formState, representative, dataflowId);
+    : updateRepresentative(formDispatcher, representative);
 };
 
 const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {

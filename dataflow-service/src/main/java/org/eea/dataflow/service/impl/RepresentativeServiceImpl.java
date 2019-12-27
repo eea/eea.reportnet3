@@ -121,6 +121,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       dataflowRepresentative.setDataProvider(dataProvider);
     }
     // save changes
+    if (existsUserMail(dataflowRepresentative.getDataProvider().getId(),
+        dataflowRepresentative.getUserMail())) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    }
     LOG.info("updating the representative relation");
     return representativeRepository.save(dataflowRepresentative).getId();
   }
