@@ -68,6 +68,11 @@ export const reducer = (state, { type, payload }) => {
 
       return { ...state, dataProvidersTypesList: payload };
 
+    case 'REPRESENTATIVE_HAS_ERROR':
+      console.log('REPRESENTATIVE_HAS_ERROR');
+
+      return { ...state, representativeHasError: payload };
+
     case 'HIDE_CONFIRM_DIALOG':
       console.log('HIDE_CONFIRM_DIALOG');
       return {

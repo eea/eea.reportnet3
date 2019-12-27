@@ -314,6 +314,7 @@
 		"datasetSchemaCreationError":"Dataset schema creation error at <a href='{:navigateTo}'>dataFlow</a>",
 		"dataflowDeleteByIdError":"Dataflow delete error",
 		"exportTableDataByIdError":"Failed exporting data",
+		"manageRolesAccountError":"Not a valid account",
 		"deleteRecordByIdError":"Failed deleting record",
 		"updateFieldByIdError":"Failed updating field",
 		"tableDataByIdError":"Failed loading data",

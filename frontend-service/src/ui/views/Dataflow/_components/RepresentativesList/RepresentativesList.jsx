@@ -11,11 +11,13 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { RepresentativeService } from 'core/services/Representative';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   const initialState = {
     allPossibleDataProviders: [],
@@ -26,7 +28,8 @@ const RepresentativesList = ({ dataflowId }) => {
     responseStatus: null,
     refresher: false,
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: []
+    unusedDataProvidersOptions: [],
+    representativeHasError: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -47,20 +50,23 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
+    let hasError = representative.representativeId == formState.representativeHasError;
     return (
-      <input
-        autoFocus
-        defaultValue={inputData}
-        onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
-        onChange={e =>
-          formDispatcher({
-            type: 'ON_ACCOUNT_CHANGE',
-            payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
-          })
-        }
-        onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-      />
+      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+        <input
+          autoFocus
+          defaultValue={inputData}
+          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId, notificationContext)}
+          onChange={e =>
+            formDispatcher({
+              type: 'ON_ACCOUNT_CHANGE',
+              payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
+            })
+          }
+          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+          placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+        />
+      </div>
     );
   };
 
@@ -236,16 +242,29 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
   }
 };
 
-const updateRepresentative = async (formDispatcher, representative) => {
-  const responseStatus = await RepresentativeService.updateProviderAccount(
-    parseInt(representative.representativeId),
-    representative.providerAccount
-  );
+const updateRepresentative = async (formDispatcher, representative, notificationContext) => {
+  try {
+    let responseStatus = await RepresentativeService.updateProviderAccount(
+      parseInt(representative.representativeId),
+      representative.providerAccount
+    );
+    if (responseStatus.status >= 200 && responseStatus.status <= 299) {
+      formDispatcher({
+        type: 'UPDATE_ACCOUNT',
+        payload: responseStatus.status
+      });
+    }
+  } catch (error) {
+    console.log('error', error);
+    formDispatcher({
+      type: 'REPRESENTATIVE_HAS_ERROR',
+      payload: representative.representativeId
+    });
 
-  formDispatcher({
-    type: 'UPDATE_ACCOUNT',
-    payload: responseStatus.status
-  });
+    // notificationContext.add({
+    //   type: 'MANAGE_ROLES_ACCOUNT_ERROR'
+    // });
+  }
 };
 
 const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
@@ -270,10 +289,10 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
   }
 };
 
-const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
+const onAddProvider = (formDispatcher, formState, representative, dataflowId, notificationContext) => {
   isNull(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
-    : updateRepresentative(formDispatcher, representative);
+    : updateRepresentative(formDispatcher, representative, notificationContext);
 };
 
 const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
