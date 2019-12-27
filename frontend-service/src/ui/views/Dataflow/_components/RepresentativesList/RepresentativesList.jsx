@@ -55,7 +55,6 @@ const RepresentativesList = ({ dataflowId }) => {
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus
-          defaultValue={inputData}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId, notificationContext)}
           onChange={e =>
             formDispatcher({
@@ -65,6 +64,7 @@ const RepresentativesList = ({ dataflowId }) => {
           }
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+          value={inputData}
         />
       </div>
     );
@@ -195,11 +195,11 @@ const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) =>
 };
 
 const onDeleteConfirm = async (formDispatcher, formState) => {
-  const responseStatus = await RepresentativeService.deleteById(formState.representativeIdToDelete);
+  await RepresentativeService.deleteById(formState.representativeIdToDelete);
 
   formDispatcher({
     type: 'DELETE_REPRESENTATIVE',
-    payload: responseStatus.status
+    payload: formState.representativeIdToDelete
   });
 };
 
