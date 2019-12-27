@@ -10,15 +10,17 @@ export const reducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD_DATA_PROVIDER':
       console.log('ADD_DATA_PROVIDER');
+      console.log(' responseStatus: payload,', payload);
       return {
         ...state,
         responseStatus: payload,
         refresher: !state.refresher
       };
+
     case 'CREATE_UNUSED_OPTIONS_LIST':
       console.log('CREATE_UNUSED_OPTIONS_LIST');
 
-      let unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
+      const unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
         let result = true;
 
         for (let index = 0; index < state.representatives.length; index++) {
@@ -85,7 +87,7 @@ export const reducer = (state, { type, payload }) => {
 
     case 'UPDATE_ACCOUNT':
       console.log('UPDATE_ACCOUNT');
-
+      console.log(' responseStatus: payload,', payload);
       return {
         ...state,
         responseStatus: payload,
@@ -93,7 +95,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'UPDATE_DATA_PROVIDER':
-      console.log('UPDATE_DATA_PROVIDER payload');
+      console.log('UPDATE_DATA_PROVIDER');
 
       return {
         ...state,
@@ -102,8 +104,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_ACCOUNT_CHANGE':
-      console.log('add ON_ACCOUNT_CHANGE payload', payload);
-      console.log('add ON_ACCOUNT_CHANGE state.representatives', state.representatives);
+      console.log('ON_ACCOUNT_CHANGE');
 
       updatedList = state.representatives.map(representative => {
         if (representative.dataProviderId === payload.dataProviderId) {
@@ -118,7 +119,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_PROVIDER_CHANGE':
-      console.log('ON_PROVIDER_CHANGE ', payload);
+      console.log('ON_PROVIDER_CHANGE ');
 
       updatedList = state.representatives.map(representative => {
         if (representative.representativeId === payload.representativeId) {
@@ -140,7 +141,7 @@ export const reducer = (state, { type, payload }) => {
       }
 
     case 'SELECT_PROVIDERS_TYPE':
-      console.log('SELECT_PROVIDERS_TYPE ', payload);
+      console.log('SELECT_PROVIDERS_TYPE ');
       return {
         ...state,
         selectedDataProviderGroup: payload
