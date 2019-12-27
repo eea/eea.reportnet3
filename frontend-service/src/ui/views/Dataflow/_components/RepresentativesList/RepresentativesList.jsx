@@ -50,7 +50,9 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
-    let hasError = representative.representativeId == formState.representativeHasError;
+
+    let hasError = representative.representativeId === formState.representativeHasError;
+
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
@@ -80,7 +82,6 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <>
         <select
-          key={Date.now()}
           className="p-dropdown-items p-dropdown-list p-component"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
@@ -90,10 +91,7 @@ const RepresentativesList = ({ dataflowId }) => {
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
-              <option
-                key={`${provider.dataProviderId}${Date.now()}`}
-                className="p-dropdown-item"
-                value={provider.dataProviderId}>
+              <option key={`${provider.dataProviderId}`} className="p-dropdown-item" value={provider.dataProviderId}>
                 {provider.label}
               </option>
             );
@@ -187,22 +185,28 @@ const getInitialData = async (formDispatcher, dataflowId, formState) => {
 };
 
 const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
-  const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
-  formDispatcher({
-    type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-    payload: responseAllDataProviders
-  });
+  try {
+    const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+
+    formDispatcher({
+      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
+      payload: responseAllDataProviders
+    });
+  } catch (error) {
+    console.log('error', error);
+  }
 };
 
 const onDeleteConfirm = async (formDispatcher, formState) => {
   try {
     await RepresentativeService.deleteById(formState.representativeIdToDelete);
+
     formDispatcher({
       type: 'DELETE_REPRESENTATIVE',
       payload: formState.representativeIdToDelete
     });
   } catch (error) {
-    console.log('error: ', error);
+    console.log('error on RepresentativeService.deleteById: ', error);
   }
 };
 
@@ -213,35 +217,49 @@ const createUnusedOptionsList = formDispatcher => {
 };
 
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
-  const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-  formDispatcher({
-    type: 'INITIAL_LOAD',
-    payload: responseAllRepresentatives
-  });
+  try {
+    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
+    formDispatcher({
+      type: 'INITIAL_LOAD',
+      payload: responseAllRepresentatives
+    });
+  } catch (error) {
+    console.log('error on RepresentativeService.allRepresentatives', error);
+  }
 };
 
 const getProviderTypes = async formDispatcher => {
-  const response = await RepresentativeService.getProviderTypes();
-  formDispatcher({
-    type: 'GET_PROVIDERS_TYPES_LIST',
-    payload: response
-  });
+  try {
+    const response = await RepresentativeService.getProviderTypes();
+
+    formDispatcher({
+      type: 'GET_PROVIDERS_TYPES_LIST',
+      payload: response
+    });
+  } catch (error) {
+    console.log('error on  RepresentativeService.getProviderTypes', error);
+  }
 };
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
   const newRepresentative = representatives.filter(representative => representative.representativeId == null);
 
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
-    const responseStatus = await RepresentativeService.add(
-      dataflowId,
-      newRepresentative[0].providerAccount,
-      parseInt(newRepresentative[0].dataProviderId)
-    );
+    try {
+      const responseStatus = await RepresentativeService.add(
+        dataflowId,
+        newRepresentative[0].providerAccount,
+        parseInt(newRepresentative[0].dataProviderId)
+      );
 
-    formDispatcher({
-      type: 'ADD_DATA_PROVIDER',
-      payload: responseStatus.status
-    });
+      formDispatcher({
+        type: 'ADD_DATA_PROVIDER',
+        payload: responseStatus.status
+      });
+    } catch (error) {
+      console.log('error on RepresentativeService.add', error);
+    }
   }
 };
 
@@ -256,9 +274,14 @@ const updateRepresentative = async (formDispatcher, representative, notification
         type: 'UPDATE_ACCOUNT',
         payload: responseStatus.status
       });
+      formDispatcher({
+        type: 'REPRESENTATIVE_HAS_ERROR',
+        payload: []
+      });
     }
   } catch (error) {
-    console.log('error', error);
+    console.log('error on RepresentativeService.updateProviderAccount', error);
+
     formDispatcher({
       type: 'REPRESENTATIVE_HAS_ERROR',
       payload: representative.representativeId
@@ -271,14 +294,18 @@ const updateRepresentative = async (formDispatcher, representative, notification
 };
 
 const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
-  const responseStatus = await RepresentativeService.updateDataProviderId(
-    parseInt(representativeId),
-    parseInt(newDataProviderId)
-  );
-  formDispatcher({
-    type: 'ON_PROVIDER_CHANGE',
-    payload: responseStatus.status
-  });
+  try {
+    const responseStatus = await RepresentativeService.updateDataProviderId(
+      parseInt(representativeId),
+      parseInt(newDataProviderId)
+    );
+    formDispatcher({
+      type: 'ON_PROVIDER_CHANGE',
+      payload: responseStatus.status
+    });
+  } catch (error) {
+    console.log('error on RepresentativeService.updateDataProviderId', error);
+  }
 };
 
 const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {

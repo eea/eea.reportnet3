@@ -37,13 +37,13 @@ export const reducer = (state, { type, payload }) => {
     case 'DELETE_REPRESENTATIVE':
       console.log('state.representatives', state.representatives);
 
-      // updatedList = state.representatives.map(representative => {
-      //   if (representative.representativeId === null) {
-      //     representative.providerAccount = '';
-      //   }
-      //   console.log('representative', representative);
-      //   return representative;
-      // });
+      updatedList = state.representatives.map(representative => {
+        if (representative.representativeId === null) {
+          representative.providerAccount = '';
+        }
+
+        return representative;
+      });
 
       updatedList = state.representatives.filter(representative => representative.representativeId !== payload);
 
@@ -51,7 +51,7 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         representatives: updatedList,
         isVisibleConfirmDeleteDialog: false,
-        // responseStatus: payload (200),
+        //responseStatus: 200, //payload(200),
         refresher: !state.refresher
       };
 
