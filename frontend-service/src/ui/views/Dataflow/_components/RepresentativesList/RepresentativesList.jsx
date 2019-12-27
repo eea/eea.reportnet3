@@ -118,7 +118,7 @@ const RepresentativesList = ({ dataflowId }) => {
   };
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.selectWrapper}>
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
@@ -162,7 +162,7 @@ const RepresentativesList = ({ dataflowId }) => {
         labelCancel={resources.messages['no']}>
         {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
       </ConfirmDialog>
-    </>
+    </div>
   );
 };
 
