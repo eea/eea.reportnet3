@@ -195,12 +195,15 @@ const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) =>
 };
 
 const onDeleteConfirm = async (formDispatcher, formState) => {
-  await RepresentativeService.deleteById(formState.representativeIdToDelete);
-
-  formDispatcher({
-    type: 'DELETE_REPRESENTATIVE',
-    payload: formState.representativeIdToDelete
-  });
+  try {
+    await RepresentativeService.deleteById(formState.representativeIdToDelete);
+    formDispatcher({
+      type: 'DELETE_REPRESENTATIVE',
+      payload: formState.representativeIdToDelete
+    });
+  } catch (error) {
+    console.log('error: ', error);
+  }
 };
 
 const createUnusedOptionsList = formDispatcher => {
