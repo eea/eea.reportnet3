@@ -159,13 +159,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       }
     }
     try {
-      if (representativeService.existsUserMail(representativeVO.getDataProviderId(),
-          representativeVO.getProviderAccount())) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-            EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
-      }
       representativeService.updateDataflowRepresentative(representativeVO);
     } catch (EEAException e) {
+      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }

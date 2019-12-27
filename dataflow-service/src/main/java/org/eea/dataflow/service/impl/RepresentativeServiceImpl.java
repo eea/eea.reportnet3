@@ -121,6 +121,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       dataflowRepresentative.setDataProvider(dataProvider);
     }
     // save changes
+    if (existsUserMail(dataflowRepresentative.getDataProvider().getId(),
+        dataflowRepresentative.getUserMail())) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    }
     LOG.info("updating the representative relation");
     return representativeRepository.save(dataflowRepresentative).getId();
   }
@@ -172,9 +176,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return dataProviderMapper.entityListToClass(dataProviderRepository.findAllByGroupId(groupId));
   }
 
+  /**
+   * Exists user mail.
+   *
+   * @param dataProviderId the data provider id
+   * @param userMail the user mail
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
   @Override
   public boolean existsUserMail(Long dataProviderId, String userMail) throws EEAException {
-    if (StringUtils.isBlank(userMail)) {
+    if (dataProviderId == null || StringUtils.isBlank(userMail)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     return representativeRepository.existsByDataProviderIdAndUserMail(dataProviderId, userMail);
