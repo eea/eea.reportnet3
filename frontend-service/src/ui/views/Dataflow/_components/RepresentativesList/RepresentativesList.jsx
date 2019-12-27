@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import { isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_components/reducer.jsx';
@@ -35,10 +35,6 @@ const RepresentativesList = ({ dataflowId }) => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
 
-  /*   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
-  }, [formState.refresher]); */
-
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
@@ -47,31 +43,28 @@ const RepresentativesList = ({ dataflowId }) => {
     createUnusedOptionsList(formDispatcher);
   }, [formState.selectedDataProviderGroup]);
 
-  const providerAccountInputColumnTemplate = rowData => {
-    let inputData = rowData.providerAccount;
+  const providerAccountInputColumnTemplate = representative => {
+    let inputData = representative.providerAccount;
     return (
       <input
         autoFocus
         defaultValue={inputData}
-        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+        onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
         onChange={e =>
           formDispatcher({
             type: 'ON_ACCOUNT_CHANGE',
-            payload: { input: e.target.value, dataProviderId: rowData.dataProviderId }
+            payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
           })
         }
-        onBlur={event =>
-          isNull(rowData.representativeId)
-            ? addRepresentative(formDispatcher, formState, rowData, dataflowId, event.target.value)
-            : updateRepresentative(formDispatcher, formState, rowData, dataflowId, event.target.value)
-        }
+        onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+        placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
       />
     );
   };
 
-  const dropdownColumnTemplate = rowData => {
+  const dropdownColumnTemplate = representative => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
-      option => option.dataProviderId === rowData.dataProviderId
+      option => option.dataProviderId === representative.dataProviderId
     );
 
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
@@ -80,13 +73,12 @@ const RepresentativesList = ({ dataflowId }) => {
       <>
         <select
           className="p-dropdown p-component"
-          onChange={e => {
-            formDispatcher({
-              type: 'ON_PROVIDER_CHANGE',
-              payload: { dataProviderId: e.target.value, representativeId: rowData.representativeId }
-            });
+          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
+          onChange={event => {
+            onDataProviderIdChange(formDispatcher, event.target.value, representative);
           }}
-          value={rowData.dataProviderId}>
+          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+          value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
               <option
@@ -102,8 +94,8 @@ const RepresentativesList = ({ dataflowId }) => {
     );
   };
 
-  const deleteBtnColumnTemplate = rowData => {
-    return !isNull(rowData.representativeId) ? (
+  const deleteBtnColumnTemplate = representative => {
+    return !isNull(representative.representativeId) ? (
       <Button
         tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
         tooltipOptions={{ position: 'right' }}
@@ -111,7 +103,10 @@ const RepresentativesList = ({ dataflowId }) => {
         disabled={false}
         className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
         onClick={() => {
-          formDispatcher({ type: 'SHOW_CONFIRM_DIALOG', payload: { representativeId: rowData.representativeId } });
+          formDispatcher({
+            type: 'SHOW_CONFIRM_DIALOG',
+            payload: { representativeId: representative.representativeId }
+          });
         }}
       />
     ) : (
@@ -175,9 +170,11 @@ const getInitialData = async (formDispatcher, dataflowId, formState) => {
 
   await getAllRepresentatives(dataflowId, formDispatcher);
 
-  await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+  if (!isEmpty(formState.representatives)) {
+    await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
 
-  createUnusedOptionsList(formDispatcher);
+    createUnusedOptionsList(formDispatcher);
+  }
 };
 
 const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
@@ -219,22 +216,68 @@ const getProviderTypes = async formDispatcher => {
   });
 };
 
-const addRepresentative = async (formDispatcher, formState, rowData, dataflowId, inputValue) => {
-  console.log('ON ADD PROVIDER formState.representatives', formState.representatives);
-  const responseStatus = await RepresentativeService.add(dataflowId, inputValue, parseInt(rowData.dataProviderId));
+const addRepresentative = async (formDispatcher, representatives, dataflowId, inputValue) => {
+  console.log('add ON ADD PROVIDER representatives', representatives);
+  const newRepresentative = representatives.filter(representative => representative.representativeId == null);
 
-  formDispatcher({
-    type: 'ADD_DATA_PROVIDER',
-    payload: responseStatus.status
-  });
+  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
+    const responseStatus = await RepresentativeService.add(
+      dataflowId,
+      newRepresentative[0].providerAccount,
+      parseInt(newRepresentative[0].dataProviderId)
+    );
+
+    formDispatcher({
+      type: 'ADD_DATA_PROVIDER',
+      payload: responseStatus.status
+    });
+  }
 };
 
-const updateRepresentative = async (formDispatcher, formState, rowData, dataflowId, inputValue) => {
-  console.log('ON UPDATE PROVIDER formState.representatives', formState.representatives);
-  const responseStatus = await RepresentativeService.add(dataflowId, inputValue, parseInt(rowData.dataProviderId));
+const updateRepresentative = async (formDispatcher, representative, dataflowId, inputValue) => {
+  const responseStatus = await RepresentativeService.update(
+    dataflowId,
+    inputValue,
+    parseInt(representative.dataProviderId)
+  );
 
   formDispatcher({
     type: 'UPDATE_ACCOUNT',
     payload: responseStatus.status
   });
+};
+
+const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
+  const responseStatus = await RepresentativeService.updateDataProviderId(
+    parseInt(representativeId),
+    parseInt(newDataProviderId)
+  );
+  formDispatcher({
+    type: 'ON_PROVIDER_CHANGE',
+    payload: responseStatus.status
+  });
+};
+
+const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
+  if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
+    updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
+  } else {
+    //THIS IS FOR NEW ONE
+    formDispatcher({
+      type: 'ON_PROVIDER_CHANGE',
+      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
+    });
+  }
+};
+
+const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
+  isNull(representative.representativeId)
+    ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
+    : updateRepresentative(formDispatcher, formState, representative, dataflowId);
+};
+
+const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
+  if (event.key === 'Enter') {
+    onAddProvider(formDispatcher, formState, representative, dataflowId);
+  }
 };

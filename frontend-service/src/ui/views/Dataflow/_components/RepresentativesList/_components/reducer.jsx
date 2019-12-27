@@ -1,4 +1,4 @@
-import { includes } from 'lodash';
+import { includes, isUndefined } from 'lodash';
 
 import { Representative } from 'core/domain/model/Representative/Representative';
 
@@ -70,7 +70,9 @@ export const reducer = (state, { type, payload }) => {
 
     case 'INITIAL_LOAD':
       console.log('INITIAL_LOAD');
-
+      const group = state.dataProvidersTypesList.filter(
+        dataProviderType => dataProviderType.dataProviderGroupId === payload.group.dataProviderGroupId
+      );
       if (!includes(state.representatives, emptyRepresentative)) {
         payload.representatives.push(emptyRepresentative);
       }
@@ -78,20 +80,30 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedDataProviderGroup: payload.group
+        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0]
       };
 
     case 'UPDATE_ACCOUNT':
-      console.log('UPDATE_ACCOUNT payload', payload);
-      console.log('updatedList', state.representatives);
+      console.log('UPDATE_ACCOUNT');
 
-      //api call to update providerAccount
+      return {
+        ...state,
+        responseStatus: payload,
+        refresher: !state.refresher
+      };
 
-      return state;
+    case 'UPDATE_DATA_PROVIDER':
+      console.log('UPDATE_DATA_PROVIDER payload');
+
+      return {
+        ...state,
+        responseStatus: payload,
+        refresher: !state.refresher
+      };
 
     case 'ON_ACCOUNT_CHANGE':
-      console.log('ON_ACCOUNT_CHANGE payload', payload);
-      console.log('ON_ACCOUNT_CHANGE state.representatives', state.representatives);
+      console.log('add ON_ACCOUNT_CHANGE payload', payload);
+      console.log('add ON_ACCOUNT_CHANGE state.representatives', state.representatives);
 
       updatedList = state.representatives.map(representative => {
         if (representative.dataProviderId === payload.dataProviderId) {
@@ -106,7 +118,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_PROVIDER_CHANGE':
-      console.log('ON_PROVIDER_CHANGE payload', payload.representativeId);
+      console.log('ON_PROVIDER_CHANGE ', payload);
 
       updatedList = state.representatives.map(representative => {
         if (representative.representativeId === payload.representativeId) {
@@ -115,10 +127,17 @@ export const reducer = (state, { type, payload }) => {
         return representative;
       });
 
-      return {
-        ...state,
-        representatives: updatedList
-      };
+      if (payload.representativeId !== null) {
+        return {
+          ...state,
+          refresher: !state.refresher
+        };
+      } else {
+        return {
+          ...state,
+          representatives: updatedList
+        };
+      }
 
     case 'SELECT_PROVIDERS_TYPE':
       console.log('SELECT_PROVIDERS_TYPE ', payload);

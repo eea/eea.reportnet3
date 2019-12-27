@@ -14,7 +14,7 @@ const allRepresentatives = async dataflowId => {
 
   const dataToConsume = {
     group: !isEmpty(representativesDTO.data)
-      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId, label: 'Country' } // !solve label problem
+      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
       : { dataProviderGroupId: null },
     representatives: representativesList
   };
@@ -25,21 +25,15 @@ const allRepresentatives = async dataflowId => {
 const allDataProviders = async dataProviderGroup => {
   let response = [];
 
-  if (!isNull(dataProviderGroup)) {
-    const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroup.dataProviderGroupId);
+  const dataProvidersDTO = await apiRepresentative.allDataProviders(dataProviderGroup.dataProviderGroupId);
 
-    response = dataProvidersDTO.data.map(dataProvider => {
-      return { dataProviderId: dataProvider.id, label: dataProvider.label };
-    });
+  response = dataProvidersDTO.data.map(dataProvider => {
+    return { dataProviderId: dataProvider.id, label: dataProvider.label };
+  });
 
-    response.unshift({ dataProviderId: '', label: 'Select...' });
-  } else {
-    const dataProvidersDTO = await apiRepresentative.allDataProviders(1); //hardcoded
+  response.unshift({ dataProviderId: '', label: 'Select...' });
 
-    response = dataProvidersDTO.data.map(dataProvider => {
-      return { dataProviderId: dataProvider.id, label: dataProvider.label };
-    });
-  }
+  console.log('allDataProviders response', response);
 
   return response;
 };
@@ -59,8 +53,12 @@ const deleteById = async representativeId => {
   return dataDeleted;
 };
 
-const update = async (dataflowId, representativeId, providerAccount, dataProviderId) => {
-  return await apiRepresentative.update(dataflowId, representativeId, providerAccount, dataProviderId);
+const updateProviderAccount = async (representativeId, providerAccount) => {
+  return await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
+};
+
+const updateDataProviderId = async (representativeId, dataProviderId) => {
+  return await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
 };
 
 export const ApiRepresentativeRepository = {
@@ -69,5 +67,6 @@ export const ApiRepresentativeRepository = {
   add,
   deleteById,
   getProviderTypes,
-  update
+  updateProviderAccount,
+  updateDataProviderId
 };
