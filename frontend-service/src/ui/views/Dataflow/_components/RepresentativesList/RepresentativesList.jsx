@@ -75,7 +75,7 @@ const RepresentativesList = ({ dataflowId }) => {
       <>
         <select
           key={Date.now()}
-          className="p-dropdown p-component"
+          className="p-dropdown-items p-dropdown-list p-component"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative);
@@ -86,7 +86,7 @@ const RepresentativesList = ({ dataflowId }) => {
             return (
               <option
                 key={`${provider.dataProviderId}${Date.now()}`}
-                className="p-dropdown-item p-dropdown-items p-dropdown-list p-component"
+                className="p-dropdown-item"
                 value={provider.dataProviderId}>
                 {provider.label}
               </option>
@@ -142,13 +142,13 @@ const RepresentativesList = ({ dataflowId }) => {
         <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
           <Column
             body={providerAccountInputColumnTemplate}
-            header={resources.messages['manageRolesDialogAccoutColumn']}
+            header={resources.messages['manageRolesDialogAccountColumn']}
           />
           <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
           <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
         </DataTable>
       ) : (
-        <p>Please select provider group</p>
+        <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
       )}
 
       <ConfirmDialog
