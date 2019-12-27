@@ -145,6 +145,9 @@ public class DataflowServiceImpl implements DataflowService {
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
     // add to the filter the design datasets (data schemas) too
     datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
+    // also, add to the filter the data collection
+    datasets
+        .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);

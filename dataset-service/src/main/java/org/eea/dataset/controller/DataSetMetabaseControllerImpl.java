@@ -61,6 +61,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DataCollectionService dataCollectionService;
 
+
   /**
    * The Constant LOG.
    */
@@ -250,15 +251,26 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow);
     // 3. Create reporting datasets as many providers are by design dataset
     for (DesignDatasetVO design : designs) {
-      for (RepresentativeVO representative : representatives) {
-        this.createEmptyDataSet(
-            TypeDatasetEnum.REPORTING, representativeControllerZuul
-                .findDataProviderById(representative.getDataProviderId()).getLabel(),
-            design.getDatasetSchema(), idDataflow);
+      try {
+        for (RepresentativeVO representative : representatives) {
+          Long newDatasetId = datasetMetabaseService.createEmptyDataset(
+              TypeDatasetEnum.REPORTING, representativeControllerZuul
+                  .findDataProviderById(representative.getDataProviderId()).getLabel(),
+              design.getDatasetSchema(), idDataflow);
+
+          // Create the reporting dataset in keycloak and add it to the user provider
+          // datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
+          // representative.getProviderAccount());
+        }
+        // 4.Create one DC per design dataset
+        Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
+            "nombreDC", design.getDatasetSchema(), idDataflow);
+        datasetMetabaseService.createGroupDcAndAddUser(newDc);
+
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+            e.getMessage(), e);
       }
-      // 4.Create one DC per design dataset
-      this.createEmptyDataSet(TypeDatasetEnum.COLLECTION, "nombreDC", design.getDatasetSchema(),
-          idDataflow);
     }
 
   }

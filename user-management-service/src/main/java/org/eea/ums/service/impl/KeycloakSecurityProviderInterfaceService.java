@@ -351,7 +351,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
     UserRepresentation[] users = keycloakConnectorService.getUsers();
     Optional<UserRepresentation> contributor = Arrays.asList(users).stream()
-        .filter(user -> user.getEmail().equals(userMail)).findFirst();
+        .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+        .findFirst();
     contributor.orElseThrow(() -> new EEAException("Error, user not found"));
 
     this.addUserToUserGroup(contributor.get().getId(), groupName);

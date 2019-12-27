@@ -85,4 +85,8 @@ public interface DatasetMetabaseService {
   List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
 
+  void createGroupProviderAndAddUser(Long datasetId, String userMail);
+
+  void createGroupDcAndAddUser(Long datasetId);
+
 }

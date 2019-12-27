@@ -49,11 +49,23 @@ public enum ResourceGroupEnum {
   /**
    * Dataschema provider resource group enum.
    */
-  DATASCHEMA_PROVIDER("Dataschema-%s-DATA_PROVIDER");
+  DATASCHEMA_PROVIDER("Dataschema-%s-DATA_PROVIDER"),
+
+  /** The datacollection custodian. */
+  DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
+
+  /** The datacollection provider. */
+  DATACOLLECTION_PROVIDER("DataCollection-%s-DATA_PROVIDER");
 
 
+  /** The expression. */
   private String expression;
 
+  /**
+   * Instantiates a new resource group enum.
+   *
+   * @param expression the expression
+   */
   private ResourceGroupEnum(String expression) {
     this.expression = expression;
   }
@@ -82,8 +94,8 @@ public enum ResourceGroupEnum {
       SecurityRoleEnum securityRoleEnum) {
     String resource = resourceTypeEnum.toString();
     String role = securityRoleEnum.toString();
-    String resourceGroupExpresion = new StringBuilder(resource).append("-%s-").append(role)
-        .toString();
+    String resourceGroupExpresion =
+        new StringBuilder(resource).append("-%s-").append(role).toString();
     ResourceGroupEnum[] values = ResourceGroupEnum.values();
     ResourceGroupEnum result = null;
     for (ResourceGroupEnum value : values) {

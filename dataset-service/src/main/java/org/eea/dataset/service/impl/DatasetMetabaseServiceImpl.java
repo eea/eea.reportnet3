@@ -24,10 +24,16 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +72,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
+
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZuul;
 
 
   /** The Constant LOG. */
@@ -338,5 +350,47 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     return statistics;
   }
+
+
+
+  @Override
+  public void createGroupProviderAndAddUser(Long datasetId, String userMail) {
+
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+
+    userManagementControllerZuul.addContributorToResource(datasetId,
+        ResourceGroupEnum.DATASET_PROVIDER, userMail);
+
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+
+    userManagementControllerZuul.addUserToResource(datasetId, ResourceGroupEnum.DATASET_CUSTODIAN);
+
+  }
+
+
+  @Override
+  public void createGroupDcAndAddUser(Long datasetId) {
+
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_COLLECTION, SecurityRoleEnum.DATA_CUSTODIAN));
+
+    userManagementControllerZuul.addUserToResource(datasetId,
+        ResourceGroupEnum.DATACOLLECTION_CUSTODIAN);
+
+  }
+
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+
+    return resourceInfoVO;
+  }
+
+
 
 }

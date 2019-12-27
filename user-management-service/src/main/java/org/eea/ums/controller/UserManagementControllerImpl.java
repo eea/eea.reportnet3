@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -275,12 +276,24 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRepresentationMapper.entityListToClass(arrayList);
   }
 
+
+  /**
+   * Adds the contributor to resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   * @param userMail the user mail
+   */
   @Override
   @RequestMapping(value = "/add_contributor_to_resource", method = RequestMethod.PUT)
   public void addContributorToResource(Long idResource, ResourceGroupEnum resourceGroupEnum,
       String userMail) {
-    securityProviderInterfaceService.addContributorToUserGroup(userMail,
-        resourceGroupEnum.getGroupName(idResource));
+    try {
+      securityProviderInterfaceService.addContributorToUserGroup(userMail,
+          resourceGroupEnum.getGroupName(idResource));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+    }
   }
 
 }
