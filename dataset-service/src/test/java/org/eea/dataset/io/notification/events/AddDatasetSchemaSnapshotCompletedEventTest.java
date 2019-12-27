@@ -12,10 +12,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class LoadDataFailedEventTest {
+public class AddDatasetSchemaSnapshotCompletedEventTest {
 
   @InjectMocks
-  private LoadDataFailedEvent loadDataFailedEvent;
+  private AddDatasetSchemaSnapshotCompletedEvent addDatasetSchemaSnapshotCompletedEvent;
 
   @Mock
   private DatasetService datasetService;
@@ -27,23 +27,20 @@ public class LoadDataFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.LOAD_DATA_FAILED_EVENT, loadDataFailedEvent.getEventType());
+    Assert.assertEquals(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT,
+        addDatasetSchemaSnapshotCompletedEvent.getEventType());
   }
 
   @Test
   public void getMapTest1() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    Assert.assertEquals(6,
-        loadDataFailedEvent.getMap(NotificationVO.builder().user("user").error("error")
-            .fileName("fileName").datasetId(1L).tableSchemaId("tableSchemaId").build()).size());
+    Assert.assertEquals(3, addDatasetSchemaSnapshotCompletedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 
   @Test
   public void getMapTest2() throws EEAException {
-    Assert.assertEquals(6,
-        loadDataFailedEvent
-            .getMap(NotificationVO.builder().user("user").error("error").fileName("fileName")
-                .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build())
-            .size());
+    Assert.assertEquals(3, addDatasetSchemaSnapshotCompletedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L).build()).size());
   }
 }

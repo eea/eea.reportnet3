@@ -27,7 +27,7 @@ public class AddDatasetSchemaSnapshotCompletedEvent implements NotificableEventH
    */
   @Override
   public EventType getEventType() {
-    return EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
+    return EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT;
   }
 
   /**

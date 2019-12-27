@@ -29,7 +29,7 @@ public class RestoreDatasetSchemaSnapshotFailedEvent implements NotificableEvent
    */
   @Override
   public EventType getEventType() {
-    return EventType.RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT;
+    return EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
   }
 
   /**
