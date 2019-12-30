@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -20,6 +21,7 @@ public interface DatasetMetabaseService {
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
 
 
+
   /**
    * Creates the empty dataset.
    *
@@ -27,11 +29,12 @@ public interface DatasetMetabaseService {
    * @param datasetName the dataset name
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
+   * @param dueDate the due date
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId) throws EEAException;
+      Long dataflowId, Date dueDate) throws EEAException;
 
   /**
    * Gets the dataset name.

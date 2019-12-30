@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.metabase.domain;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,6 +24,10 @@ public class DataCollection extends DataSetMetabase {
   @Id
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
+
+  /** The due date. */
+  @Column(name = "DUE_DATE")
+  private Date dueDate;
 
 
 

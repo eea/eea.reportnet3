@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -140,7 +141,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
     try {
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow);
+          idDataflow, null);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -233,48 +234,67 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return statistics;
   }
 
+
+  /**
+   * Creates the empty data collection.
+   *
+   * @param dataCollectionVO the data collection VO
+   */
   @Override
   @HystrixCommand
   @PostMapping(value = "/createDataCollection")
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createEmptyDataCollection(@RequestParam(value = "name") String name,
-      @RequestParam(value = "idDataflow", required = true) Long idDataflow) {
-    if (StringUtils.isBlank(name)) {
+  public void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO) {
+    if (StringUtils.isBlank(dataCollectionVO.getDataSetName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
     // 1. Get the design datasets
-    List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+    /*
+     * List<DesignDatasetVO> designs =
+     * designDatasetService.getDesignDataSetIdByDataflowId(dataCollectionVO.getIdDataflow());
+     */
     // 2. Get the providers who are going to provide data
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow);
+    List<RepresentativeVO> representatives = representativeControllerZuul
+        .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 3. Create reporting datasets as many providers are by design dataset
-    for (DesignDatasetVO design : designs) {
-      try {
-        for (RepresentativeVO representative : representatives) {
-          Long newDatasetId = datasetMetabaseService.createEmptyDataset(
-              TypeDatasetEnum.REPORTING, representativeControllerZuul
-                  .findDataProviderById(representative.getDataProviderId()).getLabel(),
-              design.getDatasetSchema(), idDataflow);
 
-          // Create the reporting dataset in keycloak and add it to the user provider
-          // datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
-          // representative.getProviderAccount());
-        }
-        // 4.Create one DC per design dataset
-        Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-            "nombreDC", design.getDatasetSchema(), idDataflow);
-        datasetMetabaseService.createGroupDcAndAddUser(newDc);
+    try {
 
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-            e.getMessage(), e);
+      for (RepresentativeVO representative : representatives) {
+        Long newDatasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING,
+            representativeControllerZuul.findDataProviderById(representative.getDataProviderId())
+                .getLabel(),
+            dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null);
+
+        // Create the reporting dataset in keycloak and add it to the user provider //
+        datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId, //
+            representative.getProviderAccount());
       }
+
+      // 4.Create the DC per design dataset
+      Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
+          dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
+          dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate());
+      datasetMetabaseService.createGroupDcAndAddUser(newDc);
+
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR);
     }
+
 
   }
 
+  /**
+   * Find data collection id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/datacollection/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

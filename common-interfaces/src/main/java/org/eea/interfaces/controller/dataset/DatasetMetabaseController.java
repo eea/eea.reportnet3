@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -123,9 +124,13 @@ public interface DatasetMetabaseController {
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
 
 
+  /**
+   * Creates the empty data collection.
+   *
+   * @param dataCollectionVO the data collection VO
+   */
   @PostMapping(value = "/createDataCollection")
-  void createEmptyDataCollection(@RequestParam(value = "name") String name,
-      @RequestParam(value = "idDataflow", required = true) Long idDataflow);
+  void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO);
 
 
 }

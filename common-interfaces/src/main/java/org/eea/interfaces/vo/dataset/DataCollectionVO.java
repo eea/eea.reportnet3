@@ -28,10 +28,16 @@ public class DataCollectionVO implements Serializable {
   /** The creation date. */
   private Date creationDate;
 
+  /** The due date. */
+  private Date dueDate;
+
   /** The status. */
   private String status;
 
   /** The dataset schema. */
   private String datasetSchema;
+
+  /** The id dataflow. */
+  private Long idDataflow;
 
 }

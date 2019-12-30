@@ -118,7 +118,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.createGroupAndAddUser(
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, datasetSchemaName,
-              dataschemaService.createEmptyDataSetSchema(dataflowId).toString(), dataflowId));
+              dataschemaService.createEmptyDataSetSchema(dataflowId).toString(), dataflowId, null));
     } catch (EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

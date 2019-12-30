@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,12 +71,15 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private StatisticsRepository statisticsRepository;
 
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The user management controller zuul. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
 
+  /** The resource management controller zuul. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
@@ -110,6 +114,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetName the dataset name
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
+   * @param dueDate the due date
    * @return the long
    * @throws EEAException the EEA exception
    */
@@ -121,7 +126,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * transactional manager. Otherwise the operation will be fail
    */
   public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String datasetSchemaId, Long dataflowId) throws EEAException {
+      String datasetSchemaId, Long dataflowId, Date dueDate) throws EEAException {
 
     if (datasetType != null && datasetName != null && datasetSchemaId != null
         && dataflowId != null) {
@@ -141,6 +146,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         case COLLECTION:
           dataset = new DataCollection();
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          ((DataCollection) dataset).setDueDate(dueDate);
           dataCollectionRepository.save((DataCollection) dataset);
           break;
         default:
@@ -160,6 +166,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param dataset the dataset
    * @param datasetName the dataset name
    * @param idDataFlow the id data flow
+   * @param datasetSchemaId the dataset schema id
    */
   private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow,
       String datasetSchemaId) {
@@ -353,6 +360,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
 
+  /**
+   * Creates the group provider and add user.
+   *
+   * @param datasetId the dataset id
+   * @param userMail the user mail
+   */
   @Override
   public void createGroupProviderAndAddUser(Long datasetId, String userMail) {
 
@@ -370,6 +383,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  /**
+   * Creates the group dc and add user.
+   *
+   * @param datasetId the dataset id
+   */
   @Override
   public void createGroupDcAndAddUser(Long datasetId) {
 
@@ -381,6 +399,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
 
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
