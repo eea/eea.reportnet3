@@ -142,8 +142,12 @@ const RepresentativesList = ({ dataflowId }) => {
         </div>
       </div>
 
-      {!isNull(formState.selectedDataProviderGroup) ? (
-        <DataTable value={formState.representatives} scrollable={true} scrollHeight="100vh">
+      {!isNull(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
+        <DataTable
+          value={formState.representatives}
+          scrollable={true}
+          scrollHeight="100vh"
+          rows={formState.allPossibleDataProviders.length - 1}>
           <Column
             body={providerAccountInputColumnTemplate}
             header={resources.messages['manageRolesDialogAccountColumn']}

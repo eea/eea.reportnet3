@@ -51,7 +51,6 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         representatives: updatedList,
         isVisibleConfirmDeleteDialog: false,
-        //responseStatus: 200, //payload(200),
         refresher: !state.refresher
       };
 
