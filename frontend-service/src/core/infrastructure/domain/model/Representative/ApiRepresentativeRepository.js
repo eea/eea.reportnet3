@@ -33,8 +33,6 @@ const allDataProviders = async dataProviderGroup => {
 
   response.unshift({ dataProviderId: '', label: 'Select...' });
 
-  console.log('allDataProviders response', response);
-
   return response;
 };
 

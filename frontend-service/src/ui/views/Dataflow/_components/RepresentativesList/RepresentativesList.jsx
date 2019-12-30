@@ -25,11 +25,11 @@ const RepresentativesList = ({ dataflowId }) => {
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
     representatives: [],
-    responseStatus: null,
     refresher: false,
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: [],
-    representativeHasError: []
+    representativeHasError: [],
+    currentInputRepresentativeId: undefined
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -235,11 +235,11 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
 
 const getProviderTypes = async formDispatcher => {
   try {
-    const response = await RepresentativeService.getProviderTypes();
+    const providerTypes = await RepresentativeService.getProviderTypes();
 
     formDispatcher({
       type: 'GET_PROVIDERS_TYPES_LIST',
-      payload: response
+      payload: providerTypes
     });
   } catch (error) {
     console.log('error on  RepresentativeService.getProviderTypes', error);
@@ -251,15 +251,14 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
 
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
-      const responseStatus = await RepresentativeService.add(
+      await RepresentativeService.add(
         dataflowId,
         newRepresentative[0].providerAccount,
         parseInt(newRepresentative[0].dataProviderId)
       );
 
       formDispatcher({
-        type: 'ADD_DATA_PROVIDER',
-        payload: responseStatus.status
+        type: 'ADD_REPRESENTATIVE'
       });
     } catch (error) {
       console.log('error on RepresentativeService.add', error);
@@ -269,20 +268,19 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
 
 const updateRepresentative = async (formDispatcher, representative, notificationContext) => {
   try {
-    let responseStatus = await RepresentativeService.updateProviderAccount(
+    await RepresentativeService.updateProviderAccount(
       parseInt(representative.representativeId),
       representative.providerAccount
     );
-    if (responseStatus.status >= 200 && responseStatus.status <= 299) {
-      formDispatcher({
-        type: 'UPDATE_ACCOUNT',
-        payload: responseStatus.status
-      });
-      formDispatcher({
-        type: 'REPRESENTATIVE_HAS_ERROR',
-        payload: []
-      });
-    }
+
+    formDispatcher({
+      type: 'UPDATE_ACCOUNT'
+    });
+
+    formDispatcher({
+      type: 'REPRESENTATIVE_HAS_ERROR',
+      payload: []
+    });
   } catch (error) {
     console.log('error on RepresentativeService.updateProviderAccount', error);
 
@@ -299,13 +297,10 @@ const updateRepresentative = async (formDispatcher, representative, notification
 
 const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
   try {
-    const responseStatus = await RepresentativeService.updateDataProviderId(
-      parseInt(representativeId),
-      parseInt(newDataProviderId)
-    );
+    await RepresentativeService.updateDataProviderId(parseInt(representativeId), parseInt(newDataProviderId));
+
     formDispatcher({
-      type: 'ON_PROVIDER_CHANGE',
-      payload: responseStatus.status
+      type: 'ON_PROVIDER_CHANGE'
     });
   } catch (error) {
     console.log('error on RepresentativeService.updateDataProviderId', error);

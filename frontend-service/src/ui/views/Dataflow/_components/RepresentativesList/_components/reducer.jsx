@@ -8,12 +8,12 @@ export const reducer = (state, { type, payload }) => {
   let updatedList = [];
 
   switch (type) {
-    case 'ADD_DATA_PROVIDER':
-      console.log('ADD_DATA_PROVIDER');
-      console.log(' responseStatus: payload,', payload);
+    case 'ADD_REPRESENTATIVE':
+      console.log('ADD_REPRESENTATIVE');
+
       return {
         ...state,
-        responseStatus: payload,
+
         refresher: !state.refresher
       };
 
@@ -102,10 +102,10 @@ export const reducer = (state, { type, payload }) => {
 
     case 'UPDATE_ACCOUNT':
       console.log('UPDATE_ACCOUNT');
-      console.log(' responseStatus: payload,', payload);
+
       return {
         ...state,
-        responseStatus: payload,
+
         refresher: !state.refresher
       };
 
@@ -114,7 +114,7 @@ export const reducer = (state, { type, payload }) => {
 
       return {
         ...state,
-        responseStatus: payload,
+
         refresher: !state.refresher
       };
 
