@@ -23,6 +23,7 @@ const RepresentativesList = ({ dataflowId }) => {
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
     representatives: [],
+    initialRepresentatives: [],
     refresher: false,
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: [],
@@ -222,9 +223,11 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
+    const representativesByCopy = JSON.parse(JSON.stringify(responseAllRepresentatives.representatives));
+
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: responseAllRepresentatives
+      payload: { response: responseAllRepresentatives, representativesByCopy }
     });
   } catch (error) {
     console.log('error on RepresentativeService.allRepresentatives', error);
@@ -264,23 +267,36 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
   }
 };
 
-const updateRepresentative = async (formDispatcher, representative) => {
-  try {
-    await RepresentativeService.updateProviderAccount(
-      parseInt(representative.representativeId),
-      representative.providerAccount
-    );
+const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
+  let isChangedAccount = false;
 
-    formDispatcher({
-      type: 'UPDATE_ACCOUNT'
-    });
-  } catch (error) {
-    console.log('error on RepresentativeService.updateProviderAccount', error);
+  formState.initialRepresentatives.forEach(representative => {
+    if (
+      representative.representativeId === updatedRepresentative.representativeId &&
+      representative.providerAccount !== updatedRepresentative.providerAccount
+    ) {
+      isChangedAccount = true;
+    }
+  });
 
-    formDispatcher({
-      type: 'REPRESENTATIVE_HAS_ERROR',
-      payload: representative.representativeId
-    });
+  if (isChangedAccount) {
+    try {
+      await RepresentativeService.updateProviderAccount(
+        parseInt(updatedRepresentative.representativeId),
+        updatedRepresentative.providerAccount
+      );
+
+      formDispatcher({
+        type: 'UPDATE_ACCOUNT'
+      });
+    } catch (error) {
+      console.log('error on RepresentativeService.updateProviderAccount', error);
+
+      formDispatcher({
+        type: 'REPRESENTATIVE_HAS_ERROR',
+        payload: updatedRepresentative.representativeId
+      });
+    }
   }
 };
 
@@ -311,7 +327,7 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
 const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNull(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
-    : updateRepresentative(formDispatcher, representative);
+    : updateRepresentative(formDispatcher, formState, representative);
 };
 
 const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {

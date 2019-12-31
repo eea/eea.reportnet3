@@ -87,16 +87,17 @@ export const reducer = (state, { type, payload }) => {
       console.log('INITIAL_LOAD');
 
       const group = state.dataProvidersTypesList.filter(
-        dataProviderType => dataProviderType.dataProviderGroupId === payload.group.dataProviderGroupId
+        dataProviderType => dataProviderType.dataProviderGroupId === payload.response.group.dataProviderGroupId
       );
 
       if (!includes(state.representatives, emptyRepresentative)) {
-        payload.representatives.push(emptyRepresentative);
+        payload.response.representatives.push(emptyRepresentative);
       }
 
       return {
         ...state,
-        representatives: payload.representatives,
+        representatives: payload.response.representatives,
+        initialRepresentatives: payload.representativesByCopy,
         selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0],
         representativeHasError: []
       };
@@ -139,7 +140,7 @@ export const reducer = (state, { type, payload }) => {
 
       updatedList = state.representatives.map(representative => {
         console.log('representative', representative);
-        console.log('payload', payload);
+        console.log('representative', representative);
         if (representative.representativeId === payload.representativeId) {
           representative.dataProviderId = payload.dataProviderId;
         }
