@@ -45,7 +45,7 @@ const Codelists = withRouter(({ match, history }) => {
 
   const onLoadCategories = async () => {
     try {
-      let loadedCategories = {
+      const loadedCategories = {
         categories: [
           {
             name: 'wise',
