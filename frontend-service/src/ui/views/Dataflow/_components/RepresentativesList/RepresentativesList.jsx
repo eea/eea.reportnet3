@@ -56,7 +56,7 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
-          autoFocus
+          autoFocus={representative.representativeId === null}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId, notificationContext)}
           onChange={e =>
             formDispatcher({
