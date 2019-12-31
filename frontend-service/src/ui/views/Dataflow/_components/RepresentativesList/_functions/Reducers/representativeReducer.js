@@ -57,11 +57,11 @@ export const reducer = (state, { type, payload }) => {
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
       console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID');
 
-      let representativesPop = state.representatives;
+      if (state.representatives.length <= payload.length) {
+        payload.unshift({ dataProviderId: '', label: 'Select...' });
+      }
 
-      payload.unshift({ dataProviderId: '', label: 'Select...' });
-
-      return { ...state, allPossibleDataProviders: payload, representatives: representativesPop };
+      return { ...state, allPossibleDataProviders: payload };
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');
@@ -139,8 +139,6 @@ export const reducer = (state, { type, payload }) => {
       console.log('ON_PROVIDER_CHANGE ');
 
       updatedList = state.representatives.map(representative => {
-        console.log('representative', representative);
-        console.log('representative', representative);
         if (representative.representativeId === payload.representativeId) {
           representative.dataProviderId = payload.dataProviderId;
         }
