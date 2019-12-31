@@ -276,11 +276,6 @@ const updateRepresentative = async (formDispatcher, representative, notification
     formDispatcher({
       type: 'UPDATE_ACCOUNT'
     });
-
-    formDispatcher({
-      type: 'REPRESENTATIVE_HAS_ERROR',
-      payload: []
-    });
   } catch (error) {
     console.log('error on RepresentativeService.updateProviderAccount', error);
 
@@ -310,7 +305,7 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
   } else {
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId } // check out!
+      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
     });
   }
 };
