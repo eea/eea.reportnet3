@@ -11,13 +11,11 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { RepresentativeService } from 'core/services/Representative';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
-  const notificationContext = useContext(NotificationContext);
 
   const initialState = {
     allPossibleDataProviders: [],
@@ -56,8 +54,8 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
-          autoFocus={representative.representativeId === null}
-          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId, notificationContext)}
+          autoFocus={isNull(representative.representativeId)}
+          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={e =>
             formDispatcher({
               type: 'ON_ACCOUNT_CHANGE',
@@ -247,7 +245,7 @@ const getProviderTypes = async formDispatcher => {
 };
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
-  const newRepresentative = representatives.filter(representative => representative.representativeId == null);
+  const newRepresentative = representatives.filter(representative => isNull(representative.representativeId));
 
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
@@ -266,7 +264,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
   }
 };
 
-const updateRepresentative = async (formDispatcher, representative, notificationContext) => {
+const updateRepresentative = async (formDispatcher, representative) => {
   try {
     await RepresentativeService.updateProviderAccount(
       parseInt(representative.representativeId),
@@ -310,10 +308,10 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
   }
 };
 
-const onAddProvider = (formDispatcher, formState, representative, dataflowId, notificationContext) => {
+const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNull(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
-    : updateRepresentative(formDispatcher, representative, notificationContext);
+    : updateRepresentative(formDispatcher, representative);
 };
 
 const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
