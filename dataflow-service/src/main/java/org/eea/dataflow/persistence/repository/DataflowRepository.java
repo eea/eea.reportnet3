@@ -2,10 +2,12 @@ package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -68,5 +70,17 @@ public interface DataflowRepository
    * @return the long
    */
   Dataflow findDataflowByWeblinks_Id(Long idLink);
+
+  /**
+   * Delete a single dataflow record using native query.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from  dataflow  where id = :idDataflow ")
+  void deleteNativeDataflow(@Param("idDataflow") Long idDataflow);
+
+
 
 }

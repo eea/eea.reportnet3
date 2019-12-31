@@ -105,6 +105,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Map token to VO.
+   *
+   * @param tokenInfo the token info
+   * @return the token VO
+   */
   private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
     TokenVO tokenVO = new TokenVO();
     tokenVO.setAccessToken(tokenInfo.getAccessToken());
@@ -247,14 +253,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
-    //Retrieve the groups available in keycloak. Keycloak does not support queries on groups
+    // Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
-      //Retrieve the group id of the group where the user will be added
+      // Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.equalsIgnoreCase(groupInfo.getName()))
           .map(GroupInfo::getId).findFirst().orElse("");
-      //Finally add the user to the group
+      // Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
       }
@@ -299,6 +305,41 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   * @return the groups by id resource type
+   */
+  @Override
+  public List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource,
+      ResourceTypeEnum resourceType) {
+    // we get all groups
+    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    List<ResourceInfoVO> resourceReturn = new ArrayList<>();
+    // ge create the resource that we are looking for it to filter
+    String resourceToContain = resourceType + "-" + idResource.toString() + "-";
+
+    // we do a for and find the data that we need
+    if (null != groups && groups.length > 0) {
+      Arrays.asList(groups).stream().forEach(groupInfo -> {
+        if (groupInfo.getName().contains(resourceToContain)) {
+          ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+          resourceInfoVO.setName(groupInfo.getName());
+          resourceInfoVO.setResourceId(idResource);
+          resourceInfoVO.setResourceTypeEnum(resourceType);
+          resourceInfoVO.setPath(groupInfo.getPath());
+          resourceInfoVO.setAttributes(groupInfo.getAttributes());
+          resourceReturn.add(resourceInfoVO);
+        }
+      });
+
+    }
+
+    return resourceReturn;
   }
 
 
