@@ -4,6 +4,15 @@ import { isEmpty, isNull } from 'lodash';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
+import {
+  getAllDataProviders,
+  getInitialData,
+  createUnusedOptionsList,
+  onAddProvider,
+  onDataProviderIdChange,
+  onDeleteConfirm,
+  onKeyDown
+} from './_functions/Utils/representativeUtils';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
@@ -12,15 +21,6 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import {
-  getInitialData,
-  getAllDataProviders,
-  createUnusedOptionsList,
-  onAddProvider,
-  onKeyDown,
-  onDataProviderIdChange,
-  onDeleteConfirm
-} from './_functions/Utils/representativeUtils';
 
 const RepresentativesList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
@@ -35,8 +35,7 @@ const RepresentativesList = ({ dataflowId }) => {
     refresher: false,
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: [],
-    representativeHasError: [],
-    currentInputRepresentativeId: undefined
+    representativeHasError: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -154,7 +153,7 @@ const RepresentativesList = ({ dataflowId }) => {
           value={formState.representatives}
           scrollable={true}
           scrollHeight="100vh"
-          rows={formState.allPossibleDataProviders.length - 1}>
+          rows={formState.allPossibleDataProviders.length}>
           <Column
             body={providerAccountInputColumnTemplate}
             header={resources.messages['manageRolesDialogAccountColumn']}
