@@ -57,7 +57,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(true);
+  const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
