@@ -59,9 +59,7 @@ export const reducer = (state, { type, payload }) => {
 
       let representativesPop = state.representatives;
 
-      if (representativesPop.length === payload.length) {
-        representativesPop.pop();
-      }
+      payload.unshift({ dataProviderId: '', label: 'Select...' });
 
       return { ...state, allPossibleDataProviders: payload, representatives: representativesPop };
 
@@ -72,8 +70,10 @@ export const reducer = (state, { type, payload }) => {
 
     case 'REPRESENTATIVE_HAS_ERROR':
       console.log('REPRESENTATIVE_HAS_ERROR');
+      let inputsWithErrors = state.representativeHasError;
+      inputsWithErrors.unshift(payload);
 
-      return { ...state, representativeHasError: payload };
+      return { ...state, representativeHasError: inputsWithErrors };
 
     case 'HIDE_CONFIRM_DIALOG':
       console.log('HIDE_CONFIRM_DIALOG');
@@ -97,7 +97,8 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: payload.representatives,
-        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0]
+        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0],
+        representativeHasError: []
       };
 
     case 'UPDATE_ACCOUNT':
@@ -137,6 +138,8 @@ export const reducer = (state, { type, payload }) => {
       console.log('ON_PROVIDER_CHANGE ');
 
       updatedList = state.representatives.map(representative => {
+        console.log('representative', representative);
+        console.log('payload', payload);
         if (representative.representativeId === payload.representativeId) {
           representative.dataProviderId = payload.dataProviderId;
         }

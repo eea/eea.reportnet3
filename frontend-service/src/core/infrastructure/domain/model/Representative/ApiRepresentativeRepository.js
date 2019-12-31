@@ -31,8 +31,6 @@ const allDataProviders = async dataProviderGroup => {
     return { dataProviderId: dataProvider.id, label: dataProvider.label };
   });
 
-  response.unshift({ dataProviderId: '', label: 'Select...' });
-
   return response;
 };
 

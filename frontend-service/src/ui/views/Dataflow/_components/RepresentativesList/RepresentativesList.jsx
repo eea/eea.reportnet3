@@ -51,7 +51,7 @@ const RepresentativesList = ({ dataflowId }) => {
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
-    let hasError = representative.representativeId === formState.representativeHasError;
+    let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
@@ -288,10 +288,6 @@ const updateRepresentative = async (formDispatcher, representative, notification
       type: 'REPRESENTATIVE_HAS_ERROR',
       payload: representative.representativeId
     });
-
-    // notificationContext.add({
-    //   type: 'MANAGE_ROLES_ACCOUNT_ERROR'
-    // });
   }
 };
 
@@ -300,7 +296,8 @@ const updateProviderId = async (formDispatcher, representativeId, newDataProvide
     await RepresentativeService.updateDataProviderId(parseInt(representativeId), parseInt(newDataProviderId));
 
     formDispatcher({
-      type: 'ON_PROVIDER_CHANGE'
+      type: 'ON_PROVIDER_CHANGE',
+      payload: { dataProviderId: newDataProviderId, representativeId }
     });
   } catch (error) {
     console.log('error on RepresentativeService.updateDataProviderId', error);
@@ -313,7 +310,7 @@ const onDataProviderIdChange = (formDispatcher, newDataProviderId, representativ
   } else {
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
+      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId } // check out!
     });
   }
 };
