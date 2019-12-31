@@ -354,6 +354,18 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
+
+  const closeManageRolesDialog = (
+    <div>
+      <Button
+        className="p-button-primary"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsActiveManageRolesDialog(false)}
+      />
+    </div>
+  );
+
   const onReleaseSnapshot = async snapshotId => {
     try {
       await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
@@ -629,6 +641,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <Dialog
           header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          footer={closeManageRolesDialog}
           visible={isActiveManageRolesDialog}
           onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
