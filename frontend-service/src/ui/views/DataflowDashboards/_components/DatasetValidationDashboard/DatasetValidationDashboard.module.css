@@ -1,0 +1,66 @@
+.positioning {
+  position: sticky !important;
+}
+.colorPicker {
+  margin-left: 3px;
+}
+.colorPicker > input {
+  font-size: 12px !important;
+}
+.colorPickerWrap {
+  border: 1px solid var(--gray-50);
+  padding: 20px;
+}
+.colorPickerItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.colorPickerItem:nth-of-type(2) {
+  margin: 0 1rem;
+}
+.fieldsetContent {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.chart_released {
+  position: relative;
+  padding-top: 1rem;
+  margin-right: 0rem !important;
+  margin-left: 0rem !important;
+}
+
+.dashboardName {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0.5rem !important;
+}
+
+.emptyChart {
+  margin-top: 1.5rem !important;
+}
+
+.stamp {
+  position: relative;
+  top: 50% !important;
+  font-size: 3rem;
+  font-weight: 700;
+  border-radius: 5px;
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  text-transform: uppercase;
+}
+
+.emptySchema {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 2rem;
+  color: var(--errors);
+  border: 0.5rem double var(--errors);
+  opacity: 0.5;
+  transform: translateX(-50%) rotate(15deg);
+}

@@ -15,43 +15,19 @@ const allDesigner = async datasetSchemaId => {
 };
 
 const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {
-  const isCreated = await apiSnapshot.createByIdDesigner(datasetId, datasetSchemaId, description);
-
-  const snapshotToCreate = new Snapshot();
-  snapshotToCreate.description = description;
-  snapshotToCreate.isCreated = isCreated;
-
-  return snapshotToCreate;
+  return await apiSnapshot.createByIdDesigner(datasetId, datasetSchemaId, description);
 };
 
 const deleteByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  const isDeleted = await apiSnapshot.deleteByIdDesigner(datasetSchemaId, snapshotId);
-
-  const snapshotToDelete = new Snapshot();
-  snapshotToDelete.id = snapshotId;
-  snapshotToDelete.isDeleted = isDeleted;
-
-  return snapshotToDelete;
+  return await apiSnapshot.deleteByIdDesigner(datasetSchemaId, snapshotId);
 };
 
 const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  const isRestored = await apiSnapshot.restoreByIdDesigner(datasetSchemaId, snapshotId);
-
-  const snapshotToRestore = new Snapshot();
-  snapshotToRestore.id = snapshotId;
-  snapshotToRestore.isRestored = isRestored;
-
-  return snapshotToRestore;
+  return await apiSnapshot.restoreByIdDesigner(datasetSchemaId, snapshotId);
 };
 
 const releaseByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  const isReleased = await apiSnapshot.releaseByIdDesigner(datasetSchemaId, snapshotId);
-
-  const snapshotToRelease = new Snapshot();
-  snapshotToRelease.id = snapshotId;
-  snapshotToRelease.isReleased = isReleased;
-
-  return snapshotToRelease;
+  return await apiSnapshot.releaseByIdDesigner(datasetSchemaId, snapshotId);
 };
 
 const allReporter = async datasetId => {
@@ -63,33 +39,15 @@ const allReporter = async datasetId => {
 };
 
 const createByIdReporter = async (datasetId, description) => {
-  const isCreated = await apiSnapshot.createByIdReporter(datasetId, description);
-
-  const snapshotToCreate = new Snapshot();
-  snapshotToCreate.description = description;
-  snapshotToCreate.isCreated = isCreated;
-
-  return snapshotToCreate;
+  return await apiSnapshot.createByIdReporter(datasetId, description);
 };
 
 const deleteByIdReporter = async (datasetId, snapshotId) => {
-  const isDeleted = await apiSnapshot.deleteByIdReporter(datasetId, snapshotId);
-
-  const snapshotToDelete = new Snapshot();
-  snapshotToDelete.id = snapshotId;
-  snapshotToDelete.isDeleted = isDeleted;
-
-  return snapshotToDelete;
+  return await apiSnapshot.deleteByIdReporter(datasetId, snapshotId);
 };
 
 const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
-  const isRestored = await apiSnapshot.restoreByIdReporter(dataflowId, datasetId, snapshotId);
-
-  const snapshotToRestore = new Snapshot();
-  snapshotToRestore.id = snapshotId;
-  snapshotToRestore.isRestored = isRestored;
-
-  return snapshotToRestore;
+  return await apiSnapshot.restoreByIdReporter(dataflowId, datasetId, snapshotId);
 };
 
 const releaseByIdReporter = async (dataflowId, datasetId, snapshotId) => {

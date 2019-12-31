@@ -316,5 +316,4 @@ public interface ValidationService {
    */
   Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
       String originName);
-
 }

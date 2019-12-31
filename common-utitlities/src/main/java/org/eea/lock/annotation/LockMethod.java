@@ -22,4 +22,11 @@ public @interface LockMethod {
    * @return true, if successful
    */
   public boolean removeWhenFinish() default true;
+
+  /**
+   * Checks if is controller.
+   *
+   * @return true, if is controller
+   */
+  public boolean isController() default true;
 }

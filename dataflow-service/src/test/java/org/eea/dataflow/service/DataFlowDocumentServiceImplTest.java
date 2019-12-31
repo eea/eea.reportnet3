@@ -164,17 +164,17 @@ public class DataFlowDocumentServiceImplTest {
 
   @Test
   public void updateDocumentExceptionTest() throws EEAException {
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    when(documentRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
       dataflowServiceImpl.updateDocument(documentVO);
     } catch (EEAException e) {
-      assertEquals("bad message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getMessage());
     }
   }
 
   @Test
   public void updateDocumentSuccessTest() throws EEAException {
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    when(documentRepository.findById(Mockito.any())).thenReturn(Optional.of(new Document()));
     when(documentMapper.classToEntity(Mockito.any())).thenReturn(new Document());
     when(documentRepository.save(Mockito.any())).thenReturn(null);
     dataflowServiceImpl.updateDocument(documentVO);

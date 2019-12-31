@@ -30,6 +30,9 @@ public class FieldSchema {
   @Field(value = "_id")
   private ObjectId idFieldSchema;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The idRecord. */
   @Field(value = "idRecord")
@@ -44,21 +47,9 @@ public class FieldSchema {
   @Field(value = "headerName")
   private String headerName;
 
-
   /** The rule field. */
   @Field(value = "rules")
   private List<RuleField> ruleField;
-
-  /**
-   * To JSON.
-   *
-   * @return the string
-   */
-  public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idFieldSchema + "\"}, \"idRecord\": {\"$oid\":\"" + idRecord
-        + "\"}, \"typeData\": \"" + type.getValue() + "\", \"headerName\": \"" + headerName
-        + "\", \"rules\": []}";
-  }
 
   /**
    * Hash code.
@@ -67,9 +58,8 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, ruleField, type);
+    return Objects.hash(headerName, description, idFieldSchema, idRecord, ruleField, type);
   }
-
 
   /**
    * Equals.
@@ -87,6 +77,7 @@ public class FieldSchema {
     }
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
+        && Objects.equals(description, other.description)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
         && Objects.equals(type, other.type);

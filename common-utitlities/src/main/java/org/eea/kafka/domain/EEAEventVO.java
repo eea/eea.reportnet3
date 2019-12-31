@@ -85,6 +85,6 @@ public class EEAEventVO implements Serializable {
    */
   @Override
   public String toString() {
-    return "EEAEventVO{" + "eventType=" + eventType + '}';
+    return "EEAEventVO{" + "eventType=" + eventType + ", data=" + data + '}';
   }
 }

@@ -1,15 +1,10 @@
 package org.eea.validation.kafka.command;
 
 import java.util.UUID;
-import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.lock.annotation.LockCriteria;
-import org.eea.lock.annotation.LockMethod;
 import org.eea.validation.util.ValidationHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The validation helper.
@@ -43,22 +33,13 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
   }
 
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
    */
-  // The lock should be released during ValidationHelper.checkFinishedFalidations(..) method
-  @LockMethod(removeWhenFinish = false)
   @Override
-  public void execute(@LockCriteria(name = "eeaEventVO") EEAEventVO eeaEventVO) {
+  public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    try {
-      validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
-          e);
-    }
+    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
   }
-
-
 }

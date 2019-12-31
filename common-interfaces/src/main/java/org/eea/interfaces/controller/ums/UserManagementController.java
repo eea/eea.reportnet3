@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -132,6 +133,7 @@ public interface UserManagementController {
   @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
+
   /**
    * Sets the users.
    *
@@ -140,4 +142,13 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
   void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
+
+
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
+  List<UserRepresentationVO> getUsers();
 }

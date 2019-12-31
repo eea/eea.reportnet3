@@ -48,9 +48,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Gets the link.
    *
    * @param idLink the id link
-   *
    * @return the link
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
@@ -129,7 +127,6 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Update link.
    *
    * @param weblinkVO the weblink VO
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
