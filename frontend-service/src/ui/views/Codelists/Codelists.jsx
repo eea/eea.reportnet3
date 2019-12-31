@@ -58,11 +58,13 @@ const Codelists = withRouter(({ match, history }) => {
                 status: 'Ready',
                 items: [
                   {
+                    idItem: '1',
                     code: 'confirmedValue',
                     label: 'Confirmed value',
                     definition: 'Status flag to confirm that the reported observation value is...'
                   },
                   {
+                    idItem: '2',
                     code: 'limitOfDetectionValue',
                     label: 'Limit of detection value',
                     definition: 'Status flag to inform that a specific observed...'
@@ -76,11 +78,13 @@ const Codelists = withRouter(({ match, history }) => {
                 status: 'Design',
                 items: [
                   {
+                    idItem: '3',
                     code: 0,
                     label: 'Not classified',
                     definition: 'Bathing water quality cannot be assessed and classified.'
                   },
                   {
+                    idItem: '4',
                     code: 1,
                     label: 'Excellent',
                     definition:
@@ -95,11 +99,13 @@ const Codelists = withRouter(({ match, history }) => {
                 status: 'Design',
                 items: [
                   {
+                    idItem: '5',
                     code: 0,
                     label: 'Not classified',
                     definition: 'Bathing water quality cannot be assessed and classified.'
                   },
                   {
+                    idItem: '6',
                     code: 1,
                     label: 'Excellent',
                     definition:
