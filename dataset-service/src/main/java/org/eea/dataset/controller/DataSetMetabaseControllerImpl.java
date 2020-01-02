@@ -59,9 +59,13 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  /** The data collection service. */
   @Autowired
   private DataCollectionService dataCollectionService;
 
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * The Constant LOG.
@@ -74,8 +78,6 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Find data set id by dataflow id.
@@ -141,7 +143,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
     try {
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow, null);
+          idDataflow, null, null);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -259,24 +261,22 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     List<RepresentativeVO> representatives = representativeControllerZuul
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 3. Create reporting datasets as many providers are by design dataset
-
     try {
 
       for (RepresentativeVO representative : representatives) {
         Long newDatasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING,
-            representativeControllerZuul.findDataProviderById(representative.getDataProviderId())
-                .getLabel(),
-            dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null);
+            null, dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
+            representative.getDataProviderId());
 
-        // Create the reporting dataset in keycloak and add it to the user provider //
-        datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId, //
+        // Create the reporting dataset in keycloak and add it to the user provider
+        datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
             representative.getProviderAccount());
       }
 
       // 4.Create the DC per design dataset
       Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
           dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-          dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate());
+          dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
       datasetMetabaseService.createGroupDcAndAddUser(newDc);
 
     } catch (EEAException e) {
@@ -285,7 +285,6 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR);
     }
-
 
   }
 

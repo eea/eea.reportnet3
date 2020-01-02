@@ -96,7 +96,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestException2() throws Exception {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
   }
 
@@ -108,11 +108,11 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void createEmptyDataSetTest() throws Exception {
     Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -202,7 +202,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void createEmptyDataCollectionTest() throws EEAException {
     Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     DataCollectionVO dc = new DataCollectionVO();
     dc.setDataSetName("datasetTest");
     dc.setDueDate(new Date());
@@ -215,11 +215,9 @@ public class DataSetMetabaseControllerImplTest {
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
-    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
-        .thenReturn(dataprovider);
     dataSetMetabaseControllerImpl.createEmptyDataCollection(dc);
     Mockito.verify(datasetMetabaseService, times(2)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -258,11 +256,9 @@ public class DataSetMetabaseControllerImplTest {
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
-    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
-        .thenReturn(dataprovider);
 
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenThrow(new EEAException());
+        Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
 
     try {
       dataSetMetabaseControllerImpl.createEmptyDataCollection(dc);

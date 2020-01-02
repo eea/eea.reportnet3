@@ -30,11 +30,12 @@ public interface DatasetMetabaseService {
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param idDataProvider the id data provider
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId, Date dueDate) throws EEAException;
+      Long dataflowId, Date dueDate, Long idDataProvider) throws EEAException;
 
   /**
    * Gets the dataset name.

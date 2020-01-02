@@ -24,9 +24,11 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
@@ -83,6 +85,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
@@ -126,16 +132,20 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * transactional manager. Otherwise the operation will be fail
    */
   public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String datasetSchemaId, Long dataflowId, Date dueDate) throws EEAException {
+      String datasetSchemaId, Long dataflowId, Date dueDate, Long idDataProvider)
+      throws EEAException {
 
-    if (datasetType != null && datasetName != null && datasetSchemaId != null
-        && dataflowId != null) {
+    if (datasetType != null && datasetSchemaId != null && dataflowId != null) {
       DataSetMetabase dataset;
 
       switch (datasetType) {
         case REPORTING:
           dataset = new ReportingDataset();
+          DataProviderVO provider =
+              representativeControllerZuul.findDataProviderById(idDataProvider);
+          datasetName = provider.getLabel();
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          dataset.setDataProviderId(idDataProvider);
           reportingDatasetRepository.save((ReportingDataset) dataset);
           break;
         case DESIGN:

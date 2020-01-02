@@ -18,9 +18,11 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.junit.Assert;
@@ -74,6 +76,9 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
 
   /**
    * Inits the mocks.
@@ -106,9 +111,14 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void testCreateEmptyDataset() throws Exception {
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setLabel("test");
+
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(dataprovider);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
-        "5d0c822ae1ccd34cfcd97e20", 1L, null);
+        "5d0c822ae1ccd34cfcd97e20", 1L, null, 1L);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
@@ -125,7 +135,7 @@ public class DatasetMetabaseServiceTest {
   public void createEmptyDatasetTest() throws EEAException {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, "datasetName",
-        (new ObjectId()).toString(), 1L, null);
+        (new ObjectId()).toString(), 1L, null, null);
   }
 
   @Test

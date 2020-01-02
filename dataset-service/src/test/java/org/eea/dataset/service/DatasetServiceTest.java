@@ -57,6 +57,9 @@ import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
@@ -229,6 +232,12 @@ public class DatasetServiceTest {
   /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
+
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /** The field value. */
   private FieldValue fieldValue;
@@ -1125,6 +1134,10 @@ public class DatasetServiceTest {
     record.setFields(fields);
     recordsList.add(record);
     when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
     datasetService.createRecords(1L, records, "");
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
