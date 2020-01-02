@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,7 +72,7 @@ public interface RepresentativeController {
    * @param dataflowRepresentativeVO the dataflow representative VO
    */
   @PutMapping(value = "/update")
-  void updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
+  ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**
    * Delete representative.
