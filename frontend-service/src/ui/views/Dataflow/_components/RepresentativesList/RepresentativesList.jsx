@@ -55,14 +55,21 @@ const RepresentativesList = ({ dataflowId }) => {
     createUnusedOptionsList(formDispatcher);
   }, [formState.allPossibleDataProviders]);
 
+  useEffect(() => {
+    if (!isEmpty(formState.representatives)) {
+      if (
+        isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
+        !isNull(document.getElementById('emptyInput'))
+      ) {
+        document.getElementById('emptyInput').focus();
+      }
+    }
+  }, [formState.representativeHasError]);
+
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
-
-    if (isEmpty(inputData) && !isNull(document.getElementById('emptyInput'))) {
-      document.getElementById('emptyInput').focus();
-    }
 
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
