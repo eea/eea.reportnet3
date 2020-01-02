@@ -60,10 +60,15 @@ const RepresentativesList = ({ dataflowId }) => {
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
+    if (isEmpty(inputData) && !isNull(document.getElementById('emptyInput'))) {
+      document.getElementById('emptyInput').focus();
+    }
+
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus={isNull(representative.representativeId)}
+          id={isEmpty(inputData) ? 'emptyInput' : ''}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={e =>
             formDispatcher({
