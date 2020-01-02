@@ -51,6 +51,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   private static final Logger LOG = LoggerFactory.getLogger(RepresentativeServiceImpl.class);
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Insert representative.
    *
    * @param dataflowId the dataflow id
@@ -121,7 +126,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
             : representative.getUserMail(),
         representative.getDataflow().getId())) {
-      LOG.error("duplicado");
+      LOG_ERROR.error("Duplicated representative relationship");
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     } else {
       // update changes on first level

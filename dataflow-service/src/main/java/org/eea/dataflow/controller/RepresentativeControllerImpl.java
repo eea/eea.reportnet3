@@ -46,9 +46,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   private UserManagementControllerZull userManagementControllerZull;
 
   /**
-   * The Constant LOG.
+   * The Constant LOG_ERROR.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(RepresentativeControllerImpl.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Insert representative.
@@ -161,7 +161,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       representativeService.updateDataflowRepresentative(representativeVO);
     } catch (EEAException e) {
       if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
-        LOG.error("duplicado", e.getCause());
+        LOG_ERROR.error("Duplicated representative relationship", e.getCause());
         throw new ResponseStatusException(HttpStatus.CONFLICT,
             EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e);
       }
