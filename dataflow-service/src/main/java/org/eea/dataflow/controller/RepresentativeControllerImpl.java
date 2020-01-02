@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -47,9 +46,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   private UserManagementControllerZull userManagementControllerZull;
 
   /**
-   * The Constant LOG.
+   * The Constant LOG_ERROR.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(RepresentativeControllerImpl.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Insert representative.
@@ -75,6 +74,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       return representativeService.insertRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
+      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
@@ -157,6 +160,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeService.updateDataflowRepresentative(representativeVO);
     } catch (EEAException e) {
+      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
+        LOG_ERROR.error("Duplicated representative relationship", e.getCause());
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
