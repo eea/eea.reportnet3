@@ -121,14 +121,38 @@ const updateProviderId = async (formDispatcher, representativeId, newDataProvide
 
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
-  formState.initialRepresentatives.forEach(representative => {
+
+  formState.initialRepresentatives.forEach(initialRepresentative => {
     if (
-      representative.representativeId === updatedRepresentative.representativeId &&
-      representative.providerAccount !== updatedRepresentative.providerAccount
+      initialRepresentative.representativeId === updatedRepresentative.representativeId &&
+      initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
     ) {
       isChangedAccount = true;
+    } else if (
+      initialRepresentative.representativeId === updatedRepresentative.representativeId &&
+      initialRepresentative.providerAccount === updatedRepresentative.providerAccount
+    ) {
+      formDispatcher({
+        type: 'REPRESENTATIVE_HAS_NO_ERROR',
+        payload: { representativeId: updatedRepresentative.representativeId }
+      });
     }
   });
+
+  /*  if (isChangedAccount) {
+    formState.initialRepresentatives.forEach(initialRepresentative => {
+      if (
+        initialRepresentative.representativeId === updatedRepresentative.representativeId &&
+        initialRepresentative.providerAccount === updatedRepresentative.providerAccount
+      ) {
+        formDispatcher({
+          type: 'REPRESENTATIVE_HAS_NO_ERROR',
+          payload: { representativeId: updatedRepresentative.representativeId }
+        });
+      }
+    });
+  } */
+
   if (isChangedAccount) {
     try {
       await RepresentativeService.updateProviderAccount(
