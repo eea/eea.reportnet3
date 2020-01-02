@@ -37,14 +37,6 @@ export const reducer = (state, { type, payload }) => {
     case 'DELETE_REPRESENTATIVE':
       console.log('state.representatives', state.representatives);
 
-      updatedList = state.representatives.map(representative => {
-        if (representative.representativeId === null) {
-          representative.providerAccount = '';
-        }
-
-        return representative;
-      });
-
       updatedList = state.representatives.filter(representative => representative.representativeId !== payload);
 
       return {
@@ -56,12 +48,13 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
       console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID');
+      const providersNoSelect = [...payload];
 
       if (state.representatives.length <= payload.length) {
         payload.unshift({ dataProviderId: '', label: 'Select...' });
       }
 
-      return { ...state, allPossibleDataProviders: payload };
+      return { ...state, allPossibleDataProviders: payload, allPossibleDataProvidersNoSelect: providersNoSelect };
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');

@@ -27,6 +27,7 @@ const RepresentativesList = ({ dataflowId }) => {
 
   const initialState = {
     allPossibleDataProviders: [],
+    allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     isVisibleConfirmDeleteDialog: false,
     representativeIdToDelete: '',
@@ -153,7 +154,7 @@ const RepresentativesList = ({ dataflowId }) => {
           value={formState.representatives}
           scrollable={true}
           scrollHeight="100vh"
-          rows={formState.allPossibleDataProviders.length}>
+          rows={formState.allPossibleDataProvidersNoSelect.length}>
           <Column
             body={providerAccountInputColumnTemplate}
             header={resources.messages['manageRolesDialogAccountColumn']}
