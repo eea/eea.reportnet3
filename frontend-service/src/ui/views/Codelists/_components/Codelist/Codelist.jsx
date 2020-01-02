@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState, useReducer } from 'react';
 
 import { capitalize, isUndefined } from 'lodash';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
@@ -30,10 +31,10 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
     initialCellValue: undefined,
-    initialItem: { code: '', label: '', definition: '' },
+    initialItem: { idItem: '', code: '', label: '', definition: '' },
     isEditing: false,
     isNewCodelistVisible: false,
-    newItem: { code: '', label: '', definition: '' }
+    newItem: { idItem: '', code: '', label: '', definition: '' }
   };
 
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
@@ -116,6 +117,8 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     console.log({ inmItems });
     dispatchCodelist({ type: 'SAVE_NEW_ITEM', payload: inmItems });
   };
+
+  const actionTemplate = () => <ActionsColumn onDeleteClick={() => {}} onEditClick={() => {}} />;
 
   const cellItemDataEditor = (cells, field) => {
     return (
@@ -250,14 +253,24 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
         editable={codelistState.isEditing}
         footer={isDataCustodian ? renderFooter() : null}
         value={codelistState.items}>
-        {['code', 'label', 'definition'].map(column => (
+        {['itemId', 'code', 'label', 'definition'].map(column => (
           <Column
+            editor={codelistState.isEditing ? row => cellItemDataEditor(row, column) : null}
             field={column}
             header={capitalize(column)}
             sortable={true}
-            editor={codelistState.isEditing ? row => cellItemDataEditor(row, column) : null}
+            style={{ display: column === 'itemId' ? 'none' : 'auto' }}
           />
         ))}
+        {codelistState.isEditing ? (
+          <Column
+            header={resources.messages['actions']}
+            key="actions"
+            body={row => actionTemplate(row)}
+            sortable={false}
+            style={{ width: '100px' }}
+          />
+        ) : null}
       </DataTable>
     );
   };

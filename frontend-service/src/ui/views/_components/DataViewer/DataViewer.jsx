@@ -8,7 +8,7 @@ import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
 
-import { ActionsColumn } from './_components/ActionsColumn';
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
