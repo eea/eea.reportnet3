@@ -1,6 +1,7 @@
 package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -22,11 +23,13 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
   /**
    * Exists by user mail.
    *
+   * @param dataProviderId the data provider id
    * @param userMail the user mail
+   * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  @Query(nativeQuery = true,
-      value = "SELECT exists (SELECT * from representative where data_provider_id=:dataProviderId and user_mail=:userMail)")
-  boolean existsByDataProviderIdAndUserMail(@Param("dataProviderId") Long dataProviderId,
-      @Param("userMail") String userMail);
+  @Query("SELECT r from Representative r WHERE (r.dataProvider.id = :dataProviderId AND r.userMail= :userMail AND r.dataflow.id= :dataflowId)")
+  Optional<List<Representative>> findBydataProviderIdAnduserMailAnddataflowId(
+      @Param("dataProviderId") Long dataProviderId, @Param("userMail") String userMail,
+      @Param("dataflowId") Long dataflowId);
 }

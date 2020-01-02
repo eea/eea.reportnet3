@@ -65,6 +65,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (representativeVO == null || dataflowId == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
+    if (existsUserMail(representativeVO.getDataProviderId(), representativeVO.getProviderAccount(),
+        dataflowId)) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    }
     Representative dataflowRepresentative = representativeMapper.classToEntity(representativeVO);
     Dataflow dataflow = new Dataflow();
     dataflow.setId(dataflowId);
@@ -106,27 +110,32 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     // load old relationship
-    Representative dataflowRepresentative =
+    Representative representative =
         representativeRepository.findById(representativeVO.getId()).orElse(null);
-    if (dataflowRepresentative == null) {
+    if (representative == null) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
-    // update changes on first level
-    if (representativeVO.getProviderAccount() != null) {
-      dataflowRepresentative.setUserMail(representativeVO.getProviderAccount());
-    }
-    if (representativeVO.getDataProviderId() != null) {
-      DataProvider dataProvider = new DataProvider();
-      dataProvider.setId(representativeVO.getDataProviderId());
-      dataflowRepresentative.setDataProvider(dataProvider);
-    }
-    // save changes
-    if (existsUserMail(dataflowRepresentative.getDataProvider().getId(),
-        dataflowRepresentative.getUserMail())) {
+    if (existsUserMail(
+        representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()
+            : representative.getDataProvider().getId(),
+        representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
+            : representative.getUserMail(),
+        representative.getDataflow().getId())) {
+      LOG.error("duplicado");
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    } else {
+      // update changes on first level
+      if (representativeVO.getProviderAccount() != null) {
+        representative.setUserMail(representativeVO.getProviderAccount());
+      }
+      if (representativeVO.getDataProviderId() != null) {
+        DataProvider dataProvider = new DataProvider();
+        dataProvider.setId(representativeVO.getDataProviderId());
+        representative.setDataProvider(dataProvider);
+      }
+      // save changes
+      return representativeRepository.save(representative).getId();
     }
-    LOG.info("updating the representative relation");
-    return representativeRepository.save(dataflowRepresentative).getId();
   }
 
   /**
@@ -181,15 +190,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    *
    * @param dataProviderId the data provider id
    * @param userMail the user mail
+   * @param dataflowId the dataflow id
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  @Override
-  public boolean existsUserMail(Long dataProviderId, String userMail) throws EEAException {
+  private boolean existsUserMail(Long dataProviderId, String userMail, Long dataflowId)
+      throws EEAException {
     if (dataProviderId == null || StringUtils.isBlank(userMail)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
-    return representativeRepository.existsByDataProviderIdAndUserMail(dataProviderId, userMail);
+    return representativeRepository
+        .findBydataProviderIdAnduserMailAnddataflowId(dataProviderId, userMail, dataflowId)
+        .isPresent();
   }
 
 }
