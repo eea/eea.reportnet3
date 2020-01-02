@@ -33,7 +33,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
       payload: { responseAllDataProviders }
     });
   } catch (error) {
-    console.log('error', error);
+    console.log('error on RepresentativeService.allDataProviders', error);
   }
 };
 
@@ -139,20 +139,6 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     }
   });
 
-  /*  if (isChangedAccount) {
-    formState.initialRepresentatives.forEach(initialRepresentative => {
-      if (
-        initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-        initialRepresentative.providerAccount === updatedRepresentative.providerAccount
-      ) {
-        formDispatcher({
-          type: 'REPRESENTATIVE_HAS_NO_ERROR',
-          payload: { representativeId: updatedRepresentative.representativeId }
-        });
-      }
-    });
-  } */
-
   if (isChangedAccount) {
     try {
       await RepresentativeService.updateProviderAccount(
@@ -164,10 +150,13 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       });
     } catch (error) {
       console.log('error on RepresentativeService.updateProviderAccount', error);
-      formDispatcher({
-        type: 'REPRESENTATIVE_HAS_ERROR',
-        payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
-      });
+
+      if (error.response.status === 404 /* || error.response.status === 500 */) {
+        formDispatcher({
+          type: 'REPRESENTATIVE_HAS_ERROR',
+          payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
+        });
+      }
     }
   }
 };
