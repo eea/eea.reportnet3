@@ -29,7 +29,7 @@
           "refresh":false
         },
         {
-          "key":"DOCUMENT_UPLOAD_FAILED_EVENT",
+          "key":"UPLOAD_DOCUMENT_FAILED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
@@ -37,7 +37,7 @@
           "refresh":false
         },
         {
-          "key":"DOCUMENT_DELETE_FAILED_EVENT",
+          "key":"DELETE_DOCUMENT_FAILED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
@@ -191,6 +191,27 @@
         {
           "key": "RESTORED_BY_ID_REPORTER_ERROR",
           "refresh":false
+        },
+        {
+          "key":"ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"ADD_DATASET_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },
@@ -232,7 +253,7 @@
           "refresh":false
         },
         {
-          "key":"DOCUMENT_UPLOAD_COMPLETED_EVENT",
+          "key":"UPLOAD_DOCUMENT_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
@@ -240,7 +261,7 @@
           "refresh":false
         },
         {
-          "key":"DOCUMENT_DELETE_COMPLETED_EVENT",
+          "key":"DELETE_DOCUMENT_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
@@ -261,6 +282,10 @@
         },
         {
           "key":"DELETE_TABLE_SCHEMA_COMPLETED_EVENT",
+          "navigateTo":{
+            "section": "DATAFLOW",
+            "parameters":["dataflowId"]
+          },
           "refresh":false
         },
         {
@@ -278,6 +303,27 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key": "ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"ADD_DATASET_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },

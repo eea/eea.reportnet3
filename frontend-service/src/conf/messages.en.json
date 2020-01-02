@@ -317,6 +317,14 @@
 		"deletedByIdReporterError":"Failed deleting snapshot",
 		"allReporterError":"Failed loading snapshot list",
 		"releasedByIdReporterError":"Failed releasing snapshot",
-		"restoredByIdReporterError":"Failed restoring snapshot"
+		"restoredByIdReporterError":"Failed restoring snapshot",
+		"addDatasetSchemaSnapshotCompletedEvent":"Schema snapshot created at <a href='{:navigateTo}'>dataset</a>",
+		"addDatasetSchemaSnapshotFailedEvent":"Failed creating schema snapshot at <a href='{:navigateTo}'>dataset</a>",
+		"addDatasetSnapshotCompletedEvent":"Snapshot created at <a href='{:navigateTo}'>dataset</a>",
+		"addDatasetSnapshotFailedEvent":"Failed creating a snapshot <a href='{:navigateTo}'>dataset</a>",
+		"deleteDocumentCompletedEvent":"document deleted at <a href='{:navigateTo}'>dataflow</a>",
+		"deleteDocumentFailedEvent":"Failed deleting document at <a href='{:navigateTo}'>dataflow</a>",
+		"uploadDocumentFailedEvent":"Failied uploading document at <a href='{:navigateTo}'>dataflow</a>",
+		"uploadDocumentCompletedEvent":"Document uploaded at <a href='{:navigateTo}'>dataflow</a>"
 	}
 }
