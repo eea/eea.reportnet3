@@ -30,7 +30,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
     const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: responseAllDataProviders
+      payload: { responseAllDataProviders }
     });
   } catch (error) {
     console.log('error', error);
@@ -55,7 +55,7 @@ const getProviderTypes = async formDispatcher => {
     const providerTypes = await RepresentativeService.getProviderTypes();
     formDispatcher({
       type: 'GET_PROVIDERS_TYPES_LIST',
-      payload: providerTypes
+      payload: { providerTypes }
     });
   } catch (error) {
     console.log('error on  RepresentativeService.getProviderTypes', error);
@@ -91,9 +91,10 @@ export const onDataProviderIdChange = (formDispatcher, newDataProviderId, repres
 export const onDeleteConfirm = async (formDispatcher, formState) => {
   try {
     await RepresentativeService.deleteById(formState.representativeIdToDelete);
+
     formDispatcher({
       type: 'DELETE_REPRESENTATIVE',
-      payload: formState.representativeIdToDelete
+      payload: { representativeIdToDelete: formState.representativeIdToDelete }
     });
   } catch (error) {
     console.log('error on RepresentativeService.deleteById: ', error);
@@ -141,7 +142,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.log('error on RepresentativeService.updateProviderAccount', error);
       formDispatcher({
         type: 'REPRESENTATIVE_HAS_ERROR',
-        payload: updatedRepresentative.representativeId
+        payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
       });
     }
   }

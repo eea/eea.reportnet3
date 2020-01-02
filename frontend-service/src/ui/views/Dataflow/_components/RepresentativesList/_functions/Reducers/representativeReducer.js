@@ -37,7 +37,9 @@ export const reducer = (state, { type, payload }) => {
     case 'DELETE_REPRESENTATIVE':
       console.log('state.representatives', state.representatives);
 
-      updatedList = state.representatives.filter(representative => representative.representativeId !== payload);
+      updatedList = state.representatives.filter(
+        representative => representative.representativeId !== payload.representativeIdToDelete
+      );
 
       return {
         ...state,
@@ -48,23 +50,28 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
       console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID');
-      const providersNoSelect = [...payload];
+      const providersNoSelect = [...payload.responseAllDataProviders];
 
-      if (state.representatives.length <= payload.length) {
-        payload.unshift({ dataProviderId: '', label: 'Select...' });
+      if (state.representatives.length <= payload.responseAllDataProviders.length) {
+        payload.responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
       }
 
-      return { ...state, allPossibleDataProviders: payload, allPossibleDataProvidersNoSelect: providersNoSelect };
+      return {
+        ...state,
+        allPossibleDataProviders: payload.responseAllDataProviders,
+        allPossibleDataProvidersNoSelect: providersNoSelect
+      };
 
     case 'GET_PROVIDERS_TYPES_LIST':
       console.log('GET_PROVIDERS_TYPES_LIST');
 
-      return { ...state, dataProvidersTypesList: payload };
+      return { ...state, dataProvidersTypesList: payload.providerTypes };
 
     case 'REPRESENTATIVE_HAS_ERROR':
       console.log('REPRESENTATIVE_HAS_ERROR');
+
       let inputsWithErrors = state.representativeHasError;
-      inputsWithErrors.unshift(payload);
+      inputsWithErrors.unshift(payload.representativeIdThatHasError);
 
       return { ...state, representativeHasError: inputsWithErrors };
 
