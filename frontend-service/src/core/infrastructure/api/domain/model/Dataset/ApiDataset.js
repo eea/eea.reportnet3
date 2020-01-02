@@ -448,10 +448,9 @@ export const apiDataset = {
         url: window.env.REACT_APP_JSON
           ? `/${datasetId}/datasetSchema/updateDatasetSchemaDescription`
           : getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
-              datasetId,
-              datasetSchemaDescription
+              datasetId
             }),
-        data: {},
+        data: { description: datasetSchemaDescription },
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
