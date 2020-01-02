@@ -19,7 +19,7 @@
     "orderFieldSchemaDesign":"/dataschema/{:datasetId}/fieldSchema/order",
     "orderTableSchemaDesign":"/dataschema/{:datasetId}/tableSchema/order",
     "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
-    "updateDatasetSchemaDescriptionDesign":"/dataschema/{:datasetId}/datasetSchema?description={:datasetSchemaDescription}",
+    "updateDatasetSchemaDescriptionDesign":"/dataschema/{:datasetId}/datasetSchema",
     "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
