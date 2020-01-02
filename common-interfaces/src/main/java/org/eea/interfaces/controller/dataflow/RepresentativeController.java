@@ -36,7 +36,7 @@ public interface RepresentativeController {
    * @return the long
    */
   @PostMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  Long insertRepresentative(@PathVariable("dataflowId") final Long dataflowId,
+  ResponseEntity<?> insertRepresentative(@PathVariable("dataflowId") final Long dataflowId,
       @RequestBody RepresentativeVO representativeVO);
 
   /**

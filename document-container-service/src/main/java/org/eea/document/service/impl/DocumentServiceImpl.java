@@ -3,7 +3,6 @@ package org.eea.document.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
@@ -120,7 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Release finish event
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_COMPLETED_EVENT,
-            new HashMap<String, Object>(),
+            null,
             NotificationVO.builder()
                 .user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
                 .dataflowId(documentVO.getDataflowId()).fileName(fileName).build());
@@ -129,8 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
       }
     } catch (RepositoryException | EEAException e) {
       // Release fail event
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_FAILED_EVENT,
-          new HashMap<String, Object>(),
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_FAILED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
               .fileName(fileName).error(e.getMessage()).build());
@@ -233,15 +231,13 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
 
       // Release finish event
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_COMPLETED_EVENT,
-          new HashMap<String, Object>(),
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_COMPLETED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(dataFlowId).build());
     } catch (Exception e) {
 
       // Release finish event
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT,
-          new HashMap<String, Object>(),
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(dataFlowId).error(e.getMessage()).build());
       LOG_ERROR.error("Error in deleteDocument due to", e);
