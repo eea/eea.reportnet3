@@ -15,6 +15,12 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
       });
     } catch (error) {
       console.log('error on RepresentativeService.add', error);
+      if (error.response.status === 404) {
+        formDispatcher({
+          type: 'REPRESENTATIVE_HAS_ERROR',
+          payload: { representativeIdThatHasError: representatives[representatives.length - 1].representativeId }
+        });
+      }
     }
   }
 };
@@ -151,7 +157,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     } catch (error) {
       console.log('error on RepresentativeService.updateProviderAccount', error);
 
-      if (error.response.status === 404 /* || error.response.status === 500 */) {
+      if (error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
           payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
