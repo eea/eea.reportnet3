@@ -79,7 +79,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void insertRepresentativeSuccessTest() throws EEAException {
-    ResponseEntity<Long> response = new ResponseEntity<>(1L, HttpStatus.OK);
+    ResponseEntity<String> response = new ResponseEntity<>("1", HttpStatus.OK);
     when(userManagementControllerZull.getUsers()).thenReturn(users);
     when(representativeService.insertRepresentative(Mockito.any(), Mockito.any())).thenReturn(1L);
     assertEquals(response, representativeControllerImpl.insertRepresentative(1L, representativeVO));

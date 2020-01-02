@@ -61,27 +61,35 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{dataflowId}")
   public ResponseEntity<?> insertRepresentative(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
     List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
+    String message;
+    HttpStatus status = HttpStatus.OK;
     UserRepresentationVO userRepresentationVO =
         users.stream().filter(user -> representativeVO.getProviderAccount().equals(user.getEmail()))
             .findFirst().orElse(null);
     if (userRepresentationVO == null) {
-      return new ResponseEntity<>(EEAErrorMessage.USER_REQUEST_NOTFOUND, HttpStatus.NOT_FOUND);
-    }
-    try {
-      return new ResponseEntity<>(
-          representativeService.insertRepresentative(dataflowId, representativeVO), HttpStatus.OK);
-    } catch (EEAException e) {
-      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
-        LOG_ERROR.error("Duplicated representative relationship", e.getCause());
-        return new ResponseEntity<>(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, HttpStatus.CONFLICT);
+      message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
+      status = HttpStatus.NOT_FOUND;
+    } else {
+      try {
+        message = String
+            .valueOf(representativeService.insertRepresentative(dataflowId, representativeVO));
+      } catch (EEAException e) {
+        if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
+          LOG_ERROR.error("Duplicated representative relationship", e.getCause());
+          message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
+          status = HttpStatus.CONFLICT;
+        } else {
+          LOG_ERROR.error("Bad Request", e.getCause());
+          message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
+          status = HttpStatus.BAD_REQUEST;
+        }
       }
-      LOG_ERROR.error("Bad Request", e.getCause());
-      return new ResponseEntity<>(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, HttpStatus.BAD_REQUEST);
     }
+    return new ResponseEntity<>(message, status);
   }
 
   /**
@@ -148,26 +156,34 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PutMapping(value = "/update")
   public ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
+    String message = null;
+    HttpStatus status = HttpStatus.OK;
     if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()
           .filter(user -> representativeVO.getProviderAccount().equals(user.getEmail())).findFirst()
           .orElse(null);
       if (userRepresentationVO == null) {
-        return new ResponseEntity<>(EEAErrorMessage.USER_REQUEST_NOTFOUND, HttpStatus.NOT_FOUND);
+        message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
+        status = HttpStatus.NOT_FOUND;
       }
     }
     try {
-      return new ResponseEntity<>(
-          representativeService.updateDataflowRepresentative(representativeVO), HttpStatus.OK);
+      message = message == null
+          ? String.valueOf(representativeService.updateDataflowRepresentative(representativeVO))
+          : message;
     } catch (EEAException e) {
       if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
         LOG_ERROR.error("Duplicated representative relationship", e.getCause());
-        return new ResponseEntity<>(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, HttpStatus.CONFLICT);
+        message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
+        status = HttpStatus.CONFLICT;
+      } else {
+        LOG_ERROR.error("Bad Request", e.getCause());
+        message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
+        status = HttpStatus.BAD_REQUEST;
       }
-      LOG_ERROR.error("Bad Request", e.getCause());
-      return new ResponseEntity<>(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, HttpStatus.BAD_REQUEST);
     }
+    return new ResponseEntity<>(message, status);
   }
 
   /**
