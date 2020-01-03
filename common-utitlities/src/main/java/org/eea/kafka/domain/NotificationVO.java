@@ -30,11 +30,20 @@ public class NotificationVO implements Serializable {
   /** The dataset id. */
   private Long datasetId;
 
+  /** The dataset name. */
+  private String datasetName;
+
   /** The dataflow id. */
   private Long dataflowId;
 
+  /** The dataflow name. */
+  private String dataflowName;
+
   /** The table schema id. */
   private String tableSchemaId;
+
+  /** The table schema name. */
+  private String tableSchemaName;
 
   /** The file name. */
   private String fileName;
