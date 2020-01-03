@@ -771,6 +771,7 @@ const DataViewer = withRouter(
         <ActionsToolbar
           colsSchema={colsSchema}
           datasetId={datasetId}
+          dataflowId={dataflowId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
           isWebFormMMR={isWebFormMMR}

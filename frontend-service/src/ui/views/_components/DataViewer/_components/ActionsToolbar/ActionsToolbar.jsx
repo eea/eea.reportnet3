@@ -22,6 +22,7 @@ import { DatasetService } from 'core/services/Dataset';
 const ActionsToolbar = ({
   colsSchema,
   datasetId,
+  dataflowId,
   hasWritePermissions,
   isFilterValidationsActive,
   isWebFormMMR,
@@ -83,10 +84,15 @@ const ActionsToolbar = ({
       setExportTableDataName(createTableName(tableName, fileType));
       setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
     } catch (error) {
-      console.error(error);
+      const datasetMetadata = await DatasetService.getMetaData(datasetId);
       notificationContext.add({
         type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
-        content: {}
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: datasetMetadata.datasetSchemaName,
+          tableName
+        }
       });
     } finally {
       setIsLoadingFile(false);
