@@ -16,7 +16,6 @@ import { BigButton } from './_components/BigButton';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { ContributorsList } from './_components/ContributorsList';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
@@ -24,6 +23,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
+import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -57,7 +57,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
+  const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
@@ -262,14 +262,6 @@ const Dataflow = withRouter(({ history, match }) => {
         ]
       : [
           {
-            label: resources.messages['manageRoles'],
-            icon: 'users',
-            show: hasWritePermissions,
-            command: () => {
-              showContributorsDialog();
-            }
-          },
-          {
             label: resources.messages['settings'],
             icon: 'settings',
             show: true,
@@ -341,7 +333,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const showContributorsDialog = () => {
-    setIsActiveContributorsDialog(true);
+    setIsActiveManageRolesDialog(true);
   };
 
   const showNewDatasetDialog = () => {
@@ -354,6 +346,18 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
+
+  const closeManageRolesDialog = (
+    <div>
+      <Button
+        className="p-button-primary"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsActiveManageRolesDialog(false)}
+      />
+    </div>
+  );
+
   const onReleaseSnapshot = async snapshotId => {
     try {
       await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
@@ -419,7 +423,7 @@ const Dataflow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} />
+            <DropdownButton icon="ellipsis" model={dropDownItems} disabled={false} />
           </div>
         </div>
 
@@ -628,12 +632,13 @@ const Dataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages['dataProviderManageContributorsDialogTitle']} "${dataflowData.name}"`}
-          visible={isActiveContributorsDialog}
-          onHide={() => setIsActiveContributorsDialog(false)}
+          header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          footer={closeManageRolesDialog}
+          visible={isActiveManageRolesDialog}
+          onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <ContributorsList dataflowId={dataflowData.id} />
+          <RepresentativesList dataflowId={dataflowData.id} />
         </Dialog>
 
         <Dialog
@@ -787,31 +792,35 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        <ConfirmDialog
-          header={resources.messages['delete'].toUpperCase()}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
-          onConfirm={() => onDeleteDataflow()}
-          onHide={onHideDeleteDataflowDialog}
-          styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
-          visible={isDeleteDialogVisible}>
-          <p>{resources.messages['deleteDataflow']}</p>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                dataflowName: dataflowState[match.params.dataflowId].name
-              })
-            }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              onChange={e => onChangeDataflowName(e)}
-              value={dataflowTitle}
-            />
-          </p>
-        </ConfirmDialog>
+        {!isUndefined(dataflowState) ? (
+          <ConfirmDialog
+            header={resources.messages['delete'].toUpperCase()}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+            onConfirm={() => onDeleteDataflow()}
+            onHide={onHideDeleteDataflowDialog}
+            styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
+            visible={isDeleteDialogVisible}>
+            <p>{resources.messages['deleteDataflow']}</p>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+                  dataflowName: dataflowState[match.params.dataflowId].name
+                })
+              }}></p>
+            <p>
+              <InputText
+                autoFocus={true}
+                className={`${styles.inputText}`}
+                onChange={e => onChangeDataflowName(e)}
+                value={dataflowTitle}
+              />
+            </p>
+          </ConfirmDialog>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );
