@@ -1,6 +1,14 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -16,27 +24,48 @@ public interface DatasetCodelistController {
 
   }
 
-  // @GetMapping(value = "/{idDataset}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
-  // List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
-  //
-  // @PostMapping(value = "/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  // void createSnapshot(@PathVariable("idDataset") Long datasetId,
-  // @RequestParam("description") String description);
-  //
-  // @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  // void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
-  // @PathVariable("idSnapshot") Long idSnapshot);
-  //
-  //
-  // @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
-  // produces = MediaType.APPLICATION_JSON_VALUE)
-  // List<SnapshotVO> getSchemaSnapshotsByIdDataset(@PathVariable("idDesignDataset") Long
-  // datasetId);
-  //
-  //
-  // @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
-  // void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
-  // @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
+  /**
+   * Gets the by id.
+   *
+   * @param codelistId the codelist id
+   * @return the by id
+   */
+  @GetMapping(value = "/{codelistId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  CodelistVO getById(@PathVariable("codelistId") Long codelistId);
 
+  /**
+   * Creates the.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
+  @PostMapping
+  Long create(@RequestBody CodelistVO codelistVO);
 
+  /**
+   * Update.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
+  @PutMapping(value = "/update")
+  Long update(@RequestBody CodelistVO codelistVO);
+
+  /**
+   * Clone.
+   *
+   * @param codelistId the codelist id
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
+  @PostMapping(value = "/clone/{codelistId}")
+  Long clone(@PathVariable("codelistId") Long codelistId, @RequestBody CodelistVO codelistVO);
+
+  /**
+   * Delete document.
+   *
+   * @param codelistId the codelist id
+   */
+  @DeleteMapping(value = "/{codelistId}")
+  void deleteDocument(@PathVariable("codelistId") Long codelistId);
 }
