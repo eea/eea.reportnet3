@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
 import { isEmpty, isNull } from 'lodash';
+import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
@@ -110,7 +111,7 @@ const RepresentativesList = ({ dataflowId }) => {
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
-              <option key={`${provider.dataProviderId}`} className="p-dropdown-item" value={provider.dataProviderId}>
+              <option key={uuid.v4()} className="p-dropdown-item" value={provider.dataProviderId}>
                 {provider.label}
               </option>
             );

@@ -792,31 +792,35 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        <ConfirmDialog
-          header={resources.messages['delete'].toUpperCase()}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
-          onConfirm={() => onDeleteDataflow()}
-          onHide={onHideDeleteDataflowDialog}
-          styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
-          visible={isDeleteDialogVisible}>
-          <p>{resources.messages['deleteDataflow']}</p>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                dataflowName: dataflowState[match.params.dataflowId].name
-              })
-            }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              onChange={e => onChangeDataflowName(e)}
-              value={dataflowTitle}
-            />
-          </p>
-        </ConfirmDialog>
+        {!isUndefined(dataflowState) ? (
+          <ConfirmDialog
+            header={resources.messages['delete'].toUpperCase()}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+            onConfirm={() => onDeleteDataflow()}
+            onHide={onHideDeleteDataflowDialog}
+            styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
+            visible={isDeleteDialogVisible}>
+            <p>{resources.messages['deleteDataflow']}</p>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+                  dataflowName: dataflowState[match.params.dataflowId].name
+                })
+              }}></p>
+            <p>
+              <InputText
+                autoFocus={true}
+                className={`${styles.inputText}`}
+                onChange={e => onChangeDataflowName(e)}
+                value={dataflowTitle}
+              />
+            </p>
+          </ConfirmDialog>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );
