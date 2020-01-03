@@ -118,7 +118,11 @@
         },
         {
           "key":"EXPORT_TABLE_DATA_BY_ID_ERROR",
-          "refresh":false
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         },
         {
           "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
@@ -211,6 +215,13 @@
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DATAFLOW_UPDATING_ERROR",
+          "navigateTo":{
+            "section":"DATAFLOWS",
+            "parameters":["dataflowName"]
           }
         }
       ]

@@ -91,10 +91,21 @@ const DataflowManagementForm = ({
             : await DataflowService.create(values.name, values.description);
           isEditForm ? onEdit(dataflowId, values.name, values.description) : onCreate();
         } catch (error) {
-          notificationContext.add({
-            type: 'DATAFLOW_CREATION_ERROR',
-            content: {}
-          });
+          const notification = isEditForm
+            ? {
+                type: 'DATAFLOW_UPDATING_ERROR',
+                content: {
+                  dataflowId,
+                  dataflowName: values.name
+                }
+              }
+            : {
+                type: 'DATAFLOW_CREATION_ERROR',
+                content: {
+                  dataflowName: values.name
+                }
+              };
+          notificationContext.add(notification);
         } finally {
           setSubmitting(false);
         }
