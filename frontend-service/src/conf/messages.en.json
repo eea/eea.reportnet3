@@ -126,6 +126,7 @@
 		"duplicatedTabHeaderError": "The table name already exists in the schema, please select another one.",
 		"ds": "DS",
 		"edit": "Edit",
+		"editCategory": "Edit category",
 		"editDocument": "Edit document",
 		"editItem": "Edit item",
 		"editRow": "Edit row",

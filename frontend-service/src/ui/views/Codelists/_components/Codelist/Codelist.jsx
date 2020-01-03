@@ -224,7 +224,7 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
         ) : null}
         <Button
           label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
-          icon={codelistState.isEditing ? 'save' : 'add'}
+          icon={codelistState.isEditing ? 'save' : 'pencil'}
           onClick={() => onEditCodelistClick()}
           style={{ marginLeft: 'auto', marginRight: '0.5rem' }}
         />

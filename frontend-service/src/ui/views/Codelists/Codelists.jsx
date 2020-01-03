@@ -175,6 +175,16 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
             className={styles.categoryExpandable}
             expanded={true}
             items={[category.name, category.description]}>
+            {isDataCustodian ? (
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  label={resources.messages['editCategory']}
+                  icon="pencil"
+                  onClick={() => setNewCategoryVisible(true)}
+                  style={{ float: 'right' }}
+                />
+              </div>
+            ) : null}
             <div className={styles.codelists}>
               {category.codelists.map(codelist => {
                 return <Codelist codelist={codelist} />;

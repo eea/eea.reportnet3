@@ -31,7 +31,7 @@ const CodelistsForm = ({ newCategory, columns, onChangeCategoryForm, onHideDialo
           <InputText
             id={`${column}Input`}
             onChange={e => onChangeCategoryForm(column, e.target.value)}
-            required={true}
+            // required={true}
             value={
               isUndefined(newCategory) || isNull(newCategory[column]) || isUndefined(newCategory[column])
                 ? ''
