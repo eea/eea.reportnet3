@@ -45,8 +45,7 @@ const add = async (dataflowId, providerAccount, dataProviderId) => {
 };
 
 const deleteById = async representativeId => {
-  const dataDeleted = await apiRepresentative.deleteById(representativeId);
-  return dataDeleted;
+  return await apiRepresentative.deleteById(representativeId);
 };
 
 const updateProviderAccount = async (representativeId, providerAccount) => {

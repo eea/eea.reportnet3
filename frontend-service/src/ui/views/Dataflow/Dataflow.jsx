@@ -262,14 +262,6 @@ const Dataflow = withRouter(({ history, match }) => {
         ]
       : [
           {
-            label: resources.messages['manageRoles'],
-            icon: 'users',
-            show: hasWritePermissions,
-            command: () => {
-              showContributorsDialog();
-            }
-          },
-          {
             label: resources.messages['settings'],
             icon: 'settings',
             show: true,

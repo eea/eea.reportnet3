@@ -9,8 +9,6 @@ export const reducer = (state, { type, payload }) => {
 
   switch (type) {
     case 'ADD_REPRESENTATIVE':
-      console.log('ADD_REPRESENTATIVE');
-
       return {
         ...state,
 
@@ -18,8 +16,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
-      console.log('CREATE_UNUSED_OPTIONS_LIST');
-
       const unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
         let result = true;
 
@@ -35,8 +31,6 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      console.log('state.representatives', state.representatives);
-
       updatedList = state.representatives.filter(
         representative => representative.representativeId !== payload.representativeIdToDelete
       );
@@ -49,7 +43,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      console.log('GET_DATA_PROVIDERS_LIST_BY_GROUP_ID');
       const providersNoSelect = [...payload.responseAllDataProviders];
 
       if (state.representatives.length <= payload.responseAllDataProviders.length) {
@@ -63,21 +56,15 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_PROVIDERS_TYPES_LIST':
-      console.log('GET_PROVIDERS_TYPES_LIST');
-
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
     case 'REPRESENTATIVE_HAS_ERROR':
-      console.log('REPRESENTATIVE_HAS_ERROR');
-
       let inputsWithErrors = state.representativeHasError;
       inputsWithErrors.unshift(payload.representativeIdThatHasError);
 
       return { ...state, representativeHasError: inputsWithErrors };
 
     case 'REPRESENTATIVE_HAS_NO_ERROR':
-      console.log('REPRESENTATIVE_HAS_NO_ERROR');
-
       const filteredInputsWithErrors = state.representativeHasError.filter(
         representativeId => representativeId !== payload.representativeId
       );
@@ -85,7 +72,6 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, representativeHasError: filteredInputsWithErrors };
 
     case 'HIDE_CONFIRM_DIALOG':
-      console.log('HIDE_CONFIRM_DIALOG');
       return {
         ...state,
         isVisibleConfirmDeleteDialog: false,
@@ -93,8 +79,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
-      console.log('INITIAL_LOAD');
-
       const group = state.dataProvidersTypesList.filter(
         dataProviderType => dataProviderType.dataProviderGroupId === payload.response.group.dataProviderGroupId
       );
@@ -112,8 +96,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'UPDATE_ACCOUNT':
-      console.log('UPDATE_ACCOUNT');
-
       return {
         ...state,
 
@@ -121,8 +103,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'UPDATE_DATA_PROVIDER':
-      console.log('UPDATE_DATA_PROVIDER');
-
       return {
         ...state,
 
@@ -130,8 +110,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_ACCOUNT_CHANGE':
-      console.log('ON_ACCOUNT_CHANGE');
-
       updatedList = state.representatives.map(representative => {
         if (representative.dataProviderId === payload.dataProviderId) {
           representative.providerAccount = payload.providerAccount;
@@ -145,8 +123,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_PROVIDER_CHANGE':
-      console.log('ON_PROVIDER_CHANGE ');
-
       updatedList = state.representatives.map(representative => {
         if (representative.representativeId === payload.representativeId) {
           representative.dataProviderId = payload.dataProviderId;
@@ -167,14 +143,12 @@ export const reducer = (state, { type, payload }) => {
       }
 
     case 'SELECT_PROVIDERS_TYPE':
-      console.log('SELECT_PROVIDERS_TYPE ');
       return {
         ...state,
         selectedDataProviderGroup: payload
       };
 
     case 'SHOW_CONFIRM_DIALOG':
-      console.log('SHOW_CONFIRM_DIALOG');
       return {
         ...state,
         isVisibleConfirmDeleteDialog: true,
