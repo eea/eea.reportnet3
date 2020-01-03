@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,6 +34,9 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @HystrixCommand
   @GetMapping(value = "/{codelistId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public CodelistVO getById(Long codelistId) {
+    if (codelistId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
     CodelistVO codelistVO = new CodelistVO();
     try {
       codelistVO = codelistService.getById(codelistId);
@@ -44,26 +49,60 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   }
 
   @Override
+  @HystrixCommand
+  @PostMapping
   public Long create(CodelistVO codelistVO) {
-    // TODO Auto-generated method stub
-    return null;
+    if (codelistVO == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    Long response;
+    try {
+      response = codelistService.create(codelistVO, null);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    return response;
   }
 
   @Override
   public Long update(CodelistVO codelistVO) {
-    // TODO Auto-generated method stub
-    return null;
+    if (codelistVO == null || codelistVO.getId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    Long response;
+    try {
+      response = codelistService.update(codelistVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    return response;
   }
 
   @Override
   public Long clone(Long codelistId, CodelistVO codelistVO) {
-    // TODO Auto-generated method stub
-    return null;
+    if (codelistVO == null || codelistId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    Long response;
+    try {
+      response = codelistService.create(codelistVO, codelistId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    return response;
   }
 
   @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{codelistId}")
   public void deleteDocument(Long codelistId) {
-    // TODO Auto-generated method stub
+    if (codelistId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    codelistService.delete(codelistId);
   }
 
 }

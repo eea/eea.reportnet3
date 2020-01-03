@@ -17,4 +17,28 @@ public interface CodelistService {
    */
   CodelistVO getById(Long codelistId) throws EEAException;
 
+  /**
+   * Delete.
+   *
+   * @param codelistId the codelist id
+   */
+  void delete(Long codelistId);
+
+  /**
+   * Creates the.
+   *
+   * @param codelistVO the codelist VO
+   * @param codelistId the codelist id
+   */
+  Long create(CodelistVO codelistVO, Long codelistId) throws EEAException;
+
+  /**
+   * Update.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long update(CodelistVO codelistVO) throws EEAException;
+
 }
