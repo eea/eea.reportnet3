@@ -1,5 +1,7 @@
-import React, { useContext } from 'react';
-import { capitalize, isNull } from 'lodash';
+import React, { useContext, useEffect } from 'react';
+import { capitalize, isNull, isUndefined } from 'lodash';
+
+import styles from './CodelistForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -12,12 +14,18 @@ const CodelistForm = ({
   formType,
   onCancelAddEditItem,
   onChangeItemForm,
+  onFormLoaded,
   onHideDialog,
   onSaveItem,
-  items,
+  item,
   visible
 }) => {
   const resources = useContext(ResourcesContext);
+
+  useEffect(() => {
+    onFormLoaded();
+    console.log('LOADED');
+  }, []);
 
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -25,7 +33,7 @@ const CodelistForm = ({
         label={resources.messages['save']}
         icon="save"
         onClick={() => {
-          onSaveItem();
+          onSaveItem(formType);
         }}
       />
       <Button
@@ -39,20 +47,19 @@ const CodelistForm = ({
     </div>
   );
 
-  const newCodelistForm = columns.map((column, i) => {
-    //   if (i < colsSchema.length - 2) {
-    console.log({ items });
-    // const field = items[column];
+  const addEditCodelistForm = columns.map((column, i) => {
+    console.log({ item });
     return (
       <React.Fragment key={column}>
-        <div className="p-col-4" style={{ padding: '.75em' }}>
-          <label htmlFor={column}>{capitalize(column)}</label>
-        </div>
-        <div className="p-col-8" style={{ padding: '.5em' }}>
-          <InputText id={column} onChange={e => onChangeItemForm(column, e.target.value, formType)} />
-        </div>
+        <span className={`${styles.codelistInput} p-float-label`}>
+          <InputText
+            id={`${column}Input`}
+            onChange={e => onChangeItemForm(column, e.target.value, formType)}
+            value={isUndefined(item) || isNull(item[column]) || isUndefined(item[column]) ? '' : item[column]}
+          />
+          <label htmlFor={`${column}Input`}>{capitalize(column)}</label>
+        </span>
       </React.Fragment>
-      //   }
     );
   });
 
@@ -62,12 +69,12 @@ const CodelistForm = ({
       blockScroll={false}
       contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
       footer={codelistDialogFooter}
-      header={formType === 'EDIT' ? resources.messages['editRow'] : resources.messages['addNewRow']}
+      header={formType === 'EDIT' ? resources.messages['editItem'] : resources.messages['addNewItem']}
       modal={true}
       onHide={() => onHideDialog()}
-      style={{ width: '50%', height: '80%' }}
+      style={{ width: '50%' }}
       visible={visible}>
-      <div className="p-grid p-fluid"> {formType === 'EDIT' ? newCodelistForm : newCodelistForm}</div>
+      <div className="p-grid p-fluid"> {addEditCodelistForm}</div>
     </Dialog>
   );
 
