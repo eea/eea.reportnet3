@@ -128,6 +128,9 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 
+  /** The Constant CODELIST_NOT_FOUND. */
+  public static final String CODELIST_NOT_FOUND = "Codelist not found";
+
   /**
    * Instantiates a new EEA error message.
    */
