@@ -459,7 +459,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/{datasetId}/datasetSchema")
   public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("description") String description) {
+      @RequestBody(required = false) String description) {
     try {
       if (!dataschemaService.updateDatasetSchemaDescription(
           dataschemaService.getDatasetSchemaId(datasetId), description)) {

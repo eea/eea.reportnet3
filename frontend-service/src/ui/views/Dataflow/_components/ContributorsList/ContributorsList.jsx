@@ -15,11 +15,14 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ContributorService } from 'core/services/Contributor';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export function ContributorsList({ dataflowId }) {
+export const ContributorsList = ({ dataflowId }) => {
   const resources = useContext(ResourcesContext);
   const [contributorsArray, setContributorsArray] = useState([]);
 
-  const rolesList = [{ roleLabel: 'Read only', role: 'read' }, { roleLabel: 'Read/Write', role: 'read_write' }];
+  const rolesList = [
+    { roleLabel: 'Read only', role: 'read' },
+    { roleLabel: 'Read/Write', role: 'read_write' }
+  ];
 
   const loadContributorsList = async () => {
     setContributorsArray(await ContributorService.all(dataflowId));
@@ -40,7 +43,7 @@ export function ContributorsList({ dataflowId }) {
   const onContributorDelete = async contributorId => {
     await ContributorService.deleteById(dataflowId, contributorId);
   };
-  /* #region Actions Reducer */
+
   const initialState = { role: '', contributorId: '' };
 
   const roleReducer = (state, action) => {
@@ -79,9 +82,7 @@ export function ContributorsList({ dataflowId }) {
     }
   };
   const [contributorState, contributorDispatcher] = useReducer(roleReducer, initialState);
-  /* #endregion */
 
-  /* #region ROLES */
   useEffect(() => {
     loadContributorsList();
   }, [contributorState]);
@@ -116,9 +117,7 @@ export function ContributorsList({ dataflowId }) {
       </>
     );
   };
-  /* #endregion */
 
-  /* #region DELETE */
   const deleteBtnColumnTemplate = rowData => {
     return (
       <>
@@ -127,7 +126,7 @@ export function ContributorsList({ dataflowId }) {
           tooltipOptions={{ position: 'right' }}
           icon="trash"
           disabled={false}
-          className={`${styles.btn} rp-btn warning`}
+          className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
           onClick={e => {
             contributorDispatcher({ type: 'DELETE_CONTRIBUTOR', payload: rowData.id });
           }}
@@ -135,20 +134,16 @@ export function ContributorsList({ dataflowId }) {
       </>
     );
   };
-  /* #endregion */
 
-  /* #region ADD */
   const actualContributorsLoginsList = contributorsArray.map(contributor => contributor.login);
 
   const addContributorValidationSchema = Yup.object().shape({
     addContributorLogin: Yup.string()
       .min(6, resources.messages.contributorLoginValidationMin)
-      .max(50, resources.messages.contributorLoginValidationMax)
-      .required(resources.messages.contributorLoginValidationRequired)
-      .notOneOf(actualContributorsLoginsList, resources.messages.contributorLoginValidationIsInList),
-    newContributorRole: Yup.string().required(resources.messages.contributorRoleValidationIsRequired)
+      .required(' ')
+      .notOneOf(actualContributorsLoginsList, ' '),
+    newContributorRole: Yup.string().required(' ')
   });
-  /* #endregion */
 
   return (
     <>
@@ -212,4 +207,4 @@ export function ContributorsList({ dataflowId }) {
       </DataTable>
     </>
   );
-}
+};

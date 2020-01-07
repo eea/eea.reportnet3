@@ -961,4 +961,19 @@ public class DatasetSchemaServiceTest {
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
   }
+
+  @Test
+  public void getTableSchemaNameTest1() {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(tableSchema);
+    Mockito.when(tableSchema.get(Mockito.any())).thenReturn("nameTableSchema");
+    Assert.assertEquals("nameTableSchema",
+        dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
+  }
+
+  @Test
+  public void getTableSchemaNameTest2() {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
+  }
 }

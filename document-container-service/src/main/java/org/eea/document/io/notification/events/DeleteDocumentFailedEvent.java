@@ -3,9 +3,11 @@ package org.eea.document.io.notification.events;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +15,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DeleteDocumentFailedEvent implements NotificableEventHandler {
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Gets the event type.
@@ -36,6 +42,9 @@ public class DeleteDocumentFailedEvent implements NotificableEventHandler {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", notificationVO.getDataflowId());
+    notification.put("dataflowName",
+        notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
+            : dataflowControllerZuul.findById(notificationVO.getDataflowId()).getName());
     notification.put("error", notificationVO.getError());
     return notification;
   }
