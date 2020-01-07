@@ -54,7 +54,7 @@ import com.google.common.collect.Lists;
 /**
  * The type Dataschema service.
  */
-@Service("datachemaService")
+@Service("dataschemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /**
@@ -818,5 +818,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description) {
     return schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description)
         .getModifiedCount() == 1;
+  }
+
+  /**
+   * Gets the table schema name.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the table schema name
+   */
+  @Override
+  public String getTableSchemaName(String datasetSchemaId, String tableSchemaId) {
+    Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+    if (tableSchema != null) {
+      return (String) tableSchema.get("nameTableSchema");
+    }
+    return null;
   }
 }
