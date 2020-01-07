@@ -68,8 +68,7 @@ const deleteRecordFieldDesign = async (datasetId, recordId) => {
 };
 
 const deleteRecordById = async (datasetId, recordId) => {
-  const recordDeleted = await apiDataset.deleteRecordById(datasetId, recordId);
-  return recordDeleted;
+  return await apiDataset.deleteRecordById(datasetId, recordId);
 };
 
 const deleteSchemaById = async datasetId => {
@@ -77,8 +76,7 @@ const deleteSchemaById = async datasetId => {
 };
 
 const deleteTableDataById = async (datasetId, tableId) => {
-  const dataDeleted = await apiDataset.deleteTableDataById(datasetId, tableId);
-  return dataDeleted;
+  return await apiDataset.deleteTableDataById(datasetId, tableId);
 };
 
 const deleteTableDesign = async (datasetId, tableSchemaId) => {
