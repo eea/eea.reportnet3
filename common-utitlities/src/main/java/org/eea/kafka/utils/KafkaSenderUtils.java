@@ -68,8 +68,11 @@ public class KafkaSenderUtils {
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception
    */
-  public void releaseNotificableKafkaEvent(final EventType eventType,
-      final Map<String, Object> value, final NotificationVO notificationVO) throws EEAException {
+  public void releaseNotificableKafkaEvent(final EventType eventType, Map<String, Object> value,
+      final NotificationVO notificationVO) throws EEAException {
+    if (value == null) {
+      value = new HashMap<>();
+    }
     value.put("notification",
         notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO));
     releaseKafkaEvent(eventType, value);
