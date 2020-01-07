@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -78,10 +79,10 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void insertRepresentativeSuccessTest() throws EEAException {
+    ResponseEntity<String> response = new ResponseEntity<>("1", HttpStatus.OK);
     when(userManagementControllerZull.getUsers()).thenReturn(users);
     when(representativeService.insertRepresentative(Mockito.any(), Mockito.any())).thenReturn(1L);
-    assertEquals((Long) 1L,
-        representativeControllerImpl.insertRepresentative(1L, representativeVO));
+    assertEquals(response, representativeControllerImpl.insertRepresentative(1L, representativeVO));
   }
 
   /**
@@ -114,6 +115,24 @@ public class RepresentativeControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Insert representative exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void insertRepresentativeException3Test() throws EEAException {
+    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    when(representativeService.insertRepresentative(Mockito.any(), Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
+    try {
+      representativeControllerImpl.insertRepresentative(1L, representativeVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
     }
   }
 
@@ -249,6 +268,24 @@ public class RepresentativeControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Update representative exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateRepresentativeException3Test() throws EEAException {
+    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    when(representativeService.updateDataflowRepresentative(Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
+    try {
+      representativeControllerImpl.updateRepresentative(representativeVO);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
     }
   }
 

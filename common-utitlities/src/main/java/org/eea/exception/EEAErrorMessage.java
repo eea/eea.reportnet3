@@ -125,6 +125,9 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_NOT_FOUND. */
   public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
 
+  /** The Constant REPRESENTATIVE_DUPLICATED. */
+  public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
+
   /**
    * Instantiates a new EEA error message.
    */

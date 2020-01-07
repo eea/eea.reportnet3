@@ -599,7 +599,10 @@ export class Dropdown extends Component {
           ) : null}
           {selectedOption ? (
             selectedOption.fieldTypeIcon ? (
-              <FontAwesomeIcon icon={AwesomeIcons(selectedOption.fieldTypeIcon)} style={{ float: 'right' }} />
+              <FontAwesomeIcon
+                icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
+                style={{ float: 'right', marginTop: '2px' }}
+              />
             ) : null
           ) : null}
         </label>
