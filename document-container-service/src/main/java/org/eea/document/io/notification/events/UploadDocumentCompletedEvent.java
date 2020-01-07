@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * The Class DocumentUploadCompletedEvent.
  */
 @Component
-public class DocumentUploadFailedEvent implements NotificableEventHandler {
+public class UploadDocumentCompletedEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -21,7 +21,7 @@ public class DocumentUploadFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DOCUMENT_UPLOAD_FAILED_EVENT;
+    return EventType.UPLOAD_DOCUMENT_COMPLETED_EVENT;
   }
 
   /**

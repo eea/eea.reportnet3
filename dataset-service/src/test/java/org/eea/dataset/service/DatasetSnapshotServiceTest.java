@@ -29,6 +29,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
@@ -56,6 +57,7 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
@@ -107,6 +109,10 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DatasetSchemaService schemaService;
 
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * Inits the mocks.
    */
@@ -136,18 +142,51 @@ public class DatasetSnapshotServiceTest {
   /**
    * Test add snapshots.
    *
-   * @throws Exception the exception
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void testAddSnapshots() throws Exception {
+  public void addSnapshotTest1() throws EEAException {
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSnapshot(1L, "test");
+    Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
+  }
+
+  /**
+   * Adds the snapshot test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void addSnapshotTest2() throws EEAException {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
     datasetSnapshotService.addSnapshot(1L, "test");
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
+  }
 
+  /**
+   * Adds the snapshot test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void addSnapshotTest3() throws EEAException {
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
+    Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
+        .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSnapshot(1L, "test");
+    Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
   /**
@@ -192,6 +231,11 @@ public class DatasetSnapshotServiceTest {
   }
 
 
+  /**
+   * Release snapshot.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void releaseSnapshot() throws Exception {
 
@@ -201,6 +245,11 @@ public class DatasetSnapshotServiceTest {
   }
 
 
+  /**
+   * Test get schema snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetSchemaSnapshots() throws Exception {
 
@@ -211,8 +260,33 @@ public class DatasetSnapshotServiceTest {
 
   }
 
+  /**
+   * Adds the schema snapshot test 1.
+   *
+   * @throws Exception the exception
+   */
   @Test
-  public void testAddSchemaSnapshots() throws Exception {
+  public void addSchemaSnapshotTest1() throws Exception {
+
+    doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
+    Mockito.verify(snapshotSchemaRepository, times(1)).save(Mockito.any());
+  }
+
+  /**
+   * Adds the schema snapshot test 2.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void addSchemaSnapshotTest2() throws Exception {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
@@ -221,11 +295,17 @@ public class DatasetSnapshotServiceTest {
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
     datasetSnapshotService.addSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
     Mockito.verify(snapshotSchemaRepository, times(1)).save(Mockito.any());
-
   }
 
+  /**
+   * Test delete schema snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteSchemaSnapshots() throws Exception {
 
@@ -236,6 +316,11 @@ public class DatasetSnapshotServiceTest {
 
   }
 
+  /**
+   * Test restore schema snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testRestoreSchemaSnapshots() throws Exception {
 
@@ -252,6 +337,11 @@ public class DatasetSnapshotServiceTest {
   }
 
 
+  /**
+   * Test delete all schema snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteAllSchemaSnapshots() throws Exception {
 
@@ -265,6 +355,11 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(snapshotSchemaMapper, times(1)).entityListToClass(Mockito.any());
   }
 
+  /**
+   * Test delete all schema snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteAllSchemaSnapshotsException() throws Exception {
 
@@ -281,6 +376,11 @@ public class DatasetSnapshotServiceTest {
   }
 
 
+  /**
+   * Test delete all snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteAllSnapshots() throws Exception {
 
@@ -295,6 +395,9 @@ public class DatasetSnapshotServiceTest {
 
 
 
+  /**
+   * After tests.
+   */
   @After
   public void afterTests() {
     File file = new File("./nullschemaSnapshot_null-DesignDataset_1.snap");

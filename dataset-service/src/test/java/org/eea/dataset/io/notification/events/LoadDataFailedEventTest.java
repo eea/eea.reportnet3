@@ -33,11 +33,9 @@ public class LoadDataFailedEventTest {
   @Test
   public void getMapTest1() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    Assert
-        .assertEquals(6,
-            loadDataFailedEvent.getMap(NotificationVO.builder().user("user").error("error")
-                .fileName("fileName").datasetId(1L).tableSchemaId("tableSchemaId").build())
-                .size());;
+    Assert.assertEquals(6,
+        loadDataFailedEvent.getMap(NotificationVO.builder().user("user").error("error")
+            .fileName("fileName").datasetId(1L).tableSchemaId("tableSchemaId").build()).size());
   }
 
   @Test
@@ -46,6 +44,6 @@ public class LoadDataFailedEventTest {
         loadDataFailedEvent
             .getMap(NotificationVO.builder().user("user").error("error").fileName("fileName")
                 .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build())
-            .size());;
+            .size());
   }
 }

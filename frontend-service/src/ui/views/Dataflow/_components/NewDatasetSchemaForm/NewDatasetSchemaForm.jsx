@@ -11,6 +11,7 @@ import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const NewDatasetSchemaForm = ({
   dataflowId,
@@ -55,18 +56,28 @@ const NewDatasetSchemaForm = ({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         showLoading();
-        const response = await DataflowService.newEmptyDatasetSchema(
-          dataflowId,
-          encodeURIComponent(values.datasetSchemaName)
-        );
-        onCreate();
-        if (response === 200) {
+        try {
+          const response = await DataflowService.newEmptyDatasetSchema(
+            dataflowId,
+            encodeURIComponent(values.datasetSchemaName)
+          );
+          if (response >= 200 && response <= 200) {
+            onUpdateData();
+            setSubmitting(false);
+          } else {
+            throw new Error('Schema creation error');
+          }
+        } catch (error) {
+          NotificationContext.add({
+            type: 'DATASET_SCHEMA_CREATION_ERROR',
+            content: {
+              dataflowId
+            }
+          });
+        } finally {
           onCreate();
-          onUpdateData();
           setSubmitting(false);
           hideLoading();
-        } else {
-          setSubmitting(false);
         }
       }}>
       {({ errors, isSubmitting, touched }) => (
@@ -77,7 +88,7 @@ const NewDatasetSchemaForm = ({
               <Field
                 id="dataSchemaInput"
                 name="datasetSchemaName"
-                placeholder={resources.messages['createdatasetSchemaName']}
+                placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"
               />
               <ErrorMessage className="error" name="datasetSchemaName" component="div" />

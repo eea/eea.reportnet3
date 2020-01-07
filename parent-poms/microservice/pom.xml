@@ -214,37 +214,54 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.7</version>
-        <configuration>
-          <instrumentation>
-            <excludes>
-              <exclude>
-                org.eea.*.persistence.**
-              </exclude>
-              <exclude>
-                org.eea.*.configuration
-              </exclude>
-              <exclude>
-                org.eea.*.service.vo
-              </exclude>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.4</version>
 
-              <exclude>
-                org.eea.*.mapper
-              </exclude>
-              <exclude>
-                org.eea.validation.util.**
-              </exclude>
-              <exclude>
-                org.eea.ums.service.keycloak.model.**
-              </exclude>
-              <exclude>
-                org.eea.indexsearch.io.kafka.domain.**
-              </exclude>
-            </excludes>
-          </instrumentation>
+        <configuration>
+          <excludes>
+            <exclude>
+              org.eea.*.persistence.**
+            </exclude>
+            <exclude>
+              org.eea.*.configuration
+            </exclude>
+            <exclude>
+              org.eea.*.service.vo
+            </exclude>
+            <exclude>
+              org.eea.*.mapper
+            </exclude>
+            <exclude>
+              org.eea.validation.util.**
+            </exclude>
+            <exclude>
+              org.eea.ums.service.keycloak.model.**
+            </exclude>
+            <exclude>
+              org.eea.indexsearch.io.kafka.domain.**
+            </exclude>
+          </excludes>
+
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <!-- attached to Maven test phase -->
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+
+          </execution>
+
+        </executions>
+
       </plugin>
       <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
@@ -258,8 +275,9 @@
   <reporting>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+
         <reportSets>
           <reportSet>
             <reports>

@@ -1,18 +1,24 @@
-package org.eea.document.io.notification.events;
+package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class DocumentUploadCompletedEvent.
+ * The Class LoadDataCompletedEvent.
  */
 @Component
-public class DocumentUploadCompletedEvent implements NotificableEventHandler {
+public class AddDatasetSchemaSnapshotFailedEvent implements NotificableEventHandler {
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
   /**
    * Gets the event type.
@@ -21,7 +27,7 @@ public class DocumentUploadCompletedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DOCUMENT_UPLOAD_COMPLETED_EVENT;
+    return EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
   }
 
   /**
@@ -35,8 +41,11 @@ public class DocumentUploadCompletedEvent implements NotificableEventHandler {
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("dataflowId", notificationVO.getDataflowId());
-    notification.put("fileName", notificationVO.getFileName());
+    notification.put("datasetId", notificationVO.getDatasetId());
+    notification.put("dataflowId",
+        notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
+            : datasetService.getDataFlowIdById(notificationVO.getDatasetId()));
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }

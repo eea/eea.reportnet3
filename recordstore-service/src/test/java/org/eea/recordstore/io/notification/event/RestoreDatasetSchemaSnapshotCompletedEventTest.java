@@ -27,7 +27,7 @@ public class RestoreDatasetSchemaSnapshotCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT,
+    Assert.assertEquals(EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT,
         restoreDatasetSchemaSnapshotCompletedEvent.getEventType());
   }
 

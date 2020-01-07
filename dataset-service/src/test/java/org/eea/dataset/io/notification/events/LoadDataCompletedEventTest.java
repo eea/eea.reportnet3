@@ -34,13 +34,13 @@ public class LoadDataCompletedEventTest {
   public void getMapTest1() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Assert.assertEquals(5, loadDataCompletedEvent.getMap(NotificationVO.builder().user("user")
-        .fileName("fileName").datasetId(1L).tableSchemaId("tableSchemaId").build()).size());;
+        .fileName("fileName").datasetId(1L).tableSchemaId("tableSchemaId").build()).size());
   }
 
   @Test
   public void getMapTest2() throws EEAException {
     Assert.assertEquals(5,
         loadDataCompletedEvent.getMap(NotificationVO.builder().user("user").fileName("fileName")
-            .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build()).size());;
+            .datasetId(1L).dataflowId(1L).tableSchemaId("tableSchemaId").build()).size());
   }
 }

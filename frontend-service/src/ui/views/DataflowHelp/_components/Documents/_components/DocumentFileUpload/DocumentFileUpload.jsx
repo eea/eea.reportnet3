@@ -10,6 +10,7 @@ import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { DocumentService } from 'core/services/Document';
 
@@ -17,13 +18,13 @@ const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
   onUpload,
-  onGrowlAlert,
   isFormReset,
   setIsUploadDialogVisible,
   isEditForm = false,
   isUploadDialogVisible
 }) => {
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   const form = useRef(null);
   const inputRef = useRef();
@@ -63,7 +64,7 @@ const DocumentFileUpload = ({
     document.querySelector('.uploadFile').value = '';
   }
 
-  const Checkbox = ({ field, type, checked }) => {
+  const IsPublicCheckbox = ({ field, type, checked }) => {
     return (
       <>
         <input id="isPublic" {...field} type={type} checked={checked} />
@@ -75,70 +76,67 @@ const DocumentFileUpload = ({
   };
 
   const buildInitialValue = documentInitialValues => {
-    let initiaValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
+    let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
       const langField = {
         lang: config.languages
           .filter(language => language.name == documentInitialValues.language)
           .map(country => country.code)
       };
-      initiaValues = Object.assign({}, documentInitialValues, langField);
-      initiaValues.uploadFile = {};
+      initialValues = Object.assign({}, documentInitialValues, langField);
+      initialValues.uploadFile = {};
     }
-    return initiaValues;
+    return initialValues;
   };
 
-  const initiaValueslWithLangField = buildInitialValue(documentInitialValues);
+  const initialValueslWithLangField = buildInitialValue(documentInitialValues);
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initiaValueslWithLangField}
+      initialValues={initialValueslWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
-        onGrowlAlert({
-          severity: 'info',
-          summary: resources.messages['documentUploadingGrowlUploadingSummary'],
-          detail: resources.messages['documentUploadingGrowlUploadingDetail'],
-          life: '5000'
+        notificationContext.add({
+          type: 'DOCUMENT_UPLOADING_INIT_INFO',
+          content: {}
         });
-
-        const response = isEditForm
-          ? await DocumentService.editDocument(
+        try {
+          if (isEditForm) {
+            await DocumentService.editDocument(
               dataflowId,
               values.description,
               values.lang,
               values.uploadFile,
               values.isPublic,
               values.id
-            )
-          : await DocumentService.uploadDocument(
+            );
+            onUpload();
+          } else {
+            await DocumentService.uploadDocument(
               dataflowId,
               values.description,
               values.lang,
               values.uploadFile,
               values.isPublic
             );
-
-        onUpload();
-        if (response === 200) {
-          onGrowlAlert({
-            severity: 'success',
-            summary: resources.messages['documentUploadingGrowlSuccessSummary'],
-            detail: resources.messages['documentUploadingGrowlSuccessDetail'],
-            life: '5000'
-          });
-          setSubmitting(false);
-          onUpload();
-        } else {
-          onGrowlAlert({
-            severity: 'error',
-            summary: resources.messages['documentUploadingGrowlErrorSummary'],
-            detail: resources.messages['documentUploadingGrowlErrorDetail'],
-            life: '5000'
-          });
+            onUpload();
+          }
+        } catch (error) {
+          if (isEditForm) {
+            notificationContext.add({
+              type: 'DOCUMENT_EDITING_ERROR',
+              content: {}
+            });
+          } else {
+            notificationContext.add({
+              type: 'DOCUMENT_UPLOADING_ERROR',
+              content: {}
+            });
+          }
+        } finally {
           setSubmitting(false);
         }
       }}>
@@ -184,8 +182,8 @@ const DocumentFileUpload = ({
             </div>
           </fieldset>
           <fieldset>
-            <div className={styles.checkboxIsPublick}>
-              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={Checkbox} />
+            <div className={styles.checkboxIsPublic}>
+              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={IsPublicCheckbox} />
             </div>
           </fieldset>
           <fieldset>

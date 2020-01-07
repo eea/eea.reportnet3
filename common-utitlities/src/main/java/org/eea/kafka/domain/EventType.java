@@ -88,16 +88,40 @@ public enum EventType {
       "dataset_snapshot_restored_failed_key", true),
 
   /**
-   * The restore datasetschema snapshot completed event.
+   * The restore dataset schema snapshot completed event.
    */
-  RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
-      "datasetschema_snapshot_restored_completed_key", true),
+  RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_schema_snapshot_restored_completed_key", true),
 
   /**
-   * The restore datasetschema snapshot failed event.
+   * The restore dataset schema snapshot failed event.
    */
-  RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
-      "datasetchema_snapshot_restored_failed_key", true),
+  RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_schema_snapshot_restored_failed_key", true),
+
+  /**
+   * The add dataset snapshot completed event.
+   */
+  ADD_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_snapshot_completed_event", true),
+
+  /**
+   * The add dataset snapshot failed event.
+   */
+  ADD_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_dataset_snapshot_failed_event",
+      true),
+
+  /**
+   * The add dataset schema snapshot completed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_completed_event", true),
+
+  /**
+   * The add dataset schema snapshot failed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_failed_event", true),
 
   /**
    * The command execute validation.
@@ -175,24 +199,24 @@ public enum EventType {
   UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true),
 
   /**
-   * The document upload completed event.
+   * The upload document completed event.
    */
-  DOCUMENT_UPLOAD_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_upload_completed_event", true),
+  UPLOAD_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_document_completed_event", true),
 
   /**
-   * The document upload failed event.
+   * The upload document failed event.
    */
-  DOCUMENT_UPLOAD_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_upload_failed_event", true),
+  UPLOAD_DOCUMENT_FAILED_EVENT("DATA_REPORTING_TOPIC", "upload_document_failed_event", true),
 
   /**
-   * The document delete completed event.
+   * The delete document completed event.
    */
-  DOCUMENT_DELETE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "document_delete_completed_event", true),
+  DELETE_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_document_completed_event", true),
 
   /**
-   * The document delete failed event.
+   * The delete document failed event.
    */
-  DOCUMENT_DELETE_FAILED_EVENT("DATA_REPORTING_TOPIC", "document_delete_failed_event", true),
+  DELETE_DOCUMENT_FAILED_EVENT("DATA_REPORTING_TOPIC", "delete_document_failed_event", true),
 
   /** The command execute new design field propagation. */
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",

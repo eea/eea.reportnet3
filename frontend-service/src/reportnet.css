@@ -1870,3 +1870,8 @@ body .p-dialog.edit-table .p-dialog-content {
 .p-toolbar.p-component {
   position: relative;
 }
+
+/*growl notifications*/
+.p-growl.p-component.p-growl-topright {
+  z-index: 2000 !important;
+}

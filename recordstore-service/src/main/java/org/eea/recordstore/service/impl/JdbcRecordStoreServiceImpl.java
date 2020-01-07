@@ -171,6 +171,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     result.put("connectionDataVO", createConnectionDataVO(datasetName));
     result.put("dataset_id", datasetName);
     result.put("idDatasetSchema", idDatasetSchema);
+    result.put("user", ThreadPropertiesManager.getVariable("user"));
     kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
 
   }
@@ -381,10 +382,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       TypeDatasetEnum datasetType, Boolean isSchemaSnapshot) throws SQLException, IOException {
 
     EventType successEventType =
-        isSchemaSnapshot ? EventType.RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT
+        isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType =
-        isSchemaSnapshot ? EventType.RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT
+        isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT;
     NotificationVO notificationVO =
         NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
