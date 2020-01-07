@@ -23,14 +23,14 @@ public class CodelistVO {
   /** The description. */
   private String description;
 
-  /** The category id. */
-  private Long categoryId;
+  /** The category. */
+  private CodelistCategoryVO category;
 
   /** The version. */
   private Long version;
 
   /** The items id. */
-  private List<Long> itemsId;
+  private List<CodelistItemVO> items;
 
   /** The status. */
   private CodelistStatusEnum status;
