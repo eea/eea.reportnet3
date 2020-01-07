@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -78,10 +79,10 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void insertRepresentativeSuccessTest() throws EEAException {
+    ResponseEntity<String> response = new ResponseEntity<>("1", HttpStatus.OK);
     when(userManagementControllerZull.getUsers()).thenReturn(users);
     when(representativeService.insertRepresentative(Mockito.any(), Mockito.any())).thenReturn(1L);
-    assertEquals((Long) 1L,
-        representativeControllerImpl.insertRepresentative(1L, representativeVO));
+    assertEquals(response, representativeControllerImpl.insertRepresentative(1L, representativeVO));
   }
 
   /**
