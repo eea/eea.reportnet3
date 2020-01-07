@@ -434,7 +434,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           dataset.setDataProviderId(representative.getDataProviderId());
           reportingDatasetRepository.save((ReportingDataset) dataset);
-          this.createGroupProviderAndAddUser(dataset.getId(), representative.getProviderAccount());
+          if (StringUtils.isNotBlank(representative.getProviderAccount())) {
+            this.createGroupProviderAndAddUser(dataset.getId(),
+                representative.getProviderAccount());
+          }
           break;
         case DESIGN:
           dataset = new DesignDataset();
