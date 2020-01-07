@@ -125,6 +125,10 @@
           }
         },
         {
+          "key":"MANAGE_ROLES_ACCOUNT_ERROR",
+          "refresh":false
+        },
+        {
           "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
           "refresh":false,
           "navigateTo":{

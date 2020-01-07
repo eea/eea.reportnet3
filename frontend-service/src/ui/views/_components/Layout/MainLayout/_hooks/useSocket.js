@@ -13,7 +13,6 @@ const useSocket = () => {
   const userContext = useContext(UserContext);
   const socket_url = window.env.WEBSOCKET_URL;
   React.useEffect(() => {
-    console.log('userContext.socket', userContext.socket);
     if (isUndefined(userContext.socket)) {
       const token = UserService.getToken();
       const ws = new WebSocket(socket_url);
