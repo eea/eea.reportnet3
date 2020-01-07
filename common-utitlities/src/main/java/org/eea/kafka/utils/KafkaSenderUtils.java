@@ -54,9 +54,9 @@ public class KafkaSenderUtils {
    */
   public void releaseKafkaEvent(final EventType eventType, final Map<String, Object> value) {
     final EEAEventVO event = new EEAEventVO();
-    if (ThreadPropertiesManager.getVariable("user") != null) {
-      value.put("user", ThreadPropertiesManager.getVariable("user"));
-    }
+
+    value.put("user", ThreadPropertiesManager.getVariable("user"));
+
     event.setEventType(eventType);
     event.setData(value);
     kafkaSender.sendMessage(event);

@@ -16,10 +16,10 @@ import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
-import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
@@ -116,7 +116,10 @@ public class DataflowServiceImpl implements DataflowService {
 
 
   @Autowired
-  private WebLinkRepository webLinkRepository;
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+
+
   /**
    * The Constant LOG.
    */
@@ -160,8 +163,8 @@ public class DataflowServiceImpl implements DataflowService {
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the data collections
-    dataflowVO
-        .setDataCollections(datasetMetabaseController.findDataCollectionIdByDataflowId(id).stream()
+    dataflowVO.setDataCollections(
+        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     LOG.info("Get the dataflow information with id {}", id);
@@ -530,6 +533,27 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
 
+  }
+
+
+  /**
+   * Update data flow status.
+   *
+   * @param id the id
+   * @param status the status
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException {
+    Optional<Dataflow> dataflow = dataflowRepository.findById(id);
+    if (dataflow.isPresent()) {
+      dataflow.get().setStatus(status);
+      dataflowRepository.save(dataflow.get());
+      LOG.info("The dataflow {} has been saved.", dataflow.get().getName());
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
   }
 
 

@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DataCollectionService;
@@ -8,10 +9,9 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +65,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * The Constant LOG.
@@ -236,72 +239,6 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return statistics;
   }
 
-
-  /**
-   * Creates the empty data collection.
-   *
-   * @param dataCollectionVO the data collection VO
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/createDataCollection")
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO) {
-    if (StringUtils.isBlank(dataCollectionVO.getDataSetName())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    // 1. Get the design datasets
-    /*
-     * List<DesignDatasetVO> designs =
-     * designDatasetService.getDesignDataSetIdByDataflowId(dataCollectionVO.getIdDataflow());
-     */
-    // 2. Get the providers who are going to provide data
-    List<RepresentativeVO> representatives = representativeControllerZuul
-        .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
-    // 3. Create reporting datasets as many providers are by design dataset
-    try {
-
-      for (RepresentativeVO representative : representatives) {
-        Long newDatasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING,
-            null, dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
-            representative.getDataProviderId());
-
-        // Create the reporting dataset in keycloak and add it to the user provider
-        datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
-            representative.getProviderAccount());
-      }
-
-      // 4.Create the DC per design dataset
-      Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-          dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-          dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
-      datasetMetabaseService.createGroupDcAndAddUser(newDc);
-
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-          e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR);
-    }
-
-  }
-
-  /**
-   * Find data collection id by dataflow id.
-   *
-   * @param idDataflow the id dataflow
-   * @return the list
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/datacollection/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataCollectionVO> findDataCollectionIdByDataflowId(Long idDataflow) {
-
-    return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
-
-  }
 
 
 }

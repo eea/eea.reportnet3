@@ -1,7 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -74,9 +72,12 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
-  @GetMapping(value = "/datacollection/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataCollectionVO> findDataCollectionIdByDataflowId(
-      @PathVariable("id") final Long idDataflow);
+  /*
+   * @GetMapping(value = "/datacollection/dataflow/{id}", produces =
+   * MediaType.APPLICATION_JSON_VALUE) List<DataCollectionVO> findDataCollectionIdByDataflowId(
+   * 
+   * @PathVariable("id") final Long idDataflow);
+   */
 
   /**
    * Update dataset name.
@@ -129,8 +130,10 @@ public interface DatasetMetabaseController {
    *
    * @param dataCollectionVO the data collection VO
    */
-  @PostMapping(value = "/createDataCollection")
-  void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO);
+  /*
+   * @PostMapping(value = "/createDataCollection") void createEmptyDataCollection(@RequestBody
+   * DataCollectionVO dataCollectionVO);
+   */
 
 
 }

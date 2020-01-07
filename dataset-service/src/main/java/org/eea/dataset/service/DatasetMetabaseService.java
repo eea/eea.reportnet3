@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -89,8 +90,25 @@ public interface DatasetMetabaseService {
   List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
 
+  /**
+   * Creates the group provider and add user.
+   *
+   * @param datasetId the dataset id
+   * @param userMail the user mail
+   */
   void createGroupProviderAndAddUser(Long datasetId, String userMail);
 
+  /**
+   * Creates the group dc and add user.
+   *
+   * @param datasetId the dataset id
+   */
   void createGroupDcAndAddUser(Long datasetId);
+
+
+  Long crearDatasetAsync(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
+      Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
+
+
 
 }

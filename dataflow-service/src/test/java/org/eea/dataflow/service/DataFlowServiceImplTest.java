@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +32,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
@@ -420,8 +420,7 @@ public class DataFlowServiceImplTest {
     Dataflow dataflow = new Dataflow();
     when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
-        Mockito.any());
+    doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(), Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
     Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
@@ -776,6 +775,25 @@ public class DataFlowServiceImplTest {
     } catch (EEAException ex) {
       assertEquals("Error deleting resource in keycloack ", ex.getMessage());
       throw ex;
+    }
+  }
+
+
+  @Test
+  public void testUpdateDataflowStatus() throws EEAException {
+
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+    Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
+  }
+
+
+  @Test
+  public void testUpdateDataflowStatusException() {
+    try {
+      dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
     }
   }
 }

@@ -29,6 +29,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
@@ -40,6 +41,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -427,6 +429,54 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return resourceInfoVO;
   }
 
+
+
+  @Override
+  @Async
+  @org.springframework.transaction.annotation.Transactional(
+      value = "metabaseDataSetsTransactionManager")
+  public Long crearDatasetAsync(TypeDatasetEnum datasetType, String datasetName,
+      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
+      throws EEAException {
+
+    if (datasetType != null && datasetSchemaId != null && dataflowId != null) {
+      DataSetMetabase dataset;
+
+      switch (datasetType) {
+        case REPORTING:
+          dataset = new ReportingDataset();
+          DataProviderVO provider =
+              representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
+          datasetName = provider.getLabel();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          dataset.setDataProviderId(representative.getDataProviderId());
+          reportingDatasetRepository.save((ReportingDataset) dataset);
+          this.createGroupProviderAndAddUser(dataset.getId(), representative.getProviderAccount());
+          break;
+        case DESIGN:
+          dataset = new DesignDataset();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          designDatasetRepository.save((DesignDataset) dataset);
+          break;
+        case COLLECTION:
+          dataset = new DataCollection();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          ((DataCollection) dataset).setDueDate(dueDate);
+          dataCollectionRepository.save((DataCollection) dataset);
+          this.createGroupDcAndAddUser(dataset.getId());
+          break;
+        default:
+          throw new EEAException("Unsupported datasetType: " + datasetType);
+      }
+
+      recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+
+
+    }
+
+    throw new EEAException("createEmptyDataset: Bad arguments");
+
+  }
 
 
 }
