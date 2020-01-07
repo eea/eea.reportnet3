@@ -16,7 +16,7 @@ const parseText = (rawText = '', param = {}) => {
 };
 
 const ellipsis = (rawText, limit) => {
-  if (rawText.length > limit) {
+  if (rawText.length > limit - 3) {
     return `${rawText.substr(0, limit - 3)}...`;
   }
   return rawText;
