@@ -470,8 +470,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       }
 
       recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
-
-
+      return dataset.getId();
     }
 
     throw new EEAException("createEmptyDataset: Bad arguments");

@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -12,6 +13,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Autowired
+  private DesignDatasetService designDatasetService;
+
 
   /**
    * The Constant LOG_ERROR.
@@ -73,57 +78,58 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    // Set the user name on the thread
-    /*
-     * ThreadPropertiesManager.setVariable("user",
-     * SecurityContextHolder.getContext().getAuthentication().getName());
-     */
+    // 1. Get the design datasets
+    List<DesignDatasetVO> designs =
+        designDatasetService.getDesignDataSetIdByDataflowId(dataCollectionVO.getIdDataflow());
 
-    // 1. Get the providers who are going to provide data
+    // Get the providers who are going to provide data
     List<RepresentativeVO> representatives = representativeControllerZuul
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
-    try {
+    for (DesignDatasetVO design : designs) {
+      try {
 
-      for (RepresentativeVO representative : representatives) {
+        for (RepresentativeVO representative : representatives) {
+          /*
+           * Long newDatasetId =
+           * datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
+           * dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
+           * representative.getDataProviderId());
+           * 
+           * // Create the reporting dataset in keycloak and add it to the user provider
+           * datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
+           * representative.getProviderAccount());
+           */
+
+          datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.REPORTING, null,
+              dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
+              representative);
+        }
+
+        // 3.Create the DC per design dataset
         /*
-         * Long newDatasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING,
-         * null, dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
-         * representative.getDataProviderId());
-         * 
-         * // Create the reporting dataset in keycloak and add it to the user provider
-         * datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
-         * representative.getProviderAccount());
+         * Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
+         * dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
+         * dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
+         * datasetMetabaseService.createGroupDcAndAddUser(newDc);
          */
 
-        datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.REPORTING, null,
-            dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
-            representative);
+
+        datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.COLLECTION,
+            dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
+            dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
+
+        // 4. Update the dataflow status to DRAFT
+        dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
+            TypeStatusEnum.DRAFT);
+
+
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            EEAErrorMessage.EXECUTION_ERROR);
       }
-
-      // 3.Create the DC per design dataset
-      /*
-       * Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-       * dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-       * dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
-       * datasetMetabaseService.createGroupDcAndAddUser(newDc);
-       */
-
-
-      datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.COLLECTION,
-          dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-          dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
-
-      // 4. Update the dataflow status to DRAFT
-      dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
-          TypeStatusEnum.DRAFT);
-
-
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-          e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR);
     }
 
   }
