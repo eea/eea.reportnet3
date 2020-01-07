@@ -4,7 +4,7 @@ import { useSnapshotReducer } from './useSnapshotReducer';
 import { SnapshotService } from 'core/services/Snapshot';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) => {
+const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const notificationContext = useContext(NotificationContext);
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
@@ -34,7 +34,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId, growlRef) =>
       onLoadSnapshotList();
     } catch (error) {
       notificationContext.add({
-        type: 'SNAPSHOT_CREATION_ERROR',
+        type: 'CREATE_BY_ID_DESIGNER_ERROR',
         content: {
           dataflowId,
           datasetId

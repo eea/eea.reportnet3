@@ -43,8 +43,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
-  let growlRef = useRef();
-
   const {
     isLoadingSnapshotListData,
     isSnapshotsBarVisible,
@@ -54,7 +52,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId, growlRef);
+  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
     try {
@@ -162,7 +160,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <Growl ref={growlRef} />
         <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
