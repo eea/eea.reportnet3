@@ -4,7 +4,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
-import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -48,9 +47,6 @@ public class DataSetMetabaseControllerImplTest {
 
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
-
-  @Mock
-  private DataCollectionService dataCollectionService;
 
 
 
@@ -189,63 +185,5 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.when(reportingDatasetService.getDataSetIdBySchemaId(Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
   }
-
-
-  /*
-   * @Test public void createEmptyDataCollectionTest() throws EEAException {
-   * Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-   * Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L); DataCollectionVO
-   * dc = new DataCollectionVO(); dc.setDataSetName("datasetTest"); dc.setDueDate(new Date());
-   * dc.setDatasetSchema(""); dc.setIdDataflow(1L); RepresentativeVO representative = new
-   * RepresentativeVO(); representative.setDataProviderId(1L); DataProviderVO dataprovider = new
-   * DataProviderVO(); dataprovider.setLabel("test");
-   * 
-   * Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-   * .thenReturn(Arrays.asList(representative));
-   * dataSetMetabaseControllerImpl.createEmptyDataCollection(dc);
-   * Mockito.verify(datasetMetabaseService, times(2)).createEmptyDataset(Mockito.any(),
-   * Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()); }
-   * 
-   * @Test public void createEmptyDataCollectionTestException() throws EEAException {
-   * 
-   * DataCollectionVO dc = new DataCollectionVO(); dc.setDueDate(new Date());
-   * dc.setDatasetSchema(""); dc.setIdDataflow(1L); RepresentativeVO representative = new
-   * RepresentativeVO(); representative.setDataProviderId(1L); DataProviderVO dataprovider = new
-   * DataProviderVO(); dataprovider.setLabel("test");
-   * 
-   * try { dataSetMetabaseControllerImpl.createEmptyDataCollection(dc); } catch
-   * (ResponseStatusException e) { assertEquals(HttpStatus.BAD_REQUEST, e.getStatus()); }
-   * 
-   * }
-   * 
-   * 
-   * @Test public void createEmptyDataCollectionTestException2() throws EEAException {
-   * 
-   * DataCollectionVO dc = new DataCollectionVO(); dc.setDataSetName("datasetTest");
-   * RepresentativeVO representative = new RepresentativeVO(); representative.setDataProviderId(1L);
-   * DataProviderVO dataprovider = new DataProviderVO(); dataprovider.setLabel("test");
-   * 
-   * Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-   * .thenReturn(Arrays.asList(representative));
-   * 
-   * Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-   * .thenReturn(Arrays.asList(representative));
-   * 
-   * when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
-   * Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
-   * 
-   * try { dataSetMetabaseControllerImpl.createEmptyDataCollection(dc); } catch
-   * (ResponseStatusException e) { assertEquals("Cause is ok", EEAErrorMessage.EXECUTION_ERROR,
-   * e.getReason()); }
-   * 
-   * }
-   * 
-   * 
-   * @Test public void findDataCollectionIdByDataflowIdTest() {
-   * Mockito.when(dataCollectionService.getDataCollectionIdByDataflowId(Mockito.any()))
-   * .thenReturn(null);
-   * Assert.assertNull(dataSetMetabaseControllerImpl.findDataCollectionIdByDataflowId(1L)); }
-   */
-
 
 }

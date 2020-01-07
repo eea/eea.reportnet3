@@ -31,12 +31,12 @@ public interface DatasetMetabaseService {
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
    * @param dueDate the due date
-   * @param idDataProvider the id data provider
+   * @param representative the representative
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId, Date dueDate, Long idDataProvider) throws EEAException;
+      Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
 
   /**
    * Gets the dataset name.
@@ -106,8 +106,10 @@ public interface DatasetMetabaseService {
   void createGroupDcAndAddUser(Long datasetId);
 
 
-  Long crearDatasetAsync(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
+  /*
+   * Long crearDatasetAsync(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
+   * Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
+   */
 
 
 

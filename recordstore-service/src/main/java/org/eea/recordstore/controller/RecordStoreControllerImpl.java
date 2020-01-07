@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,9 +75,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
     // TODO neeed to create standar
     try {
-
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);

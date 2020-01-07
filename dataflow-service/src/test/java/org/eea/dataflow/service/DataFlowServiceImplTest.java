@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
@@ -33,6 +35,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
@@ -133,6 +136,11 @@ public class DataFlowServiceImplTest {
    */
   @Mock
   private DocumentControllerZuul documentControllerZuul;
+
+
+  @Mock
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
   /**
    * The dataflows.
    */
@@ -713,6 +721,9 @@ public class DataFlowServiceImplTest {
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
     resourceList.add(resource);
+    DataCollectionVO dcVO = new DataCollectionVO();
+    dcVO.setId(1L);
+    dataFlowVO.setDataCollections(Arrays.asList(dcVO));
 
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
@@ -721,6 +732,8 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
+    when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
+        .thenReturn(Arrays.asList(dcVO));
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
     doThrow(MockitoException.class).when(dataflowRepository).deleteById(Mockito.any());

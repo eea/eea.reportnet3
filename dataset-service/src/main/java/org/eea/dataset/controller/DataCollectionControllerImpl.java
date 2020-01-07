@@ -90,34 +90,15 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       try {
 
         for (RepresentativeVO representative : representatives) {
-          /*
-           * Long newDatasetId =
-           * datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
-           * dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
-           * representative.getDataProviderId());
-           * 
-           * // Create the reporting dataset in keycloak and add it to the user provider
-           * datasetMetabaseService.createGroupProviderAndAddUser(newDatasetId,
-           * representative.getProviderAccount());
-           */
 
-          datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.REPORTING, null,
-              dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null,
-              representative);
+          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
+              design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representative);
         }
-
-        // 3.Create the DC per design dataset
-        /*
-         * Long newDc = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-         * dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-         * dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
-         * datasetMetabaseService.createGroupDcAndAddUser(newDc);
-         */
-
-
-        datasetMetabaseService.crearDatasetAsync(TypeDatasetEnum.COLLECTION,
-            dataCollectionVO.getDataSetName(), dataCollectionVO.getDatasetSchema(),
-            dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
+        // Create the DC per design dataset
+        datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
+            dataCollectionVO.getDataSetName() + "_" + design.getDataSetName(),
+            dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(),
+            dataCollectionVO.getDueDate(), null);
 
         // 4. Update the dataflow status to DRAFT
         dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),

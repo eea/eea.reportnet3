@@ -23,6 +23,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.junit.Assert;
@@ -118,7 +119,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
-        "5d0c822ae1ccd34cfcd97e20", 1L, null, 1L);
+        "5d0c822ae1ccd34cfcd97e20", 1L, null, new RepresentativeVO());
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
