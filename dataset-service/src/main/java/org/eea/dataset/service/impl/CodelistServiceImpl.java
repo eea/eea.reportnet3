@@ -1,8 +1,10 @@
 package org.eea.dataset.service.impl;
 
+import org.eea.dataset.mapper.CodelistCategoryMapper;
+import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
-import org.eea.dataset.persistence.data.domain.Codelist;
 import org.eea.dataset.persistence.data.repository.CodelistRepository;
+import org.eea.dataset.persistence.metabase.domain.Codelist;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -11,15 +13,35 @@ import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class CodelistServiceImpl.
+ */
 @Service("codelistService")
 public class CodelistServiceImpl implements CodelistService {
 
+  /** The codelist repository. */
   @Autowired
   private CodelistRepository codelistRepository;
 
+  /** The codelist mapper. */
   @Autowired
   private CodelistMapper codelistMapper;
 
+  /** The codelist item mapper. */
+  @Autowired
+  private CodelistItemMapper codelistItemMapper;
+
+  /** The codelist category mapper. */
+  @Autowired
+  private CodelistCategoryMapper codelistCategoryMapper;
+
+  /**
+   * Gets the by id.
+   *
+   * @param codelistId the codelist id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public CodelistVO getById(Long codelistId) throws EEAException {
     Codelist codelist = codelistRepository.findById(codelistId).orElse(null);
@@ -29,11 +51,24 @@ public class CodelistServiceImpl implements CodelistService {
     return codelistMapper.entityToClass(codelist);
   }
 
+  /**
+   * Delete.
+   *
+   * @param codelistId the codelist id
+   */
   @Override
   public void delete(Long codelistId) {
     codelistRepository.deleteById(codelistId);
   }
 
+  /**
+   * Creates the.
+   *
+   * @param codelistVO the codelist VO
+   * @param codelistId the codelist id
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
   @Override
   public Long create(CodelistVO codelistVO, Long codelistId) throws EEAException {
     Long response;
@@ -65,6 +100,13 @@ public class CodelistServiceImpl implements CodelistService {
     return response;
   }
 
+  /**
+   * Update.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
   @Override
   public Long update(CodelistVO codelistVO) throws EEAException {
     Codelist oldCodelist = codelistRepository.findById(codelistVO.getId()).orElse(null);
@@ -76,22 +118,33 @@ public class CodelistServiceImpl implements CodelistService {
         if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
           oldCodelist.setStatus(CodelistStatusEnum.READY);
         }
+        if (codelistVO.getName() != null) {
+          oldCodelist.setName(codelistVO.getName());
+        }
+        if (codelistVO.getDescription() != null) {
+          oldCodelist.setDescription(codelistVO.getDescription());
+        }
+        if (codelistVO.getCategory() != null) {
+          oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
+        }
+        if (codelistVO.getItems() != null) {
+          oldCodelist.setItems(codelistItemMapper.classListToEntity(codelistVO.getItems()));
+        }
         break;
       case DEPRECATED:
         if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
           oldCodelist.setStatus(CodelistStatusEnum.READY);
-          codelistRepository.save(oldCodelist);
         }
         break;
       case READY:
         if (CodelistStatusEnum.DEPRECATED.equals(codelistVO.getStatus())) {
           oldCodelist.setStatus(CodelistStatusEnum.DEPRECATED);
-          codelistRepository.save(oldCodelist);
         }
         break;
       default:
         throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
     }
+    codelistRepository.save(oldCodelist);
     return codelistVO.getId();
   }
 }

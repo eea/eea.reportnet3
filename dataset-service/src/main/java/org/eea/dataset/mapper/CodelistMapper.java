@@ -1,6 +1,6 @@
 package org.eea.dataset.mapper;
 
-import org.eea.dataset.persistence.data.domain.Codelist;
+import org.eea.dataset.persistence.metabase.domain.Codelist;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;

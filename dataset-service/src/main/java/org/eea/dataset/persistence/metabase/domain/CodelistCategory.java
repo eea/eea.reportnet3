@@ -1,15 +1,12 @@
-package org.eea.dataset.persistence.data.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,10 +25,6 @@ public class CodelistCategory {
 
   /** The id. */
   @Id
-  @SequenceGenerator(name = "codelist_category_sequence_generator",
-      sequenceName = "codelist_category_sequence_generator", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE,
-      generator = "codelist_category_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -44,7 +37,7 @@ public class CodelistCategory {
   private String description;
 
   /** The codelists. */
-  @OneToMany(mappedBy = "codelistId", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Codelist> codelists;
 
   /**
