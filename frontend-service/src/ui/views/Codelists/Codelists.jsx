@@ -18,12 +18,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { CodelistsUtils } from './_functions/Utils/CodelistsUtils';
+
 const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   const resources = useContext(ResourcesContext);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
@@ -49,7 +52,15 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   };
 
   const onFilter = filter => {
-    // const inmCategories =
+    if (filter === '') {
+      setIsFiltered(false);
+    } else {
+      setIsFiltered(true);
+    }
+
+    const inmCategories = [...categories];
+    //const filteredCategories = CodelistsUtils.filterByText(inmCategories, filter);
+    setFilteredCategories(CodelistsUtils.filterByText(inmCategories, filter));
   };
 
   const onLoadCategories = async () => {
@@ -143,6 +154,32 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     setNewCategoryVisible(false);
   };
 
+  const renderCategories = data =>
+    data.map(category => {
+      return (
+        <TreeViewExpandableItem
+          className={styles.categoryExpandable}
+          expanded={true}
+          items={[category.name, category.description]}>
+          {isDataCustodian ? (
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                label={resources.messages['editCategory']}
+                icon="pencil"
+                onClick={() => setNewCategoryVisible(true)}
+                style={{ float: 'right' }}
+              />
+            </div>
+          ) : null}
+          <div className={styles.codelists}>
+            {category.codelists.map(codelist => {
+              return <Codelist codelist={codelist} />;
+            })}
+          </div>
+        </TreeViewExpandableItem>
+      );
+    });
+
   const layout = children => {
     return (
       <MainLayout>
@@ -161,7 +198,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
       <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
       <div className={styles.codelistsActions}>
         <span className={`${styles.filterSpan} p-float-label`}>
-          <InputText id="filterInput" onKeyDown={e => onFilter(e.target.value)} />
+          <InputText id="filterInput" onKeyDown={e => onFilter(e.target.value.toUpperCase)} />
           <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
         </span>
         {isDataCustodian ? (
@@ -169,30 +206,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
         ) : null}
       </div>
       <hr />
-      {categories.map(category => {
-        return (
-          <TreeViewExpandableItem
-            className={styles.categoryExpandable}
-            expanded={true}
-            items={[category.name, category.description]}>
-            {isDataCustodian ? (
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  label={resources.messages['editCategory']}
-                  icon="pencil"
-                  onClick={() => setNewCategoryVisible(true)}
-                  style={{ float: 'right' }}
-                />
-              </div>
-            ) : null}
-            <div className={styles.codelists}>
-              {category.codelists.map(codelist => {
-                return <Codelist codelist={codelist} />;
-              })}
-            </div>
-          </TreeViewExpandableItem>
-        );
-      })}
+      {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}
         columns={['name', 'description']}
