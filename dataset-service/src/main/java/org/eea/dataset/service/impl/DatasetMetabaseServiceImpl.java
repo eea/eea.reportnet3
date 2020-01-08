@@ -116,46 +116,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Creates the empty dataset.
-   *
-   * @param datasetType the dataset type
-   * @param datasetName the dataset name
-   * @param datasetSchemaId the dataset schema id
-   * @param dataflowId the dataflow id
-   * @param dueDate the due date
-   * @return the long
-   * @throws EEAException the EEA exception
-   */
-  /*
-   * @Override
-   * 
-   * @org.springframework.transaction.annotation.Transactional( value =
-   * "metabaseDataSetsTransactionManager")
-   * 
-   * public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String
-   * datasetSchemaId, Long dataflowId, Date dueDate, Long idDataProvider) throws EEAException {
-   * 
-   * if (datasetType != null && datasetSchemaId != null && dataflowId != null) { DataSetMetabase
-   * dataset;
-   * 
-   * switch (datasetType) { case REPORTING: dataset = new ReportingDataset(); DataProviderVO
-   * provider = representativeControllerZuul.findDataProviderById(idDataProvider); datasetName =
-   * provider.getLabel(); fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-   * dataset.setDataProviderId(idDataProvider); reportingDatasetRepository.save((ReportingDataset)
-   * dataset); break; case DESIGN: dataset = new DesignDataset(); fillDataset(dataset, datasetName,
-   * dataflowId, datasetSchemaId); designDatasetRepository.save((DesignDataset) dataset); break;
-   * case COLLECTION: dataset = new DataCollection(); fillDataset(dataset, datasetName, dataflowId,
-   * datasetSchemaId); ((DataCollection) dataset).setDueDate(dueDate);
-   * dataCollectionRepository.save((DataCollection) dataset); break; default: throw new
-   * EEAException("Unsupported datasetType: " + datasetType); }
-   * 
-   * recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
-   * return dataset.getId(); }
-   * 
-   * throw new EEAException("createEmptyDataset: Bad arguments"); }
-   */
-
-  /**
    * Fill dataset.
    *
    * @param dataset the dataset

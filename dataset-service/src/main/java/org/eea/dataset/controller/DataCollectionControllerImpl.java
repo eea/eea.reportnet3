@@ -51,6 +51,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
