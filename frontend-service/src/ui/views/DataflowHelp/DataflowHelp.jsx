@@ -110,7 +110,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     const refresh = notificationContext.toShow.find(
       notification =>
-        notification.key === 'DOCUMENT_UPLOAD_COMPLETED_EVENT' || notification.key === 'DOCUMENT_DELETE_COMPLETED_EVENT'
+        notification.key === 'UPLOAD_DOCUMENT_COMPLETED_EVENT' || notification.key === 'DELETE_DOCUMENT_COMPLETED_EVENT'
     );
     if (refresh) {
       fetchDocumentsData();

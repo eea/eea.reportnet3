@@ -54,7 +54,7 @@ const NotificationProvider = ({ children }) => {
             type,
             content,
             message: resourcesContext.messages[camelCase(type)],
-            config: config.notifications,
+            config: config.notifications.notificationSchema,
             routes
           });
           console.log('notification', notification);

@@ -34,7 +34,7 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
@@ -56,6 +56,7 @@ const DataViewer = withRouter(
     match: {
       params: { datasetId, dataflowId }
     },
+    match: { params },
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);

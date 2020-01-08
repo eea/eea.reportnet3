@@ -1,4 +1,6 @@
- [
+ {
+   "STRING_LENGTH_MAX":22,
+   "notificationSchema":[
     {
       "key":"error",
       "lifeTime":0,
@@ -376,5 +378,5 @@
         }
       ]
     }
-  ]
+  ]}
     
