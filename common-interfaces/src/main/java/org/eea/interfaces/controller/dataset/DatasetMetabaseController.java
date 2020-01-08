@@ -90,6 +90,7 @@ public interface DatasetMetabaseController {
    * @param datasetId the dataset id
    * @return the statistics by id
    */
+
   @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 

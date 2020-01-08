@@ -115,6 +115,86 @@
             "section":"DATAFLOW",
             "parameters":["dataflowId"]
           }
+        },
+        {
+          "key":"EXPORT_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"MANAGE_ROLES_ACCOUNT_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DELETE_RECORD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_FIELD_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"TABLE_DATA_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"UPDATE_RECORDS_BY_ID_ERROR",
+          "refresh":false,
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key":"DOCUMENT_EDITING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DOCUMENT_UPLOADING_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETE_DOCUMENT_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"CREATE_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key":"DELETED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "ALL_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RELEASED_BY_ID_REPORTER_ERROR",
+          "refresh":false
+        },
+        {
+          "key": "RESTORED_BY_ID_REPORTER_ERROR",
+          "refresh":false
         }
       ]
     },
@@ -209,11 +289,20 @@
       "key":"info",
       "lifeTime":5000,
       "fixed":false,
-      "types":[{
-        "key": "DATASET_DATA_LOADING_INIT",
-        "refresh":false
-      }]
+      "types":[
+        {
+          "key": "DATASET_DATA_LOADING_INIT",
+          "refresh":false
+        },
+        {
+          "key": "DOCUMENT_UPLOADING_INIT_INFO",
+          "refresh":false
+        },
+        {
+          "key": "DELETE_DOCUMENT_INIT_INFO",
+          "refresh":false
+        }
+      ]
     }
-
   ]
     

@@ -16,14 +16,14 @@ public interface DocumentService {
    *
    * @param inputStream the file
    * @param contentType the content type
-   * @param filename the filename
+   * @param fileName the file name
    * @param documentVO the document VO
    * @param size the size
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void uploadDocument(final InputStream inputStream, final String contentType,
-      final String filename, DocumentVO documentVO, final Long size)
+      final String fileName, DocumentVO documentVO, final Long size)
       throws EEAException, IOException;
 
   /**
@@ -44,7 +44,8 @@ public interface DocumentService {
    * @param dataFlowId the data flow id
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final Long documentId, final Long dataFlowId) throws EEAException;
+  void deleteDocument(final Long documentId, final Long dataFlowId, final Boolean deleteMetabase)
+      throws EEAException;
 
   /**
    * Upload schema snapshot.

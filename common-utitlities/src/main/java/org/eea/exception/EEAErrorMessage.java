@@ -113,6 +113,21 @@ public final class EEAErrorMessage {
   /** The Constant ID_LINK_NOT_FOUND. */
   public static final String ID_LINK_NOT_FOUND = "WebLink not found";
 
+  /** The Constant NOT_ENOUGH_PERMISSION. */
+  public static final String NOT_ENOUGH_PERMISSION = "Not enough permission to perform";
+
+  /** The Constant METHOD_LOCKED. */
+  public static final String METHOD_LOCKED = "Method locked";
+
+  /** The Constant REPRESENTATIVE_TYPE_INCORRECT. */
+  public static final String REPRESENTATIVE_TYPE_INCORRECT = "Representative type incorrect";
+
+  /** The Constant REPRESENTATIVE_NOT_FOUND. */
+  public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
+
+  /** The Constant REPRESENTATIVE_DUPLICATED. */
+  public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
+
   /**
    * Instantiates a new EEA error message.
    */

@@ -13,6 +13,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
@@ -51,6 +52,7 @@ const ActionsToolbar = ({
 
   const datasetContext = useContext(DatasetContext);
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   let exportMenuRef = useRef();
   let filterMenuRef = useRef();
@@ -82,6 +84,10 @@ const ActionsToolbar = ({
       setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
     } catch (error) {
       console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+        content: {}
+      });
     } finally {
       setIsLoadingFile(false);
     }

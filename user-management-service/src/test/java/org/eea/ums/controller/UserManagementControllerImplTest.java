@@ -1,7 +1,6 @@
 package org.eea.ums.controller;
 
 import static org.mockito.Mockito.times;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -11,12 +10,15 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,12 +35,18 @@ public class UserManagementControllerImplTest {
 
   @InjectMocks
   private UserManagementControllerImpl userManagementController;
+
   @Mock
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
+  @Mock
+  private KeycloakConnectorService keycloakConnectorService;
 
   @Mock
   private BackupManagmentService backupManagmentService;
+
+  @Mock
+  private UserRepresentationMapper userRepresentationMapper;
 
   @Before
   public void setUp() throws Exception {
@@ -50,8 +58,8 @@ public class UserManagementControllerImplTest {
   public void generateTokenTest() {
     TokenVO tokenVO = new TokenVO();
     tokenVO.setAccessToken("token");
-    Mockito.doReturn(tokenVO).when(securityProviderInterfaceService)
-        .doLogin(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
+    Mockito.doReturn(tokenVO).when(securityProviderInterfaceService).doLogin(Mockito.anyString(),
+        Mockito.anyString(), Mockito.anyBoolean());
 
     TokenVO result = userManagementController.generateToken("", "");
     Assert.assertNotNull(result);
@@ -82,8 +90,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -171,6 +179,33 @@ public class UserManagementControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void readExcelFailTest() throws IOException {
     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Not found");
+  }
+
+  @Test
+  public void getUsersTest() throws IOException {
+
+    UserRepresentation[] userList = new UserRepresentation[1];
+    UserRepresentation user = new UserRepresentation();
+    user.setId("idGroupInfo");
+    user.setUsername("Dataflow-1-DATA_CUSTODIAN");
+    userList[0] = user;
+
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userList);
+
+    userManagementController.getUsers();
+    Mockito.verify(keycloakConnectorService, times(1)).getUsers();
+
+  }
+
+  @Test
+  public void getUsersTestFail() throws IOException {
+
+    UserRepresentation[] userList = new UserRepresentation[1];
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userList);
+
+    userManagementController.getUsers();
+    Mockito.verify(keycloakConnectorService, times(1)).getUsers();
+
   }
 
 }

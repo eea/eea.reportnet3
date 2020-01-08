@@ -33,6 +33,7 @@ public class DataFlowVO implements Serializable {
   /** The datasets. */
   private List<ReportingDatasetVO> reportingDatasets;
 
+  /** The design datasets. */
   private List<DesignDatasetVO> designDatasets;
 
   /** The description. */

@@ -2,7 +2,6 @@ package org.eea.interfaces.controller.document;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +29,13 @@ public interface DocumentController {
    * Upload document .
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the dataflow id
    * @param description the description
    * @param language the language
    * @param isPublic the is public
    */
-  @PostMapping(value = "/upload/{dataFlowId}")
-  void uploadDocument(final MultipartFile file, @PathVariable("dataFlowId") final Long dataFlowId,
+  @PostMapping(value = "/upload/{dataflowId}")
+  void uploadDocument(final MultipartFile file, @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic);
@@ -48,16 +47,20 @@ public interface DocumentController {
    * @return the document
    */
   @GetMapping(value = "/{documentId}")
-  ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId);
+  Resource getDocument(@PathVariable("documentId") final Long documentId);
 
   /**
-   * Delete document.
+   * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
+   * your own
    *
    * @param documentId the document id
+   * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
   @DeleteMapping(value = "/{documentId}")
-  void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
+  void deleteDocument(@PathVariable("documentId") final Long documentId,
+      @RequestParam("deleteMetabase") final Boolean deleteMetabase) throws Exception;
+
 
   /**
    * Update document.

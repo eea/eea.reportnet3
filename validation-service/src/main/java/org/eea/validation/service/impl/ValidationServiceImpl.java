@@ -71,7 +71,6 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /**
    * The kie base manager.
    */
@@ -150,11 +149,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-
   /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
-
 
   /**
    * Gets the element lenght.
@@ -311,10 +308,7 @@ public class ValidationServiceImpl implements ValidationService {
     } finally {
       session.destroy();
     }
-
-
   }
-
 
   /**
    * Validate record.
@@ -354,7 +348,6 @@ public class ValidationServiceImpl implements ValidationService {
       session.destroy();
     }
   }
-
 
   /**
    * Validate data set data.
@@ -801,6 +794,4 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return true;
   }
-
-
 }
