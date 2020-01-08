@@ -1,6 +1,2 @@
-export const Create = ({ dataCollectionRepository }) => async (
-  dataflowId,
-  schemaId,
-  dataCollectionName,
-  creationDate
-) => dataCollectionRepository.create(dataflowId, schemaId, dataCollectionName, creationDate);
+export const Create = ({ dataCollectionRepository }) => async (dataflowId, endDate) =>
+  dataCollectionRepository.create(dataflowId, endDate);
