@@ -4,7 +4,7 @@
 }
 .addContributorButton {
   border-radius: 5px !important;
-  padding: 0 !important;
+  padding: 0 0 0.1rem 0.3rem !important;
   color: white;
 
   &:hover {
@@ -16,13 +16,11 @@
     box-shadow: none !important;
   }
 }
-.btn {
-  padding: 0;
-  margin: 0 3.5px;
-  border-radius: 5px;
-  width: 30px;
-  height: 32px;
-  border-color: transparent !important;
+.btnDelete {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0em var(--blue-100) !important;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
 
   &:focus {
     box-shadow: none;

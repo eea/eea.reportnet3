@@ -23,7 +23,7 @@ public interface RepresentativeController {
   /**
    * The Interface RepresentativeControllerZuul.
    */
-  @FeignClient(value = "representative", contextId = "representative", path = "/representative")
+  @FeignClient(value = "dataflow", contextId = "representative", path = "/representative")
   interface RepresentativeControllerZuul extends RepresentativeController {
 
   }

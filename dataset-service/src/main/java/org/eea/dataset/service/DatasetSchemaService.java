@@ -182,4 +182,13 @@ public interface DatasetSchemaService {
    * @return the boolean
    */
   Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
+
+  /**
+   * Gets the table schema name.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the table schema name
+   */
+  String getTableSchemaName(String datasetSchemaId, String tableSchemaId);
 }
