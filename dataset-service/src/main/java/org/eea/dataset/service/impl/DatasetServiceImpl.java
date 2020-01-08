@@ -49,6 +49,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -57,6 +58,9 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
@@ -236,6 +240,14 @@ public class DatasetServiceImpl implements DatasetService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
 
 
@@ -1103,6 +1115,13 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
     TableValue table = new TableValue();
     table.setId(tableId);
+    // obtain the provider code (ie ES, FR, IT, etc)
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
+    }
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
     recordValue.parallelStream().forEach(record -> {
       if (record.getDatasetPartitionId() == null) {
         try {
@@ -1112,6 +1131,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       record.setTableValue(table);
+      record.setDataProviderCode(provider.getCode());
       record.getFields().stream().filter(field -> field.getValue() == null)
           .forEach(field -> field.setValue(""));
 

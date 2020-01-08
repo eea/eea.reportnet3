@@ -1,13 +1,10 @@
 package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,21 +25,9 @@ public class DataCollection extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
-  @Column(name = "NAME")
-  private String name;
-
-  /** The visible. */
-  @Column(name = "VISIBLE")
-  private Boolean visible;
-
   /** The due date. */
-  @Column(name = "DUEDATE")
+  @Column(name = "DUE_DATE")
   private Date dueDate;
-
-  /** The snapshots. */
-  @OneToMany(mappedBy = "datacollection", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Snapshot> snapshots;
 
 
 
@@ -72,7 +57,7 @@ public class DataCollection extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, visible, dueDate, snapshots);
+    return Objects.hash(id);
   }
 
 }

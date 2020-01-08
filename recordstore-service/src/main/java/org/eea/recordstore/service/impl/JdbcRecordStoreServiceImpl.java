@@ -171,7 +171,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     result.put("connectionDataVO", createConnectionDataVO(datasetName));
     result.put("dataset_id", datasetName);
     result.put("idDatasetSchema", idDatasetSchema);
-    result.put("user", ThreadPropertiesManager.getVariable("user"));
     kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
 
   }

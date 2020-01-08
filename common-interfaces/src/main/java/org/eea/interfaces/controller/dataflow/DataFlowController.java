@@ -152,4 +152,16 @@ public interface DataFlowController {
    */
   @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
+
+
+  /**
+   * Update data flow status.
+   *
+   * @param idDataflow the id dataflow
+   * @param status the status
+   */
+  @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
+      @RequestParam(value = "status", required = true) TypeStatusEnum status);
+
 }

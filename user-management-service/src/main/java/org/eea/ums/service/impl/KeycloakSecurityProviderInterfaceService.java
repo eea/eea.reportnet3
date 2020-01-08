@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -22,6 +24,7 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -109,6 +112,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Map token to VO.
    *
    * @param tokenInfo the token info
+   *
    * @return the token VO
    */
   private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
@@ -312,6 +316,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param idResource the id resource
    * @param resourceType the resource type
+   *
    * @return the groups by id resource type
    */
   @Override
@@ -340,6 +345,18 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     }
 
     return resourceReturn;
+  }
+
+  @Override
+  public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
+    UserRepresentation[] users = keycloakConnectorService.getUsers();
+    Optional<UserRepresentation> contributor = Arrays.asList(users).stream()
+        .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+        .findFirst();
+    contributor.orElseThrow(() -> new EEAException("Error, user not found"));
+
+    this.addUserToUserGroup(contributor.get().getId(), groupName);
+
   }
 
 

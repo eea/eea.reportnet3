@@ -3,6 +3,7 @@ package org.eea.ums.service;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -130,13 +131,21 @@ public interface SecurityProviderInterfaceService {
   ResourceInfoVO getResourceDetails(String groupId);
 
 
-
   /**
    * Gets the groups by id resource type.
    *
    * @param idResource the id resource
    * @param resourceType the resource type
+   *
    * @return the groups by id resource type
    */
   List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource, ResourceTypeEnum resourceType);
+
+  /**
+   * Add contributor to user group.
+   *
+   * @param userMail the user mail
+   * @param groupName the group name
+   */
+  void addContributorToUserGroup(String userMail, String groupName) throws EEAException;
 }

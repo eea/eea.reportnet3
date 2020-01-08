@@ -125,19 +125,20 @@ public interface UserManagementController {
   void doLogOut(@RequestParam("refreshToken") String refreshToken);
 
   /**
-   * Add contributor to resource.
+   * Add invoking user to a resource. User must be authenticated
    *
    * @param idResource the id resource
    * @param resourceGroupEnum the resource group enum
    */
-  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
-  void addContributorToResource(@RequestParam("idResource") Long idResource,
+  @RequestMapping(value = "/add_user_to_resource", method = RequestMethod.PUT)
+  void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
   /**
    * Sets the users.
    *
    * @param file the file
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
@@ -151,4 +152,16 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
   List<UserRepresentationVO> getUsers();
+
+  /**
+   * Add a contributor to resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   * @param userMail the user mail
+   */
+  @RequestMapping(value = "/add_contributor_to_resource", method = RequestMethod.PUT)
+  void addContributorToResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
+      @RequestParam("userMail") String userMail);
 }

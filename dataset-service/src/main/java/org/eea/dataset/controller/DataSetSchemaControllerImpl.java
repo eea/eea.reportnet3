@@ -82,12 +82,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /*
-   * @Autowired private UpdateRecordHelper updateRecordHelper;
-   */
-
-
-
   /**
    * The dataflow controller zuul.
    */
@@ -122,9 +116,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      dataschemaService.createGroupAndAddUser(
-          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, datasetSchemaName,
-              dataschemaService.createEmptyDataSetSchema(dataflowId).toString(), dataflowId));
+      dataschemaService
+          .createGroupAndAddUser(datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
+              datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
+              dataflowId, null, null));
     } catch (EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -208,8 +203,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
-   *
-   * @throws EEAException
    */
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -457,17 +450,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Update dataset schema description.
    *
    * @param datasetId the dataset id
-   * @param description the description
+   * @param datasetSchemaVO the dataset schema VO
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/{datasetId}/datasetSchema")
   public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = false) String description) {
+      @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO) {
     try {
       if (!dataschemaService.updateDatasetSchemaDescription(
-          dataschemaService.getDatasetSchemaId(datasetId), description)) {
+          dataschemaService.getDatasetSchemaId(datasetId), datasetSchemaVO.getDescription())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
