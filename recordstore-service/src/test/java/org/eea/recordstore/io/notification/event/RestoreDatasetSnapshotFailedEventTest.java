@@ -1,7 +1,11 @@
 package org.eea.recordstore.io.notification.event;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.junit.Assert;
@@ -20,6 +24,18 @@ public class RestoreDatasetSnapshotFailedEventTest {
   @Mock
   private DataSetControllerZuul dataSetControllerZuul;
 
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  @Mock
+  private DataSetMetabaseVO datasetVO;
+
+  @Mock
+  private DataFlowVO dataflowVO;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -33,17 +49,21 @@ public class RestoreDatasetSnapshotFailedEventTest {
 
   @Test
   public void getMapTest1() throws EEAException {
-    Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    Assert.assertEquals(4,
-        restoreDatasetSnapshotFailedEvent
-            .getMap(NotificationVO.builder().user("user").error("error").datasetId(1L).build())
-            .size());;
+    Assert.assertEquals(6,
+        restoreDatasetSnapshotFailedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
+            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName").build())
+            .size());
   }
 
   @Test
   public void getMapTest2() throws EEAException {
-    Assert.assertEquals(4, restoreDatasetSnapshotFailedEvent.getMap(
-        NotificationVO.builder().user("user").error("error").datasetId(1L).dataflowId(1L).build())
-        .size());;
+    Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(datasetVO);
+    Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
+    Assert.assertEquals(6, restoreDatasetSnapshotFailedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }
