@@ -72,12 +72,6 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
-  /*
-   * @GetMapping(value = "/datacollection/dataflow/{id}", produces =
-   * MediaType.APPLICATION_JSON_VALUE) List<DataCollectionVO> findDataCollectionIdByDataflowId(
-   * 
-   * @PathVariable("id") final Long idDataflow);
-   */
 
   /**
    * Update dataset name.
@@ -123,17 +117,6 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
-
-
-  /**
-   * Creates the empty data collection.
-   *
-   * @param dataCollectionVO the data collection VO
-   */
-  /*
-   * @PostMapping(value = "/createDataCollection") void createEmptyDataCollection(@RequestBody
-   * DataCollectionVO dataCollectionVO);
-   */
 
 
 }

@@ -85,7 +85,6 @@ public class DataCollectionControllerImplTest {
     DataCollectionVO dc = new DataCollectionVO();
     dc.setDueDate(new Date());
     dc.setDatasetSchema("");
-    dc.setIdDataflow(1L);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
     DataProviderVO dataprovider = new DataProviderVO();
@@ -105,6 +104,7 @@ public class DataCollectionControllerImplTest {
 
     DataCollectionVO dc = new DataCollectionVO();
     dc.setDataSetName("datasetTest");
+    dc.setIdDataflow(1L);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
     DataProviderVO dataprovider = new DataProviderVO();
