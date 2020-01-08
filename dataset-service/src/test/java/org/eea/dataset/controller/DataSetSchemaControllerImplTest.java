@@ -91,11 +91,15 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  private DataSetSchemaVO datasetSchemaVO;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    datasetSchemaVO = new DataSetSchemaVO();
+    datasetSchemaVO.setDescription("description");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -646,7 +650,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
         .thenReturn(true);
-    dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+    dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
     Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
         Mockito.any());
   }
@@ -662,7 +666,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
         .thenReturn(false);
     try {
-      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -678,7 +682,7 @@ public class DataSetSchemaControllerImplTest {
   public void updateDatasetSchemaDescriptionTest3() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
     try {
-      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, "description");
+      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.SCHEMA_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
