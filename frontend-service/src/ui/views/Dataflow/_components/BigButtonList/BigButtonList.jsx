@@ -16,49 +16,52 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
 export const BigButtonList = ({
-  handleRedirect,
-  dataflowId,
   dataflowData,
-  designDatasetSchemas,
+  dataflowId,
   dataflowStatus,
-  isCustodian,
+  designDatasetSchemas,
+  handleRedirect,
   hasWritePermissions,
+  isCustodian,
   onUpdateData,
+  onSaveName,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema,
-  onSaveName
+  updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
 
-  const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const [isDuplicated, setIsDuplicated] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+  const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          setErrorDialogVisible(false);
+          setIsDuplicated(false);
+        }}
+      />
+    </div>
+  );
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
   };
 
+  const onCreateDatasetSchema = () => {
+    setNewDatasetDialog(false);
+  };
+
   const onDatasetSchemaNameError = () => {
     setErrorDialogVisible(true);
-  };
-
-  const onDuplicateName = () => {
-    setIsDuplicated(true);
-  };
-
-  const showNewDatasetDialog = () => {
-    setNewDatasetDialog(true);
-    setIsFormReset(true);
-  };
-
-  const onHideErrorDialog = () => {
-    setErrorDialogVisible(false);
-    setIsDuplicated(false);
   };
 
   const onDeleteDatasetSchema = async index => {
@@ -76,22 +79,19 @@ export const BigButtonList = ({
     }
   };
 
-  const onCreateDatasetSchema = () => {
-    setNewDatasetDialog(false);
+  const onDuplicateName = () => {
+    setIsDuplicated(true);
   };
 
-  const errorDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setErrorDialogVisible(false);
-          setIsDuplicated(false);
-        }}
-      />
-    </div>
-  );
+  const onHideErrorDialog = () => {
+    setErrorDialogVisible(false);
+    setIsDuplicated(false);
+  };
+
+  const onShowNewSchemaDialog = () => {
+    setNewDatasetDialog(true);
+    setIsFormReset(true);
+  };
 
   return (
     <>
@@ -109,7 +109,7 @@ export const BigButtonList = ({
               onDatasetSchemaNameError: onDatasetSchemaNameError,
               onDuplicateName: onDuplicateName,
               onSaveName: onSaveName,
-              showNewDatasetDialog: showNewDatasetDialog,
+              onShowNewSchemaDialog: onShowNewSchemaDialog,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
               updatedDatasetSchema: updatedDatasetSchema
             }).map(button => (button.visibility ? <BigButton {...button} /> : <></>))}

@@ -20,7 +20,7 @@ const useBigButtonList = ({
   onDatasetSchemaNameError,
   onDuplicateName,
   onSaveName,
-  showNewDatasetDialog,
+  onShowNewSchemaDialog,
   showReleaseSnapshotDialog,
   updatedDatasetSchema
 }) => {
@@ -34,7 +34,7 @@ const useBigButtonList = ({
         {
           label: resources.messages['createNewEmptyDatasetSchema'],
           icon: 'add',
-          command: () => showNewDatasetDialog()
+          command: () => onShowNewSchemaDialog()
         },
         {
           label: resources.messages['createNewDatasetFromTemplate'],
