@@ -228,7 +228,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.doNothing().when(resourceManagementControllerZuul).createResource(Mockito.any());
     Mockito.doNothing().when(userManagementControllerZuul).addUserToResource(Mockito.any(),
         Mockito.any());
-    datasetMetabaseService.createGroupProviderAndAddUser(1L, "test@reportnet.net");
+    datasetMetabaseService.createGroupProviderAndAddUser(1L, "test@reportnet.net", 1L);
     Mockito.verify(userManagementControllerZuul, times(1)).addUserToResource(Mockito.any(),
         Mockito.any());
   }

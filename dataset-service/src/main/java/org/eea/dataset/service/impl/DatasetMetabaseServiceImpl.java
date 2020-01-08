@@ -360,15 +360,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param userMail the user mail
+   * @param dataflowId the dataflow id
    */
   @Override
-  public void createGroupProviderAndAddUser(Long datasetId, String userMail) {
+  public void createGroupProviderAndAddUser(Long datasetId, String userMail, Long dataflowId) {
 
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
 
     userManagementControllerZuul.addContributorToResource(datasetId,
         ResourceGroupEnum.DATASET_PROVIDER, userMail);
+
+    userManagementControllerZuul.addContributorToResource(dataflowId,
+        ResourceGroupEnum.DATAFLOW_PROVIDER, userMail);
 
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
@@ -422,7 +426,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
       throws EEAException {
 
-    if (datasetType != null && datasetSchemaId != null && dataflowId != null) {
+    if (datasetType != null && dataflowId != null) {
       DataSetMetabase dataset;
 
       switch (datasetType) {
@@ -435,8 +439,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           dataset.setDataProviderId(representative.getDataProviderId());
           reportingDatasetRepository.save((ReportingDataset) dataset);
           if (StringUtils.isNotBlank(representative.getProviderAccount())) {
-            this.createGroupProviderAndAddUser(dataset.getId(),
-                representative.getProviderAccount());
+            this.createGroupProviderAndAddUser(dataset.getId(), representative.getProviderAccount(),
+                dataflowId);
           }
           break;
         case DESIGN:

@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -73,9 +72,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PostMapping(value = "/create")
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO) {
-    if (StringUtils.isBlank(dataCollectionVO.getDataSetName())) {
+    if (dataCollectionVO.getIdDataflow() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
 
     // 1. Get the design datasets
@@ -96,7 +95,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         }
         // Create the DC per design dataset
         datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-            dataCollectionVO.getDataSetName() + "_" + design.getDataSetName(),
+            "Data Collection" + " - " + design.getDataSetName(),
             dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(),
             dataCollectionVO.getDueDate(), null);
 

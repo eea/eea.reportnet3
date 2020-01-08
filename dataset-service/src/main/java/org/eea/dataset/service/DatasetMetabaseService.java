@@ -90,13 +90,15 @@ public interface DatasetMetabaseService {
   List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
 
+
   /**
    * Creates the group provider and add user.
    *
    * @param datasetId the dataset id
    * @param userMail the user mail
+   * @param idDataflow the id dataflow
    */
-  void createGroupProviderAndAddUser(Long datasetId, String userMail);
+  void createGroupProviderAndAddUser(Long datasetId, String userMail, Long idDataflow);
 
   /**
    * Creates the group dc and add user.
@@ -104,13 +106,6 @@ public interface DatasetMetabaseService {
    * @param datasetId the dataset id
    */
   void createGroupDcAndAddUser(Long datasetId);
-
-
-  /*
-   * Long crearDatasetAsync(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-   * Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
-   */
-
 
 
 }
