@@ -3,8 +3,9 @@ package org.eea.dataset.service.impl;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
-import org.eea.dataset.persistence.data.repository.CodelistRepository;
 import org.eea.dataset.persistence.metabase.domain.Codelist;
+import org.eea.dataset.persistence.metabase.repository.CodelistItemRepository;
+import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -12,6 +13,7 @@ import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class CodelistServiceImpl.
@@ -22,6 +24,10 @@ public class CodelistServiceImpl implements CodelistService {
   /** The codelist repository. */
   @Autowired
   private CodelistRepository codelistRepository;
+
+  /** The codelist item repository. */
+  @Autowired
+  private CodelistItemRepository codelistItemRepository;
 
   /** The codelist mapper. */
   @Autowired
@@ -43,6 +49,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public CodelistVO getById(Long codelistId) throws EEAException {
     Codelist codelist = codelistRepository.findById(codelistId).orElse(null);
     if (null == codelist) {
@@ -57,6 +64,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @param codelistId the codelist id
    */
   @Override
+  @Transactional
   public void delete(Long codelistId) {
     codelistRepository.deleteById(codelistId);
   }
@@ -70,32 +78,40 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public Long create(CodelistVO codelistVO, Long codelistId) throws EEAException {
     Long response;
+    codelistVO.setStatus(CodelistStatusEnum.DESIGN);
+    Codelist codelist = codelistMapper.classToEntity(codelistVO);
     if (codelistId == null) {
-      codelistVO.setStatus(CodelistStatusEnum.DESIGN);
-      response = codelistRepository.save(codelistMapper.classToEntity(codelistVO)).getId();
+      response = codelistRepository.save(codelist).getId();
     } else {
       Codelist oldCodelist = codelistRepository.findById(codelistId).orElse(null);
       if (oldCodelist == null) {
         throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
       }
-      Codelist newCodelist = codelistMapper.classToEntity(codelistVO);
-      if (newCodelist.getCategory() == null) {
-        newCodelist.setCategory(oldCodelist.getCategory());
+
+      if (codelist.getCategory() == null) {
+        codelist.setCategory(oldCodelist.getCategory());
       }
-      if (newCodelist.getDescription() == null) {
-        newCodelist.setDescription(oldCodelist.getDescription());
+      if (codelist.getDescription() == null) {
+        codelist.setDescription(oldCodelist.getDescription());
       }
-      if (newCodelist.getItems() == null) {
-        newCodelist.setItems(oldCodelist.getItems());
+      if (codelist.getItems() == null) {
+        codelist.setItems(oldCodelist.getItems());
       }
-      if (newCodelist.getName() == null) {
-        newCodelist.setName(oldCodelist.getName());
+      if (codelist.getName() == null) {
+        codelist.setName(oldCodelist.getName());
       }
-      newCodelist.setVersion(oldCodelist.getVersion() + 1);
-      newCodelist.setStatus(CodelistStatusEnum.DESIGN);
-      response = codelistRepository.save(newCodelist).getId();
+      codelist.setVersion(oldCodelist.getVersion() + 1);
+      codelist.setStatus(CodelistStatusEnum.DESIGN);
+      response = codelistRepository.save(codelist).getId();
+    }
+    if (response != null) {
+      Codelist codelisttemp = new Codelist();
+      codelisttemp.setId(response);
+      codelist.getItems().stream().forEach(item -> item.setCodelist(codelisttemp));
+      codelistItemRepository.saveAll(codelist.getItems());
     }
     return response;
   }
@@ -108,6 +124,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public Long update(CodelistVO codelistVO) throws EEAException {
     Codelist oldCodelist = codelistRepository.findById(codelistVO.getId()).orElse(null);
     if (oldCodelist == null) {
@@ -144,7 +161,14 @@ public class CodelistServiceImpl implements CodelistService {
       default:
         throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
     }
-    codelistRepository.save(oldCodelist);
+
+    Long response = codelistRepository.save(oldCodelist).getId();
+    if (response != null) {
+      Codelist codelisttemp = new Codelist();
+      codelisttemp.setId(response);
+      oldCodelist.getItems().stream().forEach(item -> item.setCodelist(codelisttemp));
+      codelistItemRepository.saveAll(oldCodelist.getItems());
+    }
     return codelistVO.getId();
   }
 }

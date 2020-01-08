@@ -1,14 +1,14 @@
 package org.eea.dataset.persistence.metabase.domain;
 
-import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +26,9 @@ public class CodelistItem {
 
   /** The id. */
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "codelist_item_id_seq")
+  @SequenceGenerator(name = "codelist_item_id_seq", sequenceName = "codelist_item_id_seq",
+      allocationSize = 1)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -42,14 +45,8 @@ public class CodelistItem {
   private String definition;
 
   @ManyToOne
-  @JoinColumn(name = "id")
+  @JoinColumn(name = "id_codelist")
   private Codelist codelist;
-
-  /**
-   * The table values.
-   */
-  @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Codelist> codelists;
 
   /**
    * Equals.

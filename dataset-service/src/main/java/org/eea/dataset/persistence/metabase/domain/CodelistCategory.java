@@ -5,8 +5,11 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +28,9 @@ public class CodelistCategory {
 
   /** The id. */
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "codelist_category_id_seq")
+  @SequenceGenerator(name = "codelist_category_id_seq", sequenceName = "codelist_category_id_seq",
+      allocationSize = 1)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -37,7 +43,7 @@ public class CodelistCategory {
   private String description;
 
   /** The codelists. */
-  @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Codelist> codelists;
 
   /**

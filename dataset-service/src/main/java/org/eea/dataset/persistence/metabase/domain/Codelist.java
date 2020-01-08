@@ -5,10 +5,14 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
 import lombok.Getter;
@@ -27,6 +31,8 @@ public class Codelist {
 
   /** The id. */
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "codelist_id_seq")
+  @SequenceGenerator(name = "codelist_id_seq", sequenceName = "codelist_id_seq", allocationSize = 1)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -40,7 +46,7 @@ public class Codelist {
 
   /** The category. */
   @ManyToOne
-  @JoinColumn(name = "id")
+  @JoinColumn(name = "id_category")
   private CodelistCategory category;
 
   /** The version. */
@@ -48,7 +54,8 @@ public class Codelist {
   private Long version;
 
   /** The items. */
-  @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "codelist", cascade = CascadeType.ALL, orphanRemoval = false,
+      fetch = FetchType.EAGER)
   private List<CodelistItem> items;
 
   /** The status. */

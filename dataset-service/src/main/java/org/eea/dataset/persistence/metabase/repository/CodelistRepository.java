@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.data.repository;
+package org.eea.dataset.persistence.metabase.repository;
 
 import org.eea.dataset.persistence.metabase.domain.Codelist;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -18,10 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+/**
+ * The Class DatasetCodelistControllerImpl.
+ */
 @RestController
 @RequestMapping("/codelist")
 public class DatasetCodelistControllerImpl implements DatasetCodelistController {
 
+  /** The codelist service. */
   @Autowired
   private CodelistService codelistService;
 
@@ -30,6 +34,12 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * Gets the by id.
+   *
+   * @param codelistId the codelist id
+   * @return the by id
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/{codelistId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,6 +58,12 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return codelistVO;
   }
 
+  /**
+   * Creates the.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
   @Override
   @HystrixCommand
   @PostMapping
@@ -65,6 +81,12 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return response;
   }
 
+  /**
+   * Update.
+   *
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
   @Override
   public Long update(CodelistVO codelistVO) {
     if (codelistVO == null || codelistVO.getId() == null) {
@@ -80,6 +102,13 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return response;
   }
 
+  /**
+   * Clone.
+   *
+   * @param codelistId the codelist id
+   * @param codelistVO the codelist VO
+   * @return the long
+   */
   @Override
   public Long clone(Long codelistId, CodelistVO codelistVO) {
     if (codelistVO == null || codelistId == null) {
@@ -95,10 +124,15 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return response;
   }
 
+  /**
+   * Delete codelist.
+   *
+   * @param codelistId the codelist id
+   */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{codelistId}")
-  public void deleteDocument(Long codelistId) {
+  public void delete(Long codelistId) {
     if (codelistId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
     }

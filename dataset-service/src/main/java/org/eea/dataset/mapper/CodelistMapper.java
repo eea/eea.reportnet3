@@ -18,8 +18,6 @@ public interface CodelistMapper extends IMapper<Codelist, CodelistVO> {
    * @param entity the entity
    * @return the codelist VO
    */
-  // @Mapping(source = "category.id", target = "categoryId")
-  // @Mapping(source = "items.id", target = "itemsId")
   @Override
   CodelistVO entityToClass(Codelist entity);
 
@@ -29,8 +27,6 @@ public interface CodelistMapper extends IMapper<Codelist, CodelistVO> {
    * @param model the model
    * @return the codelist
    */
-  // @Mapping(source = "categoryId", target = "category.id")
-  // @Mapping(source = "itemsId", target = "items.id")
   @Override
   Codelist classToEntity(CodelistVO model);
 

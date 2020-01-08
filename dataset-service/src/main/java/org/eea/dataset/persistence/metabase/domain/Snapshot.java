@@ -15,26 +15,8 @@ import lombok.ToString;
  * The type Snapshot.
  */
 @Entity
-
-/**
- * Gets the release.
- *
- * @return the release
- */
 @Getter
-
-/**
- * Sets the release.
- *
- * @param release the new release
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Table(name = "SNAPSHOT")
 public class Snapshot extends DataSetMetabase {

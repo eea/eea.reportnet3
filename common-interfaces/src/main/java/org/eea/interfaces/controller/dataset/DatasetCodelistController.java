@@ -62,10 +62,10 @@ public interface DatasetCodelistController {
   Long clone(@PathVariable("codelistId") Long codelistId, @RequestBody CodelistVO codelistVO);
 
   /**
-   * Delete document.
+   * Delete codelist.
    *
    * @param codelistId the codelist id
    */
   @DeleteMapping(value = "/{codelistId}")
-  void deleteDocument(@PathVariable("codelistId") Long codelistId);
+  void delete(@PathVariable("codelistId") Long codelistId);
 }
