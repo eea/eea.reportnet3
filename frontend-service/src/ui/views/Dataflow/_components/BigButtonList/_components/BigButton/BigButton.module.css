@@ -3,10 +3,30 @@
   font-size: 2rem;
   max-width: fit-content;
   cursor: pointer;
+  margin-right: 1rem !important;
 }
 
 .bigButton > a {
   padding: 2.3rem 2.7rem;
+}
+
+.dataCollection {
+  background-color: var(--c-corporate-blue);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.dataCollection a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.dataCollection a:hover {
+  color: var(--white);
+  background-color: var(--c-blue-400);
 }
 
 .dataset {

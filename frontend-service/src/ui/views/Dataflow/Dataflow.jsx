@@ -12,7 +12,7 @@ import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 
-import { BigButton } from './_components/BigButton';
+import { BigButtonList } from './_components/BigButtonList';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -22,7 +22,6 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -53,9 +52,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowTitle, setDataflowTitle] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
-  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
@@ -66,11 +62,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isDuplicated, setIsDuplicated] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
@@ -271,56 +264,6 @@ const Dataflow = withRouter(({ history, match }) => {
           }
         ];
 
-  const errorDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setErrorDialogVisible(false);
-          setIsDuplicated(false);
-        }}
-      />
-    </div>
-  );
-
-  const getDeleteSchemaIndex = index => {
-    setDeleteSchemaIndex(index);
-    setDeleteDialogVisible(true);
-  };
-
-  const onCreateDatasetSchema = () => {
-    setNewDatasetDialog(false);
-  };
-
-  const onDatasetSchemaNameError = () => {
-    setErrorDialogVisible(true);
-  };
-
-  const onDeleteDatasetSchema = async index => {
-    setDeleteDialogVisible(false);
-    showLoading();
-    try {
-      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
-      if (response >= 200 && response <= 299) {
-        onUpdateData();
-      }
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      hideLoading();
-    }
-  };
-
-  const onDuplicateName = () => {
-    setIsDuplicated(true);
-  };
-
-  const onHideErrorDialog = () => {
-    setErrorDialogVisible(false);
-    setIsDuplicated(false);
-  };
-
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
   };
@@ -334,11 +277,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const showContributorsDialog = () => {
     setIsActiveManageRolesDialog(true);
-  };
-
-  const showNewDatasetDialog = () => {
-    setNewDatasetDialog(true);
-    setIsFormReset(true);
   };
 
   const showReleaseSnapshotDialog = async datasetId => {
@@ -427,209 +365,19 @@ const Dataflow = withRouter(({ history, match }) => {
           </div>
         </div>
 
-        <div className={`${styles.buttonsWrapper}`}>
-          <div className={styles.splitButtonWrapper}>
-            {isCustodian && (
-              <div className={`${styles.datasetItem}`}>
-                <BigButton
-                  layout="newItem"
-                  caption={resources.messages['newItem']}
-                  model={[
-                    {
-                      label: resources.messages['createNewEmptyDatasetSchema'],
-                      icon: 'add',
-                      command: () => showNewDatasetDialog()
-                    },
-                    {
-                      label: resources.messages['createNewDatasetFromTemplate'],
-                      icon: 'add',
-                      disabled: true
-                    }
-                  ]}
-                />
-              </div>
-            )}
-            <div className={`${styles.datasetItem}`}>
-              <BigButton
-                layout="documents"
-                caption={resources.messages['dataflowHelp']}
-                handleRedirect={() =>
-                  handleRedirect(
-                    getUrl(
-                      routes.DOCUMENTS,
-                      {
-                        dataflowId: match.params.dataflowId
-                      },
-                      true
-                    )
-                  )
-                }
-                onWheel={getUrl(
-                  routes.DOCUMENTS,
-                  {
-                    dataflowId: match.params.dataflowId
-                  },
-                  true
-                )}
-              />
-            </div>
-            {!isUndefined(dataflowData.designDatasets) ? (
-              dataflowData.designDatasets.map(newDatasetSchema => {
-                return (
-                  <div className={`${styles.datasetItem}`} key={newDatasetSchema.datasetId}>
-                    <BigButton
-                      layout="designDatasetSchema"
-                      caption={newDatasetSchema.datasetSchemaName}
-                      dataflowStatus={dataflowStatus}
-                      datasetSchemaInfo={updatedDatasetSchema}
-                      handleRedirect={() => {
-                        handleRedirect(
-                          getUrl(
-                            routes.DATASET_SCHEMA,
-                            {
-                              dataflowId: match.params.dataflowId,
-                              datasetId: newDatasetSchema.datasetId
-                            },
-                            true
-                          )
-                        );
-                      }}
-                      index={newDatasetSchema.index}
-                      onDuplicateName={onDuplicateName}
-                      onSaveError={onDatasetSchemaNameError}
-                      onSaveName={onSaveName}
-                      onWheel={getUrl(
-                        routes.DATASET_SCHEMA,
-                        {
-                          dataflowId: match.params.dataflowId,
-                          datasetId: newDatasetSchema.datasetId
-                        },
-                        true
-                      )}
-                      placeholder={resources.messages['datasetSchemaNamePlaceholder']}
-                      model={[
-                        {
-                          label: resources.messages['openDataset'],
-                          icon: 'openFolder',
-                          command: () => {
-                            handleRedirect(
-                              getUrl(
-                                routes.DATASET_SCHEMA,
-                                {
-                                  dataflowId: match.params.dataflowId,
-                                  datasetId: newDatasetSchema.datasetId
-                                },
-                                true
-                              )
-                            );
-                          }
-                        },
-                        {
-                          label: resources.messages['rename'],
-                          icon: 'pencil',
-                          disabled: dataflowStatus !== config.dataflowStatus['DESIGN']
-                        },
-                        {
-                          label: resources.messages['duplicate'],
-                          icon: 'clone',
-                          disabled: true
-                        },
-                        {
-                          label: resources.messages['delete'],
-                          icon: 'trash',
-                          disabled: dataflowStatus !== config.dataflowStatus['DESIGN'],
-                          command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-                        },
-                        {
-                          label: resources.messages['properties'],
-                          icon: 'info',
-                          disabled: true
-                        }
-                      ]}
-                    />
-                  </div>
-                );
-              })
-            ) : (
-              <></>
-            )}
-            {dataflowData.datasets.map(dataset => {
-              return (
-                <div className={`${styles.datasetItem}`} key={dataset.datasetId}>
-                  <BigButton
-                    layout="dataset"
-                    caption={dataset.datasetSchemaName}
-                    isReleased={dataset.isReleased}
-                    handleRedirect={() => {
-                      handleRedirect(
-                        getUrl(
-                          routes.DATASET,
-                          {
-                            dataflowId: match.params.dataflowId,
-                            datasetId: dataset.datasetId
-                          },
-                          true
-                        )
-                      );
-                    }}
-                    onWheel={getUrl(
-                      routes.DATASET,
-                      {
-                        dataflowId: match.params.dataflowId,
-                        datasetId: dataset.datasetId
-                      },
-                      true
-                    )}
-                    model={
-                      hasWritePermissions
-                        ? [
-                            {
-                              label: resources.messages['releaseDataCollection'],
-                              icon: 'cloudUpload',
-                              command: () => showReleaseSnapshotDialog(dataset.datasetId),
-                              disabled: false
-                            }
-                          ]
-                        : [
-                            {
-                              label: resources.messages['properties'],
-                              icon: 'info',
-                              disabled: true
-                            }
-                          ]
-                    }
-                  />
-                </div>
-              );
-            })}
-            {isCustodian && !isEmpty(dataflowData.datasets) && (
-              <div className={`${styles.datasetItem}`}>
-                <BigButton
-                  layout="dashboard"
-                  caption={resources.messages['dashboards']}
-                  handleRedirect={() =>
-                    handleRedirect(
-                      getUrl(
-                        routes.DASHBOARDS,
-                        {
-                          dataflowId: match.params.dataflowId
-                        },
-                        true
-                      )
-                    )
-                  }
-                  onWheel={getUrl(
-                    routes.DASHBOARDS,
-                    {
-                      dataflowId: match.params.dataflowId
-                    },
-                    true
-                  )}
-                />
-              </div>
-            )}
-          </div>
-        </div>
+        <BigButtonList
+          dataflowData={dataflowData}
+          handleRedirect={handleRedirect}
+          dataflowStatus={dataflowStatus}
+          dataflowId={match.params.dataflowId}
+          designDatasetSchemas={designDatasetSchemas}
+          isCustodian={isCustodian}
+          hasWritePermissions={hasWritePermissions}
+          onUpdateData={onUpdateData}
+          showReleaseSnapshotDialog={showReleaseSnapshotDialog}
+          onSaveName={onSaveName}
+          updatedDatasetSchema={updatedDatasetSchema}
+        />
 
         <Dialog
           header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
@@ -641,47 +389,6 @@ const Dataflow = withRouter(({ history, match }) => {
           <RepresentativesList dataflowId={dataflowData.id} />
         </Dialog>
 
-        <Dialog
-          header={resources.messages['newDatasetSchema']}
-          visible={newDatasetDialog}
-          className={styles.dialog}
-          dismissableMask={false}
-          onHide={() => {
-            setNewDatasetDialog(false);
-            setIsFormReset(false);
-          }}>
-          <NewDatasetSchemaForm
-            dataflowId={match.params.dataflowId}
-            datasetSchemaInfo={updatedDatasetSchema}
-            isFormReset={isFormReset}
-            onCreate={onCreateDatasetSchema}
-            onUpdateData={onUpdateData}
-            setNewDatasetDialog={setNewDatasetDialog}
-          />
-        </Dialog>
-        <Dialog
-          footer={errorDialogFooter}
-          header={resources.messages['error'].toUpperCase()}
-          onHide={onHideErrorDialog}
-          visible={isDuplicated}>
-          <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
-        </Dialog>
-        <Dialog
-          footer={errorDialogFooter}
-          header={resources.messages['error'].toUpperCase()}
-          onHide={onHideErrorDialog}
-          visible={errorDialogVisible}>
-          <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
-        </Dialog>
-        <ConfirmDialog
-          header={resources.messages['delete'].toUpperCase()}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
-          onHide={() => setDeleteDialogVisible(false)}
-          visible={deleteDialogVisible}>
-          {resources.messages['deleteDatasetSchema']}
-        </ConfirmDialog>
         <Dialog
           header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
           className={styles.releaseSnapshotsDialog}
@@ -792,7 +499,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}

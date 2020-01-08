@@ -121,6 +121,22 @@ export const BigButton = ({
     }
   };
 
+  const dataCollection = (
+    <>
+      <div className={`${styles.bigButton} ${styles.dataCollection}`}>
+        <a
+          onClick={e => {
+            e.preventDefault();
+            handleRedirect();
+          }}
+          onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon icon={AwesomeIcons('archive')} />
+        </a>
+      </div>
+      <p className={styles.caption}>{caption}</p>
+    </>
+  );
+
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
@@ -239,6 +255,7 @@ export const BigButton = ({
     </>
   );
   const buttons = {
+    dataCollection,
     dataset,
     dashboard,
     designDatasetSchema,
