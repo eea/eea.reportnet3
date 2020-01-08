@@ -1,7 +1,9 @@
 package org.eea.dataset.service;
 
+import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -20,6 +22,7 @@ public interface DatasetMetabaseService {
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
 
 
+
   /**
    * Creates the empty dataset.
    *
@@ -27,11 +30,13 @@ public interface DatasetMetabaseService {
    * @param datasetName the dataset name
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @param representative the representative
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId) throws EEAException;
+      Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
 
   /**
    * Gets the dataset name.
@@ -84,5 +89,23 @@ public interface DatasetMetabaseService {
    */
   List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
+
+
+  /**
+   * Creates the group provider and add user.
+   *
+   * @param datasetId the dataset id
+   * @param userMail the user mail
+   * @param idDataflow the id dataflow
+   */
+  void createGroupProviderAndAddUser(Long datasetId, String userMail, Long idDataflow);
+
+  /**
+   * Creates the group dc and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  void createGroupDcAndAddUser(Long datasetId);
+
 
 }

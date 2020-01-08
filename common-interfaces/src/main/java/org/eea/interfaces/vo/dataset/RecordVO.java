@@ -41,6 +41,9 @@ public class RecordVO implements Serializable {
    */
   private Long datasetPartitionId;
 
+  /** The data provider code. */
+  private String dataProviderCode;
+
   /**
    * The validations.
    */

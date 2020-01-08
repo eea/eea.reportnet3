@@ -82,12 +82,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /*
-   * @Autowired private UpdateRecordHelper updateRecordHelper;
-   */
-
-
-
   /**
    * The dataflow controller zuul.
    */
@@ -122,9 +116,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      dataschemaService.createGroupAndAddUser(
-          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, datasetSchemaName,
-              dataschemaService.createEmptyDataSetSchema(dataflowId).toString(), dataflowId));
+      dataschemaService
+          .createGroupAndAddUser(datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
+              datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
+              dataflowId, null, null));
     } catch (EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

@@ -71,6 +71,10 @@ public class DataSetMetabase {
   @Column(name = "DATASET_SCHEMA")
   private String datasetSchema;
 
+  /** The data provider id. */
+  @Column(name = "DATA_PROVIDER_ID")
+  private Long dataProviderId;
+
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
