@@ -1,0 +1,1 @@
+export { apiDataCollection } from './ApiDataCollection';
