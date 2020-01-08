@@ -442,6 +442,7 @@ export const apiDataset = {
     }
   },
   updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
+    console.log(datasetSchemaDescription);
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -450,7 +451,7 @@ export const apiDataset = {
           : getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
               datasetId
             }),
-        data: { description: datasetSchemaDescription },
+        data: datasetSchemaDescription,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`

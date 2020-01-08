@@ -5,7 +5,7 @@ import styles from './Codelists.module.css';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
-import { Codelist } from './_components/Codelist';
+import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -22,12 +22,13 @@ import { CodelistsUtils } from './_functions/Utils/CodelistsUtils';
 
 const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   const resources = useContext(ResourcesContext);
-  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   };
 
   const onFilter = filter => {
+    console.log({ filter });
     if (filter === '') {
       setIsFiltered(false);
     } else {
@@ -59,8 +61,10 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     }
 
     const inmCategories = [...categories];
+    console.log(CodelistsUtils.filterByText(inmCategories, filter.toUpperCase()));
     //const filteredCategories = CodelistsUtils.filterByText(inmCategories, filter);
-    setFilteredCategories(CodelistsUtils.filterByText(inmCategories, filter));
+    setFilteredCategories(CodelistsUtils.filterByText(inmCategories, filter.toUpperCase()));
+    setFilter(filter);
   };
 
   const onLoadCategories = async () => {
@@ -133,6 +137,11 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
               ]
             }
           ]
+        },
+        {
+          name: 'category 2',
+          description: '(Category 2 - Fire Information System of Europe)',
+          codelists: []
         }
       ];
       // await Categorieservice.all(`${match.params.dataflowId}`);
@@ -161,21 +170,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
           className={styles.categoryExpandable}
           expanded={true}
           items={[category.name, category.description]}>
-          {isDataCustodian ? (
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                label={resources.messages['editCategory']}
-                icon="pencil"
-                onClick={() => setNewCategoryVisible(true)}
-                style={{ float: 'right' }}
-              />
-            </div>
-          ) : null}
-          <div className={styles.codelists}>
-            {category.codelists.map(codelist => {
-              return <Codelist codelist={codelist} />;
-            })}
-          </div>
+          <Category category={category} isDataCustodian={isDataCustodian} />
         </TreeViewExpandableItem>
       );
     });
@@ -198,7 +193,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
       <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
       <div className={styles.codelistsActions}>
         <span className={`${styles.filterSpan} p-float-label`}>
-          <InputText id="filterInput" onKeyDown={e => onFilter(e.target.value.toUpperCase)} />
+          <InputText id="filterInput" onChange={e => onFilter(e.target.value)} value={filter} />
           <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
         </span>
         {isDataCustodian ? (

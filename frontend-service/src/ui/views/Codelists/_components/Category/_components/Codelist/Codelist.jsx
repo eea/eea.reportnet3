@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 
 import { capitalize, isUndefined } from 'lodash';
 
@@ -9,6 +9,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { CodelistForm } from './_components/CodelistForm/CodelistForm';
+import { CodelistProperties } from 'ui/views/_components/CodelistProperties/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -29,10 +30,10 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
   const resources = useContext(ResourcesContext);
 
   const initialCodelistState = {
-    name: codelist.name,
-    version: codelist.version,
-    status: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
-    description: codelist.description,
+    codelistName: codelist.name,
+    codelistVersion: codelist.version,
+    codelistStatus: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
+    codelistDescription: codelist.description,
     editedItem: { itemId: '', code: '', label: '', definition: '' },
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
@@ -242,57 +243,12 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
 
   const renderInputs = () => {
     return (
-      <div className={styles.inputsWrapper}>
-        <span className={`${styles.codelistInput} p-float-label`}>
-          <InputText
-            disabled={!codelistState.isEditing}
-            id="nameInput"
-            onChange={e => onEditorPropertiesInputChange(e.target.value, 'name')}
-            onKeyDown={e => onKeyChange(e, 'name')}
-            value={codelistState.name}
-          />
-          <label htmlFor="nameInput">{resources.messages['codelistName']}</label>
-        </span>
-        <span className={`${styles.codelistInput} p-float-label`}>
-          <InputText
-            disabled={!codelistState.isEditing}
-            id="versionInput"
-            onChange={e => onEditorPropertiesInputChange(e.target.value, 'version')}
-            onKeyDown={e => onKeyChange(e, 'version')}
-            value={codelistState.version}
-          />
-          <label htmlFor="versionInput">{resources.messages['codelistVersion']}</label>
-        </span>
-        <div className={styles.codelistDropdown}>
-          <label className={styles.codelistStatus}>{resources.messages['codelistStatus']}</label>
-          <Dropdown
-            className={styles.dropdownFieldType}
-            disabled={!codelistState.isEditing}
-            onChange={e => onEditorPropertiesInputChange(e.target.value, 'status')}
-            optionLabel="statusType"
-            options={statusTypes}
-            // required={true}
-            placeholder={resources.messages['codelistStatus']}
-            value={getStatusValue(codelistState.status)}
-          />
-        </div>
-        <span className={`${styles.codelistInputTextarea} p-float-label`}>
-          <InputTextarea
-            collapsedHeight={40}
-            disabled={!codelistState.isEditing}
-            expandableOnClick={true}
-            id="descriptionInput"
-            key="descriptionInput"
-            onChange={e => onEditorPropertiesInputChange(e.target.value, 'description')}
-            onKeyDown={e => onKeyChange(e, 'description')}
-            // onFocus={e => {
-            //   setInitialTableDescription(e.target.value);
-            // }}
-            value={codelistState.description}
-          />
-          <label htmlFor="descriptionInput">{resources.messages['codelistDescription']}</label>
-        </span>
-      </div>
+      <CodelistProperties
+        isEmbedded={false}
+        onEditorPropertiesInputChange={onEditorPropertiesInputChange}
+        onKeyChange={onKeyChange}
+        state={codelistState}
+      />
     );
   };
 

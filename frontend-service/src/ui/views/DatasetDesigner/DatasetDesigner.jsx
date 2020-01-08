@@ -122,6 +122,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const onBlurDescription = description => {
     if (description !== initialDatasetDescription) {
+      console.log({ description });
       onUpdateDescription(description);
     }
   };

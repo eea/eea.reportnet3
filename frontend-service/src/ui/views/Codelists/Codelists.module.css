@@ -1,9 +1,3 @@
-.codelists {
-  display: flex;
-  flex-direction: column;
-  margin-top: 1rem;
-}
-
 .codelistsActions {
   display: flex;
   justify-content: space-between;
