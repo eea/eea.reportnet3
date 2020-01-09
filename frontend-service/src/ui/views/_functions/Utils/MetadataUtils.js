@@ -24,8 +24,8 @@ const getMetadata = ({ dataflowId, datasetId }) => {
     const dataflowMedatada = getDataflowMetadata();
     metadata.dataflow = {
       dataflowId,
-      name: dataflowMedatada.name,
-      description: dataflowMedatada.description
+      name: dataflowMedatada.name || '',
+      description: dataflowMedatada.description || ''
     };
   }
 
@@ -33,7 +33,7 @@ const getMetadata = ({ dataflowId, datasetId }) => {
     const datasetMetadata = getDatasetMetadata();
     metadata.dataset = {
       datasetId,
-      name: datasetMetadata.datasetSchemaName
+      name: datasetMetadata.datasetSchemaName || ''
     };
   }
   return metadata;
