@@ -131,6 +131,9 @@ public final class EEAErrorMessage {
   /** The Constant CODELIST_NOT_FOUND. */
   public static final String CODELIST_NOT_FOUND = "Codelist not found";
 
+  /** The Constant CODELIST_CATEGORY_NOT_FOUND. */
+  public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
+
   /**
    * Instantiates a new EEA error message.
    */

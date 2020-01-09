@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -68,4 +69,39 @@ public interface DatasetCodelistController {
    */
   @DeleteMapping(value = "/{codelistId}")
   void delete(@PathVariable("codelistId") Long codelistId);
+
+  /**
+   * Gets the category by id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the category by id
+   */
+  @GetMapping(value = "/category/{codelistCategoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  CodelistCategoryVO getCategoryById(@PathVariable("codelistCategoryId") Long codelistCategoryId);
+
+  /**
+   * Creates the category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   */
+  @PostMapping(value = "/category")
+  Long createCategory(@RequestBody CodelistCategoryVO codelistCategoryVO);
+
+  /**
+   * Update category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   */
+  @PutMapping(value = "/category/update")
+  Long updateCategory(@RequestBody CodelistCategoryVO codelistCategoryVO);
+
+  /**
+   * Delete category.
+   *
+   * @param codelistCategoryId the codelist category id
+   */
+  @DeleteMapping(value = "/category/{codelistCategoryId}")
+  void deleteCategory(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 }

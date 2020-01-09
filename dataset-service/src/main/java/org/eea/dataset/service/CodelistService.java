@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 
 /**
@@ -13,7 +14,7 @@ public interface CodelistService {
    *
    * @param codelistId the codelist id
    * @return the codelist by id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   CodelistVO getById(Long codelistId) throws EEAException;
 
@@ -29,6 +30,8 @@ public interface CodelistService {
    *
    * @param codelistVO the codelist VO
    * @param codelistId the codelist id
+   * @return the long
+   * @throws EEAException the EEA exception
    */
   Long create(CodelistVO codelistVO, Long codelistId) throws EEAException;
 
@@ -40,5 +43,39 @@ public interface CodelistService {
    * @throws EEAException the EEA exception
    */
   Long update(CodelistVO codelistVO) throws EEAException;
+
+  /**
+   * Gets the category by id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the category by id
+   * @throws EEAException the EEA exception
+   */
+  CodelistCategoryVO getCategoryById(Long codelistCategoryId) throws EEAException;
+
+  /**
+   * Creates the category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long createCategory(CodelistCategoryVO codelistCategoryVO) throws EEAException;
+
+  /**
+   * Update category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long updateCategory(CodelistCategoryVO codelistCategoryVO) throws EEAException;
+
+  /**
+   * Delete category.
+   *
+   * @param codelistCategoryId the codelist category id
+   */
+  void deleteCategory(Long codelistCategoryId);
 
 }

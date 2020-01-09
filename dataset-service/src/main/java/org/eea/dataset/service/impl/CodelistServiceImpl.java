@@ -1,14 +1,19 @@
 package org.eea.dataset.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
 import org.eea.dataset.persistence.metabase.domain.Codelist;
+import org.eea.dataset.persistence.metabase.domain.CodelistCategory;
+import org.eea.dataset.persistence.metabase.repository.CodelistCategoryRepository;
 import org.eea.dataset.persistence.metabase.repository.CodelistItemRepository;
 import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,10 @@ public class CodelistServiceImpl implements CodelistService {
   /** The codelist item repository. */
   @Autowired
   private CodelistItemRepository codelistItemRepository;
+
+  /** The codelist category repository. */
+  @Autowired
+  private CodelistCategoryRepository codelistCategoryRepository;
 
   /** The codelist mapper. */
   @Autowired
@@ -59,6 +68,24 @@ public class CodelistServiceImpl implements CodelistService {
   }
 
   /**
+   * Find duplicated.
+   *
+   * @param name the name
+   * @param version the version
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  public List<CodelistVO> findDuplicated(String name, Long version) throws EEAException {
+    List<Codelist> codelists =
+        codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
+    if (null != codelists) {
+      return codelistMapper.entityListToClass(codelists);
+    }
+    return new ArrayList<>();
+  }
+
+  /**
    * Delete.
    *
    * @param codelistId the codelist id
@@ -82,6 +109,7 @@ public class CodelistServiceImpl implements CodelistService {
   public Long create(CodelistVO codelistVO, Long codelistId) throws EEAException {
     Long response;
     codelistVO.setStatus(CodelistStatusEnum.DESIGN);
+    codelistVO.setVersion(1L);
     Codelist codelist = codelistMapper.classToEntity(codelistVO);
     if (codelistId == null) {
       response = codelistRepository.save(codelist).getId();
@@ -104,6 +132,9 @@ public class CodelistServiceImpl implements CodelistService {
         codelist.setName(oldCodelist.getName());
       }
       codelist.setVersion(oldCodelist.getVersion() + 1);
+      if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
+        codelist.setVersion(codelist.getVersion() + 1);
+      }
       codelist.setStatus(CodelistStatusEnum.DESIGN);
       response = codelistRepository.save(codelist).getId();
     }
@@ -132,21 +163,7 @@ public class CodelistServiceImpl implements CodelistService {
     }
     switch (oldCodelist.getStatus()) {
       case DESIGN:
-        if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
-          oldCodelist.setStatus(CodelistStatusEnum.READY);
-        }
-        if (codelistVO.getName() != null) {
-          oldCodelist.setName(codelistVO.getName());
-        }
-        if (codelistVO.getDescription() != null) {
-          oldCodelist.setDescription(codelistVO.getDescription());
-        }
-        if (codelistVO.getCategory() != null) {
-          oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
-        }
-        if (codelistVO.getItems() != null) {
-          oldCodelist.setItems(codelistItemMapper.classListToEntity(codelistVO.getItems()));
-        }
+        modifyCodelistDesignState(codelistVO, oldCodelist);
         break;
       case DEPRECATED:
         if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
@@ -170,5 +187,106 @@ public class CodelistServiceImpl implements CodelistService {
       codelistItemRepository.saveAll(oldCodelist.getItems());
     }
     return codelistVO.getId();
+  }
+
+  /**
+   * Modify codelist design state.
+   *
+   * @param codelistVO the codelist VO
+   * @param oldCodelist the old codelist
+   * @throws EEAException the EEA exception
+   */
+  private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist)
+      throws EEAException {
+    if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
+      oldCodelist.setStatus(CodelistStatusEnum.READY);
+    }
+    if (codelistVO.getName() != null) {
+      if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion()).isEmpty()) {
+        oldCodelist.setVersion(oldCodelist.getVersion() + 1);
+      }
+      oldCodelist.setName(codelistVO.getName());
+    }
+    if (codelistVO.getDescription() != null) {
+      oldCodelist.setDescription(codelistVO.getDescription());
+    }
+    if (codelistVO.getCategory() != null) {
+      oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
+    }
+    if (codelistVO.getItems() != null) {
+      oldCodelist.setItems(codelistItemMapper.classListToEntity(codelistVO.getItems()));
+    }
+  }
+
+  /**
+   * Gets the category by id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the category by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public CodelistCategoryVO getCategoryById(Long codelistCategoryId) throws EEAException {
+    CodelistCategory codelistCategory =
+        codelistCategoryRepository.findById(codelistCategoryId).orElse(null);
+    if (null == codelistCategory) {
+      throw new EEAException(EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
+    }
+    return codelistCategoryMapper.entityToClass(codelistCategory);
+  }
+
+  /**
+   * Creates the category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public Long createCategory(CodelistCategoryVO codelistCategoryVO) throws EEAException {
+    if (codelistCategoryVO == null) {
+      throw new EEAException(EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
+    }
+    CodelistCategory codelistCategory = codelistCategoryMapper.classToEntity(codelistCategoryVO);
+    return codelistCategoryRepository.save(codelistCategory).getId();
+  }
+
+  /**
+   * Update category.
+   *
+   * @param codelistCategoryVO the codelist category VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public Long updateCategory(CodelistCategoryVO codelistCategoryVO) throws EEAException {
+    CodelistCategory oldCodelistCategory =
+        codelistCategoryRepository.findById(codelistCategoryVO.getId()).orElse(null);
+    if (oldCodelistCategory == null) {
+      throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    if (oldCodelistCategory.getShortCode() != null) {
+      oldCodelistCategory.setShortCode(codelistCategoryVO.getShortCode());
+    }
+    if (oldCodelistCategory.getDescription() != null) {
+      oldCodelistCategory.setDescription(codelistCategoryVO.getDescription());
+    }
+    return codelistCategoryRepository.save(oldCodelistCategory).getId();
+
+
+  }
+
+  /**
+   * Delete category.
+   *
+   * @param codelistCategoryId the codelist category id
+   */
+  @Override
+  @Transactional
+  public void deleteCategory(Long codelistCategoryId) {
+    codelistCategoryRepository.deleteById(codelistCategoryId);
   }
 }
