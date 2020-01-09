@@ -68,20 +68,19 @@
   background-color: var(--c-aquamarine);
 }
 
-.documents {
-  background-color: var(--c-orange-200);
+.defaultBigButton {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.documents a {
+.defaultBigButton a {
   color: var(--white);
   border-radius: 10px;
 }
 
-.documents a:hover {
+.defaultBigButton a:hover {
   background-color: var(--c-orange-300);
   color: var(--white);
 }

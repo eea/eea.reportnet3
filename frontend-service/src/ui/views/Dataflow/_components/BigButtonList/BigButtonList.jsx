@@ -9,6 +9,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { DatasetService } from 'core/services/Dataset';
+import { DataCollectionService } from 'core/services/DataCollection';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -31,6 +32,7 @@ export const BigButtonList = ({
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
 
+  const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -58,6 +60,15 @@ export const BigButtonList = ({
 
   const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
+  };
+
+  const onCreateDataCollection = async date => {
+    setDataCollectionDialog(false);
+    try {
+      const response = await DataCollectionService.create(dataflowId, date);
+    } catch (error) {
+      console.log('error: ', error);
+    }
   };
 
   const onDatasetSchemaNameError = () => {
@@ -93,6 +104,10 @@ export const BigButtonList = ({
     setIsFormReset(true);
   };
 
+  const onShowDataCollectionModal = () => {
+    setDataCollectionDialog(true);
+  };
+
   return (
     <>
       <div className={styles.buttonsWrapper}>
@@ -109,14 +124,11 @@ export const BigButtonList = ({
               onDatasetSchemaNameError: onDatasetSchemaNameError,
               onDuplicateName: onDuplicateName,
               onSaveName: onSaveName,
+              onShowDataCollectionModal: onShowDataCollectionModal,
               onShowNewSchemaDialog: onShowNewSchemaDialog,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
               updatedDatasetSchema: updatedDatasetSchema
             }).map(button => (button.visibility ? <BigButton {...button} /> : <></>))}
-          </div>
-
-          <div className={`${styles.datasetItem}`}>
-            <BigButton layout="dataCollection" caption="Create data collection" />
           </div>
         </div>
       </div>
@@ -164,6 +176,16 @@ export const BigButtonList = ({
         onHide={() => setDeleteDialogVisible(false)}
         visible={deleteDialogVisible}>
         {resources.messages['deleteDatasetSchema']}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        header={resources.messages['delete'].toUpperCase()}
+        labelCancel={resources.messages['close']}
+        labelConfirm={resources.messages['create']}
+        // onConfirm={onConfirmModal}
+        visible={dataCollectionDialog}
+        onHide={() => setDataCollectionDialog(false)}>
+        Please select end date: <input type="date" onChange={e => console.log('e', e.target.value)} />
       </ConfirmDialog>
     </>
   );

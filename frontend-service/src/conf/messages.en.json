@@ -35,6 +35,7 @@
 		"copyrightResources": "Resources for partners",
 		"correct": "Correct",
 		"create": "Create",
+		"createDataCollection": "Create data collections",
 		"createNewDataflow": "Create new dataflow",
 		"createNewDatasetFromTemplate": "New dataset from template",
 		"createNewEmptyDatasetSchema": "New empty dataset schema",

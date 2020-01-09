@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
+import colors from 'conf/colors.json';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -20,6 +21,7 @@ const useBigButtonList = ({
   onDatasetSchemaNameError,
   onDuplicateName,
   onSaveName,
+  onShowDataCollectionModal,
   onShowNewSchemaDialog,
   showReleaseSnapshotDialog,
   updatedDatasetSchema
@@ -45,7 +47,9 @@ const useBigButtonList = ({
       visibility: isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
     },
     {
-      layout: 'documents',
+      layout: 'defaultBigButton',
+      buttonColor: colors['c-orange-200'],
+      buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
       handleRedirect: () =>
         handleRedirect(
@@ -207,6 +211,17 @@ const useBigButtonList = ({
     }
   ];
 
-  return [...buttonList, ...designDatasetModels, ...datasetModels, ...dashboardModels];
+  const createDataCollection = [
+    {
+      layout: 'defaultBigButton',
+      buttonColor: colors['c-blue-200'],
+      buttonIcon: 'polygon',
+      caption: resources.messages['createDataCollection'],
+      handleRedirect: () => onShowDataCollectionModal(),
+      visibility: !isEmpty(dataflowData.designDatasets)
+    }
+  ];
+
+  return [...buttonList, ...designDatasetModels, ...datasetModels, ...createDataCollection, ...dashboardModels];
 };
 export { useBigButtonList };

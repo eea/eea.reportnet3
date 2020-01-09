@@ -15,6 +15,8 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const BigButton = ({
+  buttonColor,
+  buttonIcon,
   caption,
   dataflowStatus,
   datasetSchemaInfo,
@@ -163,6 +165,7 @@ export const BigButton = ({
   ) : (
     <></>
   );
+
   const dashboard = (
     <>
       <div className={`${styles.bigButton} ${styles.dashboard}`}>
@@ -178,6 +181,23 @@ export const BigButton = ({
       <p className={styles.caption}>{caption}</p>
     </>
   );
+
+  const defaultBigButton = (
+    <>
+      <div className={`${styles.bigButton} ${styles.defaultBigButton}`} style={{ backgroundColor: buttonColor }}>
+        <a
+          onClick={e => {
+            e.preventDefault();
+            handleRedirect();
+          }}
+          onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} />
+        </a>
+      </div>
+      <p className={styles.caption}>{caption}</p>
+    </>
+  );
+
   const designDatasetSchema = designModel ? (
     <>
       <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
@@ -224,21 +244,7 @@ export const BigButton = ({
   ) : (
     <></>
   );
-  const documents = (
-    <>
-      <div className={`${styles.bigButton} ${styles.documents}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons('info')} />
-        </a>
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  );
+
   const newItem = (
     <>
       <div className={`${styles.bigButton} ${styles.newItem}`}>
@@ -258,8 +264,8 @@ export const BigButton = ({
     dataCollection,
     dataset,
     dashboard,
+    defaultBigButton,
     designDatasetSchema,
-    documents,
     newItem
   };
   return <div className={`${styles.datasetItem}`}>{buttons[layout]}</div>;
