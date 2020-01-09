@@ -380,7 +380,7 @@ const Dataflow = withRouter(({ history, match }) => {
         />
 
         <Dialog
-          header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          header={resources.messages['manageRolesDialogTitle']}
           footer={closeManageRolesDialog}
           visible={isActiveManageRolesDialog}
           onHide={() => setIsActiveManageRolesDialog(false)}
