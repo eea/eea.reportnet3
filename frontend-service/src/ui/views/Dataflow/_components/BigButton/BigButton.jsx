@@ -231,7 +231,7 @@ export const BigButton = ({
             e.preventDefault();
             newDatasetRef.current.show(e);
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('plus')} />
+          <FontAwesomeIcon icon={AwesomeIcons('plus')} className={styles.newItemCross} />
         </a>
         <DropDownMenu ref={newDatasetRef} model={model} />
       </div>
