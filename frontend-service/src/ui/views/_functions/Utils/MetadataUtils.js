@@ -18,19 +18,20 @@ const getDatasetMetadata = async datasetId => {
   }
 };
 
-const getMetadata = ({ dataflowId, datasetId }) => {
+const getMetadata = async ({ dataflowId, datasetId }) => {
   const metadata = {};
   if (dataflowId) {
-    const dataflowMedatada = getDataflowMetadata();
+    const dataflowMetadata = await getDataflowMetadata(dataflowId);
+
     metadata.dataflow = {
       dataflowId,
-      name: dataflowMedatada.name || '',
-      description: dataflowMedatada.description || ''
+      name: dataflowMetadata.name || '',
+      description: dataflowMetadata.description || ''
     };
   }
 
   if (datasetId) {
-    const datasetMetadata = getDatasetMetadata();
+    const datasetMetadata = await getDatasetMetadata(datasetId);
     metadata.dataset = {
       datasetId,
       name: datasetMetadata.datasetSchemaName || ''

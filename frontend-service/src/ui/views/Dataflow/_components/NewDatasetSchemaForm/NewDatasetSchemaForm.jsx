@@ -70,9 +70,10 @@ const NewDatasetSchemaForm = ({
             throw new Error('Schema creation error');
           }
         } catch (error) {
+          const metadata = await MetadataUtils.getMetadata({ dataflowId });
           const {
             dataflow: { name: dataflowName }
-          } = MetadataUtils.getMetadata({ dataflowId });
+          } = metadata;
           notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR',
             content: {

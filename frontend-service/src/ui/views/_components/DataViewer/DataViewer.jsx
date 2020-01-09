@@ -302,7 +302,7 @@ const DataViewer = withRouter(
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
           content: {
@@ -334,7 +334,7 @@ const DataViewer = withRouter(
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DELETE_RECORD_BY_ID_ERROR',
           content: {
@@ -390,7 +390,7 @@ const DataViewer = withRouter(
             const {
               dataflow: { name: dataflowName },
               dataset: { name: datasetName }
-            } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
             notificationContext.add({
               type: 'UPDATE_FIELD_BY_ID_ERROR',
               content: {
@@ -477,7 +477,7 @@ const DataViewer = withRouter(
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'TABLE_DATA_BY_ID_ERROR',
           content: {
@@ -515,7 +515,7 @@ const DataViewer = withRouter(
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'ADD_RECORDS_BY_ID_ERROR',
           content: {
@@ -565,7 +565,7 @@ const DataViewer = withRouter(
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
-          } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
             content: {
@@ -589,7 +589,7 @@ const DataViewer = withRouter(
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
-          } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'UPDATE_RECORDS_BY_ID_ERROR',
             content: {
@@ -617,12 +617,12 @@ const DataViewer = withRouter(
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
 
-    const onUpload = () => {
+    const onUpload = async () => {
       setImportDialogVisible(false);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
         content: {

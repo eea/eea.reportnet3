@@ -89,7 +89,7 @@ const ActionsToolbar = ({
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = MetadataUtils.getMetadata({ dataflowId, datasetId });
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
         content: {
