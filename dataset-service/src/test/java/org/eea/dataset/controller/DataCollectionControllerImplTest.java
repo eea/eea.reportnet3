@@ -150,21 +150,12 @@ public class DataCollectionControllerImplTest {
     representative.setDataProviderId(1L);
     DataProviderVO dataprovider = new DataProviderVO();
     dataprovider.setLabel("test");
-    /*
-     * DesignDatasetVO design = new DesignDatasetVO(); design.setDatasetSchema(new
-     * ObjectId().toString());
-     */
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
-
-
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
-
 
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<>());
