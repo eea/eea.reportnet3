@@ -1,0 +1,6 @@
+{
+    "all":  "/dataflow/{:dataflowId}/loadCategories",
+    "add": "/dataflow/{:dataflowId}/category",
+    "delete": "/dataflow/{:dataflowId}/category/{:categoryId}",
+    "update": "/dataflow/{:dataflowId}/updateCategory"    
+}

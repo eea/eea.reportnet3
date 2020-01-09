@@ -10,9 +10,16 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const CodelistProperties = ({ state, isEmbedded, onEditorPropertiesInputChange, onKeyChange }) => {
+const CodelistProperties = ({
+  checkDuplicates,
+  isCloning = false,
+  isEmbedded = true,
+  onEditorPropertiesInputChange,
+  onKeyChange,
+  state
+}) => {
   const resources = useContext(ResourcesContext);
-  console.log({ state });
+
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
     { statusType: 'Ready', value: 'ready' },
@@ -32,9 +39,15 @@ const CodelistProperties = ({ state, isEmbedded, onEditorPropertiesInputChange, 
         <InputText
           disabled={!isEmbedded ? !state.isEditing : false}
           id="nameInput"
+          onBlur={() =>
+            checkDuplicates(
+              !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
+              !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion
+            )
+          }
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistName')}
           onKeyDown={e => onKeyChange(e, 'codelistName')}
-          value={state.codelistName}
+          value={!isCloning ? state.codelistName : state.clonedCodelist.codelistName}
         />
         <label htmlFor="nameInput">{resources.messages['codelistName']}</label>
       </span>
@@ -42,9 +55,15 @@ const CodelistProperties = ({ state, isEmbedded, onEditorPropertiesInputChange, 
         <InputText
           disabled={!isEmbedded ? !state.isEditing : false}
           id="versionInput"
+          onBlur={() =>
+            checkDuplicates(
+              !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
+              !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion
+            )
+          }
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistVersion')}
           onKeyDown={e => onKeyChange(e, 'codelistVersion')}
-          value={state.codelistVersion}
+          value={!isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion}
         />
         <label htmlFor="versionInput">{resources.messages['codelistVersion']}</label>
       </span>
@@ -58,7 +77,7 @@ const CodelistProperties = ({ state, isEmbedded, onEditorPropertiesInputChange, 
           options={statusTypes}
           // required={true}
           placeholder={resources.messages['codelistStatus']}
-          value={getStatusValue(state.codelistStatus)}
+          value={getStatusValue(!isCloning ? state.codelistStatus : state.clonedCodelist.codelistStatus)}
         />
       </div>
       <span
@@ -75,7 +94,7 @@ const CodelistProperties = ({ state, isEmbedded, onEditorPropertiesInputChange, 
           // onFocus={e => {
           //   setInitialTableDescription(e.target.value);
           // }}
-          value={state.codelistDescription}
+          value={!isCloning ? state.codelistDescription : state.clonedCodelist.codelistDescription}
         />
         <label htmlFor="descriptionInput">{resources.messages['codelistDescription']}</label>
       </span>

@@ -2,11 +2,22 @@ export const codelistReducer = (state, { type, payload }) => {
   switch (type) {
     case 'EDIT_CODELIST_PROPERTIES':
       return { ...state, [payload.property]: payload.value };
+    case 'EDIT_CLONED_CODELIST_PROPERTIES':
+      return { ...state, clonedCodelist: { ...state.clonedCodelist, [payload.property]: payload.value } };
     case 'RESET_INITIAL_VALUES':
-      console.log(payload.items[0]);
       return { ...payload };
     case 'RESET_INITIAL_NEW_ITEM':
       return { ...state, newItem: { itemId: `-${state.items.length}`, code: '', label: '', definition: '' } };
+    case 'RESET_INITIAL_CLONED_CODELIST':
+      return {
+        ...state,
+        clonedCodelist: {
+          codelistName: '',
+          codelistVersion: '',
+          codelistStatus: { statusType: 'design', value: 'DESIGN' },
+          codelistDescription: ''
+        }
+      };
     case 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE':
       console.log(state.selectedItem);
       return { ...state, isAddEditCodelistVisible: payload.visible, formType: payload.formType };
@@ -14,6 +25,8 @@ export const codelistReducer = (state, { type, payload }) => {
       return { ...state, isEditing: payload };
     case 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE':
       return { ...state, isDeleteCodelistItemVisible: payload };
+    case 'TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE':
+      return { ...state, isCloneCodelistVisible: payload };
     case 'SAVE_INITIAL_CELL_VALUE':
       return { ...state, initialCellValue: payload };
     case 'SAVE_ADDED_EDITED_ITEM':

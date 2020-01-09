@@ -22,6 +22,8 @@
 		"categoryDescription": "Description",
 		"chooseChartColor": "Choose your dashboard color",
 		"cleanFilters": "Clean filters",
+		"clone": "Clone",
+		"cloneCodelist": "Clone codelist",
 		"close": "Close",
 		"codelist": "Codelist",
 		"codelistName": "Name",

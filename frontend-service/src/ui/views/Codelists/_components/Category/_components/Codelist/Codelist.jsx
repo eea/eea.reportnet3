@@ -12,10 +12,9 @@ import { CodelistForm } from './_components/CodelistForm/CodelistForm';
 import { CodelistProperties } from 'ui/views/_components/CodelistProperties/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
-import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -25,11 +24,17 @@ import { codelistReducer } from './_functions/Reducers/codelistReducer';
 
 import { CodelistUtils } from './_functions/Utils/CodelistUtils';
 
-const Codelist = ({ codelist, isDataCustodian = true }) => {
+const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const initialCodelistState = {
+    clonedCodelist: {
+      codelistName: codelist.name,
+      codelistVersion: codelist.version,
+      codelistStatus: { statusType: 'design', value: 'DESIGN' },
+      codelistDescription: codelist.description
+    },
     codelistName: codelist.name,
     codelistVersion: codelist.version,
     codelistStatus: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
@@ -41,6 +46,7 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     initialItem: { itemId: '', code: '', label: '', definition: '' },
     isAddEditCodelistVisible: false,
     isDeleteCodelistItemVisible: false,
+    isCloneCodelistVisible: false,
     isEditing: false,
     newItem: { itemId: `-${codelist.items.length}`, code: '', label: '', definition: '' },
     selectedItem: {}
@@ -48,17 +54,8 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
 
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
 
-  const statusTypes = [
-    { statusType: 'Design', value: 'design' },
-    { statusType: 'Ready', value: 'ready' },
-    { statusType: 'Deprecated', value: 'deprecated' }
-  ];
-
   const onAddCodelistItemClick = () => {
-    dispatchCodelist({
-      type: 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE',
-      payload: { visible: true, formType: 'ADD' }
-    });
+    toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, 'ADD');
   };
 
   const onCancelEditCodelistClick = () => {
@@ -78,17 +75,32 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
   };
 
   const onChangeItemForm = (property, value, formType) => {
-    console.log({ property, value, formType });
-    console.log(codelistState.newItem);
     dispatchCodelist({
       type: formType === 'EDIT' ? 'SET_EDITED_CODELIST_ITEM' : 'SET_NEW_CODELIST_ITEM',
       payload: { property, value }
     });
   };
 
+  const onSaveCloneCodelist = () => {
+    try {
+      //await CodelistService.cloneById(dataflowId, codelistId, codelist);
+    } catch (error) {
+      notificationContext.add({
+        type: 'CLONE_CODELIST_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
+    } finally {
+      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
+      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+    }
+  };
+
   const onConfirmDeleteItem = async () => {
     try {
-      //await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
+      //await CodelistService.deleteById(datasetId, records.selectedRecord.recordId);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR',
@@ -98,22 +110,16 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
         }
       });
     } finally {
-      dispatchCodelist({
-        type: 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE',
-        payload: false
-      });
+      toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false);
     }
-  };
-
-  const onEditCodelistClick = () => {
-    dispatchCodelist({
-      type: 'TOGGLE_EDITING_CODELIST_ITEM',
-      payload: true
-    });
   };
 
   const onEditorPropertiesInputChange = (value, property) => {
     dispatchCodelist({ type: 'EDIT_CODELIST_PROPERTIES', payload: { property, value } });
+  };
+
+  const onEditorPropertiesClonedInputChange = (value, property) => {
+    dispatchCodelist({ type: 'EDIT_CLONED_CODELIST_PROPERTIES', payload: { property, value } });
   };
 
   const onEditorItemsValueChange = (cells, value) => {
@@ -161,10 +167,7 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
         }
       });
     } finally {
-      dispatchCodelist({
-        type: 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE',
-        payload: false
-      });
+      toggleDialog('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', false);
       dispatchCodelist({
         type: 'RESET_INITIAL_NEW_ITEM'
       });
@@ -177,18 +180,8 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
 
   const actionTemplate = () => (
     <ActionsColumn
-      onDeleteClick={() => {
-        dispatchCodelist({
-          type: 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE',
-          payload: true
-        });
-      }}
-      onEditClick={() => {
-        dispatchCodelist({
-          type: 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE',
-          payload: { visible: true, formType: 'EDIT' }
-        });
-      }}
+      onDeleteClick={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', true)}
+      onEditClick={() => toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, 'EDIT')}
     />
   );
 
@@ -211,10 +204,89 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     );
   };
 
-  const getStatusValue = value => {
-    if (!isUndefined(value.statusType)) {
-      return statusTypes.filter(status => status.statusType.toUpperCase() === value.statusType.toUpperCase())[0];
-    }
+  const cloneCodelistDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button label={resources.messages['save']} icon="save" onClick={() => onSaveCloneCodelist()} />
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
+      />
+    </div>
+  );
+
+  const cloneCodelistForm = (
+    <CodelistProperties
+      checkDuplicates={checkDuplicates}
+      isCloning={true}
+      onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
+      onKeyChange={() => {}}
+      state={codelistState}
+    />
+  );
+
+  const renderButtons = () => (
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Button
+        label={resources.messages['clone']}
+        icon="clone"
+        onClick={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true)}
+      />
+    </div>
+  );
+
+  const renderCloneCodelistDialog = () => {
+    return codelistState.isCloneCodelistVisible ? (
+      <Dialog
+        className="edit-table"
+        blockScroll={false}
+        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+        closeOnEscape={false}
+        footer={cloneCodelistDialogFooter}
+        header={resources.messages['cloneCodelist']}
+        modal={true}
+        onHide={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
+        style={{ width: '60%' }}
+        visible={codelistState.isCloneCodelistVisible}>
+        <div className="p-grid p-fluid">{cloneCodelistForm}</div>
+      </Dialog>
+    ) : null;
+  };
+
+  const renderDeleteDialog = () => {
+    return codelistState.isDeleteCodelistItemVisible ? (
+      <ConfirmDialog
+        onConfirm={onConfirmDeleteItem}
+        onHide={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false)}
+        visible={codelistState.isDeleteCodelistItemVisible}
+        header={resources.messages['deleteRow']}
+        labelConfirm={resources.messages['yes']}
+        labelCancel={resources.messages['no']}>
+        {resources.messages['confirmDeleteRow']}
+      </ConfirmDialog>
+    ) : null;
+  };
+
+  const renderEditItemsDialog = () => {
+    return codelistState.isAddEditCodelistVisible ? (
+      <CodelistForm
+        columns={['code', 'label', 'definition']}
+        formType={codelistState.formType}
+        item={
+          codelistState.formType === 'EDIT'
+            ? codelistState.editedItem.itemId === ''
+              ? CodelistUtils.getItem(codelistState.items, codelistState.selectedItem)
+              : codelistState.editedItem
+            : codelistState.newItem
+        }
+        onCancelAddEditItem={onCancelAddEditItem}
+        onChangeItemForm={onChangeItemForm}
+        onFormLoaded={onFormLoaded}
+        onHideDialog={() => toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, '')}
+        onSaveItem={onSaveItem}
+        visible={codelistState.isAddEditCodelistVisible}
+      />
+    ) : null;
   };
 
   const renderFooter = () => {
@@ -226,7 +298,7 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
         <Button
           label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
           icon={codelistState.isEditing ? 'save' : 'pencil'}
-          onClick={() => onEditCodelistClick()}
+          onClick={() => toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', true)}
           style={{ marginLeft: 'auto', marginRight: '0.5rem' }}
         />
         {codelistState.isEditing ? (
@@ -244,57 +316,11 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
   const renderInputs = () => {
     return (
       <CodelistProperties
+        checkDuplicates={checkDuplicates}
         isEmbedded={false}
         onEditorPropertiesInputChange={onEditorPropertiesInputChange}
         onKeyChange={onKeyChange}
         state={codelistState}
-      />
-    );
-  };
-
-  const renderDeleteDialog = () => {
-    return (
-      <ConfirmDialog
-        onConfirm={onConfirmDeleteItem}
-        onHide={() =>
-          dispatchCodelist({
-            type: 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE',
-            payload: false
-          })
-        }
-        visible={codelistState.isDeleteCodelistItemVisible}
-        header={resources.messages['deleteRow']}
-        labelConfirm={resources.messages['yes']}
-        labelCancel={resources.messages['no']}>
-        {resources.messages['confirmDeleteRow']}
-      </ConfirmDialog>
-    );
-  };
-
-  const renderEditDialog = () => {
-    console.log(codelistState.editedItem);
-    return (
-      <CodelistForm
-        columns={['code', 'label', 'definition']}
-        formType={codelistState.formType}
-        item={
-          codelistState.formType === 'EDIT'
-            ? codelistState.editedItem.itemId === ''
-              ? CodelistUtils.getItem(codelistState.items, codelistState.selectedItem)
-              : codelistState.editedItem
-            : codelistState.newItem
-        }
-        onCancelAddEditItem={onCancelAddEditItem}
-        onChangeItemForm={onChangeItemForm}
-        onFormLoaded={onFormLoaded}
-        onHideDialog={() => {
-          dispatchCodelist({
-            type: 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE',
-            payload: { visible: false, formType: '' }
-          });
-        }}
-        onSaveItem={onSaveItem}
-        visible={codelistState.isAddEditCodelistVisible}
       />
     );
   };
@@ -331,16 +357,32 @@ const Codelist = ({ codelist, isDataCustodian = true }) => {
     );
   };
 
+  const toggleDialog = (action, isVisible) => {
+    dispatchCodelist({
+      type: action,
+      payload: isVisible
+    });
+  };
+
+  const toggleDialogWithFormType = (action, isVisible, formType) => {
+    dispatchCodelist({
+      type: action,
+      payload: { visible: isVisible, formType }
+    });
+  };
+
   return (
     <React.Fragment>
       <TreeViewExpandableItem
         className={styles.codelistItem}
         expanded={false}
         items={[codelist.name, codelist.version, codelist.status, codelist.description]}>
+        {renderButtons()}
         {renderInputs()}
         {renderTable()}
-        {codelistState.isAddEditCodelistVisible ? renderEditDialog() : null}
-        {codelistState.isDeleteCodelistItemVisible ? renderDeleteDialog() : null}
+        {renderEditItemsDialog()}
+        {renderDeleteDialog()}
+        {renderCloneCodelistDialog()}
       </TreeViewExpandableItem>
     </React.Fragment>
   );

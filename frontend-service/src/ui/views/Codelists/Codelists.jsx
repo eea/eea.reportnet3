@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined, isNull } from 'lodash';
+
 import styles from './Codelists.module.css';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
@@ -163,6 +165,21 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     setNewCategoryVisible(false);
   };
 
+  const checkDuplicates = (codelistName, codelistVersion) => {
+    // if (!isUndefined(categories) && !isNull(categories)) {
+    //   const inmCategories = [...categories];
+    //   const repeteadElements = inmCategories.codelists.filter(
+    //     codelist =>
+    //       codelistName.toLowerCase() === codelist.name.toLowerCase() &&
+    //       codelistVersion.toLowerCase() === codelist.version.toLowerCase()
+    //   );
+    //   return repeteadElements.length > 0;
+    //   //&& fieldId !== repeteadElements[0].fieldId;
+    // } else {
+    //   return false;
+    // }
+  };
+
   const renderCategories = data =>
     data.map(category => {
       return (
@@ -170,7 +187,7 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
           className={styles.categoryExpandable}
           expanded={true}
           items={[category.name, category.description]}>
-          <Category category={category} isDataCustodian={isDataCustodian} />
+          <Category category={category} checkDuplicates={checkDuplicates} isDataCustodian={isDataCustodian} />
         </TreeViewExpandableItem>
       );
     });

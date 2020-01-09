@@ -9,12 +9,15 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 
+// import { CodelistCategoryService } from 'core/services/CodelistCategory';
+// import { CodelistService } from 'core/services/Codelist';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, isDataCustodian }) => {
+const Category = ({ category, checkDuplicates, isDataCustodian }) => {
   const initialCategoryState = {
     categoryDescription: '',
     categoryName: '',
@@ -69,18 +72,39 @@ const Category = ({ category, isDataCustodian }) => {
   };
 
   const onSaveCategory = () => {
-    //API CALL
     try {
+      //CodelistCategoryService.addById(dataflowId, categoryState.categoryName, categoryState.categoryDescription, []);
     } catch (error) {
+      notificationContext.add({
+        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
     } finally {
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
   };
 
   const onSaveCodelist = () => {
-    //API CALL
     try {
+      // CodelistService.addById(
+      //   dataflowId,
+      //   categoryState.codelistDescription,
+      //   [],
+      //   categoryState.codelistName,
+      //   categoryState.codelistStatus,
+      //   categoryState.codelistVersion
+      // );
     } catch (error) {
+      notificationContext.add({
+        type: 'ADD_CODELIST_BY_ID_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
     } finally {
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
@@ -88,7 +112,7 @@ const Category = ({ category, isDataCustodian }) => {
 
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['save']} icon="save" onClick={() => onSaveCodelist()} />
+      <Button label={resources.messages['save']} icon="save" onClick={onSaveCodelist} />
       <Button
         label={resources.messages['cancel']}
         icon="cancel"
@@ -99,7 +123,7 @@ const Category = ({ category, isDataCustodian }) => {
 
   const addCodelistForm = (
     <CodelistProperties
-      isEmbedded={true}
+      checkDuplicates={checkDuplicates}
       onEditorPropertiesInputChange={onEditorPropertiesInputChange}
       onKeyChange={onKeyChange}
       state={categoryState}
@@ -202,7 +226,7 @@ const Category = ({ category, isDataCustodian }) => {
     return (
       <div className={styles.categories}>
         {category.codelists.map(codelist => {
-          return <Codelist codelist={codelist} />;
+          return <Codelist checkDuplicates={checkDuplicates} codelist={codelist} />;
         })}
       </div>
     );
