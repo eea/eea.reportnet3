@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
@@ -42,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -378,11 +380,23 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
 
+  /**
+   * Creates the empty dataset.
+   *
+   * @param datasetType the dataset type
+   * @param datasetName the dataset name
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @param representative the representative
+   * @return the future
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Async
   @org.springframework.transaction.annotation.Transactional(
       value = "metabaseDataSetsTransactionManager")
-  public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+  public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
       throws EEAException {
 
@@ -407,6 +421,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           dataset = new DesignDataset();
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           designDatasetRepository.save((DesignDataset) dataset);
+          this.createSchemaGroupAndAddUser(dataset.getId());
           break;
         case COLLECTION:
           dataset = new DataCollection();
@@ -420,12 +435,36 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       }
 
       recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
-      return dataset.getId();
+      // return dataset.getId();
+      return new AsyncResult<Long>(dataset.getId());
     }
 
     throw new EEAException("createEmptyDataset: Bad arguments");
 
   }
+
+
+  /**
+   * Creates the schema group and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createSchemaGroupAndAddUser(Long datasetId) {
+
+    // Create group Dataschema-X-DATA_CUSTODIAN
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
+
+    // Create group Dataschema-X-DATA_PROVIDER
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
+
+    // Add user to new group Dataschema-X-DATA_CUSTODIAN
+    userManagementControllerZuul.addUserToResource(datasetId,
+        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
+  }
+
 
 
 }

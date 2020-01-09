@@ -61,6 +61,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
+
 
 
   /**
@@ -88,22 +93,18 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     // 2. Create reporting datasets as many providers are by design dataset
     for (DesignDatasetVO design : designs) {
       try {
-
         for (RepresentativeVO representative : representatives) {
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representative);
+          LOG.info("New Reporting Dataset into the dataflow {}", dataCollectionVO.getIdDataflow());
         }
         // Create the DC per design dataset
         datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-            "Data Collection" + " - " + design.getDataSetName(),
-            dataCollectionVO.getDatasetSchema(), dataCollectionVO.getIdDataflow(),
-            dataCollectionVO.getDueDate(), null);
-
-        // 4. Update the dataflow status to DRAFT
-        dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
-            TypeStatusEnum.DRAFT);
-
+            "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
+            dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null);
+        LOG.info("New Data Collection created into the dataflow {}",
+            dataCollectionVO.getIdDataflow());
 
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
@@ -111,6 +112,15 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.EXECUTION_ERROR);
       }
+    }
+    // 4. Update the dataflow status to DRAFT
+    if (!designs.isEmpty()) {
+      dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
+          TypeStatusEnum.DRAFT);
+      LOG.info("Dataflow {} changed status to DRAFT", dataCollectionVO.getIdDataflow());
+    } else {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATA_COLLECTION_NOT_CREATED);
     }
 
   }

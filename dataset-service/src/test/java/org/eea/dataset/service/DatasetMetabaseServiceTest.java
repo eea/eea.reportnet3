@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -12,6 +13,7 @@ import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
@@ -79,6 +81,9 @@ public class DatasetMetabaseServiceTest {
 
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Mock
+  private DataCollectionRepository dataCollectionRepository;
 
 
   /**
@@ -241,6 +246,20 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.createGroupDcAndAddUser(1L);
     Mockito.verify(userManagementControllerZuul, times(1)).addUserToResource(Mockito.any(),
         Mockito.any());
+  }
+
+
+  @Test
+  public void createEmptyDCTest() throws EEAException {
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setLabel("test");
+
+    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION, "testName",
+        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new RepresentativeVO());
+    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any());
+
   }
 
 }

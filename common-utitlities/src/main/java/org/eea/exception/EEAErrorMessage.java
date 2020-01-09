@@ -128,6 +128,9 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 
+  /** The Constant REPRESENTATIVE_DUPLICATED. */
+  public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
+
   /**
    * Instantiates a new EEA error message.
    */
