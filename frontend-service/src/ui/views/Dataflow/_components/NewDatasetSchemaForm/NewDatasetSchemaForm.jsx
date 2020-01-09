@@ -22,6 +22,7 @@ const NewDatasetSchemaForm = ({
   setNewDatasetDialog
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
@@ -68,7 +69,7 @@ const NewDatasetSchemaForm = ({
             throw new Error('Schema creation error');
           }
         } catch (error) {
-          NotificationContext.add({
+          notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR',
             content: {
               dataflowId
