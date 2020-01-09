@@ -3,6 +3,7 @@ import { isNull, isUndefined } from 'lodash';
 import moment from 'moment';
 
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
+import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
@@ -12,6 +13,7 @@ import { CoreUtils } from 'core/infrastructure/CoreUtils';
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
+  dataflow.dataCollections = parseDataCollectionListDTO(dataflowDTO.dataCollections);
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
   dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
@@ -24,6 +26,33 @@ const parseDataflowDTO = dataflowDTO => {
   dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
   dataflow.requestId = dataflowDTO.requestId;
   return dataflow;
+};
+
+const parseDataCollectionListDTO = dataCollectionsDTO => {
+  if (isUndefined(dataCollectionsDTO)) {
+    return;
+  }
+  if (!isNull(dataCollectionsDTO)) {
+    const dataCollections = [];
+    dataCollectionsDTO.forEach(dataCollectionDTO => {
+      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+    });
+    return dataCollections;
+  } else {
+    return null;
+  }
+};
+
+const parseDataCollectionDTO = dataCollectionDTO => {
+  return new DataCollection(
+    dataCollectionDTO.id,
+    dataCollectionDTO.dataSetName,
+    dataCollectionDTO.idDataflow,
+    dataCollectionDTO.datasetSchema,
+    dataCollectionDTO.creationDate,
+    dataCollectionDTO.dueDate,
+    dataCollectionDTO.status
+  );
 };
 
 const parseDatasetListDTO = datasetsDTO => {
