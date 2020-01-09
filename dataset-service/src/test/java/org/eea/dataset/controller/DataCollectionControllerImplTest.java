@@ -2,8 +2,10 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 import org.bson.types.ObjectId;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -64,8 +66,10 @@ public class DataCollectionControllerImplTest {
     design.setDatasetSchema(new ObjectId().toString());
 
 
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito
+        .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(1L));
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
@@ -131,6 +135,45 @@ public class DataCollectionControllerImplTest {
       dataCollectionControllerImpl.createEmptyDataCollection(dc);
     } catch (ResponseStatusException e) {
       assertEquals("Cause is ok", EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+    }
+
+  }
+
+
+  @Test
+  public void createEmptyDataCollectionTestException3() throws EEAException {
+
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setDataSetName("datasetTest");
+    dc.setIdDataflow(1L);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setLabel("test");
+    /*
+     * DesignDatasetVO design = new DesignDatasetVO(); design.setDatasetSchema(new
+     * ObjectId().toString());
+     */
+
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(Arrays.asList(representative));
+
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(Arrays.asList(representative));
+
+
+    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
+
+
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+
+
+    try {
+      dataCollectionControllerImpl.createEmptyDataCollection(dc);
+    } catch (ResponseStatusException e) {
+      assertEquals("Cause is ok", EEAErrorMessage.DATA_COLLECTION_NOT_CREATED, e.getReason());
     }
 
   }

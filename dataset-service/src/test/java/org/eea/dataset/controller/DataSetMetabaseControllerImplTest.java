@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -95,8 +96,10 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test
   public void createEmptyDataSetTest() throws Exception {
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito
+        .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(1L));
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
