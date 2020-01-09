@@ -31,7 +31,7 @@ const parse = ({ type, content, message, config, routes }) => {
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
-        notificationDTO.redirectionUrl = getUrl(routes[(navigateTo.section, urlParameters)]);
+        notificationDTO.redirectionUrl = getUrl(routes[navigateTo.section], urlParameters, true);
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
         });
