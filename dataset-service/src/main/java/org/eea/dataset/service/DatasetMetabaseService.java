@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -32,11 +33,12 @@ public interface DatasetMetabaseService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param representative the representative
-   * @return the long
+   * @return the future
    * @throws EEAException the EEA exception
    */
-  Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId, Date dueDate, RepresentativeVO representative) throws EEAException;
+  Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
+      throws EEAException;
 
   /**
    * Gets the dataset name.
@@ -108,4 +110,10 @@ public interface DatasetMetabaseService {
   void createGroupDcAndAddUser(Long datasetId);
 
 
+  /**
+   * Creates the schema group and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  void createSchemaGroupAndAddUser(Long datasetId);
 }
