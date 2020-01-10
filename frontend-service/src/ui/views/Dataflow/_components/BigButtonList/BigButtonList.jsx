@@ -190,16 +190,17 @@ export const BigButtonList = ({
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
-        visible={dataCollectionDialog}
-        onHide={() => setDataCollectionDialog(false)}>
-        Please select end date:
-        <Calendar
-          inline={true}
-          showWeek={true}
-          icon="pi pi-calendar"
-          onChange={event => setDataCollectionDueDate(event.target.value)}
-          value={dataCollectionDueDate}
-        />
+        onHide={() => setDataCollectionDialog(false)}
+        visible={dataCollectionDialog}>
+        <div style={{ minHeight: '55vh' }}>
+          {`${resources.messages['chooseExpirationDate']}: `}
+          <Calendar
+            inline={true}
+            showWeek={true}
+            onChange={event => setDataCollectionDueDate(event.target.value)}
+            value={dataCollectionDueDate}
+          />
+        </div>
       </ConfirmDialog>
     </>
   );

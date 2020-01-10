@@ -16,6 +16,7 @@
 		"cancel": "Cancel",
 		"category": "Category",
 		"chooseChartColor": "Choose your dashboard color",
+		"chooseExpirationDate": "Please, choose data collection expiration date",
 		"cleanFilters": "Clean filters",
 		"close": "Close",
 		"completedDataflowText": "These are the completed dataflows",
