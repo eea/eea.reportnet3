@@ -38,8 +38,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: updatedList,
-        isVisibleConfirmDeleteDialog: false,
-        refresher: !state.refresher
+        isVisibleConfirmDeleteDialog: false
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':

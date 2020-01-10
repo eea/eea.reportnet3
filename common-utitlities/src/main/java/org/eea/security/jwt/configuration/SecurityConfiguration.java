@@ -2,6 +2,7 @@ package org.eea.security.jwt.configuration;
 
 
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -25,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 
+  /** The unauthorized handler. */
   @Autowired
   private JwtAuthenticationEntryPoint unauthorizedHandler;
 
@@ -36,22 +39,26 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  /**
+   * Inits the security.
+   */
+  @PostConstruct
+  private void initSecurity() {
+    SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+  }
 
+  /**
+   * Configure.
+   *
+   * @param http the http
+   * @throws Exception the exception
+   */
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http
-        .csrf()
-        .disable()
-        .exceptionHandling()
-        .authenticationEntryPoint(unauthorizedHandler)
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .authorizeRequests()
-        .antMatchers("/actuator/**")
-        .permitAll()
-    //.antMatchers("/user/test-security").hasRole("PROVIDER")
+    http.csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .authorizeRequests().antMatchers("/actuator/**").permitAll()
+    // .antMatchers("/user/test-security").hasRole("PROVIDER")
 
     ;
     String[] authenticatedRequest = getAuthenticatedRequest();

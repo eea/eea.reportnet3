@@ -14,7 +14,11 @@ public enum TypeDatasetEnum {
 
 
   /** The design. */
-  DESIGN("DESIGN");
+  DESIGN("DESIGN"),
+
+
+  /** The collection. */
+  COLLECTION("COLLECTION");
 
 
   /** The value. */

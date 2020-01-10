@@ -350,7 +350,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const closeManageRolesDialog = (
     <div>
       <Button
-        className="p-button-primary"
+        className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => setIsActiveManageRolesDialog(false)}
@@ -632,7 +632,7 @@ const Dataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          header={resources.messages['manageRolesDialogTitle']}
           footer={closeManageRolesDialog}
           visible={isActiveManageRolesDialog}
           onHide={() => setIsActiveManageRolesDialog(false)}

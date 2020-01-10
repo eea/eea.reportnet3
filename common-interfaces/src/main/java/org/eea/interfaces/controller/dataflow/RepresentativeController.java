@@ -56,14 +56,15 @@ public interface RepresentativeController {
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderTypes();
 
+
   /**
-   * Find represetatives by id data flow.
+   * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<RepresentativeVO> findRepresetativesByIdDataFlow(
+  List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
@@ -82,4 +83,14 @@ public interface RepresentativeController {
   @DeleteMapping(value = "/{dataflowRepresentativeId}")
   void deleteRepresentative(
       @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId);
+
+
+  /**
+   * Find data provider by id.
+   *
+   * @param dataProviderId the data provider id
+   * @return the data provider VO
+   */
+  @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId);
 }

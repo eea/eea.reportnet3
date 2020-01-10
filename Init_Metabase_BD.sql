@@ -23,6 +23,7 @@ CREATE TABLE public.dataset (
 	url_connection varchar(255) NULL,
 	visibility varchar(255) NULL,
 	dataset_schema varchar(255) NULL,
+	data_provider_id int8 NULL,
 	CONSTRAINT dataset_pkey PRIMARY KEY (id)
 );
 
@@ -36,9 +37,7 @@ CREATE TABLE public.contributor (
 );
 
 CREATE TABLE public.data_collection (
-	duedate timestamp NULL,
-	"name" varchar(255) NULL,
-	visible bool NULL,
+	due_date timestamp NULL,
 	id bigserial NOT NULL,
 	CONSTRAINT data_collection_pkey PRIMARY KEY (id),
 	CONSTRAINT dataset_data_collection_fkey FOREIGN KEY (id) REFERENCES dataset(id)

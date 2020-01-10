@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -122,27 +123,39 @@ public class DatasetSchemaServiceTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The table schema. */
+  /**
+   * The table schema.
+   */
   @Mock
   private Document tableSchema;
 
-  /** The field schema. */
+  /**
+   * The field schema.
+   */
   @Mock
   private Document fieldSchema;
 
-  /** The field schema VO. */
+  /**
+   * The field schema VO.
+   */
   @Mock
   private FieldSchemaVO fieldSchemaVO;
 
-  /** The table schema VO. */
+  /**
+   * The table schema VO.
+   */
   @Mock
   private TableSchemaVO tableSchemaVO;
 
@@ -506,10 +519,10 @@ public class DatasetSchemaServiceTest {
   @Test
   public void createGroupAndAddUserTest() {
     Mockito.doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
         Mockito.any());
     dataSchemaServiceImpl.createGroupAndAddUser(1L);
-    Mockito.verify(userManagementControllerZull, times(1)).addContributorToResource(Mockito.any(),
+    Mockito.verify(userManagementControllerZull, times(1)).addUserToResource(Mockito.any(),
         Mockito.any());
   }
 
@@ -904,6 +917,7 @@ public class DatasetSchemaServiceTest {
    * Gets the dataset schema id test.
    *
    * @return the dataset schema id test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -916,6 +930,7 @@ public class DatasetSchemaServiceTest {
    * Gets the dataset schema id success test.
    *
    * @return the dataset schema id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test

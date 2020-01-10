@@ -1,13 +1,18 @@
 package org.eea.dataset.controller;
 
+
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -54,6 +59,18 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  /** The data collection service. */
+  @Autowired
+  private DataCollectionService dataCollectionService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   /**
    * The Constant LOG.
    */
@@ -63,6 +80,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
 
   /**
    * Find data set id by dataflow id.
@@ -127,8 +146,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
+      RepresentativeVO representative = new RepresentativeVO();
+      representative.setDataProviderId(0L);
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow);
+          idDataflow, null, representative);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -220,6 +241,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
     return statistics;
   }
+
 
 
 }

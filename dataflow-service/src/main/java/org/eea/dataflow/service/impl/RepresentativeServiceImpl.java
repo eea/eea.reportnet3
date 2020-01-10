@@ -209,4 +209,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .isPresent();
   }
 
+
+  /**
+   * Gets the data provider by id.
+   *
+   * @param dataProviderId the data provider id
+   * @return the data provider by id
+   */
+  @Override
+  public DataProviderVO getDataProviderById(Long dataProviderId) {
+    DataProvider dataprovider =
+        dataProviderRepository.findById(dataProviderId).orElse(new DataProvider());
+
+    return dataProviderMapper.entityToClass(dataprovider);
+
+  }
+
 }

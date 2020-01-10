@@ -122,17 +122,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.getAllDataProviderTypes();
   }
 
+
   /**
-   * Find represetatives by id data flow.
+   * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the list
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<RepresentativeVO> findRepresetativesByIdDataFlow(
+  public List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -202,5 +202,23 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
+  }
+
+
+  /**
+   * Find data provider by id.
+   *
+   * @param dataProviderId the data provider id
+   * @return the data provider VO
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
+    if (null == dataProviderId) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    return representativeService.getDataProviderById(dataProviderId);
   }
 }

@@ -99,11 +99,11 @@ public interface DatasetSchemaController {
    * Update dataset schema description.
    *
    * @param datasetId the dataset id
-   * @param description the description
+   * @param datasetSchemaVO the dataset schema VO
    */
   @PutMapping("/{datasetId}/datasetSchema")
   void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = false) String description);
+      @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO);
 
   /**
    * Creates the table schema.

@@ -6,6 +6,6 @@ spring:
 
 eea:
   security:
-    authenticatedRequest: /user/checkAccess,/user/resources*,/user/add_contributtor_to_resource
+    authenticatedRequest: /user/checkAccess,/user/resources*,/user/add_user_to_resource
     roleProtectedRequest:
-      DATA_CUSTODIAN: /resource/create,/resource/delete*
+      DATA_CUSTODIAN: /resource/create,/resource/delete*,/user/add_contributor_to_resource
