@@ -1018,5 +1018,17 @@
    {
     "key": "config/dataset/validation.fieldBatchSize",
     "value": "JHtEQVRBU0NIRU1BX0ZJRUxEX0JBVENIX1NJWkU6MzAwMH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.path",
+    "value": "L3JlcHJlc2VudGF0aXZlLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

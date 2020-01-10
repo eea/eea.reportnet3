@@ -73,10 +73,8 @@ public class CodelistServiceImpl implements CodelistService {
    * @param name the name
    * @param version the version
    * @return the list
-   * @throws EEAException the EEA exception
    */
-  @Transactional
-  public List<CodelistVO> findDuplicated(String name, Long version) throws EEAException {
+  private List<CodelistVO> findDuplicated(String name, Long version) {
     List<Codelist> codelists =
         codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
     if (null != codelists) {
@@ -115,36 +113,41 @@ public class CodelistServiceImpl implements CodelistService {
       response = codelistRepository.save(codelist).getId();
     } else {
       Codelist oldCodelist = codelistRepository.findById(codelistId).orElse(null);
-      if (oldCodelist == null) {
-        throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
-      }
-
-      if (codelist.getCategory() == null) {
-        codelist.setCategory(oldCodelist.getCategory());
-      }
-      if (codelist.getDescription() == null) {
-        codelist.setDescription(oldCodelist.getDescription());
-      }
-      if (codelist.getItems() == null) {
-        codelist.setItems(oldCodelist.getItems());
-      }
-      if (codelist.getName() == null) {
-        codelist.setName(oldCodelist.getName());
-      }
-      codelist.setVersion(oldCodelist.getVersion() + 1);
-      if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
-        codelist.setVersion(codelist.getVersion() + 1);
-      }
+      modifyWhenClone(codelist, oldCodelist);
       codelist.setStatus(CodelistStatusEnum.DESIGN);
       response = codelistRepository.save(codelist).getId();
     }
-    if (response != null) {
+    if (response != null && codelist.getItems() != null && !codelist.getItems().isEmpty()) {
       Codelist codelisttemp = new Codelist();
       codelisttemp.setId(response);
       codelist.getItems().stream().forEach(item -> item.setCodelist(codelisttemp));
       codelistItemRepository.saveAll(codelist.getItems());
     }
     return response;
+  }
+
+
+  private void modifyWhenClone(Codelist codelist, Codelist oldCodelist) throws EEAException {
+    if (oldCodelist == null) {
+      throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+
+    if (codelist.getCategory() == null) {
+      codelist.setCategory(oldCodelist.getCategory());
+    }
+    if (codelist.getDescription() == null) {
+      codelist.setDescription(oldCodelist.getDescription());
+    }
+    if (codelist.getItems() == null) {
+      codelist.setItems(oldCodelist.getItems());
+    }
+    if (codelist.getName() == null) {
+      codelist.setName(oldCodelist.getName());
+    }
+    codelist.setVersion(oldCodelist.getVersion() + 1);
+    if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
+      codelist.setVersion(codelist.getVersion() + 1);
+    }
   }
 
   /**
@@ -176,7 +179,6 @@ public class CodelistServiceImpl implements CodelistService {
         }
         break;
       default:
-        throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
     }
 
     Long response = codelistRepository.save(oldCodelist).getId();
@@ -196,8 +198,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @param oldCodelist the old codelist
    * @throws EEAException the EEA exception
    */
-  private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist)
-      throws EEAException {
+  private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist) {
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
     }
@@ -266,7 +267,7 @@ public class CodelistServiceImpl implements CodelistService {
     CodelistCategory oldCodelistCategory =
         codelistCategoryRepository.findById(codelistCategoryVO.getId()).orElse(null);
     if (oldCodelistCategory == null) {
-      throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
     }
     if (oldCodelistCategory.getShortCode() != null) {
       oldCodelistCategory.setShortCode(codelistCategoryVO.getShortCode());
