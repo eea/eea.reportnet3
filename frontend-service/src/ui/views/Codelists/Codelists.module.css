@@ -8,8 +8,9 @@
 }
 
 .categoryExpandable {
-  height: 1vw;
+  height: 2vw;
   padding: 1rem 0 2rem 1rem;
+  align-items: center;
   /* background-color: var(--gray-5); */
   display: flex;
 }

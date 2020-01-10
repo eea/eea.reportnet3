@@ -166,18 +166,22 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   };
 
   const checkDuplicates = (codelistName, codelistVersion) => {
-    // if (!isUndefined(categories) && !isNull(categories)) {
-    //   const inmCategories = [...categories];
-    //   const repeteadElements = inmCategories.codelists.filter(
-    //     codelist =>
-    //       codelistName.toLowerCase() === codelist.name.toLowerCase() &&
-    //       codelistVersion.toLowerCase() === codelist.version.toLowerCase()
-    //   );
-    //   return repeteadElements.length > 0;
-    //   //&& fieldId !== repeteadElements[0].fieldId;
-    // } else {
-    //   return false;
-    // }
+    if (!isUndefined(categories) && !isNull(categories)) {
+      const inmCategories = [...categories];
+      console.log({ inmCategories });
+
+      const repeteadElements = inmCategories.filter(
+        category =>
+          category.codelists.filter(
+            codelist =>
+              codelistName.toLowerCase() === codelist.name.toLowerCase() &&
+              codelistVersion.toLowerCase() === codelist.version.toLowerCase()
+          ).length > 0
+      );
+      return repeteadElements.length > 0; //&& fieldId !== repeteadElements[0].fieldId;
+    } else {
+      return false;
+    }
   };
 
   const renderCategories = data =>
@@ -186,7 +190,8 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
         <TreeViewExpandableItem
           className={styles.categoryExpandable}
           expanded={true}
-          items={[category.name, category.description]}>
+          items={[category.name, category.description]}
+          buttons={[{ label: 'test', icon: 'check', onClick: () => console.log('asdfa') }]}>
           <Category category={category} checkDuplicates={checkDuplicates} isDataCustodian={isDataCustodian} />
         </TreeViewExpandableItem>
       );
