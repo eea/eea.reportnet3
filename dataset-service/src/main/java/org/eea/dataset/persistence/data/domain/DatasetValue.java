@@ -51,8 +51,13 @@ public class DatasetValue {
   @OneToMany(mappedBy = "datasetValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<DatasetValidation> datasetValidations;
 
+  /** The level error. */
   @Transient
   private TypeErrorEnum levelError;
+
+  /** The data provider code. */
+  @Transient
+  private String dataProviderCode;
 
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.
