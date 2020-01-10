@@ -15,7 +15,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const BigButton = ({
-  buttonColor,
+  buttonClass,
   buttonIcon,
   caption,
   dataflowStatus,
@@ -37,7 +37,7 @@ export const BigButton = ({
   const [initialValue, setInitialValue] = useState();
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
-  const newDatasetRef = useRef();
+  const menuBigButtonRef = useRef();
 
   if (isEditEnabled && document.getElementsByClassName('p-inputtext p-component').length > 0) {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
@@ -123,68 +123,9 @@ export const BigButton = ({
     }
   };
 
-  const dataCollection = (
-    <>
-      <div className={`${styles.bigButton} ${styles.dataCollection}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons('archive')} />
-        </a>
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  );
-
-  const dataset = model ? (
-    <>
-      <div className={`${styles.bigButton} ${styles.dataset}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
-        </a>
-        <DropdownButton
-          icon="caretDown"
-          model={model}
-          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-          iconStyle={{ fontSize: '1.8rem' }}
-        />
-        {isReleased && (
-          <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
-        )}
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  ) : (
-    <></>
-  );
-
-  const dashboard = (
-    <>
-      <div className={`${styles.bigButton} ${styles.dashboard}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons('barChart')} />
-        </a>
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  );
-
   const defaultBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.defaultBigButton}`} style={{ backgroundColor: buttonColor }}>
+      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]}`}>
         <a
           onClick={e => {
             e.preventDefault();
@@ -193,28 +134,21 @@ export const BigButton = ({
           onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} />
         </a>
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  );
-
-  const designDatasetSchema = designModel ? (
-    <>
-      <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons('pencilRuler')} />
-        </a>
-        <DropdownButton
-          icon="caretDown"
-          model={designModel}
-          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-          iconStyle={{ fontSize: '1.8rem' }}
-        />
+        {model ? (
+          <>
+            <DropdownButton
+              icon="caretDown"
+              model={designModel}
+              buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+              iconStyle={{ fontSize: '1.8rem' }}
+            />
+            {isReleased && (
+              <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
+            )}
+          </>
+        ) : (
+          <></>
+        )}
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
@@ -241,33 +175,28 @@ export const BigButton = ({
         </p>
       )}
     </>
-  ) : (
-    <></>
   );
 
-  const newItem = (
+  const menuBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.newItem}`}>
+      <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]}`}>
         <a
           onClick={e => {
             e.preventDefault();
-            newDatasetRef.current.show(e);
+            menuBigButtonRef.current.show(e);
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('plus')} className={styles.newItemCross} />
+          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles.newItemCross} />
         </a>
-        <DropDownMenu ref={newDatasetRef} model={model} />
+        <DropDownMenu ref={menuBigButtonRef} model={model} />
       </div>
       <p className={styles.caption}>{caption}</p>
     </>
   );
 
   const buttons = {
-    dataCollection,
-    dataset,
-    dashboard,
     defaultBigButton,
-    designDatasetSchema,
-    newItem
+    menuBigButton
   };
+
   return <div className={`${styles.datasetItem}`}>{buttons[layout]}</div>;
 };
