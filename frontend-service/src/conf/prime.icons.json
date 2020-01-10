@@ -10,6 +10,7 @@
 		"camera": "pi pi-camera",
 		"check": "pi pi-check",
 		"checkCircle": "pi pi-check-circle",
+		"checkSquare": "pi pi-check-square",
 		"clipboard": "pi pi-paperclip",
 		"clock": "pi pi-clock",
 		"clone": "pi pi-clone",

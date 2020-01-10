@@ -18,6 +18,6 @@ const filterByText = (data, filterText) =>
     }
   });
 
-export const CodelistsUtils = {
+export const CodelistsManagerUtils = {
   filterByText
 };

@@ -8,6 +8,7 @@ import { CodelistProperties } from 'ui/views/_components/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
+import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 // import { CodelistCategoryService } from 'core/services/CodelistCategory';
 // import { CodelistService } from 'core/services/Codelist';
@@ -17,7 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, checkDuplicates, isDataCustodian }) => {
+const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign }) => {
   const initialCategoryState = {
     categoryDescription: '',
     categoryName: '',
@@ -191,42 +192,18 @@ const Category = ({ category, checkDuplicates, isDataCustodian }) => {
     ) : null;
   };
 
-  const renderEditButton = () => {
-    return isDataCustodian ? (
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          label={resources.messages['editCategory']}
-          icon="pencil"
-          onClick={() => {
-            toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true);
-          }}
-        />
-        <Button
-          label={resources.messages['deleteCategory']}
-          disabled={category.codelists.length > 0}
-          icon="trash"
-          onClick={() => {
-            toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true);
-          }}
-          style={{ marginLeft: '0.5rem' }}
-        />
-        <Button
-          label={resources.messages['newCodelist']}
-          icon="add"
-          onClick={() => {
-            toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true);
-          }}
-          style={{ marginLeft: '0.5rem' }}
-        />
-      </div>
-    ) : null;
-  };
-
   const renderCodelist = () => {
     return (
       <div className={styles.categories}>
         {category.codelists.map(codelist => {
-          return <Codelist checkDuplicates={checkDuplicates} codelist={codelist} />;
+          return (
+            <Codelist
+              checkDuplicates={checkDuplicates}
+              codelist={codelist}
+              isDataCustodian={isDataCustodian}
+              isInDesign={isInDesign}
+            />
+          );
         })}
       </div>
     );
@@ -270,8 +247,33 @@ const Category = ({ category, checkDuplicates, isDataCustodian }) => {
 
   return (
     <React.Fragment>
-      {renderEditButton()}
-      {renderCodelist()}
+      <TreeViewExpandableItem
+        className={styles.categoryExpandable}
+        expanded={true}
+        items={[category.name, category.description]}
+        buttons={[
+          {
+            label: '',
+            tooltip: resources.messages['editCategory'],
+            icon: 'pencil',
+            onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true)
+          },
+          {
+            label: '',
+            disabled: category.codelists.length > 0,
+            tooltip: resources.messages['deleteCategory'],
+            icon: 'trash',
+            onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true)
+          },
+          {
+            label: '',
+            tooltip: resources.messages['newCodelist'],
+            icon: 'add',
+            onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true)
+          }
+        ]}>
+        {renderCodelist()}
+      </TreeViewExpandableItem>
       {renderEditDialog()}
       {renderAddCodelistDialog()}
       {renderDeleteDialog()}

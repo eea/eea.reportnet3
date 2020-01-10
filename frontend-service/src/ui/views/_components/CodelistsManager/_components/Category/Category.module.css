@@ -1,0 +1,18 @@
+.categories {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0rem;
+}
+
+.categoryInput {
+  margin: 2rem;
+  width: 90%;
+}
+
+.categoryExpandable {
+  height: 1.5vw;
+  padding: 1rem 1.5rem 2rem 1rem;
+  align-items: center;
+  /* background-color: var(--gray-5); */
+  display: flex;
+}

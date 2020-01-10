@@ -12,6 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { DatasetService } from 'core/services/Dataset';
+import { Button } from 'primereact/button';
 
 export const FieldDesigner = ({
   addField = false,
@@ -23,6 +24,7 @@ export const FieldDesigner = ({
   fieldType,
   index,
   initialFieldIndexDragged,
+  onCodelistSelected,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
@@ -30,6 +32,7 @@ export const FieldDesigner = ({
   onNewFieldAdd,
   onShowDialogError,
   recordId,
+  selectedCodelist = { codelistId: 1, codelistName: 'WISE', codelistVersion: '3.2' },
   totalFields
 }) => {
   const fieldTypes = [
@@ -41,7 +44,8 @@ export const FieldDesigner = ({
     { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' }
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
     // { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' },
@@ -132,18 +136,24 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     setFieldTypeValue(type);
-    if (fieldId === '-1') {
-      if (type !== '') {
-        if (!isUndefined(fieldValue) && fieldValue !== '') {
-          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
-        }
-      }
+    console.log(type);
+    if (type.fieldType === 'Codelist') {
+      console.log(onCodelistSelected);
+      onCodelistSelected();
     } else {
-      if (type !== '' && type !== fieldValue) {
-        fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
-      } else {
+      if (fieldId === '-1') {
         if (type !== '') {
-          onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+          if (!isUndefined(fieldValue) && fieldValue !== '') {
+            onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
+          }
+        }
+      } else {
+        if (type !== '' && type !== fieldValue) {
+          fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+        } else {
+          if (type !== '') {
+            onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+          }
         }
       }
     }
@@ -449,6 +459,7 @@ export const FieldDesigner = ({
           itemTemplate={fieldTypeTemplate}
           onChange={e => onChangeFieldType(e.target.value)}
           onMouseDown={event => {
+            console.log(event.target.value);
             event.preventDefault();
             event.stopPropagation();
           }}
@@ -460,6 +471,13 @@ export const FieldDesigner = ({
           scrollHeight="450px"
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
+        {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
+          <Button
+            className={`${styles.codelistButton} p-button-secondary`}
+            label={`${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`}
+            onClick={() => onCodelistSelected()}
+          />
+        ) : null}
         {!addField ? (
           <a
             draggable={true}

@@ -17,7 +17,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
+export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeFields, onChangeTableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
@@ -228,6 +228,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
           fieldValue=""
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
+          onCodelistSelected={onCodelistSelected}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
@@ -254,6 +255,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
               key={field.fieldId}
+              onCodelistSelected={onCodelistSelected}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
               onFieldDragAndDropStart={onFieldDragAndDropStart}

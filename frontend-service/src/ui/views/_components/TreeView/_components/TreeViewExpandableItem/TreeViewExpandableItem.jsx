@@ -6,16 +6,35 @@ import styles from './TreeViewExpandableItem.module.css';
 
 // import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TreeViewExpandableItem = ({ expanded = true, children, items, className }) => {
+const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, className }) => {
   const [isOpen, setIsOpen] = useState(expanded);
   const resources = useContext(ResourcesContext);
 
   const renderHeader = () => {
     const width = 90 / items.length;
     return items.map(item => <span style={{ width: `${width}%` }}>{item}</span>);
+  };
+
+  const renderButtons = () => {
+    console.log(!isUndefined(buttons) ? buttons[1].visible : 'No buttons');
+    return !isUndefined(buttons)
+      ? buttons.map(button => (
+          <Button
+            icon={button.icon}
+            disabled={!isUndefined(button.disabled) ? button.disabled : false}
+            label={button.label}
+            onClick={button.onClick}
+            style={{ marginLeft: '0.5rem' }}
+            tooltip={button.tooltip}
+            tooltipOptions={{ position: 'bottom' }}
+            visible={!isUndefined(button.visible) ? button.visible : true}
+          />
+        ))
+      : null;
   };
 
   return (
@@ -39,6 +58,7 @@ const TreeViewExpandableItem = ({ expanded = true, children, items, className })
           ''
         )}
         {renderHeader()}
+        {renderButtons()}
       </div>
       {isOpen ? children : null}
       {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDatasetDesign'] : null}

@@ -24,7 +24,7 @@ import { codelistReducer } from './_functions/Reducers/codelistReducer';
 
 import { CodelistUtils } from './_functions/Utils/CodelistUtils';
 
-const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
+const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true, isInDesign }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -65,13 +65,14 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
     });
   };
 
-  const onCancelAddEditItem = formType => {
-    if (formType !== 'EDIT') {
+  const onCancelAddEditItem = () => {
+    if (codelistState.formType !== 'EDIT') {
       dispatchCodelist({
         type: 'RESET_INITIAL_NEW_ITEM'
       });
     } else {
     }
+    toggleDialog('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', false);
   };
 
   const onChangeItemForm = (property, value, formType) => {
@@ -225,16 +226,6 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
     />
   );
 
-  const renderButtons = () => (
-    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-      <Button
-        label={resources.messages['clone']}
-        icon="clone"
-        onClick={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true)}
-      />
-    </div>
-  );
-
   const renderCloneCodelistDialog = () => {
     return codelistState.isCloneCodelistVisible ? (
       <Dialog
@@ -282,7 +273,7 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
         onCancelAddEditItem={onCancelAddEditItem}
         onChangeItemForm={onChangeItemForm}
         onFormLoaded={onFormLoaded}
-        onHideDialog={() => toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, '')}
+        onHideDialog={() => toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', false, '')}
         onSaveItem={onSaveItem}
         visible={codelistState.isAddEditCodelistVisible}
       />
@@ -374,16 +365,29 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true }) => {
   return (
     <React.Fragment>
       <TreeViewExpandableItem
-        className={styles.codelistItem}
+        buttons={[
+          {
+            icon: 'clone',
+            onClick: () => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['clone']
+          },
+          {
+            icon: 'checkSquare',
+            onClick: () => {},
+            //() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['selectCodelist'],
+            visible: isInDesign
+          }
+        ]}
+        className={`${styles.codelistItem} ${styles.codelistExpandable}`}
         expanded={false}
         items={[codelist.name, codelist.version, codelist.status, codelist.description]}>
-        {renderButtons()}
         {renderInputs()}
         {renderTable()}
         {renderEditItemsDialog()}
         {renderDeleteDialog()}
-        {renderCloneCodelistDialog()}
       </TreeViewExpandableItem>
+      {renderCloneCodelistDialog()}
     </React.Fragment>
   );
 };
