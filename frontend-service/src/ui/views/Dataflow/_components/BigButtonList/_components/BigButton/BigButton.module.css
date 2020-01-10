@@ -5,120 +5,95 @@
   cursor: pointer;
   margin-right: 1rem !important;
 }
-
 .bigButton > a {
   padding: 2.3rem 2.7rem;
 }
 
-.dataCollection {
-  background-color: var(--c-corporate-blue);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.dataCollection a {
-  color: var(--white);
-  border-radius: 10px;
-}
-.dataCollection a:hover {
-  color: var(--white);
-  background-color: var(--c-blue-400);
-}
-
-.dataset {
-  background-color: var(--c-corporate-blue);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.dataset a {
-  color: var(--white);
-  border-radius: 10px;
-}
-.dataset a:hover {
-  color: var(--white);
-  background-color: var(--c-blue-400);
-}
-
-.designDatasetSchema {
-  background-color: var(--c-blue-green);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.designDatasetSchema a {
-  color: var(--white);
-  border-radius: 10px;
-}
-
-.designDatasetSchema a:hover {
-  color: var(--white);
-  background-color: var(--c-aquamarine);
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
+  padding: 0px !important;
+  height: 0px !important;
 }
 
 .defaultBigButton {
+  color: var(--white);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
-
 .defaultBigButton a {
   color: var(--white);
   border-radius: 10px;
 }
-
 .defaultBigButton a:hover {
-  background-color: var(--c-orange-300);
   color: var(--white);
+}
+
+.menuBigButton {
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.menuBigButton a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.menuBigButton a:hover {
+  color: var(--white);
+}
+
+.createDataCollection {
+  background-color: var(--c-red-200);
+}
+.createDataCollection a:hover {
+  background-color: var(--c-red-300);
 }
 
 .dashboard {
   background-color: var(--c-purple-400);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--white);
-}
-.dashboard a {
-  color: var(--white);
-  border-radius: 10px;
 }
 .dashboard a:hover {
   background-color: var(--c-purple-300);
-  color: var(--white);
 }
+
+.dataCollection {
+  background-color: var(--c-green);
+}
+.dataCollection a:hover {
+  background-color: var(--c-khaki-300);
+}
+
+.dataflowHelp {
+  background-color: var(--c-orange-200);
+}
+.dataflowHelp a:hover {
+  background-color: var(--c-orange-300);
+}
+
+.dataset {
+  background-color: var(--c-corporate-blue);
+}
+.dataset a:hover {
+  background-color: var(--c-blue-400);
+}
+
+.designDataset {
+  background-color: var(--c-blue-green);
+}
+.designDataset a:hover {
+  background-color: var(--c-aquamarine);
+}
+
 .newItem {
   background-color: var(--c-blue-300);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--white);
-}
-.newItem a {
-  color: var(--white);
-  border-radius: 10px;
 }
 .newItem a:hover {
   background-color: var(--c-blue-200);
-  color: var(--white);
 }
-
 .newItem a:hover .newItemCross {
   -webkit-transition-duration: 0.5s;
   -moz-transition-duration: 0.5s;
@@ -141,10 +116,6 @@
   word-wrap: break-word;
   max-width: 100px;
   box-sizing: content-box;
-}
-.datasetItem :global .p-button.p-button-icon-only .p-button-text {
-  padding: 0px !important;
-  height: 0px !important;
 }
 
 .inputText {

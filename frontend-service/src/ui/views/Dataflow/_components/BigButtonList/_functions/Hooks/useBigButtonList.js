@@ -2,7 +2,6 @@ import { useContext } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
-import colors from 'conf/colors.json';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -30,7 +29,9 @@ const useBigButtonList = ({
 
   const buttonList = [
     {
-      layout: 'newItem',
+      layout: 'menuBigButton',
+      buttonClass: 'newItem',
+      buttonIcon: 'plus',
       caption: resources.messages['newItem'],
       model: [
         {
@@ -48,7 +49,7 @@ const useBigButtonList = ({
     },
     {
       layout: 'defaultBigButton',
-      buttonColor: colors['c-orange-200'],
+      buttonClass: 'dataflowHelp',
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
       handleRedirect: () =>
@@ -71,8 +72,11 @@ const useBigButtonList = ({
       visibility: true
     }
   ];
+
   const designDatasetModels = dataflowData.designDatasets.map(newDatasetSchema => ({
-    layout: 'designDatasetSchema',
+    layout: 'defaultBigButton',
+    buttonClass: 'designDataset',
+    buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowStatus,
     datasetSchemaInfo: updatedDatasetSchema,
@@ -144,7 +148,9 @@ const useBigButtonList = ({
   }));
 
   const datasetModels = dataflowData.datasets.map(dataset => ({
-    layout: 'dataset',
+    layout: 'defaultBigButton',
+    buttonClass: 'dataset',
+    buttonIcon: 'dataset',
     caption: dataset.datasetSchemaName,
     isReleased: dataset.isReleased,
     handleRedirect: () => {
@@ -188,7 +194,9 @@ const useBigButtonList = ({
 
   const dashboardModels = [
     {
-      layout: 'dashboard',
+      layout: 'defaultBigButton',
+      buttonClass: 'dashboard',
+      buttonIcon: 'barChart',
       caption: resources.messages['dashboards'],
       handleRedirect: () =>
         handleRedirect(
@@ -214,8 +222,8 @@ const useBigButtonList = ({
   const createDataCollection = [
     {
       layout: 'defaultBigButton',
-      buttonColor: colors['c-blue-200'],
-      buttonIcon: 'polygon',
+      buttonClass: 'createDataCollection',
+      buttonIcon: 'checkedSquare',
       caption: resources.messages['createDataCollection'],
       handleRedirect: () => onShowDataCollectionModal(),
       visibility: isEmpty(dataflowData.dataCollections) && !isEmpty(dataflowData.designDatasets)
@@ -223,7 +231,9 @@ const useBigButtonList = ({
   ];
 
   const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
-    layout: 'designDatasetSchema',
+    layout: 'defaultBigButton',
+    buttonClass: 'dataCollection',
+    buttonIcon: 'dataCollectionIcon',
     caption: dataCollection.dataCollectionName,
     model: [
       {
@@ -259,4 +269,5 @@ const useBigButtonList = ({
     ...dashboardModels
   ];
 };
+
 export { useBigButtonList };
