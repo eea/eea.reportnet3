@@ -627,7 +627,7 @@ const DataViewer = withRouter(
         type: 'DATASET_DATA_LOADING_INIT',
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          title: DataViewerUtils.editLargeStringWithDots(tableName, 22),
+          title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
           datasetLoading: resources.messages['datasetLoading'],
           dataflowName,
           datasetName
