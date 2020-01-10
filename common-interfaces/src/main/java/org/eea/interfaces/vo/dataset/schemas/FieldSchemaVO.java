@@ -46,6 +46,9 @@ public class FieldSchemaVO {
   /** The version code list. */
   private String versionCodeList;
 
+  /** The id code list. */
+  private Long idCodeList;
+
 
   /**
    * Hash code.
@@ -55,7 +58,7 @@ public class FieldSchemaVO {
   @Override
   public int hashCode() {
     return Objects.hash(id, description, idRecord, name, ruleField, type, nameCodeList,
-        versionCodeList);
+        versionCodeList, idCodeList);
   }
 
   /**
@@ -77,6 +80,7 @@ public class FieldSchemaVO {
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
         && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type)
         && Objects.equals(nameCodeList, other.nameCodeList)
-        && Objects.equals(versionCodeList, other.versionCodeList);
+        && Objects.equals(versionCodeList, other.versionCodeList)
+        && Objects.equals(idCodeList, other.idCodeList);
   }
 }

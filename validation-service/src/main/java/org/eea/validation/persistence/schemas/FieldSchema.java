@@ -22,6 +22,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class FieldSchema {
 
@@ -57,6 +63,10 @@ public class FieldSchema {
   @Field(value = "versionCodeList")
   private String versionCodeList;
 
+  /** The id code list. */
+  @Field(value = "idCodeList")
+  private Long idCodeList;
+
   /**
    * Hash code.
    *
@@ -65,7 +75,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, ruleField, type, nameCodeList,
-        versionCodeList);
+        versionCodeList, idCodeList);
   }
 
 
@@ -88,7 +98,8 @@ public class FieldSchema {
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
         && Objects.equals(type, other.type) && Objects.equals(nameCodeList, other.nameCodeList)
-        && Objects.equals(versionCodeList, other.versionCodeList);
+        && Objects.equals(versionCodeList, other.versionCodeList)
+        && Objects.equals(idCodeList, other.idCodeList);
   }
 
 
