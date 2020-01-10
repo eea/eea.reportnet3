@@ -183,7 +183,7 @@
 		"loginPassword": "Password",
 		"loginUserName": "User name",
 		"manageRoles": "Manage roles",		
-        "manageRolesDialogTitle": "Manage roles for dataflow",
+        "manageRolesDialogTitle": "Manage roles",
         "manageRolesDialogHeader": "Data providers",
         "manageRolesDialogDropdownLabel": "Representative of",
         "manageRolesDialogDeleteTooltip": "Delete representative",
