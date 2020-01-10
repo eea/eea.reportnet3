@@ -15,6 +15,7 @@ import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 
 export const BigButtonList = ({
   dataflowData,
@@ -33,6 +34,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -66,6 +68,11 @@ export const BigButtonList = ({
     setDataCollectionDialog(false);
     try {
       const response = await DataCollectionService.create(dataflowId, date);
+      if (response >= 200 && response <= 200) {
+        onUpdateData();
+      } else {
+        throw new Error('Data collection creation error');
+      }
     } catch (error) {
       console.log('error: ', error);
     }
@@ -182,10 +189,17 @@ export const BigButtonList = ({
         header={resources.messages['delete'].toUpperCase()}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
-        // onConfirm={onConfirmModal}
+        onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
         visible={dataCollectionDialog}
         onHide={() => setDataCollectionDialog(false)}>
-        Please select end date: <input type="date" onChange={e => console.log('e', e.target.value)} />
+        Please select end date:
+        <Calendar
+          inline={true}
+          showWeek={true}
+          icon="pi pi-calendar"
+          onChange={event => setDataCollectionDueDate(event.target.value)}
+          value={dataCollectionDueDate}
+        />
       </ConfirmDialog>
     </>
   );

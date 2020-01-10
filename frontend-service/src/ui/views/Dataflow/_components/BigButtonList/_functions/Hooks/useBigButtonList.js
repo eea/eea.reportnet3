@@ -140,7 +140,7 @@ const useBigButtonList = ({
         disabled: true
       }
     ],
-    visibility: !isUndefined(dataflowData.designDatasets)
+    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections)
   }));
 
   const datasetModels = dataflowData.datasets.map(dataset => ({
@@ -218,10 +218,45 @@ const useBigButtonList = ({
       buttonIcon: 'polygon',
       caption: resources.messages['createDataCollection'],
       handleRedirect: () => onShowDataCollectionModal(),
-      visibility: !isEmpty(dataflowData.designDatasets)
+      visibility: isEmpty(dataflowData.dataCollections) && !isEmpty(dataflowData.designDatasets)
     }
   ];
 
-  return [...buttonList, ...designDatasetModels, ...datasetModels, ...createDataCollection, ...dashboardModels];
+  const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
+    layout: 'designDatasetSchema',
+    caption: dataCollection.dataCollectionName,
+    model: [
+      {
+        label: resources.messages['rename'],
+        icon: 'pencil',
+        disabled: true
+      },
+      {
+        label: resources.messages['duplicate'],
+        icon: 'clone',
+        disabled: true
+      },
+      {
+        label: resources.messages['delete'],
+        icon: 'trash',
+        disabled: true
+      },
+      {
+        label: resources.messages['properties'],
+        icon: 'info',
+        disabled: true
+      }
+    ],
+    visibility: !isEmpty(dataflowData.dataCollections)
+  }));
+
+  return [
+    ...buttonList,
+    ...designDatasetModels,
+    ...dataCollectionModels,
+    ...datasetModels,
+    ...createDataCollection,
+    ...dashboardModels
+  ];
 };
 export { useBigButtonList };
