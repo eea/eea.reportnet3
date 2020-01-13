@@ -13,6 +13,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -48,10 +49,10 @@ public class KafkaSender {
    */
   public void sendMessage(final EEAEventVO event) {
 
-    String user = String.valueOf(ThreadPropertiesManager.getVariable("user"));
-    if (user != null) {
-      event.getData().put("user", user);
-    }
+    event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
+    event.getData().put("token",
+        String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+
     Message<EEAEventVO> message = null;
     final List<PartitionInfo> partitions =
         kafkaTemplate.partitionsFor(event.getEventType().getTopic());
