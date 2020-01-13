@@ -9,7 +9,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.notification.factory.NotificableEventFactory;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +53,6 @@ public class KafkaSenderUtils {
    */
   public void releaseKafkaEvent(final EventType eventType, final Map<String, Object> value) {
     final EEAEventVO event = new EEAEventVO();
-
-    value.put("user", ThreadPropertiesManager.getVariable("user"));
-
     event.setEventType(eventType);
     event.setData(value);
     kafkaSender.sendMessage(event);
