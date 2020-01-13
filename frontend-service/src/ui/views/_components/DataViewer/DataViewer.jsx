@@ -729,30 +729,14 @@ const DataViewer = withRouter(
 
     //Template for Record validation
     const validationsTemplate = recordData => {
-      try {
-        const validationsGroup = DataViewerUtils.groupValidations(
-          recordData,
-          resources.messages['recordBlockers'],
-          resources.messages['recordErrors'],
-          resources.messages['recordWarnings'],
-          resources.messages['recordInfos']
-        );
-        return getIconsValidationsErrors(validationsGroup);
-      } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'GROUP_VALIDATIONS_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName
-          }
-        });
-      }
+      const validationsGroup = DataViewerUtils.groupValidations(
+        recordData,
+        resources.messages['recordBlockers'],
+        resources.messages['recordErrors'],
+        resources.messages['recordWarnings'],
+        resources.messages['recordInfos']
+      );
+      return getIconsValidationsErrors(validationsGroup);
     };
 
     const addIconLevelError = (validation, levelError, message) => {
