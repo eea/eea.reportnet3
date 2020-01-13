@@ -264,11 +264,11 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(new ObjectId());
     Mockito
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any()))
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -279,7 +279,8 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
