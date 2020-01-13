@@ -1,6 +1,7 @@
 import React, { useEffect, useContext, useRef } from 'react';
 
 import { capitalize } from 'lodash';
+import sanitizeHtml from 'sanitize-html';
 
 import { Growl } from 'primereact/growl';
 
@@ -18,7 +19,12 @@ const Notifications = () => {
       const message = (
         <div
           dangerouslySetInnerHTML={{
-            __html: notification.message
+            __html: sanitizeHtml(notification.message, {
+              allowedTags: ['a', 'strong'],
+              allowedAttributes: {
+                a: ['href', 'title']
+              }
+            })
           }}></div>
       );
       growlRef.current.show({

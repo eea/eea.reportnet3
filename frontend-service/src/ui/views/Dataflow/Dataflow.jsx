@@ -161,7 +161,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onChangeDataflowName = event => {
-    setOnConfirmDelete(event.target.value);
+    setOnConfirmDelete(event.target.value.toLowerCase());
     setDataflowTitle(event.target.value);
   };
 
@@ -260,6 +260,7 @@ const Dataflow = withRouter(({ history, match }) => {
       await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
       onLoadSnapshotList(datasetIdToProps);
     } catch (error) {
+      console.log('ERROR ON RELEASE', error);
       notificationContext.add({
         type: 'RELEASED_BY_ID_REPORTER_ERROR',
         content: {}
@@ -504,7 +505,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
             onConfirm={() => onDeleteDataflow()}
             onHide={onHideDeleteDataflowDialog}
             styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
