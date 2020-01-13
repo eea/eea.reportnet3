@@ -3,6 +3,8 @@ package org.eea.dataset.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -37,6 +39,9 @@ public class DatasetCodelistControllerImplTest {
   /** The codelist VO. */
   private CodelistVO codelistVO;
 
+  /** The codelists VO. */
+  private List<CodelistVO> codelistsVO;
+
   /** The codelist category VO. */
   private CodelistCategoryVO codelistCategoryVO;
 
@@ -47,6 +52,8 @@ public class DatasetCodelistControllerImplTest {
   public void initMocks() {
     codelistVO = new CodelistVO();
     codelistCategoryVO = new CodelistCategoryVO();
+    codelistsVO = new ArrayList<>();
+    codelistsVO.add(codelistVO);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -432,5 +439,71 @@ public class DatasetCodelistControllerImplTest {
     codelistCategoryVO.setId(1L);
     datasetCodelistControllerImpl.deleteCategory(1L);
     Mockito.verify(codelistService, times(1)).deleteCategory(Mockito.any());
+  }
+
+  /**
+   * Gets the all by id exception 1 test.
+   *
+   * @return the all by id exception 1 test
+   */
+  @Test
+  public void getAllByIdException1Test() {
+    try {
+      datasetCodelistControllerImpl.getAllById(null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all by id exception 2 test.
+   *
+   * @return the all by id exception 2 test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByIdException2Test() throws EEAException {
+    try {
+
+      datasetCodelistControllerImpl.getAllById(new ArrayList<Long>());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all by id exception 3 test.
+   *
+   * @return the all by id exception 3 test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByIdException3Test() throws EEAException {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    when(codelistService.getAllByIds(Mockito.any())).thenThrow(EEAException.class);
+    try {
+
+      datasetCodelistControllerImpl.getAllById(ids);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all by id success test.
+   *
+   * @return the all by id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByIdSuccessTest() throws EEAException {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    when(codelistService.getAllByIds(Mockito.any())).thenReturn(codelistsVO);
+    assertEquals("not equal", codelistsVO, datasetCodelistControllerImpl.getAllById(ids));
   }
 }

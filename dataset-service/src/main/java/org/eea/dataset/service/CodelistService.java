@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
@@ -77,5 +78,14 @@ public interface CodelistService {
    * @param codelistCategoryId the codelist category id
    */
   void deleteCategory(Long codelistCategoryId);
+
+  /**
+   * Gets the all by ids.
+   *
+   * @param codelistIds the codelist ids
+   * @return the all by ids
+   * @throws EEAException the EEA exception
+   */
+  List<CodelistVO> getAllByIds(List<Long> codelistIds) throws EEAException;
 
 }

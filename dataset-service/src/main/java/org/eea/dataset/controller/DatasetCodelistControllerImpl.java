@@ -1,5 +1,10 @@
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -234,6 +239,33 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
           EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
     }
     codelistService.deleteCategory(codelistCategoryId);
+  }
+
+  /**
+   * Gets the all by id.
+   *
+   * @param codelistIds the codelist ids
+   * @return the all by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<CodelistVO> getAllById(List<Long> codelistIds) {
+    if (codelistIds == null || codelistIds.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    Set<Long> codelistIdsSet = new HashSet<>();
+    codelistIdsSet.addAll(codelistIds);
+    List<CodelistVO> codelistVOs = new ArrayList<>();
+    try {
+      codelistVOs =
+          codelistService.getAllByIds(codelistIdsSet.stream().collect(Collectors.toList()));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the codelists. Error message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND,
+          e);
+    }
+    return codelistVOs;
   }
 
 }

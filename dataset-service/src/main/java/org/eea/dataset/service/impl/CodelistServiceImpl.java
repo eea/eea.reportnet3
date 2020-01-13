@@ -290,4 +290,20 @@ public class CodelistServiceImpl implements CodelistService {
   public void deleteCategory(Long codelistCategoryId) {
     codelistCategoryRepository.deleteById(codelistCategoryId);
   }
+
+  /**
+   * Gets the all by ids.
+   *
+   * @param codelistIds the codelist ids
+   * @return the all by ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<CodelistVO> getAllByIds(List<Long> codelistIds) throws EEAException {
+    List<Codelist> codelists = codelistRepository.findAllByIdIn(codelistIds).orElse(null);
+    if (null == codelists) {
+      throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    return codelistMapper.entityListToClass(codelists);
+  }
 }

@@ -498,4 +498,31 @@ public class CodelistServiceImplTest {
     codelistServiceImpl.deleteCategory(1L);
     Mockito.verify(codelistCategoryRepository, times(1)).deleteById(Mockito.any());
   }
+
+  @Test
+  public void getAllByIdsExceptionTest() {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    when(codelistRepository.findAllByIdIn(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      codelistServiceImpl.getAllByIds(ids);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getMessage());
+    }
+  }
+
+  /**
+   * Gets the by id success test.
+   *
+   * @return the by id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByIdsSuccessTest() throws EEAException {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    when(codelistRepository.findAllByIdIn(Mockito.any())).thenReturn(Optional.of(codelists));
+    when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
+    assertEquals("not equal", codelistsVO, codelistServiceImpl.getAllByIds(ids));
+  }
 }

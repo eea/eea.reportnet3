@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -104,4 +105,13 @@ public interface DatasetCodelistController {
    */
   @DeleteMapping(value = "/category/{codelistCategoryId}")
   void deleteCategory(@PathVariable("codelistCategoryId") Long codelistCategoryId);
+
+  /**
+   * Gets the all by id.
+   *
+   * @param codelistIds the codelist ids
+   * @return the all by id
+   */
+  @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<CodelistVO> getAllById(@RequestBody List<Long> codelistIds);
 }
