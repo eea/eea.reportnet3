@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -113,5 +114,5 @@ public interface DatasetCodelistController {
    * @return the all by id
    */
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<CodelistVO> getAllById(@RequestBody List<Long> codelistIds);
+  List<CodelistVO> getAllById(@RequestParam List<Long> codelistIds);
 }
