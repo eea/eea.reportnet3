@@ -39,12 +39,19 @@ public class FieldValueGenerator implements IdentifierGenerator {
         String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
         BigInteger bi = new BigInteger(md5Hex, 16);
         Long hexId = bi.longValue();
-        return hexId;
+        String textId = hexId.toString();
+        Long hashId = Long.parseLong(textId.substring(0, 14));
+        return hashId;
       }
 
+      rs.close();
+      statement.close();
+      connection.close();
     } catch (SQLException e) {
+
       e.printStackTrace();
     }
+
     return null;
   }
 
