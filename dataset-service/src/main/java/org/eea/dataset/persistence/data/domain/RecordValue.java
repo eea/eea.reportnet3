@@ -34,11 +34,9 @@ public class RecordValue {
    * The id.
    */
   @Id
-  // @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
-  // allocationSize = 1)
-  @GenericGenerator(name = "record_sequence_generator_v2",
+  @GenericGenerator(name = "record_sequence_generator",
       strategy = "org.eea.dataset.persistence.data.sequence.RecordValueGenerator")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator_v2")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

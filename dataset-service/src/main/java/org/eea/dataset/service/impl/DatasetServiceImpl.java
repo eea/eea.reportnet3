@@ -1113,8 +1113,10 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    DatasetValue dataset = new DatasetValue();
     TableValue table = new TableValue();
     table.setId(tableId);
+
     // obtain the provider code (ie ES, FR, IT, etc)
     Long providerId = 0L;
     DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -1122,6 +1124,14 @@ public class DatasetServiceImpl implements DatasetService {
       providerId = metabase.getDataProviderId();
     }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+    // Set the provider code to create Hash
+    if (null == provider)
+      dataset.setDataProviderCode("AUX" + datasetId.toString());
+    else {
+      dataset.setDataProviderCode(provider.getCode());
+    }
+
     recordValue.parallelStream().forEach(record -> {
       if (record.getDatasetPartitionId() == null) {
         try {
@@ -1130,6 +1140,7 @@ public class DatasetServiceImpl implements DatasetService {
           LOG_ERROR.error(e.getMessage());
         }
       }
+      table.setDatasetId(dataset);
       record.setTableValue(table);
       record.setDataProviderCode(provider.getCode());
       record.getFields().stream().filter(field -> field.getValue() == null)

@@ -7,28 +7,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
-public class RecordValueGenerator implements IdentifierGenerator {
+public class FieldValueGenerator implements IdentifierGenerator {
 
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    RecordValue record = new RecordValue();
-    record = (RecordValue) object;
-    String prefix = record.getTableValue().getDatasetId().getDataProviderCode();
+    FieldValue field = new FieldValue();
+    field = (FieldValue) object;
+    String prefix = field.getRecord().getTableValue().getDatasetId().getDataProviderCode();
     Connection connection = session.connection();
 
     try {
       Statement statement = connection.createStatement();
-      ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");
+      ResultSet rs = statement.executeQuery("SELECT nextval('field_sequence')");
 
       if (rs.next()) {
-
         int id = rs.getInt(1);
         String idcompose = prefix + new Integer(id).toString();
         String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
@@ -44,5 +43,3 @@ public class RecordValueGenerator implements IdentifierGenerator {
   }
 
 }
-
-
