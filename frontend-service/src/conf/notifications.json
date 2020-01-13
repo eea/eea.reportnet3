@@ -240,6 +240,13 @@
             "section":"DATASET_SCHEMA",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key":"GROUP_VALIDATIONS_ERROR",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     },
