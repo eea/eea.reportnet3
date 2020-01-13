@@ -363,6 +363,7 @@ const Dataflow = withRouter(({ history, match }) => {
       await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
       onLoadSnapshotList(datasetIdToProps);
     } catch (error) {
+      console.log('ERROR ON RELEASE', error);
       notificationContext.add({
         type: 'RELEASED_BY_ID_REPORTER_ERROR',
         content: {}
