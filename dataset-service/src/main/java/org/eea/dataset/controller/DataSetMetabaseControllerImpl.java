@@ -149,7 +149,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       RepresentativeVO representative = new RepresentativeVO();
       representative.setDataProviderId(0L);
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow, null, representative);
+          idDataflow, null, representative, 0);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

@@ -28,6 +28,8 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,12 +87,16 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -124,7 +130,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
-        "5d0c822ae1ccd34cfcd97e20", 1L, null, new RepresentativeVO());
+        "5d0c822ae1ccd34cfcd97e20", 1L, null, new RepresentativeVO(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
@@ -141,7 +147,7 @@ public class DatasetMetabaseServiceTest {
   public void createEmptyDatasetTest() throws EEAException {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, "datasetName",
-        (new ObjectId()).toString(), 1L, null, null);
+        (new ObjectId()).toString(), 1L, null, null, 0);
   }
 
   @Test
@@ -256,7 +262,7 @@ public class DatasetMetabaseServiceTest {
 
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION, "testName",
-        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new RepresentativeVO());
+        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new RepresentativeVO(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 

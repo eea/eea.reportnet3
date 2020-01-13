@@ -120,7 +120,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
           datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
-          dataflowId, null, null);
+          dataflowId, null, null, 0);
       datasetId.get();
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());

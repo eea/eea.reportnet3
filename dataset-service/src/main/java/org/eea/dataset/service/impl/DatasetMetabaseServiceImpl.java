@@ -39,9 +39,14 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -92,6 +97,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  @Lazy
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
 
   /** The Constant LOG. */
@@ -397,8 +408,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @org.springframework.transaction.annotation.Transactional(
       value = "metabaseDataSetsTransactionManager")
   public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
-      throws EEAException {
+      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative,
+      Integer iterationDC) throws EEAException {
 
     if (datasetType != null && dataflowId != null) {
       DataSetMetabase dataset;
@@ -429,13 +440,22 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           ((DataCollection) dataset).setDueDate(dueDate);
           dataCollectionRepository.save((DataCollection) dataset);
           this.createGroupDcAndAddUser(dataset.getId());
+          if (iterationDC == 0) {
+            // Notification
+            kafkaSenderUtils
+                .releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+                    NotificationVO.builder()
+                        .user((String) ThreadPropertiesManager.getVariable("user"))
+                        .dataflowId(dataflowId).build());
+
+          }
           break;
         default:
           throw new EEAException("Unsupported datasetType: " + datasetType);
       }
 
       recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
-      // return dataset.getId();
+
       return new AsyncResult<Long>(dataset.getId());
     }
 
