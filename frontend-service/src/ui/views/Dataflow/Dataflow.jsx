@@ -792,7 +792,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
