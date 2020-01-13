@@ -1115,6 +1115,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
     TableValue table = new TableValue();
     table.setId(tableId);
+
     // obtain the provider code (ie ES, FR, IT, etc)
     Long providerId = 0L;
     DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -1122,6 +1123,7 @@ public class DatasetServiceImpl implements DatasetService {
       providerId = metabase.getDataProviderId();
     }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
     recordValue.parallelStream().forEach(record -> {
       if (record.getDatasetPartitionId() == null) {
         try {
