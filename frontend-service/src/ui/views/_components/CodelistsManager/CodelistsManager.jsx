@@ -17,7 +17,7 @@ import { routes } from 'ui/routes';
 
 import { CodelistsManagerUtils } from './_functions/Utils/CodelistsManagerUtils';
 
-const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoading }) => {
+const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoading, onCodelistSelected }) => {
   const resources = useContext(ResourcesContext);
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState();
@@ -174,13 +174,15 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
   };
 
   const renderCategories = data =>
-    data.map(category => {
+    data.map((category, i) => {
       return (
         <Category
           category={category}
           checkDuplicates={checkDuplicates}
           isDataCustodian={isDataCustodian}
           isInDesign={isInDesign}
+          key={i}
+          onCodelistSelected={onCodelistSelected}
         />
       );
     });

@@ -16,16 +16,20 @@ const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, cla
 
   const renderHeader = () => {
     const width = 90 / items.length;
-    return items.map(item => <span style={{ width: `${width}%` }}>{item}</span>);
+    return items.map((item, i) => (
+      <span key={i} style={{ width: `${width}%` }}>
+        {item}
+      </span>
+    ));
   };
 
   const renderButtons = () => {
-    console.log(!isUndefined(buttons) ? buttons[1].visible : 'No buttons');
     return !isUndefined(buttons)
-      ? buttons.map(button => (
+      ? buttons.map((button, i) => (
           <Button
             icon={button.icon}
             disabled={!isUndefined(button.disabled) ? button.disabled : false}
+            key={i}
             label={button.label}
             onClick={button.onClick}
             style={{ marginLeft: '0.5rem' }}

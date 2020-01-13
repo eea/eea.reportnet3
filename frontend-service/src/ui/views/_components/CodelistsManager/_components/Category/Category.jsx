@@ -18,7 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign }) => {
+const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected }) => {
   const initialCategoryState = {
     categoryDescription: '',
     categoryName: '',
@@ -195,13 +195,15 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign }) =>
   const renderCodelist = () => {
     return (
       <div className={styles.categories}>
-        {category.codelists.map(codelist => {
+        {category.codelists.map((codelist, i) => {
           return (
             <Codelist
               checkDuplicates={checkDuplicates}
               codelist={codelist}
               isDataCustodian={isDataCustodian}
               isInDesign={isInDesign}
+              key={i}
+              onCodelistSelected={onCodelistSelected}
             />
           );
         })}

@@ -28,6 +28,7 @@
 		"codelist": "Codelist",
 		"codelistName": "Name",
 		"codelists": "Codelists",
+		"codelistSelection":"No codelist selected",
 		"codelistsManager": "Codelists manager",
 		"codelistVersion": "Version",
 		"codelistStatus": "Status",

@@ -8,8 +8,6 @@ import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
-import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
-import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -41,7 +39,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
-  const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const resources = useContext(ResourcesContext);
@@ -119,12 +116,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     onLoadDatasetSchemaName();
   }, []);
 
-  const codelistDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setIsCodelistManagerVisible(false)} />
-    </div>
-  );
-
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
     setDataflowName(dataflowData.name);
@@ -135,10 +126,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       console.log({ description });
       onUpdateDescription(description);
     }
-  };
-
-  const onCodelistSelected = () => {
-    setIsCodelistManagerVisible(true);
   };
 
   const onKeyChange = event => {
@@ -254,19 +241,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} onCodelistSelected={onCodelistSelected} />
-      <Dialog
-        blockScroll={false}
-        contentStyle={{ overflow: 'auto' }}
-        closeOnEscape={false}
-        footer={codelistDialogFooter}
-        header={resources.messages['codelistsManager']}
-        modal={true}
-        onHide={() => setIsCodelistManagerVisible(false)}
-        style={{ width: '80%' }}
-        visible={isCodelistManagerVisible}>
-        <div className="p-grid p-fluid">{<CodelistsManager setIsLoading={setIsLoading} isInDesign={true} />}</div>
-      </Dialog>
+      <TabsDesigner editable={true} />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

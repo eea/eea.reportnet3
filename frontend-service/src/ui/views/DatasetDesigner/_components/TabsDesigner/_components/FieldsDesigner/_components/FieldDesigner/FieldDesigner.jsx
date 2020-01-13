@@ -6,13 +6,15 @@ import styles from './FieldDesigner.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'ui/views/_components/Button';
+import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { DatasetService } from 'core/services/Dataset';
-import { Button } from 'primereact/button';
 
 export const FieldDesigner = ({
   addField = false,
@@ -24,7 +26,8 @@ export const FieldDesigner = ({
   fieldType,
   index,
   initialFieldIndexDragged,
-  onCodelistSelected,
+  isCodelistSelected,
+  onCodelistShow,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
@@ -32,7 +35,6 @@ export const FieldDesigner = ({
   onNewFieldAdd,
   onShowDialogError,
   recordId,
-  selectedCodelist = { codelistId: 1, codelistName: 'WISE', codelistVersion: '3.2' },
   totalFields
 }) => {
   const fieldTypes = [
@@ -74,9 +76,12 @@ export const FieldDesigner = ({
   const [initialFieldValue, setInitialFieldValue] = useState();
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
+  const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // const [position, setPosition] = useState({});
+  const [selectedCodelist, setSelectedCodelist] = useState({ codelistId: 1, codelistName: '', codelistVersion: '' });
 
   const fieldRef = useRef();
   const inputRef = useRef();
@@ -138,8 +143,7 @@ export const FieldDesigner = ({
     setFieldTypeValue(type);
     console.log(type);
     if (type.fieldType === 'Codelist') {
-      console.log(onCodelistSelected);
-      onCodelistSelected();
+      onCodelistDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
@@ -156,6 +160,7 @@ export const FieldDesigner = ({
           }
         }
       }
+      onCodelistShow(fieldId, type);
     }
   };
 
@@ -223,6 +228,18 @@ export const FieldDesigner = ({
         }
       }
     }
+  };
+
+  const onCodelistSelected = (codelistName, codelistVersion) => {
+    setSelectedCodelist({ codelistId: 1, codelistName: codelistName, codelistVersion: codelistVersion });
+    setIsCodelistManagerVisible(false);
+  };
+
+  const onCodelistDropdownSelected = fieldType => {
+    if (!isUndefined(fieldType)) {
+      onCodelistShow(fieldId, fieldType);
+    }
+    setIsCodelistManagerVisible(true);
   };
 
   const onFieldAdd = async (recordId, type, value, description) => {
@@ -331,6 +348,12 @@ export const FieldDesigner = ({
     }
   };
 
+  const codelistDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setIsCodelistManagerVisible(false)} />
+    </div>
+  );
+
   const parseGeospatialTypes = value => {
     if (value.toUpperCase() === 'LONGITUDE') {
       return 'COORDINATE_LONG';
@@ -373,6 +396,7 @@ export const FieldDesigner = ({
     }
   };
 
+  console.log({ isCodelistSelected });
   return (
     <React.Fragment>
       {/* <style children={inEffect} /> */}
@@ -474,9 +498,22 @@ export const FieldDesigner = ({
         {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
           <Button
             className={`${styles.codelistButton} p-button-secondary`}
-            label={`${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`}
-            onClick={() => onCodelistSelected()}
+            label={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            onClick={() => onCodelistDropdownSelected()}
+            style={{ pointerEvents: 'auto' }}
+            tooltip={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            tooltipOptions={{ position: 'top' }}
           />
+        ) : isCodelistSelected ? (
+          <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
         ) : null}
         {!addField ? (
           <a
@@ -495,6 +532,20 @@ export const FieldDesigner = ({
           </a>
         ) : null}
       </div>
+      {isCodelistManagerVisible ? (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={codelistDialogFooter}
+          header={resources.messages['codelistsManager']}
+          modal={true}
+          onHide={() => setIsCodelistManagerVisible(false)}
+          style={{ width: '80%' }}
+          visible={isCodelistManagerVisible}>
+          {<CodelistsManager setIsLoading={setIsLoading} isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+        </Dialog>
+      ) : null}
     </React.Fragment>
   );
   // });

@@ -24,7 +24,7 @@ import { codelistReducer } from './_functions/Reducers/codelistReducer';
 
 import { CodelistUtils } from './_functions/Utils/CodelistUtils';
 
-const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true, isInDesign }) => {
+const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true, isInDesign, onCodelistSelected }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -326,11 +326,12 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true, isInDesig
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
-        {['itemId', 'code', 'label', 'definition'].map(column => (
+        {['itemId', 'code', 'label', 'definition'].map((column, i) => (
           <Column
             editor={codelistState.isEditing ? row => cellItemDataEditor(row, column) : null}
             field={column}
             header={capitalize(column)}
+            key={i}
             sortable={true}
             style={{ display: column === 'itemId' ? 'none' : 'auto' }}
           />
@@ -373,7 +374,7 @@ const Codelist = ({ checkDuplicates, codelist, isDataCustodian = true, isInDesig
           },
           {
             icon: 'checkSquare',
-            onClick: () => {},
+            onClick: () => onCodelistSelected(codelistState.codelistName, codelistState.codelistVersion),
             //() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign

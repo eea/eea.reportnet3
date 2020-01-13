@@ -17,12 +17,13 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeFields, onChangeTableDescription }) => {
+export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
+  const [isCodelistSelected, setIsCodelistSelected] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,9 +53,15 @@ export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeF
     }
   }, [isPreviewModeOn]);
 
-  const onLoadErrorTypes = async () => {
-    const datasetSchema = await DatasetService.schemaById(datasetId);
-    return datasetSchema.levelErrorTypes;
+  const onCodelistShow = (fieldId, selectedField) => {
+    console.log(fieldId, fields, selectedField);
+    console.log(fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId));
+    console.log(selectedField.fieldType.toUpperCase() === 'CODELIST');
+    // console.log(selectedField.fieldType.toUpperCase() === 'CODELIST', selectedField);
+    setIsCodelistSelected(
+      fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId).length > 0 ||
+        selectedField.fieldType.toUpperCase() === 'CODELIST'
+    );
   };
 
   const onFieldAdd = (fieldId, fieldName, recordId, fieldType, fieldDescription) => {
@@ -102,6 +109,11 @@ export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeF
       //API CALL
       updateTableDescriptionDesign();
     }
+  };
+
+  const onLoadErrorTypes = async () => {
+    const datasetSchema = await DatasetService.schemaById(datasetId);
+    return datasetSchema.levelErrorTypes;
   };
 
   const onShowDialogError = (message, title) => {
@@ -228,7 +240,8 @@ export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeF
           fieldValue=""
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
-          onCodelistSelected={onCodelistSelected}
+          isCodelistSelected={isCodelistSelected}
+          onCodelistShow={onCodelistShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
@@ -240,6 +253,10 @@ export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeF
   };
 
   const renderFields = () => {
+    console.log(
+      fields.filter(field => field.type === 'CODELIST').length,
+      fields.filter(field => field.type === 'CODELIST')
+    );
     const renderedFields =
       !isUndefined(fields) && !isNull(fields) ? (
         fields.map((field, index) => (
@@ -254,8 +271,9 @@ export const FieldsDesigner = ({ datasetId, table, onCodelistSelected, onChangeF
               fieldValue={field.value}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
+              isCodelistSelected={isCodelistSelected}
               key={field.fieldId}
-              onCodelistSelected={onCodelistSelected}
+              onCodelistShow={onCodelistShow}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
               onFieldDragAndDropStart={onFieldDragAndDropStart}
