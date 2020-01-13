@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,6 +75,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @PostMapping
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public Long create(CodelistVO codelistVO) {
     if (codelistVO == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
@@ -97,6 +99,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @PutMapping(value = "/update")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public Long update(CodelistVO codelistVO) {
     if (codelistVO == null || codelistVO.getId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
@@ -121,6 +124,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @PostMapping(value = "/clone/{codelistId}")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public Long clone(Long codelistId, CodelistVO codelistVO) {
     if (codelistVO == null || codelistId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
@@ -143,6 +147,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{codelistId}")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void delete(Long codelistId) {
     if (codelistId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
@@ -184,6 +189,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @PostMapping(value = "/category")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public Long createCategory(CodelistCategoryVO codelistCategoryVO) {
     if (codelistCategoryVO == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -209,6 +215,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @PutMapping(value = "/category/update")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public Long updateCategory(CodelistCategoryVO codelistCategoryVO) {
     if (codelistCategoryVO == null || codelistCategoryVO.getId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -233,6 +240,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/category/{codelistCategoryId}")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void deleteCategory(Long codelistCategoryId) {
     if (codelistCategoryId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
