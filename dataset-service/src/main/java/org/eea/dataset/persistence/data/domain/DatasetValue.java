@@ -55,10 +55,6 @@ public class DatasetValue {
   @Transient
   private TypeErrorEnum levelError;
 
-  /** The data provider code. */
-  @Transient
-  private String dataProviderCode;
-
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.
    *

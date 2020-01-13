@@ -20,7 +20,13 @@ public class RecordValueGenerator implements IdentifierGenerator {
 
     RecordValue record = new RecordValue();
     record = (RecordValue) object;
-    String prefix = record.getTableValue().getDatasetId().getDataProviderCode();
+    String prefix = null;
+    // Set the provider code to create Hash
+    if (null == record.getDataProviderCode())
+      prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
+    else {
+      prefix = record.getDataProviderCode();
+    }
     Connection connection = session.connection();
 
     try {

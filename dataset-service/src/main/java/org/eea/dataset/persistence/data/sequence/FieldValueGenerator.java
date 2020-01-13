@@ -20,7 +20,13 @@ public class FieldValueGenerator implements IdentifierGenerator {
 
     FieldValue field = new FieldValue();
     field = (FieldValue) object;
-    String prefix = field.getRecord().getTableValue().getDatasetId().getDataProviderCode();
+    String prefix = null;
+    // Set the provider code to create Hash
+    if (null == field.getRecord().getDataProviderCode())
+      prefix = "AUX" + field.getRecord().getTableValue().getDatasetId().getId().toString();
+    else {
+      prefix = field.getRecord().getDataProviderCode();
+    }
     Connection connection = session.connection();
 
     try {

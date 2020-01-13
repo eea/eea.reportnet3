@@ -119,13 +119,6 @@ public class FileTreatmentHelper {
       }
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-      // Set the provider code to create Hash
-      if (null == provider)
-        dataset.setDataProviderCode("AUX" + datasetId.toString());
-      else {
-        dataset.setDataProviderCode(provider.getCode());
-      }
-
       listaGeneral.parallelStream().forEach(value -> {
         value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
         datasetService.saveAllRecords(datasetId, value);
