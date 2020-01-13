@@ -16,10 +16,10 @@ import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
-import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
@@ -116,7 +116,10 @@ public class DataflowServiceImpl implements DataflowService {
 
 
   @Autowired
-  private WebLinkRepository webLinkRepository;
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+
+
   /**
    * The Constant LOG.
    */
@@ -145,6 +148,9 @@ public class DataflowServiceImpl implements DataflowService {
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
     // add to the filter the design datasets (data schemas) too
     datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
+    // also, add to the filter the data collection
+    datasets
+        .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -156,6 +162,11 @@ public class DataflowServiceImpl implements DataflowService {
         .setDesignDatasets(datasetMetabaseController.findDesignDataSetIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
+    // Add the data collections
+    dataflowVO.setDataCollections(
+        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -165,8 +176,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
-   *
-   *
    *
    * @return the by status
    *
@@ -292,7 +301,7 @@ public class DataflowServiceImpl implements DataflowService {
         for (Dataflow df : ur.getDataflows()) {
           dataflowId = df.getId();
         }
-        userManagementControllerZull.addContributorToResource(dataflowId,
+        userManagementControllerZull.addUserToResource(dataflowId,
             ResourceGroupEnum.DATAFLOW_PROVIDER);
         LOG.info("The dataflow {} has been added into keycloak", dataflowId);
       }
@@ -339,6 +348,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -359,8 +369,11 @@ public class DataflowServiceImpl implements DataflowService {
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+
     // // with that service we assing the group created to a user who create it
-    userManagementControllerZull.addContributorToResource(dataFlowSaved.getId(),
+    userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
 
@@ -369,6 +382,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Update data flow.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -396,6 +410,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -410,7 +425,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the datasets id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -457,6 +474,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
+   *
    * @throws Exception the exception
    */
   @Override
@@ -482,7 +500,6 @@ public class DataflowServiceImpl implements DataflowService {
       }
       LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
     }
-
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
@@ -521,6 +538,26 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+
+  /**
+   * Update data flow status.
+   *
+   * @param id the id
+   * @param status the status
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException {
+    Optional<Dataflow> dataflow = dataflowRepository.findById(id);
+    if (dataflow.isPresent()) {
+      dataflow.get().setStatus(status);
+      dataflowRepository.save(dataflow.get());
+      LOG.info("The dataflow {} has been saved.", dataflow.get().getName());
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+  }
 
 
 }

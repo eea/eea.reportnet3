@@ -4,10 +4,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -44,6 +46,9 @@ public class DataSetMetabaseControllerImplTest {
   @Mock
   private DesignDatasetService designDatasetService;
 
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
 
 
   /**
@@ -79,8 +84,9 @@ public class DataSetMetabaseControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestException2() throws Exception {
-    Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
-        .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
     dataSetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
   }
 
@@ -91,12 +97,14 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test
   public void createEmptyDataSetTest() throws Exception {
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito
+        .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(1L));
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -181,4 +189,5 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.when(reportingDatasetService.getDataSetIdBySchemaId(Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
   }
+
 }

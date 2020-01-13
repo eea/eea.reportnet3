@@ -209,7 +209,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
 
     // Add user to new group Dataschema-X-DATA_CUSTODIAN
-    userManagementControllerZull.addContributorToResource(datasetId,
+    userManagementControllerZull.addUserToResource(datasetId,
         ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
   }
 

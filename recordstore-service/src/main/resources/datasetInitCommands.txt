@@ -2,7 +2,7 @@ CREATE schema %dataset_name% AUTHORIZATION %user%;
 
 CREATE TABLE %dataset_name%.DATASET_VALUE (ID bigint, ID_DATASET_SCHEMA text, PRIMARY key (ID))  TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.TABLE_VALUE (ID bigint, ID_TABLE_SCHEMA text, DATASET_ID bigint, PRIMARY key (ID), FOREIGN KEY (dataset_id) REFERENCES %dataset_name%.dataset_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.RECORD_VALUE(ID bigint, ID_RECORD_SCHEMA text, ID_TABLE bigint, DATASET_PARTITION_ID bigint, PRIMARY key (ID), FOREIGN KEY (id_table) REFERENCES %dataset_name%.table_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.RECORD_VALUE(ID bigint, ID_RECORD_SCHEMA text, ID_TABLE bigint, DATASET_PARTITION_ID bigint, DATA_PROVIDER_CODE text, PRIMARY key (ID), FOREIGN KEY (id_table) REFERENCES %dataset_name%.table_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.FIELD_VALUE (ID bigint, TYPE text, VALUE text, ID_FIELD_SCHEMA text, ID_RECORD bigint, PRIMARY key (ID), FOREIGN KEY (id_record) REFERENCES %dataset_name%.record_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE  %dataset_name%.VALIDATION (ID bigint,ID_RULE text,LEVEL_ERROR text, MESSAGE text, TYPE_ENTITY text, VALIDATION_DATE text, ORIGIN_NAME TEXT, PRIMARY KEY (id));
 CREATE TABLE %dataset_name%.DATASET_VALIDATION (ID bigint,ID_DATASET bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_DATASET) REFERENCES %dataset_name%.DATASET_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;

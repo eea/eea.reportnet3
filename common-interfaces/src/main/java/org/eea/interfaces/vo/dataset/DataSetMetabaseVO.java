@@ -43,4 +43,8 @@ public class DataSetMetabaseVO implements Serializable {
   /** The dataset schema. */
   private String datasetSchema;
 
+
+  /** The data provider id. */
+  private Long dataProviderId;
+
 }

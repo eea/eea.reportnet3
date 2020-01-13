@@ -1,6 +1,7 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,8 +11,12 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -69,6 +74,13 @@ public class FileTreatmentHelperTest {
   @Mock
   private NotificableEventHandler notificableEventHandler;
 
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+
   /**
    * Inits the mocks.
    */
@@ -99,6 +111,10 @@ public class FileTreatmentHelperTest {
     Mockito.when(listRecordValue.subList(Mockito.anyInt(), Mockito.anyInt()))
         .thenReturn(new ArrayList<RecordValue>());
     Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
@@ -133,6 +149,10 @@ public class FileTreatmentHelperTest {
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410");

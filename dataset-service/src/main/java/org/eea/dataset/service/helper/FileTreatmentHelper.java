@@ -10,8 +10,12 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -56,6 +60,14 @@ public class FileTreatmentHelper {
   @Autowired
   private LockService lockService;
 
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -99,8 +111,18 @@ public class FileTreatmentHelper {
 
       List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
 
-      listaGeneral.parallelStream()
-          .forEach(value -> datasetService.saveAllRecords(datasetId, value));
+      // Obtain the data provider code to insert into the record
+      Long providerId = 0L;
+      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+      if (metabase.getDataProviderId() != null) {
+        providerId = metabase.getDataProviderId();
+      }
+      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+      listaGeneral.parallelStream().forEach(value -> {
+        value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
+        datasetService.saveAllRecords(datasetId, value);
+      });
 
       LOG.info("File processed and saved into DB");
       releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,

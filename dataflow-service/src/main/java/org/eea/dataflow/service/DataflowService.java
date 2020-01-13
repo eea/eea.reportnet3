@@ -151,4 +151,14 @@ public interface DataflowService {
   DataFlowVO getMetabaseById(Long id) throws EEAException;
 
 
+  /**
+   * Update data flow status.
+   *
+   * @param id the id
+   * @param status the status
+   * @throws EEAException the EEA exception
+   */
+  void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException;
+
+
 }

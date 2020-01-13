@@ -177,7 +177,7 @@ public class RepresentativeControllerImplTest {
   @Test
   public void findRepresetativesByIdDataFlowException1Test() throws EEAException {
     try {
-      representativeControllerImpl.findRepresetativesByIdDataFlow(null);
+      representativeControllerImpl.findRepresentativesByIdDataFlow(null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
@@ -194,7 +194,7 @@ public class RepresentativeControllerImplTest {
     doThrow(new EEAException()).when(representativeService)
         .getRepresetativesByIdDataFlow(Mockito.anyLong());
     try {
-      representativeControllerImpl.findRepresetativesByIdDataFlow(1L);
+      representativeControllerImpl.findRepresentativesByIdDataFlow(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
@@ -211,7 +211,7 @@ public class RepresentativeControllerImplTest {
     when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
         .thenReturn(representativeVOs);
     assertEquals("error in the message", representativeVOs,
-        representativeControllerImpl.findRepresetativesByIdDataFlow(1L));
+        representativeControllerImpl.findRepresentativesByIdDataFlow(1L));
   }
 
   /**

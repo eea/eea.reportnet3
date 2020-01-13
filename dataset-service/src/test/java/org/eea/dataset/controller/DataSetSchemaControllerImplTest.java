@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -261,11 +262,13 @@ public class DataSetSchemaControllerImplTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(1L);
-    Mockito.doNothing().when(dataschemaService).createGroupAndAddUser(Mockito.any());
+    Mockito
+        .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(1L));
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
-    Mockito.verify(dataschemaService, times(1)).createGroupAndAddUser(Mockito.any());
+    Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -275,8 +278,9 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
-    Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
-        .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
