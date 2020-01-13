@@ -34,15 +34,19 @@ public class RecordValueGenerator implements IdentifierGenerator {
       ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");
 
       if (rs.next()) {
-
         int id = rs.getInt(1);
         String idcompose = prefix + new Integer(id).toString();
         String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
         BigInteger bi = new BigInteger(md5Hex, 16);
         Long hexId = bi.longValue();
-        return hexId;
+        String textId = hexId.toString();
+        Long hashId = Long.parseLong(textId.substring(0, 14));
+        return hashId;
       }
 
+      rs.close();
+      statement.close();
+      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
