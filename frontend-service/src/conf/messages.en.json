@@ -342,6 +342,14 @@
 		"dataflowCreationError":"Failed creating <strong title='dataflowName'>{:sortDataflowName}</strong> dataflow at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"restoreDatasetSchemaSnapshotCompletedEvent":"restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"restoreDatasetSchemaSnapshotFailedEvent":"restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
+		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"groupValidationsError":"Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"schemaByIdError":"Failed loading schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"errorStatisticsByIdError":"Failed getting error statistics by error id at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"dataflowDetailsError":"Failed getting dataflow details",
+		"reportingError":"Failed getting dataflow data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"deleteDataByIdError":"Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"validateDataByIdError":"Failed validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
 	}
 }
