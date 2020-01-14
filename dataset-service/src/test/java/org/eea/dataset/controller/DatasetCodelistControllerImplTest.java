@@ -471,7 +471,7 @@ public class DatasetCodelistControllerImplTest {
   public void getAllByIdException2Test() throws EEAException {
     try {
 
-      datasetCodelistControllerImpl.getAllById(new ArrayList<Long>());
+      datasetCodelistControllerImpl.getAllById("");
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -486,12 +486,10 @@ public class DatasetCodelistControllerImplTest {
    */
   @Test
   public void getAllByIdException3Test() throws EEAException {
-    List<Long> ids = new ArrayList<>();
-    ids.add(1L);
     when(codelistService.getAllByIds(Mockito.any())).thenThrow(EEAException.class);
     try {
 
-      datasetCodelistControllerImpl.getAllById(ids);
+      datasetCodelistControllerImpl.getAllById("1,2");
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
@@ -506,10 +504,8 @@ public class DatasetCodelistControllerImplTest {
    */
   @Test
   public void getAllByIdSuccessTest() throws EEAException {
-    List<Long> ids = new ArrayList<>();
-    ids.add(1L);
     when(codelistService.getAllByIds(Mockito.any())).thenReturn(codelistsVO);
-    assertEquals("not equal", codelistsVO, datasetCodelistControllerImpl.getAllById(ids));
+    assertEquals("not equal", codelistsVO, datasetCodelistControllerImpl.getAllById("1"));
   }
 
 

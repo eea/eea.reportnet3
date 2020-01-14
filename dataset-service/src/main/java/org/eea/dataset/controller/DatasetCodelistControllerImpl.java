@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -180,6 +181,11 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return codelistCategoryVO;
   }
 
+  /**
+   * Gets the all categories.
+   *
+   * @return the all categories
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/category/all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -274,12 +280,14 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<CodelistVO> getAllById(List<Long> codelistIds) {
-    if (codelistIds == null || codelistIds.isEmpty()) {
+  public List<CodelistVO> getAllById(String codelistIds) {
+    if (StringUtils.isBlank(codelistIds)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
     Set<Long> codelistIdsSet = new HashSet<>();
-    codelistIdsSet.addAll(codelistIds);
+    for (String item : codelistIds.split(",")) {
+      codelistIdsSet.add(Long.valueOf(item));
+    }
     List<CodelistVO> codelistVOs = new ArrayList<>();
     try {
       codelistVOs =
@@ -292,6 +300,12 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return codelistVOs;
   }
 
+  /**
+   * Gets the all by category id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the all by category id
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/find/category/{codelistCategoryId}",

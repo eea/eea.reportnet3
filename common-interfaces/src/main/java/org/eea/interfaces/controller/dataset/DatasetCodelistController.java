@@ -122,7 +122,7 @@ public interface DatasetCodelistController {
    * @return the all by id
    */
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<CodelistVO> getAllById(@RequestParam List<Long> codelistIds);
+  List<CodelistVO> getAllById(@RequestParam String codelistIds);
 
   /**
    * Gets the all by category id.
