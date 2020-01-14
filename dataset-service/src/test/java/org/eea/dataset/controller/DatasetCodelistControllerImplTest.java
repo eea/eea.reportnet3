@@ -45,6 +45,9 @@ public class DatasetCodelistControllerImplTest {
   /** The codelist category VO. */
   private CodelistCategoryVO codelistCategoryVO;
 
+  /** The codelist category VOS. */
+  private List<CodelistCategoryVO> codelistCategoryVOS;
+
   /**
    * Inits the mocks.
    */
@@ -54,6 +57,8 @@ public class DatasetCodelistControllerImplTest {
     codelistCategoryVO = new CodelistCategoryVO();
     codelistsVO = new ArrayList<>();
     codelistsVO.add(codelistVO);
+    codelistCategoryVOS = new ArrayList<>();
+    codelistCategoryVOS.add(codelistCategoryVO);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -505,5 +510,80 @@ public class DatasetCodelistControllerImplTest {
     ids.add(1L);
     when(codelistService.getAllByIds(Mockito.any())).thenReturn(codelistsVO);
     assertEquals("not equal", codelistsVO, datasetCodelistControllerImpl.getAllById(ids));
+  }
+
+
+  /**
+   * Gets the all categories exception test.
+   *
+   * @return the all categories exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllCategoriesExceptionTest() throws EEAException {
+    when(codelistService.getAllCategories()).thenThrow(EEAException.class);
+    try {
+      datasetCodelistControllerImpl.getAllCategories();
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all categories success test.
+   *
+   * @return the all categories success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllCategoriesSuccessTest() throws EEAException {
+    when(codelistService.getAllCategories()).thenReturn(codelistCategoryVOS);
+    assertEquals("not equal", codelistCategoryVOS,
+        datasetCodelistControllerImpl.getAllCategories());
+  }
+
+  /**
+   * Gets the all by category id exception 1 test.
+   *
+   * @return the all by category id exception 1 test
+   */
+  @Test
+  public void getAllByCategoryIdException1Test() {
+    try {
+      datasetCodelistControllerImpl.getAllByCategoryId(null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all by category id exception 2 test.
+   *
+   * @return the all by category id exception 2 test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByCategoryIdException2Test() throws EEAException {
+    when(codelistService.getAllByCategoryId(Mockito.any())).thenThrow(EEAException.class);
+    try {
+      datasetCodelistControllerImpl.getAllByCategoryId(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Gets the all by category id success test.
+   *
+   * @return the all by category id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllByCategoryIdSuccessTest() throws EEAException {
+    when(codelistService.getAllByCategoryId(Mockito.any())).thenReturn(codelistsVO);
+    assertEquals("not equal", codelistsVO, datasetCodelistControllerImpl.getAllByCategoryId(1L));
   }
 }

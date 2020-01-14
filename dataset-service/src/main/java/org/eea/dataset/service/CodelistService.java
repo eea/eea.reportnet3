@@ -55,6 +55,14 @@ public interface CodelistService {
   CodelistCategoryVO getCategoryById(Long codelistCategoryId) throws EEAException;
 
   /**
+   * Gets the all categories.
+   *
+   * @return the all categories
+   * @throws EEAException the EEA exception
+   */
+  List<CodelistCategoryVO> getAllCategories() throws EEAException;
+
+  /**
    * Creates the category.
    *
    * @param codelistCategoryVO the codelist category VO
@@ -87,5 +95,14 @@ public interface CodelistService {
    * @throws EEAException the EEA exception
    */
   List<CodelistVO> getAllByIds(List<Long> codelistIds) throws EEAException;
+
+  /**
+   * Gets the all by category id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the all by category id
+   * @throws EEAException the EEA exception
+   */
+  List<CodelistVO> getAllByCategoryId(Long codelistCategoryId) throws EEAException;
 
 }

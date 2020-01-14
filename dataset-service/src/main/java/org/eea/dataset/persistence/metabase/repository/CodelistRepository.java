@@ -27,4 +27,12 @@ public interface CodelistRepository extends PagingAndSortingRepository<Codelist,
    * @return the optional
    */
   Optional<List<Codelist>> findAllByIdIn(List<Long> codelistIds);
+
+  /**
+   * Find all by category id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the optional
+   */
+  Optional<List<Codelist>> findAllByCategory_Id(Long codelistCategoryId);
 }

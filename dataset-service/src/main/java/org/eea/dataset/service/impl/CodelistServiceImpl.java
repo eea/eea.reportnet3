@@ -238,6 +238,18 @@ public class CodelistServiceImpl implements CodelistService {
   }
 
   /**
+   * Gets the all categories.
+   *
+   * @return the all categories
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<CodelistCategoryVO> getAllCategories() throws EEAException {
+    List<CodelistCategory> codelistCategories = codelistCategoryRepository.findAll();
+    return codelistCategoryMapper.entityListToClass(codelistCategories);
+  }
+
+  /**
    * Creates the category.
    *
    * @param codelistCategoryVO the codelist category VO
@@ -304,6 +316,20 @@ public class CodelistServiceImpl implements CodelistService {
     if (null == codelists) {
       throw new EEAException(EEAErrorMessage.CODELIST_NOT_FOUND);
     }
+    return codelistMapper.entityListToClass(codelists);
+  }
+
+  /**
+   * Gets the all by category id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the all by category id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<CodelistVO> getAllByCategoryId(Long codelistCategoryId) throws EEAException {
+    List<Codelist> codelists = codelistRepository.findAllByCategory_Id(codelistCategoryId)
+        .orElse(new ArrayList<Codelist>());
     return codelistMapper.entityListToClass(codelists);
   }
 }

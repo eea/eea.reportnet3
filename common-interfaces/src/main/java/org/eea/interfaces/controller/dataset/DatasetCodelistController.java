@@ -82,6 +82,14 @@ public interface DatasetCodelistController {
   CodelistCategoryVO getCategoryById(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 
   /**
+   * Gets the all categories.
+   *
+   * @return the all categories
+   */
+  @GetMapping(value = "/category/all", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<CodelistCategoryVO> getAllCategories();
+
+  /**
    * Creates the category.
    *
    * @param codelistCategoryVO the codelist category VO
@@ -115,4 +123,15 @@ public interface DatasetCodelistController {
    */
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
   List<CodelistVO> getAllById(@RequestParam List<Long> codelistIds);
+
+  /**
+   * Gets the all by category id.
+   *
+   * @param codelistCategoryId the codelist category id
+   * @return the all by category id
+   */
+  @GetMapping(value = "/find/category/{codelistCategoryId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<CodelistVO> getAllByCategoryId(@PathVariable("codelistCategoryId") Long codelistCategoryId);
+
 }

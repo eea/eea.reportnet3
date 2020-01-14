@@ -180,6 +180,22 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     return codelistCategoryVO;
   }
 
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/category/all", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<CodelistCategoryVO> getAllCategories() {
+    List<CodelistCategoryVO> codelistCategoryVOs = new ArrayList<>();
+    try {
+      codelistCategoryVOs = codelistService.getAllCategories();
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the codelist category. Error message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND, e);
+    }
+    return codelistCategoryVOs;
+  }
+
+
   /**
    * Creates the category.
    *
@@ -268,6 +284,25 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     try {
       codelistVOs =
           codelistService.getAllByIds(codelistIdsSet.stream().collect(Collectors.toList()));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the codelists. Error message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND,
+          e);
+    }
+    return codelistVOs;
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/find/category/{codelistCategoryId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<CodelistVO> getAllByCategoryId(Long codelistCategoryId) {
+    if (codelistCategoryId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
+    }
+    List<CodelistVO> codelistVOs = new ArrayList<>();
+    try {
+      codelistVOs = codelistService.getAllByCategoryId(codelistCategoryId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the codelists. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND,
