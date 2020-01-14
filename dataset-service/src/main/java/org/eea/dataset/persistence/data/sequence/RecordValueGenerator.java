@@ -27,28 +27,40 @@ public class RecordValueGenerator implements IdentifierGenerator {
     else {
       prefix = record.getDataProviderCode();
     }
-    Connection connection = session.connection();
-
+    // Connection must not close because transaction not finished yet.
+    Connection connection = session.connection();// NOPMD
+    Statement statement = null;
+    ResultSet rs = null;
     try {
-      Statement statement = connection.createStatement();
-      ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");
+      statement = connection.createStatement();
+      rs = statement.executeQuery("SELECT nextval('record_sequence')");
 
       if (rs.next()) {
-
         int id = rs.getInt(1);
-        String idcompose = prefix + new Integer(id).toString();
+        String idcompose = prefix + Integer.valueOf(id);
         String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
         BigInteger bi = new BigInteger(md5Hex, 16);
         Long hexId = bi.longValue();
-        return hexId;
+        String textId = hexId.toString();
+        Long hashId = Long.parseLong(textId.substring(0, 14));
+        return hashId;
       }
-
     } catch (SQLException e) {
+      try {
+        if (null != rs) {
+          rs.close();
+        }
+        if (statement != null) {
+          statement.close();
+        }
+        if (null != connection) {
+          connection.close();
+        }
+      } catch (SQLException i) {
+        i.printStackTrace();
+      }
       e.printStackTrace();
     }
     return null;
   }
-
 }
-
-
