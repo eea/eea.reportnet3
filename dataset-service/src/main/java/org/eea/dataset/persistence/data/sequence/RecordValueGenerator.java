@@ -18,8 +18,7 @@ public class RecordValueGenerator implements IdentifierGenerator {
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    RecordValue record = new RecordValue();
-    record = (RecordValue) object;
+    RecordValue record = (RecordValue) object;
     String prefix = null;
     // Set the provider code to create Hash
     if (null == record.getDataProviderCode())
@@ -29,11 +28,9 @@ public class RecordValueGenerator implements IdentifierGenerator {
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
-    Statement statement = null;
-    ResultSet rs = null;
     try {
-      statement = connection.createStatement();
-      rs = statement.executeQuery("SELECT nextval('record_sequence')");
+      Statement statement = connection.createStatement();// NOPMD
+      ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");// NOPMD
 
       if (rs.next()) {
         int id = rs.getInt(1);
@@ -46,19 +43,6 @@ public class RecordValueGenerator implements IdentifierGenerator {
         return hashId;
       }
     } catch (SQLException e) {
-      try {
-        if (null != rs) {
-          rs.close();
-        }
-        if (statement != null) {
-          statement.close();
-        }
-        if (null != connection) {
-          connection.close();
-        }
-      } catch (SQLException i) {
-        i.printStackTrace();
-      }
       e.printStackTrace();
     }
     return null;

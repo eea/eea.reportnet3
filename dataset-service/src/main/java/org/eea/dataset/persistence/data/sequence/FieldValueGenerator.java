@@ -18,8 +18,7 @@ public class FieldValueGenerator implements IdentifierGenerator {
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    FieldValue field = new FieldValue();
-    field = (FieldValue) object;
+    FieldValue field = (FieldValue) object;
     String prefix = null;
     // Set the provider code to create Hash
     if (null == field.getRecord().getDataProviderCode())
@@ -29,11 +28,10 @@ public class FieldValueGenerator implements IdentifierGenerator {
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection(); // NOPMD
-    Statement statement = null;
-    ResultSet rs = null;
+
     try {
-      statement = connection.createStatement();
-      rs = statement.executeQuery("SELECT nextval('field_sequence')");
+      Statement statement = connection.createStatement(); // NOPMD
+      ResultSet rs = statement.executeQuery("SELECT nextval('field_sequence')");// NOPMD
 
       if (rs.next()) {
         int id = rs.getInt(1);
@@ -50,19 +48,7 @@ public class FieldValueGenerator implements IdentifierGenerator {
       statement.close();
       connection.close();
     } catch (SQLException e) {
-      try {
-        if (null != rs) {
-          rs.close();
-        }
-        if (statement != null) {
-          statement.close();
-        }
-        if (null != connection) {
-          connection.close();
-        }
-      } catch (SQLException i) {
-        i.printStackTrace();
-      }
+      e.printStackTrace();
     }
     return null;
   }
