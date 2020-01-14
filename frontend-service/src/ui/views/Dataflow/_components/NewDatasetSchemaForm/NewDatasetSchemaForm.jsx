@@ -12,6 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
 
 const NewDatasetSchemaForm = ({
   dataflowId,
@@ -22,6 +23,7 @@ const NewDatasetSchemaForm = ({
   setNewDatasetDialog
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
@@ -68,10 +70,15 @@ const NewDatasetSchemaForm = ({
             throw new Error('Schema creation error');
           }
         } catch (error) {
-          NotificationContext.add({
+          const metadata = await MetadataUtils.getMetadata({ dataflowId });
+          const {
+            dataflow: { name: dataflowName }
+          } = metadata;
+          notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR',
             content: {
-              dataflowId
+              dataflowId,
+              dataflowName
             }
           });
         } finally {
