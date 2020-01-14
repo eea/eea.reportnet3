@@ -1,6 +1,7 @@
 {
-    "all":  "/dataflow/{:dataflowId}/loadCategories",
-    "add": "/dataflow/{:dataflowId}/category",
-    "delete": "/dataflow/{:dataflowId}/category/{:categoryId}",
-    "update": "/dataflow/{:dataflowId}/updateCategory"    
+    "all":  "/codelist/category/{:codelistCategoryId}",
+    "add": "/codelist/category",
+    "delete": "/codelist/category/{:codelistCategoryId}",
+    "find":"/codelist/category/find?codelistIds={:codelistIds}",
+    "update": "/codelist/category/update"    
 }

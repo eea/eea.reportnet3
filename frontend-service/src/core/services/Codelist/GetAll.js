@@ -1,1 +1,1 @@
-export const GetAll = ({ codelistRepository }) => async dataflowId => codelistRepository.all(dataflowId);
+export const GetAll = ({ codelistRepository }) => async () => codelistRepository.all();

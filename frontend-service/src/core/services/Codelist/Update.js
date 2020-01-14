@@ -1,2 +1,2 @@
-export const Update = ({ codelistRepository }) => async (dataflowId, codelistId, codelist) =>
-  codelistRepository.updateById(dataflowId, codelistId, codelist);
+export const Update = ({ codelistRepository }) => async (id, description, items, name, status, version) =>
+  codelistRepository.updateById(id, description, items, name, status, version);

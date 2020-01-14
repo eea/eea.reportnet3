@@ -4,12 +4,10 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiCodelist = {
-  all: async dataflowId => {
+  all: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.all, {
-        dataflowId
-      }),
+      url: getUrl(CodelistConfig.all, {}),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -17,19 +15,11 @@ export const apiCodelist = {
     });
     return response;
   },
-  addById: async (dataflowId, description, items, name, status, version) => {
+  addById: async codelist => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
-      url: getUrl(CodelistConfig.add, {
-        dataflowId
-      }),
-      data: {
-        description,
-        items,
-        name,
-        status,
-        version
-      },
+      url: getUrl(CodelistConfig.add, {}),
+      data: { codelist },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -37,11 +27,10 @@ export const apiCodelist = {
     return response;
   },
 
-  deleteById: async (dataflowId, codelistId) => {
+  deleteById: async codelistId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(CodelistConfig.delete, {
-        dataflowId,
         codelistId
       }),
       headers: {
@@ -52,19 +41,14 @@ export const apiCodelist = {
     return response;
   },
 
-  updateById: async (dataflowId, codelistId, codelist) => {
+  updateById: async codelist => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(CodelistConfig.update, {
-        dataflowId
-      }),
+      url: getUrl(CodelistConfig.update, {}),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: {
-        codelistId,
-        codelist
-      }
+      data: { codelist }
     });
     return response;
   }

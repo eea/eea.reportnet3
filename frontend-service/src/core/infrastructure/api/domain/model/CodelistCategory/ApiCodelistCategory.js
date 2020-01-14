@@ -4,12 +4,10 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiCodelistCategory = {
-  all: async dataflowId => {
+  all: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(CodelistCategoryConfig.all, {
-        dataflowId
-      }),
+      url: getUrl(CodelistCategoryConfig.all, {}),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -17,17 +15,11 @@ export const apiCodelistCategory = {
     });
     return response;
   },
-  addById: async (dataflowId, name, description, codelists) => {
+  addById: async category => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
-      url: getUrl(CodelistCategoryConfig.add, {
-        dataflowId
-      }),
-      data: {
-        description,
-        name,
-        codelists
-      },
+      url: getUrl(CodelistCategoryConfig.add, {}),
+      data: { category },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -35,12 +27,11 @@ export const apiCodelistCategory = {
     return response;
   },
 
-  deleteById: async (dataflowId, categoryId) => {
+  deleteById: async codelistCategoryId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(CodelistCategoryConfig.delete, {
-        dataflowId,
-        categoryId
+        codelistCategoryId
       }),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -50,18 +41,17 @@ export const apiCodelistCategory = {
     return response;
   },
 
-  updateById: async (dataflowId, categoryId, category) => {
+  updateById: async (id, shortCode, description) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(CodelistCategoryConfig.update, {
-        dataflowId,
-        categoryId
-      }),
+      url: getUrl(CodelistCategoryConfig.update, {}),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
       data: {
-        category
+        id,
+        shortCode,
+        description
       }
     });
     return response;

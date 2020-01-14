@@ -12,6 +12,7 @@ export const categoryReducer = (state, { type, payload }) => {
       return {
         ...state,
         categoryDescription: payload.description ? payload.description : state.categoryDescription,
+        categoryId: payload.categoryId ? payload.categoryId : state.categoryId,
         categoryName: payload.name ? payload.name : state.categoryName
       };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':

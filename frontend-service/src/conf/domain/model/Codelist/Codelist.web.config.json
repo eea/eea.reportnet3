@@ -1,6 +1,8 @@
 {
-    "all":  "/dataflow/{:dataflowId}/loadCodelists",
-    "add": "/dataflow/{:dataflowId}/codelist",
-    "delete": "/dataflow/{:dataflowId}/codelist/{:codelistId}",
-    "update": "/dataflow/{:dataflowId}/updateCodelist"    
+    "add": "/codelist",
+    "all": "/codelist/{:codelistId}",
+    "clone": "/codelist/{:codelistId}",
+    "delete": "/codelist/{:codelistId}",
+    "find":"/codelist/find?codelistIds={:codelistIds}",
+    "update": "/codelist/update" 
 }

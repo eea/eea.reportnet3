@@ -3,13 +3,13 @@ import { CodelistCategory } from 'core/domain/model/CodelistCategory/CodelistCat
 import { Codelist } from 'core/domain/model/Codelist/Codelist';
 import { CodelistItem } from 'core/domain/model/Codelist/CodelistItem/CodelistItem';
 
-const all = async dataflowId => {
-  const categoriesDTO = await apiCodelistCategory.all(dataflowId);
+const all = async () => {
+  const categoriesDTO = await apiCodelistCategory.all();
 
   return categoriesDTO.map(categorieDTO => {
     const codelists = categorieDTO.codelists.map(codelistDTO => {
       const codelistItems = codelistDTO.items.map(
-        itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition)
+        itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
       );
       return new Codelist(
         codelistDTO.id,
@@ -24,16 +24,18 @@ const all = async dataflowId => {
   });
 };
 
-const addById = async (dataflowId, name, description, codelists) => {
-  return await apiCodelistCategory.addById(dataflowId, name, description, codelists);
+const addById = async (shortCode, description) => {
+  const codelistCategoryDTO = new CodelistCategory(null, shortCode, description);
+  return await apiCodelistCategory.addById(codelistCategoryDTO);
 };
 
-const deleteById = async (dataflowId, categoryId) => {
-  return await apiCodelistCategory.deleteById(dataflowId, categoryId);
+const deleteById = async categoryId => {
+  return await apiCodelistCategory.deleteById(categoryId);
 };
 
-const updateById = async (dataflowId, categoryId, category) => {
-  return await apiCodelistCategory.updateById(dataflowId, categoryId, category);
+const updateById = async (id, shortCode, description) => {
+  const codelistCategoryDTO = new CodelistCategory(id, shortCode, description);
+  return await apiCodelistCategory.updateById(codelistCategoryDTO);
 };
 
 export const ApiCodelistCategoryRepository = {

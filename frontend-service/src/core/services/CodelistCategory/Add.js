@@ -1,2 +1,2 @@
-export const Add = ({ codelistCategoryRepository }) => async (dataflowId, name, description, codelists) =>
-  codelistCategoryRepository.addById(dataflowId, name, description, codelists);
+export const Add = ({ codelistCategoryRepository }) => async (shortCode, description) =>
+  codelistCategoryRepository.addById(shortCode, description);

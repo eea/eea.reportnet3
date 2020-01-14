@@ -203,7 +203,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
           />
         ) : null}
       </div>
-      <hr />
       {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}

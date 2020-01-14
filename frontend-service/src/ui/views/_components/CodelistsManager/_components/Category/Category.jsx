@@ -1,5 +1,7 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
+import { isNull } from 'lodash';
+
 import styles from './Category.module.css';
 
 import { Button } from 'ui/views/_components/Button';
@@ -10,8 +12,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
-// import { CodelistCategoryService } from 'core/services/CodelistCategory';
-// import { CodelistService } from 'core/services/Codelist';
+import { CodelistCategoryService } from 'core/services/CodelistCategory';
+import { CodelistService } from 'core/services/Codelist';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -20,6 +22,7 @@ import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
 const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected }) => {
   const initialCategoryState = {
+    categoryId: null,
     categoryDescription: '',
     categoryName: '',
     isAddCodelistDialogVisible: '',
@@ -42,7 +45,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
 
   const onConfirmDeleteCategory = async () => {
     try {
-      //await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
+      await CodelistService.deleteById(categoryState.categoryId);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -74,7 +77,15 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
 
   const onSaveCategory = () => {
     try {
-      //CodelistCategoryService.addById(dataflowId, categoryState.categoryName, categoryState.categoryDescription, []);
+      if (!isNull(categoryState.categoryId)) {
+        //CodelistCategoryService.addById(categoryState.categoryName, categoryState.categoryDescription);
+      } else {
+        CodelistCategoryService.updateById(
+          categoryState.categoryId,
+          categoryState.categoryName,
+          categoryState.categoryDescription
+        );
+      }
     } catch (error) {
       notificationContext.add({
         type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -164,10 +175,10 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     </React.Fragment>
   );
 
-  const setCategoryInputs = (description, name) => {
+  const setCategoryInputs = (description, name, id) => {
     dispatchCategory({
       type: 'SET_CATEGORY_INPUTS',
-      payload: { description, name }
+      payload: { description, name, id }
     });
   };
 

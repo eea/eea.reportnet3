@@ -70,9 +70,11 @@ export const FieldDesigner = ({
   };
 
   const [animation] = useState('');
-  const [fieldValue, setFieldValue] = useState(fieldName);
-  const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
+  const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
+  const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+  const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
@@ -140,8 +142,9 @@ export const FieldDesigner = ({
   }, [isDragging]);
 
   const onChangeFieldType = type => {
+    setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    console.log(type);
+    console.log(type, fieldType);
     if (type.fieldType === 'Codelist') {
       onCodelistDropdownSelected(type);
     } else {
@@ -160,6 +163,7 @@ export const FieldDesigner = ({
           }
         }
       }
+      setSelectedCodelist({ codelistId: 1, codelistName: '', codelistVersion: '' });
       onCodelistShow(fieldId, type);
     }
   };
@@ -231,6 +235,7 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistName, codelistVersion) => {
+    console.log(codelistName, codelistVersion);
     setSelectedCodelist({ codelistId: 1, codelistName: codelistName, codelistVersion: codelistVersion });
     setIsCodelistManagerVisible(false);
   };
@@ -350,7 +355,17 @@ export const FieldDesigner = ({
 
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setIsCodelistManagerVisible(false)} />
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          console.log(selectedCodelist, fieldTypeValue);
+          if (selectedCodelist.codelistName === '' && selectedCodelist.codelistVersion === '') {
+            setFieldTypeValue(fieldPreviousTypeValue);
+          }
+          setIsCodelistManagerVisible(false);
+        }}
+      />
     </div>
   );
 

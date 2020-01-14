@@ -1,12 +1,9 @@
 .codelistsActions {
   display: flex;
   justify-content: space-between;
+  padding-bottom: 1rem;
 }
 
 .filterSpan {
   width: 33%;
 }
-
-/* .codelists li:hover {
-    background-color: var(--gray-25);
-  } */

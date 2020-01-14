@@ -1,8 +1,8 @@
 export class CodelistCategory {
-  constructor(id, name, description, codelists) {
+  constructor(id, shortCode, description, codelists) {
     this.codelists = codelists;
     this.description = description;
     this.id = id;
-    this.name = name;
+    this.shortCode = shortCode;
   }
 }
