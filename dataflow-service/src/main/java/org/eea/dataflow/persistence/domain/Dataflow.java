@@ -85,7 +85,7 @@ public class Dataflow {
   private Set<UserRequest> userRequests;
 
   /** The dataflow representatives. */
-  @OneToMany(mappedBy = "dataflow")
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Representative> representatives;
 
   /**

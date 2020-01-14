@@ -4,6 +4,7 @@ import org.eea.dataset.persistence.metabase.domain.CodelistItem;
 import org.eea.interfaces.vo.dataset.CodelistItemVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 
 /**
@@ -19,6 +20,7 @@ public interface CodelistItemMapper extends IMapper<CodelistItem, CodelistItemVO
    * @return the codelist VO
    */
   @Override
+  @Mapping(source = "codelist.id", target = "codelistId")
   CodelistItemVO entityToClass(CodelistItem entity);
 
   /**
