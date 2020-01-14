@@ -123,6 +123,7 @@ public class LockServiceImpl implements LockService {
    * @return the integer
    */
   private Integer generateHashCode(List<Object> args) {
+    args.sort((o1, o2) -> (o1.hashCode() - o2.hashCode()));
     return args.hashCode();
   }
 
