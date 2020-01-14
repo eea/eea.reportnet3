@@ -21,16 +21,16 @@ public class FieldValueGenerator implements IdentifierGenerator {
     FieldValue field = (FieldValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == field.getRecord().getDataProviderCode())
+    if (null == field.getRecord().getDataProviderCode()) {
       prefix = "AUX" + field.getRecord().getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = field.getRecord().getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection(); // NOPMD
 
     try {
-      Statement statement = connection.createStatement(); // NOPMD
+      Statement statement = connection.createStatement(); // NOSONAR
       ResultSet rs = statement.executeQuery("SELECT nextval('field_sequence')");// NOPMD
 
       if (rs.next()) {

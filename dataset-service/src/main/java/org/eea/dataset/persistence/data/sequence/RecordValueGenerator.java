@@ -21,15 +21,15 @@ public class RecordValueGenerator implements IdentifierGenerator {
     RecordValue record = (RecordValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == record.getDataProviderCode())
+    if (null == record.getDataProviderCode()) {
       prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = record.getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
     try {
-      Statement statement = connection.createStatement();// NOPMD
+      Statement statement = connection.createStatement();// NOSONAR
       ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");// NOPMD
 
       if (rs.next()) {
