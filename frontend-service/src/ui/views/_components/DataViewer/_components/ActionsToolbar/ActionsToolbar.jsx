@@ -19,9 +19,12 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+
 const ActionsToolbar = ({
   colsSchema,
   datasetId,
+  dataflowId,
   hasWritePermissions,
   isFilterValidationsActive,
   isWebFormMMR,
@@ -83,10 +86,19 @@ const ActionsToolbar = ({
       setExportTableDataName(createTableName(tableName, fileType));
       setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
     } catch (error) {
-      console.error(error);
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
-        content: {}
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName,
+          tableName
+        }
       });
     } finally {
       setIsLoadingFile(false);
