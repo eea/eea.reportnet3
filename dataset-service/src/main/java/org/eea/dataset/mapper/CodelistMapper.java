@@ -42,8 +42,10 @@ public interface CodelistMapper extends IMapper<Codelist, CodelistVO> {
    */
   @AfterMapping
   default void fillIds(Codelist codelist, @MappingTarget CodelistVO codelistVO) {
-    List<CodelistItemVO> codelistItemsVO = codelistVO.getItems();
-    codelistItemsVO.stream().forEach(item -> item.setCodelistId(codelist.getId()));
+    if (codelistVO.getItems() != null) {
+      List<CodelistItemVO> codelistItemsVO = codelistVO.getItems();
+      codelistItemsVO.stream().forEach(item -> item.setCodelistId(codelist.getId()));
+    }
   }
 }
 
