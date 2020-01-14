@@ -32,9 +32,9 @@ public class RecordValueGenerator implements IdentifierGenerator {
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
     try {
-      Statement statement = connection
+      Statement statement = connection // NOPMD 
           .createStatement();// NOSONAR statement must not be closed in order to allow the operation to go on
-      ResultSet rs = statement.executeQuery(
+      ResultSet rs = statement.executeQuery( // NOPMD
           "SELECT nextval('record_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
 
       if (rs.next()) {
