@@ -39,9 +39,9 @@ public class RecordValueGenerator implements IdentifierGenerator {
     RecordValue record = (RecordValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == record.getDataProviderCode())
+    if (null == record.getDataProviderCode()) {
       prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = record.getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.

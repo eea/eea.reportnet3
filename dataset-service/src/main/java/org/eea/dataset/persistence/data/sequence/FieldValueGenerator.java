@@ -39,9 +39,9 @@ public class FieldValueGenerator implements IdentifierGenerator {
     FieldValue field = (FieldValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == field.getRecord().getDataProviderCode())
+    if (null == field.getRecord().getDataProviderCode()) {
       prefix = "AUX" + field.getRecord().getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = field.getRecord().getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
