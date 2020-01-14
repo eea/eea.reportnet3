@@ -237,8 +237,8 @@ public class DocumentServiceImplTest {
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
+  @Test
+  public void deleteDocumentExceptionTest() throws RepositoryException, EEAException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
@@ -246,24 +246,8 @@ public class DocumentServiceImplTest {
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.deleteDocument(1L, 1L, Boolean.FALSE);
-  }
-
-  /**
-   * Delete document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentException2Test() throws EEAException, RepositoryException, IOException {
-    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
-    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
-    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
-    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
   }
 
   /**
