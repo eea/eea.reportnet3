@@ -12,6 +12,9 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
+/**
+ * The type Record value generator.
+ */
 public class RecordValueGenerator implements IdentifierGenerator {
 
   @Override
@@ -29,8 +32,10 @@ public class RecordValueGenerator implements IdentifierGenerator {
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
     try {
-      Statement statement = connection.createStatement();// NOSONAR
-      ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')");// NOPMD
+      Statement statement = connection
+          .createStatement();// NOSONAR statement must not be closed in order to allow the operation to go on
+      ResultSet rs = statement.executeQuery(
+          "SELECT nextval('record_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
 
       if (rs.next()) {
         int id = rs.getInt(1);
