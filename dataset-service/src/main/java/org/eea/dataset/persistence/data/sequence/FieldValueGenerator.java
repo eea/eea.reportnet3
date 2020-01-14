@@ -12,28 +12,31 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
+/**
+ * The type Field value generator.
+ */
 public class FieldValueGenerator implements IdentifierGenerator {
 
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    FieldValue field = new FieldValue();
-    field = (FieldValue) object;
+    FieldValue field = (FieldValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == field.getRecord().getDataProviderCode())
+    if (null == field.getRecord().getDataProviderCode()) {
       prefix = "AUX" + field.getRecord().getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = field.getRecord().getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection(); // NOPMD
-    Statement statement = null;
-    ResultSet rs = null;
+
     try {
-      statement = connection.createStatement();
-      rs = statement.executeQuery("SELECT nextval('field_sequence')");
+      Statement statement = connection // NOPMD
+          .createStatement(); // NOSONAR statement must not be closed in order to allow the operation to go on
+      ResultSet rs = statement.executeQuery( // NOPMD
+          "SELECT nextval('field_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
 
       if (rs.next()) {
         int id = rs.getInt(1);
@@ -50,19 +53,7 @@ public class FieldValueGenerator implements IdentifierGenerator {
       statement.close();
       connection.close();
     } catch (SQLException e) {
-      try {
-        if (null != rs) {
-          rs.close();
-        }
-        if (statement != null) {
-          statement.close();
-        }
-        if (null != connection) {
-          connection.close();
-        }
-      } catch (SQLException i) {
-        i.printStackTrace();
-      }
+      e.printStackTrace();
     }
     return null;
   }

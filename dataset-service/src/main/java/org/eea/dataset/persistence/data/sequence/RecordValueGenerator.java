@@ -12,28 +12,30 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
+/**
+ * The type Record value generator.
+ */
 public class RecordValueGenerator implements IdentifierGenerator {
 
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    RecordValue record = new RecordValue();
-    record = (RecordValue) object;
+    RecordValue record = (RecordValue) object;
     String prefix = null;
     // Set the provider code to create Hash
-    if (null == record.getDataProviderCode())
+    if (null == record.getDataProviderCode()) {
       prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
-    else {
+    } else {
       prefix = record.getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
-    Statement statement = null;
-    ResultSet rs = null;
     try {
-      statement = connection.createStatement();
-      rs = statement.executeQuery("SELECT nextval('record_sequence')");
+      Statement statement = connection // NOPMD 
+          .createStatement();// NOSONAR statement must not be closed in order to allow the operation to go on
+      ResultSet rs = statement.executeQuery( // NOPMD
+          "SELECT nextval('record_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
 
       if (rs.next()) {
         int id = rs.getInt(1);
@@ -46,19 +48,6 @@ public class RecordValueGenerator implements IdentifierGenerator {
         return hashId;
       }
     } catch (SQLException e) {
-      try {
-        if (null != rs) {
-          rs.close();
-        }
-        if (statement != null) {
-          statement.close();
-        }
-        if (null != connection) {
-          connection.close();
-        }
-      } catch (SQLException i) {
-        i.printStackTrace();
-      }
       e.printStackTrace();
     }
     return null;
