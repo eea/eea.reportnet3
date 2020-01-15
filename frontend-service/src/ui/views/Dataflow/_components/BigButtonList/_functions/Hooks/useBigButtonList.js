@@ -276,9 +276,9 @@ const useBigButtonList = ({
     ...buttonList,
     ...designDatasetModels,
     ...dataCollectionModels,
+    ...dashboardModels,
     ...datasetModels,
-    ...createDataCollection,
-    ...dashboardModels
+    ...createDataCollection
   ];
 };
 
