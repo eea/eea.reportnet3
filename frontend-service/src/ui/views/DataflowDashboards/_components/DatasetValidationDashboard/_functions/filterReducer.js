@@ -16,6 +16,24 @@ const filterItem = (filter, item) => {
   return !filter.includes(item);
 };
 
+const onFilteringData = (originalData, tableIds, reporters, status) => {
+  if (isEmpty(originalData)) {
+    return;
+  }
+  let tablesData = [];
+  if (isUndefined(tableIds)) {
+    return tablesData;
+  }
+  tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
+
+  const labels = originalData.labels.filter(label => filterItem(reporters, label));
+  const labelsPositionsInFilteredLabels = reporters.map(label => getLabelIndex(originalData, label));
+
+  tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabels);
+  tablesData = tablesData.filter(table => filterItem(status, table.label));
+  return { labels: labels, datasets: tablesData };
+};
+
 const onFilteringReporters = (originalData, tableIds, reporters, status) => {
   if (isEmpty(originalData)) {
     return;
@@ -76,7 +94,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
     case 'TABLE_CHECKBOX_ON':
       tablesIds = !isUndefined(state.tableFilter) ? state.tableFilter.filter(table => table !== payload.tableId) : [];
-      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+      filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
 
       return {
         ...state,
@@ -86,7 +104,7 @@ export const filterReducer = (state, { type, payload }) => {
 
     case 'TABLE_CHECKBOX_OFF':
       tablesIds = [...state.tableFilter, payload.tableId];
-      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+      filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
 
       return {
         ...state,
@@ -96,7 +114,7 @@ export const filterReducer = (state, { type, payload }) => {
 
     case 'TABLE_CHECKBOX_SELECT_ALL_ON':
       tablesIds = [];
-      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+      filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
 
       return {
         ...state,
