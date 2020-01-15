@@ -105,6 +105,7 @@ const DocumentFileUpload = ({
         });
         try {
           if (isEditForm) {
+            onUpload();
             await DocumentService.editDocument(
               dataflowId,
               values.description,
@@ -113,8 +114,8 @@ const DocumentFileUpload = ({
               values.isPublic,
               values.id
             );
-            onUpload();
           } else {
+            onUpload();
             await DocumentService.uploadDocument(
               dataflowId,
               values.description,
@@ -122,7 +123,6 @@ const DocumentFileUpload = ({
               values.uploadFile,
               values.isPublic
             );
-            onUpload();
           }
         } catch (error) {
           if (isEditForm) {

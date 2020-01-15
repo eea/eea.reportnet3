@@ -23,21 +23,20 @@ import { Footer } from './_components/Footer';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 
+import { DatasetService } from 'core/services/Dataset';
+
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { DatasetService } from 'core/services/Dataset';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
-
-import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
@@ -57,6 +56,7 @@ const DataViewer = withRouter(
     match: {
       params: { datasetId, dataflowId }
     },
+    match: { params },
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
@@ -293,19 +293,24 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       try {
-        const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
-        if (dataDeleted) {
-          setFetchedData([]);
-          dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
-          dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        }
+        await DatasetService.deleteTableDataById(datasetId, tableId);
+        setFetchedData([]);
+        dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
+        dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       } catch (error) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
           content: {
             dataflowId,
-            datasetId
+            datasetId,
+            dataflowName,
+            datasetName,
+            tableName
           }
         });
       } finally {
@@ -315,23 +320,29 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       try {
-        const recordDeleted = await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
-        if (recordDeleted) {
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-          const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
-          const page =
-            (calcRecords - 1) / records.recordsPerPage === 1
-              ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
-              : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
-          dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
-          dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
-        }
+        await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
+
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
+        const page =
+          (calcRecords - 1) / records.recordsPerPage === 1
+            ? (Math.floor(records.firstPageRecord / records.recordsPerPage) - 1) * records.recordsPerPage
+            : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
+        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
+        dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DELETE_RECORD_BY_ID_ERROR',
           content: {
             dataflowId,
-            datasetId
+            datasetId,
+            dataflowName,
+            datasetName,
+            tableName
           }
         });
       } finally {
@@ -376,11 +387,18 @@ const DataViewer = withRouter(
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
           } catch (error) {
+            const {
+              dataflow: { name: dataflowName },
+              dataset: { name: datasetName }
+            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
             notificationContext.add({
               type: 'UPDATE_FIELD_BY_ID_ERROR',
               content: {
                 dataflowId,
-                datasetId
+                datasetId,
+                dataflowName,
+                datasetName,
+                tableName
               }
             });
           } finally {
@@ -456,11 +474,17 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'TABLE_DATA_BY_ID_ERROR',
           content: {
             dataflowId,
-            datasetId
+            datasetId,
+            dataflowName,
+            datasetName
           }
         });
       } finally {
@@ -488,11 +512,18 @@ const DataViewer = withRouter(
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
         }
       } catch (error) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'ADD_RECORDS_BY_ID_ERROR',
           content: {
             dataflowId,
-            datasetId
+            datasetId,
+            dataflowName,
+            datasetName,
+            tableName
           }
         });
       } finally {
@@ -531,11 +562,18 @@ const DataViewer = withRouter(
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
             content: {
               dataflowId,
-              datasetId
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
             }
           });
         } finally {
@@ -548,11 +586,18 @@ const DataViewer = withRouter(
           onRefresh();
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'UPDATE_RECORDS_BY_ID_ERROR',
             content: {
               dataflowId,
-              datasetId
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
             }
           });
         } finally {
@@ -572,14 +617,20 @@ const DataViewer = withRouter(
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
 
-    const onUpload = () => {
+    const onUpload = async () => {
       setImportDialogVisible(false);
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
         content: {
           datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          title: DataViewerUtils.editLargeStringWithDots(tableName, 22),
-          datasetLoading: resources.messages['datasetLoading']
+          title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+          datasetLoading: resources.messages['datasetLoading'],
+          dataflowName,
+          datasetName
         }
       });
     };
@@ -771,6 +822,7 @@ const DataViewer = withRouter(
         <ActionsToolbar
           colsSchema={colsSchema}
           datasetId={datasetId}
+          dataflowId={dataflowId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
           isWebFormMMR={isWebFormMMR}
