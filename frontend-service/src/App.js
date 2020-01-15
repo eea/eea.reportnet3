@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import styles from './App.module.css';
@@ -15,6 +15,7 @@ import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
 import { EULogin } from 'ui/views/Login/EULogin';
 import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
 import { NotificationProvider } from 'ui/views/_functions/Providers/NotificationProvider';
+import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { ResourcesProvider } from 'ui/views/_functions/Providers/ResourcesProvider';
@@ -27,6 +28,7 @@ const App = () => {
         <UserProvider>
           <NotificationProvider>
             <LoadingProvider>
+              <Notifications />
               <Router>
                 <Switch>
                   <Route
