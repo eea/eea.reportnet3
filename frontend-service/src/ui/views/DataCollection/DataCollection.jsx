@@ -232,6 +232,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onRenderTabsSchema = (
     <TabsSchema
       hasWritePermissions={hasWritePermissions}
+      isDataCollection={true}
       levelErrorTypes={levelErrorTypes}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}

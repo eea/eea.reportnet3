@@ -208,21 +208,23 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
-        header={resources.messages['delete'].toUpperCase()}
+        header={resources.messages['createDataCollection']}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
-        <div style={{ minHeight: '55vh' }}>
-          {`${resources.messages['chooseExpirationDate']}: `}
-          <Calendar
-            inline={true}
-            showWeek={true}
-            onChange={event => setDataCollectionDueDate(event.target.value)}
-            value={dataCollectionDueDate}
-          />
-        </div>
+        <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+        <Calendar
+          className={styles.calendar}
+          inline={true}
+          onChange={event => setDataCollectionDueDate(event.target.value)}
+          showWeek={true}
+          monthNavigator={true}
+          value={dataCollectionDueDate}
+          yearNavigator={true}
+          yearRange="2020:2030"
+        />
       </ConfirmDialog>
     </>
   );

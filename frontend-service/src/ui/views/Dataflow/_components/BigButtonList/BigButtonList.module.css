@@ -43,3 +43,12 @@
   flex-direction: row;
   flex-wrap: wrap;
 }
+
+.calendar {
+  display: flex !important;
+}
+:global body .p-datepicker .p-datepicker-header .p-datepicker-title select {
+  display: initial;
+  width: auto;
+  box-sizing: border-box;
+}
