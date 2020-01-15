@@ -57,8 +57,10 @@ public class CodelistServiceImpl implements CodelistService {
    * @return the by id
    * @throws EEAException the EEA exception
    */
+  // Forcing the metabase transaction manager because in the subentity load loses the
+  // session
   @Override
-  @Transactional
+  @Transactional(transactionManager = "metabaseDataSetsTransactionManager")
   public CodelistVO getById(Long codelistId) throws EEAException {
     Codelist codelist = codelistRepository.findById(codelistId).orElse(null);
     if (null == codelist) {
@@ -316,6 +318,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public List<CodelistVO> getAllByIds(List<Long> codelistIds) throws EEAException {
     List<Codelist> codelists = codelistRepository.findAllByIdIn(codelistIds).orElse(null);
     if (null == codelists) {
@@ -332,6 +335,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public List<CodelistVO> getAllByCategoryId(Long codelistCategoryId) throws EEAException {
     List<Codelist> codelists = codelistRepository.findAllByCategory_Id(codelistCategoryId)
         .orElse(new ArrayList<Codelist>());

@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,8 +53,7 @@ public class Codelist {
   private Long version;
 
   /** The items. */
-  @OneToMany(mappedBy = "codelist", cascade = CascadeType.ALL, orphanRemoval = false,
-      fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "codelist", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<CodelistItem> items;
 
   /** The status. */
