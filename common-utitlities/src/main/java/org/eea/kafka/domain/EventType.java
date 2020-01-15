@@ -231,7 +231,14 @@ public enum EventType {
       "dataset_snapshot_released_failed_key", true),
 
   /** The command new design field propagation. */
-  COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false);
+  COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false),
+
+  /** The add datacollection completed event. */
+  ADD_DATACOLLECTION_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_completed_event",
+      true),
+
+  /** The add datacollection failed event. */
+  ADD_DATACOLLECTION_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_failed_event", true);
 
   /**
    * The topic.

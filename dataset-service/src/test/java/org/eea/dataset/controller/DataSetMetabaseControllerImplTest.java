@@ -85,7 +85,8 @@ public class DataSetMetabaseControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestException2() throws Exception {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
     dataSetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
   }
 
@@ -98,12 +99,12 @@ public class DataSetMetabaseControllerImplTest {
   public void createEmptyDataSetTest() throws Exception {
     Mockito
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any()))
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test

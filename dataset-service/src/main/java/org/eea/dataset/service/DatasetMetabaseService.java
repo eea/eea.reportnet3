@@ -37,8 +37,8 @@ public interface DatasetMetabaseService {
    * @throws EEAException the EEA exception
    */
   Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative)
-      throws EEAException;
+      String datasetSchemaId, Long dataflowId, Date dueDate, RepresentativeVO representative,
+      Integer iterationDC) throws EEAException;
 
   /**
    * Gets the dataset name.

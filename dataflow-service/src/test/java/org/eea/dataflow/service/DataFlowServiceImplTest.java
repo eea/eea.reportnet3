@@ -431,7 +431,7 @@ public class DataFlowServiceImplTest {
     doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(), Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
-    Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
+    Mockito.verify(resourceManagementControllerZull, times(2)).createResource(Mockito.any());
   }
 
   /**

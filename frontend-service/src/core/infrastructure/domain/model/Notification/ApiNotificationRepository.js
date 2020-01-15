@@ -1,5 +1,7 @@
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { isUndefined } from 'lodash';
+import { isUndefined, camelCase, kebabCase } from 'lodash';
+
+import { config as generalConfig } from 'conf';
 
 import { apiNotification } from 'core/infrastructure/api/domain/model/Notification';
 import { Notification } from 'core/domain/model/Notification/Notification';
@@ -14,28 +16,38 @@ const parse = ({ type, content, message, config, routes }) => {
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
     if (notificationTypeConfig) {
-      const { key, fixed, lifeTime, downloadLinkSchema } = notificationGeneralTypeConfig;
+      const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
+      const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
+      const newContent = {};
       notificationDTO.message = message;
       notificationDTO.type = key;
-      notificationDTO.fixed = notificationTypeConfig.fixed || fixed;
-      notificationDTO.lifeTime = notificationTypeConfig.lifeTime || lifeTime;
+      notificationDTO.fixed = typeFixed || fixed;
+      notificationDTO.lifeTime = typeLifeTime || lifeTime;
       notificationDTO.key = type;
-      if (!isUndefined(notificationTypeConfig.navigateTo)) {
+      const contentKeys = Object.keys(content);
+
+      if (!isUndefined(navigateTo)) {
         const urlParameters = {};
-        notificationTypeConfig.navigateTo.parameters.forEach(parameter => {
+        navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
-        notificationDTO.redirectionUrl = getUrl(routes[(notificationTypeConfig.section, urlParameters)]);
+        notificationDTO.redirectionUrl = getUrl(routes[navigateTo.section], urlParameters, true);
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
         });
       }
-      if (!isUndefined(downloadLinkSchema)) {
-        notificationDTO.downloadLink = content.downloadLink;
-        notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
-          downloadLink: notificationDTO.downloadLink
-        });
-      }
+      contentKeys.forEach(key => {
+        if (navigateTo && !navigateTo.parameters.includes(key)) {
+          const sortKey = camelCase(`sort-${kebabCase(key)}`);
+          content[sortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+        }
+      });
+      // if (!isUndefined(downloadLinkSchema)) {
+      //   notificationDTO.downloadLink = content.downloadLink;
+      //   notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
+      //     downloadLink: notificationDTO.downloadLink
+      //   });
+      // }
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
     }
   });

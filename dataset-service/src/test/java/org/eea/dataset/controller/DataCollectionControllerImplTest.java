@@ -18,16 +18,23 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class DataCollectionControllerImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DataCollectionControllerImplTest {
 
@@ -49,6 +56,18 @@ public class DataCollectionControllerImplTest {
   @Mock
   private DesignDatasetService designDatasetService;
 
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
+
+  /**
+   * Inits the mocks.
+   */
+  @Before
+  public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
+    MockitoAnnotations.initMocks(this);
+  }
 
   @Test
   public void createEmptyDataCollectionTest() throws EEAException {
@@ -68,7 +87,7 @@ public class DataCollectionControllerImplTest {
 
     Mockito
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any()))
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -123,8 +142,10 @@ public class DataCollectionControllerImplTest {
         .thenReturn(Arrays.asList(representative));
 
 
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
+    Mockito
+        .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(new EEAException());
 
 
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
@@ -150,21 +171,12 @@ public class DataCollectionControllerImplTest {
     representative.setDataProviderId(1L);
     DataProviderVO dataprovider = new DataProviderVO();
     dataprovider.setLabel("test");
-    /*
-     * DesignDatasetVO design = new DesignDatasetVO(); design.setDatasetSchema(new
-     * ObjectId().toString());
-     */
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
 
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(Arrays.asList(representative));
-
-
-    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new EEAException());
-
 
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<>());

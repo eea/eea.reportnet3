@@ -1,13 +1,17 @@
 package org.eea.kafka.handler;
 
+import java.util.HashSet;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.factory.EEAEventCommandFactory;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,9 +47,16 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
   public void processMessage(EEAEventVO message) throws EEAException {
     EEAEventHandlerCommand command = eeaEentCommandFactory.getEventCommand(message);
     if (null != command) {
+      String user = "null";
       if (message.getData().containsKey("user")) {
-        String user = String.valueOf(message.getData().get("user"));
+        user = String.valueOf(message.getData().get("user"));
         ThreadPropertiesManager.setVariable("user", user);
+      }
+      if (message.getData().containsKey("token")) {
+        SecurityContextHolder.getContext()
+            .setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(user, new HashSet<String>()),
+                String.valueOf(message.getData().get("token")), null));
       }
       command.execute(message);
     }

@@ -149,7 +149,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }
 
   const onChangeDataflowName = event => {
-    setOnConfirmDelete(event.target.value);
+    setOnConfirmDelete(event.target.value.toLowerCase());
     setDataflowTitle(event.target.value);
   };
 
@@ -350,7 +350,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const closeManageRolesDialog = (
     <div>
       <Button
-        className="p-button-primary"
+        className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => setIsActiveManageRolesDialog(false)}
@@ -363,6 +363,7 @@ const Dataflow = withRouter(({ history, match }) => {
       await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
       onLoadSnapshotList(datasetIdToProps);
     } catch (error) {
+      console.log('ERROR ON RELEASE', error);
       notificationContext.add({
         type: 'RELEASED_BY_ID_REPORTER_ERROR',
         content: {}
@@ -632,7 +633,7 @@ const Dataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages['manageRolesDialogTitle']} "${dataflowData.name}"`}
+          header={resources.messages['manageRolesDialogTitle']}
           footer={closeManageRolesDialog}
           visible={isActiveManageRolesDialog}
           onHide={() => setIsActiveManageRolesDialog(false)}
@@ -792,12 +793,12 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name}
+            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
             onConfirm={() => onDeleteDataflow()}
             onHide={onHideDeleteDataflowDialog}
             styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
