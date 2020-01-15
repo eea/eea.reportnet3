@@ -11,12 +11,27 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The type Record value generator.
+ * The Class RecordValueGenerator.
  */
 public class RecordValueGenerator implements IdentifierGenerator {
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * Generate.
+   *
+   * @param session the session
+   * @param object the object
+   * @return the serializable
+   * @throws HibernateException the hibernate exception
+   */
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
@@ -31,11 +46,9 @@ public class RecordValueGenerator implements IdentifierGenerator {
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
-    try {
-      Statement statement = connection // NOPMD 
-          .createStatement();// NOSONAR statement must not be closed in order to allow the operation to go on
-      ResultSet rs = statement.executeQuery( // NOPMD
-          "SELECT nextval('record_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
+
+    try (Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')")) {
 
       if (rs.next()) {
         int id = rs.getInt(1);
@@ -44,11 +57,10 @@ public class RecordValueGenerator implements IdentifierGenerator {
         BigInteger bi = new BigInteger(md5Hex, 16);
         Long hexId = bi.longValue();
         String textId = hexId.toString();
-        Long hashId = Long.parseLong(textId.substring(0, 14));
-        return hashId;
+        return Long.parseLong(textId.substring(0, 14));
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Faliled to generate Field ID");
     }
     return null;
   }
