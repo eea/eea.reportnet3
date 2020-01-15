@@ -10,6 +10,8 @@ import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { CodelistCategoryService } from 'core/services/CodelistCategory';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -60,83 +62,83 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
 
   const onLoadCategories = async () => {
     try {
-      const loadedCategories = [
-        {
-          name: 'wise',
-          description: '(WISE - Water Information System of Europe)',
-          codelists: [
-            {
-              name: 'BWDObservationStatus',
-              description: '(Bathing water observation status)',
-              version: '1.0',
-              status: 'Ready',
-              items: [
-                {
-                  itemId: '1',
-                  code: 'confirmedValue',
-                  label: 'Confirmed value',
-                  definition: 'Status flag to confirm that the reported observation value is...'
-                },
-                {
-                  itemId: '2',
-                  code: 'limitOfDetectionValue',
-                  label: 'Limit of detection value',
-                  definition: 'Status flag to inform that a specific observed...'
-                }
-              ]
-            },
-            {
-              name: 'BWDStatus',
-              description: '(Bathing water quality) ',
-              version: '3.0',
-              status: 'Design',
-              items: [
-                {
-                  itemId: '3',
-                  code: 0,
-                  label: 'Not classified',
-                  definition: 'Bathing water quality cannot be assessed and classified.'
-                },
-                {
-                  itemId: '4',
-                  code: 1,
-                  label: 'Excellent',
-                  definition:
-                    'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-                }
-              ]
-            },
-            {
-              name: 'BWDStatus',
-              description: '(Bathing water quality) ',
-              version: '3.1',
-              status: 'Design',
-              items: [
-                {
-                  itemId: '5',
-                  code: 0,
-                  label: 'Not classified',
-                  definition: 'Bathing water quality cannot be assessed and classified.'
-                },
-                {
-                  itemId: '6',
-                  code: 1,
-                  label: 'Excellent',
-                  definition:
-                    'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          name: 'category 2',
-          description: '(Category 2 - Fire Information System of Europe)',
-          codelists: []
-        }
-      ];
-      // await Categorieservice.all(`${match.params.dataflowId}`);
-      // loadedCategories = sortBy(loadedCategories, ['Document', 'id']);
+      // [
+      //   {
+      //     name: 'wise',
+      //     description: '(WISE - Water Information System of Europe)',
+      //     codelists: [
+      //       {
+      //         name: 'BWDObservationStatus',
+      //         description: '(Bathing water observation status)',
+      //         version: '1.0',
+      //         status: 'Ready',
+      //         items: [
+      //           {
+      //             itemId: '1',
+      //             code: 'confirmedValue',
+      //             label: 'Confirmed value',
+      //             definition: 'Status flag to confirm that the reported observation value is...'
+      //           },
+      //           {
+      //             itemId: '2',
+      //             code: 'limitOfDetectionValue',
+      //             label: 'Limit of detection value',
+      //             definition: 'Status flag to inform that a specific observed...'
+      //           }
+      //         ]
+      //       },
+      //       {
+      //         name: 'BWDStatus',
+      //         description: '(Bathing water quality) ',
+      //         version: '3.0',
+      //         status: 'Design',
+      //         items: [
+      //           {
+      //             itemId: '3',
+      //             code: 0,
+      //             label: 'Not classified',
+      //             definition: 'Bathing water quality cannot be assessed and classified.'
+      //           },
+      //           {
+      //             itemId: '4',
+      //             code: 1,
+      //             label: 'Excellent',
+      //             definition:
+      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
+      //           }
+      //         ]
+      //       },
+      //       {
+      //         name: 'BWDStatus',
+      //         description: '(Bathing water quality) ',
+      //         version: '3.1',
+      //         status: 'Design',
+      //         items: [
+      //           {
+      //             itemId: '5',
+      //             code: 0,
+      //             label: 'Not classified',
+      //             definition: 'Bathing water quality cannot be assessed and classified.'
+      //           },
+      //           {
+      //             itemId: '6',
+      //             code: 1,
+      //             label: 'Excellent',
+      //             definition:
+      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
+      //           }
+      //         ]
+      //       }
+      //     ]
+      //   },
+      //   {
+      //     name: 'category 2',
+      //     description: '(Category 2 - Fire Information System of Europe)',
+      //     codelists: []
+      //   }
+      // ];
+      const loadedCategories = await CodelistCategoryService.all();
+      console.log({ loadedCategories });
       setCategories(loadedCategories);
     } catch (error) {
     } finally {

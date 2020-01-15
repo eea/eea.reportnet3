@@ -26,7 +26,6 @@ export const apiCodelistCategory = {
     });
     return response;
   },
-
   deleteById: async codelistCategoryId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
@@ -40,7 +39,19 @@ export const apiCodelistCategory = {
 
     return response;
   },
+  getCategoryInfo: async codelistCategoryId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(CodelistCategoryConfig.getCategoryInfo, {
+        codelistCategoryId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
 
+    return response;
+  },
   updateById: async (id, shortCode, description) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({

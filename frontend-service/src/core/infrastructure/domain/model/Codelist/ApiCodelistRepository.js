@@ -21,6 +21,24 @@ const all = async () => {
   });
 };
 
+const allInCategory = async codelistCategoryId => {
+  const codelistsDTO = await apiCodelist.allInCategory(codelistCategoryId);
+
+  return codelistsDTO.map(codelistDTO => {
+    const codelistItems = codelistDTO.items.map(
+      itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+    );
+    return new Codelist(
+      codelistDTO.id,
+      codelistDTO.name,
+      codelistDTO.description,
+      codelistDTO.version,
+      codelistDTO.status,
+      codelistItems
+    );
+  });
+};
+
 const addById = async (description, items, name, status, version, categoryId) => {
   const categoryDTO = new CodelistCategory(categoryId);
   const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
@@ -42,8 +60,9 @@ const updateById = async (id, description, items, name, status, version) => {
 };
 
 export const ApiCodelistRepository = {
-  all,
   addById,
+  all,
+  allInCategory,
   deleteById,
   updateById
 };

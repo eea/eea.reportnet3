@@ -3,11 +3,16 @@ import { CodelistCategory } from 'core/domain/model/CodelistCategory/CodelistCat
 import { Codelist } from 'core/domain/model/Codelist/Codelist';
 import { CodelistItem } from 'core/domain/model/Codelist/CodelistItem/CodelistItem';
 
+const addById = async (shortCode, description) => {
+  const codelistCategoryDTO = new CodelistCategory(null, shortCode, description);
+  return await apiCodelistCategory.addById(codelistCategoryDTO);
+};
+
 const all = async () => {
   const categoriesDTO = await apiCodelistCategory.all();
 
-  return categoriesDTO.map(categorieDTO => {
-    const codelists = categorieDTO.codelists.map(codelistDTO => {
+  return categoriesDTO.map(categoryDTO => {
+    const codelists = categoryDTO.codelists.map(codelistDTO => {
       const codelistItems = codelistDTO.items.map(
         itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
       );
@@ -20,17 +25,17 @@ const all = async () => {
         codelistItems
       );
     });
-    return new CodelistCategory(categorieDTO.id, categorieDTO.shortCode, categorieDTO.description, codelists);
+    return new CodelistCategory(categoryDTO.id, categoryDTO.shortCode, categoryDTO.description, codelists);
   });
 };
 
-const addById = async (shortCode, description) => {
-  const codelistCategoryDTO = new CodelistCategory(null, shortCode, description);
-  return await apiCodelistCategory.addById(codelistCategoryDTO);
+const deleteById = async codelistCategoryId => {
+  return await apiCodelistCategory.deleteById(codelistCategoryId);
 };
 
-const deleteById = async categoryId => {
-  return await apiCodelistCategory.deleteById(categoryId);
+const getCategoryInfo = async codelistCategoryId => {
+  const categoryDTO = await apiCodelistCategory.getCategoryInfo(codelistCategoryId);
+  return new CodelistCategory(categoryDTO.id, categoryDTO.shortCode, categoryDTO.description, null);
 };
 
 const updateById = async (id, shortCode, description) => {
@@ -42,5 +47,6 @@ export const ApiCodelistCategoryRepository = {
   all,
   addById,
   deleteById,
+  getCategoryInfo,
   updateById
 };

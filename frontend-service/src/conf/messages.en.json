@@ -183,6 +183,7 @@
 		"linkInEulogin":"Access to EU Login",
 		"loginPassword": "Password",
 		"loginUserName": "User name",
+		"manageCodelists": "Manage codelists",
 		"manageRoles": "Manage roles",		
         "manageRolesDialogTitle": "Manage roles",
         "manageRolesDialogHeader": "Data providers",

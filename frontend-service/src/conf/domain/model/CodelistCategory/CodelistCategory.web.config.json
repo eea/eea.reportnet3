@@ -1,7 +1,7 @@
 {
-    "all":  "/codelist/category/{:codelistCategoryId}",
+    "all":  "/codelist/category/all",
     "add": "/codelist/category",
     "delete": "/codelist/category/{:codelistCategoryId}",
-    "find":"/codelist/category/find?codelistIds={:codelistIds}",
+    "getCategoryInfo":"/codelist/category/{:codelistCategoryId}",
     "update": "/codelist/category/update"    
 }

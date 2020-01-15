@@ -18,7 +18,15 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['codelists'], icon: 'home' }]);
+    setBreadCrumbItems([
+      {
+        label: resources.messages['dataflowList'],
+        icon: 'home',
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      { label: resources.messages['codelists'], icon: 'list' }
+    ]);
   }, [history, resources.messages]);
 
   const layout = children => {
