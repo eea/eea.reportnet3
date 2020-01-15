@@ -390,7 +390,11 @@ const Dataflow = withRouter(({ history, match }) => {
   );
   const layout = children => {
     return (
-      <MainLayout>
+      <MainLayout
+        leftSideBarConfig={{
+          isCustodian,
+          buttons: []
+        }}>
         <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
@@ -403,16 +407,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <LeftSideBar
-        subscribeButtonTitle={resources.messages['subscribeThisButton']}
-        dataflowTitle={dataflowData.name}
-        navTitle={resources.messages['dataflow']}
-        components={[]}
-        entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
-        style={{ textAlign: 'left' }}
-      />
-
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>

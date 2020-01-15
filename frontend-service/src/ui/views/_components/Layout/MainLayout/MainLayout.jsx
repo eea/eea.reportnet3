@@ -1,11 +1,12 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
 
-import { Navigation } from './_components';
 import { Footer } from './_components';
+import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
+import { Navigation } from './_components';
 import { Notifications } from 'ui/views/_components/Notifications';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -13,7 +14,8 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, leftSideBarConfig }) => {
+  const [margin, setMargin] = useState('50px');
   const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
   useEffect(() => {
@@ -36,16 +38,28 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
   }, []);
+
+  const onToggleSideBar = hover => {
+    if (hover) {
+      setMargin('200px');
+    } else {
+      setMargin('50px');
+    }
+  };
+
   useSocket();
   return (
     <Fragment>
-      <Navigation />
+      {/* <Navigation /> */}
       <Notifications />
       {/* <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
         {resources.messages['disclaimerTitle']}
       </div> */}
-      <div className={styles.mainContent}>{children}</div>
+      <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
+        <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />
+        {children}
+      </div>
       <Footer />
     </Fragment>
   );

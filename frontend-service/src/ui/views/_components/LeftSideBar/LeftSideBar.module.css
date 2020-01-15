@@ -17,17 +17,42 @@
   height: 100%;
   width: 50px;
   position: fixed;
-  /* position: absolute; */
   z-index: 1;
   left: 0;
   top: 0;
   background-color: var(--blue-120);
   transition: 0.5s;
   overflow-x: hidden;
-  padding-top: 60px;
+  padding-top: 45px;
   white-space: nowrap;
   cursor: pointer;
-  /* transform: translate(0%, 0%); */
+}
+
+.leftSideBar a:first-child {
+  position: absolute;
+  top: 0;
+  color: var(--white);
+}
+
+.leftSideBar a:nth-child(2) {
+  font-style: italic;
+  color: var(--white);
+  margin-top: 3rem;
+}
+
+.leftSideBar a:nth-child(3) {
+  margin-bottom: 2rem;
+  color: var(--white);
+}
+
+.leftSideBar a:last-child {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 3rem;
+}
+
+.leftSideBar img:first-child {
+  margin-right: 12px;
 }
 
 .leftSideBar a {
@@ -39,10 +64,10 @@
 }
 
 .leftSideBar a i {
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
-.leftSideBar a:hover {
+.leftSideBar a:hover:not(:first-child) {
   color: var(--white);
 }
 
@@ -52,6 +77,18 @@
 
 .leftSideBarText {
   font-size: 14px;
+}
+
+.leftSideBarTextTitle {
+  font-size: 22px;
+}
+
+.leftSideBarUserText {
+  font-size: 14px;
+}
+
+.leftSideBarUserIcon {
+  margin-right: 12px;
 }
 
 .leftSideBarElementWrapper {
@@ -64,5 +101,27 @@
 }
 
 .leftSideBarElementAnimation:hover {
-  transform: rotate(180deg);
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+  /* transform: rotate(180deg); */
+}
+
+.leftSideBarLogo:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+}
+
+@keyframes blink {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 }

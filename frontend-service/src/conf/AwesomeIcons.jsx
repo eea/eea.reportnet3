@@ -58,7 +58,8 @@ import {
   faCircle,
   faMinusSquare,
   faPlusSquare,
-  faEyeSlash
+  faEyeSlash,
+  faBell
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -207,6 +208,8 @@ export const AwesomeIcons = icon => {
       return faMapMarkedAlt;
     case 'move':
       return faBars;
+    case 'notifications':
+      return faBell;
     case 'number':
       return faDiceSix;
     case 'percentage':
