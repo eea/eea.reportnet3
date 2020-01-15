@@ -37,11 +37,7 @@ const onFilteringReporters = (originalData, tableIds, reporters, status) => {
 const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
   let tablesData = [];
   let labels = [];
-  console.log({ reporterFilters });
-  // if (isUndefined(tableIds)) {
-  // }
   if (isEmpty(originalData) || reporterFilters.length == originalData.labels.length) {
-    console.log('tests');
     tablesData = [];
     labels = [];
   } else {
@@ -49,8 +45,6 @@ const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
     tablesData = tablesData.filter(table => filterItem(status, table.label));
     labels = originalData.labels.filter(label => filterItem(reporterFilters, label));
   }
-  console.log({ labels });
-  console.log({ tablesData });
   return { labels: labels, datasets: tablesData };
 };
 
@@ -81,11 +75,9 @@ export const filterReducer = (state, { type, payload }) => {
         data: payload
       };
     case 'TABLE_CHECKBOX_ON':
-      console.log(state);
       tablesIds = !isUndefined(state.tableFilter) ? state.tableFilter.filter(table => table !== payload.tableId) : [];
       filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-      console.log({ tablesIds });
-      console.log({ filteredTableData });
+
       return {
         ...state,
         tableFilter: tablesIds,
@@ -103,7 +95,9 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'TABLE_CHECKBOX_SELECT_ALL_ON':
-      filteredTableData = onFilteringTables(state.originalData, [], state.reporterFilter, state.statusFilter);
+      tablesIds = [];
+      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+
       return {
         ...state,
         tableFilter: [],
@@ -111,10 +105,15 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'TABLE_CHECKBOX_SELECT_ALL_OFF':
-      tablesIds = [...state.tableFilter, payload.tableId];
+      tablesIds = [];
+      payload.allFilters.forEach(table => {
+        tablesIds.push(table.tableId);
+      });
+      filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
+
       return {
         ...state,
-        tableFilter: tablesIds[0],
+        tableFilter: tablesIds,
         data: []
       };
 
