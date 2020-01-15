@@ -24,7 +24,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabsSchema } from './_components/TabsSchema';
+import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';

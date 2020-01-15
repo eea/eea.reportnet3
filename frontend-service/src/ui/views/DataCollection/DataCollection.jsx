@@ -15,7 +15,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabsSchema } from 'ui/views/Dataset/_components/TabsSchema';
+import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
