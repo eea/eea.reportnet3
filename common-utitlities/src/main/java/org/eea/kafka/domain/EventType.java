@@ -222,6 +222,14 @@ public enum EventType {
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",
       false),
 
+  /** The release dataset snapshot completed event. */
+  RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_released_completed_key", true),
+
+  /** The release dataset snapshot failed event. */
+  RELEASE_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_released_failed_key", true),
+
   /** The command new design field propagation. */
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false);
 
