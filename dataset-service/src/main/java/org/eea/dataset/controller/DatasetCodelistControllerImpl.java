@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +55,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     if (codelistId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
-    CodelistVO codelistVO = new CodelistVO();
+    CodelistVO codelistVO = null;
     try {
       codelistVO = codelistService.getById(codelistId);
     } catch (EEAException e) {
@@ -182,7 +181,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
     }
-    CodelistCategoryVO codelistCategoryVO = new CodelistCategoryVO();
+    CodelistCategoryVO codelistCategoryVO = null;
     try {
       codelistCategoryVO = codelistService.getCategoryById(codelistCategoryId);
     } catch (EEAException e) {
@@ -202,7 +201,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @HystrixCommand
   @GetMapping(value = "/category/all", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<CodelistCategoryVO> getAllCategories() {
-    List<CodelistCategoryVO> codelistCategoryVOs = new ArrayList<>();
+    List<CodelistCategoryVO> codelistCategoryVOs = null;
     try {
       codelistCategoryVOs = codelistService.getAllCategories();
     } catch (EEAException e) {
@@ -300,7 +299,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     for (String item : codelistIds.split(",")) {
       codelistIdsSet.add(Long.valueOf(item));
     }
-    List<CodelistVO> codelistVOs = new ArrayList<>();
+    List<CodelistVO> codelistVOs = null;
     try {
       codelistVOs =
           codelistService.getAllByIds(codelistIdsSet.stream().collect(Collectors.toList()));
@@ -326,7 +325,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
     if (codelistCategoryId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
-    List<CodelistVO> codelistVOs = new ArrayList<>();
+    List<CodelistVO> codelistVOs = null;
     try {
       codelistVOs = codelistService.getAllByCategoryId(codelistCategoryId);
     } catch (EEAException e) {
