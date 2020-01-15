@@ -51,6 +51,7 @@
 		"createSnapshotTooltip": "Save copy",
 		"creationDate": "Creation date",
 		"dashboards": "Dashboards",
+		"dataCollection": "Data Collection",
 		"dataflow": "Dataflow",
 		"dataflowAcceptedPendingTab": "Pending & Accepted",
 		"dataflowCompletedTab": "Completed",
@@ -350,6 +351,9 @@
 		"reportingError":"Failed getting dataflow data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"deleteDataByIdError":"Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"validateDataByIdError":"Failed validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
+		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>"
 	}
 }

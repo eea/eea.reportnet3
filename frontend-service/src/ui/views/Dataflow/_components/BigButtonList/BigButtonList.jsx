@@ -4,6 +4,7 @@ import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
+import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
@@ -12,10 +13,12 @@ import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
-import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+
+import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowData,
@@ -31,6 +34,7 @@ export const BigButtonList = ({
   updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
@@ -60,6 +64,20 @@ export const BigButtonList = ({
     setDeleteDialogVisible(true);
   };
 
+  const getMetadata = async ids => {
+    try {
+      return await MetadataUtils.getMetadata(ids);
+    } catch (error) {
+      console.log('METADATA error', error);
+      notificationContext.add({
+        type: 'GET_METADATA_ERROR',
+        content: {
+          dataflowId
+        }
+      });
+    }
+  };
+
   const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
   };
@@ -67,14 +85,18 @@ export const BigButtonList = ({
   const onCreateDataCollection = async date => {
     setDataCollectionDialog(false);
     try {
-      const response = await DataCollectionService.create(dataflowId, date);
-      if (response >= 200 && response <= 200) {
-        onUpdateData();
-      } else {
-        throw new Error('Data collection creation error');
-      }
+      return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
-      console.log('error: ', error);
+      const {
+        dataflow: { name: dataflowName }
+      } = await getMetadata({ dataflowId });
+      notificationContext.add({
+        type: 'CREATE_DATA_COLLECTION_ERROR',
+        content: {
+          dataflowId,
+          dataflowName
+        }
+      });
     }
   };
 
