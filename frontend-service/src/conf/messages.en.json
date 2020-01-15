@@ -107,6 +107,7 @@
 		"deliveryDate": "Delivery date",
 		"description": "Description",
 		"descriptionTooShort": "Description must be at least 5 characters",
+		"deselectAll":"Deselect All",
 		"design": "Design",
 		"disclaimerTitle": "SPRINT 9 REVIEW DEMO",
 		"disclaimerMessage":"The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by any countries featured",
@@ -261,7 +262,8 @@
 		"save": "Save",
 		"search": "Search",		
 		"searchDataflow": "Search dataflows",
-		"select":"select",	
+		"select":"select",		
+		"selectAll":"Select All",		
 		"selectCodelist":"Select codelist",
 		"selectContributorRole":"Select Role",	
 		"selectFile": "Select or drag here your dataset (.csv)",
@@ -367,6 +369,14 @@
 		"dataflowCreationError":"Failed creating <strong title='dataflowName'>{:sortDataflowName}</strong> dataflow at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"restoreDatasetSchemaSnapshotCompletedEvent":"restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"restoreDatasetSchemaSnapshotFailedEvent":"restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
+		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"groupValidationsError":"Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"schemaByIdError":"Failed loading schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"errorStatisticsByIdError":"Failed getting error statistics by error id at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"dataflowDetailsError":"Failed getting dataflow details",
+		"reportingError":"Failed getting dataflow data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"deleteDataByIdError":"Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"validateDataByIdError":"Failed validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
 	}
 }

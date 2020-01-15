@@ -134,9 +134,12 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       {
         <React.Fragment>
           {renderTitle()}
+          {/* <hr className={styles.leftSideBarButtonFirstSeparator} /> */}
           {renderUserProfile()}
           {renderUserNotifications()}
+          <hr className={styles.leftSideBarButtonSeparator} />
           {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
+          <hr className={styles.leftSideBarButtonLastSeparator} />
           {renderLogout()}
         </React.Fragment>
       }
