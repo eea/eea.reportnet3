@@ -72,7 +72,6 @@ const FieldEditor = ({
           //     //   onChange={e => onEditorValueChange(cells, e.value)}
           //     dateFormat="yy-mm-dd"
           //     monthNavigator={true}
-          //     onChange={e => console.log(e.value)}
           //     value={RecordUtils.getCellValue(cells, cells.field)}
           //     yearNavigator={true}
           //     yearRange="2010:2030"
