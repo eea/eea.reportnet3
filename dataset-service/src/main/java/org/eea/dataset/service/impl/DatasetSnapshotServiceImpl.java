@@ -13,19 +13,24 @@ import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -103,6 +108,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
+  /** The data collection repository. */
+  @Autowired
+  private DataCollectionRepository dataCollectionRepository;
+
   /**
    * The dataset service.
    */
@@ -125,6 +134,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
 
   /**
@@ -171,7 +188,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void addSnapshot(Long idDataset, String description) {
+  public void addSnapshot(Long idDataset, String description, Boolean released) {
 
     try {
       // 1. Create the snapshot in the metabase
@@ -190,6 +207,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
+
+      if (released) {
+        releaseSnapshot(idDataset, snap.getId());
+      }
+
       LOG.info("Snapshot {} data files created", snap.getId());
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
     } catch (Exception e) {
@@ -202,6 +224,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       criteria.add(idDataset);
       lockService.removeLockByCriteria(criteria);
     }
+
   }
 
   /**
@@ -254,14 +277,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
+  public void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData)
+      throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        TypeDatasetEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"));
+        TypeDatasetEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
+        deleteData);
   }
+
 
 
   /**
@@ -275,6 +301,32 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
+
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
+    }
+
+    // Get the provider
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+    // Get the dataCollection
+    String datasetSchema = metabaseRepository.findDatasetSchemaIdById(idDataset);
+    Long idDataCollection =
+        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema).isPresent()
+            ? dataCollectionRepository.findFirstByDatasetSchema(datasetSchema).get().getId()
+            : null;
+
+
+    // Delete data of the same provider
+    if (provider != null && idDataCollection != null) {
+      datasetService.deleteRecordValues(idDataCollection, provider.getCode());
+
+      // Restore data from snapshot
+      restoreSnapshot(idDataCollection, idSnapshot, true);
+    }
+    // Check the snapshot released
     snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
     LOG.info("Snapshot {} released", idSnapshot);
   }

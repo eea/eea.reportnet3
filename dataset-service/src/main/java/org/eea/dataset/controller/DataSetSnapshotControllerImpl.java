@@ -83,6 +83,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    *
    * @param datasetId the dataset id
    * @param description the description
+   * @param released the released
    */
   @Override
   @LockMethod(removeWhenFinish = false)
@@ -91,13 +92,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @RequestParam("description") String description) {
+      @RequestParam("description") String description,
+      @RequestParam(value = "released", defaultValue = "false") Boolean released) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, description);
+    datasetSnapshotService.addSnapshot(datasetId, description, released);
   }
 
   /**
@@ -152,7 +154,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, false);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
