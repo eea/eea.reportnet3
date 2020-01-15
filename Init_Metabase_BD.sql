@@ -193,6 +193,33 @@ CREATE TABLE public.representative (
 	CONSTRAINT dataflow_id FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
 );
 
+CREATE TABLE public.codelist_category (
+	id bigserial NOT NULL,
+	description varchar(255) NULL,
+	short_code varchar(255) NULL,
+	CONSTRAINT codelist_category_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.codelist (
+	id bigserial NOT NULL,
+	description varchar(255) NULL,
+	"name" varchar(255) NULL,
+	status int4 NULL,
+	"version" int8 NULL,
+	id_category int8 NOT NULL,
+	CONSTRAINT codelist_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.codelist_item (
+	id bigserial NOT NULL,
+	definition varchar(255) NULL,
+	"label" varchar(255) NULL,
+	short_code varchar(255) NULL,
+	id_codelist int8 NOT NULL,
+	CONSTRAINT codelist_item_pkey PRIMARY KEY (id),
+	CONSTRAINT codelist_fk FOREIGN KEY (id_codelist) REFERENCES codelist(id)
+);
+
 --GRANTS
 
 GRANT USAGE ON SCHEMA public TO testuser ;
@@ -243,6 +270,12 @@ ALTER TABLE public.representative OWNER TO testuser;
 GRANT ALL ON TABLE public.representative TO testuser;
 ALTER TABLE public.data_provider OWNER TO testuser;
 GRANT ALL ON TABLE public.data_provider TO testuser;
+ALTER TABLE public.codelist OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist TO testuser;
+ALTER TABLE public.codelist_category OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist_category TO testuser;
+ALTER TABLE public.codelist_item OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist_item TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);
