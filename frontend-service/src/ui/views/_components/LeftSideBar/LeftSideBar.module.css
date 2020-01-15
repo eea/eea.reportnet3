@@ -12,3 +12,57 @@
 .dialog :global .p-dialog-content {
   padding-bottom: 0 !important;
 }
+
+.leftSideBar {
+  height: 100%;
+  width: 50px;
+  position: fixed;
+  /* position: absolute; */
+  z-index: 1;
+  left: 0;
+  top: 0;
+  background-color: var(--blue-120);
+  transition: 0.5s;
+  overflow-x: hidden;
+  padding-top: 60px;
+  white-space: nowrap;
+  cursor: pointer;
+  /* transform: translate(0%, 0%); */
+}
+
+.leftSideBar a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 25px;
+  color: var(--gray-50);
+  display: block;
+}
+
+.leftSideBar a i {
+  margin-right: 10px;
+}
+
+.leftSideBar a:hover {
+  color: var(--white);
+}
+
+.leftSideBar:hover {
+  width: 200px;
+}
+
+.leftSideBarText {
+  font-size: 14px;
+}
+
+.leftSideBarElementWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.leftSideBarElementAnimation {
+  transition: transform 0.8s ease-in-out;
+}
+
+.leftSideBarElementAnimation:hover {
+  transform: rotate(180deg);
+}

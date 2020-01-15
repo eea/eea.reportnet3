@@ -35,6 +35,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [margin, setMargin] = useState('50px');
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
@@ -101,6 +102,14 @@ const Dataflows = withRouter(({ match, history }) => {
     setIsFormReset(false);
   };
 
+  const onToggleSideBar = hover => {
+    if (hover) {
+      setMargin('200px');
+    } else {
+      setMargin('50px');
+    }
+  };
+
   const onRefreshToken = async () => {
     try {
       const userObject = await UserService.refreshToken();
@@ -133,17 +142,20 @@ const Dataflows = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <div className="rep-row" id="dataflows">
+    <div className="rep-row">
       <LeftSideBar
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
         components={['search', 'createDataflow']}
         isCustodian={isCustodian}
         navTitle={resources.messages['dataflowList']}
         onShowAddForm={onShowAddForm}
+        onToggleSideBar={onToggleSideBar}
         subscribeButtonTitle={resources.messages['subscribeButton']}
         style={{ textAlign: 'left' }}
       />
-      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-10`}>
+      <div
+        className={`${styles.container} rep-col-xs-12 rep-col-xl-10`}
+        style={{ marginLeft: margin, transition: '0.5s' }}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
