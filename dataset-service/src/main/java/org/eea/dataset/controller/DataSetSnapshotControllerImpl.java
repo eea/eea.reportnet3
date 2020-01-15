@@ -154,7 +154,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, false);
+      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -174,8 +174,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @LockMethod(removeWhenFinish = false)
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+      @LockCriteria(name = "snapshotId") @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

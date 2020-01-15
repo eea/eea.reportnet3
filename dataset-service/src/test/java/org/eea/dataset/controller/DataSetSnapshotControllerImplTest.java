@@ -74,8 +74,9 @@ public class DataSetSnapshotControllerImplTest {
   public void testAddSnapshots() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.createSnapshot(1L, "test");
-    Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any());
+    dataSetSnapshotControllerImpl.createSnapshot(1L, "test", false);
+    Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**

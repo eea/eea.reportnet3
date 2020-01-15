@@ -151,7 +151,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test");
+    datasetSnapshotService.addSnapshot(1L, "test", false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -169,7 +169,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test");
+    datasetSnapshotService.addSnapshot(1L, "test", false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -185,7 +185,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test");
+    datasetSnapshotService.addSnapshot(1L, "test", false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -211,7 +211,7 @@ public class DatasetSnapshotServiceTest {
   @Test(expected = EEAException.class)
   public void testRestoreSnapshotsException() throws Exception {
 
-    datasetSnapshotService.restoreSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSnapshot(1L, 1L, true);
 
   }
 
@@ -225,7 +225,7 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSnapshot(1L, 1L, true);
     Mockito.verify(partitionDataSetMetabaseRepository, times(1))
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any());
   }

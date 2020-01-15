@@ -384,17 +384,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws SQLException, IOException {
 
 
-    EventType successEventType =
-        isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT;
-    EventType failEventType =
-        isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT;
+    EventType successEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+    EventType failEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+
     NotificationVO notificationVO =
         NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
             .datasetId(idReportingDataset).build();
-    String signature = isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-        : LockSignature.RESTORE_SNAPSHOT.getValue();
+    String signature =
+        deleteData
+            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
@@ -484,7 +490,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(signature);
-      criteria.add(idReportingDataset);
+      if (deleteData) {
+        criteria.add(idReportingDataset);
+      } else {
+        criteria.add(idSnapshot);
+      }
       lockService.removeLockByCriteria(criteria);
     }
   }

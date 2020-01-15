@@ -324,7 +324,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       datasetService.deleteRecordValues(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
-      restoreSnapshot(idDataCollection, idSnapshot, true);
+      restoreSnapshot(idDataCollection, idSnapshot, false);
     }
     // Check the snapshot released
     snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
