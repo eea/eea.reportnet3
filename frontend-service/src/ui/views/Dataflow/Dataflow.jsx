@@ -603,7 +603,6 @@ const Dataflow = withRouter(({ history, match }) => {
                 </div>
               );
             })}
-            {console.log(isCustodian)}
             {isCustodian && !isEmpty(dataflowData.datasets) && (
               <div className={`${styles.datasetItem}`}>
                 <BigButton
