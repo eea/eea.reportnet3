@@ -130,12 +130,15 @@ public final class EEAErrorMessage {
 
   /** The Constant CODELIST_NOT_FOUND. */
   public static final String CODELIST_NOT_FOUND = "Codelist not found";
-  
+
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
 
   /** The Constant CODELIST_CATEGORY_NOT_FOUND. */
   public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
+
+  /** The Constant CODELIST_VERSION_DUPLICATED. */
+  public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
   /**
    * Instantiates a new EEA error message.

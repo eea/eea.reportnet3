@@ -136,6 +136,23 @@ public class DatasetCodelistControllerImplTest {
   }
 
   /**
+   * Creates the exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createException3Test() throws EEAException {
+    when(codelistService.create(Mockito.any(), Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED));
+    try {
+      datasetCodelistControllerImpl.create(codelistVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+  }
+
+  /**
    * Creates the success test.
    *
    * @throws EEAException the EEA exception
@@ -186,6 +203,24 @@ public class DatasetCodelistControllerImplTest {
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Update exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateException4Test() throws EEAException {
+    codelistVO.setId(1L);
+    when(codelistService.update(Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED));
+    try {
+      datasetCodelistControllerImpl.update(codelistVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
   }
 
@@ -241,6 +276,24 @@ public class DatasetCodelistControllerImplTest {
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Clone exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void cloneException4Test() throws EEAException {
+    codelistVO.setId(1L);
+    when(codelistService.create(Mockito.any(), Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED));
+    try {
+      datasetCodelistControllerImpl.clone(1L, codelistVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e.getReason());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
   }
 

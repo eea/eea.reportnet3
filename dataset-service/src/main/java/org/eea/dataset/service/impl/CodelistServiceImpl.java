@@ -107,7 +107,6 @@ public class CodelistServiceImpl implements CodelistService {
   public Long create(CodelistVO codelistVO, Long codelistId) throws EEAException {
     Long response;
     codelistVO.setStatus(CodelistStatusEnum.DESIGN);
-    codelistVO.setVersion(1L);
     Codelist codelist = codelistMapper.classToEntity(codelistVO);
     if (codelistId == null) {
       response = codelistRepository.save(codelist).getId();
@@ -144,9 +143,11 @@ public class CodelistServiceImpl implements CodelistService {
     if (codelist.getName() == null) {
       codelist.setName(oldCodelist.getName());
     }
-    codelist.setVersion(oldCodelist.getVersion() + 1);
+    if (codelist.getVersion() == null) {
+      codelist.setVersion(oldCodelist.getVersion());
+    }
     if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
-      codelist.setVersion(codelist.getVersion() + 1);
+      throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
     }
   }
 
@@ -198,18 +199,22 @@ public class CodelistServiceImpl implements CodelistService {
    * @param oldCodelist the old codelist
    * @throws EEAException the EEA exception
    */
-  private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist) {
+  private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist)
+      throws EEAException {
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
     }
     if (codelistVO.getName() != null) {
       if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion()).isEmpty()) {
-        oldCodelist.setVersion(oldCodelist.getVersion() + 1);
+        throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
       }
       oldCodelist.setName(codelistVO.getName());
     }
     if (codelistVO.getDescription() != null) {
       oldCodelist.setDescription(codelistVO.getDescription());
+    }
+    if (codelistVO.getVersion() != null) {
+      oldCodelist.setVersion(codelistVO.getVersion());
     }
     if (codelistVO.getCategory() != null) {
       oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));

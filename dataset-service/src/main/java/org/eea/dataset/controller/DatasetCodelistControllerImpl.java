@@ -86,6 +86,10 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
       response = codelistService.create(codelistVO, null);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+      if (EEAErrorMessage.CODELIST_VERSION_DUPLICATED.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
     return response;
@@ -110,6 +114,10 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
       response = codelistService.update(codelistVO);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+      if (EEAErrorMessage.CODELIST_VERSION_DUPLICATED.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
     return response;
@@ -135,6 +143,10 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
       response = codelistService.create(codelistVO, codelistId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+      if (EEAErrorMessage.CODELIST_VERSION_DUPLICATED.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e);
+      }
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
     return response;
