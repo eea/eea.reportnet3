@@ -81,10 +81,10 @@
   background-color: var(--c-blue-400);
 }
 
-.designDataset {
+.schemaDataset {
   background-color: var(--c-blue-green);
 }
-.designDataset a:hover {
+.schemaDataset a:hover {
   background-color: var(--c-aquamarine);
 }
 
