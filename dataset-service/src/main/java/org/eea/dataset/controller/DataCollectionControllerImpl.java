@@ -103,17 +103,13 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     for (DesignDatasetVO design : designs) {
       try {
         for (RepresentativeVO representative : representatives) {
-
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representative, i);
-          LOG.info("New Reporting Dataset into the dataflow {}", dataCollectionVO.getIdDataflow());
         }
         // Create the DC per design dataset
         datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
             "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
             dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, i);
-        LOG.info("New Data Collection created into the dataflow {}",
-            dataCollectionVO.getIdDataflow());
         i--;
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",

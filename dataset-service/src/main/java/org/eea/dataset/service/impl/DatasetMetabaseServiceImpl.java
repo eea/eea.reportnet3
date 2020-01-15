@@ -423,6 +423,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           dataset.setDataProviderId(representative.getDataProviderId());
           reportingDatasetRepository.save((ReportingDataset) dataset);
+          LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}",
+              dataflowId, dataset.getId(), datasetName);
           if (StringUtils.isNotBlank(representative.getProviderAccount())) {
             this.createGroupProviderAndAddUser(dataset.getId(), representative.getProviderAccount(),
                 dataflowId);
@@ -439,6 +441,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           ((DataCollection) dataset).setDueDate(dueDate);
           dataCollectionRepository.save((DataCollection) dataset);
+          LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
+              dataflowId, dataset.getId(), datasetName);
           this.createGroupDcAndAddUser(dataset.getId());
           if (iterationDC == 0) {
             // Notification
