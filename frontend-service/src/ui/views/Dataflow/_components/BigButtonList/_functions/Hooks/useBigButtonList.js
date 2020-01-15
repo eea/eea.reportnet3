@@ -75,7 +75,7 @@ const useBigButtonList = ({
 
   const designDatasetModels = dataflowData.designDatasets.map(newDatasetSchema => ({
     layout: 'defaultBigButton',
-    buttonClass: 'designDataset',
+    buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowStatus,
@@ -232,9 +232,21 @@ const useBigButtonList = ({
 
   const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
     layout: 'defaultBigButton',
-    buttonClass: 'dataCollection',
-    buttonIcon: 'dataCollectionIcon',
+    buttonClass: 'schemaDataset',
+    buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
+    handleRedirect: () => {
+      handleRedirect(
+        getUrl(
+          routes.DATA_COLLECTION,
+          {
+            dataflowId: dataflowId,
+            datasetId: dataCollection.dataCollectionId
+          },
+          true
+        )
+      );
+    },
     model: [
       {
         label: resources.messages['rename'],

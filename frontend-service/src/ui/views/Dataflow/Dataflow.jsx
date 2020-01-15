@@ -116,6 +116,15 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadDataflowsData();
   }, [match.params.dataflowId, isDataUpdated]);
 
+  useEffect(() => {
+    const refresh = notificationContext.toShow.find(
+      notification => notification.key === 'ADD_DATACOLLECTION_COMPLETED_EVENT'
+    );
+    if (refresh) {
+      onUpdateData();
+    }
+  }, [notificationContext]);
+
   const dropDownItems =
     isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
       ? [

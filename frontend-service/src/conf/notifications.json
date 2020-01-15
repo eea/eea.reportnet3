@@ -296,6 +296,20 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key": "CREATE_DATA_COLLECTION_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "ADD_DATACOLLECTION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         }
       ]
     },
@@ -411,6 +425,13 @@
           "navigateTo":{
             "section":"DATASET_SCHEMA",
             "parameters":["dataflowId","datasetId"]
+          }
+        },
+        {
+          "key": "ADD_DATACOLLECTION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
           }
         }
       ]
