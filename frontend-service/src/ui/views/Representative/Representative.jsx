@@ -84,13 +84,15 @@ const Representative = withRouter(({ history, match }) => {
     }
 
     if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(
-        UserService.hasPermission(
-          user,
-          [config.permissions.CUSTODIAN],
-          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
-        )
+      const custodian = UserService.hasPermission(
+        user,
+        [config.permissions.CUSTODIAN],
+        `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
       );
+      if (!custodian) {
+        history.push(getUrl(routes.DATAFLOWS, true));
+      }
+      setIsCustodian(true);
     }
   }, [user]);
 
