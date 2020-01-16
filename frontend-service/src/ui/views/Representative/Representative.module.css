@@ -1,0 +1,19 @@
+.titleBar {
+  display: flex;
+  border-bottom: 1px solid var(--gray-25);
+  margin: 20px 0;
+  justify-content: space-between;
+  .title_wrapper {
+    .title {
+      margin: 0;
+    }
+  }
+}
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
+
+.releaseSnapshotsDialog :global .p-dialog-content {
+  max-height: 50vh !important;
+}

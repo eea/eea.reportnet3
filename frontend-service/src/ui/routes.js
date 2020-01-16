@@ -8,5 +8,6 @@ export const routes = {
   DATAFLOWS: '/dataflows',
   DATAFLOW: '/dataflow/:dataflowId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
-  DOCUMENTS: '/dataflow/:dataflowId/documents'
+  DOCUMENTS: '/dataflow/:dataflowId/documents',
+  REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative'
 };

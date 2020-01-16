@@ -31,7 +31,8 @@ export const BigButtonList = ({
   onUpdateData,
   onSaveName,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema
+  updatedDatasetSchema,
+  representative
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -155,7 +156,8 @@ export const BigButtonList = ({
               onShowDataCollectionModal: onShowDataCollectionModal,
               onShowNewSchemaDialog: onShowNewSchemaDialog,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema
+              updatedDatasetSchema: updatedDatasetSchema,
+              representative
             }).map(button => (button.visibility ? <BigButton {...button} /> : <></>))}
           </div>
         </div>
