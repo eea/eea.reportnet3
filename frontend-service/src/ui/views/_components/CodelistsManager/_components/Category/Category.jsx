@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
-import { isNull } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './Category.module.css';
 
@@ -10,6 +10,7 @@ import { CodelistProperties } from 'ui/views/_components/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -20,16 +21,24 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected, onLoadCategories }) => {
+const Category = ({
+  categoriesDropdown,
+  category,
+  checkDuplicates,
+  isDataCustodian,
+  isInDesign,
+  onCodelistSelected,
+  onLoadCategories
+}) => {
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
     categoryShortCode: '',
-    categoryEditedDescription: '',
-    categoryEditedShortCode: '',
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
+    isLoading: false,
+    codelists: [],
     codelistName: '',
     codelistVersion: '',
     codelistStatus: { statusType: 'design', value: 'DESIGN' },
@@ -51,7 +60,6 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
 
   const onConfirmDeleteCategory = async () => {
     try {
-      console.log({ categoryState });
       const response = await CodelistCategoryService.deleteById(categoryState.categoryId);
       onRefreshCategories(response);
     } catch (error) {
@@ -91,6 +99,19 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     }
   };
 
+  const onLoadCodelists = async () => {
+    toggleLoading(true);
+    try {
+      const response = await CodelistService.getAllInCategory(categoryState.categoryId);
+      dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
+    } catch (error) {
+    } finally {
+      toggleLoading(false);
+    }
+
+    // setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+  };
+
   const onRefreshCategories = response => {
     if (response.status >= 200 && response.status <= 299) {
       onLoadCategories();
@@ -127,14 +148,6 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
 
   const onSaveCodelist = async () => {
     try {
-      // CodelistService.addById(
-      //   dataflowId,
-      //   categoryState.codelistDescription,
-      //   [],
-      //   categoryState.codelistName,
-      //   categoryState.codelistStatus,
-      //   categoryState.codelistVersion
-      // );
       const response = await CodelistService.addById(
         categoryState.codelistDescription,
         [],
@@ -144,7 +157,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
         categoryState.categoryId
       );
       if (response.status >= 200 && response.status <= 299) {
-        //onLoadCategories();
+        onLoadCategories();
       }
     } catch (error) {
       notificationContext.add({
@@ -227,6 +240,10 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     });
   };
 
+  const toggleLoading = loading => {
+    dispatchCategory({ type: 'SET_ISLOADING', payload: { loading } });
+  };
+
   const renderDeleteDialog = () => {
     return categoryState.isDeleteConfirmDialogVisible ? (
       <ConfirmDialog
@@ -242,25 +259,35 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
   };
 
   const renderCodelist = () => {
+    console.log(categoriesDropdown);
     return (
       <div className={styles.categories}>
-        {category.codelists.map((codelist, i) => {
-          return (
-            <Codelist
-              checkDuplicates={checkDuplicates}
-              codelist={codelist}
-              isDataCustodian={isDataCustodian}
-              isInDesign={isInDesign}
-              key={i}
-              onCodelistSelected={onCodelistSelected}
-            />
-          );
-        })}
+        {!isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
+          categoryState.codelists.map((codelist, i) => {
+            return (
+              <Codelist
+                categoriesDropdown={categoriesDropdown}
+                categoryId={categoryState.categoryId}
+                checkDuplicates={checkDuplicates}
+                codelist={codelist}
+                isDataCustodian={isDataCustodian}
+                isInDesign={isInDesign}
+                key={i}
+                onCodelistSelected={onCodelistSelected}
+              />
+            );
+          })
+        ) : (
+          <div className={styles.noCodelistsMessage}>
+            <span>{resources.messages['noCodelists']}</span>
+          </div>
+        )}
       </div>
     );
   };
 
   const renderAddCodelistDialog = () => {
+    console.log({ categoriesDropdown });
     return categoryState.isAddCodelistDialogVisible ? (
       <Dialog
         className="edit-table"
@@ -311,7 +338,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
           },
           {
             label: '',
-            disabled: category.codelists.length > 0,
+            disabled: categoryState.codelists.length > 0,
             tooltip: resources.messages['deleteCategory'],
             icon: 'trash',
             onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true)
@@ -322,8 +349,9 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
             icon: 'add',
             onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true)
           }
-        ]}>
-        {renderCodelist()}
+        ]}
+        onExpandTree={onLoadCodelists}>
+        {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
       </TreeViewExpandableItem>
       {renderEditDialog()}
       {renderAddCodelistDialog()}

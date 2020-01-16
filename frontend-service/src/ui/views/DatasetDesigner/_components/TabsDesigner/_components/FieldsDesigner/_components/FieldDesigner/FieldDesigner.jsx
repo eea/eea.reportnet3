@@ -81,9 +81,12 @@ export const FieldDesigner = ({
   const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   // const [position, setPosition] = useState({});
-  const [selectedCodelist, setSelectedCodelist] = useState({ codelistId: 1, codelistName: '', codelistVersion: '' });
+  const [selectedCodelist, setSelectedCodelist] = useState({
+    codelistId: 1,
+    codelistName: '',
+    codelistVersion: ''
+  });
 
   const fieldRef = useRef();
   const inputRef = useRef();
@@ -558,7 +561,7 @@ export const FieldDesigner = ({
           onHide={() => setIsCodelistManagerVisible(false)}
           style={{ width: '80%' }}
           visible={isCodelistManagerVisible}>
-          {<CodelistsManager setIsLoading={setIsLoading} isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+          {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
         </Dialog>
       ) : null}
     </React.Fragment>

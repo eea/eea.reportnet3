@@ -209,6 +209,7 @@
 		"newTableDescriptionPlaceHolder": "Table description",
 		"newTablePlaceHolder": "Table name",
 		"no": "No",
+		"noCodelists":"There are no codelists",
 		"noDashboardSelected": "There is no dashboard selected",
 		"noDataInDataTable": "There is not any data to show",
 		"noDesignSchemasCreated": "There are no dataset schemas created",

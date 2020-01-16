@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import { isUndefined } from 'lodash';
 
@@ -10,12 +10,19 @@ import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, className }) => {
+const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, className, onExpandTree }) => {
   const [isOpen, setIsOpen] = useState(expanded);
   const resources = useContext(ResourcesContext);
 
+  useEffect(() => {
+    if (isOpen) {
+      if (!isUndefined(onExpandTree)) {
+        onExpandTree();
+      }
+    }
+  }, [isOpen]);
+
   const renderHeader = () => {
-    console.log(items);
     const width = 90 / items.length;
     return items.map((item, i) => (
       <span key={i} style={{ width: `${width}%` }}>

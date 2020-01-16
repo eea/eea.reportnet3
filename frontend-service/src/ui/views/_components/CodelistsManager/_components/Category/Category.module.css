@@ -18,3 +18,20 @@
   display: flex;
   border-top: 2px dashed var(--gray-25);
 }
+
+.positioning {
+  position: sticky !important;
+  width: 3rem !important;
+  height: 3rem !important;
+}
+
+.noCodelistsMessage {
+  display: flex;
+  justify-content: center;
+}
+
+.noCodelistsMessage span {
+  font-style: italic;
+  color: var(--gray-50);
+  user-select: none;
+}

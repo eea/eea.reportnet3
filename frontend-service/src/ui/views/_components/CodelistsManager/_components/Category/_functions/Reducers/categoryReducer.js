@@ -15,6 +15,11 @@ export const categoryReducer = (state, { type, payload }) => {
         categoryId: payload.id ? payload.id : state.categoryId,
         categoryShortCode: payload.shortCode ? payload.shortCode : state.categoryShortCode
       };
+    case 'SET_CODELISTS_IN_CATEGORY':
+      console.log(payload.data);
+      return { ...state, codelists: payload.data };
+    case 'SET_ISLOADING':
+      return { ...state, isLoading: payload.loading };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':
       return { ...state, isEditingDialogVisible: payload };
     case 'TOGGLE_ADD_CODELIST_DIALOG_VISIBLE':

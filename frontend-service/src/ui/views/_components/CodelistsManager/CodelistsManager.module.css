@@ -1,9 +1,14 @@
 .codelistsActions {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  justify-content: flex-end;
   padding-bottom: 1rem;
 }
 
 .filterSpan {
   width: 33%;
+}
+
+.positioning {
+  position: sticky !important;
 }

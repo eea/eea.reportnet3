@@ -9,6 +9,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { InputText } from 'ui/views/_components/InputText';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
 
@@ -20,7 +21,7 @@ import { routes } from 'ui/routes';
 
 import { CodelistsManagerUtils } from './_functions/Utils/CodelistsManagerUtils';
 
-const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoading, onCodelistSelected }) => {
+const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodelistSelected }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -28,17 +29,16 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
   const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     try {
       onLoadCategories();
     } catch (error) {
       console.error(error.response);
     } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -65,83 +65,8 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
 
   const onLoadCategories = async () => {
     try {
-      // [
-      //   {
-      //     name: 'wise',
-      //     description: '(WISE - Water Information System of Europe)',
-      //     codelists: [
-      //       {
-      //         name: 'BWDObservationStatus',
-      //         description: '(Bathing water observation status)',
-      //         version: '1.0',
-      //         status: 'Ready',
-      //         items: [
-      //           {
-      //             itemId: '1',
-      //             code: 'confirmedValue',
-      //             label: 'Confirmed value',
-      //             definition: 'Status flag to confirm that the reported observation value is...'
-      //           },
-      //           {
-      //             itemId: '2',
-      //             code: 'limitOfDetectionValue',
-      //             label: 'Limit of detection value',
-      //             definition: 'Status flag to inform that a specific observed...'
-      //           }
-      //         ]
-      //       },
-      //       {
-      //         name: 'BWDStatus',
-      //         description: '(Bathing water quality) ',
-      //         version: '3.0',
-      //         status: 'Design',
-      //         items: [
-      //           {
-      //             itemId: '3',
-      //             code: 0,
-      //             label: 'Not classified',
-      //             definition: 'Bathing water quality cannot be assessed and classified.'
-      //           },
-      //           {
-      //             itemId: '4',
-      //             code: 1,
-      //             label: 'Excellent',
-      //             definition:
-      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-      //           }
-      //         ]
-      //       },
-      //       {
-      //         name: 'BWDStatus',
-      //         description: '(Bathing water quality) ',
-      //         version: '3.1',
-      //         status: 'Design',
-      //         items: [
-      //           {
-      //             itemId: '5',
-      //             code: 0,
-      //             label: 'Not classified',
-      //             definition: 'Bathing water quality cannot be assessed and classified.'
-      //           },
-      //           {
-      //             itemId: '6',
-      //             code: 1,
-      //             label: 'Excellent',
-      //             definition:
-      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-      //           }
-      //         ]
-      //       }
-      //     ]
-      //   },
-      //   {
-      //     name: 'category 2',
-      //     description: '(Category 2 - Fire Information System of Europe)',
-      //     codelists: []
-      //   }
-      // ];
+      setIsLoading(true);
       const loadedCategories = await CodelistCategoryService.all();
-      console.log({ loadedCategories });
       setCategories(loadedCategories);
     } catch (error) {
       console.log(error);
@@ -176,7 +101,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
     }
   };
 
-  const checkDuplicates = (codelistShortCode, codelistVersion) => {
+  const checkDuplicates = (codelistName, codelistVersion) => {
     if (!isUndefined(categories) && !isNull(categories)) {
       const inmCategories = [...categories];
       console.log({ inmCategories });
@@ -185,7 +110,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
         category =>
           category.codelists.filter(
             codelist =>
-              codelistShortCode.toLowerCase() === codelist.shortCode.toLowerCase() &&
+              codelistName.toLowerCase() === codelist.shortCode.toLowerCase() &&
               codelistVersion.toLowerCase() === codelist.version.toLowerCase()
           ).length > 0
       );
@@ -199,6 +124,9 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
     data.map((category, i) => {
       return (
         <Category
+          categoriesDropdown={categories.map(category => {
+            return { categoryType: category.shortCode, value: category.id };
+          })}
           category={category}
           checkDuplicates={checkDuplicates}
           isDataCustodian={isDataCustodian}
@@ -213,10 +141,10 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
   return (
     <React.Fragment>
       <div className={styles.codelistsActions}>
-        <span className={`${styles.filterSpan} p-float-label`}>
+        {/* <span className={`${styles.filterSpan} p-float-label`}>
           <InputText id="filterInput" onChange={e => onFilter(e.target.value)} value={filter} />
           <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
-        </span>
+        </span> */}
         {isDataCustodian ? (
           <Button
             label={resources.messages['newCategory']}
@@ -226,7 +154,9 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
           />
         ) : null}
       </div>
-      {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)}
+      {/* {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)} */}
+      {console.log({ categories })}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}
         columns={['shortCode', 'description']}

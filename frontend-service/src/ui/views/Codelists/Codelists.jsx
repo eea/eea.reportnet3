@@ -15,7 +15,6 @@ import { routes } from 'ui/routes';
 const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -38,14 +37,10 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     );
   };
 
-  if (isLoading) {
-    return layout(<Spinner />);
-  }
-
   return layout(
     <React.Fragment>
       <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
-      <CodelistsManager setIsLoading={setIsLoading} />
+      <CodelistsManager />
     </React.Fragment>
   );
 });

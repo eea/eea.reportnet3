@@ -12,6 +12,7 @@ export const codelistReducer = (state, { type, payload }) => {
       return {
         ...state,
         clonedCodelist: {
+          codelistId: '',
           codelistName: '',
           codelistVersion: '',
           codelistStatus: { statusType: 'design', value: 'DESIGN' },

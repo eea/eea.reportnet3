@@ -12,6 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const CodelistProperties = ({
   checkDuplicates,
+  categoriesDropdown,
   isCloning = false,
   isEmbedded = true,
   onEditorPropertiesInputChange,
@@ -19,7 +20,7 @@ const CodelistProperties = ({
   state
 }) => {
   const resources = useContext(ResourcesContext);
-
+  console.log({ categoriesDropdown });
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
     { statusType: 'Ready', value: 'ready' },
@@ -27,14 +28,35 @@ const CodelistProperties = ({
   ];
 
   const getStatusValue = value => {
-    console.log({ value });
     if (!isUndefined(value.statusType)) {
       return statusTypes.filter(status => status.statusType.toUpperCase() === value.statusType.toUpperCase())[0];
     }
   };
 
+  const getCategoryValue = value => {
+    console.log({ value, categoriesDropdown });
+    if (!isUndefined(value)) {
+      return categoriesDropdown.filter(category => category.value === value)[0];
+    }
+  };
+
   return (
     <div className={styles.inputsWrapper}>
+      {console.log({ state, isEmbedded })}
+      {!isUndefined(categoriesDropdown) && ((isEmbedded && isCloning) || (!isEmbedded && state.isEditing)) ? (
+        <div className={styles.codelistDropdown}>
+          <label className={styles.codelistDropdownLabel}>{resources.messages['category']}</label>
+          <Dropdown
+            className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
+            onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
+            optionLabel="categoryType"
+            options={categoriesDropdown}
+            // required={true}
+            placeholder={resources.messages['category']}
+            value={getCategoryValue(!isCloning ? state.codelistCategoryId : state.clonedCodelist.codelistCategoryId)}
+          />
+        </div>
+      ) : null}
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
           disabled={!isEmbedded ? !state.isEditing : false}
@@ -68,7 +90,7 @@ const CodelistProperties = ({
         <label htmlFor="versionInput">{resources.messages['codelistVersion']}</label>
       </span>
       <div className={styles.codelistDropdown}>
-        <label className={styles.codelistStatus}>{resources.messages['codelistStatus']}</label>
+        <label className={styles.codelistDropdownLabel}>{resources.messages['codelistStatus']}</label>
         <Dropdown
           className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
           disabled={!isEmbedded ? !state.isEditing : isUndefined(state.codelistId) ? true : false}
