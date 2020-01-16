@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -27,6 +29,7 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -143,6 +146,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The dataset snapshot controller. */
+  @Autowired
+  private DatasetSnapshotController datasetSnapshotController;
+
 
   /**
    * The Constant FILE_PATTERN_NAME.
@@ -190,6 +197,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void addSnapshot(Long idDataset, String description, Boolean released) {
 
+    Long snapshotId = 0L;
     try {
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
@@ -202,15 +210,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setRelease(false);
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
+      snapshotId = snap.getId();
 
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
 
-      if (released) {
-        releaseSnapshot(idDataset, snap.getId());
-      }
 
       LOG.info("Snapshot {} data files created", snap.getId());
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
@@ -223,6 +229,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
       criteria.add(idDataset);
       lockService.removeLockByCriteria(criteria);
+    }
+
+    if (released) {
+      datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
 
   }
@@ -299,7 +309,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
+  @Async
+  public void releaseSnapshot(Long idDataset, Long idSnapshot) {
 
 
     Long providerId = 0L;
@@ -313,18 +324,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Get the dataCollection
     String datasetSchema = metabaseRepository.findDatasetSchemaIdById(idDataset);
-    Long idDataCollection =
-        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema).isPresent()
-            ? dataCollectionRepository.findFirstByDatasetSchema(datasetSchema).get().getId()
-            : null;
+    Optional<DataCollection> dataCollection =
+        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
+    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
 
 
     // Delete data of the same provider
     if (provider != null && idDataCollection != null) {
-      datasetService.deleteRecordValues(idDataCollection, provider.getCode());
+      datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
-      restoreSnapshot(idDataCollection, idSnapshot, false);
+      try {
+        restoreSnapshot(idDataCollection, idSnapshot, false);
+      } catch (EEAException e) {
+        LOG.error(e.getMessage());
+      }
     }
     // Check the snapshot released
     snapshotRepository.releaseSnaphot(idDataset, idSnapshot);

@@ -54,7 +54,7 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot);
 
 
   /**

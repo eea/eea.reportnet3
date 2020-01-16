@@ -162,18 +162,6 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Test release snapshots exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testReleaseSnapshotsException2() throws Exception {
-
-    doThrow(new EEAException()).when(datasetSnapshotService).releaseSnapshot(Mockito.any(),
-        Mockito.any());
-    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
-  }
 
 
   /**

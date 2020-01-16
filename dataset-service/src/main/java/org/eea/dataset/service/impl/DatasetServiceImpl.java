@@ -1471,7 +1471,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void deleteRecordValues(@DatasetId Long datasetId, String providerCode) {
+  public void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode) {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     recordRepository.deleteByDataProviderCode(providerCode);
   }

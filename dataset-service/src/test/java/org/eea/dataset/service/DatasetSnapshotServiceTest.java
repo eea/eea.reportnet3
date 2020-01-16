@@ -17,7 +17,9 @@ import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
@@ -26,8 +28,11 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -112,6 +117,18 @@ public class DatasetSnapshotServiceTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset metabase service. */
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The representative controller zuul. */
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The data collection repository. */
+  @Mock
+  private DataCollectionRepository dataCollectionRepository;
 
   /**
    * Inits the mocks.
@@ -238,7 +255,19 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void releaseSnapshot() throws Exception {
-
+    DataSetMetabaseVO metabase = new DataSetMetabaseVO();
+    DataCollection dataCollection = new DataCollection();
+    dataCollection.setId(1L);
+    metabase.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(dataSetMetabaseRepository.findDatasetSchemaIdById(Mockito.any())).thenReturn("");
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(dataCollection));
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    datasetSnapshotService.restoreSnapshot(1L, 1L, true);
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());

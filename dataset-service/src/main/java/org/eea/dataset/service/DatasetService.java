@@ -361,5 +361,5 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param providerCode the provider code
    */
-  void deleteRecordValues(@DatasetId Long datasetId, String providerCode);
+  void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 }
