@@ -156,7 +156,7 @@ const useBigButtonList = ({
     return uniqRepresentatives.map(representative => ({
       layout: 'defaultBigButton',
       buttonClass: 'dataset',
-      buttonIcon: 'dataset',
+      buttonIcon: 'representative',
       caption: representative,
       handleRedirect: () => {
         handleRedirect(
