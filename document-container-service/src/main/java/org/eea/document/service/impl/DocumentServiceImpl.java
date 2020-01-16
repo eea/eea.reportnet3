@@ -215,10 +215,6 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
-      if (Boolean.TRUE.equals(deleteMetabase)) {
-        dataflowController.deleteDocument(documentId);
-
-      }
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -228,23 +224,23 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), Long.toString(documentId));
       LOG.info("File deleted...");
 
-      oakRepositoryUtils.deleteBlobsFromRepository(ns);
+      if (Boolean.TRUE.equals(deleteMetabase)) {
+        dataflowController.deleteDocument(documentId);
+      }
 
       // Release finish event
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_COMPLETED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(dataFlowId).build());
-    } catch (Exception e) {
 
+      // Physical delete. This won't be notified
+      oakRepositoryUtils.deleteBlobsFromRepository(ns);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in deleteDocument due to", e);
       // Release finish event
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(dataFlowId).error(e.getMessage()).build());
-      LOG_ERROR.error("Error in deleteDocument due to", e);
-      if (e.getClass().equals(PathNotFoundException.class)) {
-        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
-      }
-      throw new EEAException(EEAErrorMessage.EXECUTION_ERROR, e);
     } finally {
       oakRepositoryUtils.cleanUp(session, ns);
     }

@@ -51,6 +51,10 @@ public class FieldSchema {
   @Field(value = "rules")
   private List<RuleField> ruleField;
 
+  /** The id code list. */
+  @Field(value = "idCodeList")
+  private Long idCodeList;
+
   /**
    * Hash code.
    *
@@ -58,7 +62,8 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, description, idFieldSchema, idRecord, ruleField, type);
+    return Objects.hash(headerName, description, idFieldSchema, idRecord, ruleField, type,
+        idCodeList);
   }
 
   /**
@@ -80,6 +85,6 @@ public class FieldSchema {
         && Objects.equals(description, other.description)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
-        && Objects.equals(type, other.type);
+        && Objects.equals(idCodeList, other.idCodeList);
   }
 }
