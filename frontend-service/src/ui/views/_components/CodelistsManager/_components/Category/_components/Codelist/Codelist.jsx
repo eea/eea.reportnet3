@@ -166,21 +166,20 @@ const Codelist = ({
 
   const onSaveCodelist = async () => {
     try {
-      const response = await CodelistService.addById(
+      console.log(codelistState.codelistCategoryId);
+      const response = await CodelistService.updateById(
+        codelistState.codelistId,
         codelistState.codelistDescription,
         codelistState.items,
         codelistState.codelistName,
-        codelistState.codelistStatus.value,
+        codelistState.codelistStatus.value.toUpperCase(),
         codelistState.codelistVersion,
         codelistState.codelistCategoryId
       );
     } catch (error) {
       notificationContext.add({
-        type: 'SAVE_CODELIST_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'SAVE_EDIT_CODELIST_ERROR',
+        content: {}
       });
     } finally {
       toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
