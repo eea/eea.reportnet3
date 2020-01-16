@@ -45,7 +45,8 @@ import {
   faCloudUploadAlt,
   faThList,
   faMinus,
-  faLayerGroup
+  faLayerGroup,
+  faSitemap
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -236,6 +237,8 @@ export const AwesomeIcons = icon => {
       return faCloudUploadAlt;
     case 'dataCollection':
       return faLayerGroup;
+    case 'siteMap':
+      return faSitemap;
     default:
       return faFileAlt;
   }

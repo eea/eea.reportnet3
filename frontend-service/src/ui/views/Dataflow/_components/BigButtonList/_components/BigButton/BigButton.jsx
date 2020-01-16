@@ -17,6 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const BigButton = ({
   buttonClass,
   buttonIcon,
+  buttonIconClass,
   caption,
   dataflowStatus,
   datasetSchemaInfo,
@@ -132,7 +133,7 @@ export const BigButton = ({
             handleRedirect();
           }}
           onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </a>
         {model ? (
           <>
@@ -185,7 +186,7 @@ export const BigButton = ({
             e.preventDefault();
             menuBigButtonRef.current.show(e);
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles.newItemCross} />
+          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </a>
         <DropDownMenu ref={menuBigButtonRef} model={model} />
       </div>

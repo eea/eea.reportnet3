@@ -32,6 +32,7 @@ const useBigButtonList = ({
       layout: 'menuBigButton',
       buttonClass: 'newItem',
       buttonIcon: 'plus',
+      buttonIconClass: 'newItemCross',
       caption: resources.messages['newItem'],
       model: [
         {
@@ -222,8 +223,9 @@ const useBigButtonList = ({
   const createDataCollection = [
     {
       layout: 'defaultBigButton',
-      buttonClass: 'createDataCollection',
-      buttonIcon: 'checkedSquare',
+      buttonClass: 'newItem',
+      buttonIcon: 'siteMap',
+      buttonIconClass: 'siteMap',
       caption: resources.messages['createDataCollection'],
       handleRedirect: () => onShowDataCollectionModal(),
       visibility: isEmpty(dataflowData.dataCollections) && !isEmpty(dataflowData.designDatasets)
