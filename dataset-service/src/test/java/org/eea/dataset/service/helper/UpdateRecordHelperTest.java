@@ -71,7 +71,7 @@ public class UpdateRecordHelperTest {
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(datasetService).deleteRecord(Mockito.any(), Mockito.any());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeDeleteProcess(1L, 1L);
+    updateRecordHelper.executeDeleteProcess(1L, "1L");
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
