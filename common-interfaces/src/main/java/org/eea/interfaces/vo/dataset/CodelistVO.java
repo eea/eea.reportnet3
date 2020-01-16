@@ -28,7 +28,7 @@ public class CodelistVO {
   private CodelistCategoryVO category;
 
   /** The version. */
-  private Long version;
+  private String version;
 
   /** The items id. */
   private List<CodelistItemVO> items;

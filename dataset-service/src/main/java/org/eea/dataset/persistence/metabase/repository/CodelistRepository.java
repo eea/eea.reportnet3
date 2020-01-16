@@ -18,7 +18,7 @@ public interface CodelistRepository extends PagingAndSortingRepository<Codelist,
    * @param version the version
    * @return the optional
    */
-  Optional<List<Codelist>> findAllByNameAndVersion(String name, Long version);
+  Optional<List<Codelist>> findAllByNameAndVersion(String name, String version);
 
   /**
    * Find all by id in.

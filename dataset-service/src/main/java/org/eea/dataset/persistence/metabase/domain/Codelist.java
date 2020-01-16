@@ -50,7 +50,7 @@ public class Codelist {
 
   /** The version. */
   @Column(name = "version")
-  private Long version;
+  private String version;
 
   /** The items. */
   @OneToMany(mappedBy = "codelist", cascade = CascadeType.ALL, orphanRemoval = false)
