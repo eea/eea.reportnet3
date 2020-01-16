@@ -15,7 +15,7 @@ const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, cla
   const resources = useContext(ResourcesContext);
 
   const renderHeader = () => {
-    console.log(items);
+    // console.log(items);
     const width = 90 / items.length;
     return items.map((item, i) => (
       <span key={i} style={{ width: `${width}%` }}>

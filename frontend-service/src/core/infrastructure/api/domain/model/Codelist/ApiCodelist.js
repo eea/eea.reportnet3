@@ -15,15 +15,17 @@ export const apiCodelist = {
     });
     return response;
   },
-  all: async () => {
+  all: async codelistId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.all, {}),
-      queryString: {},
+      url: getUrl(CodelistConfig.all, {
+        codelistId: codelistId
+      }),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('Get all by id response', response);
     return response;
   },
   allInCategory: async codelistCategoryId => {
