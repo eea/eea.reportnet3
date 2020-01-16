@@ -43,7 +43,13 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  const [dataViewerOptions, setDataViewerOptions] = useState({
+    recordPositionId: -1,
+    selectedRecordErrorId: -1,
+    activeIndex: null
+  });
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -229,15 +235,29 @@ export const DataCollection = withRouter(({ match, history }) => {
     setLoading(false);
   };
 
+  const onLoadTableData = hasData => {
+    setDatasetHasData(hasData);
+  };
+
   const onRenderTabsSchema = (
     <TabsSchema
+      activeIndex={dataViewerOptions.activeIndex}
       hasWritePermissions={hasWritePermissions}
       isDataCollection={true}
+      isWebFormMMR={false}
       levelErrorTypes={levelErrorTypes}
+      onLoadTableData={onLoadTableData}
+      onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+      recordPositionId={dataViewerOptions.recordPositionId}
+      selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
     />
   );
+
+  const onTabChange = tableSchemaId => {
+    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+  };
 
   const layout = children => {
     return (
@@ -308,6 +328,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         value={{
           isValidationSelected: isValidationSelected,
           setIsValidationSelected: setIsValidationSelected,
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+            setDataViewerOptions({
+              recordPositionId: posIdRecord,
+              selectedRecordErrorId: selectedRecordErrorId,
+              activeIndex: tableSchemaId
+            });
+          },
           onValidationsVisible: () => {}
         }}>
         {onRenderTabsSchema}

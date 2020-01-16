@@ -250,12 +250,12 @@ const DataViewer = withRouter(
         />
       );
 
-      if (!isWebFormMMR) {
+      if (!isDataCollection && !isWebFormMMR) {
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
       if (isDataCollection && !isWebFormMMR) {
-        columnsArr.unshift(providerCode);
+        columnsArr.unshift(validationCol, providerCode);
       }
 
       if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
