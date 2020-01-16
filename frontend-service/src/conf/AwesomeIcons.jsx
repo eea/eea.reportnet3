@@ -46,7 +46,8 @@ import {
   faThList,
   faMinus,
   faLayerGroup,
-  faCoins
+  faCoins,
+  faSitemap
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -239,6 +240,8 @@ export const AwesomeIcons = icon => {
       return faLayerGroup;
     case 'representative':
       return faCoins;
+    case 'siteMap':
+      return faSitemap;
     default:
       return faFileAlt;
   }

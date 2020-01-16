@@ -219,21 +219,22 @@ const DataViewer = withRouter(
           />
         );
       });
-      let countryCode = (
+      let providerCode = (
         <Column
-          className={styles.countryCode}
+          body={providerCodeTemplate}
+          className={styles.providerCode}
           header={resources.messages['countryCode']}
-          key="countryCode"
+          key="providerCode"
           sortable={false}
           style={{ width: '100px' }}
         />
       );
       let editCol = (
         <Column
+          body={row => actionTemplate(row)}
           className={styles.validationCol}
           header={resources.messages['actions']}
           key="actions"
-          body={row => actionTemplate(row)}
           sortable={false}
           style={{ width: '100px' }}
         />
@@ -249,12 +250,12 @@ const DataViewer = withRouter(
         />
       );
 
-      if (!isWebFormMMR) {
+      if (!isDataCollection && !isWebFormMMR) {
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
       if (isDataCollection && !isWebFormMMR) {
-        columnsArr.unshift(countryCode);
+        columnsArr.unshift(validationCol, providerCode);
       }
 
       if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
@@ -739,6 +740,14 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }
       setFetchedData(dataFiltered);
+    };
+
+    const providerCodeTemplate = rowData => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {!isUndefined(rowData) ? rowData.providerCode : null}
+        </div>
+      );
     };
 
     //Template for Record validation

@@ -328,26 +328,23 @@ export const Dataset = withRouter(({ match, history }) => {
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       return datasetSchema;
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      const datasetError = {
-        type: 'SCHEMA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      };
-      notificationContext.add(datasetError);
+      throw new Error('SCHEMA_BY_ID_ERROR');
     }
   };
+
+  const getStatisticsById = async (datasetId, tableSchemaNames) => {
+    try {
+      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return datasetStatistics;
+    } catch (error) {
+      throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
+    }
+  };
+
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const datasetStatistics = await DatasetService.errorStatisticsById(
+      const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
@@ -384,10 +381,14 @@ export const Dataset = withRouter(({ match, history }) => {
 
       setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
       const datasetError = {
-        type: 'ERROR_STATISTICS_BY_ID_ERROR',
+        type: error.message,
         content: {
-          dataflowId,
+          // dataflowId,
           datasetId,
           dataflowName,
           datasetName
