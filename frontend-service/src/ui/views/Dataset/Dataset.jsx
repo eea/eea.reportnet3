@@ -321,11 +321,32 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDatasetSchema = async () => {
+  const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      return datasetSchema;
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+      const datasetError = {
+        type: 'SCHEMA_BY_ID_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      };
+      notificationContext.add(datasetError);
+    }
+  };
+  const onLoadDatasetSchema = async () => {
+    try {
+      const datasetSchema = await getDataSchema();
       const datasetStatistics = await DatasetService.errorStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -363,20 +384,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
       setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
-      const metadata = await getMetadata({ dataflowId, datasetId });
-      console.log('[metadata]: ', metadata);
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = metadata;
-      const {
-        response,
-        response: {
-          data: { path }
-        }
-      } = error;
       const datasetError = {
-        type: '',
+        type: 'ERROR_STATISTICS_BY_ID_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -384,17 +393,13 @@ export const Dataset = withRouter(({ match, history }) => {
           datasetName
         }
       };
-      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
-        datasetError.type = 'SCHEMA_BY_ID_ERROR';
-      } else {
-        datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
-      }
       notificationContext.add(datasetError);
-      if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const onSetVisible = (fnUseState, visible) => {
