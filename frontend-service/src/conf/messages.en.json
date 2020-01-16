@@ -18,7 +18,7 @@
 		"blocker": "Blocker",
 		"cancel": "Cancel",
 		"category": "Category",
-		"categoryName": "Name",
+		"categoryShortCode": "Short code",
 		"categoryDescription": "Description",
 		"chooseChartColor": "Choose your dashboard color",
 		"cleanFilters": "Clean filters",

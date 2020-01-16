@@ -8,7 +8,7 @@ export const apiCodelist = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(CodelistConfig.add, {}),
-      data: { codelist },
+      data: { ...codelist },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -58,7 +58,7 @@ export const apiCodelist = {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: { codelist }
+      data: { ...codelist }
     });
     return response;
   }

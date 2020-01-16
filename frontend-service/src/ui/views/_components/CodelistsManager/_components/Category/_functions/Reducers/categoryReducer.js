@@ -4,7 +4,7 @@ export const categoryReducer = (state, { type, payload }) => {
       return {
         ...state,
         categoryDescription: payload.description,
-        categoryName: payload.name,
+        categoryShortCode: payload.shortCode,
         isEditingDialogVisible: false
       };
     case 'SET_CATEGORY_INPUTS':
@@ -12,8 +12,8 @@ export const categoryReducer = (state, { type, payload }) => {
       return {
         ...state,
         categoryDescription: payload.description ? payload.description : state.categoryDescription,
-        categoryId: payload.categoryId ? payload.categoryId : state.categoryId,
-        categoryName: payload.name ? payload.name : state.categoryName
+        categoryId: payload.id ? payload.id : state.categoryId,
+        categoryShortCode: payload.shortCode ? payload.shortCode : state.categoryShortCode
       };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':
       return { ...state, isEditingDialogVisible: payload };

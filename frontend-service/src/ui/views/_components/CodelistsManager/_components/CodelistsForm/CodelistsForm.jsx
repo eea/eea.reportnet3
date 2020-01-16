@@ -38,7 +38,9 @@ const CodelistsForm = ({ newCategory, columns, onChangeCategoryForm, onHideDialo
                 : newCategory[column]
             }
           />
-          <label htmlFor={`${column}Input`}>{capitalize(column)}</label>
+          <label htmlFor={`${column}Input`}>
+            {column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+          </label>
         </span>
       </React.Fragment>
     );

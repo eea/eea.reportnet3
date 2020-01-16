@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { isUndefined } from 'lodash';
+import { isUndefined, isNull } from 'lodash';
 
 import styles from './CodelistProperties.module.css';
 
@@ -71,7 +71,7 @@ const CodelistProperties = ({
         <label className={styles.codelistStatus}>{resources.messages['codelistStatus']}</label>
         <Dropdown
           className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-          disabled={!isEmbedded ? !state.isEditing : false}
+          disabled={!isEmbedded ? !state.isEditing : isUndefined(state.codelistId) ? true : false}
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistStatus')}
           optionLabel="statusType"
           options={statusTypes}

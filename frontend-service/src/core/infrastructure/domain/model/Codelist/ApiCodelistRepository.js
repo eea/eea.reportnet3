@@ -42,7 +42,7 @@ const allInCategory = async codelistCategoryId => {
 const addById = async (description, items, name, status, version, categoryId) => {
   const categoryDTO = new CodelistCategory(categoryId);
   const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
-  const codelistDTO = new Codelist(null, name, description, version, status, codelistItemsDTO);
+  const codelistDTO = new Codelist(null, name, description, Number(version), status, codelistItemsDTO);
   codelistDTO.category = categoryDTO;
   return await apiCodelist.addById(codelistDTO);
 };

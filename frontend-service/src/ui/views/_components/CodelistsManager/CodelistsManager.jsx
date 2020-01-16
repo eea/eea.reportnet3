@@ -12,6 +12,7 @@ import { InputText } from 'ui/views/_components/InputText';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -20,12 +21,14 @@ import { routes } from 'ui/routes';
 import { CodelistsManagerUtils } from './_functions/Utils/CodelistsManagerUtils';
 
 const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoading, onCodelistSelected }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
   useEffect(() => {
@@ -141,22 +144,39 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
       console.log({ loadedCategories });
       setCategories(loadedCategories);
     } catch (error) {
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSaveCategory = () => {
+  const onSaveCategory = async () => {
     //API CALL
     //Meanwhile....
-    const inmCategories = [...categories];
-    newCategory.codelists = [];
-    inmCategories.push(newCategory);
-    setCategories(inmCategories);
-    setNewCategoryVisible(false);
+    // const inmCategories = [...categories];
+    // newCategory.codelists = [];
+    // inmCategories.push(newCategory);
+    // setCategories(inmCategories);
+    // setNewCategoryVisible(false);
+    try {
+      const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
+      if (response.status >= 200 && response.status <= 299) {
+        onLoadCategories();
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
+    } finally {
+      setNewCategoryVisible(false);
+    }
   };
 
-  const checkDuplicates = (codelistName, codelistVersion) => {
+  const checkDuplicates = (codelistShortCode, codelistVersion) => {
     if (!isUndefined(categories) && !isNull(categories)) {
       const inmCategories = [...categories];
       console.log({ inmCategories });
@@ -165,7 +185,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
         category =>
           category.codelists.filter(
             codelist =>
-              codelistName.toLowerCase() === codelist.name.toLowerCase() &&
+              codelistShortCode.toLowerCase() === codelist.shortCode.toLowerCase() &&
               codelistVersion.toLowerCase() === codelist.version.toLowerCase()
           ).length > 0
       );
@@ -185,6 +205,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
           isInDesign={isInDesign}
           key={i}
           onCodelistSelected={onCodelistSelected}
+          onLoadCategories={onLoadCategories}
         />
       );
     });
@@ -208,10 +229,10 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
       {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}
-        columns={['name', 'description']}
+        columns={['shortCode', 'description']}
         onChangeCategoryForm={onChangeCategoryForm}
         onHideDialog={() => {
-          setNewCategory({ name: '', description: '' });
+          setNewCategory({ shortCode: '', description: '' });
           setNewCategoryVisible(false);
         }}
         onSaveCategory={onSaveCategory}

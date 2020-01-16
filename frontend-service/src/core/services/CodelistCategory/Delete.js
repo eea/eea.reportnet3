@@ -1,2 +1,2 @@
-export const Delete = ({ codelistCategoryRepository }) => async categoryId =>
-  codelistCategoryRepository.deleteById(categoryId);
+export const Delete = ({ codelistCategoryRepository }) => async codelistCategoryId =>
+  codelistCategoryRepository.deleteById(codelistCategoryId);

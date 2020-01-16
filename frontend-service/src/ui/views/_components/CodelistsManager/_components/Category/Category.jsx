@@ -20,11 +20,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected }) => {
+const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected, onLoadCategories }) => {
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
-    categoryName: '',
+    categoryShortCode: '',
+    categoryEditedDescription: '',
+    categoryEditedShortCode: '',
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
@@ -38,14 +40,20 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
+    setCategoryInputs(category.description, category.shortCode, category.id);
+  }, [onLoadCategories]);
+
+  useEffect(() => {
     if (categoryState.isEditingDialogVisible) {
-      setCategoryInputs(category.description, category.name);
+      onLoadCategoryInfo();
     }
   }, [categoryState.isEditingDialogVisible]);
 
   const onConfirmDeleteCategory = async () => {
     try {
-      await CodelistService.deleteById(categoryState.categoryId);
+      console.log({ categoryState });
+      const response = await CodelistCategoryService.deleteById(categoryState.categoryId);
+      onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -75,17 +83,35 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     }
   };
 
-  const onSaveCategory = () => {
+  const onLoadCategoryInfo = async () => {
+    const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
+    if (response.status >= 200 && response.status <= 299) {
+      console.log(response.data);
+      setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+    }
+  };
+
+  const onRefreshCategories = response => {
+    if (response.status >= 200 && response.status <= 299) {
+      onLoadCategories();
+    }
+  };
+
+  // const onRefreshCategory = response => {
+  //   if (response.status >= 200 && response.status <= 299) {
+  //     onLoadCategory();
+  //   }
+  // };
+
+  const onSaveCategory = async () => {
     try {
-      if (!isNull(categoryState.categoryId)) {
-        //CodelistCategoryService.addById(categoryState.categoryName, categoryState.categoryDescription);
-      } else {
-        CodelistCategoryService.updateById(
-          categoryState.categoryId,
-          categoryState.categoryName,
-          categoryState.categoryDescription
-        );
-      }
+      console.log({ categoryState });
+      const response = await CodelistCategoryService.updateById(
+        categoryState.categoryId,
+        categoryState.categoryShortCode,
+        categoryState.categoryDescription
+      );
+      onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
         type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -99,7 +125,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     }
   };
 
-  const onSaveCodelist = () => {
+  const onSaveCodelist = async () => {
     try {
       // CodelistService.addById(
       //   dataflowId,
@@ -109,6 +135,17 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
       //   categoryState.codelistStatus,
       //   categoryState.codelistVersion
       // );
+      const response = await CodelistService.addById(
+        categoryState.codelistDescription,
+        [],
+        categoryState.codelistName,
+        'DESIGN',
+        categoryState.codelistVersion,
+        categoryState.categoryId
+      );
+      if (response.status >= 200 && response.status <= 299) {
+        //onLoadCategories();
+      }
     } catch (error) {
       notificationContext.add({
         type: 'ADD_CODELIST_BY_ID_ERROR',
@@ -157,11 +194,11 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     <React.Fragment>
       <span className={`${styles.categoryInput} p-float-label`}>
         <InputText
-          id={'nameInput'}
+          id={'shortCodeInput'}
           onChange={e => setCategoryInputs(undefined, e.target.value)}
-          value={categoryState.categoryName}
+          value={categoryState.categoryShortCode}
         />
-        <label htmlFor={'nameInput'}>{resources.messages['categoryName']}</label>
+        <label htmlFor={'shortCodeInput'}>{resources.messages['categoryShortCode']}</label>
       </span>
       <span className={`${styles.categoryInput} p-float-label`}>
         <InputText
@@ -175,10 +212,11 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     </React.Fragment>
   );
 
-  const setCategoryInputs = (description, name, id) => {
+  const setCategoryInputs = (description, shortCode, id) => {
+    console.log({ description, shortCode, id });
     dispatchCategory({
       type: 'SET_CATEGORY_INPUTS',
-      payload: { description, name, id }
+      payload: { description, shortCode, id }
     });
   };
 
@@ -248,7 +286,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={categoryDialogFooter}
-        header={resources.messages['addNewCategory']}
+        header={resources.messages['editCategory']}
         modal={true}
         onHide={() => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false)}
         style={{ width: '50%' }}
@@ -262,8 +300,8 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     <React.Fragment>
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
-        expanded={true}
-        items={[category.name, category.description]}
+        expanded={false}
+        items={[category.shortCode, category.description]}
         buttons={[
           {
             label: '',
