@@ -183,7 +183,7 @@ const useBigButtonList = ({
   };
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
 
-  const groupByRepresentativeModels2 = dataflowData.datasets.map(dataset => ({
+  const datasetModels = dataflowData.datasets.map(dataset => ({
     layout: 'defaultBigButton',
     buttonClass: 'dataset',
     buttonIcon: 'dataset',
@@ -227,6 +227,8 @@ const useBigButtonList = ({
         ],
     visibility: !isEmpty(dataflowData.datasets)
   }));
+
+  const datasets = isCustodian ? groupByRepresentativeModels : datasetModels;
 
   const dashboardModels = [
     {
@@ -312,7 +314,7 @@ const useBigButtonList = ({
     ...designDatasetModels,
     ...dataCollectionModels,
     ...dashboardModels,
-    ...groupByRepresentativeModels,
+    ...datasets,
     ...createDataCollection
   ];
 };

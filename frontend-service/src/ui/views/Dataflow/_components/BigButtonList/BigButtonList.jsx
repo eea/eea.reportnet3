@@ -156,7 +156,7 @@ export const BigButtonList = ({
               onShowNewSchemaDialog: onShowNewSchemaDialog,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
               updatedDatasetSchema: updatedDatasetSchema
-            }).map(button => (button.visibility ? <BigButton {...button} /> : <></>))}
+            }).map((button, i) => (button.visibility ? <BigButton {...button} /> : <></>))}
           </div>
         </div>
       </div>
