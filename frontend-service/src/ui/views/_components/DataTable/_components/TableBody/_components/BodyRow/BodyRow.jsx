@@ -131,12 +131,18 @@ export class BodyRow extends Component {
         case 13:
           this.onClick(event);
           break;
-
+        case 9:
+          //this.findNextSelectableCell(row);
+          break;
         default:
           //no op
           break;
       }
     }
+  }
+
+  findNextSelectableCell(cell) {
+    // let nextCell = cell.nextElementSibling;
   }
 
   findNextSelectableRow(row) {

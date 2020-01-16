@@ -1,14 +1,14 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { uniqBy } from 'lodash';
 
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { ReportersListItem } from './_components/ReportersListItem';
+import { ReporterList } from './_components/ReporterList';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { StatusList } from './_components/StatusList';
-import { TableListItem } from './_components/TableListItem';
+import { TableList } from './_components/TableList';
 
 const FilterList = ({
   datasetSchemaId,
@@ -34,17 +34,12 @@ const FilterList = ({
   const filterByReporters = () => {
     return labels.length > 0 ? (
       <AccordionTab header={resources.messages['filterByDataset']}>
-        <ul className={styles.list}>
-          {labels.map(item => (
-            <ReportersListItem
-              key={item}
-              datasetSchemaId={datasetSchemaId}
-              filterDispatch={filterDispatch}
-              item={item}
-              reporterFilters={reporterFilters}
-            />
-          ))}
-        </ul>
+        <ReporterList
+          datasetSchemaId={datasetSchemaId}
+          filterDispatch={filterDispatch}
+          reporterFilters={reporterFilters}
+          labels={labels}
+        />
       </AccordionTab>
     ) : (
       <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
@@ -54,17 +49,12 @@ const FilterList = ({
   const filterByTables = () => {
     return tables.length > 0 ? (
       <AccordionTab header={resources.messages['filterByTable']}>
-        <ul className={styles.list}>
-          {tables.map(table => (
-            <TableListItem
-              key={table.id}
-              datasetSchemaId={datasetSchemaId}
-              filterDispatch={filterDispatch}
-              item={table}
-              tableFilters={tableFilters}
-            />
-          ))}
-        </ul>
+        <TableList
+          datasetSchemaId={datasetSchemaId}
+          filterDispatch={filterDispatch}
+          tableFilters={tableFilters}
+          tables={tables}
+        />
       </AccordionTab>
     ) : (
       <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
