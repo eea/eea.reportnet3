@@ -91,6 +91,9 @@ public class CodelistServiceImplTest {
   /** The codelist items VO. */
   private List<CodelistItemVO> codelistItemsVO;
 
+  /** The codelist categories VO. */
+  List<CodelistCategoryVO> codelistCategoriesVO;
+
   /**
    * Inits the mocks.
    */
@@ -104,6 +107,8 @@ public class CodelistServiceImplTest {
     codelistCategoryVO.setId(1L);
     codelistCategory = new CodelistCategory();
     codelistCategory.setId(1L);
+    codelistCategoriesVO = new ArrayList<>();
+    codelistCategoriesVO.add(codelistCategoryVO);
     items = new ArrayList<>();
     items.add(new CodelistItem());
     codelists = new ArrayList<>();
@@ -551,8 +556,9 @@ public class CodelistServiceImplTest {
   @Test
   public void getAllCategoriesSuccessTest() throws EEAException {
     when(codelistCategoryRepository.findAll()).thenReturn(new ArrayList<CodelistCategory>());
-    assertEquals("not equal", new ArrayList<CodelistCategoryVO>(),
-        codelistServiceImpl.getAllCategories());
+    when(codelistCategoryMapper.entityListToClass(Mockito.any())).thenReturn(codelistCategoriesVO);
+    when(codelistRepository.findAllByCategory_Id(Mockito.any())).thenReturn(Optional.empty());
+    assertEquals("not equal", codelistCategoriesVO, codelistServiceImpl.getAllCategories());
   }
 
   /**
