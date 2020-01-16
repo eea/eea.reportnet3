@@ -431,6 +431,13 @@
         {
           "key": "DELETE_DOCUMENT_INIT_INFO",
           "refresh":false
+        },
+        {
+          "key":"VALIDATE_DATA_INIT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     }

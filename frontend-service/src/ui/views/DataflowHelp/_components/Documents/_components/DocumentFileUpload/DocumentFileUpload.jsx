@@ -89,13 +89,13 @@ const DocumentFileUpload = ({
     return initialValues;
   };
 
-  const initialValueslWithLangField = buildInitialValue(documentInitialValues);
+  const initialValuesWithLangField = buildInitialValue(documentInitialValues);
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initialValueslWithLangField}
+      initialValues={initialValuesWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
