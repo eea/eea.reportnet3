@@ -43,6 +43,7 @@ const DataViewer = withRouter(
     correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isPreviewModeOn = false,
+    isDataCollection,
     isWebFormMMR,
     levelErrorTypes = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
     levelErrorTypesWithCorrects = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
@@ -218,6 +219,15 @@ const DataViewer = withRouter(
           />
         );
       });
+      let countryCode = (
+        <Column
+          className={styles.countryCode}
+          header={resources.messages['countryCode']}
+          key="countryCode"
+          sortable={false}
+          style={{ width: '100px' }}
+        />
+      );
       let editCol = (
         <Column
           className={styles.validationCol}
@@ -241,6 +251,10 @@ const DataViewer = withRouter(
 
       if (!isWebFormMMR) {
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      }
+
+      if (isDataCollection && !isWebFormMMR) {
+        columnsArr.unshift(countryCode);
       }
 
       if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {

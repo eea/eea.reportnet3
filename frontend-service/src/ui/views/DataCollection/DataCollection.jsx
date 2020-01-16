@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import { capitalize, isUndefined } from 'lodash';
 
 import styles from './DataCollection.module.css';
 
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
-import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
@@ -41,11 +42,15 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
-  const [datasetName, setDatasetName] = useState('');
+  const [dataCollectionName, setDataCollectionName] = useState();
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tableSchema, setTableSchema] = useState();
+  const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [tableSchemaNames, setTableSchemaNames] = useState([]);
 
   let growlRef = useRef();
 
@@ -137,7 +142,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       const dataflowData = await DataflowService.reporting(match.params.dataflowId);
       const dataCollection = dataflowData.dataCollections.filter(datasets => datasets.dataCollectionId == datasetId);
-      console.log('dataCollection', dataCollection);
+      setDataCollectionName(dataCollection[0].dataCollectionName);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -164,10 +169,75 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
       console.log('datasetSchema', datasetSchema);
+      setDatasetSchemaName(datasetSchema.dataCollectionName);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      const tableSchemaNamesList = [];
+      setTableSchema(
+        datasetSchema.tables.map(tableSchema => {
+          tableSchemaNamesList.push(tableSchema.tableSchemaName);
+          return {
+            id: tableSchema['tableSchemaId'],
+            name: tableSchema['tableSchemaName']
+          };
+        })
+      );
+      setTableSchemaNames(tableSchemaNamesList);
+      setTableSchemaColumns(
+        datasetSchema.tables.map(table => {
+          return table.records[0].fields.map(field => {
+            return {
+              table: table['tableSchemaName'],
+              field: field['fieldId'],
+              header: `${capitalize(field['name'])}`,
+              type: field['type'],
+              recordId: field['recordId']
+            };
+          });
+        })
+      );
     } catch (error) {
-      console.log('datasetSchema error', error);
+      const metadata = await getMetadata({ dataflowId, datasetId });
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = metadata;
+      const {
+        response,
+        response: {
+          data: { path }
+        }
+      } = error;
+      const datasetError = {
+        type: '',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      };
+      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
+        datasetError.type = 'SCHEMA_BY_ID_ERROR';
+      } else {
+        datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
+      }
+      notificationContext.add(datasetError);
+      if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
+        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+      }
     }
+    setLoading(false);
   };
+
+  const onRenderTabsSchema = (
+    <TabsSchema
+      hasWritePermissions={hasWritePermissions}
+      isDataCollection={true}
+      levelErrorTypes={levelErrorTypes}
+      tables={tableSchema}
+      tableSchemaColumns={tableSchemaColumns}
+    />
+  );
 
   const layout = children => {
     return (
@@ -185,12 +255,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   return layout(
     <SnapshotContext.Provider value={{}}>
-      <Title
-        title={datasetName}
-        subtitle={`${dataflowName} - ${datasetSchemaName}`}
-        icon="dataCollection"
-        iconSize="3.5rem"
-      />
+      <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -244,7 +309,9 @@ export const DataCollection = withRouter(({ match, history }) => {
           isValidationSelected: isValidationSelected,
           setIsValidationSelected: setIsValidationSelected,
           onValidationsVisible: () => {}
-        }}></DatasetContext.Provider>
+        }}>
+        {onRenderTabsSchema}
+      </DatasetContext.Provider>
     </SnapshotContext.Provider>
   );
 });

@@ -47,10 +47,10 @@
 }
 
 .createDataCollection {
-  background-color: var(--c-red-200);
+  background-color: var(--c-blue-200);
 }
 .createDataCollection a:hover {
-  background-color: var(--c-red-300);
+  background-color: var(--c-blue-100);
 }
 
 .dashboard {
