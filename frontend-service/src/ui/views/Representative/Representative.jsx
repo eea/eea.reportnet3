@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
 
-import styles from './Representative.module.css';
+import styles from './Representative.module.scss';
 
 import colors from 'conf/colors.json';
 import { config } from 'conf';
@@ -354,14 +354,14 @@ const Representative = withRouter(({ history, match }) => {
         style={{ textAlign: 'left' }}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+        {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />
+              <FontAwesomeIcon icon={AwesomeIcons('representative')} style={{ fontSize: '1.2rem' }} />
               {!isUndefined(dataflowState[match.params.dataflowId])
                 ? dataflowState[match.params.dataflowId].name
                 : null}
-              {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
