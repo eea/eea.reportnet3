@@ -174,7 +174,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      console.log('datasetSchema', datasetSchema);
       setDatasetSchemaName(datasetSchema.dataCollectionName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
