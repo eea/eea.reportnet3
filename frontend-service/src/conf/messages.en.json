@@ -370,10 +370,11 @@
 		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"groupValidationsError":"Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"schemaByIdError":"Failed loading schema of <a title='{:datasetName}'>{:sortDatasetName}</a>",
-		"errorStatisticsByIdError":"Error loading schema: Failed loading statistics of <a title='{:datasetName}'>{:sortDatasetName}</a>",
+		"errorStatisticsByIdError":"Error loading schema: Failed loading statistics of <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
 		"dataflowDetailsError":"Failed loading dataflow information",
 		"reportingError":"Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"deleteDataByIdError":"Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"validateDataInit":"Validating <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
 		"validateDataByIdError":"Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
 	}
