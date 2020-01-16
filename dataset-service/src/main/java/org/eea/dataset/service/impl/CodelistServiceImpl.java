@@ -76,7 +76,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @param version the version
    * @return the list
    */
-  private List<CodelistVO> findDuplicated(String name, Long version) {
+  private List<CodelistVO> findDuplicated(String name, String version) {
     List<Codelist> codelists =
         codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
     if (null != codelists) {
