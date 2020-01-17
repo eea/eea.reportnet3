@@ -21,4 +21,7 @@ public class CodelistCategoryVO {
   /** The description. */
   private String description;
 
+  /** The codelist number. */
+  private int codelistNumber;
+
 }

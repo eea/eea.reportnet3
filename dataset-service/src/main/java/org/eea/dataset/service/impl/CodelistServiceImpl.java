@@ -76,7 +76,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @param version the version
    * @return the list
    */
-  private List<CodelistVO> findDuplicated(String name, Long version) {
+  private List<CodelistVO> findDuplicated(String name, String version) {
     List<Codelist> codelists =
         codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
     if (null != codelists) {
@@ -241,7 +241,11 @@ public class CodelistServiceImpl implements CodelistService {
     if (null == codelistCategory) {
       throw new EEAException(EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND);
     }
-    return codelistCategoryMapper.entityToClass(codelistCategory);
+    CodelistCategoryVO codelistCategoryVO = codelistCategoryMapper.entityToClass(codelistCategory);
+    List<Codelist> list =
+        codelistRepository.findAllByCategory_Id(codelistCategoryId).orElse(new ArrayList<>());
+    codelistCategoryVO.setCodelistNumber(list.size());
+    return codelistCategoryVO;
   }
 
   /**
@@ -253,7 +257,13 @@ public class CodelistServiceImpl implements CodelistService {
   @Override
   public List<CodelistCategoryVO> getAllCategories() throws EEAException {
     List<CodelistCategory> codelistCategories = codelistCategoryRepository.findAll();
-    return codelistCategoryMapper.entityListToClass(codelistCategories);
+    List<CodelistCategoryVO> categoriesVO =
+        codelistCategoryMapper.entityListToClass(codelistCategories);
+    for (CodelistCategoryVO categoryVO : categoriesVO) {
+      categoryVO.setCodelistNumber(codelistRepository.findAllByCategory_Id(categoryVO.getId())
+          .orElse(new ArrayList<Codelist>()).size());
+    }
+    return categoriesVO;
   }
 
   /**

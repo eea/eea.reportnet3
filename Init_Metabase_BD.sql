@@ -205,7 +205,7 @@ CREATE TABLE public.codelist (
 	description varchar(255) NULL,
 	"name" varchar(255) NULL,
 	status int4 NULL,
-	"version" int8 NULL,
+	"version" varchar(255) NULL,
 	id_category int8 NOT NULL,
 	CONSTRAINT codelist_pkey PRIMARY KEY (id)
 );
