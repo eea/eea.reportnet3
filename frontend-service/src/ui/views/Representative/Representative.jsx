@@ -106,7 +106,13 @@ const Representative = withRouter(({ history, match }) => {
       },
       {
         label: resources.messages['dataflow'],
-        icon: 'archive'
+        icon: 'archive',
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
+      },
+      {
+        label: resources.messages['representative'],
+        icon: 'representative'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
@@ -362,7 +368,7 @@ const Representative = withRouter(({ history, match }) => {
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('representative')} style={{ fontSize: '1.2rem' }} />
               {!isUndefined(dataflowState[match.params.dataflowId])
-                ? dataflowState[match.params.dataflowId].name
+                ? `${match.params.representative} - ${dataflowState[match.params.dataflowId].name}`
                 : null}
             </h2>
           </div>
