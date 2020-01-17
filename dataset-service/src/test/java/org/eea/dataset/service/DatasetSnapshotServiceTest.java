@@ -262,12 +262,10 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
-    Mockito.when(dataSetMetabaseRepository.findDatasetSchemaIdById(Mockito.any())).thenReturn("");
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshot(1L, 1L, true);
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());

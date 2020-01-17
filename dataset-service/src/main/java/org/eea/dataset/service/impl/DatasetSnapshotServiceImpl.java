@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -323,7 +324,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
     // Get the dataCollection
-    String datasetSchema = metabaseRepository.findDatasetSchemaIdById(idDataset);
+    Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
+    String datasetSchema = designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
     Optional<DataCollection> dataCollection =
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
     Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
@@ -337,12 +339,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       try {
         restoreSnapshot(idDataCollection, idSnapshot, false);
       } catch (EEAException e) {
-        LOG.error(e.getMessage());
+        LOG_ERROR.error(e.getMessage());
+        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
+            e.getMessage());
       }
+
+      // Check the snapshot released
+      snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+      LOG.info("Snapshot {} released", idSnapshot);
+    } else {
+      LOG_ERROR.error("Error in release snapshot");
+      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
+          "Error in release snapshot");
     }
-    // Check the snapshot released
-    snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-    LOG.info("Snapshot {} released", idSnapshot);
   }
 
 
