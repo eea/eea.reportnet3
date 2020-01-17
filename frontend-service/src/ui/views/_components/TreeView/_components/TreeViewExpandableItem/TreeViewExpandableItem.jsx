@@ -43,8 +43,13 @@ const TreeViewExpandableItem = ({
     return !isUndefined(buttons)
       ? buttons.map((button, i) => (
           <Button
-            icon={button.icon}
+            className={
+              !isUndefined(button.disabled) && button.disabled
+                ? styles.defaultExpandableButtonDisable
+                : styles.defaultExpandableButtonEnable
+            }
             disabled={!isUndefined(button.disabled) ? button.disabled : false}
+            icon={button.icon}
             key={i}
             label={button.label}
             onClick={button.onClick}
@@ -61,8 +66,8 @@ const TreeViewExpandableItem = ({
     return !isUndefined(infoButtons)
       ? infoButtons.map((button, i) => (
           <Button
-            icon={button.icon}
             className={`${button.className} ${styles.defaultInfoButton}`}
+            icon={button.icon}
             key={i}
             label={button.label}
             onClick={() => setIsOpen(true)}

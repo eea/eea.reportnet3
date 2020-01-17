@@ -99,7 +99,14 @@ const Codelist = ({
 
   const onSaveCloneCodelist = async () => {
     try {
-      await CodelistService.cloneById();
+      await CodelistService.cloneById(
+        codelistState.codelistId,
+        codelistState.clonedCodelist.codelistDescription,
+        codelistState.items,
+        codelistState.clonedCodelist.codelistName,
+        codelistState.clonedCodelist.codelistVersion,
+        codelistState.clonedCodelist.codelistCategoryId
+      );
     } catch (error) {
       notificationContext.add({
         type: 'CLONE_CODELIST_ERROR',

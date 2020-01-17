@@ -49,6 +49,14 @@ const addById = async (description, items, name, status, version, categoryId) =>
   return await apiCodelist.addById(codelistDTO);
 };
 
+const cloneById = async (codelistId, description, items, name, version, categoryId) => {
+  const categoryDTO = new CodelistCategory(categoryId);
+  const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
+  const codelistDTO = new Codelist(null, name, description, version, undefined, codelistItemsDTO);
+  codelistDTO.category = categoryDTO;
+  return await apiCodelist.cloneById(codelistId, codelistDTO);
+};
+
 const deleteById = async codelistId => {
   return await apiCodelist.deleteById(codelistId);
 };
@@ -69,6 +77,7 @@ export const ApiCodelistRepository = {
   addById,
   all,
   allInCategory,
+  cloneById,
   deleteById,
   updateById
 };
