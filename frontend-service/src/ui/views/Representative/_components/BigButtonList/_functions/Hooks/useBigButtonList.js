@@ -45,57 +45,60 @@ const useBigButtonList = ({
     visibility: true
   };
 
-  const groupByRepresentativeModels = dataflowData.datasets.map(dataset =>
-    dataset.datasetSchemaName === representative
-      ? {
-          layout: 'defaultBigButton',
-          buttonClass: 'dataset',
-          buttonIcon: 'dataset',
-          caption: dataflowData.designDatasets.find(
-            designDataset => designDataset.datasetSchemaId === dataset.datasetSchemaId
-          ).datasetSchemaName,
-          isReleased: dataset.isReleased,
-          handleRedirect: () => {
-            handleRedirect(
-              getUrl(
-                routes.DATASET,
-                {
-                  dataflowId: dataflowId,
-                  datasetId: dataset.datasetId
-                },
-                true
-              )
-            );
+  const groupByRepresentativeModels = dataflowData.datasets
+    .filter(dataset => dataset.datasetSchemaName === representative)
+    .map(dataset => {
+      const { designDatasets } = dataflowData;
+      const datasetName =
+        !isUndefined(designDatasets) && designDatasets.length > 0
+          ? designDatasets.find(designDataset => designDataset.datasetSchemaId === dataset.datasetSchemaId)
+              .datasetSchemaName
+          : representative;
+      return {
+        layout: 'defaultBigButton',
+        buttonClass: 'dataset',
+        buttonIcon: 'dataset',
+        caption: datasetName,
+        isReleased: dataset.isReleased,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(
+              routes.DATASET,
+              {
+                dataflowId: dataflowId,
+                datasetId: dataset.datasetId
+              },
+              true
+            )
+          );
+        },
+        onWheel: getUrl(
+          routes.DATASET,
+          {
+            dataflowId: dataflowId,
+            datasetId: dataset.datasetId
           },
-          onWheel: getUrl(
-            routes.DATASET,
-            {
-              dataflowId: dataflowId,
-              datasetId: dataset.datasetId
-            },
-            true
-          ),
-          model: hasWritePermissions
-            ? [
-                {
-                  label: resources.messages['releaseDataCollection'],
-                  icon: 'cloudUpload',
-                  command: () => showReleaseSnapshotDialog(dataset.datasetId),
-                  disabled: false
-                }
-              ]
-            : [
-                {
-                  label: resources.messages['properties'],
-                  icon: 'info',
-                  disabled: true
-                }
-              ],
-          visibility: !isEmpty(dataflowData.datasets)
-        }
-      : ''
-  );
-
+          true
+        ),
+        model: hasWritePermissions
+          ? [
+              {
+                label: resources.messages['releaseDataCollection'],
+                icon: 'cloudUpload',
+                command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                disabled: false
+              }
+            ]
+          : [
+              {
+                label: resources.messages['properties'],
+                icon: 'info',
+                disabled: true
+              }
+            ],
+        visibility: !isEmpty(dataflowData.datasets)
+      };
+    });
   return [helpButton, ...groupByRepresentativeModels];
 };
 

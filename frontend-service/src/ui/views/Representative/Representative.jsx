@@ -89,9 +89,6 @@ const Representative = withRouter(({ history, match }) => {
         [config.permissions.CUSTODIAN],
         `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
       );
-      if (!custodian) {
-        history.push(getUrl(routes.DATAFLOWS, true));
-      }
       setIsCustodian(true);
     }
   }, [user]);
