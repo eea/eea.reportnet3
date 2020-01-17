@@ -7,7 +7,7 @@ import styles from './InfoTable.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { IconTooltip } from 'ui/views/_components/DataViewer/_components/IconTooltip';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

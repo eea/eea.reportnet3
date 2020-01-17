@@ -20,6 +20,8 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, codelists: payload.data };
     case 'SET_ISLOADING':
       return { ...state, isLoading: payload.loading };
+    case 'TOGGLE_ADD_CODELIST_BUTTON':
+      return { ...state, isAddCodelistButtonDisabled: payload };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':
       return { ...state, isEditingDialogVisible: payload };
     case 'TOGGLE_ADD_CODELIST_DIALOG_VISIBLE':
@@ -28,23 +30,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isDeleteConfirmDialogVisible: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
-
-    case 'SAVE_ADDED_EDITED_ITEM':
-      return { ...state, items: payload, isAddEditCodelistVisible: false };
-    case 'SET_NEW_CODELIST_ITEM':
-      return { ...state, newItem: { ...state.newItem, [payload.property]: payload.value } };
-    case 'SET_INITIAL_EDITED_CODELIST_ITEM':
-      return { ...state, editedItem: { ...state.selectedItem } };
-    case 'SET_EDITED_CODELIST_ITEM':
-      // const inmItems = [JSON.parse(JSON.stringify(...state.items))];
-      // console.log({ inmItems });
-      // const itemIdx = inmItems.map(item => item.itemId).indexOf(state.selectedItem.itemId);
-      // inmItems[itemIdx][payload.property] = payload.value;
-      // console.log({ inmItems });
-      console.log(state.editedItem);
-      return { ...state, editedItem: { ...state.editedItem, [payload.property]: payload.value } };
-    case 'SET_SELECTED_ITEM':
-      return { ...state, selectedItem: payload };
     default:
       return state;
   }

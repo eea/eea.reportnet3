@@ -1,28 +1,10 @@
-.slider-enter {
-  height: 0px;
-}
-
-.slider-enter.slider-enter-active {
-  height: 100px;
-  -webkit-transition: height 0.3s ease;
-}
-
-.slider-exit.slider-exit-active {
-  height: 100px;
-  -webkit-transition: height 0.3s ease;
-}
-
 .defaultExpandable {
   color: #008080;
   font-size: 14px;
   font-weight: bold;
   margin-top: 0.5rem;
   display: flex;
+  align-content: center;
 }
-
-.codelistExpandable {
-  height: 1vw;
-  padding: 1rem 0 2rem 1rem;
-  /* background-color: var(--gray-5); */
-  display: flex;
+.defaultInfoButton {
 }

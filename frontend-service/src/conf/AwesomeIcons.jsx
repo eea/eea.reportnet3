@@ -58,7 +58,8 @@ import {
   faCircle,
   faMinusSquare,
   faPlusSquare,
-  faEyeSlash
+  faEyeSlash,
+  faSave
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -157,6 +158,8 @@ export const AwesomeIcons = icon => {
       return faToggleOff;
     case 'delete':
       return faTrashAlt;
+    case 'disk':
+      return faSave;
     case 'dropDown':
       return faCaretDown;
     case 'eye':

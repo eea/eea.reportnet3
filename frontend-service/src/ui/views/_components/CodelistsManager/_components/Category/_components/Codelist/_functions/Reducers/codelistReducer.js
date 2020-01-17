@@ -7,7 +7,10 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'RESET_INITIAL_VALUES':
       return { ...payload };
     case 'RESET_INITIAL_NEW_ITEM':
-      return { ...state, newItem: { itemId: `-${state.items.length}`, code: '', label: '', definition: '' } };
+      return {
+        ...state,
+        newItem: { id: `-${state.items.length}`, code: '', label: '', definition: '', codelistId: '' }
+      };
     case 'RESET_INITIAL_CLONED_CODELIST':
       return {
         ...state,
@@ -33,14 +36,15 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'SAVE_ADDED_EDITED_ITEM':
       return { ...state, items: payload, isAddEditCodelistVisible: false };
     case 'SET_NEW_CODELIST_ITEM':
+      console.log({ payload }, state.newItem);
       return { ...state, newItem: { ...state.newItem, [payload.property]: payload.value } };
     case 'SET_INITIAL_EDITED_CODELIST_ITEM':
       return { ...state, editedItem: { ...state.selectedItem } };
     case 'SET_EDITED_CODELIST_ITEM':
       // const inmItems = [JSON.parse(JSON.stringify(...state.items))];
       // console.log({ inmItems });
-      // const itemIdx = inmItems.map(item => item.itemId).indexOf(state.selectedItem.itemId);
-      // inmItems[itemIdx][payload.property] = payload.value;
+      // const idx = inmItems.map(item => item.id).indexOf(state.selectedItem.id);
+      // inmItems[idx][payload.property] = payload.value;
       // console.log({ inmItems });
       console.log(state.editedItem);
       return { ...state, editedItem: { ...state.editedItem, [payload.property]: payload.value } };

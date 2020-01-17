@@ -33,7 +33,8 @@ const Codelist = ({
   codelist,
   isDataCustodian = true,
   isInDesign,
-  onCodelistSelected
+  onCodelistSelected,
+  toggleAddCodelistButtonDisabled
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -53,16 +54,16 @@ const Codelist = ({
     codelistVersion: codelist.version,
     codelistStatus: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
     codelistDescription: codelist.description,
-    editedItem: { itemId: '', code: '', label: '', definition: '' },
+    editedItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
     initialCellValue: undefined,
-    initialItem: { itemId: '', code: '', label: '', definition: '' },
+    initialItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
     isAddEditCodelistVisible: false,
     isDeleteCodelistItemVisible: false,
     isCloneCodelistVisible: false,
     isEditing: false,
-    newItem: { itemId: `-${codelist.items.length}`, code: '', label: '', definition: '' },
+    newItem: { id: `-${codelist.items.length}`, shortCode: '', label: '', definition: '', codelistId: '' },
     selectedItem: {}
   };
 
@@ -176,13 +177,15 @@ const Codelist = ({
         codelistState.codelistVersion,
         codelistState.codelistCategoryId
       );
+      if (response.status >= 200 && response.status <= 299) {
+        toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
+      }
     } catch (error) {
       notificationContext.add({
         type: 'SAVE_EDIT_CODELIST_ERROR',
         content: {}
       });
     } finally {
-      toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
     }
   };
 
@@ -190,6 +193,7 @@ const Codelist = ({
     try {
       console.log({ formType });
       const inmItems = [...codelistState.items];
+      console.log({ inmItems });
       if (formType === 'ADD') {
         inmItems.push(codelistState.newItem);
       } else {
@@ -299,11 +303,11 @@ const Codelist = ({
   const renderEditItemsDialog = () => {
     return codelistState.isAddEditCodelistVisible ? (
       <CodelistForm
-        columns={['code', 'label', 'definition']}
+        columns={['shortCode', 'label', 'definition']}
         formType={codelistState.formType}
         item={
           codelistState.formType === 'EDIT'
-            ? codelistState.editedItem.itemId === ''
+            ? codelistState.editedItem.id === ''
               ? CodelistUtils.getItem(codelistState.items, codelistState.selectedItem)
               : codelistState.editedItem
             : codelistState.newItem
@@ -327,7 +331,14 @@ const Codelist = ({
         <Button
           label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
           icon={codelistState.isEditing ? 'save' : 'pencil'}
-          onClick={!codelistState.isEditing ? () => toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', true) : onSaveCodelist}
+          onClick={
+            !codelistState.isEditing
+              ? () => {
+                  toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', true);
+                  toggleAddCodelistButtonDisabled(true);
+                }
+              : onSaveCodelist
+          }
           style={{ marginLeft: 'auto', marginRight: '0.5rem' }}
         />
         {codelistState.isEditing ? (
@@ -335,7 +346,10 @@ const Codelist = ({
             className={`p-button-danger`}
             label={resources.messages['cancel']}
             icon="cancel"
-            onClick={() => onCancelEditCodelistClick()}
+            onClick={() => {
+              onCancelEditCodelistClick();
+              toggleAddCodelistButtonDisabled(false);
+            }}
           />
         ) : null}
       </div>
@@ -365,14 +379,14 @@ const Codelist = ({
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
-        {['itemId', 'code', 'label', 'definition'].map((column, i) => (
+        {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
           <Column
             editor={codelistState.isEditing ? row => cellItemDataEditor(row, column) : null}
             field={column}
-            header={capitalize(column)}
+            header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
             key={i}
             sortable={true}
-            style={{ display: column === 'itemId' ? 'none' : 'auto' }}
+            style={{ display: column === 'id' ? 'none' : 'auto' }}
           />
         ))}
         {codelistState.isEditing ? (
@@ -415,13 +429,23 @@ const Codelist = ({
           {
             icon: 'checkSquare',
             onClick: () => onCodelistSelected(codelistState.codelistName, codelistState.codelistVersion),
-            //() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign
           }
         ]}
         className={`${styles.codelistItem} ${styles.codelistExpandable}`}
         expanded={false}
+        infoButtons={
+          codelistState.isEditing
+            ? [
+                {
+                  icon: 'save',
+                  className: 'p-button-danger',
+                  tooltip: resources.messages['unsavedChanges']
+                }
+              ]
+            : undefined
+        }
         items={[codelist.name, codelist.version, codelist.status, codelist.description]}>
         {renderInputs()}
         {renderTable()}

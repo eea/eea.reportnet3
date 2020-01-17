@@ -57,7 +57,9 @@ const CodelistForm = ({
             onChange={e => onChangeItemForm(column, e.target.value, formType)}
             value={isUndefined(item) || isNull(item[column]) || isUndefined(item[column]) ? '' : item[column]}
           />
-          <label htmlFor={`${column}Input`}>{capitalize(column)}</label>
+          <label htmlFor={`${column}Input`}>
+            {column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+          </label>
         </span>
       </React.Fragment>
     );

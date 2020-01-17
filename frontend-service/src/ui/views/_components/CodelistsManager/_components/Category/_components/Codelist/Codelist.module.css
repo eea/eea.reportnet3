@@ -45,3 +45,10 @@
 .itemTable {
   margin: 1rem 3.5rem;
 }
+
+.unsavedChangesIcon {
+  font-size: 18pt;
+  position: absolute;
+  right: 0;
+  color: var(--c-chart-warning);
+}

@@ -32,7 +32,13 @@ const all = async () => {
           );
         })
       : [];
-    return new CodelistCategory(categoryDTO.id, categoryDTO.shortCode, categoryDTO.description, codelists);
+    return new CodelistCategory(
+      categoryDTO.id,
+      categoryDTO.shortCode,
+      categoryDTO.description,
+      codelists,
+      categoryDTO.codelistNumber
+    );
   });
 };
 

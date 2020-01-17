@@ -10,7 +10,15 @@ import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, className, onExpandTree }) => {
+const TreeViewExpandableItem = ({
+  buttons,
+  expanded = true,
+  children,
+  infoButtons,
+  items,
+  className,
+  onExpandTree
+}) => {
   const [isOpen, setIsOpen] = useState(expanded);
   const resources = useContext(ResourcesContext);
 
@@ -49,6 +57,23 @@ const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, cla
       : null;
   };
 
+  const renderInfoButtons = () => {
+    return !isUndefined(infoButtons)
+      ? infoButtons.map((button, i) => (
+          <Button
+            icon={button.icon}
+            className={`${button.className} ${styles.defaultInfoButton}`}
+            key={i}
+            label={button.label}
+            onClick={() => setIsOpen(true)}
+            style={{ ...button.style, marginLeft: '0.5rem' }}
+            tooltip={button.tooltip}
+            tooltipOptions={{ position: 'bottom' }}
+          />
+        ))
+      : null;
+  };
+
   return (
     <React.Fragment>
       <div className={!isUndefined(className) ? className : styles.defaultExpandable}>
@@ -71,6 +96,7 @@ const TreeViewExpandableItem = ({ buttons, expanded = true, children, items, cla
         )}
         {renderHeader()}
         {renderButtons()}
+        {renderInfoButtons()}
       </div>
       {isOpen ? children : null}
       {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDatasetDesign'] : null}

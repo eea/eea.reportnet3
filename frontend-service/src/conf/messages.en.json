@@ -374,6 +374,7 @@
 		"dataflowDetailsError":"Failed loading dataflow information",
 		"reportingError":"Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"deleteDataByIdError":"Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"unsavedChanges":"There are unsaved changes",
 		"validateDataInit":"Validating <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
 		"validateDataByIdError":"Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"

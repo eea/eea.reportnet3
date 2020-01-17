@@ -34,6 +34,7 @@ const Category = ({
     categoryId: null,
     categoryDescription: '',
     categoryShortCode: '',
+    isAddCodelistButtonDisabled: false,
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
@@ -57,6 +58,10 @@ const Category = ({
       onLoadCategoryInfo();
     }
   }, [categoryState.isEditingDialogVisible]);
+
+  const toggleAddCodelistButtonDisabled = disabled => {
+    dispatchCategory({ type: 'TOGGLE_ADD_CODELIST_BUTTON', payload: disabled });
+  };
 
   const onConfirmDeleteCategory = async () => {
     try {
@@ -274,6 +279,7 @@ const Category = ({
                 isInDesign={isInDesign}
                 key={i}
                 onCodelistSelected={onCodelistSelected}
+                toggleAddCodelistButtonDisabled={toggleAddCodelistButtonDisabled}
               />
             );
           })
@@ -325,29 +331,32 @@ const Category = ({
 
   return (
     <React.Fragment>
+      {console.log(category.codelistNumber)}
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
         expanded={false}
         items={[category.shortCode, category.description]}
         buttons={[
           {
-            label: '',
-            tooltip: resources.messages['editCategory'],
+            disabled: categoryState.isAddCodelistButtonDisabled,
             icon: 'pencil',
-            onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['editCategory']
           },
           {
-            label: '',
-            disabled: categoryState.codelists.length > 0,
-            tooltip: resources.messages['deleteCategory'],
+            disabled: category.codelistNumber > 0,
             icon: 'trash',
-            onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['deleteCategory']
           },
           {
-            label: '',
-            tooltip: resources.messages['newCodelist'],
+            disabled: categoryState.isAddCodelistButtonDisabled,
             icon: 'add',
-            onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['newCodelist']
           }
         ]}
         onExpandTree={onLoadCodelists}>
