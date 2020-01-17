@@ -368,7 +368,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
+    Set<String> processedRecords = new HashSet<>();
     for (RecordValue recordValue : records) {
       if (!processedRecords.contains(recordValue.getId())) {
         processedRecords.add(recordValue.getId());

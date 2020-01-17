@@ -64,7 +64,7 @@ public interface RecordRepository
    */
   @Modifying
   @Query("delete from RecordValue record where record.id = ?1")
-  void deleteRecordWithId(Long recordId);
+  void deleteRecordWithId(String recordId);
 
   /**
    * Delete record values to restore snapshot.

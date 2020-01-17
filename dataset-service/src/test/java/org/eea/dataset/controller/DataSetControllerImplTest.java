@@ -69,7 +69,7 @@ public class DataSetControllerImplTest {
   List<RecordVO> records;
 
   /** The record ids. */
-  Long recordId;
+  String recordId;
 
   /** The update record helper. */
   @Mock
@@ -92,7 +92,7 @@ public class DataSetControllerImplTest {
   public void initMocks() {
     records = new ArrayList<>();
     records.add(new RecordVO());
-    recordId = 1L;
+    recordId = "1L";
     authentication = Mockito.mock(Authentication.class);
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
@@ -641,7 +641,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNullEntry() throws Exception {
-    dataSetControllerImpl.deleteRecord(null, 1L);
+    dataSetControllerImpl.deleteRecord(null, "1L");
   }
 
   /**

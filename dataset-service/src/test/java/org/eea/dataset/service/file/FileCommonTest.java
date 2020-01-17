@@ -205,7 +205,7 @@ public class FileCommonTest {
     List<RecordValue> records = new ArrayList<>();
     List<FieldValue> fields = new ArrayList<>();
     RecordValue record = new RecordValue();
-    record.setId(1L);
+    record.setId("1L");
     FieldValue fieldValue = new FieldValue();
     fields.add(fieldValue);
     record.setFields(fields);
