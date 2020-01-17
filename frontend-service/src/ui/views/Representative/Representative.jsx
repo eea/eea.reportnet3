@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
 
-import styles from './Dataflow.module.scss';
+import styles from './Representative.module.scss';
 
 import colors from 'conf/colors.json';
 import { config } from 'conf';
@@ -41,7 +41,7 @@ import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_fu
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-const Dataflow = withRouter(({ history, match }) => {
+const Representative = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -84,17 +84,15 @@ const Dataflow = withRouter(({ history, match }) => {
     }
 
     if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(
-        UserService.hasPermission(
-          user,
-          [config.permissions.CUSTODIAN],
-          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
-        )
+      const custodian = UserService.hasPermission(
+        user,
+        [config.permissions.CUSTODIAN],
+        `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
       );
+      setIsCustodian(true);
     }
   }, [user]);
 
-  //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
       {
@@ -105,7 +103,13 @@ const Dataflow = withRouter(({ history, match }) => {
       },
       {
         label: resources.messages['dataflow'],
-        icon: 'archive'
+        icon: 'archive',
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
+      },
+      {
+        label: resources.messages['representative'],
+        icon: 'representative'
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
@@ -238,6 +242,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      console.log('[dataflow]: ', dataflow);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
       if (!isEmpty(dataflow.designDatasets)) {
@@ -335,19 +340,15 @@ const Dataflow = withRouter(({ history, match }) => {
     </>
   );
 
-  const layout = children => {
-    return (
-      <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
-
+  const layout = children => (
+    <MainLayout>
+      <BreadCrumb model={breadCrumbItems} />
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
   if (loading || isUndefined(dataflowData)) {
     return layout(<Spinner />);
   }
-
   return layout(
     <div className="rep-row">
       <LeftSideBar
@@ -359,14 +360,14 @@ const Dataflow = withRouter(({ history, match }) => {
         style={{ textAlign: 'left' }}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+        {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />
+              <FontAwesomeIcon icon={AwesomeIcons('representative')} style={{ fontSize: '1.2rem' }} />
               {!isUndefined(dataflowState[match.params.dataflowId])
-                ? TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
+                ? `${match.params.representative} - ${TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)}`
                 : null}
-              {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>
           </div>
           <div>
@@ -386,6 +387,7 @@ const Dataflow = withRouter(({ history, match }) => {
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           onSaveName={onSaveName}
           updatedDatasetSchema={updatedDatasetSchema}
+          representative={match.params.representative}
         />
 
         <Dialog
@@ -542,4 +544,4 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 });
 
-export { Dataflow };
+export { Representative };

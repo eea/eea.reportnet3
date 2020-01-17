@@ -31,7 +31,8 @@ export const BigButtonList = ({
   onUpdateData,
   onSaveName,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema
+  updatedDatasetSchema,
+  representative
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -155,12 +156,9 @@ export const BigButtonList = ({
               onShowDataCollectionModal: onShowDataCollectionModal,
               onShowNewSchemaDialog: onShowNewSchemaDialog,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema
-            })
-              .filter(button => button.visibility)
-              .map((button, i) => (
-                <BigButton key={i} {...button} />
-              ))}
+              updatedDatasetSchema: updatedDatasetSchema,
+              representative
+            }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>
       </div>
@@ -211,23 +209,21 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
-        header={resources.messages['createDataCollection']}
+        header={resources.messages['delete'].toUpperCase()}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
-        <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
-        <Calendar
-          className={styles.calendar}
-          inline={true}
-          onChange={event => setDataCollectionDueDate(event.target.value)}
-          showWeek={true}
-          monthNavigator={true}
-          value={dataCollectionDueDate}
-          yearNavigator={true}
-          yearRange="2020:2030"
-        />
+        <div style={{ minHeight: '55vh' }}>
+          {`${resources.messages['chooseExpirationDate']}: `}
+          <Calendar
+            inline={true}
+            showWeek={true}
+            onChange={event => setDataCollectionDueDate(event.target.value)}
+            value={dataCollectionDueDate}
+          />
+        </div>
       </ConfirmDialog>
     </>
   );

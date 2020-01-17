@@ -82,7 +82,10 @@ const parseDatasetDTO = datasetDTO => {
     null,
     null,
     null,
-    datasetDTO.isReleased
+    datasetDTO.isReleased,
+    null,
+    null,
+    datasetDTO.nameDatasetSchema
   );
 };
 

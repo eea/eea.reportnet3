@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, uniq } from 'lodash';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -148,50 +148,41 @@ const useBigButtonList = ({
     visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections)
   }));
 
-  const datasetModels = dataflowData.datasets.map(dataset => ({
-    layout: 'defaultBigButton',
-    buttonClass: 'dataset',
-    buttonIcon: 'dataset',
-    caption: dataset.datasetSchemaName,
-    isReleased: dataset.isReleased,
-    handleRedirect: () => {
-      handleRedirect(
-        getUrl(
-          routes.DATASET,
-          {
-            dataflowId: dataflowId,
-            datasetId: dataset.datasetId
-          },
-          true
-        )
-      );
-    },
-    onWheel: getUrl(
-      routes.DATASET,
-      {
-        dataflowId: dataflowId,
-        datasetId: dataset.datasetId
+  const buildGroupByRepresentativeModels = dataflowData => {
+    const { datasets } = dataflowData;
+    const representatives = datasets.map(dataset => {
+      return dataset.datasetSchemaName;
+    });
+    const uniqRepresentatives = uniq(representatives);
+    return uniqRepresentatives.map(representative => ({
+      layout: 'defaultBigButton',
+      buttonClass: 'dataset',
+      buttonIcon: 'representative',
+      caption: representative,
+      handleRedirect: () => {
+        handleRedirect(
+          getUrl(
+            routes.REPRESENTATIVE,
+            {
+              dataflowId: dataflowId,
+              representative: representative
+            },
+            true
+          )
+        );
       },
-      true
-    ),
-    model: hasWritePermissions
-      ? [
-          {
-            label: resources.messages['releaseDataCollection'],
-            icon: 'cloudUpload',
-            command: () => showReleaseSnapshotDialog(dataset.datasetId),
-            disabled: false
-          }
-        ]
-      : [
-          {
-            label: resources.messages['properties'],
-            icon: 'info',
-            disabled: true
-          }
-        ],
-    visibility: !isEmpty(dataflowData.datasets)
-  }));
+      onWheel: getUrl(
+        routes.REPRESENTATIVE,
+        {
+          dataflowId: dataflowId,
+          representative: representative
+        },
+        true
+      ),
+      visibility: !isEmpty(dataflowData.datasets)
+    }));
+  };
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
 
   const dashboardModels = [
     {
@@ -273,13 +264,12 @@ const useBigButtonList = ({
     ],
     visibility: !isEmpty(dataflowData.dataCollections)
   }));
-
   return [
     ...buttonList,
     ...designDatasetModels,
     ...dataCollectionModels,
     ...dashboardModels,
-    ...datasetModels,
+    ...groupByRepresentativeModels,
     ...createDataCollection
   ];
 };

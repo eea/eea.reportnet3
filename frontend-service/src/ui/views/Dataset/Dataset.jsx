@@ -86,6 +86,7 @@ export const Dataset = withRouter(({ match, history }) => {
   let growlRef = useRef();
 
   useEffect(() => {
+    console.log('datasetName', datasetName);
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
@@ -114,9 +115,32 @@ export const Dataset = withRouter(({ match, history }) => {
             )
           )
       },
+      {
+        label: resources.messages['representative'],
+        icon: 'representative',
+        href: getUrl(
+          routes.REPRESENTATIVE,
+          {
+            dataflowId: match.params.dataflowId,
+            representative: datasetName
+          },
+          true
+        ),
+        command: () =>
+          history.push(
+            getUrl(
+              routes.REPRESENTATIVE,
+              {
+                dataflowId: match.params.dataflowId,
+                representative: datasetName
+              },
+              true
+            )
+          )
+      },
       { label: resources.messages['dataset'], icon: 'dataset' }
     ]);
-  }, []);
+  }, [datasetName]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
