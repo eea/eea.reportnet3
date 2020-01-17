@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DataCollectionService;
@@ -149,7 +150,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       RepresentativeVO representative = new RepresentativeVO();
       representative.setDataProviderId(0L);
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow, null, representative, 0);
+          idDataflow, null, Arrays.asList(representative), 0);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

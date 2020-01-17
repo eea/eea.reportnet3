@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -293,6 +295,33 @@ public class UserManagementControllerImpl implements UserManagementController {
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @RequestMapping(value = "/add_contributors_to_resources", method = RequestMethod.PUT)
+  public void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources) {
+    try {
+      for (ResourceAssignationVO resource : resources) {
+        securityProviderInterfaceService.addContributorToUserGroup(resource.getEmail(),
+            resource.getResourceGroup().getGroupName(resource.getResourceId()));
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
+  public void addUserToResources(@RequestBody List<ResourceAssignationVO> resources) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    for (ResourceAssignationVO resource : resources) {
+      securityProviderInterfaceService.addUserToUserGroup(userId,
+          resource.getResourceGroup().getGroupName(resource.getResourceId()));
     }
   }
 
