@@ -76,9 +76,9 @@ public class CodelistServiceImpl implements CodelistService {
    * @param version the version
    * @return the list
    */
-  private List<CodelistVO> findDuplicated(String name, String version) {
+  private List<CodelistVO> findDuplicated(String name, String version, CodelistStatusEnum status) {
     List<Codelist> codelists =
-        codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
+        codelistRepository.findAllByNameAndVersionAndStatus(name, version, status).orElse(null);
     if (null != codelists) {
       return codelistMapper.entityListToClass(codelists);
     }
@@ -148,7 +148,8 @@ public class CodelistServiceImpl implements CodelistService {
     if (codelist.getVersion() == null) {
       codelist.setVersion(oldCodelist.getVersion());
     }
-    if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
+    if (!findDuplicated(codelist.getName(), codelist.getVersion(), CodelistStatusEnum.READY)
+        .isEmpty()) {
       throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
     }
   }
@@ -161,7 +162,7 @@ public class CodelistServiceImpl implements CodelistService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
+  @Transactional(transactionManager = "metabaseDataSetsTransactionManager")
   public Long update(CodelistVO codelistVO) throws EEAException {
     Codelist oldCodelist = codelistRepository.findById(codelistVO.getId()).orElse(null);
     if (oldCodelist == null) {
@@ -205,11 +206,15 @@ public class CodelistServiceImpl implements CodelistService {
       throws EEAException {
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
-    }
-    if (codelistVO.getName() != null) {
-      if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion()).isEmpty()) {
+      if (codelistVO.getVersion() != null) {
+        oldCodelist.setVersion(codelistVO.getVersion());
+      }
+      if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion(), CodelistStatusEnum.READY)
+          .isEmpty()) {
         throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
       }
+    }
+    if (codelistVO.getName() != null) {
       oldCodelist.setName(codelistVO.getName());
     }
     if (codelistVO.getDescription() != null) {

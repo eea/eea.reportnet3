@@ -234,8 +234,8 @@ public class CodelistServiceImplTest {
     codelistOld.setName("name");
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelistOld));
-    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.of(codelists));
+    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(Optional.of(codelists));
     when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
     try {
       codelistServiceImpl.create(codelistVO, 1L);
@@ -260,8 +260,8 @@ public class CodelistServiceImplTest {
     codelistOld.setItems(items);
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelistOld));
-    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.empty());
+    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(Optional.empty());
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
     Assert.assertEquals((Long) 1L, codelistServiceImpl.create(codelistVO, 1L));
   }
@@ -373,10 +373,10 @@ public class CodelistServiceImplTest {
     codelistVO.setItems(codelistItemsVO);
     codelist.setVersion("1L");
     codelist.setStatus(CodelistStatusEnum.DESIGN);
-    codelistVO.setStatus(CodelistStatusEnum.DESIGN);
+    codelistVO.setStatus(CodelistStatusEnum.READY);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
-    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.of(codelists));
+    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(Optional.of(codelists));
     when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
     try {
       codelistServiceImpl.update(codelistVO);
@@ -402,8 +402,6 @@ public class CodelistServiceImplTest {
     codelist.setStatus(CodelistStatusEnum.DESIGN);
     codelistVO.setStatus(CodelistStatusEnum.DESIGN);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
-    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.empty());
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
     Assert.assertEquals((Long) 1L, codelistServiceImpl.update(codelistVO));
   }
