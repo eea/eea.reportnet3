@@ -48,12 +48,7 @@ const useBigButtonList = ({
   const groupByRepresentativeModels = dataflowData.datasets
     .filter(dataset => dataset.datasetSchemaName === representative)
     .map(dataset => {
-      const { designDatasets } = dataflowData;
-      const datasetName =
-        !isUndefined(designDatasets) && designDatasets.length > 0
-          ? designDatasets.find(designDataset => designDataset.datasetSchemaId === dataset.datasetSchemaId)
-              .datasetSchemaName
-          : representative;
+      const datasetName = dataset.name || representative;
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',

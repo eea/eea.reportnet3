@@ -364,7 +364,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} />
               {!isUndefined(dataflowState[match.params.dataflowId])
-                ? dataflowState[match.params.dataflowId].name
+                ? TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
                 : null}
               {/* <Title title={`${dataflowData.name}`} icon="archive" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
             </h2>

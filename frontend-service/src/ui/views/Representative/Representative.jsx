@@ -242,6 +242,7 @@ const Representative = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      console.log('[dataflow]: ', dataflow);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
       if (!isEmpty(dataflow.designDatasets)) {
@@ -365,7 +366,7 @@ const Representative = withRouter(({ history, match }) => {
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('representative')} style={{ fontSize: '1.2rem' }} />
               {!isUndefined(dataflowState[match.params.dataflowId])
-                ? `${match.params.representative} - ${dataflowState[match.params.dataflowId].name}`
+                ? `${match.params.representative} - ${TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)}`
                 : null}
             </h2>
           </div>
