@@ -131,6 +131,21 @@
   margin-bottom: 7rem;
 }
 
+.notificationCounter {
+  position: absolute;
+  left: 25px;
+  background-color: var(--errors);
+  color: var(--white);
+  border-radius: 3px;
+  padding: 1px 3px;
+  font: 8px Verdana;
+}
+
+/* .notificationCounter:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+} */
+
 @keyframes blink {
   0% {
     -webkit-transform: scale(1);
