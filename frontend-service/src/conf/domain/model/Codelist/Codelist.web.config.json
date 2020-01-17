@@ -1,9 +1,9 @@
 {
     "add": "/codelist",
-    "all": "/codelist/{:codelistId}",
     "allInCategory": "/codelist/find/category/{:codelistCategoryId}",
     "clone": "/codelist/{:codelistId}",
     "delete": "/codelist/{:codelistId}",
     "find":"/codelist/find?codelistIds={:codelistIds}",
+    "getById": "/codelist/{:codelistId}",
     "update": "/codelist/update" 
 }

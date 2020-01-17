@@ -10,10 +10,22 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { CodelistService } from 'core/services/Codelist';
+
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [codelistsList, setCodelistsList] = useState();
+
+  useEffect(async () => {
+    setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
+  }, []);
+
+  const getCodelistsList = async () => {
+    const codelistsList = await getCodelistsList(datasetsSchemas);
+    return codelistsList;
+  };
 
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (

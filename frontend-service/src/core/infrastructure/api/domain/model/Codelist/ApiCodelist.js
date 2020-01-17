@@ -15,19 +15,6 @@ export const apiCodelist = {
     });
     return response;
   },
-  all: async codelistId => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.all, {
-        codelistId: codelistId
-      }),
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    console.log('Get all by id response', response);
-    return response;
-  },
   allInCategory: async codelistCategoryId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
@@ -39,6 +26,7 @@ export const apiCodelist = {
     });
     return response;
   },
+
   deleteById: async codelistId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
@@ -50,6 +38,19 @@ export const apiCodelist = {
       }
     });
 
+    return response;
+  },
+
+  getById: async codelistId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.getById, {
+        codelistId: 4
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
     return response;
   },
 
