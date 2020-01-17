@@ -45,7 +45,8 @@ import {
   faCloudUploadAlt,
   faThList,
   faMinus,
-  faEye
+  faEye,
+  faAngleDoubleUp
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -150,6 +151,8 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'angleUp':
+      return faAngleDoubleUp;
     case 'arrowDown':
       return faArrowDown;
     case 'arrowUp':

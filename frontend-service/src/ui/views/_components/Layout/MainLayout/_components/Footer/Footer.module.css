@@ -1,13 +1,45 @@
 .Footer {
   position: absolute;
+  display: none;
   bottom: 0;
   text-align: center;
   background-color: var(--blue-120);
   color: white;
-  padding: 1rem 0;
+  /* padding: 1rem 0; */
   width: 100%;
-  margin-top: 2em;
+  /* margin-top: 2em; */
   margin-left: 45px;
+}
+
+/* .Footer:hover {
+  width: 100%;
+  bottom: 0;
+  transition: 0.5s;
+} */
+
+.slideUpFooter {
+  display: flex;
+}
+
+.slideUpFooterSpan {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  background-color: var(--blue-120);
+  cursor: pointer;
+  justify-content: center;
+  padding: 6px 0;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border: 1px solid var(--gray-120);
+  width: 40px;
+  height: 20px;
+}
+
+.slideUpFooterButton {
+  font-size: 10pt;
+  color: var(--white);
 }
 
 .Footer a {
