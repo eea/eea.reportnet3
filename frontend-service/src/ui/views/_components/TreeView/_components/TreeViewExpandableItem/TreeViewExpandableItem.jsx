@@ -17,6 +17,7 @@ const TreeViewExpandableItem = ({
   infoButtons,
   items,
   className,
+  onCollapseTree,
   onExpandTree
 }) => {
   const [isOpen, setIsOpen] = useState(expanded);
@@ -26,6 +27,10 @@ const TreeViewExpandableItem = ({
     if (isOpen) {
       if (!isUndefined(onExpandTree)) {
         onExpandTree();
+      }
+    } else {
+      if (!isUndefined(onCollapseTree)) {
+        onCollapseTree();
       }
     }
   }, [isOpen]);
@@ -43,11 +48,11 @@ const TreeViewExpandableItem = ({
     return !isUndefined(buttons)
       ? buttons.map((button, i) => (
           <Button
-            className={
+            className={`${
               !isUndefined(button.disabled) && button.disabled
                 ? styles.defaultExpandableButtonDisable
                 : styles.defaultExpandableButtonEnable
-            }
+            } ${!isUndefined(button.iconSlashed) && button.iconSlashed ? styles.slashSpan : null}`}
             disabled={!isUndefined(button.disabled) ? button.disabled : false}
             icon={button.icon}
             key={i}

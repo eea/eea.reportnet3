@@ -38,6 +38,8 @@ const Category = ({
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
+    isExpanded: false,
+    isFiltered: true,
     isLoading: false,
     codelists: [],
     codelistName: '',
@@ -112,6 +114,7 @@ const Category = ({
     } catch (error) {
     } finally {
       toggleLoading(false);
+      toggleIsExpanded(true);
     }
 
     // setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
@@ -177,6 +180,10 @@ const Category = ({
     }
   };
 
+  const onShowDeprecatedCodelists = () => {
+    dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
+  };
+
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button label={resources.messages['save']} icon="save" onClick={onSaveCodelist} />
@@ -230,20 +237,19 @@ const Category = ({
     </React.Fragment>
   );
 
-  const setCategoryInputs = (description, shortCode, id) => {
-    console.log({ description, shortCode, id });
+  const setCategoryInputs = (description, shortCode, id) =>
     dispatchCategory({
       type: 'SET_CATEGORY_INPUTS',
       payload: { description, shortCode, id }
     });
-  };
 
-  const toggleDialog = (action, isVisible) => {
+  const toggleDialog = (action, isVisible) =>
     dispatchCategory({
       type: action,
       payload: isVisible
     });
-  };
+
+  const toggleIsExpanded = expanded => dispatchCategory({ type: 'TOGGLE_IS_EXPANDED', payload: expanded });
 
   const toggleLoading = loading => {
     dispatchCategory({ type: 'SET_ISLOADING', payload: { loading } });
@@ -331,12 +337,22 @@ const Category = ({
 
   return (
     <React.Fragment>
-      {console.log(category.codelistNumber)}
+      {console.log(categoryState.isFiltered)}
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
         expanded={false}
         items={[category.shortCode, category.description]}
         buttons={[
+          {
+            disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,
+            icon: 'filter',
+            iconSlashed: categoryState.isFiltered,
+            label: '',
+            onClick: () => onShowDeprecatedCodelists(),
+            tooltip: categoryState.isFiltered
+              ? resources.messages['showDeprecatedCodelists']
+              : resources.messages['hideDeprecatedCodelists']
+          },
           {
             disabled: categoryState.isAddCodelistButtonDisabled,
             icon: 'pencil',
@@ -359,6 +375,7 @@ const Category = ({
             tooltip: resources.messages['newCodelist']
           }
         ]}
+        onCollapseTree={() => toggleIsExpanded(false)}
         onExpandTree={onLoadCodelists}>
         {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
       </TreeViewExpandableItem>

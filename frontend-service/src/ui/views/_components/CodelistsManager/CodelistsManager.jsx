@@ -8,7 +8,8 @@ import styles from './CodelistsManager.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
-import { InputText } from 'ui/views/_components/InputText';
+// import { Checkbox } from 'ui/views/_components/Checkbox';
+// import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -28,6 +29,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isChecked, setIsChecked] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
@@ -61,6 +63,10 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
     setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
     setFilter(filter);
+  };
+
+  const onFilterDeprecated = () => {
+    const inmCategories = [...categories];
   };
 
   const onLoadCategories = async () => {
@@ -144,7 +150,20 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         {/* <span className={`${styles.filterSpan} p-float-label`}>
           <InputText id="filterInput" onChange={e => onFilter(e.target.value)} value={filter} />
           <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
-        </span> */}
+        </span>
+        <Checkbox
+          className={styles.filterDeprecatedCheckbox}
+          defaultChecked={false}
+          id="filterDeprecated"
+          isChecked={isChecked}
+          onChange={() => {
+            onFilterDeprecated();
+            setIsChecked(!isChecked);
+          }}
+          htmlFor="filterDeprecated"
+          labelClassName={styles.filterDeprecatedLabel}
+          labelMessage={resources.messages['showDeprecatedCodelists']}
+        /> */}
         {isDataCustodian ? (
           <Button
             label={resources.messages['newCategory']}

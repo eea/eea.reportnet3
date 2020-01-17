@@ -28,6 +28,11 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isAddCodelistDialogVisible: payload };
     case 'TOGGLE_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteConfirmDialogVisible: payload };
+    case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
+      return { ...state, isFiltered: !state.isFiltered };
+    case 'TOGGLE_IS_EXPANDED':
+      console.log(payload);
+      return { ...state, isExpanded: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
     default:

@@ -22,6 +22,16 @@
   animation: blink 0.2s;
 }
 
+.slashSpan span::after {
+  position: absolute;
+  content: '\e90b';
+  color: var(--errors);
+  font-size: 0.8em;
+  left: 7px;
+  top: 6px;
+  /* transform: rotate(15deg); */
+}
+
 @keyframes blink {
   0% {
     -webkit-transform: scale(1);
