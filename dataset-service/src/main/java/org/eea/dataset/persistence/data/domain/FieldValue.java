@@ -39,10 +39,10 @@ public class FieldValue {
    */
   @Id
   @GenericGenerator(name = "field_sequence_generator",
-      strategy = "org.eea.dataset.persistence.data.sequence.FieldValueGenerator")
+      strategy = "org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
+  private String id;
 
   /**
    * The type.

@@ -35,15 +35,18 @@ public interface DatasetSnapshotController {
   List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
 
 
+
   /**
    * Creates the snapshot.
    *
    * @param datasetId the dataset id
    * @param description the description
+   * @param released the released
    */
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("description") String description);
+      @RequestParam("description") String description,
+      @RequestParam(value = "released", defaultValue = "false") Boolean released);
 
   /**
    * Delete snapshot.
@@ -128,6 +131,7 @@ public interface DatasetSnapshotController {
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
   void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
+
 
 
 }

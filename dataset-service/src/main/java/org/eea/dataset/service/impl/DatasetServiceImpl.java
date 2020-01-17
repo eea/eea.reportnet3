@@ -539,9 +539,9 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       // 5º retrieve validations to set them into the final result
-      List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
-      Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
-      Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
+      List<String> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
+      Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
+      Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
           List<FieldValidationVO> validations =
@@ -618,7 +618,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<RecordValue> sanitizeRecords(final List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     if (records != null && !records.isEmpty()) {
-      Set<Long> processedRecords = new HashSet<>();
+      Set<String> processedRecords = new HashSet<>();
       for (RecordValue recordValue : records) {
         if (!processedRecords.contains(recordValue.getId())) {
           processedRecords.add(recordValue.getId());
@@ -1029,11 +1029,11 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return the Map
    */
-  private Map<Long, List<FieldValidation>> getFieldValidations(final List<Long> recordIds) {
+  private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds) {
     List<FieldValidation> fieldValidations =
         this.fieldValidationRepository.findByFieldValue_RecordIdIn(recordIds);
 
-    Map<Long, List<FieldValidation>> result = new HashMap<>();
+    Map<String, List<FieldValidation>> result = new HashMap<>();
 
     fieldValidations.stream().forEach(fieldValidation -> {
       if (!result.containsKey(fieldValidation.getFieldValue().getId())) {
@@ -1053,12 +1053,12 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return the record validations
    */
-  private Map<Long, List<RecordValidation>> getRecordValidations(final List<Long> recordIds) {
+  private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds) {
 
     List<RecordValidation> recordValidations =
         this.recordValidationRepository.findByRecordValueIdIn(recordIds);
 
-    Map<Long, List<RecordValidation>> result = new HashMap<>();
+    Map<String, List<RecordValidation>> result = new HashMap<>();
 
     recordValidations.stream().forEach(recordValidation -> {
       if (!result.containsKey(recordValidation.getRecordValue().getId())) {
@@ -1156,7 +1156,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void deleteRecord(final Long datasetId, final Long recordId) throws EEAException {
+  public void deleteRecord(final Long datasetId, final String recordId) throws EEAException {
     if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
@@ -1461,6 +1461,19 @@ public class DatasetServiceImpl implements DatasetService {
 
     fieldRepository.saveAll(fields);
 
+  }
+
+  /**
+   * Delete record values.
+   *
+   * @param datasetId the dataset id
+   * @param providerCode the provider code
+   */
+  @Override
+  @Transactional
+  public void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode) {
+    LOG.info("Deleting data with providerCode: {} ", providerCode);
+    recordRepository.deleteByDataProviderCode(providerCode);
   }
 
 

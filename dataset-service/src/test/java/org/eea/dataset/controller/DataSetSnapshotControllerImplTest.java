@@ -74,8 +74,9 @@ public class DataSetSnapshotControllerImplTest {
   public void testAddSnapshots() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.createSnapshot(1L, "test");
-    Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any());
+    dataSetSnapshotControllerImpl.createSnapshot(1L, "test", false);
+    Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -161,18 +162,6 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Test release snapshots exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testReleaseSnapshotsException2() throws Exception {
-
-    doThrow(new EEAException()).when(datasetSnapshotService).releaseSnapshot(Mockito.any(),
-        Mockito.any());
-    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
-  }
 
 
   /**

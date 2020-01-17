@@ -25,7 +25,7 @@ public class ErrorsValidationVO implements Serializable {
   private Long idValidation;
 
   /** The id object. */
-  private Long idObject;
+  private String idObject;
 
   /** The id table schema. */
   private String idTableSchema;

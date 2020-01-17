@@ -510,7 +510,7 @@ public class ValidationServiceImpl implements ValidationService {
     for (TableValidation tableValidation : tableValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(tableValidation.getTableValue().getId());
+      error.setIdObject(tableValidation.getTableValue().getId().toString());
       error.setIdValidation(tableValidation.getValidation().getId());
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
@@ -545,7 +545,7 @@ public class ValidationServiceImpl implements ValidationService {
         validationDatasetRepository.findByValidationIds(idValidations);
     for (DatasetValidation datasetValidation : datasetValidations) {
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(datasetValidation.getDatasetValue().getId());
+      error.setIdObject(datasetValidation.getDatasetValue().getId().toString());
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());

@@ -537,7 +537,7 @@ public class DatasetServiceTest {
     ArrayList<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     recordVO.setFields(fields);
-    recordVO.setId(1L);
+    recordVO.setId("1L");
     recordVOs.add(recordVO);
     List<FieldValidation> fieldV = new ArrayList<>();
     FieldValidation fieldValidation = new FieldValidation();
@@ -1069,7 +1069,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void deleteRecordsNullTest() throws Exception {
-    datasetService.deleteRecord(null, 1L);
+    datasetService.deleteRecord(null, "1L");
   }
 
   /**
@@ -1090,7 +1090,7 @@ public class DatasetServiceTest {
   @Test
   public void deleteRecordsTest() throws Exception {
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
-    datasetService.deleteRecord(1L, 1L);
+    datasetService.deleteRecord(1L, "1L");
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 
@@ -1448,6 +1448,12 @@ public class DatasetServiceTest {
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.DATASET_NOTFOUND, e.getMessage());
     }
+  }
+
+  @Test
+  public void deleteRecordValuesByProvider() {
+    datasetService.deleteRecordValuesByProvider(1L, "ES");
+    Mockito.verify(recordRepository, times(1)).deleteByDataProviderCode(Mockito.any());
   }
 
 }

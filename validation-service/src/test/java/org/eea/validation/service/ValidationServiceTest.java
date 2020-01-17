@@ -444,7 +444,7 @@ public class ValidationServiceTest {
     validation.setLevelError(TypeErrorEnum.WARNING);
     List<RecordValue> records = new ArrayList<>();
     RecordValue recordValue = new RecordValue();
-    recordValue.setId(1L);
+    recordValue.setId("1L");
     recordValue.setRecordValidations(new ArrayList<>());
 
     List<RecordValidation> recordValidations = new ArrayList<>();
@@ -484,7 +484,7 @@ public class ValidationServiceTest {
     fieldValidations.add(fieldValidation);
     FieldValue fieldValue = new FieldValue();
     fieldValue.setFieldValidations(fieldValidations);
-    fieldValue.setId(1L);
+    fieldValue.setId("1L");
     fieldValue.setLevelError(TypeErrorEnum.WARNING);
     fields.add(fieldValue);
     fields.add(fieldValue);

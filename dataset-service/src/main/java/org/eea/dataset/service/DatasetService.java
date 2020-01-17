@@ -157,7 +157,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  void deleteRecord(@DatasetId Long datasetId, Long recordId) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, String recordId) throws EEAException;
 
   /**
    * Delete table by schema.
@@ -353,4 +353,13 @@ public interface DatasetService {
    */
   void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
       String idFieldSchema, TypeData typeField);
+
+
+  /**
+   * Delete record values.
+   *
+   * @param datasetId the dataset id
+   * @param providerCode the provider code
+   */
+  void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 }
