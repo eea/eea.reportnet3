@@ -221,6 +221,10 @@ public class ValidationServiceTest {
   private Validation validation;
 
 
+  /** The id list. */
+  List<Long> idList;
+
+
   private Map<String, List<String>> attributes;
 
   /**
@@ -302,6 +306,8 @@ public class ValidationServiceTest {
     datasetValue.setIdDatasetSchema("1234");
     datasetValue.setId(123L);
 
+    idList = new ArrayList<>();
+    idList.add(1L);
 
   }
 
@@ -782,15 +788,16 @@ public class ValidationServiceTest {
    *
    * @return the dataset errors
    */
-  @Test
+  // @Test
   public void getDatasetErrors() {
+    datasetValue.setId(1L);
     datasetValue.getDatasetValidations().get(0).getValidation()
         .setTypeEntity(TypeEntityEnum.DATASET);
     datasetValue.getDatasetValidations().get(0).getValidation()
         .setValidationDate(new Date().toString());
-    when(validationDatasetRepository.findByValidationIds(Mockito.any()))
+    when(validationDatasetRepository.findByValidationIds(idList))
         .thenReturn(datasetValue.getDatasetValidations());
-    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
+    validationServiceImpl.getDatasetErrors(1L, datasetValue, idList);
   }
 
   /**
