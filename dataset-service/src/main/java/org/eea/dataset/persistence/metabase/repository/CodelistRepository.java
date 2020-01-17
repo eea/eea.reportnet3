@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.metabase.repository;
 import java.util.List;
 import java.util.Optional;
 import org.eea.dataset.persistence.metabase.domain.Codelist;
+import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 
@@ -18,7 +19,8 @@ public interface CodelistRepository extends PagingAndSortingRepository<Codelist,
    * @param version the version
    * @return the optional
    */
-  Optional<List<Codelist>> findAllByNameAndVersion(String name, String version);
+  Optional<List<Codelist>> findAllByNameAndVersionAndStatus(String name, String version,
+      CodelistStatusEnum status);
 
   /**
    * Find all by id in.
