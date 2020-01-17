@@ -1450,4 +1450,10 @@ public class DatasetServiceTest {
     }
   }
 
+  @Test
+  public void deleteRecordValuesByProvider() {
+    datasetService.deleteRecordValuesByProvider(1L, "ES");
+    Mockito.verify(recordRepository, times(1)).deleteByDataProviderCode(Mockito.any());
+  }
+
 }

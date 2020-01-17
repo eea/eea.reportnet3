@@ -44,6 +44,11 @@ public enum LockSignature {
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
   /**
+   * The release snapshot.
+   */
+  RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
+
+  /**
    * The delete import table.
    */
   DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)");

@@ -353,4 +353,13 @@ public interface DatasetService {
    */
   void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
       String idFieldSchema, TypeData typeField);
+
+
+  /**
+   * Delete record values.
+   *
+   * @param datasetId the dataset id
+   * @param providerCode the provider code
+   */
+  void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 }
