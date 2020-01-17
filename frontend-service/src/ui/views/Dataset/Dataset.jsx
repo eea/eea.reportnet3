@@ -246,14 +246,23 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
+      notificationContext.add({
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
         content: {
