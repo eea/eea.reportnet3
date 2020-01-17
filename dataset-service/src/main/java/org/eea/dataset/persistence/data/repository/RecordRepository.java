@@ -86,4 +86,14 @@ public interface RecordRepository
       + "(select t from TableValue t where t.idTableSchema= :idTableSchema)")
   void deleteRecordWithIdTableSchema(@Param("idTableSchema") String idTableSchema);
 
+
+  /**
+   * Delete by data provider code.
+   *
+   * @param dataProviderCode the data provider code
+   */
+  @Modifying
+  @Query("delete from RecordValue r where r.dataProviderCode = :dataProviderCode")
+  void deleteByDataProviderCode(@Param("dataProviderCode") String dataProviderCode);
+
 }

@@ -162,12 +162,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long idPartition,
       @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
-      @RequestParam(value = "user", required = true) String user) {
+      @RequestParam(value = "user", required = true) String user,
+      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
+      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
 
     try {
       ThreadPropertiesManager.setVariable("user", user);
       recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType,
-          false);
+          isSchemaSnapshot, deleteData);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
