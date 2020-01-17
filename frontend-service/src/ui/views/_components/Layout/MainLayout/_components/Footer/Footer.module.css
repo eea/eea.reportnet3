@@ -1,6 +1,6 @@
 .Footer {
   position: absolute;
-  display: none;
+  /* display: none; */
   bottom: 0;
   text-align: center;
   background-color: var(--blue-120);
@@ -52,4 +52,11 @@
 .Footer a:hover {
   color: white;
   text-decoration: none;
+}
+
+.FooterExpanded {
+  display: block;
+}
+.FooterCollapsed {
+  display: none;
 }
