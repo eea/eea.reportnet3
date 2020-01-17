@@ -141,6 +141,27 @@
   font: 8px Verdana;
 }
 
+.notificationList{
+  position: fixed;
+  background-color: var(--white);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  left:3rem;
+  border:2px solid var(--gray-50);
+  z-index: 9999;
+  max-height: 200px;
+}
+.notificationList li{
+  font-size: 12pt;
+  color: var(--black);
+  list-style: none;
+}
+
+.notificationList li:hover{
+  background-color: var(--gray-50);
+}
+
 /* .notificationCounter:hover {
   transition: 0.3s ease-in;
   animation: blink 0.3s;
