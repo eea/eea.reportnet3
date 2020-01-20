@@ -204,9 +204,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataProviderId == null || StringUtils.isBlank(userMail)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
-    return representativeRepository
-        .findBydataProviderIdAnduserMailAnddataflowId(dataProviderId, userMail, dataflowId)
-        .isPresent();
+    return representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(dataProviderId,
+        userMail.toLowerCase(), dataflowId).isPresent();
   }
 
 
