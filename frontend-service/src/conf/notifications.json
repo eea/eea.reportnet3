@@ -310,6 +310,13 @@
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
+        {
+          "key": "RELEASE_DATASET_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
         }
       ]
     },
@@ -341,6 +348,13 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key":"RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT",

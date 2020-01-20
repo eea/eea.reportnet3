@@ -360,6 +360,8 @@
 		"createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
-		"representative":"Representative"
+		"representative":"Representative",
+		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
 	}
 }
