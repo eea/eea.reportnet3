@@ -54,6 +54,19 @@ export const apiCodelist = {
     return response;
   },
 
+  getAllByIds: async codelistIds => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.find, {
+        codelistIds: [4, 4, 5]
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
   updateById: async codelist => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({

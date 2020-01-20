@@ -4,7 +4,7 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, index }) => {
+const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     return !isUndefined(designDataset) && !isNull(designDataset) ? (
       <div>
@@ -12,7 +12,7 @@ const DatasetSchema = ({ designDataset, index }) => {
           excludeBottomBorder={false}
           groupableProperties={['fields']}
           key={index}
-          property={parseDesignDataset(designDataset)}
+          property={parseDesignDataset(designDataset, codelistsList)}
           propertyName={''}
           rootProperty={''}
         />
@@ -23,7 +23,7 @@ const DatasetSchema = ({ designDataset, index }) => {
   return renderDatasetSchema();
 };
 
-const parseDesignDataset = design => {
+const parseDesignDataset = (design, codelists) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;

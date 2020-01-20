@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 
 import { apiCodelist } from 'core/infrastructure/api/domain/model/Codelist';
 import { CodelistCategory } from 'core/domain/model/CodelistCategory/CodelistCategory';
@@ -54,30 +54,33 @@ const getById = async codelistId => {
   );
 };
 
-const getCodelistsList = datasetSchemas => {
-  const codelistIds = getCodelistsIdsBySchemas(datasetSchemas);
-
-  // const codelistsList = getCodelistsByIds(codelistIds);
-  // return codelistsList;
+const getCodelistsList = async datasetSchemas => {
+  const codelistIds = await getCodelistsIdsBySchemas(datasetSchemas);
+  const codelistsList = await getCodelistsByIds(codelistIds);
+  return codelistsList;
 };
 
-const getCodelistsIdsBySchemas = async datasetsSchemas => {
-  try {
-    console.log(datasetsSchemas);
-
-    const codelistsIds = [];
-    datasetsSchemas.forEach(table => {
+const getCodelistsIdsBySchemas = datasetSchemas => {
+  const codelistIds = [];
+  datasetSchemas.forEach(schema => {
+    schema.tables.forEach(table => {
       table.records.forEach(record => {
-        record.field.forEach(field => {
+        record.fields.forEach(field => {
           let codelistId = field.type === 'CODELIST' ? field.codelistId : null;
-          codelistsIds.push(codelistId);
+          if (!isNull(codelistId)) {
+            codelistIds.push(codelistId);
+          }
         });
       });
     });
-  } catch (error) {}
+  });
+  return codelistIds;
 };
 
-const getCodelistsByIds = async codelistsIds => {};
+const getCodelistsByIds = async codelistIds => {
+  const codelists = await apiCodelist.getAllByIds(codelistIds);
+  return codelists;
+};
 
 const updateById = async (id, description, items, name, status, version) => {
   const codelistItemsDTO = items.map(

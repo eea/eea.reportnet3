@@ -1,2 +1,2 @@
-export const GetCodelistsList = ({ codelistRepository }) => async datasetSchemas =>
-  codelistRepository.getCodelistsList(datasetSchemas);
+export const GetCodelistsList = ({ codelistRepository }) => async datasetsSchemas =>
+  codelistRepository.getCodelistsList(datasetsSchemas);
