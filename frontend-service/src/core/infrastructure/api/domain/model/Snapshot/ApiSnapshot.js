@@ -74,7 +74,6 @@ export const apiSnapshot = {
   },
   releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const tokens = userStorage.get();
-
     const response = await HTTPRequester.update({
       url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
         datasetSchemaId: datasetSchemaId,

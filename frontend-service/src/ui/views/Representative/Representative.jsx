@@ -42,9 +42,9 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Representative = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const notificationContext = useContext(NotificationContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();

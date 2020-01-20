@@ -12,6 +12,7 @@ import { SnapshotsList } from './_components/SnapshotsList';
 
 import { SnapshotService } from 'core/services/Snapshot';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const SnapshotsDialog = ({
@@ -22,6 +23,7 @@ export const SnapshotsDialog = ({
   isSnapshotDialogVisible,
   setSnapshotDialog
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
@@ -35,7 +37,13 @@ export const SnapshotsDialog = ({
     if (isSnapshotDialogVisible) {
       onLoadSnapshotList(datasetId);
     }
-  }, [isSnapshotDialogVisible]);
+    const refresh = notificationContext.toShow.find(
+      notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
+    );
+    if (refresh) {
+      onLoadSnapshotList(datasetId);
+    }
+  }, [isSnapshotDialogVisible, notificationContext]);
 
   useEffect(() => {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
