@@ -1,11 +1,14 @@
 package org.eea.ums.controller;
 
 import static org.mockito.Mockito.times;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -91,8 +94,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -207,6 +210,46 @@ public class UserManagementControllerImplTest {
     userManagementController.getUsers();
     Mockito.verify(keycloakConnectorService, times(1)).getUsers();
 
+  }
+
+
+  @Test
+  public void addContributorsToResources() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("userId_123");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    resource.setResourceId(1L);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    resources.add(resource);
+    userManagementController.addContributorsToResources(resources);
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1)).addContributorToUserGroup(
+        "userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
+  }
+
+
+  @Test
+  public void addUserToResources() {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("test@reportnet.net");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    resource.setResourceId(1L);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    resources.add(resource);
+    userManagementController.addUserToResources(resources);
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .addUserToUserGroup("userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
   }
 
 }
