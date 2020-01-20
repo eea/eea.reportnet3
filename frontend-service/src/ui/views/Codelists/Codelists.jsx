@@ -32,7 +32,9 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} />
-        <div className="rep-container">{children}</div>
+        <div className="rep-container" style={{ paddingBottom: '80px' }}>
+          {children}
+        </div>
       </MainLayout>
     );
   };

@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 
 import styles from './Category.module.css';
 
@@ -34,7 +34,7 @@ const Category = ({
     categoryId: null,
     categoryDescription: '',
     categoryShortCode: '',
-    isAddCodelistButtonDisabled: false,
+    filteredCodelists: [],
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
@@ -42,6 +42,7 @@ const Category = ({
     isFiltered: true,
     isLoading: false,
     codelists: [],
+    codelistsInEdition: 0,
     codelistName: '',
     codelistVersion: '',
     codelistStatus: { statusType: 'design', value: 'DESIGN' },
@@ -56,14 +57,16 @@ const Category = ({
   }, [onLoadCategories]);
 
   useEffect(() => {
+    if (!isNull(categoryState.categoryId)) {
+      onLoadCodelists();
+    }
+  }, [categoryState.isFiltered]);
+
+  useEffect(() => {
     if (categoryState.isEditingDialogVisible) {
       onLoadCategoryInfo();
     }
   }, [categoryState.isEditingDialogVisible]);
-
-  const toggleAddCodelistButtonDisabled = disabled => {
-    dispatchCategory({ type: 'TOGGLE_ADD_CODELIST_BUTTON', payload: disabled });
-  };
 
   const onConfirmDeleteCategory = async () => {
     try {
@@ -110,7 +113,15 @@ const Category = ({
     toggleLoading(true);
     try {
       const response = await CodelistService.getAllInCategory(categoryState.categoryId);
-      dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
+      console.log({ response });
+      if (categoryState.isFiltered) {
+        dispatchCategory({
+          type: 'SET_CODELISTS_IN_CATEGORY',
+          payload: { data: response.filter(codelist => codelist.status.toUpperCase() !== 'DEPRECATED') }
+        });
+      } else {
+        dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
+      }
     } catch (error) {
     } finally {
       toggleLoading(false);
@@ -215,6 +226,8 @@ const Category = ({
     </div>
   );
 
+  const checkNoCodelistEditing = () => categoryState.codelistsInEdition === 0;
+
   const editCategoryForm = (
     <React.Fragment>
       <span className={`${styles.categoryInput} p-float-label`}>
@@ -280,12 +293,13 @@ const Category = ({
                 categoriesDropdown={categoriesDropdown}
                 categoryId={categoryState.categoryId}
                 checkDuplicates={checkDuplicates}
+                checkNoCodelistEditing={checkNoCodelistEditing}
                 codelist={codelist}
                 isDataCustodian={isDataCustodian}
                 isInDesign={isInDesign}
                 key={i}
                 onCodelistSelected={onCodelistSelected}
-                toggleAddCodelistButtonDisabled={toggleAddCodelistButtonDisabled}
+                updateEditingCodelists={updateEditingCodelists}
               />
             );
           })
@@ -335,6 +349,14 @@ const Category = ({
     ) : null;
   };
 
+  const updateEditingCodelists = isNewEditingCodelist => {
+    if (isNewEditingCodelist) {
+      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: 1 });
+    } else {
+      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: -1 });
+    }
+  };
+
   return (
     <React.Fragment>
       {console.log(categoryState.isFiltered)}
@@ -354,7 +376,7 @@ const Category = ({
               : resources.messages['hideDeprecatedCodelists']
           },
           {
-            disabled: categoryState.isAddCodelistButtonDisabled,
+            disabled: !checkNoCodelistEditing(),
             icon: 'pencil',
             label: '',
             onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true),
@@ -368,7 +390,7 @@ const Category = ({
             tooltip: resources.messages['deleteCategory']
           },
           {
-            disabled: categoryState.isAddCodelistButtonDisabled,
+            disabled: !checkNoCodelistEditing(),
             icon: 'add',
             label: '',
             onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true),

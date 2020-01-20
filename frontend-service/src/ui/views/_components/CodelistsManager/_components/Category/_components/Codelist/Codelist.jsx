@@ -34,7 +34,7 @@ const Codelist = ({
   isDataCustodian = true,
   isInDesign,
   onCodelistSelected,
-  toggleAddCodelistButtonDisabled
+  updateEditingCodelists
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -97,45 +97,26 @@ const Codelist = ({
     });
   };
 
-  const onSaveCloneCodelist = async () => {
+  const onConfirmDeleteItem = () => {
     try {
-      await CodelistService.cloneById(
-        codelistState.codelistId,
-        codelistState.clonedCodelist.codelistDescription,
-        codelistState.items,
-        codelistState.clonedCodelist.codelistName,
-        codelistState.clonedCodelist.codelistVersion,
-        codelistState.clonedCodelist.codelistCategoryId
-      );
+      console.log(codelistState.selectedItem);
+      const inmItems = [...codelistState.items];
+      dispatchCodelist({
+        type: 'SET_ITEMS',
+        payload: inmItems.filter(item => item.id !== codelistState.selectedItem.id)
+      });
     } catch (error) {
       notificationContext.add({
-        type: 'CLONE_CODELIST_ERROR',
+        type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR',
         content: {
           // dataflowId,
           // datasetId
         }
       });
     } finally {
-      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
-      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+      toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false);
     }
   };
-
-  // const onConfirmDeleteItem = async () => {
-  //   try {
-  //     //await CodelistService.deleteById(datasetId, records.selectedRecord.recordId);
-  //   } catch (error) {
-  //     notificationContext.add({
-  //       type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR',
-  //       content: {
-  //         // dataflowId,
-  //         // datasetId
-  //       }
-  //     });
-  //   } finally {
-  //     toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false);
-  //   }
-  // };
 
   const onEditorPropertiesInputChange = (value, property) => {
     console.log({ value, property });
@@ -172,6 +153,30 @@ const Codelist = ({
     }
   };
 
+  const onSaveCloneCodelist = async () => {
+    try {
+      await CodelistService.cloneById(
+        codelistState.codelistId,
+        codelistState.clonedCodelist.codelistDescription,
+        codelistState.items,
+        codelistState.clonedCodelist.codelistName,
+        codelistState.clonedCodelist.codelistVersion,
+        codelistState.clonedCodelist.codelistCategoryId
+      );
+    } catch (error) {
+      notificationContext.add({
+        type: 'CLONE_CODELIST_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
+    } finally {
+      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
+      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+    }
+  };
+
   const onSaveCodelist = async () => {
     try {
       console.log(codelistState.codelistCategoryId);
@@ -193,6 +198,10 @@ const Codelist = ({
         content: {}
       });
     } finally {
+      if (!isUndefined(updateEditingCodelists)) {
+        updateEditingCodelists(false);
+      }
+      //TODO:CALL GET CODELIST BY ID
     }
   };
 
@@ -203,6 +212,9 @@ const Codelist = ({
       console.log({ inmItems });
       if (formType === 'ADD') {
         inmItems.push(codelistState.newItem);
+        inmItems.forEach((item, i) => {
+          item.id = `-${i}`;
+        });
       } else {
       }
       console.log({ inmItems });
@@ -293,19 +305,19 @@ const Codelist = ({
     ) : null;
   };
 
-  // const renderDeleteDialog = () => {
-  //   return codelistState.isDeleteCodelistItemVisible ? (
-  //     <ConfirmDialog
-  //       onConfirm={onConfirmDeleteItem}
-  //       onHide={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false)}
-  //       visible={codelistState.isDeleteCodelistItemVisible}
-  //       header={resources.messages['deleteRow']}
-  //       labelConfirm={resources.messages['yes']}
-  //       labelCancel={resources.messages['no']}>
-  //       {resources.messages['confirmDeleteRow']}
-  //     </ConfirmDialog>
-  //   ) : null;
-  // };
+  const renderDeleteDialog = () => {
+    return codelistState.isDeleteCodelistItemVisible ? (
+      <ConfirmDialog
+        onConfirm={onConfirmDeleteItem}
+        onHide={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false)}
+        visible={codelistState.isDeleteCodelistItemVisible}
+        header={resources.messages['deleteRow']}
+        labelConfirm={resources.messages['yes']}
+        labelCancel={resources.messages['no']}>
+        {resources.messages['confirmDeleteRow']}
+      </ConfirmDialog>
+    ) : null;
+  };
 
   const renderEditItemsDialog = () => {
     return codelistState.isAddEditCodelistVisible ? (
@@ -332,7 +344,8 @@ const Codelist = ({
   const renderFooter = () => {
     return (
       <div className={styles.footerWrap} style={{ width: '100%' }}>
-        {codelistState.isEditing ? (
+        {console.log(codelistState.codelistStatus)}
+        {codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design' ? (
           <Button label={resources.messages['add']} icon="add" onClick={() => onAddCodelistItemClick()} />
         ) : null}
         <Button
@@ -342,7 +355,9 @@ const Codelist = ({
             !codelistState.isEditing
               ? () => {
                   toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', true);
-                  toggleAddCodelistButtonDisabled(true);
+                  if (!isUndefined(updateEditingCodelists)) {
+                    updateEditingCodelists(true);
+                  }
                 }
               : onSaveCodelist
           }
@@ -355,7 +370,9 @@ const Codelist = ({
             icon="cancel"
             onClick={() => {
               onCancelEditCodelistClick();
-              toggleAddCodelistButtonDisabled(false);
+              if (!isUndefined(updateEditingCodelists)) {
+                updateEditingCodelists(false);
+              }
             }}
           />
         ) : null}
@@ -381,14 +398,18 @@ const Codelist = ({
       <DataTable
         autoLayout={true}
         className={styles.itemTable}
-        editable={codelistState.isEditing}
+        editable={codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design'}
         footer={isDataCustodian ? renderFooter() : null}
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
         {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
           <Column
-            editor={codelistState.isEditing ? row => cellItemDataEditor(row, column) : null}
+            editor={
+              codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design'
+                ? row => cellItemDataEditor(row, column)
+                : null
+            }
             field={column}
             header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
             key={i}
@@ -396,7 +417,7 @@ const Codelist = ({
             style={{ display: column === 'id' ? 'none' : 'auto' }}
           />
         ))}
-        {codelistState.isEditing ? (
+        {codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design' ? (
           <Column
             header={resources.messages['actions']}
             key="actions"
@@ -453,11 +474,16 @@ const Codelist = ({
               ]
             : undefined
         }
-        items={[codelist.name, codelist.version, codelist.status, codelist.description]}>
+        items={[
+          codelistState.isEditing ? codelist.name : codelistState.codelistName,
+          codelistState.isEditing ? codelist.version : codelistState.codelistVersion,
+          codelistState.isEditing ? codelist.status : capitalize(codelistState.codelistStatus.value),
+          codelistState.isEditing ? codelist.description : codelistState.codelistDescription
+        ]}>
         {renderInputs()}
         {renderTable()}
         {renderEditItemsDialog()}
-        {/* {renderDeleteDialog()} */}
+        {renderDeleteDialog()}
       </TreeViewExpandableItem>
       {renderCloneCodelistDialog()}
     </React.Fragment>

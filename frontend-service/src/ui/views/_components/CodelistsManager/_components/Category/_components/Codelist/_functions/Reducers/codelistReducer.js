@@ -38,6 +38,8 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'SET_NEW_CODELIST_ITEM':
       console.log({ payload }, state.newItem);
       return { ...state, newItem: { ...state.newItem, [payload.property]: payload.value } };
+    case 'SET_ITEMS':
+      return { ...state, items: payload };
     case 'SET_INITIAL_EDITED_CODELIST_ITEM':
       return { ...state, editedItem: { ...state.selectedItem } };
     case 'SET_EDITED_CODELIST_ITEM':

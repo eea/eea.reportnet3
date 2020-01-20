@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isUndefined, isNull } from 'lodash';
 
@@ -19,6 +19,7 @@ const CodelistProperties = ({
   onKeyChange,
   state
 }) => {
+  const [initialStatus, setInitialStatus] = useState();
   const resources = useContext(ResourcesContext);
   console.log({ categoriesDropdown });
   const statusTypes = [
@@ -26,6 +27,15 @@ const CodelistProperties = ({
     { statusType: 'Ready', value: 'ready' },
     { statusType: 'Deprecated', value: 'deprecated' }
   ];
+
+  useEffect(() => {
+    console.log(!isCloning ? state.codelistStatus : state.clonedCodelist.codelistStatus);
+    setInitialStatus(
+      !isCloning
+        ? state.codelistStatus.value.toLocaleLowerCase()
+        : state.clonedCodelist.codelistStatus.value.toLocaleLowerCase()
+    );
+  }, []);
 
   const getStatusValue = value => {
     if (!isUndefined(value.statusType)) {
@@ -48,6 +58,7 @@ const CodelistProperties = ({
           <label className={styles.codelistDropdownLabel}>{resources.messages['category']}</label>
           <Dropdown
             className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
+            disabled={initialStatus !== 'design'}
             onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
             optionLabel="categoryType"
             options={categoriesDropdown}
@@ -59,7 +70,7 @@ const CodelistProperties = ({
       ) : null}
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
-          disabled={!isEmbedded ? !state.isEditing : false}
+          disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="nameInput"
           onBlur={() =>
             checkDuplicates(
@@ -75,7 +86,7 @@ const CodelistProperties = ({
       </span>
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
-          disabled={!isEmbedded ? !state.isEditing : false}
+          disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="versionInput"
           onBlur={() =>
             checkDuplicates(
@@ -96,7 +107,11 @@ const CodelistProperties = ({
           disabled={!isEmbedded ? !state.isEditing : isUndefined(state.codelistId) ? true : false}
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistStatus')}
           optionLabel="statusType"
-          options={statusTypes}
+          options={
+            initialStatus !== 'design'
+              ? statusTypes.filter(status => status.statusType.toLocaleLowerCase() !== 'design')
+              : statusTypes
+          }
           // required={true}
           placeholder={resources.messages['codelistStatus']}
           value={getStatusValue(!isCloning ? state.codelistStatus : state.clonedCodelist.codelistStatus)}
@@ -106,7 +121,7 @@ const CodelistProperties = ({
         className={`${!isEmbedded ? styles.codelistInputTextarea : styles.codelistInputTextareaDialog} p-float-label`}>
         <InputTextarea
           collapsedHeight={40}
-          disabled={!isEmbedded ? !state.isEditing : false}
+          disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           expandableOnClick={true}
           id="descriptionInput"
           key="descriptionInput"

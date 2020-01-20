@@ -20,8 +20,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, codelists: payload.data };
     case 'SET_ISLOADING':
       return { ...state, isLoading: payload.loading };
-    case 'TOGGLE_ADD_CODELIST_BUTTON':
-      return { ...state, isAddCodelistButtonDisabled: payload };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':
       return { ...state, isEditingDialogVisible: payload };
     case 'TOGGLE_ADD_CODELIST_DIALOG_VISIBLE':
@@ -35,6 +33,8 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isExpanded: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
+    case 'UPDATE_EDITING_CODELISTS':
+      return { ...state, codelistsInEdition: state.codelistsInEdition + payload };
     default:
       return state;
   }

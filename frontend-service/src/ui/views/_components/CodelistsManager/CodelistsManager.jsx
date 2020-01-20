@@ -28,7 +28,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState();
-  const [filteredCategories, setFilteredCategories] = useState([]);
+  // const [filteredCategories, setFilteredCategories] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,19 +55,19 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     setNewCategory(inmNewCategory);
   };
 
-  const onFilter = filter => {
-    setIsFiltered(filter === '');
+  // const onFilter = filter => {
+  //   setIsFiltered(filter === '');
 
-    const inmCategories = [...categories];
-    console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
-    setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    setFilter(filter);
-  };
+  //   const inmCategories = [...categories];
+  //   console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
+  //   //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
+  //   // setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
+  //   setFilter(filter);
+  // };
 
-  const onFilterDeprecated = () => {
-    const inmCategories = [...categories];
-  };
+  // const onFilterDeprecated = () => {
+  //   const inmCategories = [...categories];
+  // };
 
   const onLoadCategories = async () => {
     try {
