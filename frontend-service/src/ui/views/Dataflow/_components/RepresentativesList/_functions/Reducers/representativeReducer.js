@@ -1,4 +1,4 @@
-import { includes, isUndefined } from 'lodash';
+import { includes, isUndefined, isNull } from 'lodash';
 
 import { Representative } from 'core/domain/model/Representative/Representative';
 
@@ -43,7 +43,6 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-
       const providersNoSelect = [...payload.responseAllDataProviders];
 
       if (state.representatives.length <= payload.responseAllDataProviders.length) {
@@ -88,11 +87,22 @@ export const reducer = (state, { type, payload }) => {
         payload.response.representatives.push(emptyRepresentative);
       }
 
+      const getSelectedProviderGroup = () => {
+        let selectedGroup = null;
+
+        if (isNull(state.selectedDataProviderGroup)) {
+          selectedGroup = isUndefined(group[0]) ? null : group[0];
+        } else {
+          selectedGroup = state.selectedDataProviderGroup;
+        }
+        return selectedGroup;
+      };
+
       return {
         ...state,
         representatives: payload.response.representatives,
         initialRepresentatives: payload.representativesByCopy,
-        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0],
+        selectedDataProviderGroup: getSelectedProviderGroup(),
         representativeHasError: []
       };
 
