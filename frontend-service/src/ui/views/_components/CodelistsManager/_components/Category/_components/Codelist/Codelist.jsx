@@ -34,6 +34,7 @@ const Codelist = ({
   isDataCustodian = true,
   isInDesign,
   onCodelistSelected,
+  onRefreshCodelist,
   updateEditingCodelists
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -66,7 +67,6 @@ const Codelist = ({
     newItem: { id: `-${codelist.items.length}`, shortCode: '', label: '', definition: '', codelistId: '' },
     selectedItem: {}
   };
-
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
 
   const onAddCodelistItemClick = () => {
@@ -153,6 +153,26 @@ const Codelist = ({
     }
   };
 
+  const onLoadCodelist = async () => {
+    try {
+      const response = await CodelistService.getById(codelistState.codelistId);
+      console.log(response);
+      dispatchCodelist({ type: 'SET_CODELIST_DATA', payload: response });
+      onRefreshCodelist(codelistState.codelistId, response);
+    } catch (error) {
+      notificationContext.add({
+        type: 'CLONE_CODELIST_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
+    } finally {
+      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
+      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+    }
+  };
+
   const onSaveCloneCodelist = async () => {
     try {
       await CodelistService.cloneById(
@@ -179,7 +199,6 @@ const Codelist = ({
 
   const onSaveCodelist = async () => {
     try {
-      console.log(codelistState.codelistCategoryId);
       const response = await CodelistService.updateById(
         codelistState.codelistId,
         codelistState.codelistDescription,
@@ -193,6 +212,7 @@ const Codelist = ({
         toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
       }
     } catch (error) {
+      console.log({ error });
       notificationContext.add({
         type: 'SAVE_EDIT_CODELIST_ERROR',
         content: {}
@@ -201,7 +221,7 @@ const Codelist = ({
       if (!isUndefined(updateEditingCodelists)) {
         updateEditingCodelists(false);
       }
-      //TODO:CALL GET CODELIST BY ID
+      onLoadCodelist();
     }
   };
 
@@ -287,6 +307,12 @@ const Codelist = ({
     />
   );
 
+  const getStatusStyle = status => {
+    if (status.toLowerCase() === 'design') return styles.designBox;
+    if (status.toLowerCase() === 'deprecated') return styles.deprecatedBox;
+    if (status.toLowerCase() === 'ready') return styles.readyBox;
+  };
+
   const renderCloneCodelistDialog = () => {
     return codelistState.isCloneCodelistVisible ? (
       <Dialog
@@ -344,7 +370,6 @@ const Codelist = ({
   const renderFooter = () => {
     return (
       <div className={styles.footerWrap} style={{ width: '100%' }}>
-        {console.log(codelistState.codelistStatus)}
         {codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design' ? (
           <Button label={resources.messages['add']} icon="add" onClick={() => onAddCodelistItemClick()} />
         ) : null}
@@ -475,10 +500,14 @@ const Codelist = ({
             : undefined
         }
         items={[
-          codelistState.isEditing ? codelist.name : codelistState.codelistName,
-          codelistState.isEditing ? codelist.version : codelistState.codelistVersion,
-          codelistState.isEditing ? codelist.status : capitalize(codelistState.codelistStatus.value),
-          codelistState.isEditing ? codelist.description : codelistState.codelistDescription
+          { label: codelist.name },
+          { label: codelist.version },
+          {
+            className: [getStatusStyle(codelist.status), styles.statusBox].join(' '),
+            type: 'box',
+            label: capitalize(codelist.status)
+          },
+          { label: codelist.description }
         ]}>
         {renderInputs()}
         {renderTable()}

@@ -62,6 +62,7 @@ export const apiCodelist = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log({ response });
     return response;
   },
 

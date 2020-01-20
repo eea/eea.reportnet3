@@ -1,3 +1,5 @@
+import { capitalize } from 'lodash';
+
 export const codelistReducer = (state, { type, payload }) => {
   switch (type) {
     case 'EDIT_CODELIST_PROPERTIES':
@@ -42,6 +44,19 @@ export const codelistReducer = (state, { type, payload }) => {
       return { ...state, items: payload };
     case 'SET_INITIAL_EDITED_CODELIST_ITEM':
       return { ...state, editedItem: { ...state.selectedItem } };
+    case 'SET_CODELIST_DATA':
+      console.log({ payload });
+      return {
+        ...state,
+        codelistName: payload.name,
+        codelistVersion: payload.version,
+        codelistStatus: {
+          statusType: capitalize(payload.status.toString().toLowerCase()),
+          value: payload.status.toString().toLowerCase()
+        },
+        codelistDescription: payload.description,
+        items: payload.items
+      };
     case 'SET_EDITED_CODELIST_ITEM':
       // const inmItems = [JSON.parse(JSON.stringify(...state.items))];
       // console.log({ inmItems });

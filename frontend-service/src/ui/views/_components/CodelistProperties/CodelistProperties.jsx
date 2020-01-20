@@ -21,7 +21,6 @@ const CodelistProperties = ({
 }) => {
   const [initialStatus, setInitialStatus] = useState();
   const resources = useContext(ResourcesContext);
-  console.log({ categoriesDropdown });
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
     { statusType: 'Ready', value: 'ready' },
@@ -44,7 +43,6 @@ const CodelistProperties = ({
   };
 
   const getCategoryValue = value => {
-    console.log({ value, categoriesDropdown });
     if (!isUndefined(value)) {
       return categoriesDropdown.filter(category => category.value === value)[0];
     }
@@ -52,7 +50,6 @@ const CodelistProperties = ({
 
   return (
     <div className={styles.inputsWrapper}>
-      {console.log({ state, isEmbedded })}
       {!isUndefined(categoriesDropdown) && ((isEmbedded && isCloning) || (!isEmbedded && state.isEditing)) ? (
         <div className={styles.codelistDropdown}>
           <label className={styles.codelistDropdownLabel}>{resources.messages['category']}</label>

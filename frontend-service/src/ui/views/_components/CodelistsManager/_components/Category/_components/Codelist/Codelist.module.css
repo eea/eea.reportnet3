@@ -52,3 +52,24 @@
   right: 0;
   color: var(--c-chart-warning);
 }
+
+.statusBox {
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 4px;
+  color: white;
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+.deprecatedBox {
+  background-color: rgba(var(--c-red-100-rgb), 0.8);
+}
+
+.readyBox {
+  background-color: var(--success-color);
+}
+
+.designBox {
+  background-color: var(--c-corporate-blue);
+}
