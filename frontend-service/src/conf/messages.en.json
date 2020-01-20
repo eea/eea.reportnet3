@@ -363,7 +363,7 @@
 		"uploadDocumentFailedEvent":"Error uploading {:fileName} document at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"uploadDocumentCompletedEvent":"{:fileName} Document uploaded at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"dataflowUpdatingError":"Failed updating dataflow at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
-		"dataflowCreationError":"Failed creating <strong title='dataflowName'>{:sortDataflowName}</strong> dataflow at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"dataflowCreationError":"Failed creating <strong title='dataflowName'>{:sortDataflowName}</strong> dataflow",
 		"restoreDatasetSchemaSnapshotCompletedEvent":"Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"restoreDatasetSchemaSnapshotFailedEvent":"Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"deleteTableDataByIdError":"Delete <strong title='{:tableName}'>{:sortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
