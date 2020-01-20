@@ -351,23 +351,20 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
     List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
-    datasetIdsEmail.forEach((k, v) -> {
+    datasetIdsEmail.forEach((Long id, String email) -> {
 
-      ResourceAssignationVO resource = new ResourceAssignationVO();
-      resource.setResourceId(k);
-      resource.setEmail(v);
-      resource.setResourceGroup(ResourceGroupEnum.DATASET_PROVIDER);
-      resourcesProviders.add(resource);
-      ResourceAssignationVO resource2 = new ResourceAssignationVO();
-      resource2.setResourceId(dataflowId);
-      resource2.setEmail(v);
-      resource2.setResourceGroup(ResourceGroupEnum.DATAFLOW_PROVIDER);
-      resourcesProviders.add(resource2);
+      ResourceAssignationVO resourceDP =
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
+      resourcesProviders.add(resourceDP);
 
-      ResourceAssignationVO resource3 = new ResourceAssignationVO();
-      resource3.setResourceGroup(ResourceGroupEnum.DATASET_CUSTODIAN);
-      resource3.setResourceId(k);
-      resourcesCustodian.add(resource3);
+      ResourceAssignationVO resourceDFP =
+          fillResourceAssignation(dataflowId, email, ResourceGroupEnum.DATAFLOW_PROVIDER);
+      resourcesProviders.add(resourceDFP);
+
+      ResourceAssignationVO resourceDC =
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
+      resourcesCustodian.add(resourceDC);
+
 
     });
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
@@ -465,18 +462,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       switch (datasetType) {
         case REPORTING:
           for (RepresentativeVO representative : representatives) {
-            dataset = new ReportingDataset();
-            DataProviderVO provider = representativeControllerZuul
-                .findDataProviderById(representative.getDataProviderId());
-            datasetName = provider.getLabel();
-            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-            dataset.setDataProviderId(representative.getDataProviderId());
-            reportingDatasetRepository.save((ReportingDataset) dataset);
-            datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
-            recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
-                datasetSchemaId);
-            LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}",
-                dataflowId, dataset.getId(), datasetName);
+
+            datasetIdsEmail
+                .putAll(fillReportingDataset(representative, dataflowId, datasetSchemaId));
+
           }
           this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
           if (iterationDC == 0) {
@@ -520,6 +509,53 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
+
+  /**
+   * Fill resource assignation.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
+      ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
+
+
+  /**
+   * Fill reporting dataset.
+   *
+   * @param representative the representative
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the dataset schema id
+   * @return the map
+   */
+  private Map<Long, String> fillReportingDataset(RepresentativeVO representative, Long dataflowId,
+      String datasetSchemaId) {
+
+    ReportingDataset dataset = new ReportingDataset();
+    Map<Long, String> datasetIdsEmail = new HashMap<>();
+    DataProviderVO provider =
+        representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
+
+    fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
+    dataset.setDataProviderId(representative.getDataProviderId());
+    reportingDatasetRepository.save(dataset);
+    datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
+    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+    LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
+        dataset.getId(), provider.getLabel());
+
+    return datasetIdsEmail;
+  }
 
 
 }

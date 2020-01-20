@@ -61,11 +61,7 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
           datasetService.insertSchema(idDataset, idDatasetSchema);
 
           // First insert of the statistics
-          try {
-            datasetService.saveStatistics(idDataset);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error saving the statistics. Error message: {}", e.getMessage(), e);
-          }
+          datasetService.saveStatistics(idDataset);
 
         } catch (EEAException e) {
           LOG_ERROR.error(
