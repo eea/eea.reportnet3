@@ -75,15 +75,22 @@ const RepresentativesList = ({ dataflowId }) => {
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
+          className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : ''}
-          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
-          onChange={e =>
+          onBlur={() => {
+            representative.providerAccount = representative.providerAccount.toLowerCase();
+            onAddProvider(formDispatcher, formState, representative, dataflowId);
+          }}
+          onChange={event => {
             formDispatcher({
               type: 'ON_ACCOUNT_CHANGE',
-              payload: { providerAccount: e.target.value, dataProviderId: representative.dataProviderId }
-            })
-          }
+              payload: {
+                providerAccount: event.target.value,
+                dataProviderId: representative.dataProviderId
+              }
+            });
+          }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
           value={inputData}
