@@ -10,15 +10,31 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { CodelistService } from 'core/services/Codelist';
+
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [codelistsList, setCodelistsList] = useState();
+
+  useEffect(() => {
+    getCodelistsListBySchemas(datasetsSchemas);
+  }, []);
+
+  const getCodelistsListBySchemas = async datasetsSchemas => {
+    setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
+  };
+
+  const getCodelistsList = async () => {
+    const codelistsList = await getCodelistsList(datasetsSchemas);
+    return codelistsList;
+  };
 
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
+        return <DatasetSchema designDataset={designDataset} codelistsList={codelistsList} index={i} key={i} />;
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>

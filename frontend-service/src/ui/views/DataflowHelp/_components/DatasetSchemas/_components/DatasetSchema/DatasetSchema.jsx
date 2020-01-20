@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, index }) => {
+const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     return !isUndefined(designDataset) && !isNull(designDataset) ? (
       <div>
@@ -12,7 +12,7 @@ const DatasetSchema = ({ designDataset, index }) => {
           excludeBottomBorder={false}
           groupableProperties={['fields']}
           key={index}
-          property={parseDesignDataset(designDataset)}
+          property={parseDesignDataset(designDataset, codelistsList)}
           propertyName={''}
           rootProperty={''}
         />
@@ -23,7 +23,7 @@ const DatasetSchema = ({ designDataset, index }) => {
   return renderDatasetSchema();
 };
 
-const parseDesignDataset = design => {
+const parseDesignDataset = (design, codelists) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
@@ -39,12 +39,22 @@ const parseDesignDataset = design => {
         !isNull(tableDTO.records[0].fields) &&
         tableDTO.records[0].fields.length > 0
       ) {
+        const existACodelist = tableDTO.records[0].fields.filter(field => field.type === 'CODELIST');
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
-          return {
-            name: fieldDTO.name,
-            type: fieldDTO.type,
-            description: !isNull(fieldDTO.description) ? fieldDTO.description : '-'
-          };
+          if (!isEmpty(existACodelist)) {
+            return {
+              name: fieldDTO.name,
+              type: fieldDTO.type,
+              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-',
+              codelist: fieldDTO.type === 'CODELIST' ? 'Future codelist name, description and version or whatever.' : ''
+            };
+          } else {
+            return {
+              name: fieldDTO.name,
+              type: fieldDTO.type,
+              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-'
+            };
+          }
         });
         table.fields = fields;
       }
@@ -54,6 +64,29 @@ const parseDesignDataset = design => {
 
     parsedDataset.tables = tables;
   }
+  // parsedDataset.codelists = getCodelists(1);
+
+  // parsedDataset.codelists = {
+  //   id: 18,
+  //   name: 'cl2',
+  //   description: 'code1',
+  //   category: {
+  //     id: 1,
+  //     shortCode: 'c1',
+  //     description: 'cat1'
+  //   },
+  //   version: 1,
+  //   items: [
+  //     {
+  //       id: 16,
+  //       shortCode: 'o',
+  //       label: 'two',
+  //       definition: 'def',
+  //       codelistId: null
+  //     }
+  //   ],
+  //   status: 'DESIGN'
+  // };
 
   const dataset = {};
   dataset[design.datasetSchemaName] = parsedDataset;

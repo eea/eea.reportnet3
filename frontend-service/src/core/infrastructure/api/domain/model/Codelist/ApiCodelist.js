@@ -15,34 +15,23 @@ export const apiCodelist = {
     });
     return response;
   },
+  allInCategory: async codelistCategoryId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.allInCategory, { codelistCategoryId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
   cloneById: async (codelistId, codelist) => {
     console.log(CodelistConfig.clone);
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(CodelistConfig.clone, { codelistId }),
       data: { ...codelist },
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response;
-  },
-  all: async () => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.all, {}),
-      queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response;
-  },
-  allInCategory: async codelistCategoryId => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.allInCategory, { codelistCategoryId }),
-      queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -60,6 +49,32 @@ export const apiCodelist = {
       }
     });
 
+    return response;
+  },
+
+  getById: async codelistId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.getById, {
+        codelistId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
+  getAllByIds: async codelistIds => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.find, {
+        codelistIds: [4, 4, 5]
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
     return response;
   },
 
