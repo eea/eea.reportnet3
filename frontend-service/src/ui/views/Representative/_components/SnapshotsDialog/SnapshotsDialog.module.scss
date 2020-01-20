@@ -1,0 +1,25 @@
+.releaseSnapshotsDialog :global .p-dialog-content {
+  max-height: 50vh !important;
+}
+
+.createInputAndButtonWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  .createButtonWrapper {
+    align-self: center;
+  }
+}
+
+.createSnapshotButton {
+  border-radius: 0 5px 5px 0 !important;
+  // width: 30px !important;
+  height: 32px !important;
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+
+.snapshotForm {
+  margin-bottom: 0px !important;
+}
