@@ -1,7 +1,6 @@
 package org.eea.dataset.persistence.data.sequence;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,44 +10,55 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The type Record value generator.
+ * The Class RecordValueGenerator.
  */
-public class RecordValueGenerator implements IdentifierGenerator {
+public class RecordValueIdGenerator implements IdentifierGenerator {
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * Generate.
+   *
+   * @param session the session
+   * @param object the object
+   * @return the serializable
+   * @throws HibernateException the hibernate exception
+   */
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
     RecordValue record = (RecordValue) object;
     String prefix = null;
+    String datasetId = record.getTableValue().getDatasetId().getId().toString();
     // Set the provider code to create Hash
     if (null == record.getDataProviderCode()) {
-      prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
+      Double aux = Math.random();
+      prefix = "RECORD" + aux.toString() + "DS";
     } else {
       prefix = record.getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
     Connection connection = session.connection();// NOPMD
-    try {
-      Statement statement = connection // NOPMD 
-          .createStatement();// NOSONAR statement must not be closed in order to allow the operation to go on
-      ResultSet rs = statement.executeQuery( // NOPMD
-          "SELECT nextval('record_sequence')");// NOPMD resultset must not be closed in order to allow the operation to go on
+
+    try (Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')")) {
 
       if (rs.next()) {
         int id = rs.getInt(1);
-        String idcompose = prefix + Integer.valueOf(id);
-        String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
-        BigInteger bi = new BigInteger(md5Hex, 16);
-        Long hexId = bi.longValue();
-        String textId = hexId.toString();
-        Long hashId = Long.parseLong(textId.substring(0, 14));
-        return hashId;
+        String idcompose = datasetId + prefix + Integer.valueOf(id);
+        return DigestUtils.md5Hex(idcompose).toUpperCase();
+
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Faliled to generate Field ID");
     }
     return null;
   }

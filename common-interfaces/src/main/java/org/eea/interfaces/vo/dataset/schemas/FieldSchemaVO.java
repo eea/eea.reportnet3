@@ -13,6 +13,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class FieldSchemaVO {
 
@@ -34,6 +40,10 @@ public class FieldSchemaVO {
   /** The rule field. */
   private List<RuleFieldVO> ruleField;
 
+  /** The id code list. */
+  private Long idCodeList;
+
+
   /**
    * Hash code.
    *
@@ -41,7 +51,7 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, idRecord, name, ruleField, type);
+    return Objects.hash(id, description, idRecord, name, ruleField, type, idCodeList);
   }
 
   /**
@@ -61,6 +71,7 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type);
+        && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type)
+        && Objects.equals(idCodeList, other.idCodeList);
   }
 }

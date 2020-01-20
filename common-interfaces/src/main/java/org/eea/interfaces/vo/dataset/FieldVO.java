@@ -36,7 +36,7 @@ public class FieldVO implements Serializable {
   /**
    * The id.
    */
-  private Long id;
+  private String id;
 
   /**
    * The id header.

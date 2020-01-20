@@ -29,7 +29,7 @@ public class RecordVO implements Serializable {
   /**
    * The id.
    */
-  private Long id;
+  private String id;
 
   /**
    * The fields.

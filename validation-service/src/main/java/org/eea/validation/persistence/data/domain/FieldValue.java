@@ -39,7 +39,7 @@ public class FieldValue {
       allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
+  private String id;
 
   /**
    * The type.

@@ -35,10 +35,10 @@ public class RecordValue {
    */
   @Id
   @GenericGenerator(name = "record_sequence_generator",
-      strategy = "org.eea.dataset.persistence.data.sequence.RecordValueGenerator")
+      strategy = "org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
+  private String id;
 
   /**
    * The id mongo.

@@ -1030,5 +1030,29 @@
   {
     "key": "config/apiGateway/zuul.routes.datacollection.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.path",
+    "value": "L3JlcHJlc2VudGF0aXZlLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.path",
+    "value": "L2NvZGVsaXN0Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

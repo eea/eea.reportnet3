@@ -24,8 +24,9 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param description the description
+   * @param released the released
    */
-  void addSnapshot(Long idDataset, String description);
+  void addSnapshot(Long idDataset, String description, Boolean released);
 
   /**
    * Removes the snapshot.
@@ -41,9 +42,10 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param deleteData the delete data
    * @throws EEAException the EEA exception
    */
-  void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData) throws EEAException;
 
   /**
    * Release snapshot.
@@ -52,7 +54,7 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot);
 
 
   /**
@@ -113,5 +115,6 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void deleteAllSnapshots(Long idDataset) throws EEAException;
+
 
 }
