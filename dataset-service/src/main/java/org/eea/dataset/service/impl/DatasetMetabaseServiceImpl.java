@@ -357,6 +357,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       resource.setResourceId(k);
       resource.setEmail(v);
       resource.setResourceGroup(ResourceGroupEnum.DATASET_PROVIDER);
+      resourcesProviders.add(resource);
       ResourceAssignationVO resource2 = new ResourceAssignationVO();
       resource2.setResourceId(dataflowId);
       resource2.setEmail(v);
