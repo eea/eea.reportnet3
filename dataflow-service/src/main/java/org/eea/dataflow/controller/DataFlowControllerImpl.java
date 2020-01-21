@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -52,7 +53,6 @@ public class DataFlowControllerImpl implements DataFlowController {
   private DataflowService dataflowService;
 
 
-
   /**
    * Find by id.
    *
@@ -63,7 +63,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTER'))")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
     if (id == null) {
@@ -275,6 +275,36 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Update data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
+  public void updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+    final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
+    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATE_AFTER_INCORRECT);
+    }
+
+    if (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+    }
+
+    try {
+      dataflowService.updateDataFlow(dataFlowVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Create dataflow failed");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
    * Gets the metabase by id.
@@ -302,5 +332,40 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return result;
   }
+
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_CUSTODIAN')")
+  public void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow) {
+    try {
+      dataflowService.deleteDataFlow(idDataflow);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Update data flow status.
+   *
+   * @param idDataflow the id dataflow
+   * @param status the status
+   */
+  @Override
+  @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
+      @RequestParam(value = "status", required = true) TypeStatusEnum status) {
+    try {
+      dataflowService.updateDataFlowStatus(idDataflow, status);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
 
 }

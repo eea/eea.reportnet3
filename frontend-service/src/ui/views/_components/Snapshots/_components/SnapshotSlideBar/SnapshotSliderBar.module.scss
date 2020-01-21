@@ -21,7 +21,8 @@
 }
 .title {
   composes: heading-3 from global;
-  margin-bottom: 1rem;
+  margin-top: 0.8rem;
+  margin-bottom: 1.8rem;
 }
 .title h3 {
   color: var(--c-corporate-blue);
@@ -31,12 +32,14 @@
 .sidebar {
   overflow-x: hidden;
   overflow-y: auto;
+  width: 30em !important;
 }
 .newContainer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 2rem;
 }
 
 .newContainer button {

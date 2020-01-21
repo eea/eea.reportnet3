@@ -1,17 +1,28 @@
 .listItem {
   margin: 0;
-}
-.itemBox {
-  margin: 0;
-}
-p {
-  margin: 0 0 1em 0;
-}
-.listItemData {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  margin: 0;
-
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  .listItemData {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0;
+    width: 70%;
+    h5 {
+      font-size: 1rem;
+      margin: 0;
+      &.is_released_snapshot {
+        text-transform: capitalize;
+      }
+    }
+    p {
+      margin: 0.25rem 0 0 0;
+    }
+  }
   .listActions {
     display: flex;
     flex-direction: row;
@@ -32,9 +43,21 @@ p {
     }
   }
 }
+.itemBox {
+  margin: 0;
+}
+p {
+  margin: 0 0 1em 0;
+}
+
 .is_released_snapshot {
   color: green;
 }
+h5.is_released_snapshot {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
 .listItemData .listActions button:nth-last-of-type(1) {
   margin-right: 0;
 }

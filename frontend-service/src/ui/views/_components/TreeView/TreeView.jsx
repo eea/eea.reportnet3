@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { capitalize, isUndefined, isNull, isEmpty } from 'lodash';
+import { capitalize, isUndefined, isNull } from 'lodash';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -26,7 +26,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
               <span style={{ color: 'black', fontSize: '14px', fontWeight: 'bold' }}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
-              {property.toString()}
+              {property !== '' ? property.toString() : '-'}
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem
@@ -80,7 +80,7 @@ const getFieldTypeValue = value => {
 const groupFields = fields => {
   if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
     return (
-      <DataTable value={fields} style={{ width: '50%', marginTop: '1rem', marginBottom: '1rem' }}>
+      <DataTable value={fields} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }}>
         {renderColumns(fields)}
       </DataTable>
     );
@@ -100,7 +100,7 @@ const renderColumns = fields =>
       filterMatchMode="contains"
       header={capitalize(field)}
       sortable={true}
-      style={{ width: '150px' }}
+      style={{ width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%' }}
     />
   ));
 

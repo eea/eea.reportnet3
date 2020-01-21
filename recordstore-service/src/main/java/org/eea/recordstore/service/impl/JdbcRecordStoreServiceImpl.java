@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyOut;
 import org.postgresql.core.BaseConnection;
@@ -53,7 +58,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * The Constant FILE_PATTERN_NAME.
    */
-  private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
+  private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
   /**
    * The kafka sender helper.
@@ -102,6 +107,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
+
+  @Autowired
+  private LockService lockService;
 
   /**
    * The Constant LOG_ERROR.
@@ -285,15 +293,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_DatasetValue.snap");
+      String nameFileDatasetValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_DatasetValue.snap");
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
           + idReportingDataset + ".dataset_value) to STDOUT";
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_TableValue.snap");
+      String nameFileTableValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
 
       String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
           + idReportingDataset + ".table_value) to STDOUT";
@@ -301,18 +309,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_RecordValue.snap");
+      String nameFileRecordValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
       String copyQueryRecord =
-          "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
+          "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id,data_provider_code FROM dataset_"
               + idReportingDataset + ".record_value WHERE dataset_partition_id="
               + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_FieldValue.snap");
+      String nameFileFieldValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
       String copyQueryField =
           "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
               + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
@@ -357,7 +365,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
-
   /**
    * Restore data snapshot.
    *
@@ -365,14 +372,37 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType) throws SQLException, IOException {
+      TypeDatasetEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      throws SQLException, IOException {
 
+
+    EventType successEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+    EventType failEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+
+    NotificationVO notificationVO =
+        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            .datasetId(idReportingDataset).build();
+    String signature =
+        deleteData
+            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RELEASE_SNAPSHOT.getValue();
+    Map<String, Object> value = new HashMap<>();
+    value.put("dataset_id", idReportingDataset);
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
@@ -380,21 +410,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
           conexion.getPassword());
       con.setAutoCommit(false);
-      String sql = "";
 
-      switch (datasetType) {
-        case REPORTING:
-          sql = "DELETE FROM dataset_" + idReportingDataset
-              + ".record_value WHERE dataset_partition_id=" + partitionId;
-          break;
-        case DESIGN:
-          sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
-          break;
+      if (deleteData) {
+        String sql = "";
+        switch (datasetType) {
+          case REPORTING:
+            sql = "DELETE FROM dataset_" + idReportingDataset
+                + ".record_value WHERE dataset_partition_id=" + partitionId;
+            break;
+          case DESIGN:
+            sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
+            break;
+        }
+        stmt = con.createStatement();
+        LOG.info("Deleting previous data");
+        stmt.executeUpdate(sql);
       }
-      stmt = con.createStatement();
-      LOG.info("Deleting previous data");
-      stmt.executeUpdate(sql);
-
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
@@ -402,8 +433,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-              idReportingDataset, "_table_TableValue.snap");
+          String nameFileTableValue =
+              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -411,26 +442,42 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           break;
       }
       // Record value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_RecordValue.snap");
+      String nameFileRecordValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
-          + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN";
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_FieldValue.snap");
+      String nameFileFieldValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
 
-
+      // Send kafka event to launch Validation
+      final EEAEventVO event = new EEAEventVO();
+      event.setEventType(successEventType);
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+          idReportingDataset);
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value, notificationVO);
+      } catch (EEAException e) {
+        LOG.error("Error realeasing event {}: ", successEventType, e);
+      }
+      LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
         LOG_ERROR.error("Error restoring the snapshot data. Rollback");
         con.rollback();
+      }
+      try {
+        notificationVO.setError("Error restoring the snapshot data. Rollback");
+        kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value, notificationVO);
+      } catch (EEAException ex) {
+        LOG.error("Error realeasing event " + failEventType, ex);
       }
     } finally {
       if (null != stmt) {
@@ -440,16 +487,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         con.commit();
         con.close();
       }
+      // Release the lock manually
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(signature);
+      if (deleteData) {
+        criteria.add(idReportingDataset);
+      } else {
+        criteria.add(idSnapshot);
+      }
+      lockService.removeLockByCriteria(criteria);
     }
-
-    // Send kafka event to launch Validation
-    final EEAEventVO event = new EEAEventVO();
-    event.setEventType(EventType.SNAPSHOT_RESTORED_EVENT);
-
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-        idReportingDataset);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT,
-        idReportingDataset);
   }
 
   /**

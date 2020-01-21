@@ -23,6 +23,7 @@ CREATE TABLE public.dataset (
 	url_connection varchar(255) NULL,
 	visibility varchar(255) NULL,
 	dataset_schema varchar(255) NULL,
+	data_provider_id int8 NULL,
 	CONSTRAINT dataset_pkey PRIMARY KEY (id)
 );
 
@@ -36,9 +37,7 @@ CREATE TABLE public.contributor (
 );
 
 CREATE TABLE public.data_collection (
-	duedate timestamp NULL,
-	"name" varchar(255) NULL,
-	visible bool NULL,
+	due_date timestamp NULL,
 	id bigserial NOT NULL,
 	CONSTRAINT data_collection_pkey PRIMARY KEY (id),
 	CONSTRAINT dataset_data_collection_fkey FOREIGN KEY (id) REFERENCES dataset(id)
@@ -57,7 +56,7 @@ CREATE TABLE public."document" (
 	"name" varchar(255) NULL,
 	description varchar(255) NULL,
 	dataflow_id serial NOT NULL,
-	size varchar(255) NULL,
+	size int8 NULL,
 	date timestamp NULL,
 	is_public bool NULL,
 	CONSTRAINT document_pkey PRIMARY KEY (id),
@@ -175,8 +174,51 @@ CREATE TABLE public."statistics" (
 	CONSTRAINT statistics_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE public.data_provider (
+	id int8 NOT NULL,
+	"label" varchar(255) NULL,
+	"type" varchar(255) NULL,
+	code varchar NULL,
+	group_id int8 NULL,
+	CONSTRAINT representative_pk PRIMARY KEY (id)
+);
 
+CREATE TABLE public.representative (
+	id int8 NOT NULL,
+	data_provider_id int8 NULL,
+	dataflow_id int8 NULL,
+	user_id varchar(255) NULL,
+	user_mail varchar(255) NULL,
+	CONSTRAINT data_provider_pk FOREIGN KEY (data_provider_id) REFERENCES data_provider(id),
+	CONSTRAINT dataflow_id FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
+);
 
+CREATE TABLE public.codelist_category (
+	id bigserial NOT NULL,
+	description varchar(255) NULL,
+	short_code varchar(255) NULL,
+	CONSTRAINT codelist_category_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.codelist (
+	id bigserial NOT NULL,
+	description varchar(255) NULL,
+	"name" varchar(255) NULL,
+	status int4 NULL,
+	"version" varchar(255) NULL,
+	id_category int8 NOT NULL,
+	CONSTRAINT codelist_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.codelist_item (
+	id bigserial NOT NULL,
+	definition varchar(255) NULL,
+	"label" varchar(255) NULL,
+	short_code varchar(255) NULL,
+	id_codelist int8 NOT NULL,
+	CONSTRAINT codelist_item_pkey PRIMARY KEY (id),
+	CONSTRAINT codelist_fk FOREIGN KEY (id_codelist) REFERENCES codelist(id)
+);
 
 --GRANTS
 
@@ -224,6 +266,16 @@ ALTER TABLE public.snapshot_schema OWNER TO testuser;
 GRANT ALL ON TABLE public.snapshot_schema TO testuser;
 ALTER TABLE public.statistics OWNER TO testuser;
 GRANT ALL ON TABLE public.statistics TO testuser;
+ALTER TABLE public.representative OWNER TO testuser;
+GRANT ALL ON TABLE public.representative TO testuser;
+ALTER TABLE public.data_provider OWNER TO testuser;
+GRANT ALL ON TABLE public.data_provider TO testuser;
+ALTER TABLE public.codelist OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist TO testuser;
+ALTER TABLE public.codelist_category OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist_category TO testuser;
+ALTER TABLE public.codelist_item OWNER TO testuser;
+GRANT ALL ON TABLE public.codelist_item TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);

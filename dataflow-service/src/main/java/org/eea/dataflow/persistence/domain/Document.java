@@ -49,7 +49,7 @@ public class Document {
 
   /** The size. */
   @Column(name = "SIZE")
-  private String size;
+  private Long size;
 
   /** The date. */
   @Column(name = "DATE")

@@ -1,0 +1,13 @@
+.container {
+  margin-top: 65px;
+  @media (max-width: 767px) {
+    margin-top: 2rem;
+    padding-bottom: 4rem;
+  }
+}
+.flow_tab {
+  text-transform: capitalize;
+}
+.p-menuitem-link:focus {
+  box-shadow: none !important;
+}

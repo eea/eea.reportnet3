@@ -17,12 +17,11 @@ public abstract class AbstractEEAEventHandlerCommand implements EEAEventHandlerC
   public abstract EventType getEventType();
 
   /**
-   * Executes the command.
+   * Execute.
    *
    * @param eeaEventVO the eea event VO
    * @throws EEAException the EEA exception
    */
   @Override
   public abstract void execute(EEAEventVO eeaEventVO) throws EEAException;
-
 }

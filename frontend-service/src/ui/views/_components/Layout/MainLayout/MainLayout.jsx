@@ -6,12 +6,15 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { Notifications } from 'ui/views/_components/Notifications';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
-  const resources = useContext(ResourcesContext);
+  const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
   useEffect(() => {
     async function fetchData() {
@@ -20,7 +23,11 @@ const MainLayout = ({ children }) => {
           const userObject = await UserService.refreshToken();
           user.onTokenRefresh(userObject);
         } catch (error) {
-          const logout = await UserService.logout();
+          notifications.add({
+            key: 'TOKEN_REFRESH_ERROR',
+            content: {}
+          });
+          await UserService.logout();
           user.onLogout();
         }
       }
@@ -29,9 +36,11 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
   }, []);
+  useSocket();
   return (
     <Fragment>
       <Navigation />
+      <Notifications />
       {/* <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
         {resources.messages['disclaimerTitle']}

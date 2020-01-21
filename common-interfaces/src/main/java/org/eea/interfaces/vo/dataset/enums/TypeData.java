@@ -82,8 +82,11 @@ public enum TypeData {
    * select POLYGON(path'((17.0,30.0) , (15.0,12.0) , (-15.0,-30.0) , (17.0,30.0))');
    * 
    */
+  POLYGON("POLYGON"),
 
-  POLYGON("POLYGON");
+
+  /** The codelist. */
+  CODELIST("CODELIST");
 
   /** The value. */
   private final String value;

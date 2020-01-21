@@ -41,7 +41,10 @@ import {
   faMapPin,
   faDrawPolygon,
   faBars,
-  faHome
+  faHome,
+  faCloudUploadAlt,
+  faThList,
+  faMinus
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -51,7 +54,9 @@ import {
   faClone,
   faComments,
   faQuestionCircle as farQuestionCircle,
-  faCircle
+  faCircle,
+  faMinusSquare,
+  faPlusSquare
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -158,6 +163,10 @@ export const AwesomeIcons = icon => {
       return faDatabase;
     case 'plus':
       return faPlus;
+    case 'minusSquare':
+      return faMinusSquare;
+    case 'plusSquare':
+      return faPlusSquare;
     case 'square':
       return farSquareRegular;
     case 'checkedSquare':
@@ -214,12 +223,16 @@ export const AwesomeIcons = icon => {
       return faInfo;
     case 'infoCircle':
       return faInfoCircle;
+    case 'list':
+      return faThList;
     case 'question':
       return faQuestion;
     case 'questionCircle':
       return farQuestionCircle;
     case 'home':
       return faHome;
+    case 'released':
+      return faCloudUploadAlt;
     default:
       return faFileAlt;
   }

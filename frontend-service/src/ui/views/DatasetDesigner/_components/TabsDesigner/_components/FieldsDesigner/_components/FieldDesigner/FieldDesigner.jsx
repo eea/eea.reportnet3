@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { isUndefined, isNull } from 'lodash';
-import PropTypes from 'prop-types';
 
 import styles from './FieldDesigner.module.css';
 
@@ -8,16 +7,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { InputText } from 'ui/views/_components/InputText';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
   datasetId,
   fieldId,
+  fieldDescription,
   fieldName,
   fieldType,
   index,
@@ -62,10 +63,12 @@ export const FieldDesigner = ({
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
 
-  const [animation, setAnimation] = useState('');
+  const [animation] = useState('');
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+  const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [initialFieldValue, setInitialFieldValue] = useState();
+  const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -76,9 +79,11 @@ export const FieldDesigner = ({
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    if (!isUndefined(inputRef.current)) {
-      if (index === '-1') {
-        inputRef.current.element.focus();
+    if (totalFields > 0) {
+      if (!isUndefined(inputRef.current)) {
+        if (index === '-1') {
+          inputRef.current.element.focus();
+        }
       }
     }
   }, [totalFields]);
@@ -130,15 +135,38 @@ export const FieldDesigner = ({
     if (fieldId === '-1') {
       if (type !== '') {
         if (!isUndefined(fieldValue) && fieldValue !== '') {
-          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue);
+          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
         }
       }
     } else {
       if (type !== '' && type !== fieldValue) {
-        fieldUpdate(recordId, fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+        fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
       } else {
         if (type !== '') {
           onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+        }
+      }
+    }
+  };
+
+  const onBlurFieldDescription = description => {
+    if (!isUndefined(description)) {
+      if (!isDragging) {
+        //New field
+        if (fieldId === '-1') {
+          if (
+            !isUndefined(fieldTypeValue) &&
+            !isNull(fieldTypeValue) &&
+            (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+            !isNull(fieldValue) &&
+            fieldValue !== ''
+          ) {
+            onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
+          }
+        } else {
+          if (description !== initialDescriptionValue) {
+            fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, description);
+          }
         }
       }
     }
@@ -155,7 +183,7 @@ export const FieldDesigner = ({
             // if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
             if (!checkDuplicates(name, fieldId)) {
               if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
-                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
               }
             } else {
               onShowDialogError(
@@ -172,7 +200,7 @@ export const FieldDesigner = ({
           } else {
             if (name !== initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate(recordId, fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
               } else {
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
@@ -187,19 +215,21 @@ export const FieldDesigner = ({
     }
   };
 
-  const onFieldAdd = async (recordId, type, value) => {
+  const onFieldAdd = async (recordId, type, value, description) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
         name: value,
-        type: type
+        type,
+        description
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
       } else {
         setFieldValue('');
         setFieldTypeValue('');
-        onNewFieldAdd(response.data, value, recordId, type);
+        setFieldDescriptionValue('');
+        onNewFieldAdd(response.data, value, recordId, type, description);
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
@@ -281,12 +311,13 @@ export const FieldDesigner = ({
     // setPosition(fieldRef.current.getBoundingClientRect());
   };
 
-  const onKeyChange = event => {
+  const onKeyChange = (event, input) => {
     if (event.key === 'Escape') {
-      setFieldValue(initialFieldValue);
+      input === 'NAME' ? setFieldValue(initialFieldValue) : setFieldDescriptionValue(initialDescriptionValue);
     } else if (event.key == 'Enter') {
-      event.preventDefault();
-      onBlurFieldName(event.target.value);
+      if (input === 'NAME') {
+        onBlurFieldName(event.target.value);
+      }
     }
   };
 
@@ -313,19 +344,19 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (recordId, fieldSchemaId, type, value) => {
+  const fieldUpdate = async (fieldSchemaId, type, value, description) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
-        recordId,
         fieldSchemaId,
         name: value,
-        type: type
+        type: type,
+        description
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type);
+        onFieldUpdate(fieldId, value, type, description);
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -375,7 +406,8 @@ export const FieldDesigner = ({
         <InputText
           autoFocus={false}
           className={styles.inputField}
-          key={fieldId}
+          // key={`${fieldId}_${index}`} --> Problem with DOM modification
+          ref={inputRef}
           onBlur={e => {
             setIsEditing(false);
             onBlurFieldName(e.target.value);
@@ -385,10 +417,29 @@ export const FieldDesigner = ({
             setInitialFieldValue(e.target.value);
             setIsEditing(true);
           }}
-          onKeyDown={e => onKeyChange(e, index)}
+          onKeyDown={e => onKeyChange(e, 'NAME')}
           placeholder={resources.messages['newFieldPlaceHolder']}
-          inputRef={inputRef}
+          required={!isUndefined(fieldValue) ? fieldValue === '' : fieldName === ''}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
+        />
+        <InputTextarea
+          autoFocus={false}
+          collapsedHeight={30}
+          expandableOnClick={true}
+          className={styles.inputFieldDescription}
+          key={fieldId}
+          onBlur={e => {
+            setIsEditing(false);
+            onBlurFieldDescription(e.target.value);
+          }}
+          onChange={e => setFieldDescriptionValue(e.target.value)}
+          onFocus={e => {
+            setInitialDescriptionValue(e.target.value);
+            setIsEditing(true);
+          }}
+          onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
+          placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
+          value={!isUndefined(fieldDescriptionValue) ? fieldDescriptionValue : fieldDescription}
         />
         <Dropdown
           className={styles.dropdownFieldType}
@@ -403,6 +454,7 @@ export const FieldDesigner = ({
           }}
           optionLabel="fieldType"
           options={fieldTypes}
+          required={true}
           placeholder={resources.messages['newFieldTypePlaceHolder']}
           // showClear={true}
           scrollHeight="450px"

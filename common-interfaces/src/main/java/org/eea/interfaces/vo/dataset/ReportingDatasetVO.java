@@ -33,4 +33,7 @@ public class ReportingDatasetVO implements Serializable {
   /** The dataset schema. */
   private String datasetSchema;
 
+  /** The name dataset schema. */
+  private String nameDatasetSchema;
+
 }

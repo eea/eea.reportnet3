@@ -25,11 +25,10 @@ public interface DatasetSchemaService {
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id
-   * @param datasetSchemaName the dataset schema name
    * @return the object id
    * @throws EEAException the EEA exception
    */
-  ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName) throws EEAException;
+  ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException;
 
   /**
    * Gets dataschema by id.
@@ -72,7 +71,6 @@ public interface DatasetSchemaService {
    * @param role the role
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
-
 
   /**
    * Replace schema.
@@ -175,4 +173,22 @@ public interface DatasetSchemaService {
    */
   Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
+
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the boolean
+   */
+  Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
+
+  /**
+   * Gets the table schema name.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the table schema name
+   */
+  String getTableSchemaName(String datasetSchemaId, String tableSchemaId);
 }

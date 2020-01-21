@@ -60,7 +60,7 @@ public class LockControllerTest {
    */
   @Test
   public void findOneLockTest() {
-    Mockito.when(lockService.findLock(Mockito.any())).thenReturn(new LockVO());
+    Mockito.when(lockService.findById(Mockito.any())).thenReturn(new LockVO());
     Assert.assertNotNull(lockController.findOneLock(1));
   }
 }

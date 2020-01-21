@@ -7,11 +7,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
@@ -41,6 +44,7 @@ public class ValidationHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
@@ -55,6 +59,8 @@ public class ValidationHelper {
    * The processes map.
    */
   private ConcurrentHashMap<String, Integer> processesMap;
+
+  /** The drools active sessions. */
   private Map<String, KieBase> droolsActiveSessions;
 
   /**
@@ -69,6 +75,7 @@ public class ValidationHelper {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
+  /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
 
@@ -118,22 +125,22 @@ public class ValidationHelper {
   }
 
   /**
-   * Execute file process.
+   * Execute validation. The lock would be released on ValidationHelper.checkFinishedValidations(..)
    *
    * @param datasetId the dataset id
-   * @param uuId the main process id
-   *
+   * @param uuId the uu id
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeValidation(final Long datasetId, String uuId) throws EEAException {
+  @LockMethod(removeWhenFinish = false, isController = false)
+  public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
+      String uuId) {
     synchronized (processesMap) {
       processesMap.put(uuId, 0);
     }
     TenantResolver.setTenantName("dataset_" + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
-
     LOG.info("Validating Dataset");
     releaseDatasetValidation(datasetId, uuId);
     LOG.info("Validating Tables");
@@ -177,6 +184,12 @@ public class ValidationHelper {
   }
 
 
+  /**
+   * Release table validation.
+   *
+   * @param datasetId the dataset id
+   * @param uuId the uu id
+   */
   private void releaseTableValidation(Long datasetId, String uuId) {
     TenantResolver.setTenantName("dataset_" + datasetId);
     Integer totalTables = tableRepository.findAllTables().size();
@@ -281,25 +294,25 @@ public class ValidationHelper {
   public void checkFinishedValidations(final Long datasetId, final String uuid)
       throws EEAException {
     if (processesMap.get(uuid) == 0) {
+      // Release the lock manually
+      List<Object> criteria1 = new ArrayList<>();
+      List<Object> criteria2 = new ArrayList<>();
+      criteria1.add(LockSignature.EXECUTE_VALIDATION.getValue());
+      criteria1.add(datasetId);
+      criteria2.add(LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+      criteria2.add(datasetId);
+      lockService.removeLockByCriteria(criteria1);
+      lockService.removeLockByCriteria(criteria2);
+
       // after last dataset validations have been saved, an event is sent to notify it
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
       value.put("uuid", uuid);
       this.removeKieBase(uuid);
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value);
-
-      // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      final EEAEventVO event = new EEAEventVO();
-      final Map<String, Object> data = new HashMap<>();
-      data.put("dataset_id", datasetId);
-      event.setEventType(EventType.COMMAND_EXECUTE_VALIDATION);
-      event.setData(data);
-      criteria.add(LockSignature.EXECUTE_VALIDATION.getValue());
-      criteria.add(event);
-      lockService.removeLockByCriteria(criteria);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetId(datasetId).build());
     }
   }
-
 }

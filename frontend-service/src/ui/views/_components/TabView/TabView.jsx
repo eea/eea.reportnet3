@@ -2,15 +2,13 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import { isUndefined, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import UniqueComponentId from 'ui/UniqueComponentId';
-
-import { config } from 'conf';
+import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
 
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Icon } from 'ui/views/_components/Icon';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Tab } from './_components/Tab';
 
 export const TabView = ({
@@ -152,6 +150,7 @@ export const TabView = ({
         checkEditingTabs={checkEditingTabs}
         children={tab.props.children}
         className={className}
+        disabled={tab.props.disabled}
         editable={tab.props.editable}
         designMode={designMode}
         divScrollTabsRef={divTabsRef.current}

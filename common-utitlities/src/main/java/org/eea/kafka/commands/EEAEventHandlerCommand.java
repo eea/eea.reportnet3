@@ -16,5 +16,4 @@ public interface EEAEventHandlerCommand {
    * @throws EEAException the EEA exception
    */
   void execute(EEAEventVO eeaEventVO) throws EEAException;
-
 }

@@ -53,9 +53,8 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
     return EventType.CONNECTION_CREATED_EVENT;
   }
 
-
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
    */

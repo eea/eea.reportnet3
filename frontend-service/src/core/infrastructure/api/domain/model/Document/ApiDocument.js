@@ -1,6 +1,6 @@
-import { DataflowConfig } from 'conf/domain/model/DataFlow';
+import { DataflowConfig } from 'conf/domain/model/Dataflow';
 import { DocumentConfig } from 'conf/domain/model/Document';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
@@ -36,15 +36,49 @@ export const apiDocument = {
     });
     return response.data;
   },
-  upload: async (dataflowId, description, language, file) => {
+  upload: async (dataflowId, description, language, file, isPublic) => {
     const tokens = userStorage.get();
     const formData = new FormData();
     formData.append('file', file, file.name);
     const response = await HTTPRequester.postWithFiles({
       url: getUrl(DocumentConfig.uploadDocument, {
         dataflowId: dataflowId,
-        description: description,
-        language: language
+        description: encodeURIComponent(description),
+        language: language,
+        isPublic: isPublic
+      }),
+      queryString: {},
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': undefined
+      }
+    });
+    return response.status;
+  },
+  editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
+    const tokens = userStorage.get();
+    const formData = new FormData();
+    const isEmpty = arg => {
+      for (var item in arg) {
+        return false;
+      }
+      return true;
+    };
+
+    if (isEmpty(file)) {
+      formData.append('file', null);
+    } else {
+      formData.append('file', file, file.name);
+    }
+
+    const response = await HTTPRequester.putWithFiles({
+      url: getUrl(DocumentConfig.editDocument, {
+        dataflowId: dataflowId,
+        description: encodeURIComponent(description),
+        language: language,
+        isPublic: isPublic,
+        documentId: documentId
       }),
       queryString: {},
       data: formData,

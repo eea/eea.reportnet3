@@ -71,7 +71,6 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /**
    * The kie base manager.
    */
@@ -150,11 +149,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-
   /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
-
 
   /**
    * Gets the element lenght.
@@ -311,10 +308,7 @@ public class ValidationServiceImpl implements ValidationService {
     } finally {
       session.destroy();
     }
-
-
   }
-
 
   /**
    * Validate record.
@@ -354,7 +348,6 @@ public class ValidationServiceImpl implements ValidationService {
       session.destroy();
     }
   }
-
 
   /**
    * Validate data set data.
@@ -517,7 +510,7 @@ public class ValidationServiceImpl implements ValidationService {
     for (TableValidation tableValidation : tableValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(tableValidation.getTableValue().getId());
+      error.setIdObject(tableValidation.getTableValue().getId().toString());
       error.setIdValidation(tableValidation.getValidation().getId());
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
@@ -552,7 +545,7 @@ public class ValidationServiceImpl implements ValidationService {
         validationDatasetRepository.findByValidationIds(idValidations);
     for (DatasetValidation datasetValidation : datasetValidations) {
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(datasetValidation.getDatasetValue().getId());
+      error.setIdObject(datasetValidation.getDatasetValue().getId().toString());
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
@@ -801,6 +794,4 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return true;
   }
-
-
 }

@@ -379,6 +379,12 @@ public class DataFlowControllerImplTest {
     }
   }
 
+  /**
+   * Creates the data throw repeat name.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createDataThrowRepeatName() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -417,6 +423,100 @@ public class DataFlowControllerImplTest {
     Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
+  /**
+   * Creates the data flow.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void updateFlow() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    doNothing().when(dataflowService).updateDataFlow(dataflowVO);
+    dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
+  }
+
+
+  /**
+   * Update flow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateFlowThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date(-1));
+    dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow null throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDataFlowNullThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    try {
+      dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  /**
+   * Creates the data flow date today throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDataFlowDateTodayThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Date date = new Date();
+    date.setTime(date.getTime() - 1000L);
+    dataflowVO.setDeadlineDate(date);
+    try {
+      dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  /**
+   * Update data throw repeat name.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDataThrowRepeatName() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    EEAException EEAException = new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    doThrow(EEAException).when(dataflowService).updateDataFlow(dataflowVO);
+    try {
+      dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
+  }
 
 
   /**
@@ -457,6 +557,54 @@ public class DataFlowControllerImplTest {
     }
   }
 
+  /**
+   * Delete dataflow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteDataflowThrow() throws Exception {
+    EEAException Exception = new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    doThrow(Exception).when(dataflowService).deleteDataFlow(Mockito.anyLong());
+    try {
+      dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  /**
+   * Delete dataflow.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDataflow() throws Exception {
+    dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
+    Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
+  }
+
+  @Test
+  public void testUpdateStatus() throws EEAException {
+    dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).updateDataFlowStatus(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+
+  @Test
+  public void testUpdateStatusException() throws EEAException {
+    try {
+      doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
+          .updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
+      dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
+    }
+
+  }
 
 }
 

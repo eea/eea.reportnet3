@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -46,6 +48,10 @@ public class KafkaSender {
    * @param event the event
    */
   public void sendMessage(final EEAEventVO event) {
+
+    event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
+    event.getData().put("token",
+        String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
     Message<EEAEventVO> message = null;
     final List<PartitionInfo> partitions =

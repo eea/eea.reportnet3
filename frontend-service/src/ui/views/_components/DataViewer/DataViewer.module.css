@@ -1,0 +1,14 @@
+.invisibleHeader {
+  display: none;
+}
+.actionTemplate {
+  display: flex;
+}
+.iconTooltipWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.validationCol {
+  width: 15px;
+}

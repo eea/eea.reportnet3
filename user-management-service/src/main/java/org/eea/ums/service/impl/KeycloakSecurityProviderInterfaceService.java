@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -22,6 +24,7 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -105,6 +108,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Map token to VO.
+   *
+   * @param tokenInfo the token info
+   *
+   * @return the token VO
+   */
   private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
     TokenVO tokenVO = new TokenVO();
     tokenVO.setAccessToken(tokenInfo.getAccessToken());
@@ -247,14 +257,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
-    //Retrieve the groups available in keycloak. Keycloak does not support queries on groups
+    // Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
-      //Retrieve the group id of the group where the user will be added
+      // Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.equalsIgnoreCase(groupInfo.getName()))
           .map(GroupInfo::getId).findFirst().orElse("");
-      //Finally add the user to the group
+      // Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
       }
@@ -299,6 +309,83 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   *
+   * @return the groups by id resource type
+   */
+  @Override
+  public List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource,
+      ResourceTypeEnum resourceType) {
+    // we get all groups
+    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    List<ResourceInfoVO> resourceReturn = new ArrayList<>();
+    // ge create the resource that we are looking for it to filter
+    String resourceToContain = resourceType + "-" + idResource.toString() + "-";
+
+    // we do a for and find the data that we need
+    if (null != groups && groups.length > 0) {
+      Arrays.asList(groups).stream().forEach(groupInfo -> {
+        if (groupInfo.getName().contains(resourceToContain)) {
+          ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+          resourceInfoVO.setName(groupInfo.getName());
+          resourceInfoVO.setResourceId(idResource);
+          resourceInfoVO.setResourceTypeEnum(resourceType);
+          resourceInfoVO.setPath(groupInfo.getPath());
+          resourceInfoVO.setAttributes(groupInfo.getAttributes());
+          resourceReturn.add(resourceInfoVO);
+        }
+      });
+
+    }
+
+    return resourceReturn;
+  }
+
+  /**
+   * Adds the contributor to user group.
+   *
+   * @param userMail the user mail
+   * @param groupName the group name
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
+    UserRepresentation[] users = keycloakConnectorService.getUsers();
+    Optional<UserRepresentation> contributor = Arrays.asList(users).stream()
+        .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+        .findFirst();
+    contributor.orElseThrow(() -> new EEAException("Error, user not found"));
+
+    this.addUserToUserGroup(contributor.get().getId(), groupName);
+
+  }
+
+
+  /**
+   * Creates the resource instance.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @Override
+  public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) {
+    for (ResourceInfoVO resourceInfoVO : resourceInfoVOs) {
+      GroupInfo groupInfo = new GroupInfo();
+      String groupName =
+          ResourceGroupEnum
+              .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
+                  resourceInfoVO.getSecurityRoleEnum())
+              .getGroupName(resourceInfoVO.getResourceId());
+      groupInfo.setName(groupName);
+      groupInfo.setPath("/" + groupName);
+      groupInfo.setAttributes(resourceInfoVO.getAttributes());
+      keycloakConnectorService.createGroupDetail(groupInfo);
+    }
   }
 
 

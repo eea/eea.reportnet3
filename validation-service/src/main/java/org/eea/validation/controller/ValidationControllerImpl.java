@@ -1,6 +1,7 @@
 package org.eea.validation.controller;
 
 import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -8,25 +9,31 @@ import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
+import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 
 /**
  * The Class ValidationServiceController.
@@ -47,24 +54,34 @@ public class ValidationControllerImpl implements ValidationController {
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
+  @Autowired
+  private ValidationHelper validationHelper;
+
   /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
 
   /**
-   * Validate data set data.
+   * Validate data set data. The lock should be released on
+   * ValidationHelper.checkFinishedValidations(..)
    *
    * @param datasetId the dataset id
    */
   @Override
-  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public void validateDataSetData(@PathVariable("id") Long datasetId) {
+  @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CacheEvict(value = {"cacheStatistics_" + "#datasetId"})
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
+  @LockMethod(removeWhenFinish = false)
+  public void validateDataSetData(
+      @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    validationService.forceValidations(datasetId);
+    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
   }
 
   /**

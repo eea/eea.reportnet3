@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
@@ -22,40 +23,59 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
+/**
+ * The Class ValidationHelperTest.
+ */
 public class ValidationHelperTest {
 
+  /** The validation helper. */
   @InjectMocks
   public ValidationHelper validationHelper;
 
+  /** The validation service. */
   @Mock
   private ValidationService validationService;
 
+  /** The drools active sessions. */
   @Mock
   private Map<String, KieBase> droolsActiveSessions;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The kie base. */
   @Mock
   private KieBase kieBase;
 
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
 
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+    ThreadPropertiesManager.setVariable("user", "user");
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 1);
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 1);
   }
 
 
 
+  /**
+   * Test get kie base.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testGetKieBase() throws EEAException {
     Map<String, KieBase> droolsActiveSessions = new ConcurrentHashMap<>();
@@ -64,6 +84,9 @@ public class ValidationHelperTest {
     assertEquals(kieBase, validationHelper.getKieBase("", 1L));
   }
 
+  /**
+   * Test remove kie base.
+   */
   @Test
   public void testRemoveKieBase() {
     Mockito.when(droolsActiveSessions.containsKey(Mockito.any())).thenReturn(true);
@@ -71,6 +94,11 @@ public class ValidationHelperTest {
     Mockito.verify(droolsActiveSessions).remove(Mockito.any());
   }
 
+  /**
+   * Test execute validation.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testExecuteValidation() throws EEAException {
     List<TableValue> tables = new ArrayList<>();
@@ -83,6 +111,9 @@ public class ValidationHelperTest {
     validationHelper.executeValidation(1L, "");
   }
 
+  /**
+   * Test get processes map.
+   */
   @Test
   public void testGetProcessesMap() {
     ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<>();;
@@ -90,15 +121,18 @@ public class ValidationHelperTest {
     assertEquals(processesMap, validationHelper.getProcessesMap());
   }
 
-
+  /**
+   * Test check finished validations.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testCheckFinishedValidations() throws EEAException {
     ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<>();;
     processesMap.put("uuid", 0);
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     validationHelper.checkFinishedValidations(1L, "uuid");
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
 }

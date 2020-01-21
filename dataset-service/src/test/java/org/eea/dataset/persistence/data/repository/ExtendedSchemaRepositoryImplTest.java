@@ -39,6 +39,7 @@ public class ExtendedSchemaRepositoryImplTest {
   @InjectMocks
   private ExtendedSchemaRepositoryImpl extendedSchemaRepositoryImpl;
 
+  /** The expected ex. */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
@@ -54,15 +55,19 @@ public class ExtendedSchemaRepositoryImplTest {
   @Mock
   private MongoDatabase mongoDatabase;
 
+  /** The mongo collection. */
   @Mock
   private MongoCollection<Document> mongoCollection;
 
+  /** The field schema. */
   @Mock
-  private FieldSchema fieldSchema;
+  private Document fieldSchema;
 
+  /** The table schema. */
   @Mock
-  private TableSchema tableSchema;
+  private Document tableSchema;
 
+  /** The find. */
   @Mock
   private FindIterable<Document> find;
 
@@ -147,7 +152,6 @@ public class ExtendedSchemaRepositoryImplTest {
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
-    Mockito.when(fieldSchema.toJSON()).thenReturn("{\"_id\":\"sampleId\"}");
     Mockito.when(
         mongoCollection.updateMany(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
@@ -168,6 +172,11 @@ public class ExtendedSchemaRepositoryImplTest {
     extendedSchemaRepositoryImpl.updateFieldSchema("<id>", fieldSchema);
   }
 
+  /**
+   * Creates the field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createFieldSchemaTest1() throws EEAException {
     Mockito
@@ -177,6 +186,11 @@ public class ExtendedSchemaRepositoryImplTest {
         .createFieldSchema("5dd285cde8fd9d1ea8c42b1b", new FieldSchema()));
   }
 
+  /**
+   * Creates the field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createFieldSchemaTest2() throws EEAException {
     Mockito
@@ -187,29 +201,42 @@ public class ExtendedSchemaRepositoryImplTest {
     extendedSchemaRepositoryImpl.createFieldSchema("5dd285cde8fd9d1ea8c42b1b", new FieldSchema());
   }
 
+  /**
+   * Update table schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateTableSchemaTest1() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
     Mockito.when(
         mongoCollection.updateOne(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Mockito.when(tableSchema.toJSON()).thenReturn("{\"key\":\"value\"}");
     Assert.assertEquals(UpdateResult.acknowledged(1L, 1L, null),
         extendedSchemaRepositoryImpl.updateTableSchema("5dd285cde8fd9d1ea8c42b1b", tableSchema));
   }
 
+  /**
+   * Update table schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateTableSchemaTest2() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
     Mockito.when(
         mongoCollection.updateOne(Mockito.any(), Mockito.any(), Mockito.any(UpdateOptions.class)))
         .thenThrow(IllegalArgumentException.class);
-    Mockito.when(tableSchema.toJSON()).thenReturn("{\"key\":\"value\"}");
     expectedEx.expect(EEAException.class);
     expectedEx.expectCause(IsInstanceOf.<Throwable>instanceOf(IllegalArgumentException.class));
     extendedSchemaRepositoryImpl.updateTableSchema("5dd285cde8fd9d1ea8c42b1b", tableSchema);
   }
 
+  /**
+   * Insert table in position test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertTableInPositionTest1() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -219,6 +246,11 @@ public class ExtendedSchemaRepositoryImplTest {
         .insertTableInPosition("5dd285cde8fd9d1ea8c42b1b", new Document(), 1));
   }
 
+  /**
+   * Insert table in position test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertTableInPositionTest2() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -227,6 +259,11 @@ public class ExtendedSchemaRepositoryImplTest {
     extendedSchemaRepositoryImpl.insertTableInPosition("", new Document(), 1);
   }
 
+  /**
+   * Insert field in position test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertFieldInPositionTest1() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -236,6 +273,11 @@ public class ExtendedSchemaRepositoryImplTest {
         .insertFieldInPosition("5dd285cde8fd9d1ea8c42b1b", new Document(), 1));
   }
 
+  /**
+   * Insert field in position test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertFieldInPositionTest2() throws EEAException {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -244,6 +286,9 @@ public class ExtendedSchemaRepositoryImplTest {
     extendedSchemaRepositoryImpl.insertFieldInPosition("", new Document(), 1);
   }
 
+  /**
+   * Find table schema test 1.
+   */
   @Test
   public void findTableSchemaTest1() {
     List<Document> list = new ArrayList<>();
@@ -259,6 +304,9 @@ public class ExtendedSchemaRepositoryImplTest {
         .findTableSchema("5dd285cde8fd9d1ea8c42b1b", "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema test 2.
+   */
   @Test
   public void findTableSchemaTest2() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -269,6 +317,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find field schema test 1.
+   */
   @Test
   public void findFieldSchemaTest1() {
     List<Document> list = new ArrayList<>();
@@ -287,6 +338,9 @@ public class ExtendedSchemaRepositoryImplTest {
             "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find field schema test 2.
+   */
   @Test
   public void findFieldSchemaTest2() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -295,5 +349,17 @@ public class ExtendedSchemaRepositoryImplTest {
     Mockito.when(find.first()).thenReturn(null);
     Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
         "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Update dataset schema description test.
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.updateOne(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertEquals(UpdateResult.acknowledged(1L, 1L, null), extendedSchemaRepositoryImpl
+        .updateDatasetSchemaDescription("5dd285cde8fd9d1ea8c42b1b", "description"));
   }
 }

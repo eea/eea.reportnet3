@@ -15,16 +15,19 @@ import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -35,6 +38,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,16 +122,48 @@ public class DatasetSchemaServiceTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  /**
+   * The design dataset repository.
+   */
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
+
+  /**
+   * The table schema.
+   */
+  @Mock
+  private Document tableSchema;
+
+  /**
+   * The field schema.
+   */
+  @Mock
+  private Document fieldSchema;
+
+  /**
+   * The field schema VO.
+   */
+  @Mock
+  private FieldSchemaVO fieldSchemaVO;
+
+  /**
+   * The table schema VO.
+   */
+  @Mock
+  private TableSchemaVO tableSchemaVO;
 
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
-
+    ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -386,10 +422,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
     when(dataSchemaMapper.entityToClass((DataSetSchema) Mockito.any())).thenReturn(dataschema);
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new DesignDataset()));
     assertEquals("not equals", dataschema,
         dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73"));
-
-
   }
 
 
@@ -432,14 +468,12 @@ public class DatasetSchemaServiceTest {
     assertEquals("Not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
 
     DataSetSchema schema2 = new DataSetSchema();
-    schema2.setNameDataSetSchema("test");
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
@@ -455,7 +489,7 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
-    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema"));
+    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 
   /**
@@ -466,7 +500,7 @@ public class DatasetSchemaServiceTest {
   @Test(expected = EEAException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
-    dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema");
+    dataSchemaServiceImpl.createEmptyDataSetSchema(1L);
   }
 
   /**
@@ -484,10 +518,10 @@ public class DatasetSchemaServiceTest {
   @Test
   public void createGroupAndAddUserTest() {
     Mockito.doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
         Mockito.any());
     dataSchemaServiceImpl.createGroupAndAddUser(1L);
-    Mockito.verify(userManagementControllerZull, times(1)).addContributorToResource(Mockito.any(),
+    Mockito.verify(userManagementControllerZull, times(1)).addUserToResource(Mockito.any(),
         Mockito.any());
   }
 
@@ -509,7 +543,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
@@ -584,13 +618,83 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.NUMBER);
+    Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
+        .thenReturn(TypeData.TEXT.getValue());
+    Mockito.when(fieldSchemaVO.getDescription()).thenReturn("description");
+    Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
-    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
-    fieldSchemaVO.setType(TypeData.TEXT);
+    Assert.assertEquals("NUMBER", dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+  }
 
-    Assert.assertEquals("TEXT", dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+  /**
+   * Update field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaTest2() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.TEXT);
+    Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
+        .thenReturn(TypeData.TEXT.getValue());
+    Mockito.when(fieldSchemaVO.getDescription()).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getName()).thenReturn(null);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+  }
+
+  /**
+   * Update field schema test 3.
+   */
+  @Test
+  public void updateFieldSchemaTest3() {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    try {
+      dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.FIELD_NOT_FOUND, e.getMessage());
+    }
+  }
+
+  /**
+   * Update field schema test 4.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaTest4() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    try {
+      dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.FIELD_NOT_FOUND, e.getMessage());
+    }
+  }
+
+  /**
+   * Update field schema test 5.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaTest5() throws EEAException {
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenThrow(IllegalArgumentException.class);
+    try {
+      dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(IllegalArgumentException.class, e.getCause().getClass());
+    }
   }
 
   /**
@@ -608,7 +712,6 @@ public class DatasetSchemaServiceTest {
     table2.setIdTableSchema(new ObjectId());
     table2.setNameTableSchema("test");
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
@@ -630,7 +733,6 @@ public class DatasetSchemaServiceTest {
   public void deleteTableSchemaExceptionTest() throws EEAException {
     ObjectId id = new ObjectId();
     DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = null;
     schema.setTableSchemas(listaTables);
@@ -641,60 +743,72 @@ public class DatasetSchemaServiceTest {
   }
 
   /**
-   * Update table schema test.
+   * Update table schema test 1.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateTableSchemaTest() throws EEAException {
-    ObjectId id = new ObjectId();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(id);
-    table.setNameTableSchema("test");
-    DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
-    schema.setIdDataFlow(1L);
-    List<TableSchema> listaTables = new ArrayList<>();
-    listaTables.add(table);
-    schema.setTableSchemas(listaTables);
-    TableSchemaVO tableVO = new TableSchemaVO();
-    tableVO.setIdTableSchema(id.toString());
-    UpdateResult updateResult = UpdateResult.acknowledged(1L, 1L, null);
+  public void updateTableSchemaTest1() throws EEAException {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    try {
+      dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+    }
+  }
+
+  /**
+   * Update table schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateTableSchemaTest2() throws EEAException {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(tableSchema);
+    Mockito.when(tableSchemaVO.getDescription()).thenReturn("description");
+    Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn("nameTableSchema");
+    Mockito.when(tableSchema.put(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(updateResult);
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
-        .thenReturn(new TableSchema());
-    dataSchemaServiceImpl.updateTableSchema(id.toString(), tableVO);
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), tableSchemaVO);
     Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
 
   /**
-   * Update table schema dataset null test.
+   * Update table schema test 3.
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
-  public void updateTableSchemaNoResultsTest() throws EEAException {
-    UpdateResult updateResult = UpdateResult.acknowledged(1L, 0L, null);
+  @Test
+  public void updateTableSchemaTest3() throws EEAException {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(tableSchema);
+    Mockito.when(tableSchemaVO.getDescription()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(updateResult);
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
-        .thenReturn(new TableSchema());
-    dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    try {
+      dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), tableSchemaVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+    }
   }
 
   /**
-   * Update table schema table null test.
+   * Update table schema test 4.
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
-  public void updateTableSchemaExceptionTest() throws EEAException {
-    Mockito.doThrow(new IllegalArgumentException()).when(schemasRepository)
-        .updateTableSchema(Mockito.any(), Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
-        .thenReturn(new TableSchema());
-    dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
+  @Test
+  public void updateTableSchemaTest4() throws EEAException {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenThrow(IllegalArgumentException.class);
+    try {
+      dataSchemaServiceImpl.updateTableSchema("fail", tableSchemaVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(IllegalArgumentException.class, e.getCause().getClass());
+    }
   }
 
   /**
@@ -708,32 +822,6 @@ public class DatasetSchemaServiceTest {
         .thenReturn(new TableSchema());
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), new TableSchemaVO(), 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Update field schema test 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateFieldSchemaTest2() throws EEAException {
-    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-
-    Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", new FieldSchemaVO()));
-  }
-
-  /**
-   * Update field schema test 3.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void updateFieldSchemaTest3() throws EEAException {
-    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenThrow(IllegalArgumentException.class);
-
-    Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", new FieldSchemaVO()));
   }
 
   /**
@@ -828,6 +916,7 @@ public class DatasetSchemaServiceTest {
    * Gets the dataset schema id test.
    *
    * @return the dataset schema id test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -840,6 +929,7 @@ public class DatasetSchemaServiceTest {
    * Gets the dataset schema id success test.
    *
    * @return the dataset schema id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -849,5 +939,40 @@ public class DatasetSchemaServiceTest {
     when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(datasetMetabase));
     assertEquals("schema", dataSchemaServiceImpl.getDatasetSchemaId(1L));
+  }
+
+  /**
+   * Update dataset schema description test.
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest1() {
+    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+  }
+
+  /**
+   * Update dataset schema description test 2.
+   */
+  @Test
+  public void updateDatasetSchemaDescriptionTest2() {
+    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+  }
+
+  @Test
+  public void getTableSchemaNameTest1() {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(tableSchema);
+    Mockito.when(tableSchema.get(Mockito.any())).thenReturn("nameTableSchema");
+    Assert.assertEquals("nameTableSchema",
+        dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
+  }
+
+  @Test
+  public void getTableSchemaNameTest2() {
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
 }

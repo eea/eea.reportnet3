@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -17,7 +16,6 @@ import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
-import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,9 +78,6 @@ public class LoadValidationsHelper {
     validation.setErrors(new ArrayList<>());
     validation.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validation.setIdDataset(datasetId);
-    DataSetSchema schema = validationService.getfindByIdDataSetSchema(datasetId,
-        new ObjectId(dataset.getIdDatasetSchema()));
-    validation.setNameDataSetSchema(schema.getNameDataSetSchema());
 
     Page<Validation> validationStream = validationRepository.findAllRecordsByFilter(datasetId,
         levelErrorsFilter, typeEntitiesFilter, originsFilter, pageable, headerField, asc);

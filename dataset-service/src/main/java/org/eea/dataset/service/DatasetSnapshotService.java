@@ -24,9 +24,9 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param description the description
-   * @throws EEAException the EEA exception
+   * @param released the released
    */
-  void addSnapshot(Long idDataset, String description) throws EEAException;
+  void addSnapshot(Long idDataset, String description, Boolean released);
 
   /**
    * Removes the snapshot.
@@ -37,16 +37,15 @@ public interface DatasetSnapshotService {
    */
   void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
-
-
   /**
    * Restore snapshot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param deleteData the delete data
    * @throws EEAException the EEA exception
    */
-  void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData) throws EEAException;
 
   /**
    * Release snapshot.
@@ -55,7 +54,7 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot);
 
 
   /**
@@ -73,11 +72,8 @@ public interface DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idDatasetSchema the id dataset schema
    * @param description the description
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
-  void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description)
-      throws EEAException, IOException;
+  void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description);
 
   /**
    * Restore schema snapshot.
@@ -111,5 +107,14 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException;
+
+  /**
+   * Delete all snapshots.
+   *
+   * @param idDataset the id dataset
+   * @throws EEAException the EEA exception
+   */
+  void deleteAllSnapshots(Long idDataset) throws EEAException;
+
 
 }

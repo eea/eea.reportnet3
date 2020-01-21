@@ -1,13 +1,17 @@
 .draggableFieldDiv .inputField {
-  width: 40%;
+  width: 20vw;
+}
+.inputFieldDescription {
+  margin-left: 0.4rem !important;
+  width: 30vw;
 }
 .draggableFieldDiv {
   display: flex;
   justify-items: center;
   flex-flow: wrap-reverse;
-  align-items: center;
+  align-items: baseline;
   margin: 0px 0 5px 0;
-  width: 100%;
+  width: 100vw;
   cursor: grab;
 }
 
@@ -22,17 +26,17 @@
 }
 
 .dropdownFieldType {
-  margin-left: 0.5rem;
-  width: 30%;
+  margin-left: 0.4rem;
+  width: 20vw;
 }
 
 .deleteButton {
   color: var(--errors);
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
   margin-left: 0.4rem;
   border-radius: 3px;
-  height: 2rem;
+  height: 1.95rem;
   border: 1px solid var(--c-custom-gray);
 }
 
@@ -44,7 +48,7 @@
 .fieldSeparator {
   box-shadow: 1px 1px rgba(var(--blue-120-hex), 0.2), 2px 2px rgba(var(--blue-120-hex), 0.2),
     3px 3px rgba(var(--blue-120-hex), 0.2);
-  width: 71%;
+  width: 74.5vw;
   height: 30px;
   background-color: rgba(var(--blue-120-hex), 0.2);
   margin: 5px 0 5px 2rem;

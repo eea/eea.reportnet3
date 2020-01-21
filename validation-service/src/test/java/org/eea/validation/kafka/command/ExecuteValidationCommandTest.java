@@ -2,7 +2,6 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,9 +89,6 @@ public class ExecuteValidationCommandTest {
    */
   @Test
   public void executeExceptionTest() throws EEAException {
-    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any(),
-        Mockito.any());
-
     executeValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());

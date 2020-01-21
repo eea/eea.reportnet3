@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -21,7 +20,6 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
-import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,12 +132,7 @@ public class LoadValidationsHelperTest {
     List<Validation> validations = new ArrayList<>();
     validations.add(validation);
 
-    DataSetSchema schema = new DataSetSchema();
-    schema.setTableSchemas(new ArrayList<>());
-    schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     when(validationService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
-    when(validationService.getfindByIdDataSetSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(schema);
     Page<Validation> pageValidation = new PageImpl<>(validations);
     when(validationRepository.findAllRecordsByFilter(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), (Mockito.any(Pageable.class)), Mockito.any(), Mockito.any()))

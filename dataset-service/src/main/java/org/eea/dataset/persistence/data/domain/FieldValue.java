@@ -13,11 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -38,11 +38,11 @@ public class FieldValue {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "field_sequence_generator", sequenceName = "field_sequence",
-      allocationSize = 1)
+  @GenericGenerator(name = "field_sequence_generator",
+      strategy = "org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
+  private String id;
 
   /**
    * The type.

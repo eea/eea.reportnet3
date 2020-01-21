@@ -167,17 +167,18 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") Long recordId);
+  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId);
 
   /**
    * Delete import table.
    *
-   * @param dataSetId the data set id
-   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
    */
-  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  void deleteImportTable(@PathVariable("id") final Long dataSetId,
-      @PathVariable("idTableSchema") final String idTableSchema);
+  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
+  void deleteImportTable(@PathVariable("datasetId") final Long datasetId,
+      @PathVariable("tableSchemaId") final String tableSchemaId);
+
 
 
   /**

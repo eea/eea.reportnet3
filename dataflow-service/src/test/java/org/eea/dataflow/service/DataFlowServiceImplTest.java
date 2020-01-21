@@ -2,9 +2,11 @@ package org.eea.dataflow.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +17,7 @@ import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -23,13 +26,19 @@ import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.junit.Before;
@@ -39,6 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.exceptions.base.MockitoException;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -104,7 +114,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
   /**
@@ -112,6 +124,22 @@ public class DataFlowServiceImplTest {
    */
   @Mock
   private DocumentMapper documentMapper;
+
+  /**
+   * The data set schema controller zuul.
+   */
+  @Mock
+  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+
+  /**
+   * The document controller zuul.
+   */
+  @Mock
+  private DocumentControllerZuul documentControllerZuul;
+
+
+  @Mock
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
 
   /**
    * The dataflows.
@@ -321,7 +349,7 @@ public class DataFlowServiceImplTest {
     ur.get().setDataflows(dfs);
 
     when(userRequestRepository.findById(Mockito.anyLong())).thenReturn(ur);
-    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
         Mockito.any());
 
     dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
@@ -400,13 +428,48 @@ public class DataFlowServiceImplTest {
     Dataflow dataflow = new Dataflow();
     when(dataflowMapper.classToEntity(dataflowVO)).thenReturn(dataflow);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
-        Mockito.any());
+    doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(), Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
-    Mockito.verify(resourceManagementControllerZull, times(1)).createResource(Mockito.any());
+    Mockito.verify(resourceManagementControllerZull, times(2)).createResource(Mockito.any());
   }
 
+  /**
+   * Update data flow exist.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateDataFlowExist() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    Dataflow dataflowResponse = new Dataflow();
+    dataflowResponse.setId(2l);
+    when(dataflowRepository.findByName(dataFlowVO.getName()))
+        .thenReturn(Optional.of(dataflowResponse));
+    try {
+      dataflowServiceImpl.updateDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  /**
+   * Update dataflow.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDataflow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(1L);
+    dataflowVO.setName("test");
+    when(dataflowRepository.findByName(dataflowVO.getName())).thenReturn(Optional.empty());
+    when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.updateDataFlow(dataflowVO);
+    Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
+  }
 
   /**
    * Test get datasets id.
@@ -468,4 +531,282 @@ public class DataFlowServiceImplTest {
     Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
+
+  /**
+   * Delete data flow.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDataFlow() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+
+    doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.deleteDataFlow(1L);
+
+    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+  }
+
+  /**
+   * Delete data flow empty.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDataFlowEmpty() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<>());
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.deleteDataFlow(1L);
+
+    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+  }
+
+  /**
+   * Delete data flow throws documents.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataFlowThrowsDocuments() throws Exception {
+
+    Dataflow dataflow = new Dataflow();
+    List<Document> listDocu = new ArrayList<>();
+    Document docus = new Document();
+    docus.setId(1L);
+    listDocu.add(docus);
+    dataflow.setId(1L);
+    dataflow.setDocuments(listDocu);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+
+    doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L, Boolean.FALSE);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<>());
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findById(1L)).thenReturn(Optional.of(dataflow));
+
+    try {
+      dataflowServiceImpl.deleteDataFlow(1L);
+    } catch (EEAException ex) {
+      assertEquals("Error Deleting document null with 1", ex.getMessage());
+      throw ex;
+    }
+  }
+
+  /**
+   * Delete data flow throws dataset schema.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataFlowThrowsDatasetSchema() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    doThrow(MockitoException.class).when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L);
+    try {
+      dataflowServiceImpl.deleteDataFlow(1L);
+    } catch (EEAException ex) {
+      assertEquals("Error Deleting dataset null with 1", ex.getMessage());
+      throw ex;
+    }
+  }
+
+  /**
+   * Delete data flow throws delete dataflow.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataFlowThrowsDeleteDataflow() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+    DataCollectionVO dcVO = new DataCollectionVO();
+    dcVO.setId(1L);
+    dataFlowVO.setDataCollections(Arrays.asList(dcVO));
+
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
+        .thenReturn(Arrays.asList(dcVO));
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.deleteDataFlow(1L);
+    doThrow(MockitoException.class).when(dataflowRepository).deleteById(Mockito.any());
+    try {
+      dataflowServiceImpl.deleteDataFlow(1L);
+    } catch (EEAException ex) {
+      assertEquals("Error Deleting dataflow ", ex.getMessage());
+      throw ex;
+    }
+  }
+
+  /**
+   * Delete data flow throws resource.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataFlowThrowsResource() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    doThrow(MockitoException.class).when(resourceManagementControllerZull)
+        .deleteResource(Mockito.any());
+    try {
+      dataflowServiceImpl.deleteDataFlow(1L);
+    } catch (EEAException ex) {
+      assertEquals("Error deleting resource in keycloack ", ex.getMessage());
+      throw ex;
+    }
+  }
+
+
+  @Test
+  public void testUpdateDataflowStatus() throws EEAException {
+
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+    Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
+  }
+
+
+  @Test
+  public void testUpdateDataflowStatusException() {
+    try {
+      dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+    }
+  }
 }

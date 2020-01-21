@@ -2,7 +2,6 @@ package org.eea.validation.kafka;
 
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.io.DefaultKafkaReceiver;
 import org.eea.kafka.io.KafkaReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaReceiver.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BroadcastKafkaReceiver.class);
 
 
   /**

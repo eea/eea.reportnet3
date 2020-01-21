@@ -3,7 +3,7 @@ import { isNil } from 'lodash';
 const USER_TOKEN = 'reportnet_03';
 
 const get = () => {
-  const tokens = JSON.parse(localStorage.getItem(USER_TOKEN));
+  const tokens = JSON.parse(sessionStorage.getItem(USER_TOKEN));
 
   if (isNil(tokens)) {
     return;
@@ -12,10 +12,10 @@ const get = () => {
 };
 
 const set = tokens => {
-  localStorage.setItem(USER_TOKEN, JSON.stringify(tokens));
+  sessionStorage.setItem(USER_TOKEN, JSON.stringify(tokens));
 };
 
-const remove = () => localStorage.removeItem(USER_TOKEN);
+const remove = () => sessionStorage.removeItem(USER_TOKEN);
 
 const hasToken = () => {
   const tokens = get();

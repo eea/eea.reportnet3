@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
@@ -10,38 +9,39 @@ import { config } from 'conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { Title } from 'ui/views/_components/Title';
 
-import { DataflowService } from 'core/services/DataFlow';
-import { DatasetService } from 'core/services/DataSet';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
-    params: { dataflowId, datasetId }
+    params: { datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-
-  let growlRef = useRef();
 
   const {
     isLoadingSnapshotListData,
@@ -52,14 +52,14 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
+  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-
+        setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
       };
       getDatasetSchemaId();
@@ -118,6 +118,21 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     setDataflowName(dataflowData.name);
   };
 
+  const onBlurDescription = description => {
+    if (description !== initialDatasetDescription) {
+      onUpdateDescription(description);
+    }
+  };
+
+  const onKeyChange = event => {
+    if (event.key === 'Escape') {
+      setDatasetDescription(initialDatasetDescription);
+    } else if (event.key == 'Enter') {
+      event.preventDefault();
+      onBlurDescription(event.target.value);
+    }
+  };
+
   const onLoadDatasetSchemaName = async () => {
     setIsLoading(true);
     try {
@@ -130,10 +145,21 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     }
   };
 
+  const onUpdateDescription = async description => {
+    try {
+      const response = await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      if (response.status < 200 || response.status > 299) {
+        console.error('Error during datasetSchema Description update');
+      }
+    } catch (error) {
+      console.error('Error during datasetSchema Description update: ', error);
+    } finally {
+    }
+  };
+
   const layout = children => {
     return (
       <MainLayout>
-        <Growl ref={growlRef} />
         <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
@@ -158,16 +184,31 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         icon="pencilRuler"
         iconSize="3.4rem"
       />
+      <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
       <div className={styles.ButtonsBar}>
+        <InputTextarea
+          className={styles.datasetDescription}
+          collapsedHeight={40}
+          expandableOnClick={true}
+          key="datasetDescription"
+          onBlur={e => onBlurDescription(e.target.value)}
+          onChange={e => setDatasetDescription(e.target.value)}
+          onFocus={e => {
+            setInitialDatasetDescription(e.target.value);
+          }}
+          onKeyDown={e => onKeyChange(e)}
+          placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
+          value={datasetDescription}
+        />
         <Toolbar>
           <div className="p-toolbar-group-right">
-            <Button
+            {/* <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
-            />
+            /> */}
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}

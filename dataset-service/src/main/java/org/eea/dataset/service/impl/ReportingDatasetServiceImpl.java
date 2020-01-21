@@ -3,7 +3,9 @@ package org.eea.dataset.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -29,6 +31,10 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   @Autowired
   private SnapshotRepository snapshotRepository;
 
+  /** The design dataset repository. */
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
+
 
   /**
    * Gets the data set id by dataflow id.
@@ -46,8 +52,32 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     // Check if dataset is released
     isReleased(datasetsVO);
 
+    getDatasetSchemaNames(datasetsVO);
+
     return datasetsVO;
   }
+
+
+  /**
+   * Gets the dataset schema names.
+   *
+   * @param datasetsVO the datasets VO
+   * @return the dataset schema names
+   */
+  private void getDatasetSchemaNames(List<ReportingDatasetVO> datasetsVO) {
+    List<String> datasetsSchemas =
+        datasetsVO.stream().map(dataset -> dataset.getDatasetSchema()).collect(Collectors.toList());
+    if (!datasetsSchemas.isEmpty()) {
+      List<DesignDataset> resultList =
+          designDatasetRepository.findbyDatasetSchemaList(datasetsSchemas);
+      datasetsVO.stream().forEach(dataset -> resultList.stream().forEach(design -> {
+        if (design.getDatasetSchema().equals(dataset.getDatasetSchema())) {
+          dataset.setNameDatasetSchema(design.getDataSetName());
+        }
+      }));
+    }
+  }
+
 
   /**
    * Checks if is released.

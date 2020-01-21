@@ -4,31 +4,54 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +85,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private StatisticsRepository statisticsRepository;
 
+  /** The data collection repository. */
+  @Autowired
+  private DataCollectionRepository dataCollectionRepository;
+
+  /** The user management controller zuul. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The resource management controller zuul. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZuul;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  @Lazy
+  private KafkaSenderUtils kafkaSenderUtils;
+
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
@@ -87,57 +132,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Creates the empty dataset.
-   *
-   * @param datasetType the dataset type
-   * @param datasetName the dataset name
-   * @param datasetSchemaId the dataset schema id
-   * @param dataflowId the dataflow id
-   * @return the long
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @org.springframework.transaction.annotation.Transactional(
-      value = "metabaseDataSetsTransactionManager")
-  /**
-   * We use spring Transactional with this value to indicate we want to use the metabase
-   * transactional manager. Otherwise the operation will be fail
-   */
-  public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String datasetSchemaId, Long dataflowId) throws EEAException {
-
-    if (datasetType != null && datasetName != null && datasetSchemaId != null
-        && dataflowId != null) {
-      DataSetMetabase dataset;
-
-      switch (datasetType) {
-        case REPORTING:
-          dataset = new ReportingDataset();
-          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-          reportingDatasetRepository.save((ReportingDataset) dataset);
-          break;
-        case DESIGN:
-          dataset = new DesignDataset();
-          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-          designDatasetRepository.save((DesignDataset) dataset);
-          break;
-        default:
-          throw new EEAException("Unsupported datasetType: " + datasetType);
-      }
-
-      recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
-      return dataset.getId();
-    }
-
-    throw new EEAException("createEmptyDataset: Bad arguments");
-  }
-
-  /**
    * Fill dataset.
    *
    * @param dataset the dataset
    * @param datasetName the dataset name
    * @param idDataFlow the id data flow
+   * @param datasetSchemaId the dataset schema id
    */
   private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow,
       String datasetSchemaId) {
@@ -328,5 +328,234 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     return statistics;
   }
+
+
+
+  /**
+   * Creates the group provider and add user.
+   *
+   * @param datasetIdsEmail the dataset ids email
+   * @param representatives the representatives
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail,
+      List<RepresentativeVO> representatives, Long dataflowId) {
+
+    List<ResourceInfoVO> groups = new ArrayList<>();
+    Set<Long> datasetIds = datasetIdsEmail.keySet();
+    for (Long datasetId : datasetIds) {
+      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+    }
+    resourceManagementControllerZuul.createResources(groups);
+    List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+    List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
+    datasetIdsEmail.forEach((Long id, String email) -> {
+
+      ResourceAssignationVO resourceDP =
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
+      resourcesProviders.add(resourceDP);
+
+      ResourceAssignationVO resourceDFP =
+          fillResourceAssignation(dataflowId, email, ResourceGroupEnum.DATAFLOW_PROVIDER);
+      resourcesProviders.add(resourceDFP);
+
+      ResourceAssignationVO resourceDC =
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
+      resourcesCustodian.add(resourceDC);
+
+
+    });
+    userManagementControllerZuul.addContributorsToResources(resourcesProviders);
+    List<Long> ids = new ArrayList<>();
+    ids.addAll(datasetIds);
+    userManagementControllerZuul.addUserToResources(resourcesCustodian);
+  }
+
+
+
+  /**
+   * Creates the group dc and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createGroupDcAndAddUser(Long datasetId) {
+
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_COLLECTION, SecurityRoleEnum.DATA_CUSTODIAN));
+
+
+    userManagementControllerZuul.addUserToResource(datasetId,
+        ResourceGroupEnum.DATACOLLECTION_CUSTODIAN);
+
+  }
+
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+
+    return resourceInfoVO;
+  }
+
+
+
+  /**
+   * Creates the schema group and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createSchemaGroupAndAddUser(Long datasetId) {
+
+    // Create group Dataschema-X-DATA_CUSTODIAN
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
+
+    // Create group Dataschema-X-DATA_PROVIDER
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
+
+    // Add user to new group Dataschema-X-DATA_CUSTODIAN
+    userManagementControllerZuul.addUserToResource(datasetId,
+        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
+  }
+
+
+  /**
+   * Creates the empty dataset.
+   *
+   * @param datasetType the dataset type
+   * @param datasetName the dataset name
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @param representatives the representatives
+   * @param iterationDC the iteration DC
+   * @return the future
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  @org.springframework.transaction.annotation.Transactional(
+      value = "metabaseDataSetsTransactionManager")
+  public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+      String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
+      Integer iterationDC) throws EEAException {
+
+    if (datasetType != null && dataflowId != null) {
+      DataSetMetabase dataset;
+      Map<Long, String> datasetIdsEmail = new HashMap<>();
+      Long idDesignDataset = 0L;
+      switch (datasetType) {
+        case REPORTING:
+          for (RepresentativeVO representative : representatives) {
+
+            datasetIdsEmail
+                .putAll(fillReportingDataset(representative, dataflowId, datasetSchemaId));
+
+          }
+          this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
+          if (iterationDC == 0) {
+            // Notification
+            kafkaSenderUtils
+                .releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+                    NotificationVO.builder()
+                        .user((String) ThreadPropertiesManager.getVariable("user"))
+                        .dataflowId(dataflowId).build());
+
+          }
+          break;
+        case DESIGN:
+          dataset = new DesignDataset();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          designDatasetRepository.save((DesignDataset) dataset);
+          recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
+              datasetSchemaId);
+          this.createSchemaGroupAndAddUser(dataset.getId());
+          idDesignDataset = dataset.getId();
+          break;
+        case COLLECTION:
+          dataset = new DataCollection();
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+          ((DataCollection) dataset).setDueDate(dueDate);
+          dataCollectionRepository.save((DataCollection) dataset);
+          recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
+              datasetSchemaId);
+          LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
+              dataflowId, dataset.getId(), datasetName);
+          this.createGroupDcAndAddUser(dataset.getId());
+          break;
+        default:
+          throw new EEAException("Unsupported datasetType: " + datasetType);
+      }
+
+      return new AsyncResult<>(idDesignDataset);
+    }
+
+    throw new EEAException("createEmptyDataset: Bad arguments");
+
+  }
+
+
+  /**
+   * Fill resource assignation.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
+      ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
+
+
+  /**
+   * Fill reporting dataset.
+   *
+   * @param representative the representative
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the dataset schema id
+   * @return the map
+   */
+  private Map<Long, String> fillReportingDataset(RepresentativeVO representative, Long dataflowId,
+      String datasetSchemaId) {
+
+    ReportingDataset dataset = new ReportingDataset();
+    Map<Long, String> datasetIdsEmail = new HashMap<>();
+    DataProviderVO provider =
+        representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
+
+    fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
+    dataset.setDataProviderId(representative.getDataProviderId());
+    reportingDatasetRepository.save(dataset);
+    datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
+    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+    LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
+        dataset.getId(), provider.getLabel());
+
+    return datasetIdsEmail;
+  }
+
 
 }

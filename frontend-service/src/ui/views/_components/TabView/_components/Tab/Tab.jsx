@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isUndefined } from 'lodash';
 import { config } from 'conf';
 
 import styles from './Tab.module.css';
@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -22,6 +22,7 @@ export const Tab = ({
   className,
   closeIcon,
   divScrollTabsRef,
+  disabled = false,
   editable = false,
   designMode = false,
   header,
@@ -84,8 +85,8 @@ export const Tab = ({
       setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
       setInitialTitleHeader(header);
     }
-    if (document.getElementsByClassName('p-inputtext p-component').length > 0) {
-      document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    if (document.getElementsByClassName('tabInput').length > 0) {
+      document.getElementsByClassName('tabInput')[0].focus();
     }
   }, [onTabBlur, hasErrors]);
 
@@ -277,8 +278,7 @@ export const Tab = ({
           }
         }}
         role="presentation"
-        style={headerStyle}
-        style={{ pointerEvents: 'fill' }}
+        style={{ ...headerStyle, pointerEvents: 'fill' }}
         ref={tabRef}
         tabIndex={index}>
         <a
@@ -309,8 +309,10 @@ export const Tab = ({
             }
           }}
           onClick={e => {
-            onTabHeaderClick(e);
-            scrollTo(tabRef.current.offsetLeft - 80, 0);
+            if (!disabled) {
+              onTabHeaderClick(e);
+              scrollTo(tabRef.current.offsetLeft - 80, 0);
+            }
           }}
           onDragEnd={e => {
             onTabDragEnd(e);
@@ -328,7 +330,7 @@ export const Tab = ({
             <InputText
               autoFocus={true}
               key={index}
-              className={styles.p_tabview_input_design}
+              className={`${styles.p_tabview_input_design} tabInput`}
               onBlur={e => {
                 //Check for empty table name
                 if (titleHeader !== '') {

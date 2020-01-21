@@ -21,7 +21,9 @@ pipeline {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                        '''                                
+                            
+                        '''
+
                     }
                     post {
                         failure {
@@ -50,7 +52,9 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+
+                    sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
             }
         }
@@ -82,6 +86,30 @@ pipeline {
                             if ("WARN".equals(qualitygate["projectStatus"]["status"])) {
                                 currentBuild.result = 'UNSTABLE'
                                 slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                            }
+                            // Frontend
+                            props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
+                            echo "properties=${props}"
+                            sonarServerUrl=props['serverUrl']
+                            ceTaskUrl= props['ceTaskUrl']
+                            ceTask
+                            timeout(time: 1, unit: 'MINUTES') {
+                                waitUntil {
+                                    def response = httpRequest ceTaskUrl
+                                    ceTask = readJSON text: response.content
+                                    echo ceTask.toString()
+                                    return "SUCCESS".equals(ceTask["task"]["status"])
+                                }
+                            }
+                            response2 = httpRequest url : sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"], authentication: 'jenkins_scanner'
+                            qualitygate =  readJSON text: response2.content
+                            echo qualitygate.toString()
+                            if ("WARN".equals(qualitygate["projectStatus"]["status"]) || "ERROR".equals(qualitygate["projectStatus"]["status"])) {
+                                def output = ""
+                                qualitygate["conditions"].each{ gate ->
+                                  output += "\nStatus for " + gate["metricKey"] + " is " + gate["status"]
+                                }
+                                emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
                             }
                         }
                     }
@@ -131,12 +159,13 @@ pipeline {
             }
         }
         stage('Setup sandbox docker images build'){
-            when{
-                branch 'sandbox'
-            }
             steps{
-                script{
-                   env.TAG_SUFIX="_sandbox"
+                script {
+                  if (env.BRANCH_NAME == 'sandbox') {
+                      env.TAG_SUFIX="_sandbox"
+                  } else {
+                     env.TAG_SUFIX=""
+                  }
                 }
             }
         }
@@ -147,76 +176,86 @@ pipeline {
                 }
             }
             parallel {
-                stage('Build Microservices') {
+                stage('Build Core Platform') {
                     steps {
                         script {
                             echo 'Dataflow Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/dataflow-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 .")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/dataflow-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
+                            app.push()
                         }
                         script {
                             echo 'Dataset Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/dataset-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=dataset-service/target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 .")
-                            app.push()                    
-                        }
-                        script {
-                            echo 'API Gateway'
-                            def app
-                            app = docker.build("k8s-swi001:5000/api-gateway:1.0$TAG_SUFIX", "--build-arg JAR_FILE=api-gateway/target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 .")
-                            app.push()                    
-                        }
-                        script {
-                            echo 'Inspire Harvester'
-                            def app
-                            app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 .")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/dataset-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 -f ./Dockerfile ./dataset-service")
+                            app.push()
                         }
                         script {
                             echo 'Recordstore Service'
                             def app
                             app = docker.build("k8s-swi001:5000/recordstore-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
-                            app.push()                    
+                            app.push()
                         }
                         script {
                             echo 'Validation Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/validation-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8015 .")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/validation-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8015 -f ./Dockerfile ./validation-service")
+                            app.push()
                         }
                         script {
                             echo 'Collaboration Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/collaboration-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
-                            app.push()                    
-                        }
-                        script {
-                            echo 'Communication Service'
-                            def app
-                            app = docker.build("k8s-swi001:5000/communication-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=communication-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 .")
-                            app.push()                    
-                        }
-                        script {
-                            echo 'IndexSearch Service'
-                            def app
-                            app = docker.build("k8s-swi001:5000/indexsearch-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/collaboration-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/collaboration-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 -f ./Dockerfile ./collaboration-service")
+                            app.push()
                         }
                         script {
                             echo 'Document Container Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/document-container-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/document-container-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 -f ./Dockerfile ./document-container-service")
+                            app.push()
+                        }
+
+                    }
+                 }
+
+                stage('Build Integration Layer') {
+                  steps{
+                        script {
+                            echo 'API Gateway'
+                            def app
+                            app = docker.build("k8s-swi001:5000/api-gateway:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 -f ./Dockerfile ./api-gateway ")
+                            app.push()
+                        }
+                        script {
+                            echo 'Inspire Harvester'
+                            def app
+                            app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
+                            app.push()
+                        }
+                         script {
+                            echo 'Communication Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/communication-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 -f ./Dockerfile ./communication-service")
+                            app.push()
+                         }
+                        script {
+                            echo 'IndexSearch Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/indexsearch-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 -f ./Dockerfile ./indexsearch-service")
+                            app.push()
                         }
                         script {
                             echo 'User Management Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/user-management-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
-                            app.push()                    
-                        }    
-                    }
+                            app = docker.build("k8s-swi001:5000/user-management-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 -f ./Dockerfile ./user-management-service")
+                            app.push()
+                        }
+
+
+                  }
                 }
+
+
                 stage('Build Frontend') {
                     steps {
                         script {

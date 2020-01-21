@@ -102,20 +102,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 
-  /**
-   * The max pool size.
-   */
-  @Value("${spring.datasource.hikari.maximum-pool-size}")
-  private Integer maxPoolSize;
-
-  @Value("${spring.datasource.hikari.minimumIdle}")
-  private Integer minimumIdle;
-
-  @Value("${spring.datasource.hikari.idleTimeout}")
-  private Integer iddleTimeout;
-
-  @Value("${spring.datasource.hikari.maxLifetime}")
-  private Integer maxLifetime;
 
   /**
    * The record store controller zull.

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import styles from './Footer.module.css';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const Footer = () => {
   const resources = useContext(ResourcesContext);

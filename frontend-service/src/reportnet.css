@@ -273,6 +273,12 @@ body {
   margin-right: -1rem;
 }
 
+@media (max-width: 996px) {
+  .rep-row {
+    flex-direction: column;
+  }
+}
+
 @media (min-width: 480px) {
   .rep-row {
     margin-left: -1rem;
@@ -1798,7 +1804,7 @@ textarea {
 }
 
 textarea {
-  min-height: 5rem;
+  /* min-height: 5rem; */
   font-family: arial;
   resize: none;
 }
@@ -1863,4 +1869,9 @@ body .p-dialog.edit-table .p-dialog-content {
 /* Toolbar */
 .p-toolbar.p-component {
   position: relative;
+}
+
+/*growl notifications*/
+.p-growl.p-component.p-growl-topright {
+  z-index: 2000 !important;
 }

@@ -10,13 +10,19 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +47,26 @@ public class FileTreatmentHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Instantiates a new file loader helper.
@@ -65,18 +82,12 @@ public class FileTreatmentHelper {
    * @param fileName the file name
    * @param is the input stream
    * @param tableSchemaId the id table schema
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InterruptedException the interrupted exception
    */
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
-      String tableSchemaId, String user) {
-    Long dataflowId = -1L;
+      String tableSchemaId) {
     try {
       LOG.info("Processing file");
-      dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
 
       // map the VO to the entity
@@ -100,14 +111,26 @@ public class FileTreatmentHelper {
 
       List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
 
-      listaGeneral.parallelStream()
-          .forEach(value -> datasetService.saveAllRecords(datasetId, value));
+      // Obtain the data provider code to insert into the record
+      Long providerId = 0L;
+      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+      if (metabase.getDataProviderId() != null) {
+        providerId = metabase.getDataProviderId();
+      }
+      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+      listaGeneral.parallelStream().forEach(value -> {
+        value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
+        datasetService.saveAllRecords(datasetId, value);
+      });
 
       LOG.info("File processed and saved into DB");
-      releaseSuccessEvents(user, dataflowId, datasetId, tableSchemaId, fileName);
+      releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+          tableSchemaId, fileName);
     } catch (Exception e) {
-      LOG.error("Error loading file: {}", e.getCause());
-      releaseFailEvents(user, dataflowId, datasetId, tableSchemaId, fileName);
+      LOG.error("Error loading file: " + fileName, e);
+      releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+          tableSchemaId, fileName, "Fail importing file " + fileName);
     } finally {
       removeLock(datasetId, tableSchemaId);
     }
@@ -119,20 +142,22 @@ public class FileTreatmentHelper {
    * @param user the user
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param fileName the file name
    */
-  private void releaseSuccessEvents(String user, Long dataflowId, Long datasetId,
-      String tableSchemaId, String fileName) {
-    Map<String, Object> notification = new HashMap<>();
-    notification.put("user", user);
-    notification.put("datasetId", datasetId);
-    notification.put("dataflowId", dataflowId);
-    notification.put("tableSchemaId", tableSchemaId);
-    notification.put("fileName", fileName);
-    Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
-    value.put("notification", notification);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, value);
+  private void releaseSuccessEvents(String user, Long datasetId, String tableSchemaId,
+      String fileName) {
+    EventType eventType =
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_DATA_COMPLETED_EVENT
+            : EventType.LOAD_SCHEMA_COMPLETED_EVENT;
+    try {
+      Map<String, Object> value = new HashMap<>();
+      value.put("dataset_id", datasetId);
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, NotificationVO.builder()
+          .user(user).datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(fileName).build());
+    } catch (EEAException e) {
+      LOG.error("Error realeasing event " + eventType, e);
+    }
   }
 
   /**
@@ -140,21 +165,24 @@ public class FileTreatmentHelper {
    *
    * @param user the user
    * @param datasetId the dataset id
-   * @param e the e
+   * @param tableSchemaId the table schema id
+   * @param fileName the file name
+   * @param error the error
    */
-  private void releaseFailEvents(String user, Long dataflowId, Long datasetId, String tableSchemaId,
-      String fileName) {
-    Map<String, Object> notification = new HashMap<>();
-    notification.put("user", user);
-    notification.put("datasetId", datasetId);
-    notification.put("dataflowId", dataflowId);
-    notification.put("tableSchemaId", tableSchemaId);
-    notification.put("fileName", fileName);
-    notification.put("error", "Filed importing file " + fileName);
-    Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
-    value.put("notification", notification);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DATA_FAILED_EVENT, value);
+  private void releaseFailEvents(String user, Long datasetId, String tableSchemaId, String fileName,
+      String error) {
+    EventType eventType =
+        datasetService.isReportingDataset(datasetId) ? EventType.LOAD_DATA_FAILED_EVENT
+            : EventType.LOAD_SCHEMA_FAILED_EVENT;
+    try {
+      Map<String, Object> value = new HashMap<>();
+      value.put("dataset_id", datasetId);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
+          NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
+              .fileName(fileName).error(error).build());
+    } catch (EEAException e) {
+      LOG.error("Error realeasing event " + eventType, e);
+    }
   }
 
   /**

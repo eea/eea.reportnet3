@@ -5,8 +5,8 @@ import moment from 'moment';
 import styles from './Snapshots.module.scss';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 
 const Snapshots = ({
@@ -41,7 +41,7 @@ const Snapshots = ({
         <ul>
           <li>
             <strong>{resources.messages.creationDate}: </strong>
-            {moment(snapshotContext.snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            {moment(snapshotContext.snapshotState.creationDate).format('YYYY-MM-DD HH:mm:ss')}
           </li>
           <li>
             <strong>{resources.messages.description}: </strong>

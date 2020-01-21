@@ -1,13 +1,11 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
-
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleDataSetVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
 
 /**
  * The Class DataSetSchemaVO.
@@ -17,20 +15,20 @@ import lombok.ToString;
 @ToString
 public class DataSetSchemaVO {
 
-
   /** The id data set schema. */
   private String idDataSetSchema;
 
+  /** The description. */
+  private String description;
+
   /** The name data set schema. */
-  private String nameDataSetSchema;
+  private String nameDatasetSchema;
 
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;
 
-
   /** The rule data set. */
   private List<RuleDataSetVO> ruleDataSet;
-
 
   /**
    * Hash code.
@@ -39,9 +37,8 @@ public class DataSetSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, nameDataSetSchema, ruleDataSet, tableSchemas);
+    return Objects.hash(idDataSetSchema, description, nameDatasetSchema, ruleDataSet, tableSchemas);
   }
-
 
   /**
    * Equals.
@@ -59,9 +56,9 @@ public class DataSetSchemaVO {
     }
     DataSetSchemaVO other = (DataSetSchemaVO) obj;
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema)
+        && Objects.equals(description, other.description)
+        && Objects.equals(nameDatasetSchema, other.nameDatasetSchema)
         && Objects.equals(ruleDataSet, other.ruleDataSet)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }
-
 }

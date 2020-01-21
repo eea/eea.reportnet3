@@ -37,7 +37,7 @@ public class DocumentVO implements Serializable {
   private Long dataflowId;
 
   /** The size. */
-  private String size;
+  private Long size;
 
   /** The date. */
   private Date date;

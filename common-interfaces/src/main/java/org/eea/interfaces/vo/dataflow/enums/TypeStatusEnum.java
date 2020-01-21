@@ -6,16 +6,13 @@ package org.eea.interfaces.vo.dataflow.enums;
 public enum TypeStatusEnum {
 
 
-  /** The pending. */
-  PENDING("PENDING"),
+
+  /** The design. */
+  DESIGN("DESIGN"),
 
 
-  /** The accepted. */
-  ACCEPTED("ACCEPTED"),
-
-
-  /** The completed. */
-  COMPLETED("COMPLETED");
+  /** The draft. */
+  DRAFT("DRAFT");
 
 
   /** The value. */

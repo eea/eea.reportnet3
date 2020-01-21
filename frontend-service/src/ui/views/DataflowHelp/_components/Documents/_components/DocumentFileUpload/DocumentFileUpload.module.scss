@@ -1,0 +1,18 @@
+.buttonWrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.cancelButton {
+  margin-left: 0.5rem !important;
+}
+
+.checkboxIsPublic {
+  display: -webkit-inline-box;
+  input {
+    width: auto;
+  }
+  label {
+    margin-left: 0.5rem;
+  }
+}

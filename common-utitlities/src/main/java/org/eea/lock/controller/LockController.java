@@ -49,6 +49,6 @@ public class LockController {
    */
   @GetMapping("/findOne/{lockId}")
   public LockVO findOneLock(@PathVariable("lockId") final Integer lockId) {
-    return lockService.findLock(lockId);
+    return lockService.findById(lockId);
   }
 }

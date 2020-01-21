@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import ObjectUtils from 'ui/ObjectUtils';
-import DomHandler from 'ui/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import { RowRadioButton } from './_components/RowRadioButton';
 import { RowCheckbox } from 'ui/views/_components/DataTable/_components/RowCheckbox';
 

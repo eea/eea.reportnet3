@@ -1,8 +1,3 @@
-import { config } from 'conf';
-import { getUrl } from 'core/infrastructure/api/getUrl';
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { userStorage } from 'core/domain/model/User/UserStorage';
-
 export const apiContributor = {
   all: async dataflowId => {
     /* 

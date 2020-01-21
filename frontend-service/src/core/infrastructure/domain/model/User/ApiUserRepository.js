@@ -19,7 +19,7 @@ const login = async code => {
   const user = new User(
     userDTO.sub,
     userDTO.name,
-    userDTO.realm_access[0],
+    userDTO.realm_access.roles,
     userDTO.user_groups,
     userDTO.preferred_username,
     userDTO.exp
@@ -43,7 +43,7 @@ const oldLogin = async (userName, password) => {
   const user = new User(
     userDTO.sub,
     userDTO.name,
-    userDTO.realm_access[0],
+    userDTO.realm_access.roles,
     userDTO.user_groups,
     userDTO.preferred_username,
     userDTO.exp
@@ -62,7 +62,7 @@ const refreshToken = async refreshToken => {
     const user = new User(
       userDTO.sub,
       userDTO.name,
-      userDTO.realm_access.roles[0],
+      userDTO.realm_access.roles,
       userDTO.user_groups,
       userDTO.preferred_username,
       userDTO.exp
@@ -79,7 +79,7 @@ const refreshToken = async refreshToken => {
 const hasPermission = (user, permissions, entity) => {
   let allow = false;
   if (isUndefined(entity)) {
-    if (permissions.includes(user.accessRole)) allow = true;
+    if (permissions.filter(permission => user.accessRole.includes(permission)).length > 0) allow = true;
   } else {
     permissions.forEach(permission => {
       const role = `${entity}-${permission}`;
@@ -98,11 +98,16 @@ const userRole = (user, entity) => {
   return;
 };
 
+const getToken = () => {
+  return userStorage.get().accessToken;
+};
+
 export const ApiUserRepository = {
   login,
   logout,
   oldLogin,
   refreshToken,
   hasPermission,
+  getToken,
   userRole
 };

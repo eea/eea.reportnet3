@@ -1,15 +1,24 @@
+import { isUndefined } from 'lodash';
+
 export const CoreUtils = (() => {
   const UtilsAPI = {
-    getDashboardLevelErrors: datasetTableDTO => {
+    getDashboardLevelErrorByDataset: datasetDTO => {
       let levelErrors = [];
-      if (datasetTableDTO.totalErrors > 0) {
+      datasetDTO.forEach(datasetTableDTO => {
+        levelErrors.push(UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO));
+      });
+      return levelErrors;
+    },
+
+    getDashboardLevelErrorByTable: datasetTableDTO => {
+      let levelErrors = [];
+      datasetTableDTO.tables.forEach(datasetTableDTO => {
         let corrects =
           datasetTableDTO.totalRecords -
           (datasetTableDTO.totalRecordsWithBlockers +
             datasetTableDTO.totalRecordsWithErrors +
             datasetTableDTO.totalRecordsWithWarnings +
             datasetTableDTO.totalRecordsWithInfos);
-
         if (corrects > 0) {
           levelErrors.push('CORRECT');
         }
@@ -25,8 +34,8 @@ export const CoreUtils = (() => {
         if (datasetTableDTO.totalRecordsWithBlockers > 0) {
           levelErrors.push('BLOCKER');
         }
-      }
-      return levelErrors;
+      });
+      return [...new Set(levelErrors)];
     },
 
     getLevelErrorPriorityByLevelError: levelError => {
@@ -61,6 +70,13 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    onGroupBy: key => array =>
+      array.reduce((objectsByKeyValue, obj) => {
+        const value = obj[key];
+        objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+        return objectsByKeyValue;
+      }, {}),
+
     orderLevelErrors: levelErrors => {
       const levelErrorsWithPriority = [
         { id: 'CORRECT', index: 0 },
@@ -93,7 +109,9 @@ export const CoreUtils = (() => {
     },
 
     transposeMatrix: matrix => {
-      return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      if (!isUndefined(matrix[0])) {
+        return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      }
     }
   };
   return UtilsAPI;
