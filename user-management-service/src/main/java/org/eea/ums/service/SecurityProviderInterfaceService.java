@@ -146,6 +146,14 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userMail the user mail
    * @param groupName the group name
+   * @throws EEAException the EEA exception
    */
   void addContributorToUserGroup(String userMail, String groupName) throws EEAException;
+
+  /**
+   * Creates the resource instance.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs);
 }

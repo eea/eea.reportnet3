@@ -347,6 +347,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return resourceReturn;
   }
 
+  /**
+   * Adds the contributor to user group.
+   *
+   * @param userMail the user mail
+   * @param groupName the group name
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
     UserRepresentation[] users = keycloakConnectorService.getUsers();
@@ -357,6 +364,28 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
     this.addUserToUserGroup(contributor.get().getId(), groupName);
 
+  }
+
+
+  /**
+   * Creates the resource instance.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @Override
+  public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) {
+    for (ResourceInfoVO resourceInfoVO : resourceInfoVOs) {
+      GroupInfo groupInfo = new GroupInfo();
+      String groupName =
+          ResourceGroupEnum
+              .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
+                  resourceInfoVO.getSecurityRoleEnum())
+              .getGroupName(resourceInfoVO.getResourceId());
+      groupInfo.setName(groupName);
+      groupInfo.setPath("/" + groupName);
+      groupInfo.setAttributes(resourceInfoVO.getAttributes());
+      keycloakConnectorService.createGroupDetail(groupInfo);
+    }
   }
 
 

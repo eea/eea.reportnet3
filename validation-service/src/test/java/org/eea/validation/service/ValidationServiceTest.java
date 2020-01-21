@@ -221,6 +221,10 @@ public class ValidationServiceTest {
   private Validation validation;
 
 
+  /** The id list. */
+  List<Long> idList;
+
+
   private Map<String, List<String>> attributes;
 
   /**
@@ -302,6 +306,8 @@ public class ValidationServiceTest {
     datasetValue.setIdDatasetSchema("1234");
     datasetValue.setId(123L);
 
+    idList = new ArrayList<>();
+    idList.add(1L);
 
   }
 
@@ -784,10 +790,22 @@ public class ValidationServiceTest {
    */
   @Test
   public void getDatasetErrors() {
-    datasetValue.getDatasetValidations().get(0).getValidation()
-        .setTypeEntity(TypeEntityEnum.DATASET);
-    datasetValue.getDatasetValidations().get(0).getValidation()
-        .setValidationDate(new Date().toString());
+    datasetValue.setId(1L);
+    List<DatasetValidation> validations = new ArrayList<>();
+    DatasetValidation datasetValidation = new DatasetValidation();
+    datasetValidation.setId(1L);
+    Validation validationAux = new Validation();
+    validationAux.setId(1L);
+    validationAux.setIdRule("1");
+    validationAux.setLevelError(TypeErrorEnum.ERROR);
+    validationAux.setMessage("ERROR");
+    validationAux.setOriginName("DATASET");
+    validationAux.setTypeEntity(TypeEntityEnum.DATASET);
+    validationAux.setValidationDate(new Date().toString());
+    datasetValidation.setValidation(validationAux);
+    validations.add(datasetValidation);
+    datasetValue.setDatasetValidations(validations);
+    datasetValidation.setDatasetValue(datasetValue);
     when(validationDatasetRepository.findByValidationIds(Mockito.any()))
         .thenReturn(datasetValue.getDatasetValidations());
     validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
