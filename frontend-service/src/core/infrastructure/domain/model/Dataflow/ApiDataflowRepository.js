@@ -29,18 +29,14 @@ const parseDataflowDTO = dataflowDTO => {
 };
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
-  if (isUndefined(dataCollectionsDTO)) {
-    return;
-  }
-  if (!isNull(dataCollectionsDTO)) {
+  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
     const dataCollections = [];
     dataCollectionsDTO.forEach(dataCollectionDTO => {
       dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
     });
     return dataCollections;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseDataCollectionDTO = dataCollectionDTO => {
@@ -56,18 +52,14 @@ const parseDataCollectionDTO = dataCollectionDTO => {
 };
 
 const parseDatasetListDTO = datasetsDTO => {
-  if (isUndefined(datasetsDTO)) {
-    return;
-  }
-  if (!isNull(datasetsDTO)) {
+  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
     const datasets = [];
     datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseDatasetDTO = datasetDTO => {
@@ -90,18 +82,14 @@ const parseDatasetDTO = datasetDTO => {
 };
 
 const parseDocumentListDTO = documentsDTO => {
-  if (isUndefined(documentsDTO)) {
-    return;
-  }
-  if (!isNull(documentsDTO)) {
+  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
     const documents = [];
     documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseDocumentDTO = documentDTO => {
@@ -116,18 +104,14 @@ const parseDocumentDTO = documentDTO => {
 };
 
 const parseWebLinkListDTO = webLinksDTO => {
-  if (isUndefined(webLinksDTO)) {
-    return;
-  }
-  if (!isNull(webLinksDTO)) {
+  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
     const webLinks = [];
     webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseWebLinkDTO = webLinkDTO => {

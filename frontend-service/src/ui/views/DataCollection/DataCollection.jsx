@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { capitalize, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './DataCollection.module.css';
 
@@ -147,8 +147,13 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDataflowData = async () => {
     try {
       const dataflowData = await DataflowService.reporting(match.params.dataflowId);
-      const dataCollection = dataflowData.dataCollections.filter(datasets => datasets.dataCollectionId == datasetId);
-      setDataCollectionName(dataCollection[0].dataCollectionName);
+      const dataCollection = dataflowData
+        ? dataflowData.dataCollections.filter(datasets => datasets.dataCollectionId == datasetId)
+        : [];
+      const [firstDataCollection] = dataCollection;
+      if (!isEmpty(firstDataCollection)) {
+        setDataCollectionName(firstDataCollection.dataCollectionName);
+      }
     } catch (error) {
       const {
         dataflow: { name: dataflowName },

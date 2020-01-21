@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, remove } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -386,6 +386,7 @@ const Dataflow = withRouter(({ history, match }) => {
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           onSaveName={onSaveName}
           updatedDatasetSchema={updatedDatasetSchema}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
 
         <Dialog
