@@ -242,9 +242,9 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion) => {
-    console.log(codelistId, codelistName, codelistVersion);
+    console.log(codelistId, codelistName, codelistVersion, fieldId);
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
-    if (fieldId === -1) {
+    if (fieldId.toString() === '-1') {
       onFieldAdd(recordId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
     } else {
       fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);

@@ -35,3 +35,17 @@
   color: var(--gray-50);
   user-select: none;
 }
+
+.codelistHeader {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  margin: 1rem 0rem;
+}
+.codelistHeader span {
+  width: 22%;
+  display: flex;
+  font-size: 10pt;
+  color: var(--gray-65);
+  padding: 0rem 0rem 0rem 3rem;
+}

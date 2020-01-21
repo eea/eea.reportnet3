@@ -199,15 +199,13 @@ const Codelist = ({
   };
 
   const onSaveCodelist = async () => {
-    try {
-      console.log(codelistState.codelistStatus.value.toUpperCase(), codelistState.items.length);
-      if (codelistState.codelistStatus.value.toUpperCase() === 'READY' && codelistState.items.length === 0) {
-        console.log('ENTRO');
-        if (!isUndefined(onCodelistError)) {
-          console.log('ENTRO 2');
-          onCodelistError(resources.messages['noItemsInCodelistTitle'], resources.messages['noItemsInCodelistMessage']);
-        }
-      } else {
+    if (codelistState.codelistStatus.value.toUpperCase() === 'READY' && codelistState.items.length === 0) {
+      if (!isUndefined(onCodelistError)) {
+        onEditorPropertiesInputChange({ statusType: 'design', value: 'DESIGN' }, 'codelistStatus');
+        onCodelistError(resources.messages['noItemsInCodelistTitle'], resources.messages['noItemsInCodelistMessage']);
+      }
+    } else {
+      try {
         const response = await CodelistService.updateById(
           codelistState.codelistId,
           codelistState.codelistDescription,
@@ -220,18 +218,18 @@ const Codelist = ({
         if (response.status >= 200 && response.status <= 299) {
           toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
         }
+      } catch (error) {
+        console.log({ error });
+        notificationContext.add({
+          type: 'SAVE_EDIT_CODELIST_ERROR',
+          content: {}
+        });
+      } finally {
+        if (!isUndefined(updateEditingCodelists)) {
+          updateEditingCodelists(false);
+        }
+        onLoadCodelist();
       }
-    } catch (error) {
-      console.log({ error });
-      notificationContext.add({
-        type: 'SAVE_EDIT_CODELIST_ERROR',
-        content: {}
-      });
-    } finally {
-      if (!isUndefined(updateEditingCodelists)) {
-        updateEditingCodelists(false);
-      }
-      onLoadCodelist();
     }
   };
 

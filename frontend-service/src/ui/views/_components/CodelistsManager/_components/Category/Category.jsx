@@ -408,7 +408,16 @@ const Category = ({
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
         onExpandTree={onLoadCodelists}>
-        {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
+        {// <React.Fragment>
+        //   <div className={styles.codelistHeader}>
+        //     <span>Name</span>
+        //     <span>Version</span>
+        //     <span>Status</span>
+        //     <span>Description</span>
+        //   </div>
+        categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()
+        // </React.Fragment>
+        }
       </TreeViewExpandableItem>
       {renderEditDialog()}
       {renderAddCodelistDialog()}
