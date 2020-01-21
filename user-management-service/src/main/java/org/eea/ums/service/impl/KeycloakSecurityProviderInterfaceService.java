@@ -1,11 +1,21 @@
 package org.eea.ums.service.impl;
 
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -18,14 +28,22 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.jwt.data.CacheTokenVO;
+import org.eea.security.jwt.data.TokenDataVO;
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.ums.mapper.GroupInfoMapper;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,6 +64,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
+
+
+  @Autowired
+  @Qualifier("securityRedisTemplate")
+  private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
+
+  @Autowired
+  private JwtTokenProvider jwtTokenProvider;
 
   /**
    * Do login.
@@ -71,6 +97,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
     return tokenVO;
   }
 
@@ -88,6 +115,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
     return tokenVO;
   }
 
@@ -105,6 +133,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
     return tokenVO;
   }
 
@@ -115,11 +144,44 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @return the token VO
    */
+
   private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
+    TokenDataVO token = null;
+    try {
+      token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
+    } catch (VerificationException e) {
+      e.printStackTrace();
+    }
+
+    Set<String> eeaGroups = new HashSet<>();
+    Optional.ofNullable((List<String>) token.getOtherClaims().get("user_groups"))
+        .filter(groups -> groups.size() > 0).ifPresent(groups -> {
+      groups.stream().map(group -> {
+        if (group.startsWith("/")) {
+          group = group.substring(1);
+        }
+        return group.toUpperCase();
+      }).forEach(eeaGroups::add);
+    });
     TokenVO tokenVO = new TokenVO();
-    tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    tokenVO.setRoles(token.getRoles());
     tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    tokenVO.setGroups(eeaGroups);
+    tokenVO.setPreferredUsername(token.getPreferredUsername());
+    tokenVO.setAccessTokenExpiration(token.getExpiration());
+    tokenVO.setUserId(token.getUserId());
+
     return tokenVO;
+  }
+
+  private String addTokenInfoToCache(TokenInfo tokenInfo) {
+    CacheTokenVO cacheTokenVO = new CacheTokenVO();
+    cacheTokenVO.setAccessToken(tokenInfo.getAccessToken());
+    cacheTokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    String key = String.valueOf(UUID.randomUUID());
+    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, tokenInfo.getRefreshExpiresIn(),
+        TimeUnit.SECONDS);
+    return key;
   }
 
   /**
@@ -352,6 +414,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userMail the user mail
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   @Override

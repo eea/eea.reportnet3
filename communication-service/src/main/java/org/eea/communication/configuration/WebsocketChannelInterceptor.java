@@ -23,16 +23,22 @@ import org.springframework.util.Assert;
 @Component
 public class WebsocketChannelInterceptor implements ChannelInterceptor {
 
-  /** The client outbound channel. */
+  /**
+   * The client outbound channel.
+   */
   @Autowired
   @Qualifier("clientOutboundChannel")
   private MessageChannel clientOutboundChannel;
 
-  /** The jwt token provider. */
+  /**
+   * The jwt token provider.
+   */
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
-  /** The logger. */
+  /**
+   * The logger.
+   */
   private final Logger logger = LoggerFactory.getLogger(WebsocketChannelInterceptor.class);
 
   /**
@@ -40,6 +46,7 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
    *
    * @param message the message
    * @param channel the channel
+   *
    * @return the message
    */
   @Override
@@ -69,6 +76,7 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
    * Checks if is logged.
    *
    * @param accessor the accessor
+   *
    * @return true, if is logged
    */
   private boolean isLogged(StompHeaderAccessor accessor) {
@@ -91,6 +99,7 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
    * Do login.
    *
    * @param accessor the accessor
+   *
    * @return true, if successful
    */
   private boolean doLogin(StompHeaderAccessor accessor) {
