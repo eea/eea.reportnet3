@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, remove } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -73,7 +73,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
+  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState([]);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
@@ -303,6 +303,7 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
+        setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
         onUpdateData();
       }
     } catch (error) {
