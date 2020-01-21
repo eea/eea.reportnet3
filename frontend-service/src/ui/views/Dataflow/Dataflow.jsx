@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, remove } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -27,19 +27,20 @@ import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
-import { TextUtils } from 'ui/views/_functions/Utils';
-
-import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -73,7 +74,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
+  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState([]);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
@@ -303,6 +304,7 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
+        setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
         onUpdateData();
       }
     } catch (error) {

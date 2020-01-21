@@ -7,11 +7,13 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import styles from './NewDatasetSchemaForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
+
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
 
 const NewDatasetSchemaForm = ({
