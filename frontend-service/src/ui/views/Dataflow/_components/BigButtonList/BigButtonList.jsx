@@ -1,5 +1,7 @@
 import React, { useContext, useState } from 'react';
 
+import { remove } from 'lodash';
+
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
@@ -31,7 +33,8 @@ export const BigButtonList = ({
   onUpdateData,
   onSaveName,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema
+  updatedDatasetSchema,
+  setUpdatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -110,6 +113,7 @@ export const BigButtonList = ({
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
+        setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
       }
     } catch (error) {
       console.error(error.response);
