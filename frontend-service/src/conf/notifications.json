@@ -313,6 +313,7 @@
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
         {
           "key":"SAVE_EDIT_CODELIST_ERROR",
           "refresh":false          
