@@ -15,14 +15,12 @@ const useBigButtonList = ({
   dataflowStatus,
   getDeleteSchemaIndex,
   handleRedirect,
-  hasWritePermissions,
   isCustodian,
   onDatasetSchemaNameError,
   onDuplicateName,
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  showReleaseSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const resources = useContext(ResourcesContext);
