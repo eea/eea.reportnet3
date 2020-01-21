@@ -3,14 +3,18 @@
   font-size: 2rem;
   max-width: fit-content;
   cursor: pointer;
+  margin-right: 1rem !important;
 }
-
 .bigButton > a {
   padding: 2.3rem 2.7rem;
 }
 
-.dataset {
-  background-color: var(--c-corporate-blue);
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
+  padding: 0px !important;
+  height: 0px !important;
+}
+
+.defaultBigButton {
   color: var(--white);
   display: flex;
   flex-direction: column;
@@ -18,18 +22,15 @@
   align-items: center;
   position: relative;
 }
-
-.dataset a {
+.defaultBigButton a {
   color: var(--white);
   border-radius: 10px;
 }
-.dataset a:hover {
+.defaultBigButton a:hover {
   color: var(--white);
-  background-color: var(--c-blue-400);
 }
 
-.designDatasetSchema {
-  background-color: var(--c-blue-green);
+.menuBigButton {
   color: var(--white);
   display: flex;
   flex-direction: column;
@@ -37,69 +38,48 @@
   align-items: center;
   position: relative;
 }
-
-.designDatasetSchema a {
+.menuBigButton a {
   color: var(--white);
   border-radius: 10px;
 }
-
-.designDatasetSchema a:hover {
-  color: var(--white);
-  background-color: var(--c-aquamarine);
-}
-
-.documents {
-  background-color: var(--c-orange-200);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.documents a {
-  color: var(--white);
-  border-radius: 10px;
-}
-
-.documents a:hover {
-  background-color: var(--c-orange-300);
+.menuBigButton a:hover {
   color: var(--white);
 }
 
 .dashboard {
   background-color: var(--c-purple-400);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--white);
-}
-.dashboard a {
-  color: var(--white);
-  border-radius: 10px;
 }
 .dashboard a:hover {
   background-color: var(--c-purple-300);
-  color: var(--white);
 }
+
+.dataflowHelp {
+  background-color: var(--c-orange-200);
+}
+.dataflowHelp a:hover {
+  background-color: var(--c-orange-300);
+}
+
+.dataset {
+  background-color: var(--c-corporate-blue);
+}
+.dataset a:hover {
+  background-color: var(--c-blue-400);
+}
+
+.schemaDataset {
+  background-color: var(--c-blue-green);
+}
+.schemaDataset a:hover {
+  background-color: var(--c-aquamarine);
+}
+
 .newItem {
   background-color: var(--c-blue-300);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--white);
-}
-.newItem a {
-  color: var(--white);
-  border-radius: 10px;
 }
 .newItem a:hover {
   background-color: var(--c-blue-200);
-  color: var(--white);
 }
-
 .newItem a:hover .newItemCross {
   -webkit-transition-duration: 0.5s;
   -moz-transition-duration: 0.5s;
@@ -115,6 +95,9 @@
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
 }
+.newItem .siteMap {
+  transform: rotate(180deg) !important;
+}
 
 .caption {
   text-align: center;
@@ -122,10 +105,6 @@
   word-wrap: break-word;
   max-width: 100px;
   box-sizing: content-box;
-}
-.datasetItem :global .p-button.p-button-icon-only .p-button-text {
-  padding: 0px !important;
-  height: 0px !important;
 }
 
 .inputText {

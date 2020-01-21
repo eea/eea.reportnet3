@@ -1,4 +1,4 @@
-import { includes, isUndefined } from 'lodash';
+import { includes, isUndefined, isNull } from 'lodash';
 
 import { Representative } from 'core/domain/model/Representative/Representative';
 
@@ -38,6 +38,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         representatives: updatedList,
+        refresher: !state.refresher,
         isVisibleConfirmDeleteDialog: false
       };
 
@@ -86,11 +87,22 @@ export const reducer = (state, { type, payload }) => {
         payload.response.representatives.push(emptyRepresentative);
       }
 
+      const getSelectedProviderGroup = () => {
+        let selectedGroup = null;
+
+        if (isNull(state.selectedDataProviderGroup)) {
+          selectedGroup = isUndefined(group[0]) ? null : group[0];
+        } else {
+          selectedGroup = state.selectedDataProviderGroup;
+        }
+        return selectedGroup;
+      };
+
       return {
         ...state,
         representatives: payload.response.representatives,
         initialRepresentatives: payload.representativesByCopy,
-        selectedDataProviderGroup: isUndefined(group[0]) ? null : group[0],
+        selectedDataProviderGroup: getSelectedProviderGroup(),
         representativeHasError: []
       };
 

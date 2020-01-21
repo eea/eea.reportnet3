@@ -48,13 +48,13 @@
         background-color: #d9a220;
       }
     }
-    &.notStarted {
+    &.DESIGN {
       background-color: var(--c-lilac-100);
       &:hover {
         background-color: #c2c8cf;
       }
     }
-    &.drafted {
+    &.DRAFT {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
