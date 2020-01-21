@@ -10,25 +10,43 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
 import { CodelistService } from 'core/services/Codelist';
 
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(false);
   const [codelistsList, setCodelistsList] = useState();
 
   useEffect(() => {
-    getCodelistsListBySchemas(datasetsSchemas);
-  }, []);
+    if (!isUndefined(datasetsSchemas)) {
+      getCodelistsListBySchemas(datasetsSchemas);
+    }
+  }, [datasetsSchemas]);
+
+  useEffect(() => {
+    if (!isUndefined(codelistsList)) {
+      renderDatasetSchemas();
+    }
+  }, [codelistsList]);
 
   const getCodelistsListBySchemas = async datasetsSchemas => {
     setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
   };
 
   const getCodelistsList = async () => {
-    const codelistsList = await getCodelistsList(datasetsSchemas);
-    return codelistsList;
+    try {
+      const codelistsList = await getCodelistsList(datasetsSchemas);
+      return codelistsList;
+    } catch (error) {
+      console.log(error);
+      notificationContext.add({
+        type: 'DOCUMENTATION_CODELISTS_ERROR'
+      });
+    }
   };
 
   const renderDatasetSchemas = () => {

@@ -214,6 +214,9 @@
           }
         },
         {
+          "key":"DOCUMENTATION_CODELISTS_ERROR"
+        },
+        {
           "key":"ADD_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo":{
             "section":"DATASET",

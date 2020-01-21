@@ -69,31 +69,56 @@ const getCodelistsList = async datasetSchemas => {
 };
 
 const getCodelistsIdsBySchemas = datasetSchemas => {
-  const codelistIds = [];
   try {
+    const codelistIds = [];
     datasetSchemas.forEach(schema => {
       if (!isUndefined(schema)) {
-        schema.tables.forEach(table => {
-          table.records.forEach(record => {
-            record.fields.forEach(field => {
-              let codelistId = field.type === 'CODELIST' ? field.codelistId : null;
-              if (!isNull(codelistId)) {
-                codelistIds.push(codelistId);
+        schema.tables.map(table => {
+          table.records.map(record => {
+            record.fields.map(field => {
+              if (!isNull(field.codelistId)) {
+                codelistIds.push(field.codelistId);
               }
             });
           });
         });
       }
     });
+    return codelistIds;
   } catch (error) {
     console.log({ error });
+    console.error(`Error in schema: ${error}`);
   }
-  return codelistIds;
 };
 
 const getCodelistsByIds = async codelistIds => {
-  const codelists = await apiCodelist.getAllByIds(codelistIds);
-  return codelists;
+  try {
+    const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
+    let codelistItems = [];
+    codelistsDTO.data.sort((a, b) => a.id - b.id);
+    console.log({ codelistsDTO });
+    const codelists = codelistsDTO.data.map(codelistDTO => {
+      console.log({ codelistDTO });
+      if (!isEmpty(codelistDTO.items)) {
+        codelistItems = codelistDTO.items.map(
+          itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+        );
+      }
+      return new Codelist(
+        codelistDTO.id,
+        codelistDTO.category.shortCode,
+        codelistDTO.category.description,
+        codelistDTO.version,
+        codelistDTO.status,
+        codelistItems
+      );
+    });
+    console.log({ codelists });
+    return codelists;
+  } catch (error) {
+    console.log({ error });
+    console.error(`Error in schema: ${error}`);
+  }
 };
 
 const updateById = async (id, description, items, name, status, version, categoryId) => {

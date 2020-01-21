@@ -45,9 +45,11 @@ const parseDesignDataset = (design, codelistsList) => {
             let fieldCodelist;
             if (fieldDTO.type === 'CODELIST') {
               if (!isUndefined(codelistsList)) {
-                let codelist = codelistsList.data.find(codelist => codelist.id === fieldDTO.codelistId);
+                let codelist = codelistsList.find(codelist => codelist.id === fieldDTO.codelistId);
+                console.log({ codelist });
                 if (!isUndefined(codelist)) {
                   fieldCodelist = `${codelist.name} (v${codelist.version})`;
+                  console.log({ codelist });
                 }
               }
             }

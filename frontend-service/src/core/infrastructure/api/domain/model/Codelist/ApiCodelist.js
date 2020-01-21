@@ -69,12 +69,13 @@ export const apiCodelist = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(CodelistConfig.find, {
-        codelistIds: [4, 4, 5]
+        codelistIds
       }),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log({ response });
     return response;
   },
 
