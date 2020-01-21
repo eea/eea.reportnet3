@@ -1,4 +1,4 @@
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined, cloneDeep } from 'lodash';
 import { RepresentativeService } from 'core/services/Representative';
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
@@ -46,7 +46,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const representativesByCopy = JSON.parse(JSON.stringify(responseAllRepresentatives.representatives));
+    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
     formDispatcher({
       type: 'INITIAL_LOAD',
       payload: { response: responseAllRepresentatives, representativesByCopy }
