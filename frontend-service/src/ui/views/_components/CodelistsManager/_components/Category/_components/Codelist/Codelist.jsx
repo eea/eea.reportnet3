@@ -33,6 +33,7 @@ const Codelist = ({
   codelist,
   isDataCustodian = true,
   isInDesign,
+  onCodelistError,
   onCodelistSelected,
   onRefreshCodelist,
   updateEditingCodelists
@@ -199,7 +200,13 @@ const Codelist = ({
 
   const onSaveCodelist = async () => {
     try {
+      console.log(codelistState.codelistStatus.value.toUpperCase(), codelistState.items.length);
       if (codelistState.codelistStatus.value.toUpperCase() === 'READY' && codelistState.items.length === 0) {
+        console.log('ENTRO');
+        if (!isUndefined(onCodelistError)) {
+          console.log('ENTRO 2');
+          onCodelistError(resources.messages['noItemsInCodelistTitle'], resources.messages['noItemsInCodelistMessage']);
+        }
       } else {
         const response = await CodelistService.updateById(
           codelistState.codelistId,

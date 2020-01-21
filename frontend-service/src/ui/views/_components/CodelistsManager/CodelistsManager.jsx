@@ -47,6 +47,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   useEffect(() => {
     if (isErrorDialogVisible) {
+      console.log('EEEEE');
       renderErrors(errorMessageTitle, errorMessage);
     }
   }, [isErrorDialogVisible]);
@@ -63,6 +64,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const onCodelistError = (errorTitle, error) => {
+    console.log({ errorTitle, error });
     setErrorMessageTitle(errorTitle);
     setErrorMessage(error);
     setIsErrorDialogVisible(true);

@@ -27,6 +27,7 @@ const Category = ({
   checkDuplicates,
   isDataCustodian,
   isInDesign,
+  onCodelistError,
   onCodelistSelected,
   onLoadCategories
 }) => {
@@ -306,6 +307,7 @@ const Category = ({
                 isDataCustodian={isDataCustodian}
                 isInDesign={isInDesign}
                 key={i}
+                onCodelistError={onCodelistError}
                 onCodelistSelected={onCodelistSelected}
                 onRefreshCodelist={onRefreshCodelist}
                 updateEditingCodelists={updateEditingCodelists}

@@ -45,6 +45,9 @@ import {
   faCloudUploadAlt,
   faThList,
   faMinus,
+  faLayerGroup,
+  faCoins,
+  faSitemap,
   faEye,
   faAngleRight,
   faAngleDown
@@ -248,6 +251,12 @@ export const AwesomeIcons = icon => {
       return faHome;
     case 'released':
       return faCloudUploadAlt;
+    case 'dataCollection':
+      return faLayerGroup;
+    case 'representative':
+      return faCoins;
+    case 'siteMap':
+      return faSitemap;
     default:
       return faFileAlt;
   }

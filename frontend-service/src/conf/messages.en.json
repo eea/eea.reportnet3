@@ -21,6 +21,7 @@
 		"categoryShortCode": "Short code",
 		"categoryDescription": "Description",
 		"chooseChartColor": "Choose your dashboard color",
+		"chooseExpirationDate": "Please, choose data collection expiration date",
 		"cleanFilters": "Clean filters",
 		"clone": "Clone codelist",
 		"cloneCodelist": "Clone codelist",
@@ -50,7 +51,9 @@
 		"copyrightPrivacy": "Privacy policy",
 		"copyrightResources": "Resources for partners",
 		"correct": "Correct",
+		"countryCode": "Country code",
 		"create": "Create",
+		"createDataCollection": "Create data collections",
 		"createNewDataflow": "Create new dataflow",
 		"createNewDatasetFromTemplate": "New dataset from template",
 		"createNewEmptyDatasetSchema": "New empty dataset schema",
@@ -65,6 +68,7 @@
 		"createSnapshotTooltip": "Save copy",
 		"creationDate": "Creation date",
 		"dashboards": "Dashboards",
+		"dataCollection": "Data Collection",
 		"dataflow": "Dataflow",
 		"dataflowAcceptedPendingTab": "Pending & Accepted",
 		"dataflowCompletedTab": "Completed",
@@ -215,6 +219,8 @@
 		"noDataInDataTable": "There is not any data to show",
 		"noDesignSchemasCreated": "There are no dataset schemas created",
 		"noErrorData": "There is not any validation data to show",
+		"noItemsInCodelistMessage":"Codelist has no items. You need to include at least one.",
+		"noItemsInCodelistTitle":"Codelist has no items",
 		"noWeblinks": "There is not any web link to show",
 		"notificationSuccessTitle":"SUCCESS",
 		"notificationErrorTitle":"ERROR",
@@ -379,6 +385,10 @@
 		"unsavedChanges":"There are unsaved changes",
 		"validateDataInit":"Validating <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
 		"validateDataByIdError":"Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
+		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
+		"createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"representative":"Representative"
 	}
 }

@@ -15,6 +15,7 @@ export const TabsSchema = ({
   buttonsList = undefined,
   levelErrorTypes,
   hasWritePermissions,
+  isDataCollection,
   isWebFormMMR,
   onLoadTableData,
   onTabChange,
@@ -37,6 +38,7 @@ export const TabsSchema = ({
                   buttonsList={buttonsList}
                   levelErrorTypes={levelErrorTypes}
                   hasWritePermissions={hasWritePermissions}
+                  isDataCollection={isDataCollection}
                   isWebFormMMR={isWebFormMMR}
                   key={table.id}
                   onLoadTableData={onLoadTableData}

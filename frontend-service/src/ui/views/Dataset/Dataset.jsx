@@ -24,7 +24,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabsSchema } from './_components/TabsSchema';
+import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
@@ -80,43 +80,77 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
+  const [metaData, setMetaData] = useState({});
 
   let exportMenuRef = useRef();
 
   let growlRef = useRef();
 
+  const callSetMetaData = async () => {
+    setMetaData(await getMetadata({ datasetId, dataflowId }));
+  };
+
   useEffect(() => {
-    setBreadCrumbItems([
-      {
-        label: resources.messages['dataflowList'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'archive',
-        href: getUrl(
-          routes.DATAFLOW,
-          {
-            dataflowId: match.params.dataflowId
-          },
-          true
-        ),
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
-      },
-      { label: resources.messages['dataset'], icon: 'dataset' }
-    ]);
+    callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metaData.dataset)) {
+      setBreadCrumbItems([
+        {
+          label: resources.messages['dataflowList'],
+          icon: 'home',
+          href: getUrl(routes.DATAFLOWS),
+          command: () => history.push(getUrl(routes.DATAFLOWS))
+        },
+        {
+          label: resources.messages['dataflow'],
+          icon: 'archive',
+          href: getUrl(
+            routes.DATAFLOW,
+            {
+              dataflowId
+            },
+            true
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.DATAFLOW,
+                {
+                  dataflowId
+                },
+                true
+              )
+            )
+        },
+        {
+          label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
+          icon: 'representative',
+          href: getUrl(
+            routes.REPRESENTATIVE,
+            {
+              dataflowId,
+              representative: metaData.dataset.name
+            },
+            true
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.REPRESENTATIVE,
+                {
+                  dataflowId,
+                  representative: metaData.dataset.name
+                },
+                true
+              )
+            )
+        },
+        { label: resources.messages['dataset'], icon: 'dataset' }
+      ]);
+    }
+  }, [metaData]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -394,6 +428,7 @@ export const Dataset = withRouter(({ match, history }) => {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await getMetadata({ dataflowId, datasetId });
+      setDatasetName(datasetName);
       const datasetError = {
         type: error.message,
         content: {
