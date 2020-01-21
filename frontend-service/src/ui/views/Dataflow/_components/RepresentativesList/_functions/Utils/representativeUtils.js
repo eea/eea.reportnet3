@@ -1,6 +1,17 @@
 import { isEmpty, isNull, isUndefined, cloneDeep } from 'lodash';
 import { RepresentativeService } from 'core/services/Representative';
 
+export const autofocusOnEmptyInput = formState => {
+  if (!isEmpty(formState.representatives)) {
+    if (
+      isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
+      !isNull(document.getElementById('emptyInput'))
+    ) {
+      document.getElementById('emptyInput').focus();
+    }
+  }
+};
+
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
   const newRepresentative = representatives.filter(representative => isNull(representative.representativeId));
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {

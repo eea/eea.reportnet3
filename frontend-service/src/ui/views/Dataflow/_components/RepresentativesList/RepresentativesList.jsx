@@ -6,9 +6,10 @@ import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 import {
+  autofocusOnEmptyInput,
+  createUnusedOptionsList,
   getAllDataProviders,
   getInitialData,
-  createUnusedOptionsList,
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
@@ -57,14 +58,7 @@ const RepresentativesList = ({ dataflowId }) => {
   }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
-    if (!isEmpty(formState.representatives)) {
-      if (
-        isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
-        !isNull(document.getElementById('emptyInput'))
-      ) {
-        document.getElementById('emptyInput').focus();
-      }
-    }
+    autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
 
   const providerAccountInputColumnTemplate = representative => {
