@@ -27,19 +27,20 @@ import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
-import { TextUtils } from 'ui/views/_functions/Utils';
-
-import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+
+import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
