@@ -8,8 +8,7 @@ import styles from './CodelistsManager.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
-// import { Checkbox } from 'ui/views/_components/Checkbox';
-// import { InputText } from 'ui/views/_components/InputText';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -27,9 +26,11 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const resources = useContext(ResourcesContext);
 
   const [categories, setCategories] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessageTitle, setErrorMessageTitle] = useState('');
   const [filter, setFilter] = useState();
   // const [filteredCategories, setFilteredCategories] = useState([]);
-  const [isChecked, setIsChecked] = useState(false);
+  const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
@@ -44,6 +45,12 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     }
   }, []);
 
+  useEffect(() => {
+    if (isErrorDialogVisible) {
+      renderErrors(errorMessageTitle, errorMessage);
+    }
+  }, [isErrorDialogVisible]);
+
   // useEffect(() => {
   //   console.log('LOADED');
   //   setIsLoading();
@@ -53,6 +60,12 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     const inmNewCategory = { ...newCategory };
     inmNewCategory[property] = value;
     setNewCategory(inmNewCategory);
+  };
+
+  const onCodelistError = (errorTitle, error) => {
+    setErrorMessageTitle(errorTitle);
+    setErrorMessage(error);
+    setIsErrorDialogVisible(true);
   };
 
   // const onFilter = filter => {
@@ -126,6 +139,18 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     }
   };
 
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          setIsErrorDialogVisible(false);
+        }}
+      />
+    </div>
+  );
+
   const renderCategories = data =>
     data.map((category, i) => {
       return (
@@ -138,11 +163,25 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           isDataCustodian={isDataCustodian}
           isInDesign={isInDesign}
           key={i}
+          onCodelistError={onCodelistError}
           onCodelistSelected={onCodelistSelected}
           onLoadCategories={onLoadCategories}
         />
       );
     });
+
+  const renderErrors = (errorTitle, error) => {
+    return (
+      <Dialog
+        footer={errorDialogFooter}
+        header={errorTitle}
+        modal={true}
+        onHide={() => setIsErrorDialogVisible(false)}
+        visible={isErrorDialogVisible}>
+        <div className="p-grid p-fluid">{error}</div>
+      </Dialog>
+    );
+  };
 
   return (
     <React.Fragment>

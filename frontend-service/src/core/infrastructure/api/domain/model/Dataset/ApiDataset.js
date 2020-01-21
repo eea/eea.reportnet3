@@ -398,6 +398,7 @@ export const apiDataset = {
     }
   },
   updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
+    console.log({ datasetTableRecordField });
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({

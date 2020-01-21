@@ -96,13 +96,13 @@ const TreeViewExpandableItem = ({
         {!isUndefined(items) & (items.length > 0) ? (
           isOpen ? (
             <FontAwesomeIcon
-              icon={AwesomeIcons('minusSquare')}
+              icon={AwesomeIcons('angleDown')}
               style={{ cursor: 'pointer' }}
               onClick={() => setIsOpen(!isOpen)}
             />
           ) : (
             <FontAwesomeIcon
-              icon={AwesomeIcons('plusSquare')}
+              icon={AwesomeIcons('angleRight')}
               style={{ cursor: 'pointer' }}
               onClick={() => setIsOpen(!isOpen)}
             />

@@ -199,17 +199,20 @@ const Codelist = ({
 
   const onSaveCodelist = async () => {
     try {
-      const response = await CodelistService.updateById(
-        codelistState.codelistId,
-        codelistState.codelistDescription,
-        codelistState.items,
-        codelistState.codelistName,
-        codelistState.codelistStatus.value.toUpperCase(),
-        codelistState.codelistVersion,
-        codelistState.codelistCategoryId
-      );
-      if (response.status >= 200 && response.status <= 299) {
-        toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
+      if (codelistState.codelistStatus.value.toUpperCase() === 'READY' && codelistState.items.length === 0) {
+      } else {
+        const response = await CodelistService.updateById(
+          codelistState.codelistId,
+          codelistState.codelistDescription,
+          codelistState.items,
+          codelistState.codelistName,
+          codelistState.codelistStatus.value.toUpperCase(),
+          codelistState.codelistVersion,
+          codelistState.codelistCategoryId
+        );
+        if (response.status >= 200 && response.status <= 299) {
+          toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
+        }
       }
     } catch (error) {
       console.log({ error });
@@ -480,8 +483,10 @@ const Codelist = ({
             tooltip: resources.messages['clone']
           },
           {
+            disabled: codelist.status.toLowerCase() !== 'ready',
             icon: 'checkSquare',
-            onClick: () => onCodelistSelected(codelistState.codelistName, codelistState.codelistVersion),
+            onClick: () =>
+              onCodelistSelected(codelistState.codelistId, codelistState.codelistName, codelistState.codelistVersion),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign
           }

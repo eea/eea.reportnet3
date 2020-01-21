@@ -26,10 +26,12 @@
   --informative-color: #006fb4;
   --warning-color: #f29527;
   --success-color: #467a39;
+  --success-color-rgb: 70, 122, 57;
   --errors: #da2131;
 
   /* Main corporate colors */
   --c-corporate-blue: #006699;
+  --c-corporate-blue-rgb: 0, 102, 153;
   --c-corporate-aqua-marine: #008675;
   /* Blue palette */
   --c-blue-400: #4f758b;
@@ -1807,7 +1809,7 @@ textarea {
 
 textarea {
   /* min-height: 5rem; */
-  font-family: arial;
+  font-family: 'Open Sans', sans-serif;
   resize: none;
 }
 
