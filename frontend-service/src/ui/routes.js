@@ -3,10 +3,12 @@ export const routes = {
   EULOGIN: '/eulogin',
   LOGIN: '/',
   CODELISTS: '/codelists',
+  DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATAFLOWS: '/dataflows',
   DATAFLOW: '/dataflow/:dataflowId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
-  DOCUMENTS: '/dataflow/:dataflowId/documents'
+  DOCUMENTS: '/dataflow/:dataflowId/documents',
+  REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative'
 };
