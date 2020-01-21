@@ -345,13 +345,28 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG_ERROR.error(e.getMessage());
         releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
             e.getMessage());
+        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
       }
 
     } else {
       LOG_ERROR.error("Error in release snapshot");
       releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
           "Error in release snapshot");
+      removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }
+  }
+
+  /**
+   * Removes the lock.
+   *
+   * @param idLock the id lock
+   * @param lock the lock
+   */
+  private void removeLock(Long idLock, LockSignature lock) {
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(lock.getValue());
+    criteria.add(idLock);
+    lockService.removeLockByCriteria(criteria);
   }
 
 
