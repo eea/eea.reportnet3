@@ -99,41 +99,37 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     List<RepresentativeVO> representatives = representativeControllerZuul
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
+    // only if there are design datasets and providers
     int i = designs.size() - 1;
-    for (DesignDatasetVO design : designs) {
-      try {
-        for (RepresentativeVO representative : representatives) {
+    if (!designs.isEmpty() && !representatives.isEmpty()) {
+      for (DesignDatasetVO design : designs) {
+        try {
+          // Create the DC per design dataset
+          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
+              "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
+              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, i);
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
-              design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representative, i);
-          LOG.info("New Reporting Dataset into the dataflow {}", dataCollectionVO.getIdDataflow());
+              design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
+              i);
+          i--;
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+              e.getMessage(), e);
+          // Error notification
+          try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
+                null,
+                NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                    .dataflowId(dataCollectionVO.getIdDataflow()).error(e.getMessage()).build());
+          } catch (EEAException e1) {
+            LOG_ERROR.error("Error releasing notification", e1);
+          }
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              EEAErrorMessage.EXECUTION_ERROR);
         }
-        // Create the DC per design dataset
-        datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-            "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-            dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, i);
-        LOG.info("New Data Collection created into the dataflow {}",
-            dataCollectionVO.getIdDataflow());
-        i--;
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-            e.getMessage(), e);
-        // Error notification
-        try {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
-              null,
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .dataflowId(dataCollectionVO.getIdDataflow()).error(e.getMessage()).build());
-        } catch (EEAException e1) {
-          LOG_ERROR.error("Error releasing notification", e1);
-        }
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            EEAErrorMessage.EXECUTION_ERROR);
       }
-    }
-    // 4. Update the dataflow status to DRAFT, checking before if there is design datasets and
-    // providers in the dataflow
-    if (!designs.isEmpty() || !representatives.isEmpty()) {
+      // 4. Update the dataflow status to DRAFT
       dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
           TypeStatusEnum.DRAFT);
       LOG.info("Dataflow {} changed status to DRAFT", dataCollectionVO.getIdDataflow());

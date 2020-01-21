@@ -77,4 +77,13 @@ public interface ResourceManagementController {
   @GetMapping("/getResourceInfoVOByResource")
   List<ResourceInfoVO> getGroupsByIdResourceType(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceType") ResourceTypeEnum resourceType);
+
+
+  /**
+   * Creates the resources.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs);
 }
