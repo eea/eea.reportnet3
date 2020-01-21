@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,7 +75,7 @@ public class DataSetSnapshotControllerImplTest {
   public void testAddSnapshots() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.createSnapshot(1L, "test", false);
+    dataSetSnapshotControllerImpl.createSnapshot(1L, new CreateSnapshotVO());
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
