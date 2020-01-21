@@ -1,4 +1,4 @@
-import { capitalize, isEmpty, isNull } from 'lodash';
+import { capitalize, isEmpty, isNull, isUndefined } from 'lodash';
 
 import { apiCodelist } from 'core/infrastructure/api/domain/model/Codelist';
 import { CodelistCategory } from 'core/domain/model/CodelistCategory/CodelistCategory';
@@ -70,18 +70,24 @@ const getCodelistsList = async datasetSchemas => {
 
 const getCodelistsIdsBySchemas = datasetSchemas => {
   const codelistIds = [];
-  datasetSchemas.forEach(schema => {
-    schema.tables.forEach(table => {
-      table.records.forEach(record => {
-        record.fields.forEach(field => {
-          let codelistId = field.type === 'CODELIST' ? field.codelistId : null;
-          if (!isNull(codelistId)) {
-            codelistIds.push(codelistId);
-          }
+  try {
+    datasetSchemas.forEach(schema => {
+      if (!isUndefined(schema)) {
+        schema.tables.forEach(table => {
+          table.records.forEach(record => {
+            record.fields.forEach(field => {
+              let codelistId = field.type === 'CODELIST' ? field.codelistId : null;
+              if (!isNull(codelistId)) {
+                codelistIds.push(codelistId);
+              }
+            });
+          });
         });
-      });
+      }
     });
-  });
+  } catch (error) {
+    console.log({ error });
+  }
   return codelistIds;
 };
 

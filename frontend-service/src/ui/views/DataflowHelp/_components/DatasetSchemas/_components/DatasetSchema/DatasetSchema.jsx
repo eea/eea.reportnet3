@@ -23,7 +23,7 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   return renderDatasetSchema();
 };
 
-const parseDesignDataset = (design, codelists) => {
+const parseDesignDataset = (design, codelistsList) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
@@ -42,11 +42,20 @@ const parseDesignDataset = (design, codelists) => {
         const existACodelist = tableDTO.records[0].fields.filter(field => field.type === 'CODELIST');
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           if (!isEmpty(existACodelist)) {
+            let fieldCodelist;
+            if (fieldDTO.type === 'CODELIST') {
+              if (!isUndefined(codelistsList)) {
+                let codelist = codelistsList.data.find(codelist => codelist.id === fieldDTO.codelistId);
+                if (!isUndefined(codelist)) {
+                  fieldCodelist = `${codelist.name} (v${codelist.version})`;
+                }
+              }
+            }
             return {
               name: fieldDTO.name,
               type: fieldDTO.type,
               description: !isNull(fieldDTO.description) ? fieldDTO.description : '-',
-              codelist: fieldDTO.type === 'CODELIST' ? 'Future codelist name, description and version or whatever.' : ''
+              codelist: !isNull(fieldCodelist) ? fieldCodelist : ''
             };
           } else {
             return {
@@ -64,30 +73,6 @@ const parseDesignDataset = (design, codelists) => {
 
     parsedDataset.tables = tables;
   }
-  // parsedDataset.codelists = getCodelists(1);
-
-  // parsedDataset.codelists = {
-  //   id: 18,
-  //   name: 'cl2',
-  //   description: 'code1',
-  //   category: {
-  //     id: 1,
-  //     shortCode: 'c1',
-  //     description: 'cat1'
-  //   },
-  //   version: 1,
-  //   items: [
-  //     {
-  //       id: 16,
-  //       shortCode: 'o',
-  //       label: 'two',
-  //       definition: 'def',
-  //       codelistId: null
-  //     }
-  //   ],
-  //   status: 'DESIGN'
-  // };
-
   const dataset = {};
   dataset[design.datasetSchemaName] = parsedDataset;
   return dataset;
