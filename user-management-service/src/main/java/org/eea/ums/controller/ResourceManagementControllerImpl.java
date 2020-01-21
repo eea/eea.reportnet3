@@ -98,4 +98,18 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
       @RequestParam("resourceType") ResourceTypeEnum resourceType) {
     return securityProviderInterfaceService.getGroupsByIdResourceType(idResource, resourceType);
   }
+
+
+  /**
+   * Creates the resources.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
+    securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
+  }
 }

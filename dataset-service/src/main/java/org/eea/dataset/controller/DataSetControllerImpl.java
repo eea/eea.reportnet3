@@ -371,7 +371,7 @@ public class DataSetControllerImpl implements DatasetController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
-      @PathVariable("recordId") final Long recordId) {
+      @PathVariable("recordId") final String recordId) {
     if (datasetId == null || recordId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }

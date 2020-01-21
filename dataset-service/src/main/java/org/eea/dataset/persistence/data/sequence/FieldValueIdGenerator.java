@@ -1,13 +1,12 @@
 package org.eea.dataset.persistence.data.sequence;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -15,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class RecordValueGenerator.
+ * The Class FieldValueGenerator.
  */
-public class RecordValueGenerator implements IdentifierGenerator {
+public class FieldValueIdGenerator implements IdentifierGenerator {
 
   /**
    * The Constant LOG_ERROR.
@@ -36,28 +35,27 @@ public class RecordValueGenerator implements IdentifierGenerator {
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
 
-    RecordValue record = (RecordValue) object;
+    FieldValue field = (FieldValue) object;
     String prefix = null;
+    String datasetId = field.getRecord().getTableValue().getDatasetId().getId().toString();
     // Set the provider code to create Hash
-    if (null == record.getDataProviderCode()) {
-      prefix = "AUX" + record.getTableValue().getDatasetId().getId().toString();
+    if (null == field.getRecord().getDataProviderCode()) {
+      Double aux = Math.random();
+      prefix = "FIELD" + aux.toString() + "DS";
     } else {
-      prefix = record.getDataProviderCode();
+      prefix = "FIELD" + field.getRecord().getDataProviderCode();
     }
     // Connection must not close because transaction not finished yet.
-    Connection connection = session.connection();// NOPMD
+    Connection connection = session.connection(); // NOPMD
 
     try (Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT nextval('record_sequence')")) {
+        ResultSet rs = statement.executeQuery("SELECT nextval('field_sequence')")) {
 
       if (rs.next()) {
         int id = rs.getInt(1);
-        String idcompose = prefix + Integer.valueOf(id);
-        String md5Hex = DigestUtils.md5Hex(idcompose).toUpperCase();
-        BigInteger bi = new BigInteger(md5Hex, 16);
-        Long hexId = bi.longValue();
-        String textId = hexId.toString();
-        return Long.parseLong(textId.substring(0, 14));
+        String idcompose = datasetId + prefix + Integer.valueOf(id);
+        return DigestUtils.md5Hex(idcompose).toUpperCase();
+
       }
     } catch (SQLException e) {
       LOG_ERROR.error("Faliled to generate Field ID");

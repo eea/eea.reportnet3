@@ -96,7 +96,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  public void executeDeleteProcess(Long datasetId, Long recordId) throws EEAException {
+  public void executeDeleteProcess(Long datasetId, String recordId) throws EEAException {
     datasetService.deleteRecord(datasetId, recordId);
     LOG.info("Records have been deleted");
     // after the records have been deleted, an event is sent to notify it

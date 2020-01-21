@@ -22,7 +22,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    */
   @Query("SELECT rv FROM RecordValidation rv INNER JOIN FETCH rv.validation INNER JOIN FETCH rv.recordValue record "
       + "WHERE record.id in (:recordIds)")
-  List<RecordValidation> findByRecordValueIdIn(@Param("recordIds") List<Long> recordIds);
+  List<RecordValidation> findByRecordValueIdIn(@Param("recordIds") List<String> recordIds);
 
 
   /**

@@ -5,8 +5,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
@@ -129,10 +132,15 @@ public class DatasetMetabaseServiceTest {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    representative.setProviderAccount("test@reportnet.net");
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
-        "5d0c822ae1ccd34cfcd97e20", 1L, null, new RepresentativeVO(), 0);
+        "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
+
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
+
   }
 
   @Test
@@ -236,12 +244,17 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void createGroupAndAddUserTest() {
-    Mockito.doNothing().when(resourceManagementControllerZuul).createResource(Mockito.any());
-    Mockito.doNothing().when(userManagementControllerZuul).addUserToResource(Mockito.any(),
-        Mockito.any());
-    datasetMetabaseService.createGroupProviderAndAddUser(1L, "test@reportnet.net", 1L);
-    Mockito.verify(userManagementControllerZuul, times(1)).addUserToResource(Mockito.any(),
-        Mockito.any());
+
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setProviderAccount("test@reportnet.net");
+    representative.setDataProviderId(1L);
+    Map<Long, String> mapTest = new HashMap<>();
+    mapTest.put(1L, "test@reportnet.net");
+    datasetMetabaseService.createGroupProviderAndAddUser(mapTest, Arrays.asList(representative),
+        1L);
+
+    Mockito.verify(resourceManagementControllerZuul, times(1)).createResources(Mockito.any());
+
   }
 
   @Test
@@ -262,7 +275,7 @@ public class DatasetMetabaseServiceTest {
 
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION, "testName",
-        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new RepresentativeVO(), 0);
+        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<RepresentativeVO>(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 
