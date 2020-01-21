@@ -338,15 +338,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Restore data from snapshot
       try {
         restoreSnapshot(idDataCollection, idSnapshot, false);
+        // Check the snapshot released
+        snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+        LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
         releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
             e.getMessage());
       }
 
-      // Check the snapshot released
-      snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-      LOG.info("Snapshot {} released", idSnapshot);
     } else {
       LOG_ERROR.error("Error in release snapshot");
       releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,

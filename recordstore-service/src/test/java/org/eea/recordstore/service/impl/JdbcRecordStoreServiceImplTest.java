@@ -201,13 +201,13 @@ public class JdbcRecordStoreServiceImplTest {
 
   @After
   public void afterTests() {
-    File file = new File("./nullsnapshot_1-dataset_1_table_DatasetValue.snap");
+    File file = new File("./nullsnapshot_1_table_DatasetValue.snap");
     file.delete();
-    file = new File("./nullsnapshot_1-dataset_1_table_FieldValue.snap");
+    file = new File("./nullsnapshot_1_table_FieldValue.snap");
     file.delete();
-    file = new File("./nullsnapshot_1-dataset_1_table_RecordValue.snap");
+    file = new File("./nullsnapshot_1_table_RecordValue.snap");
     file.delete();
-    file = new File("./nullsnapshot_1-dataset_1_table_TableValue.snap");
+    file = new File("./nullsnapshot_1_table_TableValue.snap");
     file.delete();
   }
 
