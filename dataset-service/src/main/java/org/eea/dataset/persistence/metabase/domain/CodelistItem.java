@@ -45,7 +45,7 @@ public class CodelistItem {
   private String definition;
 
   @ManyToOne
-  @JoinColumn(name = "id_codelist")
+  @JoinColumn(name = "id_codelist", nullable = false)
   private Codelist codelist;
 
   /**

@@ -184,14 +184,10 @@ public class CodelistServiceImpl implements CodelistService {
         break;
       default:
     }
-
-    Long response = codelistRepository.save(oldCodelist).getId();
-    if (response != null) {
-      Codelist codelisttemp = new Codelist();
-      codelisttemp.setId(response);
-      oldCodelist.getItems().stream().forEach(item -> item.setCodelist(codelisttemp));
-      codelistItemRepository.saveAll(oldCodelist.getItems());
-    }
+    Codelist auxCodelist = new Codelist();
+    auxCodelist.setId(oldCodelist.getId());
+    oldCodelist.getItems().stream().forEach(item -> item.setCodelist(auxCodelist));
+    codelistRepository.save(oldCodelist).getId();
     return codelistVO.getId();
   }
 
@@ -227,6 +223,7 @@ public class CodelistServiceImpl implements CodelistService {
       oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
     }
     if (codelistVO.getItems() != null) {
+      codelistItemRepository.deleteAll(oldCodelist.getItems());
       oldCodelist.setItems(codelistItemMapper.classListToEntity(codelistVO.getItems()));
     }
   }
