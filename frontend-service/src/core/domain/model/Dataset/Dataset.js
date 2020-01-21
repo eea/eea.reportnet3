@@ -12,12 +12,14 @@ export class Dataset {
     tableStatisticValues,
     isReleased,
     levelErrorTypes,
-    datasetSchemaDescription
+    datasetSchemaDescription,
+    name
   ) {
     this.datasetId = datasetId;
     this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;
+    this.name = name;
     this.errors = errors;
     this.isReleased = isReleased;
     this.levelErrorTypes = levelErrorTypes;

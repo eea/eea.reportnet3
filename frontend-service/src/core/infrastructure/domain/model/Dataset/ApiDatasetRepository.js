@@ -352,6 +352,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
       });
 
       record.datasetPartitionId = dataTableRecordDTO.datasetPartitionId;
+      record.providerCode = dataTableRecordDTO.dataProviderCode;
       record.recordId = dataTableRecordDTO.id;
       record.recordSchemaId = dataTableRecordDTO.idRecordSchema;
       record.fields = fields;

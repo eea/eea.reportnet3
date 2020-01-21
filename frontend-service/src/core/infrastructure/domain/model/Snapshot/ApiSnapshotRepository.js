@@ -38,8 +38,8 @@ const allReporter = async datasetId => {
   );
 };
 
-const createByIdReporter = async (datasetId, description) => {
-  return await apiSnapshot.createByIdReporter(datasetId, description);
+const createByIdReporter = async (datasetId, description, isRelease) => {
+  return await apiSnapshot.createByIdReporter(datasetId, description, isRelease);
 };
 
 const deleteByIdReporter = async (datasetId, snapshotId) => {

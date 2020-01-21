@@ -6,7 +6,6 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
-import { Notifications } from 'ui/views/_components/Notifications';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -40,7 +39,6 @@ const MainLayout = ({ children }) => {
   return (
     <Fragment>
       <Navigation />
-      <Notifications />
       {/* <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
         {resources.messages['disclaimerTitle']}

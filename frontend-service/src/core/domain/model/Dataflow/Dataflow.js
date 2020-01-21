@@ -1,6 +1,7 @@
 export class Dataflow {
   constructor(
     id,
+    dataCollections,
     datasets,
     designDatasets,
     description,
@@ -14,6 +15,7 @@ export class Dataflow {
     requestId
   ) {
     this.creationDate = creationDate;
+    this.dataCollections = dataCollections;
     this.datasets = datasets;
     this.designDatasets = designDatasets;
     this.deadlineDate = deadlineDate;

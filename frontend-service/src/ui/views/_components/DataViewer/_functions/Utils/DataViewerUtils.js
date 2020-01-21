@@ -13,6 +13,7 @@ const editLargeStringWithDots = (string, length) => {
 const parseData = data =>
   data.records.map(record => {
     const datasetPartitionId = record.datasetPartitionId;
+    const providerCode = record.providerCode;
     const recordValidations = record.validations;
     const recordId = record.recordId;
     const recordSchemaId = record.recordSchemaId;
@@ -34,6 +35,7 @@ const parseData = data =>
       recordValidations,
       recordId,
       datasetPartitionId,
+      providerCode,
       recordSchemaId
     };
     return arrayDataAndValidations;
