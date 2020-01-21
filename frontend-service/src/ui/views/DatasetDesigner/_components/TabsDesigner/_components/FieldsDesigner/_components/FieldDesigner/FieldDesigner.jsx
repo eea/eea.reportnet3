@@ -85,7 +85,6 @@ export const FieldDesigner = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
-  console.log({ codelistName });
   const [selectedCodelist, setSelectedCodelist] = useState({
     codelistId: !isUndefined(codelistId) ? codelistId : 1,
     codelistName: !isUndefined(codelistName) ? codelistName : '',
@@ -151,7 +150,6 @@ export const FieldDesigner = ({
   const onChangeFieldType = type => {
     setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    console.log(type, fieldType);
     if (type.fieldType === 'Codelist') {
       onCodelistDropdownSelected(type);
     } else {
@@ -201,7 +199,6 @@ export const FieldDesigner = ({
   const onBlurFieldName = name => {
     if (!isUndefined(name)) {
       if (!isDragging) {
-        //New field
         if (fieldId === '-1') {
           if (name === '' && fieldTypeValue !== '' && !isUndefined(fieldTypeValue)) {
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -242,12 +239,11 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion) => {
-    console.log(codelistId, codelistName, codelistVersion, fieldId);
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
     if (fieldId.toString() === '-1') {
       onFieldAdd(recordId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
     } else {
-      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
+      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue);
     }
     setIsCodelistManagerVisible(false);
   };
@@ -372,7 +368,6 @@ export const FieldDesigner = ({
         label={resources.messages['cancel']}
         icon="cancel"
         onClick={() => {
-          console.log(selectedCodelist, fieldTypeValue);
           if (selectedCodelist.codelistName === '' && selectedCodelist.codelistVersion === '') {
             setFieldTypeValue(fieldPreviousTypeValue);
           }
@@ -405,7 +400,7 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (fieldSchemaId, type, value, description, codelistId, codelistName, codelistVersion) => {
+  const fieldUpdate = async (fieldSchemaId, type, value, description, codelistId) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
@@ -418,14 +413,21 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion);
+        onFieldUpdate(
+          fieldId,
+          value,
+          type,
+          description,
+          selectedCodelist.codelistId,
+          selectedCodelist.codelistName,
+          selectedCodelist.codelistVersion
+        );
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
     }
   };
 
-  console.log({ isCodelistSelected });
   return (
     <React.Fragment>
       {/* <style children={inEffect} /> */}
@@ -512,7 +514,6 @@ export const FieldDesigner = ({
           itemTemplate={fieldTypeTemplate}
           onChange={e => onChangeFieldType(e.target.value)}
           onMouseDown={event => {
-            console.log(event.target.value);
             event.preventDefault();
             event.stopPropagation();
           }}

@@ -90,7 +90,6 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       });
       //Add tab Button/Tab
       inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
-      console.log({ inmDatasetSchema });
       setDatasetSchema(inmDatasetSchema);
     } catch (error) {
       console.error(`Error while loading schema ${error}`);

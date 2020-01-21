@@ -25,7 +25,6 @@ export const codelistReducer = (state, { type, payload }) => {
         }
       };
     case 'TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE':
-      console.log(state.selectedItem);
       return { ...state, isAddEditCodelistVisible: payload.visible, formType: payload.formType };
     case 'TOGGLE_EDITING_CODELIST_ITEM':
       return { ...state, isEditing: payload };
@@ -38,14 +37,12 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'SAVE_ADDED_EDITED_ITEM':
       return { ...state, items: payload, isAddEditCodelistVisible: false };
     case 'SET_NEW_CODELIST_ITEM':
-      console.log({ payload }, state.newItem);
       return { ...state, newItem: { ...state.newItem, [payload.property]: payload.value } };
     case 'SET_ITEMS':
       return { ...state, items: payload };
     case 'SET_INITIAL_EDITED_CODELIST_ITEM':
       return { ...state, editedItem: { ...state.selectedItem } };
     case 'SET_CODELIST_DATA':
-      console.log({ payload });
       return {
         ...state,
         codelistName: payload.name,
@@ -58,12 +55,6 @@ export const codelistReducer = (state, { type, payload }) => {
         items: payload.items
       };
     case 'SET_EDITED_CODELIST_ITEM':
-      // const inmItems = [JSON.parse(JSON.stringify(...state.items))];
-      // console.log({ inmItems });
-      // const idx = inmItems.map(item => item.id).indexOf(state.selectedItem.id);
-      // inmItems[idx][payload.property] = payload.value;
-      // console.log({ inmItems });
-      console.log(state.editedItem);
       return { ...state, editedItem: { ...state.editedItem, [payload.property]: payload.value } };
     case 'SET_SELECTED_ITEM':
       return { ...state, selectedItem: payload };

@@ -42,7 +42,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       !isNull(table.records[0].fields)
     ) {
       getCodelistInfo(table.records[0].fields);
-      console.log(table.records[0].fields);
     }
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description);
@@ -56,10 +55,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   }, [isPreviewModeOn]);
 
   const onCodelistShow = (fieldId, selectedField) => {
-    console.log(fieldId, fields, selectedField);
-    console.log(fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId));
-    console.log(selectedField.fieldType.toUpperCase() === 'CODELIST');
-    // console.log(selectedField.fieldType.toUpperCase() === 'CODELIST', selectedField);
     setIsCodelistSelected(
       fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST'
@@ -87,7 +82,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       codelistName,
       codelistVersion
     });
-    console.log(inmFields);
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
   };
@@ -180,17 +174,13 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   );
 
   const getCodelistInfo = tableFields => {
-    console.log({ tableFields });
-
     const tableFieldsWithCodelistData = tableFields.map(async field => {
       if (field.type.toUpperCase() === 'CODELIST' && !isNull(field.codelistId)) {
         try {
           const response = await CodelistService.getById(field.codelistId);
-          console.log(response, field);
           field.codelistId = response.id;
           field.codelistName = response.name;
           field.codelistVersion = response.version;
-          console.log({ field });
           return field;
         } catch (error) {
           console.log(error);

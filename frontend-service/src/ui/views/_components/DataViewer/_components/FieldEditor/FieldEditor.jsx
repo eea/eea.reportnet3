@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 // import { Calendar } from 'ui/views/_components/Calendar';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
 const FieldEditor = ({
@@ -76,6 +77,24 @@ const FieldEditor = ({
           //     yearNavigator={true}
           //     yearRange="2010:2030"
           //   />
+        );
+      case 'CODELIST':
+        return (
+          <Dropdown
+            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
+            // disabled={initialStatus !== 'design'}
+            appendTo={document.body}
+            onChange={e => onEditorSubmitValue(cells, e.target.value.value, record)}
+            onMouseDown={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            optionLabel="itemType"
+            options={[{ itemType: '0', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]}
+            // required={true}
+            // placeholder={resources.messages['category']}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
         );
       default:
         return (

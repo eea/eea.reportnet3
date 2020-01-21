@@ -398,7 +398,6 @@ export const apiDataset = {
     }
   },
   updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
-    console.log({ datasetTableRecordField });
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -443,7 +442,6 @@ export const apiDataset = {
     }
   },
   updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
-    console.log(datasetSchemaDescription);
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({

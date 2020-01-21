@@ -51,11 +51,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     }
   }, [isErrorDialogVisible]);
 
-  // useEffect(() => {
-  //   console.log('LOADED');
-  //   setIsLoading();
-  // }, [categories]);
-
   const onChangeCategoryForm = (property, value) => {
     const inmNewCategory = { ...newCategory };
     inmNewCategory[property] = value;
@@ -123,7 +118,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const checkDuplicates = (codelistName, codelistVersion) => {
     if (!isUndefined(categories) && !isNull(categories)) {
       const inmCategories = [...categories];
-      console.log({ inmCategories });
 
       const repeteadElements = inmCategories.filter(
         category =>
@@ -213,7 +207,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         ) : null}
       </div>
       {/* {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)} */}
-      {console.log({ categories })}
       {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}

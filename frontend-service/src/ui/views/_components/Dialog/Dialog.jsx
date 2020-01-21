@@ -31,13 +31,13 @@ export const Dialog = ({
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1050
+    alignItems: 'center'
+    // zIndex: 1050
   };
   const dialogStyle = {
     top: 'auto',
-    left: 'auto',
-    zIndex: 1050
+    left: 'auto'
+    // zIndex: 1050
   };
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>

@@ -100,7 +100,6 @@ const Codelist = ({
 
   const onConfirmDeleteItem = () => {
     try {
-      console.log(codelistState.selectedItem);
       const inmItems = [...codelistState.items];
       dispatchCodelist({
         type: 'SET_ITEMS',
@@ -120,7 +119,6 @@ const Codelist = ({
   };
 
   const onEditorPropertiesInputChange = (value, property) => {
-    console.log({ value, property });
     dispatchCodelist({ type: 'EDIT_CODELIST_PROPERTIES', payload: { property, value } });
   };
 
@@ -131,7 +129,6 @@ const Codelist = ({
   const onEditorItemsValueChange = (cells, value) => {
     const inmItems = [...cells.value];
     inmItems[cells.rowIndex][cells.field] = value;
-    console.log(initialCodelistState.items[0], inmItems[0], value);
     dispatchCodelist({ type: 'EDIT_CODELIST_PROPERTIES', payload: { property: 'items', value: inmItems } });
   };
 
@@ -141,8 +138,6 @@ const Codelist = ({
 
   const onKeyChange = (event, property, isItem) => {
     if (event.key === 'Escape') {
-      console.log(event.target.value);
-      console.log({ event, property, value: initialCodelistState[property] });
       if (isItem) {
       } else {
         dispatchCodelist({
@@ -157,7 +152,6 @@ const Codelist = ({
   const onLoadCodelist = async () => {
     try {
       const response = await CodelistService.getById(codelistState.codelistId);
-      console.log(response);
       dispatchCodelist({ type: 'SET_CODELIST_DATA', payload: response });
       onRefreshCodelist(codelistState.codelistId, response);
     } catch (error) {
@@ -219,7 +213,6 @@ const Codelist = ({
           toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
         }
       } catch (error) {
-        console.log({ error });
         notificationContext.add({
           type: 'SAVE_EDIT_CODELIST_ERROR',
           content: {}
@@ -235,9 +228,7 @@ const Codelist = ({
 
   const onSaveItem = formType => {
     try {
-      console.log({ formType });
       const inmItems = [...codelistState.items];
-      console.log({ inmItems });
       if (formType === 'ADD') {
         inmItems.push(codelistState.newItem);
         inmItems.forEach((item, i) => {
@@ -245,7 +236,6 @@ const Codelist = ({
         });
       } else {
       }
-      console.log({ inmItems });
       dispatchCodelist({ type: 'SAVE_ADDED_EDITED_ITEM', payload: inmItems });
     } catch (error) {
       notificationContext.add({

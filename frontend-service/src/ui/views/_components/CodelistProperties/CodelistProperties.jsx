@@ -28,7 +28,6 @@ const CodelistProperties = ({
   ];
 
   useEffect(() => {
-    console.log(!isCloning ? state.codelistStatus : state.clonedCodelist.codelistStatus);
     setInitialStatus(
       !isCloning
         ? state.codelistStatus.value.toLocaleLowerCase()
@@ -54,6 +53,7 @@ const CodelistProperties = ({
         <div className={styles.codelistDropdown}>
           <label className={styles.codelistDropdownLabel}>{resources.messages['category']}</label>
           <Dropdown
+            appendTo={document.body}
             className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
             disabled={initialStatus !== 'design'}
             onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
@@ -100,6 +100,7 @@ const CodelistProperties = ({
       <div className={styles.codelistDropdown}>
         <label className={styles.codelistDropdownLabel}>{resources.messages['codelistStatus']}</label>
         <Dropdown
+          appendTo={document.body}
           className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
           disabled={!isEmbedded ? !state.isEditing : isUndefined(state.codelistId) ? true : false}
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistStatus')}

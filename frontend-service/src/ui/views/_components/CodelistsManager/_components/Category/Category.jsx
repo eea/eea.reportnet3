@@ -87,13 +87,11 @@ const Category = ({
   };
 
   const onEditorPropertiesInputChange = (value, property) => {
-    console.log({ value, property });
     dispatchCategory({ type: 'EDIT_NEW_CODELIST', payload: { property, value } });
   };
 
   const onKeyChange = (event, property) => {
     if (event.key === 'Escape') {
-      console.log(initialCategoryState[property], initialCategoryState, property);
       dispatchCategory({
         type: 'EDIT_NEW_CODELIST',
         payload: { property, value: initialCategoryState[property] }
@@ -105,7 +103,6 @@ const Category = ({
   const onLoadCategoryInfo = async () => {
     const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
     if (response.status >= 200 && response.status <= 299) {
-      console.log(response.data);
       setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
     }
   };
@@ -114,7 +111,6 @@ const Category = ({
     toggleLoading(true);
     try {
       const response = await CodelistService.getAllInCategory(categoryState.categoryId);
-      console.log({ response });
       if (categoryState.isFiltered) {
         dispatchCategory({
           type: 'SET_CODELISTS_IN_CATEGORY',
@@ -140,7 +136,6 @@ const Category = ({
 
   const onRefreshCodelist = (codelistId, newCodelist) => {
     const inmCodelists = [...categoryState.codelists];
-    console.log(inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)));
     dispatchCategory({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)) }
@@ -155,7 +150,6 @@ const Category = ({
 
   const onSaveCategory = async () => {
     try {
-      console.log({ categoryState });
       const response = await CodelistCategoryService.updateById(
         categoryState.categoryId,
         categoryState.categoryShortCode,
