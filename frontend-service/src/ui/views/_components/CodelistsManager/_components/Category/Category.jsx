@@ -27,6 +27,7 @@ const Category = ({
   checkDuplicates,
   isDataCustodian,
   isInDesign,
+  onCodelistError,
   onCodelistSelected,
   onLoadCategories
 }) => {
@@ -86,13 +87,11 @@ const Category = ({
   };
 
   const onEditorPropertiesInputChange = (value, property) => {
-    console.log({ value, property });
     dispatchCategory({ type: 'EDIT_NEW_CODELIST', payload: { property, value } });
   };
 
   const onKeyChange = (event, property) => {
     if (event.key === 'Escape') {
-      console.log(initialCategoryState[property], initialCategoryState, property);
       dispatchCategory({
         type: 'EDIT_NEW_CODELIST',
         payload: { property, value: initialCategoryState[property] }
@@ -104,7 +103,6 @@ const Category = ({
   const onLoadCategoryInfo = async () => {
     const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
     if (response.status >= 200 && response.status <= 299) {
-      console.log(response.data);
       setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
     }
   };
@@ -113,7 +111,6 @@ const Category = ({
     toggleLoading(true);
     try {
       const response = await CodelistService.getAllInCategory(categoryState.categoryId);
-      console.log({ response });
       if (categoryState.isFiltered) {
         dispatchCategory({
           type: 'SET_CODELISTS_IN_CATEGORY',
@@ -137,6 +134,14 @@ const Category = ({
     }
   };
 
+  const onRefreshCodelist = (codelistId, newCodelist) => {
+    const inmCodelists = [...categoryState.codelists];
+    dispatchCategory({
+      type: 'SET_CODELISTS_IN_CATEGORY',
+      payload: { data: inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)) }
+    });
+  };
+
   // const onRefreshCategory = response => {
   //   if (response.status >= 200 && response.status <= 299) {
   //     onLoadCategory();
@@ -145,7 +150,6 @@ const Category = ({
 
   const onSaveCategory = async () => {
     try {
-      console.log({ categoryState });
       const response = await CodelistCategoryService.updateById(
         categoryState.categoryId,
         categoryState.categoryShortCode,
@@ -283,7 +287,6 @@ const Category = ({
   };
 
   const renderCodelist = () => {
-    console.log(categoriesDropdown);
     return (
       <div className={styles.categories}>
         {!isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
@@ -298,7 +301,9 @@ const Category = ({
                 isDataCustodian={isDataCustodian}
                 isInDesign={isInDesign}
                 key={i}
+                onCodelistError={onCodelistError}
                 onCodelistSelected={onCodelistSelected}
+                onRefreshCodelist={onRefreshCodelist}
                 updateEditingCodelists={updateEditingCodelists}
               />
             );
@@ -313,7 +318,6 @@ const Category = ({
   };
 
   const renderAddCodelistDialog = () => {
-    console.log({ categoriesDropdown });
     return categoryState.isAddCodelistDialogVisible ? (
       <Dialog
         className="edit-table"
@@ -325,7 +329,8 @@ const Category = ({
         modal={true}
         onHide={() => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
-        visible={categoryState.isAddCodelistDialogVisible}>
+        visible={categoryState.isAddCodelistDialogVisible}
+        zIndex={999}>
         <div className="p-grid p-fluid">{addCodelistForm}</div>
       </Dialog>
     ) : null;
@@ -359,11 +364,10 @@ const Category = ({
 
   return (
     <React.Fragment>
-      {console.log(categoryState.isFiltered)}
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
         expanded={false}
-        items={[category.shortCode, category.description]}
+        items={[{ label: category.shortCode }, { label: category.description }]}
         buttons={[
           {
             disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,
@@ -399,7 +403,16 @@ const Category = ({
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
         onExpandTree={onLoadCodelists}>
-        {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
+        {// <React.Fragment>
+        //   <div className={styles.codelistHeader}>
+        //     <span>Name</span>
+        //     <span>Version</span>
+        //     <span>Status</span>
+        //     <span>Description</span>
+        //   </div>
+        categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()
+        // </React.Fragment>
+        }
       </TreeViewExpandableItem>
       {renderEditDialog()}
       {renderAddCodelistDialog()}

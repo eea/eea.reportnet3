@@ -37,11 +37,17 @@ const TreeViewExpandableItem = ({
 
   const renderHeader = () => {
     const width = 90 / items.length;
-    return items.map((item, i) => (
-      <span key={i} style={{ width: `${width}%` }}>
-        {item}
-      </span>
-    ));
+    return items.map((item, i) =>
+      !isUndefined(item.type) && item.type === 'box' ? (
+        <div key={i} style={{ width: `${width}%` }}>
+          <span className={item.className}>{item.label}</span>
+        </div>
+      ) : (
+        <span key={i} style={{ width: `${width}%` }}>
+          {item.label}
+        </span>
+      )
+    );
   };
 
   const renderButtons = () => {
@@ -90,13 +96,13 @@ const TreeViewExpandableItem = ({
         {!isUndefined(items) & (items.length > 0) ? (
           isOpen ? (
             <FontAwesomeIcon
-              icon={AwesomeIcons('minusSquare')}
+              icon={AwesomeIcons('angleDown')}
               style={{ cursor: 'pointer' }}
               onClick={() => setIsOpen(!isOpen)}
             />
           ) : (
             <FontAwesomeIcon
-              icon={AwesomeIcons('plusSquare')}
+              icon={AwesomeIcons('angleRight')}
               style={{ cursor: 'pointer' }}
               onClick={() => setIsOpen(!isOpen)}
             />

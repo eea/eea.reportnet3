@@ -8,7 +8,6 @@ export const categoryReducer = (state, { type, payload }) => {
         isEditingDialogVisible: false
       };
     case 'SET_CATEGORY_INPUTS':
-      console.log(payload);
       return {
         ...state,
         categoryDescription: payload.description ? payload.description : state.categoryDescription,
@@ -16,7 +15,6 @@ export const categoryReducer = (state, { type, payload }) => {
         categoryShortCode: payload.shortCode ? payload.shortCode : state.categoryShortCode
       };
     case 'SET_CODELISTS_IN_CATEGORY':
-      console.log(payload.data);
       return { ...state, codelists: payload.data };
     case 'SET_ISLOADING':
       return { ...state, isLoading: payload.loading };
@@ -29,7 +27,6 @@ export const categoryReducer = (state, { type, payload }) => {
     case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
       return { ...state, isFiltered: !state.isFiltered };
     case 'TOGGLE_IS_EXPANDED':
-      console.log(payload);
       return { ...state, isExpanded: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
