@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.eea.dataset.mapper.CodelistCategoryFullMapper;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
@@ -18,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.impl.CodelistServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistItemVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
@@ -67,6 +69,10 @@ public class CodelistServiceImplTest {
   @Mock
   private CodelistCategoryMapper codelistCategoryMapper;
 
+  /** The codelist category full mapper. */
+  @Mock
+  CodelistCategoryFullMapper codelistCategoryFullMapper;
+
   /** The codelist VO. */
   private CodelistVO codelistVO;
 
@@ -93,6 +99,7 @@ public class CodelistServiceImplTest {
 
   /** The codelist categories VO. */
   List<CodelistCategoryVO> codelistCategoriesVO;
+
 
   /**
    * Inits the mocks.
@@ -571,4 +578,21 @@ public class CodelistServiceImplTest {
     assertEquals("not equal", new ArrayList<CodelistVO>(),
         codelistServiceImpl.getAllByCategoryId(1L));
   }
+
+  /**
+   * Gets the all categories complete success test.
+   *
+   * @return the all categories complete success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllCategoriesCompleteSuccessTest() throws EEAException {
+    when(codelistCategoryRepository.findAll()).thenReturn(new ArrayList<CodelistCategory>());
+    List<CodelistCategoryFullVO> codelistCategoriesFullVO = new ArrayList<>();
+    when(codelistCategoryFullMapper.entityListToClass(Mockito.any()))
+        .thenReturn(codelistCategoriesFullVO);
+    assertEquals("not equal", codelistCategoriesFullVO,
+        codelistServiceImpl.getAllCategoriesComplete());
+  }
+
 }

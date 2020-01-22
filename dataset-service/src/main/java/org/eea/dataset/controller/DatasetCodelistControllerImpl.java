@@ -9,6 +9,7 @@ import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetCodelistController;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.slf4j.Logger;
@@ -334,6 +335,22 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
           e);
     }
     return codelistVOs;
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/category/complete", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<CodelistCategoryFullVO> getAllCategoriesComplete() {
+    List<CodelistCategoryFullVO> codelistCategoryFullVOs = null;
+    try {
+      codelistCategoryFullVOs = codelistService.getAllCategoriesComplete();
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the codelist category list. Error message: {}", e.getMessage(),
+          e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.CODELIST_CATEGORY_NOT_FOUND, e);
+    }
+    return codelistCategoryFullVOs;
   }
 
 }
