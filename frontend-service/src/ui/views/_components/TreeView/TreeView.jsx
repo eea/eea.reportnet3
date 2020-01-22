@@ -32,7 +32,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
             <TreeViewExpandableItem
               items={!Number.isInteger(Number(propertyName)) ? [camelCaseToNormal(propertyName)] : []}
               expanded={true}>
-              {groupableProperties.indexOf(propertyName.toLowerCase()) > -1
+              {groupableProperties.indexOf(propertyName) > -1
                 ? groupFields(property)
                 : !isUndefined(property)
                 ? Object.values(property).map((proper, index, { length }) => (

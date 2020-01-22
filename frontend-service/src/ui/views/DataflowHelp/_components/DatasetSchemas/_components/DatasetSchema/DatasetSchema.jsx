@@ -6,18 +6,24 @@ import { TreeView } from 'ui/views/_components/TreeView';
 
 const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
-    return !isUndefined(designDataset) && !isNull(designDataset) ? (
-      <div>
-        <TreeView
-          excludeBottomBorder={false}
-          groupableProperties={['fields']}
-          key={index}
-          property={parseDesignDataset(designDataset, codelistsList)}
-          propertyName={''}
-          rootProperty={''}
-        />
-      </div>
-    ) : null;
+    if (!isUndefined(designDataset) && !isNull(designDataset)) {
+      let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
+      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelistItems;
+      return (
+        <div>
+          <TreeView
+            excludeBottomBorder={false}
+            groupableProperties={['fields', 'codelistItems']}
+            key={index}
+            property={parsedDesignDataset}
+            propertyName={''}
+            rootProperty={''}
+          />
+        </div>
+      );
+    } else {
+      return null;
+    }
   };
 
   return renderDatasetSchema();

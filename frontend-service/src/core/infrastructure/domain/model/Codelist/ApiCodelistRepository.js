@@ -96,9 +96,7 @@ const getCodelistsByIds = async codelistIds => {
     const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
     let codelistItems = [];
     codelistsDTO.data.sort((a, b) => a.id - b.id);
-    console.log({ codelistsDTO });
     const codelists = codelistsDTO.data.map(codelistDTO => {
-      console.log({ codelistDTO });
       if (!isEmpty(codelistDTO.items)) {
         codelistItems = codelistDTO.items.map(
           itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
@@ -113,7 +111,6 @@ const getCodelistsByIds = async codelistIds => {
         codelistItems
       );
     });
-    console.log({ codelists });
     return codelists;
   } catch (error) {
     console.log({ error });
@@ -123,13 +120,11 @@ const getCodelistsByIds = async codelistIds => {
 
 const updateById = async (id, description, items, name, status, version, categoryId) => {
   const categoryDTO = new CodelistCategory(categoryId);
-  console.log({ items });
   const codelistItemsDTO = items.map(
     item => new CodelistItem(item.id.includes('-') ? null : item.id, item.shortCode, item.label, item.definition, id)
   );
   const codelistDTO = new Codelist(id, name, description, version, status, codelistItemsDTO);
   codelistDTO.category = categoryDTO;
-  console.log({ codelistDTO });
   return await apiCodelist.updateById(codelistDTO);
 };
 
