@@ -470,4 +470,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           e);
     }
   }
+
+
+  /**
+   * Validate schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the boolean
+   */
+  @Override
+  @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
+    return dataschemaService.validateSchema(datasetSchemaId);
+  }
+
 }

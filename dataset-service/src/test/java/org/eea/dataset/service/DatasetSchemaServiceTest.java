@@ -975,4 +975,9 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
+
+  @Test
+  public void validateSchemaTest() {
+    Assert.assertTrue(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
+  }
 }
