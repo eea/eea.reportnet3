@@ -754,7 +754,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getName() != null) {
           fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
-
+        if (fieldSchemaVO.getIdCodeList() != null) {
+          fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
+        }
         // Guardar el FieldSchema modificado en MongoDB
         if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
             .getModifiedCount() == 1) {

@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -134,4 +135,11 @@ public interface DatasetCodelistController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<CodelistVO> getAllByCategoryId(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 
+  /**
+   * Gets the all categories complete.
+   *
+   * @return the all categories complete
+   */
+  @GetMapping(value = "/category/complete", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<CodelistCategoryFullVO> getAllCategoriesComplete();
 }
