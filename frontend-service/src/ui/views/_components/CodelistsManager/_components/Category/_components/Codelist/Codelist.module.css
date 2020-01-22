@@ -1,0 +1,54 @@
+.codelistItem {
+  font-size: 12pt;
+  /* cursor: pointer; */
+}
+
+.codelistItem {
+  margin: 0 1.5rem 0 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--gray-25);
+  display: flex;
+  /* border-bottom: 1px solid var(--gray-25); */
+}
+
+.codelistItem:first-child {
+  border-top: 0;
+}
+
+.codelistItem span {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.codelistExpandable {
+  height: 1.5vw;
+  padding: 1.5rem 0 1.5rem 1.5rem;
+  align-items: center;
+  /* background-color: var(--gray-5); */
+  display: flex;
+}
+
+.footerWrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.footerWrap input {
+  margin-right: 1rem;
+}
+
+.footerWrap input:nth-last-child(2) {
+  margin-left: auto;
+}
+
+.itemTable {
+  margin: 1rem 3.5rem;
+}
+
+.unsavedChangesIcon {
+  font-size: 18pt;
+  position: absolute;
+  right: 0;
+  color: var(--c-chart-warning);
+}

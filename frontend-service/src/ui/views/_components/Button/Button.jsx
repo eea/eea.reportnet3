@@ -19,7 +19,8 @@ export const Button = ({
   tooltip = null,
   tooltipOptions = null,
   style = null,
-  layout = null
+  layout = null,
+  visible = true
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
   if (layout === 'simple') {
@@ -31,7 +32,7 @@ export const Button = ({
     );
   }
   if (isNull(layout)) {
-    return (
+    return visible ? (
       <PrimeButton
         id={id}
         className={className}
@@ -45,6 +46,6 @@ export const Button = ({
         type={type}
         tooltipOptions={tooltipOptions}
       />
-    );
+    ) : null;
   }
 };
