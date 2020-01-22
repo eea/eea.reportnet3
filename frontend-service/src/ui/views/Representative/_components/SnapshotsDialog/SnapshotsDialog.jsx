@@ -87,11 +87,6 @@ export const SnapshotsDialog = ({
           <div className="p-inputgroup" style={{ width: '100%' }}>
             <InputText
               name="createSnapshotDescription"
-              onBlur={() =>
-                isEmpty(snapshotDescription)
-                  ? setIsSnapshotInputActive(false)
-                  : onShowReleaseDialog({ isRelease: true })
-              }
               onChange={event => setSnapshotDescription(event.target.value)}
               placeholder={resources.messages.createSnapshotPlaceholder}
             />
@@ -123,7 +118,10 @@ export const SnapshotsDialog = ({
         className={styles.releaseSnapshotsDialog}
         footer={snapshotDialogFooter}
         header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
-        onHide={() => hideSnapshotDialog()}
+        onHide={() => {
+          hideSnapshotDialog();
+          setIsSnapshotInputActive(false);
+        }}
         style={{ width: '30vw' }}
         visible={isSnapshotDialogVisible}>
         <SnapshotsList
