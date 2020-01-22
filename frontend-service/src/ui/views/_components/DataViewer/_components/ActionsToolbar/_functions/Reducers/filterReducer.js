@@ -1,10 +1,6 @@
 export const filterReducer = (state, { type, payload }) => {
   const isFiltered = (originalFilter, filter) => {
-    if (filter.length < originalFilter.length) {
-      return true;
-    } else {
-      return false;
-    }
+    return filter.length < originalFilter.length;
   };
 
   switch (type) {
