@@ -1,0 +1,18 @@
+.buttonWrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.cancelButton {
+  margin-left: 0.5rem !important;
+}
+.search {
+  display: flex;
+  flex-direction: row;
+}
+.searchInput {
+  border-right: none;
+  padding: 5px;
+  outline: none;
+  border-radius: 3px 0 0 3px;
+}

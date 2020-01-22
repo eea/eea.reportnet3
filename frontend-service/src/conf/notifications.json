@@ -296,6 +296,20 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key": "CREATE_DATA_COLLECTION_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "ADD_DATACOLLECTION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         }
       ]
     },
@@ -412,6 +426,13 @@
             "section":"DATASET_SCHEMA",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key": "ADD_DATACOLLECTION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         }
       ]
     },
@@ -431,6 +452,13 @@
         {
           "key": "DELETE_DOCUMENT_INIT_INFO",
           "refresh":false
+        },
+        {
+          "key":"VALIDATE_DATA_INIT",
+          "navigateTo":{
+            "section":"DATASET",
+            "parameters":["dataflowId","datasetId"]
+          }
         }
       ]
     }
