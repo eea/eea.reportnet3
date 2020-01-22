@@ -36,11 +36,22 @@ const Category = ({
     categoryDescription: '',
     categoryShortCode: '',
     filteredCodelists: [],
+    filter: {
+      name: '',
+      version: '',
+      status: [
+        { statusType: 'Design', value: 'design' },
+        { statusType: 'Ready', value: 'ready' },
+        { statusType: 'Deprecated', value: 'deprecated' }
+      ],
+      description: ''
+    },
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
     isExpanded: false,
     isFiltered: true,
+    isKeyFiltered: false,
     isLoading: false,
     codelists: [],
     codelistsInEdition: 0,
@@ -230,6 +241,13 @@ const Category = ({
     </div>
   );
 
+  const changeFilterValues = (filter, value) => {
+    dispatchCategory({
+      type: 'SET_FILTER_VALUES',
+      payload: { filter, value }
+    });
+  };
+
   const checkNoCodelistEditing = () => categoryState.codelistsInEdition === 0;
 
   const editCategoryForm = (
@@ -253,6 +271,25 @@ const Category = ({
       </span>
     </React.Fragment>
   );
+
+  const getCodelists = (codelist, i) => {
+    return (
+      <Codelist
+        categoriesDropdown={categoriesDropdown}
+        categoryId={categoryState.categoryId}
+        checkDuplicates={checkDuplicates}
+        checkNoCodelistEditing={checkNoCodelistEditing}
+        codelist={codelist}
+        isDataCustodian={isDataCustodian}
+        isInDesign={isInDesign}
+        key={i}
+        onCodelistError={onCodelistError}
+        onCodelistSelected={onCodelistSelected}
+        onRefreshCodelist={onRefreshCodelist}
+        updateEditingCodelists={updateEditingCodelists}
+      />
+    );
+  };
 
   const setCategoryInputs = (description, shortCode, id) =>
     dispatchCategory({
@@ -289,24 +326,13 @@ const Category = ({
   const renderCodelist = () => {
     return (
       <div className={styles.categories}>
-        {!isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
+        {categoryState.isKeyFiltered && !isEmpty(categoryState.filteredCodelists) && !categoryState.isLoading ? (
+          categoryState.filteredCodelists.map((codelist, i) => {
+            return getCodelists(codelist, i);
+          })
+        ) : !isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
           categoryState.codelists.map((codelist, i) => {
-            return (
-              <Codelist
-                categoriesDropdown={categoriesDropdown}
-                categoryId={categoryState.categoryId}
-                checkDuplicates={checkDuplicates}
-                checkNoCodelistEditing={checkNoCodelistEditing}
-                codelist={codelist}
-                isDataCustodian={isDataCustodian}
-                isInDesign={isInDesign}
-                key={i}
-                onCodelistError={onCodelistError}
-                onCodelistSelected={onCodelistSelected}
-                onRefreshCodelist={onRefreshCodelist}
-                updateEditingCodelists={updateEditingCodelists}
-              />
-            );
+            return getCodelists(codelist, i);
           })
         ) : (
           <div className={styles.noCodelistsMessage}>
@@ -403,15 +429,23 @@ const Category = ({
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
         onExpandTree={onLoadCodelists}>
-        {// <React.Fragment>
-        //   <div className={styles.codelistHeader}>
-        //     <span>Name</span>
-        //     <span>Version</span>
-        //     <span>Status</span>
-        //     <span>Description</span>
-        //   </div>
-        categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()
-        // </React.Fragment>
+        {
+          <React.Fragment>
+            <div className={styles.codelistHeader}>
+              <span className={`${styles.categoryInput} p-float-label`}>
+                <InputText
+                  id={'filterNameInput'}
+                  onChange={e => changeFilterValues('name', e.target.value)}
+                  value={categoryState.filter.name}
+                />
+                <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
+              </span>
+              <span>Version</span>
+              <span>Status</span>
+              <span>Description</span>
+            </div>
+            {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
+          </React.Fragment>
         }
       </TreeViewExpandableItem>
       {renderEditDialog()}

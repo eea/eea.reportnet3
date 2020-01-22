@@ -16,6 +16,17 @@ export const categoryReducer = (state, { type, payload }) => {
       };
     case 'SET_CODELISTS_IN_CATEGORY':
       return { ...state, codelists: payload.data };
+    case 'SET_FILTER_VALUES':
+      return {
+        ...state,
+        isKeyFiltered: true,
+        filter: { ...state.filter, [payload.filter]: payload.value },
+        filteredCodelists: [
+          ...state.codelists.filter(codelist =>
+            codelist[payload.filter].toLowerCase().includes(payload.value.toLowerCase())
+          )
+        ]
+      };
     case 'SET_ISLOADING':
       return { ...state, isLoading: payload.loading };
     case 'TOGGLE_EDIT_DIALOG_VISIBLE':
