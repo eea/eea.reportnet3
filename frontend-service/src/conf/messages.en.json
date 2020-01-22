@@ -357,11 +357,11 @@
 		"validateDataInit":"Validating <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
 		"validateDataByIdError":"Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
 		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
-		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
-		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
+		"createDataCollectionError": "Failed creating data collection at <strong title='{:dataflowName}'>{:sortDataflowName}</strong>",
+		"addDatacollectionFailedEvent": "Failed creating data collection at <strong title='{:dataflowName}'>{:sortDataflowName}</strong>",
+		"addDatacollectionCompletedEvent": "Data collection created at <strong title='{:dataflowName}'>{:sortDataflowName}</strong>",
 		"representative":"Representative",
-		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>",
-		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <a href='{:navigateTo}' title='{:datasetName}'>{:sortDatasetName}</a>"
+		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <strong title='{:datasetName}'>{:sortDatasetName}</strong>",
+		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:sortDatasetName}</strong>"
 	}
 }
