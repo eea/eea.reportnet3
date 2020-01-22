@@ -964,7 +964,7 @@ public class DatasetServiceTest {
     when(recordRepository.findByIdAndTableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
         .thenReturn(recordValue);
 
-    datasetService.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.RECORD);
+    datasetService.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.RECORD);
     Mockito.verify(recordRepository, times(1)).findByIdAndTableValue_DatasetId_Id(Mockito.any(),
         Mockito.any());
 
@@ -982,7 +982,7 @@ public class DatasetServiceTest {
     when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any()))
         .thenReturn(tableValue);
 
-    datasetService.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    datasetService.getPositionFromAnyObjectId("1", 1L, TypeEntityEnum.TABLE);
     Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
 
   }
@@ -1007,7 +1007,7 @@ public class DatasetServiceTest {
     tableSchemas.add(tableSchema);
     schema.setTableSchemas(tableSchemas);
 
-    datasetService.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    datasetService.getPositionFromAnyObjectId("1", 1L, TypeEntityEnum.TABLE);
     Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
 
   }
@@ -1023,7 +1023,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
         .thenReturn(fieldValue);
 
-    datasetService.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.FIELD);
+    datasetService.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.FIELD);
     Mockito.verify(fieldRepository, times(1))
         .findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any());
 
