@@ -124,7 +124,6 @@ const DataViewer = withRouter(
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       }
-      console.log({ inmTableSchemaColumns });
       setColsSchema(inmTableSchemaColumns);
     }, []);
 
@@ -209,7 +208,23 @@ const DataViewer = withRouter(
             className={invisibleColumn}
             editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
             field={column.field}
-            header={column.header}
+            header={
+              column.type === 'CODELIST' ? (
+                <React.Fragment>
+                  {column.header}
+                  <Button
+                    className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
+                    icon="infoCircle"
+                    onClick={null}
+                    tooltip={`${column.codelistName}(${column.codelistVersion})`}
+                    tooltipOptions={{ position: 'top' }}
+                  />
+                </React.Fragment>
+              ) : (
+                // `${column.header}-${column.codelistName}(${column.codelistVersion})`
+                column.header
+              )
+            }
             key={column.field}
             sortable={sort}
             style={{
@@ -389,15 +404,6 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
-      console.log(
-        { cell, value, record, initialCellValue, selectedCellId },
-        RecordUtils.getCellId(cell, cell.field),
-        records.selectedRecord.recordId,
-        value !== initialCellValue &&
-          selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
-          record.recordId === records.selectedRecord.recordId
-      );
-
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (
@@ -757,7 +763,6 @@ const DataViewer = withRouter(
     );
 
     const filterDataResponse = data => {
-      console.log({ data, colsSchema });
       const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });

@@ -329,7 +329,8 @@ const Category = ({
         modal={true}
         onHide={() => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
-        visible={categoryState.isAddCodelistDialogVisible}>
+        visible={categoryState.isAddCodelistDialogVisible}
+        zIndex={999}>
         <div className="p-grid p-fluid">{addCodelistForm}</div>
       </Dialog>
     ) : null;

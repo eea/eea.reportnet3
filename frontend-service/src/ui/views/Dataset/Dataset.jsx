@@ -30,6 +30,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
@@ -387,6 +388,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
+      const codelistsList = await CodelistService.getCodelistsList([datasetSchema]);
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -411,12 +413,20 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
+            let codelist = {};
+            if (field.type === 'CODELIST') {
+              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
+            }
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              codelistId: field.codelistId,
+              codelistName: codelist.name,
+              codelistVersion: codelist.version,
+              codelistItems: codelist.items
             };
           });
         })
