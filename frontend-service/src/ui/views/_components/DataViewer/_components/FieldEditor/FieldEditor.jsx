@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { isEmpty } from 'lodash';
-
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { isEmpty, isUndefined } from 'lodash';
 
 // import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { RecordUtils } from 'ui/views/_functions/Utils';
 
 const FieldEditor = ({
   cells,
@@ -17,18 +17,19 @@ const FieldEditor = ({
   onEditorValueFocus,
   onEditorKeyChange
 }) => {
+  const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
+  const [codelistItemValue, setCodelistItemValue] = useState();
+
+  useEffect(() => {
+    console.log({ cells });
+    if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
+    setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
+  }, []);
+
   let fieldType = {};
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
-
-  const getCodelistItems = () => {
-    RecordUtils.getCellItems(cells, cells.field);
-    console.log(colsSchema, cells.field);
-    console.log(colsSchema[cells.field]);
-
-    // [{ itemType: '0-Good', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]
-  };
 
   const getFilter = type => {
     switch (type) {
@@ -88,25 +89,25 @@ const FieldEditor = ({
           //   />
         );
       case 'CODELIST':
-        console.log(cells, record, getCodelistItems());
         return (
           <Dropdown
             // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
             // disabled={initialStatus !== 'design'}
             appendTo={document.body}
-            onChange={e => onEditorSubmitValue(cells, e.target.value.value, record)}
+            onChange={e => {
+              setCodelistItemValue(e.target.value.value);
+              onEditorValueChange(cells, e.target.value.value);
+              onEditorSubmitValue(cells, e.target.value.value, record);
+            }}
             onMouseDown={e => {
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
             optionLabel="itemType"
-            options={[{ itemType: '0-Good', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]}
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             // required={true}
             // placeholder={resources.messages['category']}
-            value={{
-              itemType: RecordUtils.getCellValue(cells, cells.field).toString(),
-              value: RecordUtils.getCellValue(cells, cells.field).toString()
-            }}
+            value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
           />
         );
       default:

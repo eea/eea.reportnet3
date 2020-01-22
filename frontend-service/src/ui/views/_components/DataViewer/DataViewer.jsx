@@ -535,6 +535,8 @@ const DataViewer = withRouter(
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (!recordsAdded) {
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
+        } else {
+          onRefresh();
         }
       } catch (error) {
         const {
@@ -716,12 +718,23 @@ const DataViewer = withRouter(
               justifyContent: 'space-between'
             }}>
             {' '}
-            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}{' '}
+            <IconTooltip levelError={levelError} message={message} />
           </div>
         );
       } else {
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}
+          </div>
         );
       }
     };
@@ -744,6 +757,7 @@ const DataViewer = withRouter(
     );
 
     const filterDataResponse = data => {
+      console.log({ data, colsSchema });
       const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
@@ -1023,7 +1037,8 @@ const DataViewer = withRouter(
             modal={true}
             onHide={() => setAddDialogVisible(false)}
             style={{ width: '50%' }}
-            visible={addDialogVisible}>
+            visible={addDialogVisible}
+            zIndex={999}>
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
@@ -1037,16 +1052,17 @@ const DataViewer = withRouter(
         ) : null}
         {editDialogVisible ? (
           <Dialog
-            className="edit-table"
             blockScroll={false}
+            className="edit-table"
             closeOnEscape={false}
             contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
             onHide={() => setEditDialogVisible(false)}
-            style={{ width: '50%', height: '80%' }}
-            visible={editDialogVisible}>
+            style={{ width: '50%' }}
+            visible={editDialogVisible}
+            zIndex={999}>
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}

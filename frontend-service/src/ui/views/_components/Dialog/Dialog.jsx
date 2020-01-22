@@ -25,19 +25,20 @@ export const Dialog = ({
   rtl,
   showHeader,
   style,
-  visible
+  visible,
+  zIndex = 1050
 }) => {
   const maskStyle = {
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center'
-    // zIndex: 1050
+    alignItems: 'center',
+    zIndex
   };
   const dialogStyle = {
     top: 'auto',
-    left: 'auto'
-    // zIndex: 1050
+    left: 'auto',
+    zIndex
   };
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>

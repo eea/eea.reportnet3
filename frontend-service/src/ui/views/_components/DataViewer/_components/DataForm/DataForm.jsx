@@ -4,7 +4,23 @@ import { isUndefined, isNull } from 'lodash';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { RecordUtils } from 'ui/views/_functions/Utils';
+
 const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, onChangeForm, records }) => {
+  const renderDropdown = (field, fieldValue) => {
+    return (
+      <Dropdown
+        appendTo={document.body}
+        onChange={e => {
+          onChangeForm(field, e.target.value.value);
+        }}
+        optionLabel="itemType"
+        options={RecordUtils.getCodelistItems(colsSchema, field)}
+        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItems(colsSchema, field), fieldValue)}
+      />
+    );
+  };
+
   const editRecordForm = colsSchema.map((column, i) => {
     console.log({ column });
     //Avoid row id Field and dataSetPartitionId
@@ -12,6 +28,7 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
       if (i < colsSchema.length - 2) {
         if (!isUndefined(records.editedRecord.dataRow)) {
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+          console.log({ field });
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -19,25 +36,12 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
               </div>
               <div className="p-col-8" style={{ padding: '.5em' }}>
                 {column.type === 'CODELIST' ? (
-                  <Dropdown
-                    // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-                    // disabled={initialStatus !== 'design'}
-                    // onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
-                    appendTo={document.body}
-                    optionLabel="itemType"
-                    options={[
-                      { itemType: '0', value: '0' },
-                      { itemType: '1', value: '1' },
-                      { itemType: '2', value: '2' }
-                    ]}
-                    // required={true}
-                    // placeholder={resources.messages['category']}
-                    value={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
-                  />
+                  renderDropdown(
+                    column.field,
+                    isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
+                      ? ''
+                      : field.fieldData[column.field]
+                  )
                 ) : (
                   <InputText
                     id={column.field}
@@ -69,21 +73,12 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
               </div>
               <div className="p-col-8" style={{ padding: '.5em' }}>
                 {column.type === 'CODELIST' ? (
-                  <Dropdown
-                    // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-                    // disabled={initialStatus !== 'design'}
-                    // onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
-                    appendTo={document.body}
-                    optionLabel="itemType"
-                    options={[
-                      { itemType: '0', value: '0' },
-                      { itemType: '1', value: '1' },
-                      { itemType: '2', value: '2' }
-                    ]}
-                    // required={true}
-                    // placeholder={resources.messages['category']}
-                    value={{ itemType: '1', value: '1' }}
-                  />
+                  renderDropdown(
+                    column.field,
+                    isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
+                      ? ''
+                      : field.fieldData[column.field]
+                  )
                 ) : (
                   <InputText id={column.field} onChange={e => onChangeForm(column.field, e.target.value, field)} />
                 )}

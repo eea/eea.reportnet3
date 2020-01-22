@@ -34,10 +34,11 @@ const getCellId = (tableData, field) => {
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
 };
 
-const getCellItems = (tableData, field) => {
-  const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+const getCellItems = (colSchemaData, field) => {
+  console.log({ colSchemaData });
+  const completeField = colSchemaData.filter(data => data.field === field)[0];
   console.log({ completeField });
-  return !isUndefined(completeField) ? completeField.fieldData.codelistItems : undefined;
+  return !isUndefined(completeField) ? completeField.codelistItems : undefined;
 };
 
 const getCellValue = (tableData, field) => {
@@ -72,6 +73,23 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
   });
 };
 
+const getCodelistItems = (colsSchema, field) => {
+  const codelistItems = getCellItems(colsSchema, field);
+  return !isUndefined(codelistItems)
+    ? codelistItems.map(codelistItem => {
+        return { itemType: `${codelistItem.shortCode}-${codelistItem.label}`, value: codelistItem.shortCode };
+      })
+    : [];
+};
+
+const getCodelistValue = (codelistItemsOptions, value) => {
+  console.log({ value });
+  console.log(codelistItemsOptions.filter(item => item.value === value)[0]);
+  if (!isUndefined(value)) {
+    return codelistItemsOptions.filter(item => item.value === value)[0];
+  }
+};
+
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -83,8 +101,10 @@ const getInitialRecordValues = (record, colsSchema) => {
   );
   filteredColumns.forEach(column => {
     if (!isUndefined(record.dataRow)) {
+      console.log(record.dataRow);
       const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-      initialValues.push([column.field, field.fieldData[column.field]]);
+      console.log({ field });
+      if (!isUndefined(field)) initialValues.push([column.field, field.fieldData[column.field]]);
     }
   });
   return initialValues;
@@ -148,7 +168,10 @@ export const RecordUtils = {
   changeRecordValue,
   createEmptyObject,
   getCellId,
+  getCellItems,
   getCellValue,
+  getCodelistItems,
+  getCodelistValue,
   getClipboardData,
   getInitialRecordValues,
   getNumCopiedRecords,
