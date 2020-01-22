@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataset.mapper.CodelistCategoryFullMapper;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
@@ -13,6 +14,7 @@ import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
@@ -50,8 +52,13 @@ public class CodelistServiceImpl implements CodelistService {
   @Autowired
   private CodelistCategoryMapper codelistCategoryMapper;
 
+  /** The codelist category full mapper. */
+  @Autowired
+  private CodelistCategoryFullMapper codelistCategoryFullMapper;
+
   /**
    * Gets the by id.
+   *
    *
    * @param codelistId the codelist id
    * @return the by id
@@ -184,14 +191,10 @@ public class CodelistServiceImpl implements CodelistService {
         break;
       default:
     }
-
-    Long response = codelistRepository.save(oldCodelist).getId();
-    if (response != null) {
-      Codelist codelisttemp = new Codelist();
-      codelisttemp.setId(response);
-      oldCodelist.getItems().stream().forEach(item -> item.setCodelist(codelisttemp));
-      codelistItemRepository.saveAll(oldCodelist.getItems());
-    }
+    Codelist auxCodelist = new Codelist();
+    auxCodelist.setId(oldCodelist.getId());
+    oldCodelist.getItems().stream().forEach(item -> item.setCodelist(auxCodelist));
+    codelistRepository.save(oldCodelist).getId();
     return codelistVO.getId();
   }
 
@@ -227,6 +230,7 @@ public class CodelistServiceImpl implements CodelistService {
       oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
     }
     if (codelistVO.getItems() != null) {
+      codelistItemRepository.deleteAll(oldCodelist.getItems());
       oldCodelist.setItems(codelistItemMapper.classListToEntity(codelistVO.getItems()));
     }
   }
@@ -355,5 +359,18 @@ public class CodelistServiceImpl implements CodelistService {
     List<Codelist> codelists = codelistRepository.findAllByCategory_Id(codelistCategoryId)
         .orElse(new ArrayList<Codelist>());
     return codelistMapper.entityListToClass(codelists);
+  }
+
+  /**
+   * Gets the all categories complete.
+   *
+   * @return the all categories complete
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional(transactionManager = "metabaseDataSetsTransactionManager")
+  public List<CodelistCategoryFullVO> getAllCategoriesComplete() throws EEAException {
+    List<CodelistCategory> codelistCategories = codelistCategoryRepository.findAll();
+    return codelistCategoryFullMapper.entityListToClass(codelistCategories);
   }
 }

@@ -22,7 +22,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @param idDataset the id dataset
    * @return the field value
    */
-  FieldValue findByIdAndRecord_TableValue_DatasetId_Id(Long id, Long idDataset);
+  FieldValue findByIdAndRecord_TableValue_DatasetId_Id(String id, Long idDataset);
 
   /**
    * Find by id field schema.

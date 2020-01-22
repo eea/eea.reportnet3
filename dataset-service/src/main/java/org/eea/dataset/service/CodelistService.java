@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 
@@ -104,5 +105,13 @@ public interface CodelistService {
    * @throws EEAException the EEA exception
    */
   List<CodelistVO> getAllByCategoryId(Long codelistCategoryId) throws EEAException;
+
+  /**
+   * Gets the all categories complete.
+   *
+   * @return the all categories complete
+   * @throws EEAException the EEA exception
+   */
+  List<CodelistCategoryFullVO> getAllCategoriesComplete() throws EEAException;
 
 }

@@ -67,9 +67,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
     String message;
     HttpStatus status = HttpStatus.OK;
-    UserRepresentationVO userRepresentationVO =
-        users.stream().filter(user -> representativeVO.getProviderAccount().equals(user.getEmail()))
-            .findFirst().orElse(null);
+    UserRepresentationVO userRepresentationVO = users.stream()
+        .filter(user -> representativeVO.getProviderAccount().equalsIgnoreCase(user.getEmail()))
+        .findFirst().orElse(null);
     if (userRepresentationVO == null) {
       message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
       status = HttpStatus.NOT_FOUND;
@@ -161,8 +161,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()
-          .filter(user -> representativeVO.getProviderAccount().equals(user.getEmail())).findFirst()
-          .orElse(null);
+          .filter(user -> representativeVO.getProviderAccount().equalsIgnoreCase(user.getEmail()))
+          .findFirst().orElse(null);
       if (userRepresentationVO == null) {
         message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
         status = HttpStatus.NOT_FOUND;
