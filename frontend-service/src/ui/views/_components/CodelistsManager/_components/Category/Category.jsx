@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
-import { isNull } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 
 import styles from './Category.module.css';
 
@@ -10,6 +10,7 @@ import { CodelistProperties } from 'ui/views/_components/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -20,14 +21,28 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
-const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCodelistSelected }) => {
+const Category = ({
+  categoriesDropdown,
+  category,
+  checkDuplicates,
+  isDataCustodian,
+  isInDesign,
+  onCodelistSelected,
+  onLoadCategories
+}) => {
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
-    categoryName: '',
+    categoryShortCode: '',
+    filteredCodelists: [],
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
+    isExpanded: false,
+    isFiltered: true,
+    isLoading: false,
+    codelists: [],
+    codelistsInEdition: 0,
     codelistName: '',
     codelistVersion: '',
     codelistStatus: { statusType: 'design', value: 'DESIGN' },
@@ -38,14 +53,25 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
+    setCategoryInputs(category.description, category.shortCode, category.id);
+  }, [onLoadCategories]);
+
+  useEffect(() => {
+    if (!isNull(categoryState.categoryId)) {
+      onLoadCodelists();
+    }
+  }, [categoryState.isFiltered]);
+
+  useEffect(() => {
     if (categoryState.isEditingDialogVisible) {
-      setCategoryInputs(category.description, category.name);
+      onLoadCategoryInfo();
     }
   }, [categoryState.isEditingDialogVisible]);
 
   const onConfirmDeleteCategory = async () => {
     try {
-      await CodelistService.deleteById(categoryState.categoryId);
+      const response = await CodelistCategoryService.deleteById(categoryState.categoryId);
+      onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -75,17 +101,57 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     }
   };
 
-  const onSaveCategory = () => {
+  const onLoadCategoryInfo = async () => {
+    const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
+    if (response.status >= 200 && response.status <= 299) {
+      console.log(response.data);
+      setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+    }
+  };
+
+  const onLoadCodelists = async () => {
+    toggleLoading(true);
     try {
-      if (!isNull(categoryState.categoryId)) {
-        //CodelistCategoryService.addById(categoryState.categoryName, categoryState.categoryDescription);
+      const response = await CodelistService.getAllInCategory(categoryState.categoryId);
+      console.log({ response });
+      if (categoryState.isFiltered) {
+        dispatchCategory({
+          type: 'SET_CODELISTS_IN_CATEGORY',
+          payload: { data: response.filter(codelist => codelist.status.toUpperCase() !== 'DEPRECATED') }
+        });
       } else {
-        CodelistCategoryService.updateById(
-          categoryState.categoryId,
-          categoryState.categoryName,
-          categoryState.categoryDescription
-        );
+        dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
       }
+    } catch (error) {
+    } finally {
+      toggleLoading(false);
+      toggleIsExpanded(true);
+    }
+
+    // setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+  };
+
+  const onRefreshCategories = response => {
+    if (response.status >= 200 && response.status <= 299) {
+      onLoadCategories();
+    }
+  };
+
+  // const onRefreshCategory = response => {
+  //   if (response.status >= 200 && response.status <= 299) {
+  //     onLoadCategory();
+  //   }
+  // };
+
+  const onSaveCategory = async () => {
+    try {
+      console.log({ categoryState });
+      const response = await CodelistCategoryService.updateById(
+        categoryState.categoryId,
+        categoryState.categoryShortCode,
+        categoryState.categoryDescription
+      );
+      onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
         type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
@@ -99,16 +165,19 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     }
   };
 
-  const onSaveCodelist = () => {
+  const onSaveCodelist = async () => {
     try {
-      // CodelistService.addById(
-      //   dataflowId,
-      //   categoryState.codelistDescription,
-      //   [],
-      //   categoryState.codelistName,
-      //   categoryState.codelistStatus,
-      //   categoryState.codelistVersion
-      // );
+      const response = await CodelistService.addById(
+        categoryState.codelistDescription,
+        [],
+        categoryState.codelistName,
+        'DESIGN',
+        categoryState.codelistVersion,
+        categoryState.categoryId
+      );
+      if (response.status >= 200 && response.status <= 299) {
+        onLoadCategories();
+      }
     } catch (error) {
       notificationContext.add({
         type: 'ADD_CODELIST_BY_ID_ERROR',
@@ -120,6 +189,10 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     } finally {
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
+  };
+
+  const onShowDeprecatedCodelists = () => {
+    dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
   };
 
   const addCodelistDialogFooter = (
@@ -153,15 +226,17 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     </div>
   );
 
+  const checkNoCodelistEditing = () => categoryState.codelistsInEdition === 0;
+
   const editCategoryForm = (
     <React.Fragment>
       <span className={`${styles.categoryInput} p-float-label`}>
         <InputText
-          id={'nameInput'}
+          id={'shortCodeInput'}
           onChange={e => setCategoryInputs(undefined, e.target.value)}
-          value={categoryState.categoryName}
+          value={categoryState.categoryShortCode}
         />
-        <label htmlFor={'nameInput'}>{resources.messages['categoryName']}</label>
+        <label htmlFor={'shortCodeInput'}>{resources.messages['categoryShortCode']}</label>
       </span>
       <span className={`${styles.categoryInput} p-float-label`}>
         <InputText
@@ -175,18 +250,22 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     </React.Fragment>
   );
 
-  const setCategoryInputs = (description, name, id) => {
+  const setCategoryInputs = (description, shortCode, id) =>
     dispatchCategory({
       type: 'SET_CATEGORY_INPUTS',
-      payload: { description, name, id }
+      payload: { description, shortCode, id }
     });
-  };
 
-  const toggleDialog = (action, isVisible) => {
+  const toggleDialog = (action, isVisible) =>
     dispatchCategory({
       type: action,
       payload: isVisible
     });
+
+  const toggleIsExpanded = expanded => dispatchCategory({ type: 'TOGGLE_IS_EXPANDED', payload: expanded });
+
+  const toggleLoading = loading => {
+    dispatchCategory({ type: 'SET_ISLOADING', payload: { loading } });
   };
 
   const renderDeleteDialog = () => {
@@ -204,25 +283,37 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
   };
 
   const renderCodelist = () => {
+    console.log(categoriesDropdown);
     return (
       <div className={styles.categories}>
-        {category.codelists.map((codelist, i) => {
-          return (
-            <Codelist
-              checkDuplicates={checkDuplicates}
-              codelist={codelist}
-              isDataCustodian={isDataCustodian}
-              isInDesign={isInDesign}
-              key={i}
-              onCodelistSelected={onCodelistSelected}
-            />
-          );
-        })}
+        {!isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
+          categoryState.codelists.map((codelist, i) => {
+            return (
+              <Codelist
+                categoriesDropdown={categoriesDropdown}
+                categoryId={categoryState.categoryId}
+                checkDuplicates={checkDuplicates}
+                checkNoCodelistEditing={checkNoCodelistEditing}
+                codelist={codelist}
+                isDataCustodian={isDataCustodian}
+                isInDesign={isInDesign}
+                key={i}
+                onCodelistSelected={onCodelistSelected}
+                updateEditingCodelists={updateEditingCodelists}
+              />
+            );
+          })
+        ) : (
+          <div className={styles.noCodelistsMessage}>
+            <span>{resources.messages['noCodelists']}</span>
+          </div>
+        )}
       </div>
     );
   };
 
   const renderAddCodelistDialog = () => {
+    console.log({ categoriesDropdown });
     return categoryState.isAddCodelistDialogVisible ? (
       <Dialog
         className="edit-table"
@@ -248,7 +339,7 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={categoryDialogFooter}
-        header={resources.messages['addNewCategory']}
+        header={resources.messages['editCategory']}
         modal={true}
         onHide={() => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false)}
         style={{ width: '50%' }}
@@ -258,34 +349,57 @@ const Category = ({ category, checkDuplicates, isDataCustodian, isInDesign, onCo
     ) : null;
   };
 
+  const updateEditingCodelists = isNewEditingCodelist => {
+    if (isNewEditingCodelist) {
+      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: 1 });
+    } else {
+      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: -1 });
+    }
+  };
+
   return (
     <React.Fragment>
+      {console.log(categoryState.isFiltered)}
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
-        expanded={true}
-        items={[category.name, category.description]}
+        expanded={false}
+        items={[category.shortCode, category.description]}
         buttons={[
           {
+            disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,
+            icon: 'filter',
+            iconSlashed: categoryState.isFiltered,
             label: '',
-            tooltip: resources.messages['editCategory'],
+            onClick: () => onShowDeprecatedCodelists(),
+            tooltip: categoryState.isFiltered
+              ? resources.messages['showDeprecatedCodelists']
+              : resources.messages['hideDeprecatedCodelists']
+          },
+          {
+            disabled: !checkNoCodelistEditing(),
             icon: 'pencil',
-            onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['editCategory']
           },
           {
-            label: '',
-            disabled: category.codelists.length > 0,
-            tooltip: resources.messages['deleteCategory'],
+            disabled: category.codelistNumber > 0,
             icon: 'trash',
-            onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['deleteCategory']
           },
           {
-            label: '',
-            tooltip: resources.messages['newCodelist'],
+            disabled: !checkNoCodelistEditing(),
             icon: 'add',
-            onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true)
+            label: '',
+            onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true),
+            tooltip: resources.messages['newCodelist']
           }
-        ]}>
-        {renderCodelist()}
+        ]}
+        onCollapseTree={() => toggleIsExpanded(false)}
+        onExpandTree={onLoadCodelists}>
+        {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
       </TreeViewExpandableItem>
       {renderEditDialog()}
       {renderAddCodelistDialog()}

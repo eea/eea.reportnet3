@@ -341,7 +341,11 @@ const Representative = withRouter(({ history, match }) => {
   );
 
   const layout = children => (
-    <MainLayout>
+    <MainLayout
+      leftSideBarConfig={{
+        isCustodian,
+        buttons: []
+      }}>
       <BreadCrumb model={breadCrumbItems} />
       <div className="rep-container">{children}</div>
     </MainLayout>
@@ -351,14 +355,14 @@ const Representative = withRouter(({ history, match }) => {
   }
   return layout(
     <div className="rep-row">
-      <LeftSideBar
+      {/* <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
-      />
+      /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
         {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
         <div className={styles.titleBar}>

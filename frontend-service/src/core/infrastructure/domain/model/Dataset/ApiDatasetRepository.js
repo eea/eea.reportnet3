@@ -291,7 +291,8 @@ const schemaById = async datasetId => {
                   null,
                   null,
                   null,
-                  DataTableFieldDTO.description
+                  DataTableFieldDTO.description,
+                  DataTableFieldDTO.idCodeList
                 );
               })
             : null;

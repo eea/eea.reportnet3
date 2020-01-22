@@ -19,7 +19,7 @@ export const apiCodelistCategory = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(CodelistCategoryConfig.add, {}),
-      data: { category },
+      data: { ...category },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -41,7 +41,7 @@ export const apiCodelistCategory = {
   },
   getCategoryInfo: async codelistCategoryId => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.delete({
+    const response = await HTTPRequester.get({
       url: getUrl(CodelistCategoryConfig.getCategoryInfo, {
         codelistCategoryId
       }),
@@ -52,18 +52,14 @@ export const apiCodelistCategory = {
 
     return response;
   },
-  updateById: async (id, shortCode, description) => {
+  updateById: async category => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(CodelistCategoryConfig.update, {}),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: {
-        id,
-        shortCode,
-        description
-      }
+      data: { ...category }
     });
     return response;
   }

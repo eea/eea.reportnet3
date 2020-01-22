@@ -8,18 +8,7 @@ export const apiCodelist = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(CodelistConfig.add, {}),
-      data: { codelist },
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response;
-  },
-  all: async () => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(CodelistConfig.all, {}),
-      queryString: {},
+      data: { ...codelist },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -31,6 +20,18 @@ export const apiCodelist = {
     const response = await HTTPRequester.get({
       url: getUrl(CodelistConfig.allInCategory, { codelistCategoryId }),
       queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+  cloneById: async (codelistId, codelist) => {
+    console.log(CodelistConfig.clone);
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(CodelistConfig.clone, { codelistId }),
+      data: { ...codelist },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
@@ -51,6 +52,32 @@ export const apiCodelist = {
     return response;
   },
 
+  getById: async codelistId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.getById, {
+        codelistId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
+  getAllByIds: async codelistIds => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(CodelistConfig.find, {
+        codelistIds
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
   updateById: async codelist => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
@@ -58,7 +85,7 @@ export const apiCodelist = {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: { codelist }
+      data: { ...codelist }
     });
     return response;
   }

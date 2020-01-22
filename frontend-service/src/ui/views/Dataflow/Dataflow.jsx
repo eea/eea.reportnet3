@@ -354,14 +354,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <LeftSideBar
+      {/* <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
-      />
+      /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>

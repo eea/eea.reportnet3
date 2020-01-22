@@ -1,30 +1,14 @@
+import { capitalize, isEmpty, isNull, isUndefined } from 'lodash';
+
 import { apiCodelist } from 'core/infrastructure/api/domain/model/Codelist';
 import { CodelistCategory } from 'core/domain/model/CodelistCategory/CodelistCategory';
 import { Codelist } from 'core/domain/model/Codelist/Codelist';
 import { CodelistItem } from 'core/domain/model/Codelist/CodelistItem/CodelistItem';
 
-const all = async () => {
-  const codelistsDTO = await apiCodelist.all();
-
-  return codelistsDTO.map(codelistDTO => {
-    const codelistItems = codelistDTO.items.map(
-      itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
-    );
-    return new Codelist(
-      codelistDTO.id,
-      codelistDTO.name,
-      codelistDTO.description,
-      codelistDTO.version,
-      codelistDTO.status,
-      codelistItems
-    );
-  });
-};
-
 const allInCategory = async codelistCategoryId => {
   const codelistsDTO = await apiCodelist.allInCategory(codelistCategoryId);
-
-  return codelistsDTO.map(codelistDTO => {
+  const orderedCodelistsDTO = codelistsDTO.data.sort((a, b) => a.id - b.id);
+  return orderedCodelistsDTO.map(codelistDTO => {
     const codelistItems = codelistDTO.items.map(
       itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
     );
@@ -33,7 +17,7 @@ const allInCategory = async codelistCategoryId => {
       codelistDTO.name,
       codelistDTO.description,
       codelistDTO.version,
-      codelistDTO.status,
+      capitalize(codelistDTO.status.toLowerCase()),
       codelistItems
     );
   });
@@ -47,22 +31,109 @@ const addById = async (description, items, name, status, version, categoryId) =>
   return await apiCodelist.addById(codelistDTO);
 };
 
+const cloneById = async (codelistId, description, items, name, version, categoryId) => {
+  const categoryDTO = new CodelistCategory(categoryId);
+  const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
+  const codelistDTO = new Codelist(null, name, description, version, undefined, codelistItemsDTO);
+  codelistDTO.category = categoryDTO;
+  return await apiCodelist.cloneById(codelistId, codelistDTO);
+};
+
 const deleteById = async codelistId => {
   return await apiCodelist.deleteById(codelistId);
 };
 
-const updateById = async (id, description, items, name, status, version) => {
+const getById = async codelistId => {
+  const codelistDTO = await apiCodelist.getById(codelistId);
+  let codelistItems = [];
+
+  if (!isEmpty(codelistDTO.items)) {
+    codelistItems = codelistDTO.items.map(
+      itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+    );
+  }
+  return new Codelist(
+    codelistDTO.data.id,
+    codelistDTO.data.name,
+    codelistDTO.data.description,
+    codelistDTO.data.version,
+    codelistDTO.data.status,
+    codelistItems
+  );
+};
+
+const getCodelistsList = async datasetSchemas => {
+  const codelistIds = await getCodelistsIdsBySchemas(datasetSchemas);
+  const codelistsList = await getCodelistsByIds(codelistIds);
+  return codelistsList;
+};
+
+const getCodelistsIdsBySchemas = datasetSchemas => {
+  try {
+    const codelistIds = [];
+    datasetSchemas.forEach(schema => {
+      if (!isUndefined(schema)) {
+        schema.tables.map(table => {
+          table.records.map(record => {
+            record.fields.map(field => {
+              if (!isNull(field.codelistId)) {
+                codelistIds.push(field.codelistId);
+              }
+            });
+          });
+        });
+      }
+    });
+    return codelistIds;
+  } catch (error) {
+    console.log({ error });
+    console.error(`Error in schema: ${error}`);
+  }
+};
+
+const getCodelistsByIds = async codelistIds => {
+  try {
+    const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
+    let codelistItems = [];
+    codelistsDTO.data.sort((a, b) => a.id - b.id);
+    const codelists = codelistsDTO.data.map(codelistDTO => {
+      if (!isEmpty(codelistDTO.items)) {
+        codelistItems = codelistDTO.items.map(
+          itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+        );
+      }
+      return new Codelist(
+        codelistDTO.id,
+        codelistDTO.category.shortCode,
+        codelistDTO.category.description,
+        codelistDTO.version,
+        codelistDTO.status,
+        codelistItems
+      );
+    });
+    return codelists;
+  } catch (error) {
+    console.log({ error });
+    console.error(`Error in schema: ${error}`);
+  }
+};
+
+const updateById = async (id, description, items, name, status, version, categoryId) => {
+  const categoryDTO = new CodelistCategory(categoryId);
   const codelistItemsDTO = items.map(
-    item => new CodelistItem(item.codelistItemId, item.shortCode, item.label, item.definition, id)
+    item => new CodelistItem(item.id.includes('-') ? null : item.id, item.shortCode, item.label, item.definition, id)
   );
   const codelistDTO = new Codelist(id, name, description, version, status, codelistItemsDTO);
+  codelistDTO.category = categoryDTO;
   return await apiCodelist.updateById(codelistDTO);
 };
 
 export const ApiCodelistRepository = {
   addById,
-  all,
   allInCategory,
+  cloneById,
   deleteById,
+  getById,
+  getCodelistsList,
   updateById
 };

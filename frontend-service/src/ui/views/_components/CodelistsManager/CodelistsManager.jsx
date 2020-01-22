@@ -8,10 +8,13 @@ import styles from './CodelistsManager.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
-import { InputText } from 'ui/views/_components/InputText';
+// import { Checkbox } from 'ui/views/_components/Checkbox';
+// import { InputText } from 'ui/views/_components/InputText';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -19,23 +22,25 @@ import { routes } from 'ui/routes';
 
 import { CodelistsManagerUtils } from './_functions/Utils/CodelistsManagerUtils';
 
-const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoading, onCodelistSelected }) => {
+const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodelistSelected }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState();
-  const [filteredCategories, setFilteredCategories] = useState([]);
+  // const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isChecked, setIsChecked] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     try {
       onLoadCategories();
     } catch (error) {
       console.error(error.response);
     } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -50,110 +55,56 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
     setNewCategory(inmNewCategory);
   };
 
-  const onFilter = filter => {
-    setIsFiltered(filter === '');
+  // const onFilter = filter => {
+  //   setIsFiltered(filter === '');
 
-    const inmCategories = [...categories];
-    console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
-    setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    setFilter(filter);
-  };
+  //   const inmCategories = [...categories];
+  //   console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
+  //   //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
+  //   // setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
+  //   setFilter(filter);
+  // };
+
+  // const onFilterDeprecated = () => {
+  //   const inmCategories = [...categories];
+  // };
 
   const onLoadCategories = async () => {
     try {
-      // [
-      //   {
-      //     name: 'wise',
-      //     description: '(WISE - Water Information System of Europe)',
-      //     codelists: [
-      //       {
-      //         name: 'BWDObservationStatus',
-      //         description: '(Bathing water observation status)',
-      //         version: '1.0',
-      //         status: 'Ready',
-      //         items: [
-      //           {
-      //             itemId: '1',
-      //             code: 'confirmedValue',
-      //             label: 'Confirmed value',
-      //             definition: 'Status flag to confirm that the reported observation value is...'
-      //           },
-      //           {
-      //             itemId: '2',
-      //             code: 'limitOfDetectionValue',
-      //             label: 'Limit of detection value',
-      //             definition: 'Status flag to inform that a specific observed...'
-      //           }
-      //         ]
-      //       },
-      //       {
-      //         name: 'BWDStatus',
-      //         description: '(Bathing water quality) ',
-      //         version: '3.0',
-      //         status: 'Design',
-      //         items: [
-      //           {
-      //             itemId: '3',
-      //             code: 0,
-      //             label: 'Not classified',
-      //             definition: 'Bathing water quality cannot be assessed and classified.'
-      //           },
-      //           {
-      //             itemId: '4',
-      //             code: 1,
-      //             label: 'Excellent',
-      //             definition:
-      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-      //           }
-      //         ]
-      //       },
-      //       {
-      //         name: 'BWDStatus',
-      //         description: '(Bathing water quality) ',
-      //         version: '3.1',
-      //         status: 'Design',
-      //         items: [
-      //           {
-      //             itemId: '5',
-      //             code: 0,
-      //             label: 'Not classified',
-      //             definition: 'Bathing water quality cannot be assessed and classified.'
-      //           },
-      //           {
-      //             itemId: '6',
-      //             code: 1,
-      //             label: 'Excellent',
-      //             definition:
-      //               'See Annex II (4) of BWD. Bathing water quality status is Excellent if: for inland waters, ( p95(IE) <= 200 ) AND ( p95(EC) <= 500 ) ...'
-      //           }
-      //         ]
-      //       }
-      //     ]
-      //   },
-      //   {
-      //     name: 'category 2',
-      //     description: '(Category 2 - Fire Information System of Europe)',
-      //     codelists: []
-      //   }
-      // ];
+      setIsLoading(true);
       const loadedCategories = await CodelistCategoryService.all();
-      console.log({ loadedCategories });
       setCategories(loadedCategories);
     } catch (error) {
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSaveCategory = () => {
+  const onSaveCategory = async () => {
     //API CALL
     //Meanwhile....
-    const inmCategories = [...categories];
-    newCategory.codelists = [];
-    inmCategories.push(newCategory);
-    setCategories(inmCategories);
-    setNewCategoryVisible(false);
+    // const inmCategories = [...categories];
+    // newCategory.codelists = [];
+    // inmCategories.push(newCategory);
+    // setCategories(inmCategories);
+    // setNewCategoryVisible(false);
+    try {
+      const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
+      if (response.status >= 200 && response.status <= 299) {
+        onLoadCategories();
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
+        content: {
+          // dataflowId,
+          // datasetId
+        }
+      });
+    } finally {
+      setNewCategoryVisible(false);
+    }
   };
 
   const checkDuplicates = (codelistName, codelistVersion) => {
@@ -165,7 +116,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
         category =>
           category.codelists.filter(
             codelist =>
-              codelistName.toLowerCase() === codelist.name.toLowerCase() &&
+              codelistName.toLowerCase() === codelist.shortCode.toLowerCase() &&
               codelistVersion.toLowerCase() === codelist.version.toLowerCase()
           ).length > 0
       );
@@ -179,12 +130,16 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
     data.map((category, i) => {
       return (
         <Category
+          categoriesDropdown={categories.map(category => {
+            return { categoryType: category.shortCode, value: category.id };
+          })}
           category={category}
           checkDuplicates={checkDuplicates}
           isDataCustodian={isDataCustodian}
           isInDesign={isInDesign}
           key={i}
           onCodelistSelected={onCodelistSelected}
+          onLoadCategories={onLoadCategories}
         />
       );
     });
@@ -192,10 +147,23 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
   return (
     <React.Fragment>
       <div className={styles.codelistsActions}>
-        <span className={`${styles.filterSpan} p-float-label`}>
+        {/* <span className={`${styles.filterSpan} p-float-label`}>
           <InputText id="filterInput" onChange={e => onFilter(e.target.value)} value={filter} />
           <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
         </span>
+        <Checkbox
+          className={styles.filterDeprecatedCheckbox}
+          defaultChecked={false}
+          id="filterDeprecated"
+          isChecked={isChecked}
+          onChange={() => {
+            onFilterDeprecated();
+            setIsChecked(!isChecked);
+          }}
+          htmlFor="filterDeprecated"
+          labelClassName={styles.filterDeprecatedLabel}
+          labelMessage={resources.messages['showDeprecatedCodelists']}
+        /> */}
         {isDataCustodian ? (
           <Button
             label={resources.messages['newCategory']}
@@ -205,13 +173,15 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, setIsLoa
           />
         ) : null}
       </div>
-      {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)}
+      {/* {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)} */}
+      {console.log({ categories })}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)}
       <CodelistsForm
         newCategory={newCategory}
-        columns={['name', 'description']}
+        columns={['shortCode', 'description']}
         onChangeCategoryForm={onChangeCategoryForm}
         onHideDialog={() => {
-          setNewCategory({ name: '', description: '' });
+          setNewCategory({ shortCode: '', description: '' });
           setNewCategoryVisible(false);
         }}
         onSaveCategory={onSaveCategory}

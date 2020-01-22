@@ -12,10 +12,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
-const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
+const Codelists = withRouter(({ match, history, isCustodian = false }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -33,19 +32,17 @@ const Codelists = withRouter(({ match, history, isDataCustodian = true }) => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} />
-        <div className="rep-container">{children}</div>
+        <div className="rep-container" style={{ paddingBottom: '80px' }}>
+          {children}
+        </div>
       </MainLayout>
     );
   };
 
-  if (isLoading) {
-    return layout(<Spinner />);
-  }
-
   return layout(
     <React.Fragment>
       <Title title={`${resources.messages['codelists']} `} icon="list" iconSize="3.5rem" />
-      <CodelistsManager setIsLoading={setIsLoading} />
+      <CodelistsManager />
     </React.Fragment>
   );
 });

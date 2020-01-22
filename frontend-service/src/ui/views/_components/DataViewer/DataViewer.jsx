@@ -20,7 +20,7 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldEditor } from './_components/FieldEditor';
 import { Footer } from './_components/Footer';
-import { IconTooltip } from './_components/IconTooltip';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 
 import { DatasetService } from 'core/services/Dataset';

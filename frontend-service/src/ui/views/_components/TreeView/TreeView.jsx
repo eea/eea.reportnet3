@@ -32,7 +32,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
             <TreeViewExpandableItem
               items={!Number.isInteger(Number(propertyName)) ? [camelCaseToNormal(propertyName)] : []}
               expanded={true}>
-              {groupableProperties.indexOf(propertyName.toLowerCase()) > -1
+              {groupableProperties.indexOf(propertyName) > -1
                 ? groupFields(property)
                 : !isUndefined(property)
                 ? Object.values(property).map((proper, index, { length }) => (
@@ -65,7 +65,8 @@ const getFieldTypeValue = value => {
     { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' }
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
   ];
 
   if (value.toUpperCase() === 'COORDINATE_LONG') {
