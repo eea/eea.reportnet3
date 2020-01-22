@@ -81,7 +81,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
         <span className={styles.notificationCounter}>10</span>
         <span className={styles.leftSideBarUserText}>{resources.messages['notifications']}</span>
       </div>
-      <div className={styles.notificationList}><ul><li>Notification 1</li><li>Notification 2</li><li>Notification 2</li><li>Notification 2</li></ul></div>
+      {/* <div className={styles.notificationList}><ul><li>Notification 1</li><li>Notification 2</li><li>Notification 2</li><li>Notification 2</li></ul></div> */}
     </a>
   );
   const renderButtons = () =>
