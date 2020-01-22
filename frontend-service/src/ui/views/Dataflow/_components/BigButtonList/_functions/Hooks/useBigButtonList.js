@@ -15,6 +15,7 @@ const useBigButtonList = ({
   dataflowStatus,
   getDeleteSchemaIndex,
   handleRedirect,
+  hasRepresentatives,
   isCustodian,
   onDatasetSchemaNameError,
   onDuplicateName,
@@ -217,7 +218,7 @@ const useBigButtonList = ({
       buttonIconClass: 'siteMap',
       caption: resources.messages['createDataCollection'],
       handleRedirect: () => onShowDataCollectionModal(),
-      visibility: isEmpty(dataflowData.dataCollections) && !isEmpty(dataflowData.designDatasets)
+      visibility: isEmpty(dataflowData.dataCollections) && !isEmpty(dataflowData.designDatasets) && hasRepresentatives
     }
   ];
 

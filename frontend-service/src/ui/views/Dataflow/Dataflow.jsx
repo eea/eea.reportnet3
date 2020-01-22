@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined, remove } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -64,6 +64,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
@@ -381,6 +382,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={match.params.dataflowId}
           designDatasetSchemas={designDatasetSchemas}
           isCustodian={isCustodian}
+          hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
           onUpdateData={onUpdateData}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
@@ -396,7 +398,7 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
+          <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
         </Dialog>
 
         <Dialog
