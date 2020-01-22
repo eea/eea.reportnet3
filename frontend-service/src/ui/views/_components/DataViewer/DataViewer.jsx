@@ -124,6 +124,7 @@ const DataViewer = withRouter(
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       }
+      console.log({ inmTableSchemaColumns });
       setColsSchema(inmTableSchemaColumns);
     }, []);
 
@@ -689,6 +690,7 @@ const DataViewer = withRouter(
       return (
         <FieldEditor
           cells={cells}
+          colsSchema={colsSchema}
           record={record}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -1015,7 +1017,7 @@ const DataViewer = withRouter(
           <Dialog
             className="edit-table"
             blockScroll={false}
-            contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
             footer={addRowDialogFooter}
             header={resources.messages['addNewRow']}
             modal={true}
@@ -1048,8 +1050,8 @@ const DataViewer = withRouter(
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
-                formType="EDIT"
                 editDialogVisible={editDialogVisible}
+                formType="EDIT"
                 onChangeForm={onEditAddFormInput}
                 records={records}
               />

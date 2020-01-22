@@ -32,7 +32,11 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
                     ]}
                     // required={true}
                     // placeholder={resources.messages['category']}
-                    value={{ itemType: '1', value: '1' }}
+                    value={
+                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
+                        ? ''
+                        : field.fieldData[column.field]
+                    }
                   />
                 ) : (
                   <InputText

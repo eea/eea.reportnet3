@@ -10,6 +10,7 @@ import { InputText } from 'ui/views/_components/InputText';
 
 const FieldEditor = ({
   cells,
+  colsSchema,
   record,
   onEditorValueChange,
   onEditorSubmitValue,
@@ -20,6 +21,14 @@ const FieldEditor = ({
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
+
+  const getCodelistItems = () => {
+    RecordUtils.getCellItems(cells, cells.field);
+    console.log(colsSchema, cells.field);
+    console.log(colsSchema[cells.field]);
+
+    // [{ itemType: '0-Good', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]
+  };
 
   const getFilter = type => {
     switch (type) {
@@ -79,6 +88,7 @@ const FieldEditor = ({
           //   />
         );
       case 'CODELIST':
+        console.log(cells, record, getCodelistItems());
         return (
           <Dropdown
             // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
@@ -90,10 +100,13 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             optionLabel="itemType"
-            options={[{ itemType: '0', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]}
+            options={[{ itemType: '0-Good', value: '0' }, { itemType: '1', value: '1' }, { itemType: '2', value: '2' }]}
             // required={true}
             // placeholder={resources.messages['category']}
-            value={RecordUtils.getCellValue(cells, cells.field)}
+            value={{
+              itemType: RecordUtils.getCellValue(cells, cells.field).toString(),
+              value: RecordUtils.getCellValue(cells, cells.field).toString()
+            }}
           />
         );
       default:

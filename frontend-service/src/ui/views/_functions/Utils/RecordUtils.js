@@ -34,6 +34,12 @@ const getCellId = (tableData, field) => {
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
 };
 
+const getCellItems = (tableData, field) => {
+  const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+  console.log({ completeField });
+  return !isUndefined(completeField) ? completeField.fieldData.codelistItems : undefined;
+};
+
 const getCellValue = (tableData, field) => {
   const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
   return value.length > 0 ? value[0].fieldData[field] : '';
@@ -103,6 +109,7 @@ const getRecordId = (tableData, record) => {
     })
     .indexOf(record.recordId);
 };
+
 const getTextWidth = (text, font) => {
   const canvas =
     RecordUtils.getTextWidth.canvas || (RecordUtils.getTextWidth.canvas = document.createElement('canvas'));

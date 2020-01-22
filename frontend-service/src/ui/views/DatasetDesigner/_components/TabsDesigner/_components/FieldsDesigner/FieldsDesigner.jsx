@@ -49,6 +49,12 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   }, []);
 
   useEffect(() => {
+    if (!isUndefined(fields)) {
+      setIsCodelistSelected(fields.filter(field => field.type.toUpperCase() === 'CODELIST').length > 0);
+    }
+  }, [fields]);
+
+  useEffect(() => {
     if (isPreviewModeOn) {
       setLevelErrorTypes(onLoadErrorTypes());
     }
@@ -181,6 +187,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
           field.codelistId = response.id;
           field.codelistName = response.name;
           field.codelistVersion = response.version;
+          field.codelistItems = response.items;
+
           return field;
         } catch (error) {
           console.log(error);
@@ -203,6 +211,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const previewData = () => {
+    console.log({ fields });
     const tableSchemaColumns =
       !isUndefined(fields) && !isNull(fields)
         ? fields.map(field => {
@@ -211,10 +220,15 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              codelistId: field.codelistId,
+              codelistName: field.codelistName,
+              codelistVersion: field.codelistVersion,
+              codelistItems: field.codelistItems
             };
           })
         : [];
+    console.log({ tableSchemaColumns });
 
     return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
       <DataViewer

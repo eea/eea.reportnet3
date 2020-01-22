@@ -319,6 +319,7 @@ const schemaById = async datasetId => {
 
 const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
   const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
+  console.log({ tableDataDTO });
   const table = new DatasetTable();
 
   if (tableDataDTO.totalRecords > 0) {

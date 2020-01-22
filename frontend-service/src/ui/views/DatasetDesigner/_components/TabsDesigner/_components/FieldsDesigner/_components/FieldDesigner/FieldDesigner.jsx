@@ -243,7 +243,7 @@ export const FieldDesigner = ({
     if (fieldId.toString() === '-1') {
       onFieldAdd(recordId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
     } else {
-      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue);
+      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId);
     }
     setIsCodelistManagerVisible(false);
   };
