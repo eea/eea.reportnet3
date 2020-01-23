@@ -74,7 +74,6 @@ export const SnapshotsDialog = ({
   };
 
   const onShowReleaseDialog = ({ isReleased }) => {
-    console.log('lanza');
     setIsActiveReleaseSnapshotConfirmDialog(true);
     setSnapshotDialog(false);
     setIsReleased(isReleased);
@@ -120,7 +119,6 @@ export const SnapshotsDialog = ({
                       <InputText
                         name="createSnapshotDescription"
                         onBlur={event => {
-                          console.log('%o', event.isDefaultPrevented);
                           event.preventDefault();
                           event.isDefaultPrevented();
                           setIsSnapshotInputActive(false);
@@ -134,7 +132,7 @@ export const SnapshotsDialog = ({
                           className={styles.createSnapshotButton}
                           disabled={isEmpty(snapshotDescription)}
                           icon="cloudUpload"
-                          onClick={() => onShowReleaseDialog({ isReleased: true })}
+                          onMouseDown={() => onShowReleaseDialog({ isReleased: true })}
                           type="submit"
                         />
                       </div>
