@@ -48,7 +48,9 @@ import {
   faEye,
   faLayerGroup,
   faCoins,
-  faSitemap
+  faSitemap,
+  faAngleRight,
+  faAngleDown
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -153,6 +155,10 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'angleDown':
+      return faAngleDown;
+    case 'angleRight':
+      return faAngleRight;
     case 'arrowDown':
       return faArrowDown;
     case 'arrowUp':
