@@ -144,7 +144,7 @@
 		"editRow": "Edit row",
 		"editWebLink": "Edit web link",
 		"empty": "Empty",
-		"emptyDatasetDesign":"The dataset design is empty",
+		"emptyDatasetDesign":"The dataset design has no ",
 		"emptyDatasetSchema": "Dataset schema must have a name",
 		"emptyDescriptionValidationError":"Please enter a description",
 		"emptyErrorsDashboard": "There is not any validation data available",
@@ -391,8 +391,8 @@
 		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
 		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
 		"representative":"Representative",
-		"codelistServiceGetCodelistsIdsBySchemas":"Error loading codelists of schema (Schema undefined)",
-		"codelistServiceGetCodelistsByIds": "Error loading codelists of schema (No codelists or wrong finding codelist)",
+		"codelistServiceGetCodelistsIdsBySchemas":"Error loading codelists of schema",
+		"codelistServiceGetCodelistsByIds": "Error loading codelists of schema",
 		"userServiceOldLoginError": "Login failed. Network?"
 	}
 }
