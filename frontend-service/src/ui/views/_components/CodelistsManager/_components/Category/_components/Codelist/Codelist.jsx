@@ -481,7 +481,12 @@ const Codelist = ({
             disabled: codelist.status.toLowerCase() !== 'ready',
             icon: 'checkSquare',
             onClick: () =>
-              onCodelistSelected(codelistState.codelistId, codelistState.codelistName, codelistState.codelistVersion),
+              onCodelistSelected(
+                codelistState.codelistId,
+                codelistState.codelistName,
+                codelistState.codelistVersion,
+                codelistState.items
+              ),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign
           }

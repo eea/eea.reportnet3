@@ -35,6 +35,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
+    console.log({ table });
     if (
       !isUndefined(table) &&
       !isNull(table.records) &&
@@ -75,7 +76,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     fieldDescription,
     codelistId,
     codelistName,
-    codelistVersion
+    codelistVersion,
+    codelistItems
   ) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
@@ -86,7 +88,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       description: fieldDescription,
       codelistId,
       codelistName,
-      codelistVersion
+      codelistVersion,
+      codelistItems
     });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
@@ -206,6 +209,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     });
     console.log({ tableFieldsWithCodelistData });
     Promise.all(tableFieldsWithCodelistData).then(completeFields => {
+      console.log({ completeFields });
       setFields(completeFields);
     });
   };
