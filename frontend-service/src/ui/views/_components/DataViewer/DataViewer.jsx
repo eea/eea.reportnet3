@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, capitalize, cloneDeep } from 'lodash';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -61,6 +61,7 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [codelistInfo, setCodelistInfo] = useState({});
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
@@ -72,6 +73,7 @@ const DataViewer = withRouter(
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
@@ -215,8 +217,15 @@ const DataViewer = withRouter(
                   <Button
                     className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
                     icon="infoCircle"
-                    onClick={null}
-                    tooltip={`${column.codelistName}(${column.codelistVersion})`}
+                    onClick={() => {
+                      const inmCodeListInfo = cloneDeep(codelistInfo);
+                      inmCodeListInfo.name = column.codelistName;
+                      inmCodeListInfo.version = column.codelistVersion;
+                      inmCodeListInfo.items = column.codelistItems;
+                      setCodelistInfo(inmCodeListInfo);
+                      setIsCodelistInfoVisible(true);
+                    }}
+                    tooltip={`${column.codelistName} (${column.codelistVersion})`}
                     tooltipOptions={{ position: 'top' }}
                   />
                 </React.Fragment>
@@ -955,6 +964,37 @@ const DataViewer = withRouter(
             {columns}
           </DataTable>
         </div>
+        {isCodelistInfoVisible ? (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            header={resources.messages['codelistInfo']}
+            onHide={() => setIsCodelistInfoVisible(false)}
+            visible={isCodelistInfoVisible}>
+            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1rem' }}>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistName']}: `}</span>
+                <span>{codelistInfo.name}</span>
+              </div>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistVersion']}: `}</span>
+                <span>{codelistInfo.version}</span>
+              </div>
+            </div>
+            <DataTable autoLayout={true} className={styles.itemTable} value={codelistInfo.items}>
+              {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
+                <Column
+                  field={column}
+                  header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+                  key={i}
+                  sortable={true}
+                  style={{ display: column === 'id' ? 'none' : 'auto' }}
+                />
+              ))}
+            </DataTable>
+          </Dialog>
+        ) : null}
+
         {importDialogVisible ? (
           <Dialog
             className={styles.Dialog}

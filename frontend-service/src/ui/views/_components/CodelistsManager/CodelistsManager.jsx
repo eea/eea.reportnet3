@@ -9,6 +9,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -29,7 +30,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [errorMessage, setErrorMessage] = useState('');
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
   const [filter, setFilter] = useState();
-  // const [filteredCategories, setFilteredCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,15 +64,18 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     setIsErrorDialogVisible(true);
   };
 
-  // const onFilter = filter => {
-  //   setIsFiltered(filter === '');
-
-  //   const inmCategories = [...categories];
-  //   console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-  //   //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
-  //   // setFilteredCategories(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-  //   setFilter(filter);
-  // };
+  const onFilter = filter => {
+    const inmCategories = [...categories];
+    //console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
+    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
+    const filteredCategories = inmCategories.filter(category =>
+      category.shortCode.toLowerCase().includes(filter.toLowerCase())
+    );
+    console.log({ filteredCategories });
+    setFilteredCategories(filteredCategories);
+    setFilter(filter);
+    setIsFiltered(filter !== '');
+  };
 
   // const onFilterDeprecated = () => {
   //   const inmCategories = [...categories];
@@ -180,34 +184,36 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   return (
     <React.Fragment>
       <div className={styles.codelistsActions}>
-        {/* <span className={`${styles.filterSpan} p-float-label`}>
-          <InputText id="filterInput" onChange={e => onFilter(e.target.value)} value={filter} />
-          <label htmlFor="filterInput">{resources.messages['filterCodelists']}</label>
-        </span>
-        <Checkbox
-          className={styles.filterDeprecatedCheckbox}
-          defaultChecked={false}
-          id="filterDeprecated"
-          isChecked={isChecked}
-          onChange={() => {
-            onFilterDeprecated();
-            setIsChecked(!isChecked);
-          }}
-          htmlFor="filterDeprecated"
-          labelClassName={styles.filterDeprecatedLabel}
-          labelMessage={resources.messages['showDeprecatedCodelists']}
-        /> */}
+        {
+          <span className={`${styles.filterSpan} p-float-label`}>
+            <InputText
+              className={styles.inputFilter}
+              id="filterInput"
+              onChange={e => onFilter(e.target.value)}
+              value={filter}
+            />
+            <label htmlFor="filterInput">{resources.messages['filterCategories']}</label>
+          </span>
+        }
         {isDataCustodian ? (
           <Button
-            label={resources.messages['newCategory']}
+            className={styles.newCategoryButton}
             icon="add"
+            label={resources.messages['newCategory']}
             onClick={() => setNewCategoryVisible(true)}
             style={{ marginRight: '1.5rem' }}
           />
         ) : null}
       </div>
-      {/* {isFiltered ? renderCategories(filteredCategories) : renderCategories(categories)} */}
-      {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)}
+      {console.log(isFiltered)}
+      {isLoading ? (
+        <Spinner className={styles.positioning} />
+      ) : isFiltered ? (
+        renderCategories(filteredCategories)
+      ) : (
+        renderCategories(categories)
+      )}
+      {/* {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)} */}
       <CodelistsForm
         newCategory={newCategory}
         columns={['shortCode', 'description']}
