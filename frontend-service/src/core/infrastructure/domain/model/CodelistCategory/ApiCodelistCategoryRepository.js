@@ -43,7 +43,6 @@ const all = async () => {
 };
 
 const deleteById = async codelistCategoryId => {
-  console.log({ codelistCategoryId });
   return await apiCodelistCategory.deleteById(codelistCategoryId);
 };
 

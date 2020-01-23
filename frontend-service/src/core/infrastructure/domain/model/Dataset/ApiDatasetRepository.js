@@ -16,6 +16,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
+  datasetTableFieldDesign.idCodeList = datasetTableRecordField.codelistId;
 
   const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordsAdded;
@@ -318,6 +319,7 @@ const schemaById = async datasetId => {
 
 const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
   const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
+  console.log({ tableDataDTO });
   const table = new DatasetTable();
 
   if (tableDataDTO.totalRecords > 0) {
@@ -481,13 +483,15 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 
 const updateRecordFieldDesign = async (datasetId, record) => {
   const datasetTableFieldDesign = new DatasetTableField();
-
+  console.log({ record });
   datasetTableFieldDesign.id = record.fieldSchemaId;
   // datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
-
+  datasetTableFieldDesign.idCodeList = record.codelistId;
+  // datasetTableFieldDesign.fieldSchemaId = record.fieldSchemaId;
+  console.log({ datasetTableFieldDesign });
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };

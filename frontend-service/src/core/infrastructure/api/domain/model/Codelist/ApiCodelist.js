@@ -27,7 +27,6 @@ export const apiCodelist = {
     return response;
   },
   cloneById: async (codelistId, codelist) => {
-    console.log(CodelistConfig.clone);
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(CodelistConfig.clone, { codelistId }),
