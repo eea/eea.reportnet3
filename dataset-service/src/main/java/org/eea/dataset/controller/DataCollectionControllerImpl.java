@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -64,6 +65,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   private KafkaSenderUtils kafkaSenderUtils;
 
 
+  /** The schema service. */
+  @Autowired
+  private DatasetSchemaService schemaService;
+
+
+
   /**
    * The Constant LOG_ERROR.
    */
@@ -101,7 +108,13 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     // 2. Create reporting datasets as many providers are by design dataset
     // only if there are design datasets and providers
     int i = designs.size() - 1;
-    if (!designs.isEmpty() && !representatives.isEmpty()) {
+    Boolean schemasIntegrity = true;
+    for (DesignDatasetVO design : designs) {
+      if (!schemaService.validateSchema(design.getDatasetSchema())) {
+        schemasIntegrity = false;
+      }
+    }
+    if (!designs.isEmpty() && !representatives.isEmpty() && schemasIntegrity) {
       for (DesignDatasetVO design : designs) {
         try {
           // Create the DC per design dataset
