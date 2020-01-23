@@ -35,7 +35,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    console.log({ table });
     if (
       !isUndefined(table) &&
       !isNull(table.records) &&
@@ -194,7 +193,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
 
           return field;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           // notificationContext.add({
           //   type: 'CLONE_CODELIST_ERROR',
           //   content: {
@@ -207,9 +206,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
         return field;
       }
     });
-    console.log({ tableFieldsWithCodelistData });
     Promise.all(tableFieldsWithCodelistData).then(completeFields => {
-      console.log({ completeFields });
       setFields(completeFields);
     });
   };

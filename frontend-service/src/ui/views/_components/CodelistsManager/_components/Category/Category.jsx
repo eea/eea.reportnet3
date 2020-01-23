@@ -125,14 +125,11 @@ const Category = ({
     toggleLoading(true);
     try {
       const response = await CodelistService.getAllInCategory(categoryState.categoryId);
-      if (categoryState.isFiltered) {
-        dispatchCategory({
-          type: 'SET_CODELISTS_IN_CATEGORY',
-          payload: { data: response }
-        });
-      } else {
-        dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
-      }
+      console.log({ response });
+      dispatchCategory({
+        type: 'SET_CODELISTS_IN_CATEGORY',
+        payload: { data: response }
+      });
     } catch (error) {
     } finally {
       toggleLoading(false);
@@ -340,7 +337,6 @@ const Category = ({
         {renderFilters()}
         <div className={styles.categories}>
           {categoryState.filteredCodelists.map((codelist, i) => {
-            console.log('filtered');
             return getCodelists(codelist, i);
           })}
         </div>
