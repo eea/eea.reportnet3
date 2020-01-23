@@ -47,19 +47,20 @@ class DropdownFilter extends React.Component {
         key: column.key
       }));
 
-      const selectAllField = {
+      const deselectAllField = {
         checked: false,
         label: 'Deselect All',
-        key: 'selectAll'
+        key: 'deselectAll'
       };
 
-      fields.unshift(selectAllField);
+      fields.unshift(deselectAllField);
 
       this.setState(state => {
         return { ...state, fields: fields };
       });
     }
   }
+
   hide(e) {
     if (!this.state.menuClick) {
       this.setState(
@@ -117,27 +118,31 @@ class DropdownFilter extends React.Component {
       }
     );
   }
+
   updateChecked(fieldKey) {
     const { fields } = this.state;
     const { disabled } = this.props;
+
     if (disabled) {
       return;
     }
 
-    if (fieldKey === 'selectAll') {
-      const selectAllField = fields.find(field => field.key === fieldKey);
-      if (selectAllField) {
+    if (fieldKey === 'deselectAll') {
+      const deselectAllField = fields.find(field => field.key === fieldKey);
+
+      if (deselectAllField) {
         const newFields = fields.map(field => {
           if (field.key === fieldKey) {
             field.checked = !field.checked;
           } else {
-            field.checked = !selectAllField.checked;
+            field.checked = !deselectAllField.checked;
           }
+
           return field;
         });
 
+        // UNCHECKED IF ANY FILTER APPLIED
         // SOLVE PROBLEM WITH CORRECT ERROR CALL
-        // UNCHECK IF ANY FILTER APPLYED
 
         this.setState(
           state => {
@@ -171,12 +176,27 @@ class DropdownFilter extends React.Component {
         );
       }
     } else {
-      const newFields = fields.map(field => {
+      const hasAnyCheckedField = this.hasAnyChecked();
+
+      let newFields = fields.map(field => {
         if (field.key === fieldKey) {
           field.checked = !field.checked;
         }
+
         return field;
       });
+
+      if (hasAnyCheckedField(newFields)) {
+        //uncheck "Deselect all" if there is any checked filter
+        newFields = newFields.map(field => {
+          if (field.key !== 'deselectAll') {
+            return field;
+          } else {
+            field.checked = false;
+            return field;
+          }
+        });
+      }
 
       this.setState(
         state => {
@@ -208,6 +228,20 @@ class DropdownFilter extends React.Component {
       );
     }
   }
+  hasAnyChecked() {
+    return filters => {
+      let result = false;
+      for (let index = 0; index < filters.length; index++) {
+        const filter = filters[index];
+        if (filter.key !== 'deselectAll' && filter.checked) {
+          result = true;
+          break;
+        }
+      }
+      return result;
+    };
+  }
+
   menuClick(e) {
     this.setState(state => {
       return {

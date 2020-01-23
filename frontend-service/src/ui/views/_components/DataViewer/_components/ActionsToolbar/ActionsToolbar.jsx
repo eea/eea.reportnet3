@@ -65,6 +65,7 @@ const ActionsToolbar = ({
     const dropdownFilter = colsSchema.map(colSchema => {
       return { label: colSchema.header, key: colSchema.field };
     });
+
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -138,12 +139,15 @@ const ActionsToolbar = ({
     const currentInvisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
+
     if (!isUndefined(onSetColumns)) {
       onSetColumns(currentInvisibleColumns);
     }
+
     if (!isUndefined(onSetColumns)) {
       onSetInvisibleColumns(currentInvisibleColumns);
     }
+
     dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentInvisibleColumns } });
   };
 

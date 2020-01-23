@@ -10,12 +10,14 @@ export const filterReducer = (state, { type, payload }) => {
         visibilityDropdown: payload.dropdownFilter,
         validationDropdown: payload.levelErrors
       };
+
     case 'SET_VALIDATION_FILTER':
       return {
         ...state,
         visibilityDropdown: payload.dropdownFilter,
         validationDropdown: payload.levelErrors
       };
+
     case 'SET_FILTER_ICON':
       if (isFiltered(payload.originalColumns, payload.currentInvisibleColumns)) {
         return { ...state, visibilityColumnIcon: 'eye-slash' };

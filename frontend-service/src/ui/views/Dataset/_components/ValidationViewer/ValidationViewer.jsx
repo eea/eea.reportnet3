@@ -72,7 +72,9 @@ const ValidationViewer = React.memo(
           header: resources.messages['entityType']
         }
       ];
+
       let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
+
       columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.invisibleHeader} />);
       columnsArr.push(
         <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.invisibleHeader} />
@@ -80,6 +82,7 @@ const ValidationViewer = React.memo(
       columnsArr.push(
         <Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.invisibleHeader} />
       );
+
       setColumns(columnsArr);
     }, []);
 
@@ -112,6 +115,7 @@ const ValidationViewer = React.memo(
       originsFilter
     ) => {
       setIsLoading(true);
+
       const datasetErrors = await DatasetService.errorsById(
         datasetId,
         Math.floor(firstRow / numberRows),
@@ -122,6 +126,7 @@ const ValidationViewer = React.memo(
         typeEntitiesFilter,
         originsFilter
       );
+
       setTotalRecords(datasetErrors.totalErrors);
       setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
       setFetchedData(datasetErrors.errors);
@@ -136,12 +141,14 @@ const ValidationViewer = React.memo(
 
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [];
+
       levelErrorTypes.forEach(filter => {
         allLevelErrorsFilterList.push({
           label: capitalize(filter),
           key: `${filter.toString()}_Id`
         });
       });
+
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
     };
 
@@ -157,13 +164,16 @@ const ValidationViewer = React.memo(
 
     const onLoadOriginsFilter = () => {
       const allOriginsFilterList = [];
+
       allOriginsFilterList.push({
         label: datasetName.toString(),
         key: `${datasetName.toString()}_Id`
       });
+
       tableSchemaNames.forEach(name => {
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
+
       setAllOriginsFilter(allOriginsFilterList);
     };
 
@@ -191,11 +201,13 @@ const ValidationViewer = React.memo(
       typeEntitiesDeselected = typeEntitiesDeselected.map(filter => {
         return filter.toString().toUpperCase();
       });
+
       if (typeEntitiesDeselected.length <= 0) {
         checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);
       } else {
         setAreActiveFilters(true);
       }
+
       setTypeEntitiesFilter(typeEntitiesDeselected);
       setIsFilteredTypeEntities(typeEntitiesDeselected.length > 0);
       onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
@@ -204,6 +216,7 @@ const ValidationViewer = React.memo(
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
       setOriginsFilter(originsDeselected);
+
       if (originsDeselected.length <= 0) {
         checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
       } else {
@@ -274,10 +287,12 @@ const ValidationViewer = React.memo(
           datasetContext.onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
           datasetContext.onValidationsVisible();
           break;
+
         case 'TABLE':
           datasetContext.onSelectValidation(event.data.tableSchemaId, -1, -1);
           datasetContext.onValidationsVisible();
           break;
+
         default:
           break;
       }
@@ -394,7 +409,6 @@ const ValidationViewer = React.memo(
 
               <Button
                 className={`p-button-rounded p-button-secondary`}
-                // icon={'eye'}
                 icon={'filter'}
                 label={resources.messages['entityType']}
                 onClick={event => {
@@ -428,6 +442,7 @@ const ValidationViewer = React.memo(
                 }}
               />
             </div>
+
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary`}
