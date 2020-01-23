@@ -15,7 +15,7 @@ export const ReleaseSnapshotDialog = ({
   datasetId,
   hideReleaseDialog,
   isReleased,
-  isReleaseDialogVisible,
+  isReleasedDialogVisible,
   onLoadSnapshotList,
   snapshotDataToRelease,
   snapshotDescription
@@ -72,7 +72,7 @@ export const ReleaseSnapshotDialog = ({
       footer={releseModalFooter}
       header={`${resources.messages['releaseSnapshotMessage']}`}
       onHide={() => hideReleaseDialog()}
-      visible={isReleaseDialogVisible}>
+      visible={isReleasedDialogVisible}>
       <ul>
         <li>
           <strong>{resources.messages['creationDate']}: </strong>

@@ -104,7 +104,7 @@ export const apiSnapshot = {
     });
     return response.data;
   },
-  createByIdReporter: async (datasetId, description, isRelease) => {
+  createByIdReporter: async (datasetId, description, isReleased) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.createSnapshotReporter, {
@@ -112,7 +112,7 @@ export const apiSnapshot = {
       }),
       data: {
         description,
-        released: isRelease
+        released: isReleased
       },
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`

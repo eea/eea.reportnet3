@@ -134,7 +134,7 @@ export const SnapshotsDialog = ({
       <ReleaseSnapshotDialog
         dataflowId={dataflowId}
         datasetId={datasetId}
-        isReleaseDialogVisible={isActiveReleaseSnapshotConfirmDialog}
+        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
         isReleased={isReleased}
         hideReleaseDialog={onHideReleaseDialog}
         onLoadSnapshotList={onLoadSnapshotList}

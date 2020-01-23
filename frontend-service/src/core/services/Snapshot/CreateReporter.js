@@ -1,2 +1,2 @@
-export const CreateReporter = ({ snapshotRepository }) => async (datasetId, description, isRelease = false) =>
-  snapshotRepository.createByIdReporter(datasetId, description, isRelease);
+export const CreateReporter = ({ snapshotRepository }) => async (datasetId, description, isReleased = false) =>
+  snapshotRepository.createByIdReporter(datasetId, description, isReleased);
