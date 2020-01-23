@@ -5,7 +5,8 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ValidationSchemaIntegrityCommand.
+ * The Class ValidationSchemaIntegrityCommand. Validates the schema given: checks if at least there
+ * is one table, and each table of the schema has at least one field
  */
 @Component
 public class ValidationSchemaIntegrityCommand implements ValidationSchemaCommand {
