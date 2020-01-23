@@ -29,7 +29,7 @@ export const SnapshotItem = ({ getSnapshotData, itemData, showReleaseDialog }) =
               icon={itemData.isReleased ? 'check' : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() => {
-                showReleaseDialog({ isRelease: false });
+                showReleaseDialog({ isReleased: false });
                 getSnapshotData(itemData);
               }}
             />

@@ -46,70 +46,47 @@ export const SnapshotsDialog = ({
   }, [isSnapshotDialogVisible, notificationContext]);
 
   useEffect(() => {
-    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    if (isSnapshotInputActive) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    }
   }, [isSnapshotInputActive, isActiveReleaseSnapshotConfirmDialog]);
+
+  const onEditorKeyChange = event => {
+    if (event.key === 'Enter' && !isEmpty(snapshotDescription)) {
+      event.preventDefault();
+      onShowReleaseDialog({ isReleased: true });
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsSnapshotInputActive(false);
+    }
+  };
 
   const onHideReleaseDialog = () => {
     setIsActiveReleaseSnapshotConfirmDialog(false);
     setIsReleased(false);
     setSnapshotDialog(true);
+    setSnapshotDescription('');
   };
 
   const onLoadSnapshotList = async datasetId => {
     setSnapshotsListData(await SnapshotService.allReporter(datasetId));
   };
 
-  const onShowReleaseDialog = ({ isRelease }) => {
+  const onShowReleaseDialog = ({ isReleased }) => {
+    console.log('lanza');
     setIsActiveReleaseSnapshotConfirmDialog(true);
     setSnapshotDialog(false);
-    setIsReleased(isRelease);
+    setIsReleased(isReleased);
   };
 
   const snapshotDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      {!isSnapshotInputActive ? (
-        <>
-          <Button
-            className={styles.createButton}
-            label={resources.messages['createAndRelease']}
-            icon="check"
-            onClick={() => setIsSnapshotInputActive(true)}
-          />
-          <Button
-            className="p-button-secondary"
-            label={resources.messages['close']}
-            icon="cancel"
-            onClick={() => hideSnapshotDialog()}
-          />
-        </>
-      ) : (
-        <div className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper}`}>
-          <div className="p-inputgroup" style={{ width: '100%' }}>
-            <InputText
-              name="createSnapshotDescription"
-              onChange={event => setSnapshotDescription(event.target.value)}
-              placeholder={resources.messages.createSnapshotPlaceholder}
-            />
-            <div className={styles.createButtonWrapper}>
-              <Button
-                className={styles.createSnapshotButton}
-                disabled={isEmpty(snapshotDescription)}
-                icon="cloudUpload"
-                onClick={() => onShowReleaseDialog({ isRelease: true })}
-                tooltip={resources.messages['createAndRelease']}
-                type="submit"
-              />
-            </div>
-          </div>
-          <Button
-            className="p-button-secondary"
-            icon="cancel"
-            label={resources.messages['close']}
-            onClick={() => hideSnapshotDialog()}
-          />
-        </div>
-      )}
-    </div>
+    <Button
+      className="p-button-secondary"
+      icon="cancel"
+      label={resources.messages['close']}
+      onClick={() => hideSnapshotDialog()}
+    />
   );
 
   return (
@@ -117,13 +94,57 @@ export const SnapshotsDialog = ({
       <Dialog
         className={styles.releaseSnapshotsDialog}
         footer={snapshotDialogFooter}
-        header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
+        header={`${resources.messages['snapshots']}`}
         onHide={() => {
           hideSnapshotDialog();
           setIsSnapshotInputActive(false);
         }}
         style={{ width: '30vw' }}
         visible={isSnapshotDialogVisible}>
+        <li className={styles.listItem}>
+          <div className={styles.itemBox}>
+            <div className={styles.listItemData}>
+              <div className={styles.createAndRelease}>{resources.messages['createAndRelease']}</div>
+              <div className="ui-dialog-buttonpane p-clearfix">
+                {!isSnapshotInputActive ? (
+                  <>
+                    <Button
+                      className={styles.createButton}
+                      icon="plus"
+                      onClick={() => setIsSnapshotInputActive(true)}
+                    />
+                  </>
+                ) : (
+                  <div className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper}`}>
+                    <div className="p-inputgroup" style={{ width: '100%' }}>
+                      <InputText
+                        name="createSnapshotDescription"
+                        onBlur={event => {
+                          console.log('%o', event.isDefaultPrevented);
+                          event.preventDefault();
+                          event.isDefaultPrevented();
+                          setIsSnapshotInputActive(false);
+                        }}
+                        onChange={event => setSnapshotDescription(event.target.value)}
+                        onKeyDown={event => onEditorKeyChange(event)}
+                        placeholder={resources.messages['createSnapshotPlaceholder']}
+                      />
+                      <div className={styles.createButtonWrapper}>
+                        <Button
+                          className={styles.createSnapshotButton}
+                          disabled={isEmpty(snapshotDescription)}
+                          icon="cloudUpload"
+                          onClick={() => onShowReleaseDialog({ isReleased: true })}
+                          type="submit"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </li>
         <SnapshotsList
           className={styles.releaseList}
           getSnapshotData={setSnapshotDataToRelease}

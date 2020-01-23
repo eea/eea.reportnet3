@@ -23,3 +23,47 @@
 .snapshotForm {
   margin-bottom: 0px !important;
 }
+.listItem {
+  margin: 0;
+  margin-bottom: 5px;
+  background-color: #f2f5f94d;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--gray-50);
+  color: black;
+  list-style: none;
+}
+.itemBox {
+  margin: 0;
+}
+p {
+  margin: 0 0 1em 0;
+}
+.listItemData {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+
+  .listActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    .btn {
+      padding: 0;
+      margin: 0 3.5px;
+      border-radius: 5px;
+      width: 30px;
+      height: 32px;
+      border-color: transparent;
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+}
+.createAndRelease {
+  display: flex;
+  align-items: center;
+}

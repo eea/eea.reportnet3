@@ -53,7 +53,7 @@
 		"correct": "Correct",
 		"countryCode": "Country code",
 		"create": "Create",
-		"createAndRelease": "Create and release a copy",
+		"createAndRelease": "Create a copy and release it",
 		"createDataCollection": "Create data collections",
 		"createNewDataflow": "Create new dataflow",
 		"createNewDatasetFromTemplate": "New dataset from template",
