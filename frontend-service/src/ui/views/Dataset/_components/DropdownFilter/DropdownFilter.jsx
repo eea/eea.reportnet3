@@ -225,18 +225,18 @@ class DropdownFilter extends React.Component {
       );
     }
   }
-  hasAnyUncheckedField() {
-    return filters => {
-      let result = false;
-      for (let index = 0; index < filters.length; index++) {
-        const filter = filters[index];
-        if (filter.key !== 'selectAll' && filter.checked) {
-          result = true;
-          break;
-        }
+  hasAnyUncheckedField(filters) {
+    let result = false;
+
+    for (let index = 0; index < filters.length; index++) {
+      const filter = filters[index];
+      if (filter.key !== 'selectAll' && filter.checked) {
+        result = true;
+        break;
       }
-      return result;
-    };
+    }
+
+    return result;
   }
 
   menuClick(e) {
