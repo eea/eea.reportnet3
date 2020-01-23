@@ -24,7 +24,6 @@ const CodelistForm = ({
 
   useEffect(() => {
     onFormLoaded();
-    console.log('LOADED');
   }, []);
 
   const codelistDialogFooter = (
@@ -48,7 +47,6 @@ const CodelistForm = ({
   );
 
   const addEditCodelistForm = columns.map((column, i) => {
-    console.log({ item });
     return (
       <React.Fragment key={column}>
         <span className={`${styles.codelistInput} p-float-label`}>

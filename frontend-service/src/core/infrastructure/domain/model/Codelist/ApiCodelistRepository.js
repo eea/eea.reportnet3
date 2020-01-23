@@ -45,13 +45,9 @@ const deleteById = async codelistId => {
 
 const getById = async codelistId => {
   const codelistDTO = await apiCodelist.getById(codelistId);
-  let codelistItems = [];
-
-  if (!isEmpty(codelistDTO.items)) {
-    codelistItems = codelistDTO.items.map(
-      itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
-    );
-  }
+  const codelistItems = codelistDTO.data.items.map(
+    itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+  );
   return new Codelist(
     codelistDTO.data.id,
     codelistDTO.data.name,
@@ -121,7 +117,14 @@ const getCodelistsByIds = async codelistIds => {
 const updateById = async (id, description, items, name, status, version, categoryId) => {
   const categoryDTO = new CodelistCategory(categoryId);
   const codelistItemsDTO = items.map(
-    item => new CodelistItem(item.id.includes('-') ? null : item.id, item.shortCode, item.label, item.definition, id)
+    item =>
+      new CodelistItem(
+        item.id.toString().includes('-') ? null : item.id,
+        item.shortCode,
+        item.label,
+        item.definition,
+        id
+      )
   );
   const codelistDTO = new Codelist(id, name, description, version, status, codelistItemsDTO);
   codelistDTO.category = categoryDTO;

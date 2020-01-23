@@ -19,6 +19,9 @@ import { DatasetService } from 'core/services/Dataset';
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
+  codelistId,
+  codelistName,
+  codelistVersion,
   datasetId,
   fieldId,
   fieldDescription,
@@ -83,9 +86,9 @@ export const FieldDesigner = ({
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
   const [selectedCodelist, setSelectedCodelist] = useState({
-    codelistId: 1,
-    codelistName: '',
-    codelistVersion: ''
+    codelistId: !isUndefined(codelistId) ? codelistId : 1,
+    codelistName: !isUndefined(codelistName) ? codelistName : '',
+    codelistVersion: !isUndefined(codelistVersion) ? codelistVersion : ''
   });
 
   const fieldRef = useRef();
@@ -147,7 +150,6 @@ export const FieldDesigner = ({
   const onChangeFieldType = type => {
     setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    console.log(type, fieldType);
     if (type.fieldType === 'Codelist') {
       onCodelistDropdownSelected(type);
     } else {
@@ -166,9 +168,9 @@ export const FieldDesigner = ({
           }
         }
       }
-      setSelectedCodelist({ codelistId: 1, codelistName: '', codelistVersion: '' });
-      onCodelistShow(fieldId, type);
     }
+    setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
+    onCodelistShow(fieldId, type);
   };
 
   const onBlurFieldDescription = description => {
@@ -197,7 +199,6 @@ export const FieldDesigner = ({
   const onBlurFieldName = name => {
     if (!isUndefined(name)) {
       if (!isDragging) {
-        //New field
         if (fieldId === '-1') {
           if (name === '' && fieldTypeValue !== '' && !isUndefined(fieldTypeValue)) {
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -237,9 +238,13 @@ export const FieldDesigner = ({
     }
   };
 
-  const onCodelistSelected = (codelistName, codelistVersion) => {
-    console.log(codelistName, codelistVersion);
-    setSelectedCodelist({ codelistId: 1, codelistName: codelistName, codelistVersion: codelistVersion });
+  const onCodelistSelected = (codelistId, codelistName, codelistVersion) => {
+    setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
+    if (fieldId.toString() === '-1') {
+      onFieldAdd(recordId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
+    } else {
+      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId);
+    }
     setIsCodelistManagerVisible(false);
   };
 
@@ -250,13 +255,14 @@ export const FieldDesigner = ({
     setIsCodelistManagerVisible(true);
   };
 
-  const onFieldAdd = async (recordId, type, value, description) => {
+  const onFieldAdd = async (recordId, type, value, description, codelistId, codelistName, codelistVersion) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
         name: value,
         type,
-        description
+        description,
+        codelistId
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -264,7 +270,7 @@ export const FieldDesigner = ({
         setFieldValue('');
         setFieldTypeValue('');
         setFieldDescriptionValue('');
-        onNewFieldAdd(response.data, value, recordId, type, description);
+        onNewFieldAdd(response.data, value, recordId, type, description, codelistId, codelistName, codelistVersion);
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
@@ -362,7 +368,6 @@ export const FieldDesigner = ({
         label={resources.messages['cancel']}
         icon="cancel"
         onClick={() => {
-          console.log(selectedCodelist, fieldTypeValue);
           if (selectedCodelist.codelistName === '' && selectedCodelist.codelistVersion === '') {
             setFieldTypeValue(fieldPreviousTypeValue);
           }
@@ -395,26 +400,34 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (fieldSchemaId, type, value, description) => {
+  const fieldUpdate = async (fieldSchemaId, type, value, description, codelistId) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
         name: value,
         type: type,
-        description
+        description,
+        codelistId
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type, description);
+        onFieldUpdate(
+          fieldId,
+          value,
+          type,
+          description,
+          selectedCodelist.codelistId,
+          selectedCodelist.codelistName,
+          selectedCodelist.codelistVersion
+        );
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
     }
   };
 
-  console.log({ isCodelistSelected });
   return (
     <React.Fragment>
       {/* <style children={inEffect} /> */}
@@ -501,7 +514,6 @@ export const FieldDesigner = ({
           itemTemplate={fieldTypeTemplate}
           onChange={e => onChangeFieldType(e.target.value)}
           onMouseDown={event => {
-            console.log(event.target.value);
             event.preventDefault();
             event.stopPropagation();
           }}
