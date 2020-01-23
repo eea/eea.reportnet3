@@ -39,9 +39,10 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [isLoading, setIsLoading] = useState(false);
 
   const {
     isLoadingSnapshotListData,
@@ -120,6 +121,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const onBlurDescription = description => {
     if (description !== initialDatasetDescription) {
+      console.log({ description });
       onUpdateDescription(description);
     }
   };

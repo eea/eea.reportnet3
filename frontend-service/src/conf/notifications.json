@@ -214,6 +214,9 @@
           }
         },
         {
+          "key":"DOCUMENTATION_CODELISTS_ERROR"
+        },
+        {
           "key":"ADD_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo":{
             "section":"DATASET",
@@ -317,6 +320,10 @@
             "section":"DATAFLOW",
             "parameters":["dataflowId"]
           }
+        },
+        {
+          "key":"SAVE_EDIT_CODELIST_ERROR",
+          "refresh":false 
         }
       ]
     },

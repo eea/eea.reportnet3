@@ -35,16 +35,17 @@ export class TableBody extends Component {
     if (this.props.selectionMode) {
       let rowData = event.data;
       let rowIndex = event.index;
+      let selection;
 
       if (this.isMultipleSelectionMode() && event.originalEvent.shiftKey && this.anchorRowIndex !== null) {
         DomHandler.clearSelection();
-        //todo: shift key
+        this.rangeRowIndex = rowIndex;
+        selection = this.selectRange(event);
       } else {
         let selected = this.isSelected(rowData);
         let metaSelection = this.rowTouched ? false : this.props.metaKeySelection;
         this.anchorRowIndex = rowIndex;
         this.rangeRowIndex = rowIndex;
-        let selection;
 
         if (metaSelection) {
           let metaKey = event.originalEvent.metaKey || event.originalEvent.ctrlKey;
@@ -102,17 +103,50 @@ export class TableBody extends Component {
             }
           }
         }
+      }
 
-        if (this.props.onSelectionChange) {
-          this.props.onSelectionChange({
-            originalEvent: event.originalEvent,
-            value: selection
-          });
-        }
+      if (this.props.onSelectionChange) {
+        this.props.onSelectionChange({
+          originalEvent: event.originalEvent,
+          value: selection
+        });
       }
     }
 
     this.rowTouched = false;
+  }
+
+  selectRange(event) {
+    let rangeStart, rangeEnd;
+
+    if (this.rangeRowIndex > this.anchorRowIndex) {
+      rangeStart = this.anchorRowIndex;
+      rangeEnd = this.rangeRowIndex;
+    } else if (this.rangeRowIndex < this.anchorRowIndex) {
+      rangeStart = this.rangeRowIndex;
+      rangeEnd = this.anchorRowIndex;
+    } else {
+      rangeStart = this.rangeRowIndex;
+      rangeEnd = this.rangeRowIndex;
+    }
+
+    if (this.props.lazy && this.props.paginator) {
+      rangeStart -= this.first;
+      rangeEnd -= this.first;
+    }
+
+    const value = this.props.value;
+    let selection = [];
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      let rangeRowData = value[i];
+      selection.push(rangeRowData);
+
+      if (this.props.onRowSelect) {
+        this.props.onRowSelect({ originalEvent: event.originalEvent, data: rangeRowData, type: 'row' });
+      }
+    }
+
+    return selection;
   }
 
   onRowTouchEnd(event) {
@@ -236,20 +270,37 @@ export class TableBody extends Component {
   }
 
   onRowToggle(event) {
-    let expandedRowIndex = this.findExpandedRowIndex(event.data);
-    let expandedRows = this.props.expandedRows ? [...this.props.expandedRows] : [];
+    let expandedRows;
 
-    if (expandedRowIndex !== -1) {
-      expandedRows = expandedRows.filter((val, i) => i !== expandedRowIndex);
+    if (this.props.dataKey) {
+      let dataKeyValue = String(ObjectUtils.resolveFieldData(event.data, this.props.dataKey));
+      expandedRows = this.props.expandedRows ? { ...this.props.expandedRows } : {};
 
-      if (this.props.onRowCollapse) {
-        this.props.onRowCollapse({ originalEvent: event, data: event.data });
+      if (expandedRows[dataKeyValue] != null) {
+        delete expandedRows[dataKeyValue];
+        if (this.props.onRowCollapse) {
+          this.props.onRowCollapse({ originalEvent: event, data: event.data });
+        }
+      } else {
+        expandedRows[dataKeyValue] = true;
+        if (this.props.onRowExpand) {
+          this.props.onRowExpand({ originalEvent: event, data: event.data });
+        }
       }
     } else {
-      expandedRows.push(event.data);
+      let expandedRowIndex = this.findExpandedRowIndex(event.data);
+      expandedRows = this.props.expandedRows ? [...this.props.expandedRows] : [];
 
-      if (this.props.onRowExpand) {
-        this.props.onRowExpand({ originalEvent: event, data: event.data });
+      if (expandedRowIndex !== -1) {
+        expandedRows = expandedRows.filter((val, i) => i !== expandedRowIndex);
+        if (this.props.onRowCollapse) {
+          this.props.onRowCollapse({ originalEvent: event, data: event.data });
+        }
+      } else {
+        expandedRows.push(event.data);
+        if (this.props.onRowExpand) {
+          this.props.onRowExpand({ originalEvent: event, data: event.data });
+        }
       }
     }
 
@@ -272,7 +323,13 @@ export class TableBody extends Component {
   }
 
   isRowExpanded(row) {
-    return this.findExpandedRowIndex(row) !== -1;
+    if (this.props.dataKey) {
+      let dataKeyValue = String(ObjectUtils.resolveFieldData(row, this.props.dataKey));
+
+      return this.props.expandedRows && this.props.expandedRows[dataKeyValue] != null;
+    } else {
+      return this.findExpandedRowIndex(row) !== -1;
+    }
   }
 
   isSelectionEnabled() {
@@ -423,7 +480,7 @@ export class TableBody extends Component {
           let rowSpanIndex = i;
           let currentRowFieldData = ObjectUtils.resolveFieldData(rowData, this.props.sortField);
           let shouldCountRowSpan =
-            i === 0 ||
+            i === startIndex ||
             ObjectUtils.resolveFieldData(this.props.value[i - 1], this.props.sortField) !== currentRowFieldData;
 
           if (shouldCountRowSpan) {
@@ -470,7 +527,12 @@ export class TableBody extends Component {
             onDragOver={e => this.onRowDragOver(e, i)}
             onDragLeave={this.onRowDragLeave}
             onDrop={this.onRowDrop}
-            virtualRowHeight={this.props.virtualRowHeight}>
+            virtualRowHeight={this.props.virtualRowHeight}
+            editMode={this.props.editMode}
+            rowEditorValidator={this.props.rowEditorValidator}
+            onRowEditInit={this.props.onRowEditInit}
+            onRowEditSave={this.props.onRowEditSave}
+            onRowEditCancel={this.props.onRowEditCancel}>
             {this.props.children}
           </BodyRow>
         );
