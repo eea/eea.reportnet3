@@ -87,7 +87,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                    image = docker.build("eeacms/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -96,6 +96,22 @@ pipeline {
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
                     image = docker.build("eeacms/user-management-service:3.0", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/communication-service:3.0", "--build-arg JAR_FILE=communication-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/indexsearch-service-service:3.0", "--build-arg JAR_FILE=indexsearch-service-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
