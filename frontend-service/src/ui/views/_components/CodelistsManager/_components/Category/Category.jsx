@@ -151,6 +151,7 @@ const Category = ({
 
   const onRefreshCodelist = (codelistId, newCodelist) => {
     const inmCodelists = [...categoryState.codelists];
+    console.log({ inmCodelists, newCodelist });
     dispatchCategory({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)) }
@@ -256,7 +257,7 @@ const Category = ({
 
   const editCategoryForm = (
     <React.Fragment>
-      <span className={`${styles.categoryInput} p-float-label`}>
+      <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
           id={'shortCodeInput'}
           onChange={e => setCategoryInputs(undefined, e.target.value)}
@@ -264,7 +265,7 @@ const Category = ({
         />
         <label htmlFor={'shortCodeInput'}>{resources.messages['categoryShortCode']}</label>
       </span>
-      <span className={`${styles.categoryInput} p-float-label`}>
+      <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
           id={'descriptionInput'}
           onChange={e => setCategoryInputs(e.target.value)}
@@ -335,18 +336,15 @@ const Category = ({
 
   const renderCodelist = () => {
     return (
-      <div className={styles.categories}>
-        {!categoryState.isLoading ? (
-          categoryState.filteredCodelists.map((codelist, i) => {
+      <React.Fragment>
+        {renderFilters()}
+        <div className={styles.categories}>
+          {categoryState.filteredCodelists.map((codelist, i) => {
             console.log('filtered');
             return getCodelists(codelist, i);
-          })
-        ) : (
-          <div className={styles.noCodelistsMessage}>
-            <span>{resources.messages['noCodelists']}</span>
-          </div>
-        )}
-      </div>
+          })}
+        </div>
+      </React.Fragment>
     );
   };
 
@@ -385,6 +383,54 @@ const Category = ({
         <div className="p-grid p-fluid"> {editCategoryForm}</div>
       </Dialog>
     ) : null;
+  };
+
+  const renderFilters = () => {
+    return (
+      <div className={styles.codelistHeader}>
+        <span className={`${styles.categoryInput} p-float-label`}>
+          <InputText
+            className={styles.inputFilter}
+            id={'filterNameInput'}
+            onChange={e => changeFilterValues('name', e.target.value)}
+            value={categoryState.filter.name}
+          />
+          <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
+        </span>
+        <span className={`${styles.categoryInput} p-float-label`}>
+          <InputText
+            className={styles.inputFilter}
+            id={'filterVersionInput'}
+            onChange={e => changeFilterValues('version', e.target.value)}
+            value={categoryState.filter.version}
+          />
+          <label htmlFor={'filterVersionInput'}>{resources.messages['codelistVersion']}</label>
+        </span>
+        <span className={`${styles.categoryInput}`}>
+          <MultiSelect
+            className={styles.multiselectFilter}
+            filter={false}
+            itemTemplate={statusTemplate}
+            onChange={e => changeFilterValues('status', e.value)}
+            optionLabel="statusType"
+            options={statusTypes}
+            placeholder={resources.messages['codelistStatus']}
+            style={{ fontSize: '10pt', color: 'var(--gray-65)' }}
+            value={categoryState.filter.status}
+          />
+        </span>
+
+        <span className={`${styles.categoryInput} p-float-label`}>
+          <InputText
+            className={styles.inputFilter}
+            id={'filterDescriptionInput'}
+            onChange={e => changeFilterValues('description', e.target.value)}
+            value={categoryState.filter.description}
+          />
+          <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
+        </span>
+      </div>
+    );
   };
 
   const statusTemplate = option => (
@@ -442,52 +488,22 @@ const Category = ({
         onExpandTree={onLoadCodelists}>
         {
           <React.Fragment>
-            <div className={styles.codelistHeader}>
-              <span className={`${styles.categoryInput} p-float-label`}>
-                <InputText
-                  className={styles.inputFilter}
-                  id={'filterNameInput'}
-                  onChange={e => changeFilterValues('name', e.target.value)}
-                  value={categoryState.filter.name}
-                />
-                <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
-              </span>
-              <span className={`${styles.categoryInput} p-float-label`}>
-                <InputText
-                  className={styles.inputFilter}
-                  id={'filterVersionInput'}
-                  onChange={e => changeFilterValues('version', e.target.value)}
-                  value={categoryState.filter.version}
-                />
-                <label htmlFor={'filterVersionInput'}>{resources.messages['codelistVersion']}</label>
-              </span>
-              {/* <div className={styles.codelistDropdown}> */}
-              {/* <label className={styles.codelistDropdownLabel}>{resources.messages['codelistStatus']}</label> */}
-              <span className={`${styles.categoryInput}`}>
-                <MultiSelect
-                  className={styles.multiselectFilter}
-                  filter={false}
-                  itemTemplate={statusTemplate}
-                  onChange={e => changeFilterValues('status', e.value)}
-                  optionLabel="statusType"
-                  options={statusTypes}
-                  placeholder={resources.messages['codelistStatus']}
-                  style={{ fontSize: '10pt', color: 'var(--gray-65)' }}
-                  value={categoryState.filter.status}
-                />
-              </span>
-              {/* </div> */}
-              <span className={`${styles.categoryInput} p-float-label`}>
-                <InputText
-                  className={styles.inputFilter}
-                  id={'filterDescriptionInput'}
-                  onChange={e => changeFilterValues('description', e.target.value)}
-                  value={categoryState.filter.description}
-                />
-                <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
-              </span>
-            </div>
-            {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
+            {/* {categoryState.codelists.length > 0 ? (
+              renderFilters()
+            ) : (
+              <div className={styles.noCodelistsMessage}>
+                <span>{resources.messages['noCodelists']}</span>
+              </div>
+            )} */}
+            {categoryState.isLoading ? (
+              <Spinner className={styles.positioning} />
+            ) : categoryState.codelists.length > 0 ? (
+              renderCodelist()
+            ) : (
+              <div className={styles.noCodelistsMessage}>
+                <span>{resources.messages['noCodelists']}</span>
+              </div>
+            )}
           </React.Fragment>
         }
       </TreeViewExpandableItem>
