@@ -261,7 +261,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
+  public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "type", required = true) TypeEntityEnum type) {
 

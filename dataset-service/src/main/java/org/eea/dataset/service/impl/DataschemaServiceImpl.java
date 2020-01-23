@@ -28,6 +28,7 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -106,6 +107,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+
+  /** The validation commands. */
+  @Autowired
+  private List<ValidationSchemaCommand> validationCommands;
 
 
   /**
@@ -836,5 +842,26 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       return (String) tableSchema.get("nameTableSchema");
     }
     return null;
+  }
+
+
+  /**
+   * Validate schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the boolean
+   */
+  @Override
+  public Boolean validateSchema(String datasetSchemaId) {
+
+    Boolean isValid = true;
+    DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+    for (ValidationSchemaCommand command : validationCommands) {
+      if (!command.execute(schema)) {
+        isValid = false;
+      }
+    }
+
+    return isValid;
   }
 }
