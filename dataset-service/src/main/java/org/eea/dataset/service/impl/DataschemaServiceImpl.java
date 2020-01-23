@@ -108,9 +108,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The commands. */
+
+  /** The validation commands. */
   @Autowired
-  private List<ValidationSchemaCommand> commands;
+  private List<ValidationSchemaCommand> validationCommands;
 
 
   /**
@@ -855,13 +856,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     Boolean isValid = true;
     DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
-    if (commands != null && !commands.isEmpty()) {
-      for (ValidationSchemaCommand command : commands) {
-        if (!command.execute(schema)) {
-          isValid = false;
-        }
+    for (ValidationSchemaCommand command : validationCommands) {
+      if (!command.execute(schema)) {
+        isValid = false;
       }
     }
+
     return isValid;
   }
 }

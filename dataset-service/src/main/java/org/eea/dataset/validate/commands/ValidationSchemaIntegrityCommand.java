@@ -21,6 +21,8 @@ public class ValidationSchemaIntegrityCommand implements ValidationSchemaCommand
 
     Boolean isValid = true;
 
+    // This validation consists in: the schema has to have at least one table, and for each table,
+    // it's need to be at least one field
     if (schema.getTableSchemas() == null || schema.getTableSchemas().isEmpty()) {
       isValid = false;
     }

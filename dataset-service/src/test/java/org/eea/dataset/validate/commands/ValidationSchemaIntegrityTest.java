@@ -1,8 +1,10 @@
 package org.eea.dataset.validate.commands;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.junit.Before;
@@ -33,7 +35,7 @@ public class ValidationSchemaIntegrityTest {
 
 
   @Test
-  public void testExecute() {
+  public void testExecuteValidationEmpty() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     validationIntegrity.execute(schema);
     assertFalse("its valid", validationIntegrity.execute(schema));
@@ -41,7 +43,7 @@ public class ValidationSchemaIntegrityTest {
 
 
   @Test
-  public void testExecute2() {
+  public void testExecuteValidationWithNoRecords() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setTableSchemas(new ArrayList<>());
     TableSchemaVO table = new TableSchemaVO();
@@ -50,7 +52,7 @@ public class ValidationSchemaIntegrityTest {
   }
 
   @Test
-  public void testExecute3() {
+  public void testExecuteValidationWithNoRecords2() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setTableSchemas(new ArrayList<>());
     TableSchemaVO table = new TableSchemaVO();
@@ -61,15 +63,17 @@ public class ValidationSchemaIntegrityTest {
   }
 
   @Test
-  public void testExecute4() {
+  public void testExecuteValidationWithFieldsOk() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setTableSchemas(new ArrayList<>());
     TableSchemaVO table = new TableSchemaVO();
     RecordSchemaVO record = new RecordSchemaVO();
+    FieldSchemaVO field = new FieldSchemaVO();
     record.setFieldSchema(new ArrayList<>());
+    record.getFieldSchema().add(field);
     table.setRecordSchema(record);
     schema.getTableSchemas().add(table);
-    assertFalse("its valid", validationIntegrity.execute(schema));
+    assertTrue("its valid", validationIntegrity.execute(schema));
   }
 
 
