@@ -97,7 +97,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     return tokenVO;
   }
 
@@ -115,7 +115,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     return tokenVO;
   }
 
@@ -133,7 +133,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenInfo));
+    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     return tokenVO;
   }
 
@@ -174,12 +174,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
-  private String addTokenInfoToCache(TokenInfo tokenInfo) {
+  private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
     CacheTokenVO cacheTokenVO = new CacheTokenVO();
-    cacheTokenVO.setAccessToken(tokenInfo.getAccessToken());
-    cacheTokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
+    cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
+    cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
     String key = String.valueOf(UUID.randomUUID());
-    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, tokenInfo.getRefreshExpiresIn(),
+    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn,
         TimeUnit.SECONDS);
     return key;
   }
@@ -187,11 +188,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Do logout.
    *
-   * @param refreshToken the refresh token
+   * @param authToken the auth token
    */
   @Override
-  public void doLogout(String refreshToken) {
-    keycloakConnectorService.logout(refreshToken);
+  public void doLogout(String authToken) {
+    CacheTokenVO cacheTokenVO = securityRedisTemplate.opsForValue().get(authToken);
+    keycloakConnectorService.logout(cacheTokenVO.getRefreshToken());
+    securityRedisTemplate.delete(authToken);
   }
 
   /**

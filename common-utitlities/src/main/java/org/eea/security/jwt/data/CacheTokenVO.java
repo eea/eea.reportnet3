@@ -24,4 +24,9 @@ public class CacheTokenVO {
    * The refresh token.
    */
   private String refreshToken;
+
+  /**
+   * The Expiration.
+   */
+  private Integer expiration;
 }
