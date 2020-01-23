@@ -572,7 +572,8 @@ export const FieldDesigner = ({
           modal={true}
           onHide={() => setIsCodelistManagerVisible(false)}
           style={{ width: '80%' }}
-          visible={isCodelistManagerVisible}>
+          visible={isCodelistManagerVisible}
+          zIndex={999}>
           {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
         </Dialog>
       ) : null}

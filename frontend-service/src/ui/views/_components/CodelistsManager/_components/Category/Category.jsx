@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './Category.module.css';
 
@@ -9,6 +9,7 @@ import { Codelist } from './_components/Codelist';
 import { CodelistProperties } from 'ui/views/_components/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { MultiSelect } from 'primereact/multiselect';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
@@ -36,11 +37,18 @@ const Category = ({
     categoryDescription: '',
     categoryShortCode: '',
     filteredCodelists: [],
+    filter: {
+      name: '',
+      version: '',
+      status: [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+      description: ''
+    },
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
     isExpanded: false,
     isFiltered: true,
+    isKeyFiltered: false,
     isLoading: false,
     codelists: [],
     codelistsInEdition: 0,
@@ -52,6 +60,12 @@ const Category = ({
   const [categoryState, dispatchCategory] = useReducer(categoryReducer, initialCategoryState);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
+  const statusTypes = [
+    { statusType: 'Design', value: 'design' },
+    { statusType: 'Ready', value: 'ready' },
+    { statusType: 'Deprecated', value: 'deprecated' }
+  ];
 
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
@@ -114,7 +128,7 @@ const Category = ({
       if (categoryState.isFiltered) {
         dispatchCategory({
           type: 'SET_CODELISTS_IN_CATEGORY',
-          payload: { data: response.filter(codelist => codelist.status.toUpperCase() !== 'DEPRECATED') }
+          payload: { data: response }
         });
       } else {
         dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
@@ -123,6 +137,7 @@ const Category = ({
     } finally {
       toggleLoading(false);
       toggleIsExpanded(true);
+      changeFilterValues('status', categoryState.filter.status);
     }
 
     // setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
@@ -195,9 +210,9 @@ const Category = ({
     }
   };
 
-  const onShowDeprecatedCodelists = () => {
-    dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
-  };
+  // const onShowDeprecatedCodelists = () => {
+  //   dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
+  // };
 
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -230,6 +245,13 @@ const Category = ({
     </div>
   );
 
+  const changeFilterValues = (filter, value) => {
+    dispatchCategory({
+      type: 'SET_FILTER_VALUES',
+      payload: { filter, value }
+    });
+  };
+
   const checkNoCodelistEditing = () => categoryState.codelistsInEdition === 0;
 
   const editCategoryForm = (
@@ -253,6 +275,31 @@ const Category = ({
       </span>
     </React.Fragment>
   );
+
+  const getCodelists = (codelist, i) => {
+    return (
+      <Codelist
+        categoriesDropdown={categoriesDropdown}
+        categoryId={categoryState.categoryId}
+        checkDuplicates={checkDuplicates}
+        checkNoCodelistEditing={checkNoCodelistEditing}
+        codelist={codelist}
+        isDataCustodian={isDataCustodian}
+        isInDesign={isInDesign}
+        key={i}
+        onCodelistError={onCodelistError}
+        onCodelistSelected={onCodelistSelected}
+        onRefreshCodelist={onRefreshCodelist}
+        updateEditingCodelists={updateEditingCodelists}
+      />
+    );
+  };
+
+  const getStatusStyle = status => {
+    if (status.toLowerCase() === 'design') return styles.designBox;
+    if (status.toLowerCase() === 'deprecated') return styles.deprecatedBox;
+    if (status.toLowerCase() === 'ready') return styles.readyBox;
+  };
 
   const setCategoryInputs = (description, shortCode, id) =>
     dispatchCategory({
@@ -289,24 +336,10 @@ const Category = ({
   const renderCodelist = () => {
     return (
       <div className={styles.categories}>
-        {!isEmpty(categoryState.codelists) && !categoryState.isLoading ? (
-          categoryState.codelists.map((codelist, i) => {
-            return (
-              <Codelist
-                categoriesDropdown={categoriesDropdown}
-                categoryId={categoryState.categoryId}
-                checkDuplicates={checkDuplicates}
-                checkNoCodelistEditing={checkNoCodelistEditing}
-                codelist={codelist}
-                isDataCustodian={isDataCustodian}
-                isInDesign={isInDesign}
-                key={i}
-                onCodelistError={onCodelistError}
-                onCodelistSelected={onCodelistSelected}
-                onRefreshCodelist={onRefreshCodelist}
-                updateEditingCodelists={updateEditingCodelists}
-              />
-            );
+        {!categoryState.isLoading ? (
+          categoryState.filteredCodelists.map((codelist, i) => {
+            console.log('filtered');
+            return getCodelists(codelist, i);
           })
         ) : (
           <div className={styles.noCodelistsMessage}>
@@ -329,7 +362,8 @@ const Category = ({
         modal={true}
         onHide={() => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
-        visible={categoryState.isAddCodelistDialogVisible}>
+        visible={categoryState.isAddCodelistDialogVisible}
+        zIndex={999}>
         <div className="p-grid p-fluid">{addCodelistForm}</div>
       </Dialog>
     ) : null;
@@ -353,6 +387,10 @@ const Category = ({
     ) : null;
   };
 
+  const statusTemplate = option => (
+    <span className={`${getStatusStyle(option.value)} ${styles.statusBox}`}>{option.statusType}</span>
+  );
+
   const updateEditingCodelists = isNewEditingCodelist => {
     if (isNewEditingCodelist) {
       dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: 1 });
@@ -368,16 +406,16 @@ const Category = ({
         expanded={false}
         items={[{ label: category.shortCode }, { label: category.description }]}
         buttons={[
-          {
-            disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,
-            icon: 'filter',
-            iconSlashed: categoryState.isFiltered,
-            label: '',
-            onClick: () => onShowDeprecatedCodelists(),
-            tooltip: categoryState.isFiltered
-              ? resources.messages['showDeprecatedCodelists']
-              : resources.messages['hideDeprecatedCodelists']
-          },
+          // {
+          //   disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,
+          //   icon: 'filter',
+          //   iconSlashed: categoryState.isFiltered,
+          //   label: '',
+          //   onClick: () => onShowDeprecatedCodelists(),
+          //   tooltip: categoryState.isFiltered
+          //     ? resources.messages['showDeprecatedCodelists']
+          //     : resources.messages['hideDeprecatedCodelists']
+          // },
           {
             disabled: !checkNoCodelistEditing(),
             icon: 'pencil',
@@ -402,15 +440,55 @@ const Category = ({
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
         onExpandTree={onLoadCodelists}>
-        {// <React.Fragment>
-        //   <div className={styles.codelistHeader}>
-        //     <span>Name</span>
-        //     <span>Version</span>
-        //     <span>Status</span>
-        //     <span>Description</span>
-        //   </div>
-        categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()
-        // </React.Fragment>
+        {
+          <React.Fragment>
+            <div className={styles.codelistHeader}>
+              <span className={`${styles.categoryInput} p-float-label`}>
+                <InputText
+                  className={styles.inputFilter}
+                  id={'filterNameInput'}
+                  onChange={e => changeFilterValues('name', e.target.value)}
+                  value={categoryState.filter.name}
+                />
+                <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
+              </span>
+              <span className={`${styles.categoryInput} p-float-label`}>
+                <InputText
+                  className={styles.inputFilter}
+                  id={'filterVersionInput'}
+                  onChange={e => changeFilterValues('version', e.target.value)}
+                  value={categoryState.filter.version}
+                />
+                <label htmlFor={'filterVersionInput'}>{resources.messages['codelistVersion']}</label>
+              </span>
+              {/* <div className={styles.codelistDropdown}> */}
+              {/* <label className={styles.codelistDropdownLabel}>{resources.messages['codelistStatus']}</label> */}
+              <span className={`${styles.categoryInput}`}>
+                <MultiSelect
+                  className={styles.multiselectFilter}
+                  filter={false}
+                  itemTemplate={statusTemplate}
+                  onChange={e => changeFilterValues('status', e.value)}
+                  optionLabel="statusType"
+                  options={statusTypes}
+                  placeholder={resources.messages['codelistStatus']}
+                  style={{ fontSize: '10pt', color: 'var(--gray-65)' }}
+                  value={categoryState.filter.status}
+                />
+              </span>
+              {/* </div> */}
+              <span className={`${styles.categoryInput} p-float-label`}>
+                <InputText
+                  className={styles.inputFilter}
+                  id={'filterDescriptionInput'}
+                  onChange={e => changeFilterValues('description', e.target.value)}
+                  value={categoryState.filter.description}
+                />
+                <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
+              </span>
+            </div>
+            {categoryState.isLoading ? <Spinner className={styles.positioning} /> : renderCodelist()}
+          </React.Fragment>
         }
       </TreeViewExpandableItem>
       {renderEditDialog()}

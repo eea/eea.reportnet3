@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, capitalize, cloneDeep } from 'lodash';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -61,6 +61,7 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [codelistInfo, setCodelistInfo] = useState({});
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
@@ -72,6 +73,7 @@ const DataViewer = withRouter(
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
@@ -124,7 +126,6 @@ const DataViewer = withRouter(
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       }
-      console.log({ inmTableSchemaColumns });
       setColsSchema(inmTableSchemaColumns);
     }, []);
 
@@ -209,7 +210,30 @@ const DataViewer = withRouter(
             className={invisibleColumn}
             editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
             field={column.field}
-            header={column.header}
+            header={
+              column.type === 'CODELIST' ? (
+                <React.Fragment>
+                  {column.header}
+                  <Button
+                    className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
+                    icon="infoCircle"
+                    onClick={() => {
+                      const inmCodeListInfo = cloneDeep(codelistInfo);
+                      inmCodeListInfo.name = column.codelistName;
+                      inmCodeListInfo.version = column.codelistVersion;
+                      inmCodeListInfo.items = column.codelistItems;
+                      setCodelistInfo(inmCodeListInfo);
+                      setIsCodelistInfoVisible(true);
+                    }}
+                    tooltip={`${column.codelistName} (${column.codelistVersion})`}
+                    tooltipOptions={{ position: 'top' }}
+                  />
+                </React.Fragment>
+              ) : (
+                // `${column.header}-${column.codelistName}(${column.codelistVersion})`
+                column.header
+              )
+            }
             key={column.field}
             sortable={sort}
             style={{
@@ -389,15 +413,6 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
-      console.log(
-        { cell, value, record, initialCellValue, selectedCellId },
-        RecordUtils.getCellId(cell, cell.field),
-        records.selectedRecord.recordId,
-        value !== initialCellValue &&
-          selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
-          record.recordId === records.selectedRecord.recordId
-      );
-
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (
@@ -757,7 +772,6 @@ const DataViewer = withRouter(
     );
 
     const filterDataResponse = data => {
-      console.log({ data, colsSchema });
       const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
@@ -950,6 +964,37 @@ const DataViewer = withRouter(
             {columns}
           </DataTable>
         </div>
+        {isCodelistInfoVisible ? (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            header={resources.messages['codelistInfo']}
+            onHide={() => setIsCodelistInfoVisible(false)}
+            visible={isCodelistInfoVisible}>
+            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1rem' }}>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistName']}: `}</span>
+                <span>{codelistInfo.name}</span>
+              </div>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistVersion']}: `}</span>
+                <span>{codelistInfo.version}</span>
+              </div>
+            </div>
+            <DataTable autoLayout={true} className={styles.itemTable} value={codelistInfo.items}>
+              {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
+                <Column
+                  field={column}
+                  header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+                  key={i}
+                  sortable={true}
+                  style={{ display: column === 'id' ? 'none' : 'auto' }}
+                />
+              ))}
+            </DataTable>
+          </Dialog>
+        ) : null}
+
         {importDialogVisible ? (
           <Dialog
             className={styles.Dialog}

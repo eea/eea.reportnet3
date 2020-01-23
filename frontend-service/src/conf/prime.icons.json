@@ -29,6 +29,7 @@
 		"home": "pi pi-home",
 		"import": "pi pi-upload",
 		"info": "pi pi-info",
+		"infoCircle": "pi pi-info-circle",
 		"logout": "pi pi-power-off",
 		"openFolder": "pi pi-folder-open",
 		"pencil": "pi pi-pencil",

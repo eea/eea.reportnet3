@@ -46,10 +46,10 @@ import KeyFilter from 'ui/views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Tooltip from 'primereact/tooltip';
+
 import { relative } from 'path';
 
 export class InputText extends Component {
