@@ -303,6 +303,16 @@ public class CodelistServiceImplTest {
     Assert.assertEquals((Long) 1L, codelistServiceImpl.update(codelistVO));
   }
 
+  @Test
+  public void updateSuccess2Test() throws EEAException {
+    codelist.setItems(items);
+    codelist.setStatus(CodelistStatusEnum.DESIGN);
+    codelistVO.setStatus(CodelistStatusEnum.DEPRECATED);
+    when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
+    when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
+    Assert.assertEquals((Long) 1L, codelistServiceImpl.update(codelistVO));
+  }
+
 
   /**
    * Update success 2 test.
@@ -310,7 +320,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess2Test() throws EEAException {
+  public void updateSuccess3Test() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.READY);
     codelistVO.setStatus(CodelistStatusEnum.READY);
@@ -325,7 +335,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess3Test() throws EEAException {
+  public void updateSuccess4Test() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DEPRECATED);
     codelistVO.setStatus(CodelistStatusEnum.READY);
@@ -340,7 +350,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess4Test() throws EEAException {
+  public void updateSuccess5Test() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DEPRECATED);
     codelistVO.setStatus(CodelistStatusEnum.DEPRECATED);
@@ -355,7 +365,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess5Test() throws EEAException {
+  public void updateSuccess6Test() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DESIGN);
     codelistVO.setStatus(CodelistStatusEnum.READY);
