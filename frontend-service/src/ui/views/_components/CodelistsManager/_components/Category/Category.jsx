@@ -89,11 +89,7 @@ const Category = ({
       onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
-        type: 'DELETE_CODELIST_CATEGORY_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_CATEGORY_SERVICE_DELETE_BY_ID_ERROR'
       });
     } finally {
       toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', false);
@@ -115,9 +111,15 @@ const Category = ({
   };
 
   const onLoadCategoryInfo = async () => {
-    const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
-    if (response.status >= 200 && response.status <= 299) {
-      setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+    try {
+      const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
+      if (response.status >= 200 && response.status <= 299) {
+        setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'CODELIST_CATEGORY_SERVICE_GET_CATEGORY_INFO_ERROR'
+      });
     }
   };
 
@@ -134,6 +136,9 @@ const Category = ({
         dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
       }
     } catch (error) {
+      notificationContext.add({
+        type: 'CODELIST_SERVICE_GET_ALL_IN_CATEGORY_ERROR'
+      });
     } finally {
       toggleLoading(false);
       toggleIsExpanded(true);
@@ -174,11 +179,7 @@ const Category = ({
       onRefreshCategories(response);
     } catch (error) {
       notificationContext.add({
-        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR'
       });
     } finally {
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
@@ -200,11 +201,7 @@ const Category = ({
       }
     } catch (error) {
       notificationContext.add({
-        type: 'ADD_CODELIST_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);

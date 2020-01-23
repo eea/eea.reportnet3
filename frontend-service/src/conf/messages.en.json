@@ -391,6 +391,16 @@
 		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"addDatacollectionCompletedEvent": "Data collection created at <a href='{:navigateTo}' title='{:dataflowName}'>{:sortDataflowName}</a>",
 		"representative":"Representative",
-		"documentationCodelistsError":"Error loading codelists of a schema"
+		"documentationCodelistsError":"Error loading codelists of a schema",
+		"codelistCategoryServiceAllError": "Error loading codelists categories",
+		"codelistCategoryServiceAddByIdError": "Error creating a codelist category",
+		"codelistCategoryServiceDeleteByIdError": "Error deleting the codelist category",
+		"codelistCategoryServiceGetCategoryInfoError": "Error loading category information",
+		"codelistCategoryServiceUpdateByIdError": "Error loading codelists in category",
+		"codelistServiceCloneByIdError": "Error cloning codelist",
+		"codelistServiceGetAllInCategoryError": "Error loading codelists in category",
+		"codelistServiceGetByIdError": "Error loading codelist",
+		"codelistServiceUpdateByIdError": "Error saving codelist"
+		
 	}
 }

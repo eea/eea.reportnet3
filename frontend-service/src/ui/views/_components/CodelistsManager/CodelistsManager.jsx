@@ -88,6 +88,9 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       setCategories(loadedCategories);
     } catch (error) {
       console.log(error);
+      notificationContext.add({
+        type: 'CODELIST_CATEGORY_SERVICE_ALL_ERROR'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -107,12 +110,9 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         onLoadCategories();
       }
     } catch (error) {
+      console.log(error);
       notificationContext.add({
-        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
       setNewCategoryVisible(false);
