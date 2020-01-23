@@ -331,6 +331,9 @@
           "key":"CODELIST_SERVICE_GET_BY_ID_ERROR"
         },
         {
+          "key":"CODELIST_SERVICE_GET_CODELISTS_LIST"
+        },
+        {
           "key": "CODELIST_SERVICE_UPDATE_BY_ID_ERROR"
         },
         {

@@ -400,6 +400,7 @@
 		"codelistServiceCloneByIdError": "Error cloning codelist",
 		"codelistServiceGetAllInCategoryError": "Error loading codelists in category",
 		"codelistServiceGetByIdError": "Error loading codelist",
+		"codelistServiceGetCodelistsListError": "Error loading codelists",
 		"codelistServiceUpdateByIdError": "Error saving codelist"
 		
 	}
