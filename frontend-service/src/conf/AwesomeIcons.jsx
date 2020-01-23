@@ -45,10 +45,10 @@ import {
   faCloudUploadAlt,
   faThList,
   faMinus,
+  faEye,
   faLayerGroup,
   faCoins,
   faSitemap,
-  faEye,
   faAngleRight,
   faAngleDown
 } from '@fortawesome/free-solid-svg-icons';
