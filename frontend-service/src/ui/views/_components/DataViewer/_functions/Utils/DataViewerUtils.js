@@ -10,9 +10,26 @@ const editLargeStringWithDots = (string, length) => {
   }
 };
 
+const parseCodelistValue = (field, colsSchema) => {
+  try {
+    const filteredCodelistItems = colsSchema.filter(col => col.field === field.fieldData.fieldSchemaId)[0];
+    const codelistItem = filteredCodelistItems.codelistItems.filter(
+      item => item.shortCode === field.fieldData[field.fieldData.fieldSchemaId]
+    )[0];
+    if (!isUndefined(codelistItem)) {
+      return `${codelistItem.shortCode}-${codelistItem.label}`;
+    } else {
+      return field.fieldData[field.fieldData.fieldSchemaId];
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const parseData = data =>
   data.records.map(record => {
     const datasetPartitionId = record.datasetPartitionId;
+    const providerCode = record.providerCode;
     const recordValidations = record.validations;
     const recordId = record.recordId;
     const recordSchemaId = record.recordSchemaId;
@@ -34,6 +51,7 @@ const parseData = data =>
       recordValidations,
       recordId,
       datasetPartitionId,
+      providerCode,
       recordSchemaId
     };
     return arrayDataAndValidations;
@@ -173,5 +191,6 @@ export const DataViewerUtils = {
   getLevelError,
   groupValidations,
   orderValidationsByLevelError,
+  parseCodelistValue,
   parseData
 };

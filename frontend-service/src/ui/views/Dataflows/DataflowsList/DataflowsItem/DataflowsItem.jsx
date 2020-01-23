@@ -16,7 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, selectedDataflowId, type }) => {
+const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedDataflowId, type }) => {
   const resources = useContext(ResourcesContext);
 
   let dataflowTitles = {
@@ -29,15 +29,6 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, se
     if (dataflowTitles.id === selectedDataflowId && !isEmpty(dataflowNewValues)) {
       dataflowTitles = dataflowNewValues;
     }
-  }
-
-  //position must be removed in def implementation
-  const statusArray = ['notStarted', 'delivered', 'drafted'];
-  let status = 1;
-  if (position < 4) {
-    status = statusArray[position - 1];
-  } else {
-    status = statusArray[0];
   }
 
   const onAccept = async () => {
@@ -71,8 +62,8 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, se
       <div
         className={
           type === 'accepted' || type === 'completed'
-            ? `${styles.container} ${styles.accepted} ${styles[status]}`
-            : `${styles.container} ${styles[status]}`
+            ? `${styles.container} ${styles.accepted} ${styles[itemContent.status]}`
+            : `${styles.container} ${styles[itemContent.status]}`
         }>
         {type === 'accepted' ? (
           <Link
@@ -110,7 +101,7 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, se
       </div>
       <div className={styles.status}>
         <p>
-          <span>{`${resources.messages['status']}:`}</span> {resources.messages[status]}
+          <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
         </p>
       </div>
 
@@ -130,24 +121,26 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, position, se
             />
           </>
         ) : (
-          <>
-            <span
-              className={styles.btn}
-              href="#"
-              onClick={e => {
-                e.preventDefault();
-              }}>
-              <FontAwesomeIcon icon={AwesomeIcons('comments')} />
-            </span>
-            <span
-              className={styles.btn}
-              href="http://"
-              onClick={e => {
-                e.preventDefault();
-              }}>
-              <FontAwesomeIcon icon={AwesomeIcons('share')} />
-            </span>
-          </>
+          false && (
+            <>
+              <span
+                className={styles.btn}
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                }}>
+                <FontAwesomeIcon icon={AwesomeIcons('comments')} />
+              </span>
+              <span
+                className={styles.btn}
+                href="http://"
+                onClick={e => {
+                  e.preventDefault();
+                }}>
+                <FontAwesomeIcon icon={AwesomeIcons('share')} />
+              </span>
+            </>
+          )
         )}
       </div>
     </>

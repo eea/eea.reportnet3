@@ -133,7 +133,7 @@ const Dataflows = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <div className="rep-row">
+    <div className="rep-row" id="dataflows">
       <LeftSideBar
         createDataflowButtonTitle={resources.messages['createNewDataflow']}
         components={['search', 'createDataflow']}

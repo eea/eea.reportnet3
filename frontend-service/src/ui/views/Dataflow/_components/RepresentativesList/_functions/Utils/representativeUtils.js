@@ -1,5 +1,16 @@
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined, cloneDeep } from 'lodash';
 import { RepresentativeService } from 'core/services/Representative';
+
+export const autofocusOnEmptyInput = formState => {
+  if (!isEmpty(formState.representatives)) {
+    if (
+      isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
+      !isNull(document.getElementById('emptyInput'))
+    ) {
+      document.getElementById('emptyInput').focus();
+    }
+  }
+};
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
   const newRepresentative = representatives.filter(representative => isNull(representative.representativeId));
@@ -46,7 +57,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const representativesByCopy = JSON.parse(JSON.stringify(responseAllRepresentatives.representatives));
+    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
     formDispatcher({
       type: 'INITIAL_LOAD',
       payload: { response: responseAllRepresentatives, representativesByCopy }
