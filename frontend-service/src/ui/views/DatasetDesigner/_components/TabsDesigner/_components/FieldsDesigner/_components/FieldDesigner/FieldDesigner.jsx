@@ -6,6 +6,9 @@ import styles from './FieldDesigner.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'ui/views/_components/Button';
+import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -23,6 +26,8 @@ export const FieldDesigner = ({
   fieldType,
   index,
   initialFieldIndexDragged,
+  isCodelistSelected,
+  onCodelistShow,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
@@ -41,7 +46,8 @@ export const FieldDesigner = ({
     { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' }
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
     // { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' },
@@ -64,15 +70,23 @@ export const FieldDesigner = ({
   };
 
   const [animation] = useState('');
-  const [fieldValue, setFieldValue] = useState(fieldName);
-  const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
+  const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
+  const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+  const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
+  const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
+  const [selectedCodelist, setSelectedCodelist] = useState({
+    codelistId: 1,
+    codelistName: '',
+    codelistVersion: ''
+  });
 
   const fieldRef = useRef();
   const inputRef = useRef();
@@ -131,21 +145,29 @@ export const FieldDesigner = ({
   }, [isDragging]);
 
   const onChangeFieldType = type => {
+    setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    if (fieldId === '-1') {
-      if (type !== '') {
-        if (!isUndefined(fieldValue) && fieldValue !== '') {
-          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
-        }
-      }
+    console.log(type, fieldType);
+    if (type.fieldType === 'Codelist') {
+      onCodelistDropdownSelected(type);
     } else {
-      if (type !== '' && type !== fieldValue) {
-        fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
-      } else {
+      if (fieldId === '-1') {
         if (type !== '') {
-          onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+          if (!isUndefined(fieldValue) && fieldValue !== '') {
+            onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
+          }
+        }
+      } else {
+        if (type !== '' && type !== fieldValue) {
+          fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+        } else {
+          if (type !== '') {
+            onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+          }
         }
       }
+      setSelectedCodelist({ codelistId: 1, codelistName: '', codelistVersion: '' });
+      onCodelistShow(fieldId, type);
     }
   };
 
@@ -213,6 +235,19 @@ export const FieldDesigner = ({
         }
       }
     }
+  };
+
+  const onCodelistSelected = (codelistName, codelistVersion) => {
+    console.log(codelistName, codelistVersion);
+    setSelectedCodelist({ codelistId: 1, codelistName: codelistName, codelistVersion: codelistVersion });
+    setIsCodelistManagerVisible(false);
+  };
+
+  const onCodelistDropdownSelected = fieldType => {
+    if (!isUndefined(fieldType)) {
+      onCodelistShow(fieldId, fieldType);
+    }
+    setIsCodelistManagerVisible(true);
   };
 
   const onFieldAdd = async (recordId, type, value, description) => {
@@ -321,6 +356,22 @@ export const FieldDesigner = ({
     }
   };
 
+  const codelistDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          console.log(selectedCodelist, fieldTypeValue);
+          if (selectedCodelist.codelistName === '' && selectedCodelist.codelistVersion === '') {
+            setFieldTypeValue(fieldPreviousTypeValue);
+          }
+          setIsCodelistManagerVisible(false);
+        }}
+      />
+    </div>
+  );
+
   const parseGeospatialTypes = value => {
     if (value.toUpperCase() === 'LONGITUDE') {
       return 'COORDINATE_LONG';
@@ -363,6 +414,7 @@ export const FieldDesigner = ({
     }
   };
 
+  console.log({ isCodelistSelected });
   return (
     <React.Fragment>
       {/* <style children={inEffect} /> */}
@@ -449,6 +501,7 @@ export const FieldDesigner = ({
           itemTemplate={fieldTypeTemplate}
           onChange={e => onChangeFieldType(e.target.value)}
           onMouseDown={event => {
+            console.log(event.target.value);
             event.preventDefault();
             event.stopPropagation();
           }}
@@ -460,6 +513,26 @@ export const FieldDesigner = ({
           scrollHeight="450px"
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
+        {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
+          <Button
+            className={`${styles.codelistButton} p-button-secondary`}
+            label={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            onClick={() => onCodelistDropdownSelected()}
+            style={{ pointerEvents: 'auto' }}
+            tooltip={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            tooltipOptions={{ position: 'top' }}
+          />
+        ) : isCodelistSelected ? (
+          <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
+        ) : null}
         {!addField ? (
           <a
             draggable={true}
@@ -477,6 +550,20 @@ export const FieldDesigner = ({
           </a>
         ) : null}
       </div>
+      {isCodelistManagerVisible ? (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={codelistDialogFooter}
+          header={resources.messages['codelistsManager']}
+          modal={true}
+          onHide={() => setIsCodelistManagerVisible(false)}
+          style={{ width: '80%' }}
+          visible={isCodelistManagerVisible}>
+          {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+        </Dialog>
+      ) : null}
     </React.Fragment>
   );
   // });

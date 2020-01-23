@@ -121,24 +121,26 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedData
             />
           </>
         ) : (
-          <>
-            <span
-              className={styles.btn}
-              href="#"
-              onClick={e => {
-                e.preventDefault();
-              }}>
-              <FontAwesomeIcon icon={AwesomeIcons('comments')} />
-            </span>
-            <span
-              className={styles.btn}
-              href="http://"
-              onClick={e => {
-                e.preventDefault();
-              }}>
-              <FontAwesomeIcon icon={AwesomeIcons('share')} />
-            </span>
-          </>
+          false && (
+            <>
+              <span
+                className={styles.btn}
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                }}>
+                <FontAwesomeIcon icon={AwesomeIcons('comments')} />
+              </span>
+              <span
+                className={styles.btn}
+                href="http://"
+                onClick={e => {
+                  e.preventDefault();
+                }}>
+                <FontAwesomeIcon icon={AwesomeIcons('share')} />
+              </span>
+            </>
+          )
         )}
       </div>
     </>

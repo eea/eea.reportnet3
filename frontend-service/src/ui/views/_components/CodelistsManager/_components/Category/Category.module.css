@@ -1,0 +1,37 @@
+.categories {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0rem;
+  /* box-shadow: -1px 2px 15px 1px rgba(var(--blue-120-hex), 0.2); */
+}
+
+.categoryInput {
+  margin: 2rem;
+  width: 90%;
+}
+
+.categoryExpandable {
+  height: 1.5vw;
+  padding: 2rem 1.5rem 2rem 1rem;
+  align-items: center;
+  /* background-color: var(--gray-5); */
+  display: flex;
+  border-top: 2px dashed var(--gray-25);
+}
+
+.positioning {
+  position: sticky !important;
+  width: 3rem !important;
+  height: 3rem !important;
+}
+
+.noCodelistsMessage {
+  display: flex;
+  justify-content: center;
+}
+
+.noCodelistsMessage span {
+  font-style: italic;
+  color: var(--gray-50);
+  user-select: none;
+}

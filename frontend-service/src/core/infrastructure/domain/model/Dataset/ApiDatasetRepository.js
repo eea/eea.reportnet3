@@ -291,7 +291,8 @@ const schemaById = async datasetId => {
                   null,
                   null,
                   null,
-                  DataTableFieldDTO.description
+                  DataTableFieldDTO.description,
+                  DataTableFieldDTO.idCodeList
                 );
               })
             : null;
@@ -513,6 +514,7 @@ const updateRecordsById = async (datasetId, record) => {
 };
 
 const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) => {
+  console.log({ datasetSchemaDescription });
   return await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
 };
 

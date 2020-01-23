@@ -205,7 +205,10 @@ export class InputTextarea extends Component {
       'p-filled':
         (this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),
-      'p-inputtextarea-resizable': this.props.autoResize
+      'p-inputtextarea-resizable': this.props.autoResize,
+      'p-disabled p-filled':
+        (this.props.disabled && (this.props.value != null && this.props.value.toString().length > 0)) ||
+        (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0)
     });
 
     let textareaProps = ObjectUtils.findDiffKeys(this.props, InputTextarea.defaultProps);
