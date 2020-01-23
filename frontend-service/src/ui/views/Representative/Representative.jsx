@@ -13,14 +13,12 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
-import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';
@@ -31,6 +29,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,12 +41,12 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Representative = withRouter(({ history, match }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const notificationContext = useContext(NotificationContext);
 
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
@@ -94,7 +93,7 @@ const Representative = withRouter(({ history, match }) => {
   }, [user]);
 
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -346,7 +345,6 @@ const Representative = withRouter(({ history, match }) => {
         isCustodian,
         buttons: []
       }}>
-      <BreadCrumb model={breadCrumbItems} />
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

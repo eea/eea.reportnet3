@@ -10,13 +10,16 @@ import { Navigation } from './_components';
 import { Notifications } from 'ui/views/_components/Notifications';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
+import { BreadCrumb } from '../../BreadCrumb/BreadCrumb';
 
 const MainLayout = ({ children, leftSideBarConfig }) => {
   const [margin, setMargin] = useState('50px');
   const notifications = useContext(NotificationContext);
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const user = useContext(UserContext);
   useEffect(() => {
     async function fetchData() {
@@ -58,6 +61,7 @@ const MainLayout = ({ children, leftSideBarConfig }) => {
       </div> */}
       <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
         <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />
+        <BreadCrumb model={breadCrumbContext.model} />
         {children}
       </div>
       <Footer />

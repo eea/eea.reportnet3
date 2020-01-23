@@ -33,7 +33,10 @@ export const BreadCrumb = ({ className, id, model, style }) => {
           href={item.href || ''}
           className="p-menuitem-link"
           target={item.target}
-          onClick={event => onItemClick(event, item)}>
+          onClick={event => {
+            event.preventDefault();
+            onItemClick(event, item);
+          }}>
           <FontAwesomeIcon className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
           <span className="p-menuitem-text">{item.label}</span>
         </a>

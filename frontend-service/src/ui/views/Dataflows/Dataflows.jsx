@@ -7,27 +7,28 @@ import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
-
 import { DataflowService } from 'core/services/Dataflow';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+
 const Dataflows = withRouter(({ match, history }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [acceptedContent, setacceptedContent] = useState([]);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
@@ -80,8 +81,8 @@ const Dataflows = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataflowList'], icon: 'home' }]);
-  }, [history, match.params.dataflowId, resources.messages]);
+    breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
+  }, [breadCrumbContext]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -139,7 +140,6 @@ const Dataflows = withRouter(({ match, history }) => {
             }
           ]
         }}>
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

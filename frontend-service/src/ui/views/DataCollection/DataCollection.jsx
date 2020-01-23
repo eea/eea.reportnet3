@@ -10,7 +10,6 @@ import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -23,6 +22,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -36,11 +36,11 @@ export const DataCollection = withRouter(({ match, history }) => {
     params: { dataflowId, datasetId }
   } = match;
 
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
   const [datasetHasData, setDatasetHasData] = useState(false);
@@ -69,7 +69,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -270,7 +270,6 @@ export const DataCollection = withRouter(({ match, history }) => {
           buttons: []
         }}>
         <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
