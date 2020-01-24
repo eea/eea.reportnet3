@@ -100,10 +100,10 @@ export const SnapshotsDialog = ({
         }}
         style={{ width: '30vw' }}
         visible={isSnapshotDialogVisible}>
-        <li className={styles.listItem}>
-          <div className={styles.itemBox}>
-            <div className={styles.listItemData}>
-              <div className={styles.createAndRelease}>{resources.messages['createAndRelease']}</div>
+        <li className={styles.createAndReleaseItem}>
+          <div className={styles.itemInner}>
+            <div className={styles.itemData}>
+              <div className={styles.createAndReleaseText}>{resources.messages['createAndRelease']}</div>
               <div className="ui-dialog-buttonpane p-clearfix">
                 {!isSnapshotInputActive ? (
                   <>

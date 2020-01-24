@@ -13,7 +13,7 @@
 
 .createSnapshotButton {
   border-radius: 0 5px 5px 0 !important;
-  // width: 30px !important;
+  box-shadow: 0px 0px 0px 1.5px var(--c-corporate-blue);
   height: 32px !important;
   &:focus {
     box-shadow: none !important;
@@ -23,9 +23,9 @@
 .snapshotForm {
   margin-bottom: 0px !important;
 }
-.listItem {
+.createAndReleaseItem {
   margin: 0;
-  margin-bottom: 5px;
+  margin-bottom: 1.5rem;
   background-color: #f2f5f94d;
   padding: 0.5rem;
   border-radius: 5px;
@@ -33,13 +33,13 @@
   color: black;
   list-style: none;
 }
-.itemBox {
+.itemInner {
   margin: 0;
 }
 p {
   margin: 0 0 1em 0;
 }
-.listItemData {
+.itemData {
   display: flex;
   justify-content: space-between;
   margin: 0;
@@ -63,7 +63,7 @@ p {
     }
   }
 }
-.createAndRelease {
+.createAndReleaseText {
   display: flex;
   align-items: center;
 }
