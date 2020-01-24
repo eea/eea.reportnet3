@@ -66,20 +66,13 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const onFilter = filter => {
     const inmCategories = [...categories];
-    //console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
     const filteredCategories = inmCategories.filter(category =>
       category.shortCode.toLowerCase().includes(filter.toLowerCase())
     );
-    console.log({ filteredCategories });
     setFilteredCategories(filteredCategories);
     setFilter(filter);
     setIsFiltered(filter !== '');
   };
-
-  // const onFilterDeprecated = () => {
-  //   const inmCategories = [...categories];
-  // };
 
   const onLoadCategories = async () => {
     try {
@@ -205,7 +198,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           />
         ) : null}
       </div>
-      {console.log(isFiltered)}
       {isLoading ? (
         <Spinner className={styles.positioning} />
       ) : isFiltered ? (
