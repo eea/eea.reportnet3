@@ -339,6 +339,10 @@ const reporting = async dataflowId => {
   return dataflow;
 };
 
+const schemasValidation = async dataflowId => {
+  return await apiDataflow.schemasValidation(dataflowId);
+};
+
 const update = async (dataflowId, name, description) => {
   const updatedDataflow = await apiDataflow.update(dataflowId, name, description);
   return updatedDataflow;
@@ -372,5 +376,6 @@ export const ApiDataflowRepository = {
   pending,
   reject,
   reporting,
+  schemasValidation,
   update
 };

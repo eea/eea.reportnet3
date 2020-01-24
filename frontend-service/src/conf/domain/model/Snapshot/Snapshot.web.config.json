@@ -5,7 +5,7 @@
     "releaseSnapshotDesigner": "/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/release",
     "restoreSnapshotDesigner": "/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore",
 
-    "createSnapshotReporter": "/snapshot/dataset/{:datasetId}/create?description={:description}",
+    "createSnapshotReporter": "/snapshot/dataset/{:datasetId}/create",
     "deleteSnapshotByIdReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete",        
     "loadSnapshotsListReporter": "/snapshot/dataset/{:datasetId}/listSnapshots",        
     "releaseSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release",
