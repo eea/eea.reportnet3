@@ -61,6 +61,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
+  const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
@@ -113,8 +114,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     setLoading(true);
-    onLoadReportingDataflow();
     onLoadDataflowsData();
+    onLoadReportingDataflow();
+    onLoadSchemasValidations();
   }, [match.params.dataflowId, isDataUpdated]);
 
   useEffect(() => {
@@ -261,6 +263,10 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onLoadSchemasValidations = async () => {
+    setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
+  };
+
   const onLoadSnapshotList = async datasetId => {
     setSnapshotsListData(await SnapshotService.allReporter(datasetId));
   };
@@ -382,6 +388,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={match.params.dataflowId}
           designDatasetSchemas={designDatasetSchemas}
           isCustodian={isCustodian}
+          isDataSchemaCorrect={isDataSchemaCorrect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
           onUpdateData={onUpdateData}
