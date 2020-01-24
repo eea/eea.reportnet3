@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, capitalize, cloneDeep } from 'lodash';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -61,6 +61,7 @@ const DataViewer = withRouter(
     history
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [codelistInfo, setCodelistInfo] = useState({});
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
@@ -72,6 +73,7 @@ const DataViewer = withRouter(
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
@@ -208,7 +210,30 @@ const DataViewer = withRouter(
             className={invisibleColumn}
             editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
             field={column.field}
-            header={column.header}
+            header={
+              column.type === 'CODELIST' ? (
+                <React.Fragment>
+                  {column.header}
+                  <Button
+                    className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
+                    icon="infoCircle"
+                    onClick={() => {
+                      const inmCodeListInfo = cloneDeep(codelistInfo);
+                      inmCodeListInfo.name = column.codelistName;
+                      inmCodeListInfo.version = column.codelistVersion;
+                      inmCodeListInfo.items = column.codelistItems;
+                      setCodelistInfo(inmCodeListInfo);
+                      setIsCodelistInfoVisible(true);
+                    }}
+                    tooltip={`${column.codelistName} (${column.codelistVersion})`}
+                    tooltipOptions={{ position: 'top' }}
+                  />
+                </React.Fragment>
+              ) : (
+                // `${column.header}-${column.codelistName}(${column.codelistVersion})`
+                column.header
+              )
+            }
             key={column.field}
             sortable={sort}
             style={{
@@ -525,6 +550,8 @@ const DataViewer = withRouter(
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (!recordsAdded) {
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
+        } else {
+          onRefresh();
         }
       } catch (error) {
         const {
@@ -680,6 +707,7 @@ const DataViewer = withRouter(
       return (
         <FieldEditor
           cells={cells}
+          colsSchema={colsSchema}
           record={record}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -705,12 +733,23 @@ const DataViewer = withRouter(
               justifyContent: 'space-between'
             }}>
             {' '}
-            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}{' '}
+            <IconTooltip levelError={levelError} message={message} />
           </div>
         );
       } else {
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}
+          </div>
         );
       }
     };
@@ -925,116 +964,161 @@ const DataViewer = withRouter(
             {columns}
           </DataTable>
         </div>
-        <Dialog
-          className={styles.Dialog}
-          dismissableMask={false}
-          header={`${resources.messages['uploadDataset']}${tableName}`}
-          onHide={() => setImportDialogVisible(false)}
-          visible={importDialogVisible}>
-          <CustomFileUpload
-            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
-            className={styles.FileUpload}
-            fileLimit={1}
-            mode="advanced"
-            multiple={false}
-            name="file"
-            onUpload={onUpload}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
-              datasetId: datasetId,
-              tableId: tableId
-            })}`}
-          />
-        </Dialog>
+        {isCodelistInfoVisible ? (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            header={resources.messages['codelistInfo']}
+            onHide={() => setIsCodelistInfoVisible(false)}
+            visible={isCodelistInfoVisible}>
+            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1rem' }}>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistName']}: `}</span>
+                <span>{codelistInfo.name}</span>
+              </div>
+              <div>
+                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistVersion']}: `}</span>
+                <span>{codelistInfo.version}</span>
+              </div>
+            </div>
+            <DataTable autoLayout={true} className={styles.itemTable} value={codelistInfo.items}>
+              {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
+                <Column
+                  field={column}
+                  header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+                  key={i}
+                  sortable={true}
+                  style={{ display: column === 'id' ? 'none' : 'auto' }}
+                />
+              ))}
+            </DataTable>
+          </Dialog>
+        ) : null}
 
-        <ConfirmDialog
-          header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={onConfirmDeleteTable}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resources.messages['deleteDatasetTableConfirm']}
-        </ConfirmDialog>
-
-        <ConfirmDialog
-          onConfirm={onConfirmDeleteRow}
-          onHide={() => setConfirmDeleteVisible(false)}
-          visible={confirmDeleteVisible}
-          header={resources.messages['deleteRow']}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['confirmDeleteRow']}
-        </ConfirmDialog>
-
-        <ConfirmDialog
-          className="edit-table"
-          header={resources.messages['pasteRecords']}
-          hasPasteOption={true}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={onPasteAccept}
-          onHide={onPasteCancel}
-          onPaste={onPaste}
-          onPasteAsync={onPasteAsync}
-          divRef={divRef}
-          visible={confirmPasteVisible}>
-          <InfoTable
-            data={records.pastedRecords}
-            filteredColumns={colsSchema.filter(
-              column =>
-                column.field !== 'actions' &&
-                column.field !== 'recordValidation' &&
-                column.field !== 'id' &&
-                column.field !== 'datasetPartitionId'
-            )}
-            numCopiedRecords={records.numCopiedRecords}
-            onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
-          <br />
-          <br />
-          <hr />
-        </ConfirmDialog>
-
-        <Dialog
-          className="edit-table"
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={addRowDialogFooter}
-          header={resources.messages['addNewRow']}
-          modal={true}
-          onHide={() => setAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={addDialogVisible}>
-          <div className="p-grid p-fluid">
-            <DataForm
-              colsSchema={colsSchema}
-              formType="NEW"
-              addDialogVisible={addDialogVisible}
-              onChangeForm={onEditAddFormInput}
-              records={records}
+        {importDialogVisible ? (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            header={`${resources.messages['uploadDataset']}${tableName}`}
+            onHide={() => setImportDialogVisible(false)}
+            visible={importDialogVisible}>
+            <CustomFileUpload
+              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
+              className={styles.FileUpload}
+              fileLimit={1}
+              mode="advanced"
+              multiple={false}
+              name="file"
+              onUpload={onUpload}
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
+                datasetId: datasetId,
+                tableId: tableId
+              })}`}
             />
-          </div>
-        </Dialog>
-        <Dialog
-          className="edit-table"
-          blockScroll={false}
-          closeOnEscape={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
-          modal={true}
-          onHide={() => setEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={editDialogVisible}>
-          <div className="p-grid p-fluid">
-            <DataForm
-              colsSchema={colsSchema}
-              formType="EDIT"
-              editDialogVisible={editDialogVisible}
-              onChangeForm={onEditAddFormInput}
-              records={records}
-            />
-          </div>
-        </Dialog>
+          </Dialog>
+        ) : null}
+
+        {deleteDialogVisible ? (
+          <ConfirmDialog
+            header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteTable}
+            onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+            visible={deleteDialogVisible}>
+            {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
+        ) : null}
+
+        {confirmDeleteVisible ? (
+          <ConfirmDialog
+            onConfirm={onConfirmDeleteRow}
+            onHide={() => setConfirmDeleteVisible(false)}
+            visible={confirmDeleteVisible}
+            header={resources.messages['deleteRow']}
+            labelConfirm={resources.messages['yes']}
+            labelCancel={resources.messages['no']}>
+            {resources.messages['confirmDeleteRow']}
+          </ConfirmDialog>
+        ) : null}
+
+        {confirmPasteVisible ? (
+          <ConfirmDialog
+            className="edit-table"
+            header={resources.messages['pasteRecords']}
+            hasPasteOption={true}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onPasteAccept}
+            onHide={onPasteCancel}
+            onPaste={onPaste}
+            onPasteAsync={onPasteAsync}
+            divRef={divRef}
+            visible={confirmPasteVisible}>
+            <InfoTable
+              data={records.pastedRecords}
+              filteredColumns={colsSchema.filter(
+                column =>
+                  column.field !== 'actions' &&
+                  column.field !== 'recordValidation' &&
+                  column.field !== 'id' &&
+                  column.field !== 'datasetPartitionId'
+              )}
+              numCopiedRecords={records.numCopiedRecords}
+              onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
+            <br />
+            <br />
+            <hr />
+          </ConfirmDialog>
+        ) : null}
+
+        {addDialogVisible ? (
+          <Dialog
+            className="edit-table"
+            blockScroll={false}
+            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+            footer={addRowDialogFooter}
+            header={resources.messages['addNewRow']}
+            modal={true}
+            onHide={() => setAddDialogVisible(false)}
+            style={{ width: '50%' }}
+            visible={addDialogVisible}
+            zIndex={999}>
+            <div className="p-grid p-fluid">
+              <DataForm
+                colsSchema={colsSchema}
+                formType="NEW"
+                addDialogVisible={addDialogVisible}
+                onChangeForm={onEditAddFormInput}
+                records={records}
+              />
+            </div>
+          </Dialog>
+        ) : null}
+        {editDialogVisible ? (
+          <Dialog
+            blockScroll={false}
+            className="edit-table"
+            closeOnEscape={false}
+            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+            footer={editRowDialogFooter}
+            header={resources.messages['editRow']}
+            modal={true}
+            onHide={() => setEditDialogVisible(false)}
+            style={{ width: '50%' }}
+            visible={editDialogVisible}
+            zIndex={999}>
+            <div className="p-grid p-fluid">
+              <DataForm
+                colsSchema={colsSchema}
+                editDialogVisible={editDialogVisible}
+                formType="EDIT"
+                onChangeForm={onEditAddFormInput}
+                records={records}
+              />
+            </div>
+          </Dialog>
+        ) : null}
       </SnapshotContext.Provider>
     );
   }

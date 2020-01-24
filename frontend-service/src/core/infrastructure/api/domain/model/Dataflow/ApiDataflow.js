@@ -180,7 +180,6 @@ export const apiDataflow = {
     return response.data;
   },
   update: async (dataflowId, name, description) => {
-    console.log(name, description);
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),

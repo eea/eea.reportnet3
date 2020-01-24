@@ -442,7 +442,6 @@ export const apiDataset = {
     }
   },
   updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
-    console.log(datasetSchemaDescription);
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
