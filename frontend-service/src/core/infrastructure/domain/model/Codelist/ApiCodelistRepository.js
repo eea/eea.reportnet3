@@ -65,29 +65,36 @@ const getCodelistsList = async datasetSchemas => {
 };
 
 const getCodelistsIdsBySchemas = datasetSchemas => {
+  if (isEmpty(datasetSchemas)) {
+    console.log(datasetSchemas);
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
+  }
   try {
     const codelistIds = [];
     datasetSchemas.forEach(schema => {
-      if (!isUndefined(schema)) {
-        schema.tables.map(table => {
-          table.records.map(record => {
-            record.fields.map(field => {
-              if (!isNull(field.codelistId)) {
-                codelistIds.push(field.codelistId);
-              }
-            });
+      // if (!isUndefined(schema)) {
+      schema.tables.map(table => {
+        table.records.map(record => {
+          record.fields.map(field => {
+            if (!isNull(field.codelistId)) {
+              codelistIds.push(field.codelistId);
+            }
           });
         });
-      }
+      });
+      // }
     });
     return codelistIds;
   } catch (error) {
     console.log({ error });
-    console.error(`Error in schema: ${error}`);
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
 };
 
 const getCodelistsByIds = async codelistIds => {
+  if (isEmpty(codelistIds)) {
+    return [];
+  }
   try {
     const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
     let codelistItems = [];
@@ -109,8 +116,7 @@ const getCodelistsByIds = async codelistIds => {
     });
     return codelists;
   } catch (error) {
-    console.log({ error });
-    console.error(`Error in schema: ${error}`);
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
   }
 };
 
