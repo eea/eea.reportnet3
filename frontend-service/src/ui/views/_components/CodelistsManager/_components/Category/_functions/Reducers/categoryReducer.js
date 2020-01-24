@@ -1,5 +1,3 @@
-import { isUndefined } from 'lodash';
-
 export const categoryReducer = (state, { type, payload }) => {
   const getFilterKeys = () => Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
 
@@ -15,6 +13,12 @@ export const categoryReducer = (state, { type, payload }) => {
   };
 
   switch (type) {
+    case 'RESET_INITIAL_CATEGORY_VALUES':
+      return {
+        ...state,
+        categoryShortCode: payload.shortCode,
+        categoryDescription: payload.description
+      };
     case 'SAVE_CATEGORY':
       return {
         ...state,

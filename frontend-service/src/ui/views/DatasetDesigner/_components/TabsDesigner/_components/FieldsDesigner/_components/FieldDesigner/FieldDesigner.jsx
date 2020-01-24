@@ -239,7 +239,6 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
-    console.log({ codelistItems });
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
     if (fieldId.toString() === '-1') {
       onFieldAdd(
