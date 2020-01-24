@@ -3,9 +3,8 @@
   /* display: none; */
   bottom: 0;
   text-align: center;
-  background-color: var(--blue-120);
-  color: white;
-  /* padding: 1rem 0; */
+  color: var(--c-black-300);
+  padding: 1rem 0;
   width: 100%;
   /* margin-top: 2em; */
   margin-left: 45px;
@@ -17,40 +16,15 @@
   transition: 0.5s;
 } */
 
-.slideUpFooter {
-  display: flex;
-}
-
-.slideUpFooterSpan {
-  display: flex;
-  position: absolute;
-  bottom: 0;
-  right: 50%;
-  background-color: var(--blue-120);
-  cursor: pointer;
-  justify-content: center;
-  padding: 6px 0;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border: 1px solid var(--gray-120);
-  width: 40px;
-  height: 20px;
-}
-
-.slideUpFooterButton {
-  font-size: 10pt;
-  color: var(--white);
-}
-
 .Footer a {
-  color: white;
+  color: var(--c-black-300);
   margin: 0.5rem;
-  font-weight: 300;
+  font-weight: normal;
   font-size: 0.9rem;
 }
 
 .Footer a:hover {
-  color: white;
+  color: var(--c-black-200);
   text-decoration: none;
 }
 
