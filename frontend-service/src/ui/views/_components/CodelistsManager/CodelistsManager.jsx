@@ -90,13 +90,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const onSaveCategory = async () => {
-    //API CALL
-    //Meanwhile....
-    // const inmCategories = [...categories];
-    // newCategory.codelists = [];
-    // inmCategories.push(newCategory);
-    // setCategories(inmCategories);
-    // setNewCategoryVisible(false);
     try {
       const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
       if (response.status >= 200 && response.status <= 299) {
