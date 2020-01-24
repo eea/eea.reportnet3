@@ -223,6 +223,7 @@
 		"noErrorData": "There is not any validation data to show",
 		"noItemsInCodelistMessage":"Codelist has no items. You must include at least one.",
 		"noItemsInCodelistTitle":"Codelist has no items",
+		"noneCodelist":"-- None --",
 		"noWeblinks": "There is not any web link to show",
 		"notificationSuccessTitle":"SUCCESS",
 		"notificationErrorTitle":"ERROR",
