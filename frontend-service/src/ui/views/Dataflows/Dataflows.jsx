@@ -82,7 +82,7 @@ const Dataflows = withRouter(({ match, history }) => {
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
-  }, [breadCrumbContext]);
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {

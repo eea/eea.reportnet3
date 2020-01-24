@@ -25,7 +25,7 @@ const Codelists = withRouter(({ match, history, isCustodian = false }) => {
       },
       { label: resources.messages['codelists'], icon: 'list' }
     ]);
-  }, [breadCrumbContext]);
+  }, []);
 
   const layout = children => {
     return (

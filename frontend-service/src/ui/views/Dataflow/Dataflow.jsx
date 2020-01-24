@@ -108,7 +108,7 @@ const Dataflow = withRouter(({ history, match }) => {
         icon: 'archive'
       }
     ]);
-  }, [breadCrumbContext]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);

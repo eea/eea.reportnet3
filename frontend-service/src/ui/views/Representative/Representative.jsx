@@ -111,7 +111,7 @@ const Representative = withRouter(({ history, match }) => {
         icon: 'representative'
       }
     ]);
-  }, [history, match.params.dataflowId, resources.messages]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
