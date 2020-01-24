@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
 // import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
@@ -17,6 +19,7 @@ const FieldEditor = ({
   onEditorValueFocus,
   onEditorKeyChange
 }) => {
+  const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
 
@@ -29,6 +32,15 @@ const FieldEditor = ({
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
+
+  const getCodelistItemsWithEmptyOption = () => {
+    const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
+    codelistsItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    return codelistsItems;
+  };
 
   const getFilter = type => {
     switch (type) {
@@ -103,7 +115,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             optionLabel="itemType"
-            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
+            options={getCodelistItemsWithEmptyOption()}
             // required={true}
             // placeholder={resources.messages['category']}
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
