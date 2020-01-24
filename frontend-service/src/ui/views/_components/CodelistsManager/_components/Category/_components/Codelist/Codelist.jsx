@@ -114,11 +114,7 @@ const Codelist = ({
       });
     } catch (error) {
       notificationContext.add({
-        type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR'
       });
     } finally {
       toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false);
@@ -161,11 +157,7 @@ const Codelist = ({
       onRefreshCodelist(codelistState.codelistId, response);
     } catch (error) {
       notificationContext.add({
-        type: 'CLONE_CODELIST_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_SERVICE_GET_BY_ID_ERROR'
       });
     } finally {
       dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
@@ -185,11 +177,7 @@ const Codelist = ({
       );
     } catch (error) {
       notificationContext.add({
-        type: 'CLONE_CODELIST_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_SERVICE_CLONE_BY_ID_ERROR'
       });
     } finally {
       dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
@@ -219,8 +207,7 @@ const Codelist = ({
         }
       } catch (error) {
         notificationContext.add({
-          type: 'SAVE_EDIT_CODELIST_ERROR',
-          content: {}
+          type: 'CODELIST_SERVICE_UPDATE_BY_ID_ERROR'
         });
       } finally {
         if (!isUndefined(updateEditingCodelists)) {
