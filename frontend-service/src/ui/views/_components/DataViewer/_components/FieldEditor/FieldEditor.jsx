@@ -21,7 +21,6 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   useEffect(() => {
-    console.log({ cells });
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
     setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
   }, []);
