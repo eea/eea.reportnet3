@@ -67,15 +67,17 @@ const Category = ({
     { statusType: 'Deprecated', value: 'deprecated' }
   ];
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
   }, [onLoadCategories]);
 
-  useEffect(() => {
-    if (!isNull(categoryState.categoryId)) {
-      onLoadCodelists();
-    }
-  }, [categoryState.isFiltered]);
+  // useEffect(() => {
+  //   if (!isNull(categoryState.categoryId)) {
+  //     onLoadCodelists();
+  //   }
+  // }, [categoryState.isFiltered]);
 
   useEffect(() => {
     if (categoryState.isEditingDialogVisible) {
@@ -127,22 +129,18 @@ const Category = ({
     toggleLoading(true);
     try {
       const response = await CodelistService.getAllInCategory(categoryState.categoryId);
-      if (categoryState.isFiltered) {
-        dispatchCategory({
-          type: 'SET_CODELISTS_IN_CATEGORY',
-          payload: { data: response }
-        });
-      } else {
-        dispatchCategory({ type: 'SET_CODELISTS_IN_CATEGORY', payload: { data: response } });
-      }
+      dispatchCategory({
+        type: 'SET_CODELISTS_IN_CATEGORY',
+        payload: { data: response }
+      });
     } catch (error) {
       notificationContext.add({
         type: 'CODELIST_SERVICE_GET_ALL_IN_CATEGORY_ERROR'
       });
     } finally {
-      toggleLoading(false);
-      toggleIsExpanded(true);
       changeFilterValues('status', categoryState.filter.status);
+      toggleIsExpanded(true);
+      toggleLoading(false);
     }
 
     // setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
@@ -156,18 +154,12 @@ const Category = ({
 
   const onRefreshCodelist = (codelistId, newCodelist) => {
     const inmCodelists = [...categoryState.codelists];
-    console.log({ inmCodelists, newCodelist });
     dispatchCategory({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)) }
     });
+    changeFilterValues('status', categoryState.filter.status);
   };
-
-  // const onRefreshCategory = response => {
-  //   if (response.status >= 200 && response.status <= 299) {
-  //     onLoadCategory();
-  //   }
-  // };
 
   const onSaveCategory = async () => {
     try {
@@ -218,7 +210,9 @@ const Category = ({
       <Button
         label={resources.messages['cancel']}
         icon="cancel"
-        onClick={() => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false)}
+        onClick={() => {
+          toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false);
+        }}
       />
     </div>
   );
@@ -238,7 +232,13 @@ const Category = ({
       <Button
         label={resources.messages['cancel']}
         icon="cancel"
-        onClick={() => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false)}
+        onClick={() => {
+          toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
+          dispatchCategory({
+            type: 'RESET_INITIAL_CATEGORY_VALUES',
+            payload: category
+          });
+        }}
       />
     </div>
   );
@@ -337,7 +337,6 @@ const Category = ({
         {renderFilters()}
         <div className={styles.categories}>
           {categoryState.filteredCodelists.map((codelist, i) => {
-            console.log('filtered');
             return getCodelists(codelist, i);
           })}
         </div>
@@ -447,7 +446,7 @@ const Category = ({
       <TreeViewExpandableItem
         className={styles.categoryExpandable}
         expanded={false}
-        items={[{ label: category.shortCode }, { label: category.description }]}
+        items={[{ label: categoryState.categoryShortCode }, { label: categoryState.categoryDescription }]}
         buttons={[
           // {
           //   disabled: !categoryState.isExpanded || categoryState.codelists.length === 0,

@@ -22,13 +22,11 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
   };
 
   const editRecordForm = colsSchema.map((column, i) => {
-    console.log({ column });
     //Avoid row id Field and dataSetPartitionId
     if (editDialogVisible) {
       if (i < colsSchema.length - 2) {
         if (!isUndefined(records.editedRecord.dataRow)) {
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          console.log({ field });
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>

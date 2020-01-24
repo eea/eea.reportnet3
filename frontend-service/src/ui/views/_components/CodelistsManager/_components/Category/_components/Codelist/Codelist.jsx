@@ -1,6 +1,6 @@
 import React, { useContext, useReducer } from 'react';
 
-import { capitalize, isUndefined } from 'lodash';
+import { capitalize, isUndefined, cloneDeep } from 'lodash';
 
 import styles from './Codelist.module.css';
 
@@ -70,6 +70,13 @@ const Codelist = ({
   };
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
 
+  React.useEffect(() => {
+    dispatchCodelist({
+      type: 'RESET_INITIAL_VALUES',
+      payload: initialCodelistState
+    });
+  }, [codelist]);
+
   const onAddCodelistItemClick = () => {
     toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, 'ADD');
   };
@@ -128,9 +135,7 @@ const Codelist = ({
     dispatchCodelist({ type: 'EDIT_CODELIST_PROPERTIES', payload: { property: 'items', value: inmItems } });
   };
 
-  const onFormLoaded = () => {
-    dispatchCodelist({ type: 'SET_INITIAL_EDITED_CODELIST_ITEM', payload: {} });
-  };
+  const onFormLoaded = () => dispatchCodelist({ type: 'SET_INITIAL_EDITED_CODELIST_ITEM', payload: {} });
 
   const onKeyChange = (event, property, isItem) => {
     if (event.key === 'Escape') {
@@ -288,7 +293,7 @@ const Codelist = ({
       isCloning={true}
       onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
       onKeyChange={() => {}}
-      state={codelistState}
+      state={cloneDeep(codelistState)}
     />
   );
 
@@ -468,7 +473,12 @@ const Codelist = ({
             disabled: codelist.status.toLowerCase() !== 'ready',
             icon: 'checkSquare',
             onClick: () =>
-              onCodelistSelected(codelistState.codelistId, codelistState.codelistName, codelistState.codelistVersion),
+              onCodelistSelected(
+                codelistState.codelistId,
+                codelistState.codelistName,
+                codelistState.codelistVersion,
+                codelistState.items
+              ),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign
           }
@@ -487,15 +497,21 @@ const Codelist = ({
             : undefined
         }
         items={[
-          { label: codelist.name },
-          { label: codelist.version },
+          { label: codelistState.codelistName },
+          { label: codelistState.codelistVersion },
           {
-            className: [getStatusStyle(codelist.status), styles.statusBox].join(' '),
+            className: [getStatusStyle(codelistState.codelistStatus.value), styles.statusBox].join(' '),
             type: 'box',
-            label: capitalize(codelist.status)
+            label: capitalize(codelistState.codelistStatus.value)
           },
-          { label: codelist.description }
-        ]}>
+          { label: codelistState.codelistDescription }
+        ]}
+        onExpandTree={() =>
+          dispatchCodelist({
+            type: 'RESET_INITIAL_VALUES',
+            payload: initialCodelistState
+          })
+        }>
         {renderInputs()}
         {renderTable()}
         {renderEditItemsDialog()}
