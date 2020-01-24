@@ -191,4 +191,13 @@ public interface DatasetSchemaService {
    * @return the table schema name
    */
   String getTableSchemaName(String datasetSchemaId, String tableSchemaId);
+
+
+  /**
+   * Validate schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the boolean
+   */
+  public Boolean validateSchema(String datasetSchemaId);
 }

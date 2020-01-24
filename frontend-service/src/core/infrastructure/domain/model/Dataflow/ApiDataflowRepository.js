@@ -3,6 +3,7 @@ import { isNull, isUndefined } from 'lodash';
 import moment from 'moment';
 
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
+import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
@@ -12,6 +13,7 @@ import { CoreUtils } from 'core/infrastructure/CoreUtils';
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
+  dataflow.dataCollections = parseDataCollectionListDTO(dataflowDTO.dataCollections);
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
   dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
@@ -26,19 +28,38 @@ const parseDataflowDTO = dataflowDTO => {
   return dataflow;
 };
 
-const parseDatasetListDTO = datasetsDTO => {
-  if (isUndefined(datasetsDTO)) {
-    return;
+const parseDataCollectionListDTO = dataCollectionsDTO => {
+  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
+    const dataCollections = [];
+    dataCollectionsDTO.forEach(dataCollectionDTO => {
+      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+    });
+    return dataCollections;
   }
-  if (!isNull(datasetsDTO)) {
+  return;
+};
+
+const parseDataCollectionDTO = dataCollectionDTO => {
+  return new DataCollection(
+    dataCollectionDTO.id,
+    dataCollectionDTO.dataSetName,
+    dataCollectionDTO.idDataflow,
+    dataCollectionDTO.datasetSchema,
+    dataCollectionDTO.creationDate,
+    dataCollectionDTO.dueDate,
+    dataCollectionDTO.status
+  );
+};
+
+const parseDatasetListDTO = datasetsDTO => {
+  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
     const datasets = [];
     datasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseDatasetDTO = datasetDTO => {
@@ -53,23 +74,22 @@ const parseDatasetDTO = datasetDTO => {
     null,
     null,
     null,
-    datasetDTO.isReleased
+    datasetDTO.isReleased,
+    null,
+    null,
+    datasetDTO.nameDatasetSchema
   );
 };
 
 const parseDocumentListDTO = documentsDTO => {
-  if (isUndefined(documentsDTO)) {
-    return;
-  }
-  if (!isNull(documentsDTO)) {
+  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
     const documents = [];
     documentsDTO.forEach(documentDTO => {
       documents.push(parseDocumentDTO(documentDTO));
     });
     return documents;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseDocumentDTO = documentDTO => {
@@ -84,18 +104,14 @@ const parseDocumentDTO = documentDTO => {
 };
 
 const parseWebLinkListDTO = webLinksDTO => {
-  if (isUndefined(webLinksDTO)) {
-    return;
-  }
-  if (!isNull(webLinksDTO)) {
+  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
     const webLinks = [];
     webLinksDTO.forEach(webLinkDTO => {
       webLinks.push(parseWebLinkDTO(webLinkDTO));
     });
     return webLinks;
-  } else {
-    return null;
   }
+  return;
 };
 
 const parseWebLinkDTO = webLinkDTO => {

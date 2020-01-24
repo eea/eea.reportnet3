@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import org.bson.types.ObjectId;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -59,6 +60,9 @@ public class DataCollectionControllerImplTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Mock
+  private DatasetSchemaService schemaService;
+
 
   /**
    * Inits the mocks.
@@ -96,6 +100,8 @@ public class DataCollectionControllerImplTest {
         .thenReturn(Arrays.asList(design));
     Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
         Mockito.any());
+
+    Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 
     dataCollectionControllerImpl.createEmptyDataCollection(dc);
     Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
@@ -150,6 +156,8 @@ public class DataCollectionControllerImplTest {
 
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(Arrays.asList(design));
+
+    Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 
 
     try {

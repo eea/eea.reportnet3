@@ -7,10 +7,11 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import styles from './DataflowManagementForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { DataflowService } from 'core/services/Dataflow';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const DataflowManagementForm = ({
   dataflowId,
@@ -86,10 +87,13 @@ const DataflowManagementForm = ({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
-          const response = isEditForm
-            ? await DataflowService.update(dataflowId, values.name, values.description)
-            : await DataflowService.create(values.name, values.description);
-          isEditForm ? onEdit(dataflowId, values.name, values.description) : onCreate();
+          if (isEditForm) {
+            await DataflowService.update(dataflowId, values.name, values.description);
+            onEdit(dataflowId, values.name, values.description);
+          } else {
+            await DataflowService.create(values.name, values.description);
+            onCreate();
+          }
         } catch (error) {
           const notification = isEditForm
             ? {

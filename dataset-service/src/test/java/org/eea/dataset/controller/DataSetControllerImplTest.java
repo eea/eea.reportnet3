@@ -467,7 +467,7 @@ public class DataSetControllerImplTest {
 
     when(datasetService.getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new ValidationLinkVO());
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
     Mockito.verify(datasetService, times(1)).getPositionFromAnyObjectId(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -494,7 +494,7 @@ public class DataSetControllerImplTest {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
         .getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
   }
 
 
@@ -505,7 +505,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException3() throws Exception {
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
   /** The delete helper. */

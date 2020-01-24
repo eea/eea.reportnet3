@@ -27,6 +27,8 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.dataset.validate.commands.ValidationSchemaCommand;
+import org.eea.dataset.validate.commands.ValidationSchemaIntegrityCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -47,6 +49,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import com.mongodb.client.result.UpdateResult;
 
@@ -158,6 +161,13 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaVO tableSchemaVO;
 
+  @Spy
+  private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
+
+  @Mock
+  private ValidationSchemaIntegrityCommand command;
+
+
   /**
    * Inits the mocks.
    */
@@ -165,6 +175,7 @@ public class DatasetSchemaServiceTest {
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
+    validationCommands.add(command);
   }
 
   /**
@@ -974,5 +985,11 @@ public class DatasetSchemaServiceTest {
   public void getTableSchemaNameTest2() {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
+  }
+
+  @Test
+  public void validateSchemaTest() {
+
+    Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
   }
 }

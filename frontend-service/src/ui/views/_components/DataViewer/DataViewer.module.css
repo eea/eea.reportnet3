@@ -12,3 +12,23 @@
 .validationCol {
   width: 15px;
 }
+.codelistInfoButton {
+  border-radius: 50% !important;
+  width: 1em !important;
+  height: 1em !important;
+  font-size: 12pt !important;
+  color: var(--blue-75) !important;
+  margin-left: 0.4rem !important;
+}
+
+.codelistInfoButton span {
+  margin-top: -0.5em !important;
+}
+
+.codelistInfoButton:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.codelistInfoButton:enabled:hover {
+  background-color: var(--white) !important;
+}
