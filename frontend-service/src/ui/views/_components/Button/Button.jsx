@@ -14,6 +14,7 @@ export const Button = ({
   iconPos = 'left',
   label = null,
   onClick = () => {},
+  onMouseDown = () => {},
   className = null,
   type = 'button',
   tooltip = null,
@@ -25,7 +26,14 @@ export const Button = ({
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
   if (layout === 'simple') {
     return (
-      <button className={className} disabled={disabled} label={label} onClick={onClick} style={style} type={type}>
+      <button
+        className={className}
+        disabled={disabled}
+        label={label}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        style={style}
+        type={type}>
         {icon ? <Icon icon={icon} /> : ''}
         {label}
       </button>
@@ -41,6 +49,7 @@ export const Button = ({
         iconPos={icon ? iconPos : null}
         label={label}
         onClick={onClick}
+        onMouseDown={onMouseDown}
         style={style}
         tooltip={tooltip}
         type={type}

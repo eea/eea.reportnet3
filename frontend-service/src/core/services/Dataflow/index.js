@@ -13,6 +13,7 @@ import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Reject } from './Reject';
 import { Update } from './Update';
+import { ValidateSchemas } from './ValidateSchemas';
 
 export const DataflowService = {
   accept: Accept({ dataflowRepository }),
@@ -28,5 +29,6 @@ export const DataflowService = {
   pending: GetPending({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   reject: Reject({ dataflowRepository }),
+  schemasValidation: ValidateSchemas({ dataflowRepository }),
   update: Update({ dataflowRepository })
 };
