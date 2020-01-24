@@ -318,11 +318,19 @@
           }
         },
         {
-          "key":"SAVE_EDIT_CODELIST_ERROR",
-          "refresh":false          
+          "key": "RELEASE_DATASET_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
         },
         {
-          "key": "USER_SERVICE_OLD_LOGIN_ERROR"
+          "key":"SAVE_EDIT_CODELIST_ERROR",
+          "refresh":false 
+        },
+        {
+          "key": "USER_SERVICE_OLD_LOGIN_ERROR",
+          "refresh":false          
         }
       ]
     },
@@ -354,6 +362,13 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key":"RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT",
