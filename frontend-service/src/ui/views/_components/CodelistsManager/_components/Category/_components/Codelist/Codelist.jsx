@@ -414,7 +414,7 @@ const Codelist = ({
         autoLayout={true}
         className={styles.itemTable}
         editable={codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design'}
-        footer={isDataCustodian ? renderFooter() : null}
+        footer={isDataCustodian && !isInDesign ? renderFooter() : null}
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
@@ -467,7 +467,8 @@ const Codelist = ({
             icon: 'clone',
             disabled: codelistState.isEditing,
             onClick: () => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['clone']
+            tooltip: resources.messages['clone'],
+            visible: !isInDesign
           },
           {
             disabled: codelist.status.toLowerCase() !== 'ready',

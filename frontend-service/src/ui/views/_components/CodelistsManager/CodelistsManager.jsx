@@ -181,7 +181,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
             <label htmlFor="filterInput">{resources.messages['filterCategories']}</label>
           </span>
         }
-        {isDataCustodian ? (
+        {isDataCustodian && !isInDesign ? (
           <Button
             className={styles.newCategoryButton}
             icon="add"
