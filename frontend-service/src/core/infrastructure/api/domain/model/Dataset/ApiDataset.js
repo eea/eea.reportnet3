@@ -450,7 +450,7 @@ export const apiDataset = {
           : getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
               datasetId
             }),
-        data: datasetSchemaDescription,
+        data: { description: datasetSchemaDescription },
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`

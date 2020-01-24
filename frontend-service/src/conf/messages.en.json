@@ -392,11 +392,21 @@
 		"addDatacollectionFailedEvent": "Failed creating data collection at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
 		"addDatacollectionCompletedEvent": "Data collection created at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
 		"representative":"Representative",
-		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
-		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"documentationCodelistsError":"Error loading codelists of a schema",
+		"codelistCategoryServiceAllError": "Error loading codelists categories",
+		"codelistCategoryServiceAddByIdError": "Error creating a codelist category",
+		"codelistCategoryServiceDeleteByIdError": "Error deleting the codelist category",
+		"codelistCategoryServiceGetCategoryInfoError": "Error loading category information",
+		"codelistCategoryServiceUpdateByIdError": "Error loading codelists in category",
+		"codelistServiceCloneByIdError": "Error cloning codelist",
+		"codelistServiceGetAllInCategoryError": "Error loading codelists in category",
+		"codelistServiceGetByIdError": "Error loading codelist",
+		"codelistServiceGetCodelistsListError": "Error loading codelists",
 		"codelistServiceGetCodelistsIdsBySchemas":"Error loading codelists of schema",
 		"codelistServiceGetCodelistsByIds": "Error loading codelists of schema",
+		"codelistServiceUpdateByIdError": "Error saving codelist",
+		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
+		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"userServiceOldLoginError": "Login failed. Network?"
 	}
 }

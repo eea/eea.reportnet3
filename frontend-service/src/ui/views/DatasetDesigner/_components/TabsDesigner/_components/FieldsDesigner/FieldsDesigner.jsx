@@ -75,7 +75,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     fieldDescription,
     codelistId,
     codelistName,
-    codelistVersion
+    codelistVersion,
+    codelistItems
   ) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
@@ -86,7 +87,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       description: fieldDescription,
       codelistId,
       codelistName,
-      codelistVersion
+      codelistVersion,
+      codelistItems
     });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
@@ -191,7 +193,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
 
           return field;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           // notificationContext.add({
           //   type: 'CLONE_CODELIST_ERROR',
           //   content: {
@@ -204,7 +206,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
         return field;
       }
     });
-    console.log({ tableFieldsWithCodelistData });
     Promise.all(tableFieldsWithCodelistData).then(completeFields => {
       setFields(completeFields);
     });
