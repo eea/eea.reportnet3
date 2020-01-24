@@ -37,8 +37,8 @@ const parse = ({ type, content = {}, message, config, routes }) => {
       }
       contentKeys.forEach(key => {
         if (!navigateTo.parameters.includes(key)) {
-          const sortKey = camelCase(`sort-${kebabCase(key)}`);
-          content[sortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+          const shortKey = camelCase(`short-${kebabCase(key)}`);
+          content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
         }
       });
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);

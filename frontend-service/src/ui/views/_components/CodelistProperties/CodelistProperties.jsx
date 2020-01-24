@@ -21,7 +21,6 @@ const CodelistProperties = ({
 }) => {
   const [initialStatus, setInitialStatus] = useState();
   const resources = useContext(ResourcesContext);
-  console.log({ categoriesDropdown });
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
     { statusType: 'Ready', value: 'ready' },
@@ -29,7 +28,6 @@ const CodelistProperties = ({
   ];
 
   useEffect(() => {
-    console.log(!isCloning ? state.codelistStatus : state.clonedCodelist.codelistStatus);
     setInitialStatus(
       !isCloning
         ? state.codelistStatus.value.toLocaleLowerCase()
@@ -44,7 +42,6 @@ const CodelistProperties = ({
   };
 
   const getCategoryValue = value => {
-    console.log({ value, categoriesDropdown });
     if (!isUndefined(value)) {
       return categoriesDropdown.filter(category => category.value === value)[0];
     }
@@ -52,11 +49,11 @@ const CodelistProperties = ({
 
   return (
     <div className={styles.inputsWrapper}>
-      {console.log({ state, isEmbedded })}
       {!isUndefined(categoriesDropdown) && ((isEmbedded && isCloning) || (!isEmbedded && state.isEditing)) ? (
         <div className={styles.codelistDropdown}>
           <label className={styles.codelistDropdownLabel}>{resources.messages['category']}</label>
           <Dropdown
+            appendTo={document.body}
             className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
             disabled={initialStatus !== 'design'}
             onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
@@ -103,6 +100,7 @@ const CodelistProperties = ({
       <div className={styles.codelistDropdown}>
         <label className={styles.codelistDropdownLabel}>{resources.messages['codelistStatus']}</label>
         <Dropdown
+          appendTo={document.body}
           className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
           disabled={!isEmbedded ? !state.isEditing : isUndefined(state.codelistId) ? true : false}
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistStatus')}

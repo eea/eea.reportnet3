@@ -214,7 +214,10 @@
           }
         },
         {
-          "key":"DOCUMENTATION_CODELISTS_ERROR"
+          "key":"CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS"
+        },
+        {
+          "key":"CODELIST_SERVICE_GET_CODELISTS_BY_IDS"
         },
         {
           "key":"ADD_DATASET_SNAPSHOT_FAILED_EVENT",
@@ -324,6 +327,10 @@
         {
           "key":"SAVE_EDIT_CODELIST_ERROR",
           "refresh":false 
+        },
+        {
+          "key": "USER_SERVICE_OLD_LOGIN_ERROR",
+          "refresh":false          
         }
       ]
     },

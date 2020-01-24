@@ -1,13 +1,15 @@
 .categories {
   display: flex;
   flex-direction: column;
-  margin: 1rem 0rem;
-  /* box-shadow: -1px 2px 15px 1px rgba(var(--blue-120-hex), 0.2); */
+  margin: 0rem 0rem 1rem 0rem;
+  /* box-shadow: -1px 2px 15px 1px rgba(var(--blue-120-rgb), 0.2); */
 }
 
 .categoryInput {
-  margin: 2rem;
   width: 90%;
+}
+.categoryInput:first-child {
+  margin: 0 0 0 2rem;
 }
 
 .categoryExpandable {
@@ -34,4 +36,73 @@
   font-style: italic;
   color: var(--gray-50);
   user-select: none;
+}
+
+.codelistHeader {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  margin: 1rem 0rem 0rem 0rem;
+}
+.codelistHeader > span {
+  width: 22%;
+  display: flex;
+  font-size: 10pt;
+  /* color: var(--gray-65); */
+}
+
+.inputFilter {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  width: 65% !important;
+}
+
+.inputFilter:enabled:focus,
+.inputFilter:focus {
+  box-shadow: 0 0 0 0 var(--blue-120) !important;
+}
+
+.p-multiselect:not(.p-disabled).p-focus {
+  box-shadow: 0 0 0 0 var(--blue-120) !important;
+}
+
+.multiselectFilter {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  color: var(--gray-65) !important;
+}
+
+.codelistInputTextareaDialog {
+  margin: 1.5rem 0 0 2rem;
+  width: 80%;
+}
+
+.p-multiselect-item,
+.p-highlight {
+  background-color: transparent !important;
+}
+
+.statusBox {
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 4px;
+  color: white;
+  font-size: 10pt;
+  font-weight: 600;
+}
+
+.deprecatedBox {
+  background-color: rgba(var(--c-red-100-rgb), 0.9);
+}
+
+.readyBox {
+  background-color: rgba(var(--success-color-rgb), 0.8);
+}
+
+.designBox {
+  background-color: rgba(var(--c-corporate-blue-rgb), 0.8);
 }
