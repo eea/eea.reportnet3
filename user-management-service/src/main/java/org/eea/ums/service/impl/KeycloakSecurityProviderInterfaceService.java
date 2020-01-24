@@ -109,6 +109,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO = mapTokenToVO(tokenInfo);
     }
     tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+    LOG.info("User {} logged in and cached succesfully ", username);
     return tokenVO;
   }
 
@@ -127,6 +128,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO = mapTokenToVO(tokenInfo);
     }
     tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+    LOG.info("User {} logged in and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
 
@@ -145,7 +147,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO = mapTokenToVO(tokenInfo);
     }
     tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
-
+    LOG.info("Session for User {} renewed and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
 
@@ -220,6 +222,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     CacheTokenVO cacheTokenVO = securityRedisTemplate.opsForValue().get(authToken);
     keycloakConnectorService.logout(cacheTokenVO.getRefreshToken());
     securityRedisTemplate.delete(authToken);
+    LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
   }
 
   /**
@@ -294,6 +297,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     groupInfo.setPath("/" + groupName);
     groupInfo.setAttributes(resourceInfoVO.getAttributes());
     keycloakConnectorService.createGroupDetail(groupInfo);
+    LOG.info("Resource {} created succesfully", resourceInfoVO);
+
   }
 
   /**
@@ -308,8 +313,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(Collectors.toList());
     if (null != resourceNames && !resourceNames.isEmpty()) {
       deleteResourceInstancesByName(resourceNames);
-
     }
+    LOG.info("Resources {} removed succesfully", resourceInfoVO);
   }
 
   /**
@@ -357,6 +362,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       // Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
+        LOG.info("User {} added to group {} succesfully", userId, groupName);
       }
     }
 
