@@ -2,6 +2,7 @@ package org.eea.ums.service.impl;
 
 
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -40,6 +41,8 @@ import org.eea.ums.service.vo.UserVO;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +55,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class KeycloakSecurityProviderInterfaceService implements SecurityProviderInterfaceService {
 
-
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory
+      .getLogger(KeycloakSecurityProviderInterfaceService.class);
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   /**
    * The keycloak connector service.
    */
@@ -134,6 +145,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO = mapTokenToVO(tokenInfo);
     }
     tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+
     return tokenVO;
   }
 
@@ -179,10 +191,23 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
     cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
     cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
-    String key = String.valueOf(UUID.randomUUID());
+    String key = calculateCacheKey(tokenVO.getRefreshToken());
     securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn,
         TimeUnit.SECONDS);
     return key;
+  }
+
+  private String calculateCacheKey(String refreshToken) {
+//    MessageDigest messageDigest = null;
+//    String key = "";
+//    try {
+//      messageDigest = MessageDigest.getInstance("SHA-256");
+//      messageDigest.update(refreshToken.getBytes());
+//      key = new String(messageDigest.digest());
+//    } catch (NoSuchAlgorithmException e) {
+//      LOG_ERROR.error("Error creating hash key before saving token to cache");
+//    }
+    return UUID.randomUUID().toString();
   }
 
   /**
