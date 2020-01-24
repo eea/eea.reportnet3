@@ -280,7 +280,7 @@ const DataViewer = withRouter(
       }
 
       if (isDataCollection && !isWebFormMMR) {
-        columnsArr.unshift(validationCol, providerCode);
+        columnsArr.unshift(providerCode);
       }
 
       if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
