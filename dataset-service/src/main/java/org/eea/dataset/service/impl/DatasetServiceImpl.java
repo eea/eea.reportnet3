@@ -1453,6 +1453,11 @@ public class DatasetServiceImpl implements DatasetService {
       field.setIdFieldSchema(idFieldSchema);
       field.setType(typeField);
       RecordValue recordAux = new RecordValue();
+      TableValue tableAux = new TableValue();
+      DatasetValue datasetAux = new DatasetValue();
+      datasetAux.setId(datasetId);
+      tableAux.setDatasetId(datasetAux);
+      recordAux.setTableValue(tableAux);
       recordAux.setId(r.getId());
       field.setRecord(recordAux);
 

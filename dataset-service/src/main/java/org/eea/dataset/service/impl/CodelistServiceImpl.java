@@ -217,6 +217,9 @@ public class CodelistServiceImpl implements CodelistService {
         throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
       }
     }
+    if (CodelistStatusEnum.DEPRECATED.equals(codelistVO.getStatus())) {
+      oldCodelist.setStatus(CodelistStatusEnum.DEPRECATED);
+    }
     if (codelistVO.getName() != null) {
       oldCodelist.setName(codelistVO.getName());
     }

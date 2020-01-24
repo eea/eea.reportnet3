@@ -15,8 +15,8 @@
       height: 100%;
       flex: auto;
       display: grid;
-      grid-template-columns: 4% 50% 1fr;
-      grid-template-rows: 1fr 50% 1fr;
+      grid-template-columns: 4% 76% 20%;
+      grid-template-rows: 15% 50% 15%;
       row-gap: 1rem;
       column-gap: 1.5rem;
       color: var(--gray-110);
@@ -48,13 +48,13 @@
         background-color: #d9a220;
       }
     }
-    &.notStarted {
+    &.DESIGN {
       background-color: var(--c-lilac-100);
       &:hover {
         background-color: #c2c8cf;
       }
     }
-    &.drafted {
+    &.DRAFT {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
