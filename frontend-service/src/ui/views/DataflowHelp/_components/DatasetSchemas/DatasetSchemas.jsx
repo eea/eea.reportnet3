@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -22,30 +22,25 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const [codelistsList, setCodelistsList] = useState();
 
   useEffect(() => {
-    if (!isUndefined(datasetsSchemas)) {
-      getCodelistsListBySchemas(datasetsSchemas);
+    if (!isEmpty(datasetsSchemas)) {
+      getCodelistsList(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    if (!isUndefined(codelistsList)) {
-      renderDatasetSchemas();
-    }
+    renderDatasetSchemas();
   }, [codelistsList]);
 
-  const getCodelistsListBySchemas = async datasetsSchemas => {
-    setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
-  };
-
-  const getCodelistsList = async () => {
+  const getCodelistsList = async datasetsSchemas => {
     try {
-      const codelistsList = await getCodelistsList(datasetsSchemas);
-      return codelistsList;
+      setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
     } catch (error) {
-      console.log(error);
-      notificationContext.add({
-        type: 'DOCUMENTATION_CODELISTS_ERROR'
-      });
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
     }
   };
 
