@@ -74,7 +74,6 @@ export const apiSnapshot = {
   },
   releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const tokens = userStorage.get();
-
     const response = await HTTPRequester.update({
       url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
         datasetSchemaId: datasetSchemaId,
@@ -105,26 +104,21 @@ export const apiSnapshot = {
     });
     return response.data;
   },
-  createByIdReporter: async (datasetId, description) => {
+  createByIdReporter: async (datasetId, description, isReleased) => {
     const tokens = userStorage.get();
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(SnapshotConfig.createSnapshotReporter, {
-          datasetId,
-          description: description
-        }),
-        data: {
-          description: description
-        },
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error creating the snapshot: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.createSnapshotReporter, {
+        datasetId
+      }),
+      data: {
+        description,
+        released: isReleased
+      },
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   },
   deleteByIdReporter: async (datasetId, snapshotId) => {
     const tokens = userStorage.get();

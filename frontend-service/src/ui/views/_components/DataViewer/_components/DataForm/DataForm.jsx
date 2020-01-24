@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { isUndefined, isNull } from 'lodash';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, onChangeForm, records }) => {
+  const resources = useContext(ResourcesContext);
+
+  const getCodelistItemsWithEmptyOption = (colsSchema, field) => {
+    const codelistsItems = RecordUtils.getCodelistItems(colsSchema, field);
+    codelistsItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    return codelistsItems;
+  };
+
   const renderDropdown = (field, fieldValue) => {
     return (
       <Dropdown
@@ -15,20 +28,18 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
           onChangeForm(field, e.target.value.value);
         }}
         optionLabel="itemType"
-        options={RecordUtils.getCodelistItems(colsSchema, field)}
+        options={getCodelistItemsWithEmptyOption(colsSchema, field)}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItems(colsSchema, field), fieldValue)}
       />
     );
   };
 
   const editRecordForm = colsSchema.map((column, i) => {
-    console.log({ column });
     //Avoid row id Field and dataSetPartitionId
     if (editDialogVisible) {
       if (i < colsSchema.length - 2) {
         if (!isUndefined(records.editedRecord.dataRow)) {
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-          console.log({ field });
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>

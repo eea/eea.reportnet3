@@ -214,7 +214,10 @@
           }
         },
         {
-          "key":"DOCUMENTATION_CODELISTS_ERROR"
+          "key":"CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS"
+        },
+        {
+          "key":"CODELIST_SERVICE_GET_CODELISTS_BY_IDS"
         },
         {
           "key":"ADD_DATASET_SNAPSHOT_FAILED_EVENT",
@@ -315,8 +318,52 @@
           }
         },
         {
+          "key": "RELEASE_DATASET_SNAPSHOT_FAILED_EVENT",
+          "navigateTo":{
+            "section":"DATAFLOW",
+            "parameters":["dataflowId"]
+          }
+        },
+        {
           "key":"SAVE_EDIT_CODELIST_ERROR",
+          "refresh":false 
+        },
+        {
+          "key": "USER_SERVICE_OLD_LOGIN_ERROR",
           "refresh":false          
+        },
+        {
+          "key":"CODELIST_SERVICE_ADD_BY_ID_ERROR"
+        },
+        {
+          "key":"CODELIST_SERVICE_CLONE_BY_ID_ERROR"
+        },
+        {
+          "key": "CODELIST_SERVICE_GET_ALL_IN_CATEGORY_ERROR"
+        },
+        {
+          "key":"CODELIST_SERVICE_GET_BY_ID_ERROR"
+        },
+        {
+          "key":"CODELIST_SERVICE_GET_CODELISTS_LIST"
+        },
+        {
+          "key": "CODELIST_SERVICE_UPDATE_BY_ID_ERROR"
+        },
+        {
+          "key":"CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR"
+        },
+        {
+          "key":"CODELIST_CATEGORY_SERVICE_ALL_ERROR"
+        },
+        {
+          "key":"CODELIST_CATEGORY_SERVICE_DELETE_BY_ID_ERROR"
+        },
+        {
+          "key":"CODELIST_CATEGORY_SERVICE_GET_CATEGORY_INFO_ERROR"
+        },
+        {
+          "key": "CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR"
         }
       ]
     },
@@ -348,6 +395,13 @@
             "parameters":["dataflowId", "datasetId"]
           },
           "refresh":false
+        },
+        {
+          "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key":"RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT",
@@ -466,6 +520,9 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key": "CREATE_DATA_COLLECTION_INIT"
         }
       ]
     }

@@ -115,7 +115,9 @@ const TreeViewExpandableItem = ({
         {renderInfoButtons()}
       </div>
       {isOpen ? children : null}
-      {React.Children.count(children) === 0 && isOpen ? resources.messages['emptyDatasetDesign'] : null}
+      {React.Children.count(children) === 0 && isOpen && !isUndefined(items[0])
+        ? `${resources.messages['emptyDatasetDesign']} ${items[0].label}`
+        : null}
     </React.Fragment>
   );
 };

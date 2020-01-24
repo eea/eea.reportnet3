@@ -280,7 +280,7 @@ const DataViewer = withRouter(
       }
 
       if (isDataCollection && !isWebFormMMR) {
-        columnsArr.unshift(validationCol, providerCode);
+        columnsArr.unshift(providerCode);
       }
 
       if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
@@ -717,6 +717,18 @@ const DataViewer = withRouter(
       );
     };
 
+    const codelistInfoDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button
+          label={resources.messages['ok']}
+          icon="check"
+          onClick={() => {
+            setIsCodelistInfoVisible(false);
+          }}
+        />
+      </div>
+    );
+
     //Template for Field validation
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
@@ -968,6 +980,7 @@ const DataViewer = withRouter(
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
+            footer={codelistInfoDialogFooter}
             header={resources.messages['codelistInfo']}
             onHide={() => setIsCodelistInfoVisible(false)}
             visible={isCodelistInfoVisible}>

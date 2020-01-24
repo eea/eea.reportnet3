@@ -28,8 +28,10 @@ export const BigButtonList = ({
   dataflowStatus,
   designDatasetSchemas,
   handleRedirect,
+  hasRepresentatives,
   hasWritePermissions,
   isCustodian,
+  isDataSchemaCorrect,
   onUpdateData,
   onSaveName,
   showReleaseSnapshotDialog,
@@ -45,6 +47,7 @@ export const BigButtonList = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+  const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
@@ -86,6 +89,11 @@ export const BigButtonList = ({
 
   const onCreateDataCollection = async date => {
     setDataCollectionDialog(false);
+    notificationContext.add({
+      type: 'CREATE_DATA_COLLECTION_INIT',
+      content: {}
+    });
+    setIsCreateButtonActive(false);
     try {
       return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
@@ -99,6 +107,7 @@ export const BigButtonList = ({
           dataflowName
         }
       });
+      setIsCreateButtonActive(true);
     }
   };
 
@@ -151,8 +160,11 @@ export const BigButtonList = ({
               dataflowStatus: dataflowStatus,
               getDeleteSchemaIndex: getDeleteSchemaIndex,
               handleRedirect: handleRedirect,
+              hasRepresentatives: hasRepresentatives,
               hasWritePermissions: hasWritePermissions,
+              isCreateButtonActive: isCreateButtonActive,
               isCustodian: isCustodian,
+              isDataSchemaCorrect: isDataSchemaCorrect,
               onDatasetSchemaNameError: onDatasetSchemaNameError,
               onDuplicateName: onDuplicateName,
               onSaveName: onSaveName,

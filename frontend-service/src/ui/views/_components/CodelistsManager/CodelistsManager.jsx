@@ -66,20 +66,13 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const onFilter = filter => {
     const inmCategories = [...categories];
-    //console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
     const filteredCategories = inmCategories.filter(category =>
       category.shortCode.toLowerCase().includes(filter.toLowerCase())
     );
-    console.log({ filteredCategories });
     setFilteredCategories(filteredCategories);
     setFilter(filter);
     setIsFiltered(filter !== '');
   };
-
-  // const onFilterDeprecated = () => {
-  //   const inmCategories = [...categories];
-  // };
 
   const onLoadCategories = async () => {
     try {
@@ -88,31 +81,24 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       setCategories(loadedCategories);
     } catch (error) {
       console.log(error);
+      notificationContext.add({
+        type: 'CODELIST_CATEGORY_SERVICE_ALL_ERROR'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const onSaveCategory = async () => {
-    //API CALL
-    //Meanwhile....
-    // const inmCategories = [...categories];
-    // newCategory.codelists = [];
-    // inmCategories.push(newCategory);
-    // setCategories(inmCategories);
-    // setNewCategoryVisible(false);
     try {
       const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
       if (response.status >= 200 && response.status <= 299) {
         onLoadCategories();
       }
     } catch (error) {
+      console.log(error);
       notificationContext.add({
-        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
       setNewCategoryVisible(false);
@@ -205,7 +191,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           />
         ) : null}
       </div>
-      {console.log(isFiltered)}
       {isLoading ? (
         <Spinner className={styles.positioning} />
       ) : isFiltered ? (
