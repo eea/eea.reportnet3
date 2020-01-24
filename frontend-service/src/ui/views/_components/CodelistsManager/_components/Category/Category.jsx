@@ -463,21 +463,24 @@ const Category = ({
             icon: 'pencil',
             label: '',
             onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['editCategory']
+            tooltip: resources.messages['editCategory'],
+            visible: !isInDesign
           },
           {
             disabled: category.codelistNumber > 0,
             icon: 'trash',
             label: '',
             onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['deleteCategory']
+            tooltip: resources.messages['deleteCategory'],
+            visible: !isInDesign
           },
           {
             disabled: !checkNoCodelistEditing(),
             icon: 'add',
             label: '',
             onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['newCodelist']
+            tooltip: resources.messages['newCodelist'],
+            visible: !isInDesign
           }
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
