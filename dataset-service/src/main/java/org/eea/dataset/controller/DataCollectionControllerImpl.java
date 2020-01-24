@@ -114,7 +114,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         schemasIntegrity = false;
       }
     }
-    if (!designs.isEmpty() && !representatives.isEmpty() && schemasIntegrity) {
+    // Check if the dataflow status is correct, the schema is correct and there are representatives
+    // selected
+    if (!designs.isEmpty() && !representatives.isEmpty() && schemasIntegrity
+        && TypeStatusEnum.DESIGN.equals(
+            dataflowControllerZuul.getMetabaseById(dataCollectionVO.getIdDataflow()).getStatus())) {
       for (DesignDatasetVO design : designs) {
         try {
           // Create the DC per design dataset
