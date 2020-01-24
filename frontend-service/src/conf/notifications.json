@@ -520,6 +520,9 @@
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
+        },
+        {
+          "key": "CREATE_DATA_COLLECTION_INIT"
         }
       ]
     }
