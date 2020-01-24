@@ -53,10 +53,12 @@ const parseDesignDataset = (design, codelistsList) => {
             let fieldCodelist;
             if (fieldDTO.type === 'CODELIST') {
               if (!isUndefined(codelistsList)) {
+                console.log({ codelistsList });
                 let codelist = codelistsList.find(codelist => codelist.id === fieldDTO.codelistId);
                 if (!isUndefined(codelist)) {
+                  console.log({ codelist });
                   fieldCodelist = `${codelist.name} (v${codelist.version})`;
-                  if (!isEmpty(codelist.items)) {
+                  if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
                     codelist.items.forEach(itemDTO => {
                       let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
                       if (!isUndefined(isRepeatedCodelistItem) && isRepeatedCodelistItem.length > 0) {

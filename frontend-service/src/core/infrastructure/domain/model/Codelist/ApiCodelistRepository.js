@@ -110,8 +110,8 @@ const getCodelistsByIds = async codelistIds => {
       }
       return new Codelist(
         codelistDTO.id,
-        codelistDTO.category.shortCode,
-        codelistDTO.category.description,
+        codelistDTO.name,
+        codelistDTO.description,
         codelistDTO.version,
         codelistDTO.status,
         codelistItems
