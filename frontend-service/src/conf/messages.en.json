@@ -389,8 +389,8 @@
 		"validateDataInit":"Validating <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"validateDataByIdError":"Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
 		"exportDataByIdError":"Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-		"createDataCollectionError": "Failed creating data collection at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
-		"addDatacollectionFailedEvent": "Failed creating data collection at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
+		"createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+		"addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
 		"addDatacollectionCompletedEvent": "Data collection created at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
 		"representative":"Representative",
 		"documentationCodelistsError":"Error loading codelists of a schema",
@@ -408,6 +408,7 @@
 		"codelistServiceUpdateByIdError": "Error saving codelist",
 		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
-		"userServiceOldLoginError": "Login failed. Network?"
+		"userServiceOldLoginError": "Login failed. Network?",
+		"createDataCollectionInit": "Creating data collection"
 	}
 }
