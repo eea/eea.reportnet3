@@ -230,6 +230,13 @@ class DropdownFilter extends React.Component {
           }
           return field;
         });
+      } else if (isAnyOtherFieldUnchecked === true && isSelectAllChecked === true) {
+        newFields = fields.map(field => {
+          if (field.key === 'selectAll') {
+            field.checked = false;
+          }
+          return field;
+        });
       }
     };
 
