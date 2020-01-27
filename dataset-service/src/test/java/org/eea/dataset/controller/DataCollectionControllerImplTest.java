@@ -22,7 +22,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +32,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -65,18 +67,31 @@ public class DataCollectionControllerImplTest {
   @Mock
   private DatasetSchemaService schemaService;
 
+  /** The security context. */
+  SecurityContext securityContext;
+
+  /** The authentication. */
+  Authentication authentication;
+
 
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
-    ThreadPropertiesManager.setVariable("user", "user");
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
   @Test
   public void createEmptyDataCollectionTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     DataCollectionVO dc = new DataCollectionVO();
     dc.setDataSetName("datasetTest");
@@ -116,6 +131,9 @@ public class DataCollectionControllerImplTest {
 
   @Test
   public void createEmptyDataCollectionTestException() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     DataCollectionVO dc = new DataCollectionVO();
     dc.setDueDate(new Date());
@@ -170,6 +188,8 @@ public class DataCollectionControllerImplTest {
 
     Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     try {
       dataCollectionControllerImpl.createEmptyDataCollection(dc);
@@ -200,6 +220,8 @@ public class DataCollectionControllerImplTest {
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<>());
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     try {
       dataCollectionControllerImpl.createEmptyDataCollection(dc);
@@ -238,6 +260,8 @@ public class DataCollectionControllerImplTest {
 
     Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     try {
       dataCollectionControllerImpl.createEmptyDataCollection(dc);
