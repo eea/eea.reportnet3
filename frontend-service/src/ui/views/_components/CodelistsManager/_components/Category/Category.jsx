@@ -27,6 +27,7 @@ const Category = ({
   category,
   checkDuplicates,
   isDataCustodian,
+  isEditionModeOn,
   isInDesign,
   onCodelistError,
   onCodelistSelected,
@@ -283,10 +284,12 @@ const Category = ({
         checkNoCodelistEditing={checkNoCodelistEditing}
         codelist={codelist}
         isDataCustodian={isDataCustodian}
+        isEditionModeOn={isEditionModeOn}
         isInDesign={isInDesign}
         key={i}
         onCodelistError={onCodelistError}
         onCodelistSelected={onCodelistSelected}
+        onLoadCodelists={onLoadCodelists}
         onRefreshCodelist={onRefreshCodelist}
         updateEditingCodelists={updateEditingCodelists}
       />
@@ -464,7 +467,7 @@ const Category = ({
             label: '',
             onClick: () => toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', true),
             tooltip: resources.messages['editCategory'],
-            visible: !isInDesign
+            visible: !isInDesign || isEditionModeOn
           },
           {
             disabled: category.codelistNumber > 0,
@@ -472,7 +475,7 @@ const Category = ({
             label: '',
             onClick: () => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', true),
             tooltip: resources.messages['deleteCategory'],
-            visible: !isInDesign
+            visible: !isInDesign || isEditionModeOn
           },
           {
             disabled: !checkNoCodelistEditing(),
@@ -480,7 +483,7 @@ const Category = ({
             label: '',
             onClick: () => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', true),
             tooltip: resources.messages['newCodelist'],
-            visible: !isInDesign
+            visible: !isInDesign || isEditionModeOn
           }
         ]}
         onCollapseTree={() => toggleIsExpanded(false)}
