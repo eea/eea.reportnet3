@@ -13,7 +13,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
@@ -31,6 +30,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,12 +42,12 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
@@ -98,7 +98,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -110,7 +110,7 @@ const Dataflow = withRouter(({ history, match }) => {
         icon: 'archive'
       }
     ]);
-  }, [history, match.params.dataflowId, resources.messages]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -348,8 +348,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const layout = children => {
     return (
-      <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
+      <MainLayout
+        leftSideBarConfig={{
+          isCustodian,
+          buttons: []
+        }}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -361,15 +364,15 @@ const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <LeftSideBar
+      {/* <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
-      />
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+      /> */}
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
