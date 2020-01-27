@@ -9,6 +9,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -31,6 +32,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
   const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isEditionModeOn, setIsEditionModeOn] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -145,6 +147,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           category={category}
           checkDuplicates={checkDuplicates}
           isDataCustodian={isDataCustodian}
+          isEditionModeOn={isEditionModeOn}
           isInDesign={isInDesign}
           key={i}
           onCodelistError={onCodelistError}
@@ -181,14 +184,26 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
             <label htmlFor="filterInput">{resources.messages['filterCategories']}</label>
           </span>
         }
-        {isDataCustodian && !isInDesign ? (
-          <Button
-            className={styles.newCategoryButton}
-            icon="add"
-            label={resources.messages['newCategory']}
-            onClick={() => setNewCategoryVisible(true)}
-            style={{ marginRight: '1.5rem' }}
-          />
+        {isDataCustodian ? (
+          !isInDesign ? (
+            <Button
+              className={styles.newCategoryButton}
+              icon="add"
+              label={resources.messages['newCategory']}
+              onClick={() => setNewCategoryVisible(true)}
+              style={{ marginRight: '1.5rem' }}
+            />
+          ) : (
+            <div className={styles.switchDiv}>
+              <span className={styles.switchTextInput}>{resources.messages['editCodelists']}</span>
+              <InputSwitch
+                checked={isEditionModeOn}
+                onChange={e => {
+                  setIsEditionModeOn(e.value);
+                }}
+              />
+            </div>
+          )
         ) : null}
       </div>
       {isLoading ? (
