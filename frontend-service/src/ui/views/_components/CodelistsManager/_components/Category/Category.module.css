@@ -12,6 +12,10 @@
   margin: 0 0 0 2rem;
 }
 
+.categoryEditInput {
+  margin: 1.5rem 2rem 0 2rem;
+}
+
 .categoryExpandable {
   height: 1.5vw;
   padding: 2rem 1.5rem 2rem 1rem;
@@ -64,6 +68,12 @@
   box-shadow: 0 0 0 0 var(--blue-120) !important;
 }
 
+.inputsWrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
+}
+
 .p-multiselect:not(.p-disabled).p-focus {
   box-shadow: 0 0 0 0 var(--blue-120) !important;
 }
@@ -87,7 +97,6 @@
 }
 
 .statusBox {
-  border: 1px solid;
   border-radius: 3px;
   padding: 4px;
   color: white;

@@ -9,6 +9,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CodelistsForm } from './_components/CodelistsForm';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -31,6 +32,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
   const [filter, setFilter] = useState();
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isEditionModeOn, setIsEditionModeOn] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,20 +68,13 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const onFilter = filter => {
     const inmCategories = [...categories];
-    //console.log(CodelistsManagerUtils.filterByText(inmCategories, filter.toUpperCase()));
-    //const filteredCategories = CodelistsManagerUtils.filterByText(inmCategories, filter);
     const filteredCategories = inmCategories.filter(category =>
       category.shortCode.toLowerCase().includes(filter.toLowerCase())
     );
-    console.log({ filteredCategories });
     setFilteredCategories(filteredCategories);
     setFilter(filter);
     setIsFiltered(filter !== '');
   };
-
-  // const onFilterDeprecated = () => {
-  //   const inmCategories = [...categories];
-  // };
 
   const onLoadCategories = async () => {
     try {
@@ -88,31 +83,24 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       setCategories(loadedCategories);
     } catch (error) {
       console.log(error);
+      notificationContext.add({
+        type: 'CODELIST_CATEGORY_SERVICE_ALL_ERROR'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const onSaveCategory = async () => {
-    //API CALL
-    //Meanwhile....
-    // const inmCategories = [...categories];
-    // newCategory.codelists = [];
-    // inmCategories.push(newCategory);
-    // setCategories(inmCategories);
-    // setNewCategoryVisible(false);
     try {
       const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
       if (response.status >= 200 && response.status <= 299) {
         onLoadCategories();
       }
     } catch (error) {
+      console.log(error);
       notificationContext.add({
-        type: 'ADD_CODELIST_CATEGORY_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
       setNewCategoryVisible(false);
@@ -159,6 +147,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           category={category}
           checkDuplicates={checkDuplicates}
           isDataCustodian={isDataCustodian}
+          isEditionModeOn={isEditionModeOn}
           isInDesign={isInDesign}
           key={i}
           onCodelistError={onCodelistError}
@@ -196,16 +185,27 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           </span>
         }
         {isDataCustodian ? (
-          <Button
-            className={styles.newCategoryButton}
-            icon="add"
-            label={resources.messages['newCategory']}
-            onClick={() => setNewCategoryVisible(true)}
-            style={{ marginRight: '1.5rem' }}
-          />
+          !isInDesign ? (
+            <Button
+              className={styles.newCategoryButton}
+              icon="add"
+              label={resources.messages['newCategory']}
+              onClick={() => setNewCategoryVisible(true)}
+              style={{ marginRight: '1.5rem' }}
+            />
+          ) : (
+            <div className={styles.switchDiv}>
+              <span className={styles.switchTextInput}>{resources.messages['editCodelists']}</span>
+              <InputSwitch
+                checked={isEditionModeOn}
+                onChange={e => {
+                  setIsEditionModeOn(e.value);
+                }}
+              />
+            </div>
+          )
         ) : null}
       </div>
-      {console.log(isFiltered)}
       {isLoading ? (
         <Spinner className={styles.positioning} />
       ) : isFiltered ? (

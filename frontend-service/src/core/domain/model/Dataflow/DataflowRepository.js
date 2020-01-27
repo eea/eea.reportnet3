@@ -15,6 +15,7 @@ export const DataflowRepository = {
   pending: () => Promise.reject('[DataflowRepository#pending] must be implemented'),
   reject: () => Promise.reject('[DataflowRepository#reject] must be implemented'),
   reporting: () => Promise.reject('[DataflowRepository#reporting] must be implemented'),
+  schemasValidation: () => Promise.reject('[DataflowRepository#schemasValidation] must be implemented'),
   update: () => Promise.reject('[DataflowRepository#update] must be implemented')
 };
 

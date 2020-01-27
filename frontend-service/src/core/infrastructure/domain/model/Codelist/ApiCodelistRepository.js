@@ -60,6 +60,9 @@ const getById = async codelistId => {
 
 const getCodelistsList = async datasetSchemas => {
   const codelistIds = await getCodelistsIdsBySchemas(datasetSchemas);
+  if (isEmpty(codelistIds)) {
+    return [];
+  }
   const codelistsList = await getCodelistsByIds(codelistIds);
   return codelistsList;
 };

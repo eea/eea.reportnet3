@@ -385,14 +385,26 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const getCodelistsList = async datasetSchemas => {
+    try {
+      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
+      return codelistsList;
+    } catch (error) {
+      console.log('AQUI');
+      console.log(error);
+      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
+    }
+  };
+
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await CodelistService.getCodelistsList([datasetSchema]);
+      const codelistsList = await getCodelistsList([datasetSchema]);
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
+      console.log({ datasetStatistics });
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);

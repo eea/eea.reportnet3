@@ -1,6 +1,6 @@
 import React, { useContext, useReducer } from 'react';
 
-import { capitalize, isUndefined } from 'lodash';
+import { capitalize, isUndefined, cloneDeep } from 'lodash';
 
 import styles from './Codelist.module.css';
 
@@ -32,9 +32,11 @@ const Codelist = ({
   checkDuplicates,
   codelist,
   isDataCustodian = true,
+  isEditionModeOn,
   isInDesign,
   onCodelistError,
   onCodelistSelected,
+  onLoadCodelists,
   onRefreshCodelist,
   updateEditingCodelists
 }) => {
@@ -57,6 +59,7 @@ const Codelist = ({
     codelistStatus: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
     codelistDescription: codelist.description,
     editedItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
+    error: { isCodelistErrorVisible: false, errorTitle: '', errorMessage: '' },
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
     initialCellValue: undefined,
@@ -69,6 +72,13 @@ const Codelist = ({
     selectedItem: {}
   };
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
+
+  React.useEffect(() => {
+    dispatchCodelist({
+      type: 'RESET_INITIAL_VALUES',
+      payload: initialCodelistState
+    });
+  }, [codelist]);
 
   const onAddCodelistItemClick = () => {
     toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, 'ADD');
@@ -107,11 +117,7 @@ const Codelist = ({
       });
     } catch (error) {
       notificationContext.add({
-        type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'DELETE_CODELIST_ITEM_BY_ID_ERROR'
       });
     } finally {
       toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false);
@@ -132,9 +138,7 @@ const Codelist = ({
     dispatchCodelist({ type: 'EDIT_CODELIST_PROPERTIES', payload: { property: 'items', value: inmItems } });
   };
 
-  const onFormLoaded = () => {
-    dispatchCodelist({ type: 'SET_INITIAL_EDITED_CODELIST_ITEM', payload: {} });
-  };
+  const onFormLoaded = () => dispatchCodelist({ type: 'SET_INITIAL_EDITED_CODELIST_ITEM', payload: {} });
 
   const onKeyChange = (event, property, isItem) => {
     if (event.key === 'Escape') {
@@ -156,11 +160,7 @@ const Codelist = ({
       onRefreshCodelist(codelistState.codelistId, response);
     } catch (error) {
       notificationContext.add({
-        type: 'CLONE_CODELIST_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
-        }
+        type: 'CODELIST_SERVICE_GET_BY_ID_ERROR'
       });
     } finally {
       dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
@@ -170,25 +170,45 @@ const Codelist = ({
 
   const onSaveCloneCodelist = async () => {
     try {
-      await CodelistService.cloneById(
-        codelistState.codelistId,
-        codelistState.clonedCodelist.codelistDescription,
-        codelistState.items,
-        codelistState.clonedCodelist.codelistName,
-        codelistState.clonedCodelist.codelistVersion,
-        codelistState.clonedCodelist.codelistCategoryId
-      );
+      if (checkDuplicates(codelistState.clonedCodelist.codelistName, codelistState.clonedCodelist.codelistVersion)) {
+        console.log('Duplicated codelist');
+        dispatchCodelist({
+          type: 'SET_ERRORS_DIALOG',
+          payload: {
+            errorTitle: resources.messages['duplicatedCodelistTitle'],
+            errorMessage: resources.messages['duplicatedCodelist']
+          }
+        });
+      } else {
+        const response = await CodelistService.cloneById(
+          codelistState.codelistId,
+          codelistState.clonedCodelist.codelistDescription,
+          codelistState.items,
+          codelistState.clonedCodelist.codelistName,
+          codelistState.clonedCodelist.codelistVersion,
+          codelistState.clonedCodelist.codelistCategoryId
+        );
+        if (response.status >= 200 && response.status <= 299) {
+          dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
+          toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+        }
+      }
     } catch (error) {
-      notificationContext.add({
-        type: 'CLONE_CODELIST_ERROR',
-        content: {
-          // dataflowId,
-          // datasetId
+      console.log({ error });
+      if (!error.response.data.message.includes('duplicated')) {
+        notificationContext.add({
+          type: 'CODELIST_SERVICE_CLONE_BY_ID_ERROR'
+        });
+      }
+      dispatchCodelist({
+        type: 'SET_ERRORS_DIALOG',
+        payload: {
+          errorTitle: resources.messages['duplicatedCodelistTitle'],
+          errorMessage: resources.messages['duplicatedCodelist']
         }
       });
     } finally {
-      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
-      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+      onLoadCodelists();
     }
   };
 
@@ -214,8 +234,7 @@ const Codelist = ({
         }
       } catch (error) {
         notificationContext.add({
-          type: 'SAVE_EDIT_CODELIST_ERROR',
-          content: {}
+          type: 'CODELIST_SERVICE_UPDATE_BY_ID_ERROR'
         });
       } finally {
         if (!isUndefined(updateEditingCodelists)) {
@@ -301,8 +320,20 @@ const Codelist = ({
       isCloning={true}
       onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
       onKeyChange={() => {}}
-      state={codelistState}
+      state={cloneDeep(codelistState)}
     />
+  );
+
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          dispatchCodelist({ type: 'TOGGLE_ERROR_DIALOG_VISIBLE', payload: false });
+        }}
+      />
+    </div>
   );
 
   const getStatusStyle = status => {
@@ -325,6 +356,19 @@ const Codelist = ({
         style={{ width: '60%' }}
         visible={codelistState.isCloneCodelistVisible}>
         <div className="p-grid p-fluid">{cloneCodelistForm}</div>
+      </Dialog>
+    ) : null;
+  };
+
+  const renderErrors = (errorTitle, error) => {
+    return codelistState.error.isCodelistErrorVisible ? (
+      <Dialog
+        footer={errorDialogFooter}
+        header={errorTitle}
+        modal={true}
+        onHide={() => dispatchCodelist({ type: 'TOGGLE_ERROR_DIALOG_VISIBLE', payload: false })}
+        visible={codelistState.error.isCodelistErrorVisible}>
+        <div className="p-grid p-fluid">{error}</div>
       </Dialog>
     ) : null;
   };
@@ -422,7 +466,7 @@ const Codelist = ({
         autoLayout={true}
         className={styles.itemTable}
         editable={codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design'}
-        footer={isDataCustodian ? renderFooter() : null}
+        footer={isDataCustodian && (!isInDesign || isEditionModeOn) ? renderFooter() : null}
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
@@ -475,13 +519,19 @@ const Codelist = ({
             icon: 'clone',
             disabled: codelistState.isEditing,
             onClick: () => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['clone']
+            tooltip: resources.messages['clone'],
+            visible: !isInDesign || isEditionModeOn
           },
           {
             disabled: codelist.status.toLowerCase() !== 'ready',
             icon: 'checkSquare',
             onClick: () =>
-              onCodelistSelected(codelistState.codelistId, codelistState.codelistName, codelistState.codelistVersion),
+              onCodelistSelected(
+                codelistState.codelistId,
+                codelistState.codelistName,
+                codelistState.codelistVersion,
+                codelistState.items
+              ),
             tooltip: resources.messages['selectCodelist'],
             visible: isInDesign
           }
@@ -500,21 +550,28 @@ const Codelist = ({
             : undefined
         }
         items={[
-          { label: codelist.name },
-          { label: codelist.version },
+          { label: codelistState.codelistName },
+          { label: codelistState.codelistVersion },
           {
-            className: [getStatusStyle(codelist.status), styles.statusBox].join(' '),
+            className: [getStatusStyle(codelistState.codelistStatus.value), styles.statusBox].join(' '),
             type: 'box',
-            label: capitalize(codelist.status)
+            label: capitalize(codelistState.codelistStatus.value)
           },
-          { label: codelist.description }
-        ]}>
+          { label: codelistState.codelistDescription }
+        ]}
+        onExpandTree={() =>
+          dispatchCodelist({
+            type: 'RESET_INITIAL_VALUES',
+            payload: initialCodelistState
+          })
+        }>
         {renderInputs()}
         {renderTable()}
         {renderEditItemsDialog()}
         {renderDeleteDialog()}
       </TreeViewExpandableItem>
       {renderCloneCodelistDialog()}
+      {renderErrors(codelistState.error.errorTitle, codelistState.error.errorMessage)}
     </React.Fragment>
   );
 };

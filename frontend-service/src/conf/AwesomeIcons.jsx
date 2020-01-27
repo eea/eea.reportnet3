@@ -51,7 +51,8 @@ import {
   faCoins,
   faSitemap,
   faAngleRight,
-  faAngleDown
+  faAngleDown,
+  faCircleNotch
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -263,6 +264,8 @@ export const AwesomeIcons = icon => {
       return faCoins;
     case 'siteMap':
       return faSitemap;
+    case 'spinner':
+      return faCircleNotch;
     default:
       return faFileAlt;
   }
