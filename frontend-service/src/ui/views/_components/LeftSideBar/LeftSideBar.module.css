@@ -14,12 +14,12 @@
 }
 
 .leftSideBar {
-  height: 100%;
-  width: 50px;
   position: fixed;
+  height: calc(100% - var(--header-height));
+  width: 50px;
   z-index: 1;
   left: 0;
-  top: 0;
+  top: var(--header-height);
   background-color: var(--c-corporate-blue);
   transition: 0.5s;
   overflow-x: hidden;
