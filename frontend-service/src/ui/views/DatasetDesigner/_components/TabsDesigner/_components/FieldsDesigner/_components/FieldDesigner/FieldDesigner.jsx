@@ -150,7 +150,7 @@ export const FieldDesigner = ({
   const onChangeFieldType = type => {
     setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    if (type.fieldType === 'Codelist') {
+    if (type.fieldType.toLowerCase() === 'codelist') {
       onCodelistDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
@@ -168,8 +168,8 @@ export const FieldDesigner = ({
           }
         }
       }
+      // setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
     }
-    setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
     onCodelistShow(fieldId, type);
   };
 
@@ -239,6 +239,7 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
+    console.log({ codelistId, codelistName, codelistVersion, codelistItems });
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
     if (fieldId.toString() === '-1') {
       onFieldAdd(
@@ -252,7 +253,16 @@ export const FieldDesigner = ({
         codelistItems
       );
     } else {
-      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId);
+      fieldUpdate(
+        fieldId,
+        'CODELIST',
+        fieldValue,
+        fieldDescriptionValue,
+        codelistId,
+        codelistName,
+        codelistVersion,
+        codelistItems
+      );
     }
     setIsCodelistManagerVisible(false);
   };
@@ -428,7 +438,16 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (fieldSchemaId, type, value, description, codelistId) => {
+  const fieldUpdate = async (
+    fieldSchemaId,
+    type,
+    value,
+    description,
+    codelistId,
+    codelistName,
+    codelistVersion,
+    codelistItems
+  ) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
@@ -441,15 +460,7 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(
-          fieldId,
-          value,
-          type,
-          description,
-          selectedCodelist.codelistId,
-          selectedCodelist.codelistName,
-          selectedCodelist.codelistVersion
-        );
+        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion, codelistItems);
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);

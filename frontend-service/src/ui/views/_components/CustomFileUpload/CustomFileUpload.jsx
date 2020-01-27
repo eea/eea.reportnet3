@@ -90,9 +90,11 @@ export class CustomFileUpload extends Component {
   }
 
   clearInputElement() {
-    this.fileInput.value = '';
-    if (this.props.mode === 'basic') {
-      this.fileInput.style.display = 'inline';
+    if (this.fileInput) {
+      this.fileInput.value = '';
+      if (this.props.mode === 'basic') {
+        this.fileInput.style.display = 'inline';
+      }
     }
   }
 

@@ -32,9 +32,13 @@ const Codelist = ({
   checkDuplicates,
   codelist,
   isDataCustodian = true,
+  isEditionModeOn,
   isInDesign,
+  isIncorrect = false,
   onCodelistError,
   onCodelistSelected,
+  onLoadCategories,
+  onToggleIncorrect,
   onRefreshCodelist,
   updateEditingCodelists
 }) => {
@@ -57,12 +61,14 @@ const Codelist = ({
     codelistStatus: { statusType: codelist.status, value: codelist.status.toString().toLowerCase() },
     codelistDescription: codelist.description,
     editedItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
+    error: { isCodelistErrorVisible: false, errorTitle: '', errorMessage: '' },
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
     initialCellValue: undefined,
     initialItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
     isAddEditCodelistVisible: false,
     isDeleteCodelistItemVisible: false,
+    isCategoryChanged: false,
     isCloneCodelistVisible: false,
     isEditing: false,
     newItem: { id: `-${codelist.items.length}`, shortCode: '', label: '', definition: '', codelistId: '' },
@@ -167,7 +173,7 @@ const Codelist = ({
 
   const onSaveCloneCodelist = async () => {
     try {
-      await CodelistService.cloneById(
+      const response = await CodelistService.cloneById(
         codelistState.codelistId,
         codelistState.clonedCodelist.codelistDescription,
         codelistState.items,
@@ -175,13 +181,20 @@ const Codelist = ({
         codelistState.clonedCodelist.codelistVersion,
         codelistState.clonedCodelist.codelistCategoryId
       );
+      if (response.status >= 200 && response.status <= 299) {
+        dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
+        toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+      }
     } catch (error) {
-      notificationContext.add({
-        type: 'CODELIST_SERVICE_CLONE_BY_ID_ERROR'
+      dispatchCodelist({
+        type: 'SET_ERRORS_DIALOG',
+        payload: {
+          errorTitle: resources.messages['duplicatedCodelistTitle'],
+          errorMessage: resources.messages['duplicatedCodelist']
+        }
       });
     } finally {
-      dispatchCodelist({ type: 'RESET_INITIAL_CLONED_CODELIST' });
-      toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+      onLoadCategories();
     }
   };
 
@@ -213,7 +226,11 @@ const Codelist = ({
         if (!isUndefined(updateEditingCodelists)) {
           updateEditingCodelists(false);
         }
-        onLoadCodelist();
+        if (codelistState.isCategoryChanged) {
+          onLoadCategories();
+        } else {
+          onLoadCodelist();
+        }
       }
     }
   };
@@ -227,6 +244,7 @@ const Codelist = ({
           item.id = `-${i}`;
         });
       } else {
+        inmItems[CodelistUtils.getItemByIndex(inmItems, codelistState.editedItem.id)] = codelistState.editedItem;
       }
       dispatchCodelist({ type: 'SAVE_ADDED_EDITED_ITEM', payload: inmItems });
     } catch (error) {
@@ -260,13 +278,13 @@ const Codelist = ({
     return (
       <InputText
         // onBlur={e => onEditorSubmitValue(cells, e.target.value, field)}
-        onFocus={e => {
-          e.preventDefault();
-          dispatchCodelist({
-            type: 'SAVE_INITIAL_CELL_VALUE',
-            payload: e.target.value
-          });
-        }}
+        // onFocus={e => {
+        //   e.preventDefault();
+        //   dispatchCodelist({
+        //     type: 'SAVE_INITIAL_CELL_VALUE',
+        //     payload: e.target.value
+        //   });
+        // }}
         onKeyDown={e => onKeyChange(e, field)}
         onChange={e => onEditorItemsValueChange(cells, e.target.value)}
         type="text"
@@ -277,11 +295,19 @@ const Codelist = ({
 
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['save']} icon="save" onClick={() => onSaveCloneCodelist()} />
       <Button
-        label={resources.messages['cancel']}
+        disabled={isIncorrect}
+        icon="save"
+        label={resources.messages['save']}
+        onClick={() => onSaveCloneCodelist()}
+      />
+      <Button
         icon="cancel"
-        onClick={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
+        label={resources.messages['cancel']}
+        onClick={() => {
+          toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);
+          onToggleIncorrect(false);
+        }}
       />
     </div>
   );
@@ -291,10 +317,24 @@ const Codelist = ({
       categoriesDropdown={categoriesDropdown}
       checkDuplicates={checkDuplicates}
       isCloning={true}
+      isIncorrect={isIncorrect}
+      onToggleIncorrect={onToggleIncorrect}
       onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
       onKeyChange={() => {}}
       state={cloneDeep(codelistState)}
     />
+  );
+
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          dispatchCodelist({ type: 'TOGGLE_ERROR_DIALOG_VISIBLE', payload: false });
+        }}
+      />
+    </div>
   );
 
   const getStatusStyle = status => {
@@ -315,8 +355,22 @@ const Codelist = ({
         modal={true}
         onHide={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
-        visible={codelistState.isCloneCodelistVisible}>
+        visible={codelistState.isCloneCodelistVisible}
+        zIndex={999}>
         <div className="p-grid p-fluid">{cloneCodelistForm}</div>
+      </Dialog>
+    ) : null;
+  };
+
+  const renderErrors = (errorTitle, error) => {
+    return codelistState.error.isCodelistErrorVisible ? (
+      <Dialog
+        footer={errorDialogFooter}
+        header={errorTitle}
+        modal={true}
+        onHide={() => dispatchCodelist({ type: 'TOGGLE_ERROR_DIALOG_VISIBLE', payload: false })}
+        visible={codelistState.error.isCodelistErrorVisible}>
+        <div className="p-grid p-fluid">{error}</div>
       </Dialog>
     ) : null;
   };
@@ -364,8 +418,9 @@ const Codelist = ({
           <Button label={resources.messages['add']} icon="add" onClick={() => onAddCodelistItemClick()} />
         ) : null}
         <Button
-          label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
+          disabled={codelistState.isEditing && isIncorrect}
           icon={codelistState.isEditing ? 'save' : 'pencil'}
+          label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
           onClick={
             !codelistState.isEditing
               ? () => {
@@ -388,6 +443,7 @@ const Codelist = ({
               if (!isUndefined(updateEditingCodelists)) {
                 updateEditingCodelists(false);
               }
+              onToggleIncorrect(false);
             }}
           />
         ) : null}
@@ -400,10 +456,14 @@ const Codelist = ({
       <CodelistProperties
         categoriesDropdown={categoriesDropdown}
         checkDuplicates={checkDuplicates}
+        initialCategory={initialCodelistState.codelistCategoryId}
         isEmbedded={false}
+        isIncorrect={isIncorrect}
         onEditorPropertiesInputChange={onEditorPropertiesInputChange}
+        onToggleIncorrect={onToggleIncorrect}
         onKeyChange={onKeyChange}
         state={codelistState}
+        toggleCategoryChange={toggleCategoryChange}
       />
     );
   };
@@ -414,7 +474,7 @@ const Codelist = ({
         autoLayout={true}
         className={styles.itemTable}
         editable={codelistState.isEditing && codelistState.codelistStatus.value.toLowerCase() === 'design'}
-        footer={isDataCustodian ? renderFooter() : null}
+        footer={isDataCustodian && (!isInDesign || isEditionModeOn) ? renderFooter() : null}
         onRowSelect={e => onSelectItem(e.data)}
         selectionMode="single"
         value={codelistState.items}>
@@ -445,6 +505,9 @@ const Codelist = ({
     );
   };
 
+  const toggleCategoryChange = isCategoryChanged => {
+    dispatchCodelist({ type: 'TOGGLE_CATEGORY_CHANGED', payload: isCategoryChanged });
+  };
   const toggleDialog = (action, isVisible) => {
     dispatchCodelist({
       type: action,
@@ -466,8 +529,12 @@ const Codelist = ({
           {
             icon: 'clone',
             disabled: codelistState.isEditing,
-            onClick: () => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true),
-            tooltip: resources.messages['clone']
+            onClick: () => {
+              onToggleIncorrect(true);
+              toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true);
+            },
+            tooltip: resources.messages['clone'],
+            visible: !isInDesign || isEditionModeOn
           },
           {
             disabled: codelist.status.toLowerCase() !== 'ready',
@@ -505,19 +572,14 @@ const Codelist = ({
             label: capitalize(codelistState.codelistStatus.value)
           },
           { label: codelistState.codelistDescription }
-        ]}
-        onExpandTree={() =>
-          dispatchCodelist({
-            type: 'RESET_INITIAL_VALUES',
-            payload: initialCodelistState
-          })
-        }>
+        ]}>
         {renderInputs()}
         {renderTable()}
         {renderEditItemsDialog()}
         {renderDeleteDialog()}
       </TreeViewExpandableItem>
       {renderCloneCodelistDialog()}
+      {renderErrors(codelistState.error.errorTitle, codelistState.error.errorMessage)}
     </React.Fragment>
   );
 };

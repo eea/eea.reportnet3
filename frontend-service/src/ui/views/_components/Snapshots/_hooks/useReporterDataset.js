@@ -5,7 +5,7 @@ import { useSnapshotReducer } from './useSnapshotReducer';
 import { SnapshotService } from 'core/services/Snapshot';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-const useReporterDataset = (datasetId, dataflowId, growlRef) => {
+const useReporterDataset = (datasetId, dataflowId) => {
   const notificationContext = useContext(NotificationContext);
 
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
