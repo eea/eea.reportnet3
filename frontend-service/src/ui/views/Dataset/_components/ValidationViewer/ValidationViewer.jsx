@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { capitalize, isNull, isUndefined } from 'lodash';
+import { capitalize, isNull, isUndefined, isEmpty } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
@@ -145,7 +145,7 @@ const ValidationViewer = React.memo(
       levelErrorTypes.forEach(filter => {
         allLevelErrorsFilterList.push({
           label: capitalize(filter),
-          key: `${filter.toString()}_Id`
+          key: `${filter.toString()}`
         });
       });
 
@@ -154,10 +154,10 @@ const ValidationViewer = React.memo(
 
     const onLoadTypeEntitiesFilter = () => {
       const allTypeEntitiesFilterList = [
-        { label: 'Dataset', key: 'Dataset_Id' },
-        { label: 'Table', key: 'Table_Id' },
-        { label: 'Record', key: 'Record_Id' },
-        { label: 'Field', key: 'Field_Id' }
+        { label: 'Dataset', key: 'Dataset' },
+        { label: 'Table', key: 'Table' },
+        { label: 'Record', key: 'Record' },
+        { label: 'Field', key: 'Field' }
       ];
       setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
     };
@@ -167,20 +167,26 @@ const ValidationViewer = React.memo(
 
       allOriginsFilterList.push({
         label: datasetName.toString(),
-        key: `${datasetName.toString()}_Id`
+        key: `${datasetName.toString()}`
       });
 
       tableSchemaNames.forEach(name => {
-        allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
+        allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}` });
       });
 
       setAllOriginsFilter(allOriginsFilterList);
     };
 
+    const removeSelectAllFromList = filters => {
+      if (!isEmpty(filters)) {
+        filters.shift();
+      }
+    };
+
     const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
-      levelErrorsDeselected = levelErrorsDeselected.map(filter => {
-        return filter.toString().toUpperCase();
-      });
+      levelErrorsDeselected = levelErrorsDeselected.map(filter => filter.toString().toUpperCase());
+
+      removeSelectAllFromList(levelErrorsDeselected);
 
       setLevelErrorsFilter(levelErrorsDeselected);
 
@@ -198,9 +204,9 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
-      typeEntitiesDeselected = typeEntitiesDeselected.map(filter => {
-        return filter.toString().toUpperCase();
-      });
+      typeEntitiesDeselected = typeEntitiesDeselected.map(filter => filter.toString().toUpperCase());
+
+      removeSelectAllFromList(typeEntitiesDeselected);
 
       if (typeEntitiesDeselected.length <= 0) {
         checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);

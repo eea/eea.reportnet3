@@ -158,7 +158,7 @@ class DropdownFilter extends React.Component {
 
             if (!isUndefined(this.props.showNotCheckedFilters)) {
               this.props.showNotCheckedFilters(
-                this.state.fields.filter(field => !field.checked).map(field => field.label)
+                this.state.fields.filter(field => !field.checked).map(field => field.key)
               );
             }
           }
@@ -188,9 +188,7 @@ class DropdownFilter extends React.Component {
           }
 
           if (!isUndefined(this.props.showNotCheckedFilters)) {
-            this.props.showNotCheckedFilters(
-              this.state.fields.filter(field => !field.checked).map(field => field.label)
-            );
+            this.props.showNotCheckedFilters(this.state.fields.filter(field => !field.checked).map(field => field.key));
           }
         }
       );
@@ -203,7 +201,6 @@ class DropdownFilter extends React.Component {
     for (let index = 0; index < filters.length; index++) {
       const filter = filters[index];
 
-      console.log('filter.key', filter.key);
       if (filter.key !== 'selectAll' && filter.checked) {
         result = true;
         break;
@@ -235,6 +232,7 @@ class DropdownFilter extends React.Component {
       };
     });
   }
+
   render() {
     const { fields } = this.state;
 
