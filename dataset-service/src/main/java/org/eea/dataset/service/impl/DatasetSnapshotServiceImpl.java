@@ -343,14 +343,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
-        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
-            e.getMessage());
+        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
       }
 
     } else {
       LOG_ERROR.error("Error in release snapshot");
-      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idDataCollection,
+      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
           "Error in release snapshot");
       removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }

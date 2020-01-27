@@ -1,4 +1,4 @@
-package org.eea.recordstore.io.notification.event;
+package org.eea.dataset.io.notification.events;
 
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
