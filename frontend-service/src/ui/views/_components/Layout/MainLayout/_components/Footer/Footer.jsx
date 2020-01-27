@@ -6,15 +6,24 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const Footer = () => {
   const resources = useContext(ResourcesContext);
+  const footerLinks = [
+    { text: 'copyrightAbout' },
+    { text: 'copyrightLanguage' },
+    { text: 'copyrightResources' },
+    { text: 'copyrightCookies' },
+    { text: 'copyrightPrivacy' },
+    { text: 'copyrightLegal' },
+    { text: 'copyrightContact' }
+  ];
   return (
-    <footer className={styles.Footer}>
-      <a href=".">{resources.messages['copyrightAbout']}</a>
-      <a href=".">{resources.messages['copyrightLanguage']}</a>
-      <a href=".">{resources.messages['copyrightResources']}</a>
-      <a href=".">{resources.messages['copyrightCookies']}</a>
-      <a href=".">{resources.messages['copyrightPrivacy']}</a>
-      <a href=".">{resources.messages['copyrightLegal']}</a>
-      <a href=".">{resources.messages['copyrightContact']}</a>
-    </footer>
+    <React.Fragment>
+      <footer className={`${styles.FooterExpanded} ${styles.Footer}`}>
+        {footerLinks.map((footerLink, i) => (
+          <>
+            <a href=".">{resources.messages[footerLink.text]}</a> {i < footerLinks ? '·' : ''}
+          </>
+        ))}
+      </footer>
+    </React.Fragment>
   );
 };

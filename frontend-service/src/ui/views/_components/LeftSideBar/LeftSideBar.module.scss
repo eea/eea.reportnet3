@@ -1,0 +1,172 @@
+.searchInput {
+  margin-bottom: 1rem;
+  width: 90%;
+}
+
+.columnButton {
+  width: 90%;
+  font-size: 0.9rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
+
+.leftSideBar {
+  position: fixed;
+  height: calc(100% - var(--header-height));
+  width: 50px;
+  z-index: 1;
+  left: 0;
+  top: var(--header-height);
+  background-color: var(--c-corporate-blue);
+  transition: 0.5s;
+  overflow-x: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: hidden;
+  .barSection {
+    height: 75%;
+    flex: auto;
+    padding: 1rem 0;
+    &:first-of-type {
+      height: 10%;
+    }
+    &:last-of-type {
+      height: 15%;
+      padding-top: 0;
+    }
+    a {
+      padding: 8px;
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: var(--white);
+      display: block;
+      &:first-of-type {
+        top: 1rem;
+        color: var(--white);
+      }
+      &:nth-of-type(2) {
+        font-style: italic;
+        color: var(--white);
+      }
+      &:nth-of-type(3) {
+        color: var(--white);
+      }
+      &:last-of-type {
+        bottom: 2rem;
+      }
+      i {
+        margin-right: 12px;
+      }
+      &:hover {
+        color: var(--gray-15);
+      }
+    }
+    img {
+      &:first-child {
+        margin-right: 12px;
+      }
+    }
+    .notificationCounter {
+      position: absolute;
+      left: 25px;
+      background-color: var(--errors);
+      color: var(--white);
+      border-radius: 3px;
+      padding: 1px 3px;
+      font: 8px Verdana;
+    }
+  }
+
+  hr {
+    width: 80%;
+    border-color: var(--gray-15);
+  }
+
+  &.open {
+    width: 200px;
+  }
+}
+
+.leftSideBar a .leftSideBar a:hover:not(:first-child) {
+  color: var(--white);
+}
+
+.leftSideBarText {
+  font-size: 14px;
+}
+
+.leftSideBarTextTitle {
+  font-size: 22px;
+}
+
+.leftSideBarUserText {
+  font-size: 14px;
+}
+
+.leftSideBarUserIcon {
+  margin-right: 12px;
+}
+
+.leftSideBarElementWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.leftSideBarElementAnimation {
+  transition: transform 0.8s ease-in-out;
+}
+
+.leftSideBarElementAnimation:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+  /* transform: rotate(180deg); */
+}
+
+.leftSideBarLogo:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+}
+
+.notificationList {
+  position: fixed;
+  background-color: var(--white);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  left: 3rem;
+  border: 2px solid var(--gray-50);
+  z-index: 9999;
+  max-height: 200px;
+}
+.notificationList li {
+  font-size: 12pt;
+  color: var(--black);
+  list-style: none;
+}
+
+.notificationList li:hover {
+  background-color: var(--gray-50);
+}
+
+/* .notificationCounter:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+} */
+
+@keyframes blink {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}

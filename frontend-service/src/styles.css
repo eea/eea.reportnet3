@@ -3490,41 +3490,7 @@ body .p-lightbox .p-lightbox-content-wrapper .p-lightbox-content.p-lightbox-load
   display: none;
 }
 
-body .p-breadcrumb {
-  background-color: var(--blue-120);
-  border-bottom: 5px solid var(--yellow-120);
-  padding: 0.571em 1em;
-}
-body .p-breadcrumb ul li .p-menuitem-link {
-  color: #ffffff;
-  margin: 0;
-  -moz-transition: box-shadow 0.2s;
-  -o-transition: box-shadow 0.2s;
-  -webkit-transition: box-shadow 0.2s;
-  transition: box-shadow 0.2s;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
-  cursor: pointer;
-}
-body .p-breadcrumb ul li .p-menuitem-link:focus {
-  outline: 0 none;
-  outline-offset: 0;
-  /*-webkit-box-shadow: 0 0 0 0.2em #004494;
-  -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;*/
-}
-body .p-breadcrumb ul li.p-breadcrumb-chevron {
-  margin: 0 0.5em 0 0.5em;
-  color: #ffffff;
-}
-body .p-breadcrumb ul li:first-child a {
-  color: #ffffff;
-  margin: 0;
-}
-body .p-breadcrumb ul li .p-menuitem-icon {
-  color: #ffffff;
-}
+
 body .p-steps {
   position: relative;
 }
