@@ -131,7 +131,7 @@ class DropdownFilter extends React.Component {
       const selectAllField = fields.find(field => field.key === fieldKey);
 
       if (selectAllField) {
-        const newFields = fields.map(field => {
+        let newFields = fields.map(field => {
           if (field.key === 'selectAll') {
             field.checked = !field.checked;
           } else {
@@ -140,8 +140,6 @@ class DropdownFilter extends React.Component {
 
           return field;
         });
-
-        // SOLVE PROBLEM WITH CORRECT ERROR CALL
 
         this.setState(
           state => {
@@ -153,13 +151,11 @@ class DropdownFilter extends React.Component {
 
           () => {
             if (!isUndefined(this.props.showFilters)) {
-              this.props.showFilters(this.state.fields.filter(field => field.checked).map(field => field.key));
+              this.props.showFilters(this.filterOutCheckedFields());
             }
 
             if (!isUndefined(this.props.showNotCheckedFilters)) {
-              this.props.showNotCheckedFilters(
-                this.state.fields.filter(field => !field.checked).map(field => field.key)
-              );
+              this.props.showNotCheckedFilters(this.filterUncheckedFields());
             }
           }
         );
@@ -184,15 +180,23 @@ class DropdownFilter extends React.Component {
         },
         () => {
           if (!isUndefined(this.props.showFilters)) {
-            this.props.showFilters(this.state.fields.filter(field => field.checked).map(field => field.key));
+            this.props.showFilters(this.filterOutCheckedFields());
           }
 
           if (!isUndefined(this.props.showNotCheckedFilters)) {
-            this.props.showNotCheckedFilters(this.state.fields.filter(field => !field.checked).map(field => field.key));
+            this.props.showNotCheckedFilters(this.filterUncheckedFields());
           }
         }
       );
     }
+  }
+
+  filterUncheckedFields() {
+    return this.state.fields.filter(field => !field.checked).map(field => field.key);
+  }
+
+  filterOutCheckedFields() {
+    return this.state.fields.filter(field => field.checked).map(field => field.key);
   }
 
   hasAnyUncheckedField(filters) {
