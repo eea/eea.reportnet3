@@ -242,7 +242,6 @@ const Representative = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      console.log('[dataflow]: ', dataflow);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
       if (!isEmpty(dataflow.designDatasets)) {

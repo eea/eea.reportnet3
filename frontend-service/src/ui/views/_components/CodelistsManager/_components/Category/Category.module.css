@@ -8,6 +8,11 @@
 .categoryInput {
   width: 90%;
 }
+
+.categoryIncorrectInput {
+  border: 2px solid var(--errors) !important;
+}
+
 .categoryInput:first-child {
   margin: 0 0 0 2rem;
 }
