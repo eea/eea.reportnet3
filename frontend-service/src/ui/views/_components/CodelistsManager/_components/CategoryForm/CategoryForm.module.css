@@ -1,0 +1,8 @@
+.categoryInput {
+  margin: 2rem;
+  width: 90%;
+}
+
+.categoryIncorrectInput {
+  border: 2px solid var(--errors) !important;
+}

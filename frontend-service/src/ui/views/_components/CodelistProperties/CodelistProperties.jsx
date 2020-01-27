@@ -11,13 +11,17 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const CodelistProperties = ({
-  checkDuplicates,
   categoriesDropdown,
+  checkDuplicates,
+  initialCategory,
   isCloning = false,
   isEmbedded = true,
+  isIncorrect = false,
+  onToggleIncorrect,
   onEditorPropertiesInputChange,
   onKeyChange,
-  state
+  state,
+  toggleCategoryChange
 }) => {
   const [initialStatus, setInitialStatus] = useState();
   const resources = useContext(ResourcesContext);
@@ -56,7 +60,10 @@ const CodelistProperties = ({
             appendTo={document.body}
             className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
             disabled={initialStatus !== 'design'}
-            onChange={e => onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId')}
+            onChange={e => {
+              toggleCategoryChange(e.target.value.value !== initialCategory);
+              onEditorPropertiesInputChange(e.target.value.value, 'codelistCategoryId');
+            }}
             optionLabel="categoryType"
             options={categoriesDropdown}
             // required={true}
@@ -67,12 +74,17 @@ const CodelistProperties = ({
       ) : null}
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
+          className={isIncorrect ? styles.codelistIncorrectInput : null}
           disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="nameInput"
           onBlur={() =>
-            checkDuplicates(
-              !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
-              !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion
+            onToggleIncorrect(
+              checkDuplicates(
+                !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
+                !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion,
+                !isCloning ? state.codelistId : state.clonedCodelist.codelistId,
+                isCloning
+              )
             )
           }
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistName')}
@@ -83,12 +95,17 @@ const CodelistProperties = ({
       </span>
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
+          className={isIncorrect ? styles.codelistIncorrectInput : null}
           disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="versionInput"
           onBlur={() =>
-            checkDuplicates(
-              !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
-              !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion
+            onToggleIncorrect(
+              checkDuplicates(
+                !isCloning ? state.codelistName : state.clonedCodelist.codelistName,
+                !isCloning ? state.codelistVersion : state.clonedCodelist.codelistVersion,
+                !isCloning ? state.codelistId : state.clonedCodelist.codelistId,
+                isCloning
+              )
             )
           }
           onChange={e => onEditorPropertiesInputChange(e.target.value, 'codelistVersion')}

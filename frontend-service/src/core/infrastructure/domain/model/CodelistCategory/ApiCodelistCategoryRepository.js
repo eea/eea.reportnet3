@@ -24,7 +24,7 @@ const all = async () => {
             : [];
           return new Codelist(
             codelistDTO.id,
-            codelistDTO.shortCode,
+            codelistDTO.name,
             codelistDTO.description,
             codelistDTO.version,
             codelistDTO.status,

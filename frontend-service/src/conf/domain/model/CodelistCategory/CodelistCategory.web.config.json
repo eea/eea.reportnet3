@@ -1,5 +1,5 @@
 {
-    "all":  "/codelist/category/all",
+    "all":  "/codelist/category/complete",
     "add": "/codelist/category",
     "delete": "/codelist/category/{:codelistCategoryId}",
     "getCategoryInfo":"/codelist/category/{:codelistCategoryId}",
