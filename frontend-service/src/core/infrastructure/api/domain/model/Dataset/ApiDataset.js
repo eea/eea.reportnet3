@@ -209,6 +209,7 @@ export const apiDataset = {
     });
     return response.data;
   },
+
   errorsById: async (
     datasetId,
     pageNum,
@@ -353,8 +354,6 @@ export const apiDataset = {
     return response.data;
   },
   tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
-    let errors = levelError.map(error => error.toUpperCase());
-    levelError = errors.join(',');
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
