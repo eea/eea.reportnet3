@@ -7,17 +7,22 @@ import styles from './MainLayout.module.css';
 import { Footer } from './_components';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
-import { Notifications } from 'ui/views/_components/Notifications';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
 import { UserService } from 'core/services/User';
+
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children, leftSideBarConfig }) => {
-  const [margin, setMargin] = useState('50px');
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
+
+  const [margin, setMargin] = useState('50px');
+
   useEffect(() => {
     async function fetchData() {
       if (isUndefined(user.id)) {
@@ -39,22 +44,19 @@ const MainLayout = ({ children, leftSideBarConfig }) => {
     bodySelector.style.overflow = 'hidden auto';
   }, []);
 
-  const onToggleSideBar = hover => {
-    if (hover) {
+  useEffect(() => {
+    if (breadCrumbContext.isLeftSideBarOpened) {
       setMargin('200px');
     } else {
       setMargin('50px');
     }
-  };
+  }, [breadCrumbContext]);
+
+  const onToggleSideBar = hover => {};
 
   useSocket();
   return (
     <Fragment>
-      {/* <Navigation /> */}
-      {/* <div className={styles.disclaimer}>
-        <span className="p-messages-icon pi  pi-info-circle"></span>
-        {resources.messages['disclaimerTitle']}
-      </div> */}
       <Header />
       <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
         <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />

@@ -23,56 +23,75 @@
   background-color: var(--c-corporate-blue);
   transition: 0.5s;
   overflow-x: hidden;
-  padding-top: 45px;
   white-space: nowrap;
   cursor: pointer;
+  overflow: hidden;
+  .barSection {
+    height: 75%;
+    flex: auto;
+    padding: 1rem 0;
+    &:first-of-type {
+      height: 10%;
+    }
+    &:last-of-type {
+      height: 15%;
+      padding-top: 0;
+    }
+    a {
+      padding: 8px;
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: var(--white);
+      display: block;
+      &:first-of-type {
+        top: 1rem;
+        color: var(--white);
+      }
+      &:nth-of-type(2) {
+        font-style: italic;
+        color: var(--white);
+      }
+      &:nth-of-type(3) {
+        color: var(--white);
+      }
+      &:last-of-type {
+        bottom: 2rem;
+      }
+      i {
+        margin-right: 12px;
+      }
+      &:hover {
+        color: var(--gray-15);
+      }
+    }
+    img {
+      &:first-child {
+        margin-right: 12px;
+      }
+    }
+    .notificationCounter {
+      position: absolute;
+      left: 25px;
+      background-color: var(--errors);
+      color: var(--white);
+      border-radius: 3px;
+      padding: 1px 3px;
+      font: 8px Verdana;
+    }
+  }
+
+  hr {
+    width: 80%;
+    border-color: var(--gray-15);
+  }
+
+  &.open {
+    width: 200px;
+  }
 }
 
-.leftSideBar a:first-child {
-  position: absolute;
-  top: 0;
+.leftSideBar a .leftSideBar a:hover:not(:first-child) {
   color: var(--white);
-}
-
-.leftSideBar a:nth-child(2) {
-  font-style: italic;
-  color: var(--white);
-  margin-top: 3rem;
-}
-
-.leftSideBar a:nth-child(3) {
-  /* margin-bottom: 2rem; */
-  color: var(--white);
-}
-
-.leftSideBar a:last-child {
-  position: absolute;
-  bottom: 0;
-  margin-bottom: 3rem;
-}
-
-.leftSideBar img:first-child {
-  margin-right: 12px;
-}
-
-.leftSideBar a {
-  padding: 8px;
-  text-decoration: none;
-  font-size: 25px;
-  color: var(--gray-50);
-  display: block;
-}
-
-.leftSideBar a i {
-  margin-right: 12px;
-}
-
-.leftSideBar a:hover:not(:first-child) {
-  color: var(--white);
-}
-
-.leftSideBar:hover {
-  width: 200px;
 }
 
 .leftSideBarText {
@@ -109,36 +128,6 @@
 .leftSideBarLogo:hover {
   transition: 0.3s ease-in;
   animation: blink 0.3s;
-}
-
-.leftSideBarButtonSeparator {
-  width: 85%;
-}
-
-.leftSideBarButtonFirstSeparator {
-  width: 85%;
-  position: absolute;
-  top: 0;
-  margin-left: 5%;
-  margin-top: 14rem;
-}
-
-.leftSideBarButtonLastSeparator {
-  width: 85%;
-  position: absolute;
-  bottom: 0;
-  margin-left: 5%;
-  margin-bottom: 7rem;
-}
-
-.notificationCounter {
-  position: absolute;
-  left: 25px;
-  background-color: var(--errors);
-  color: var(--white);
-  border-radius: 3px;
-  padding: 1px 3px;
-  font: 8px Verdana;
 }
 
 .notificationList {

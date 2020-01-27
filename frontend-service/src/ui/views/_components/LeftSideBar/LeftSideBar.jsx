@@ -3,20 +3,17 @@ import { withRouter, Link } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
 
-import styles from './LeftSideBar.module.css';
+import styles from './LeftSideBar.module.scss';
 
 import { routes } from 'ui/routes';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { Button } from 'ui/views/_components/Button';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
 
-import logo from 'assets/images/EEA_agency_logo.svg';
-
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -24,13 +21,10 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
-  const setVisibleHandler = (fnUseState, visible) => {
-    fnUseState(visible);
-  };
 
   const renderUserProfile = () => (
     <a
@@ -113,18 +107,34 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   );
 
   return (
-    <div
-      className={styles.leftSideBar}
-      onMouseOver={() => onToggleSideBar(true)}
-      onMouseOut={() => onToggleSideBar(false)}>
+    <div className={`${styles.leftSideBar}${breadCrumbContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
       {
         <>
-          {renderUserProfile()}
-          {renderUserNotifications()}
-          <hr className={styles.leftSideBarButtonSeparator} />
-          {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
-          <hr className={styles.leftSideBarButtonLastSeparator} />
-          {renderLogout()}
+          <div class={styles.barSection}>
+            {renderUserProfile()}
+            {renderUserNotifications()}
+          </div>
+          <hr />
+          <div class={styles.barSection}>
+            {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
+          </div>
+          <hr />
+          <div class={styles.barSection}>
+            {renderLogout()}
+            <div className={styles.leftSideBarElementWrapper}>
+              <a
+                onClick={e => {
+                  e.preventDefault();
+                  breadCrumbContext.setMenuState();
+                }}>
+                {breadCrumbContext.isLeftSideBarOpened ? (
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} />
+                ) : (
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} />
+                )}
+              </a>
+            </div>
+          </div>
         </>
       }
     </div>

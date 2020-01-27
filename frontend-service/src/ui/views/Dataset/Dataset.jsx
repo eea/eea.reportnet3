@@ -390,8 +390,6 @@ export const Dataset = withRouter(({ match, history }) => {
       const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
       return codelistsList;
     } catch (error) {
-      console.log('AQUI');
-      console.log(error);
       throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
     }
   };
