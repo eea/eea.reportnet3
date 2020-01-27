@@ -75,7 +75,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     fieldDescription,
     codelistId,
     codelistName,
-    codelistVersion
+    codelistVersion,
+    codelistItems
   ) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
@@ -86,7 +87,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       description: fieldDescription,
       codelistId,
       codelistName,
-      codelistVersion
+      codelistVersion,
+      codelistItems
     });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
@@ -104,7 +106,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     fieldDescription,
     codelistId,
     codelistName,
-    codelistVersion
+    codelistVersion,
+    codelistItems
   ) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
@@ -115,6 +118,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       inmFields[fieldIndex].codelistId = codelistId;
       inmFields[fieldIndex].codelistName = codelistName;
       inmFields[fieldIndex].codelistVersion = codelistVersion;
+      inmFields[fieldIndex].codelistItems = codelistItems;
 
       setFields(inmFields);
     }
@@ -133,7 +137,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       setTableDescriptionValue(initialTableDescription);
     } else if (event.key == 'Enter') {
       event.preventDefault();
-      //API CALL
       updateTableDescriptionDesign();
     }
   };
@@ -149,7 +152,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const deleteField = async deletedFieldIndx => {
-    // setIsLoading(true);
     try {
       const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndx].fieldId);
       if (fieldDeleted) {
@@ -163,7 +165,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     } catch (error) {
       console.error('Error during field delete');
     } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -191,7 +192,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
 
           return field;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           // notificationContext.add({
           //   type: 'CLONE_CODELIST_ERROR',
           //   content: {
@@ -204,7 +205,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
         return field;
       }
     });
-    console.log({ tableFieldsWithCodelistData });
     Promise.all(tableFieldsWithCodelistData).then(completeFields => {
       setFields(completeFields);
     });

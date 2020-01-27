@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined, remove } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -61,9 +61,11 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
+  const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
@@ -112,8 +114,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     setLoading(true);
-    onLoadReportingDataflow();
     onLoadDataflowsData();
+    onLoadReportingDataflow();
+    onLoadSchemasValidations();
   }, [match.params.dataflowId, isDataUpdated]);
 
   useEffect(() => {
@@ -252,12 +255,20 @@ const Dataflow = withRouter(({ history, match }) => {
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
     } catch (error) {
+      notificationContext.add({
+        type: 'RELEASED_BY_ID_REPORTER_ERROR',
+        content: {}
+      });
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const onLoadSchemasValidations = async () => {
+    setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
   };
 
   const onLoadSnapshotList = async datasetId => {
@@ -381,6 +392,8 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={match.params.dataflowId}
           designDatasetSchemas={designDatasetSchemas}
           isCustodian={isCustodian}
+          isDataSchemaCorrect={isDataSchemaCorrect}
+          hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
           onUpdateData={onUpdateData}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
@@ -396,7 +409,7 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
+          <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
         </Dialog>
 
         <Dialog
