@@ -1,4 +1,4 @@
-package org.eea.recordstore.io.notification.event;
+package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
