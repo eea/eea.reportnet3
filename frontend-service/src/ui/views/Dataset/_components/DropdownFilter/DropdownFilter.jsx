@@ -123,6 +123,8 @@ class DropdownFilter extends React.Component {
     const { fields } = this.state;
     const { disabled } = this.props;
 
+    let newFields;
+
     if (disabled) {
       return;
     }
@@ -131,7 +133,7 @@ class DropdownFilter extends React.Component {
       const selectAllField = fields.find(field => field.key === fieldKey);
 
       if (selectAllField) {
-        let newFields = fields.map(field => {
+        newFields = fields.map(field => {
           if (field.key === 'selectAll') {
             field.checked = !field.checked;
           } else {
@@ -140,28 +142,9 @@ class DropdownFilter extends React.Component {
 
           return field;
         });
-
-        this.setState(
-          state => {
-            return {
-              ...state,
-              fields: newFields
-            };
-          },
-
-          () => {
-            if (!isUndefined(this.props.showFilters)) {
-              this.props.showFilters(this.filterOutCheckedFields());
-            }
-
-            if (!isUndefined(this.props.showNotCheckedFilters)) {
-              this.props.showNotCheckedFilters(this.filterUncheckedFields());
-            }
-          }
-        );
       }
     } else {
-      let newFields = fields.map(field => {
+      newFields = fields.map(field => {
         if (field.key === fieldKey) {
           field.checked = !field.checked;
         }
@@ -170,25 +153,25 @@ class DropdownFilter extends React.Component {
       });
 
       newFields = this.uncheckSelectAllIfHasAnyUncheckedFilter(newFields);
-
-      this.setState(
-        state => {
-          return {
-            ...state,
-            fields: newFields
-          };
-        },
-        () => {
-          if (!isUndefined(this.props.showFilters)) {
-            this.props.showFilters(this.filterOutCheckedFields());
-          }
-
-          if (!isUndefined(this.props.showNotCheckedFilters)) {
-            this.props.showNotCheckedFilters(this.filterUncheckedFields());
-          }
-        }
-      );
     }
+
+    this.setState(
+      state => {
+        return {
+          ...state,
+          fields: newFields
+        };
+      },
+      () => {
+        if (!isUndefined(this.props.showFilters)) {
+          this.props.showFilters(this.filterOutCheckedFields());
+        }
+
+        if (!isUndefined(this.props.showNotCheckedFilters)) {
+          this.props.showNotCheckedFilters(this.filterUncheckedFields());
+        }
+      }
+    );
   }
 
   filterUncheckedFields() {
