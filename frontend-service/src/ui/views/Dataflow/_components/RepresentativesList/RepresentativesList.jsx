@@ -79,7 +79,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
         <input
           className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
-          id={isEmpty(inputData) && 'emptyInput'}
+          id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
             representative.providerAccount = representative.providerAccount.toLowerCase();
             onAddProvider(formDispatcher, formState, representative, dataflowId);
