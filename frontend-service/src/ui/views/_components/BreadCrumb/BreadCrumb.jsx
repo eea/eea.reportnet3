@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
+
+import styles from './BreadCrumb.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import './BreadCrumb.module.css';
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 
-export const BreadCrumb = ({ className, id, model, style }) => {
+export const BreadCrumb = ({ className, id, style }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const onItemClick = (event, item) => {
     if (item.disabled) {
       event.preventDefault();
@@ -25,7 +28,7 @@ export const BreadCrumb = ({ className, id, model, style }) => {
   };
 
   const onLoadItem = item => {
-    const className = (item.className, { 'p-disabled': item.disabled });
+    const className = '';
 
     return (
       <li role="menuitem" className={className} style={item.style}>
@@ -45,6 +48,7 @@ export const BreadCrumb = ({ className, id, model, style }) => {
   };
 
   const onLoadModel = () => {
+    const { model } = breadCrumbContext;
     if (model) {
       const items = model.map((item, index) => {
         const menuitem = onLoadItem(item, index);
@@ -69,7 +73,7 @@ export const BreadCrumb = ({ className, id, model, style }) => {
   };
 
   return (
-    <div id={id} className={`p-breadcrumb p-component, ${className}`} style={style}>
+    <div id={id} className={`${styles.container} ${className ? className : ''}`} style={style}>
       <ul>{onLoadModel()}</ul>
     </div>
   );

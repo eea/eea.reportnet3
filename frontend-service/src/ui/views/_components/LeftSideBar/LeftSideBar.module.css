@@ -20,7 +20,7 @@
   z-index: 1;
   left: 0;
   top: 0;
-  background-color: var(--blue-120);
+  background-color: var(--c-corporate-blue);
   transition: 0.5s;
   overflow-x: hidden;
   padding-top: 45px;
@@ -141,24 +141,24 @@
   font: 8px Verdana;
 }
 
-.notificationList{
+.notificationList {
   position: fixed;
   background-color: var(--white);
   display: flex;
   justify-content: center;
   flex-direction: column;
-  left:3rem;
-  border:2px solid var(--gray-50);
+  left: 3rem;
+  border: 2px solid var(--gray-50);
   z-index: 9999;
   max-height: 200px;
 }
-.notificationList li{
+.notificationList li {
   font-size: 12pt;
   color: var(--black);
   list-style: none;
 }
 
-.notificationList li:hover{
+.notificationList li:hover {
   background-color: var(--gray-50);
 }
 

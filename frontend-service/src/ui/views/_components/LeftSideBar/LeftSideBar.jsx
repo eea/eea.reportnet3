@@ -32,22 +32,6 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
     fnUseState(visible);
   };
 
-  const renderTitle = () => (
-    <a
-      href={getUrl(routes.DATAFLOWS)}
-      className={styles.appLogo}
-      title={resources.messages['titleHeader']}
-      onClick={e => {
-        e.preventDefault();
-        //history.push(getUrl(routes.DATAFLOWS));
-      }}>
-      <div className={styles.leftSideBarElementWrapper}>
-        <img height="30px" src={logo} alt={resources.messages['titleHeader']} className={styles.leftSideBarLogo} />
-        <span className={styles.leftSideBarTextTitle}>{resources.messages['titleHeader']}</span>
-      </div>
-    </a>
-  );
-
   const renderUserProfile = () => (
     <a
       href="#userProfilePage"
@@ -134,16 +118,14 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onMouseOver={() => onToggleSideBar(true)}
       onMouseOut={() => onToggleSideBar(false)}>
       {
-        <React.Fragment>
-          {renderTitle()}
-          {/* <hr className={styles.leftSideBarButtonFirstSeparator} /> */}
+        <>
           {renderUserProfile()}
           {renderUserNotifications()}
           <hr className={styles.leftSideBarButtonSeparator} />
           {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
           <hr className={styles.leftSideBarButtonLastSeparator} />
           {renderLogout()}
-        </React.Fragment>
+        </>
       }
     </div>
   );

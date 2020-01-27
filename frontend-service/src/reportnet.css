@@ -86,6 +86,8 @@
   --c-chart-warning: #ffcc00;
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
+
+  --header-height: 4rem;
 }
 body {
   margin: 0px;
