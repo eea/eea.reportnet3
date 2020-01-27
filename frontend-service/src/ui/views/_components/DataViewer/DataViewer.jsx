@@ -464,7 +464,17 @@ const DataViewer = withRouter(
       }
     };
 
+    const removeSelectAllFromList = levelErrorValidations => {
+      levelErrorValidations = levelErrorValidations
+        .map(error => error.toUpperCase())
+        .filter(error => error !== 'SELECTALL')
+        .join(',');
+      return levelErrorValidations;
+    };
+
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
+      levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
+
       setIsLoading(true);
       try {
         let fields;

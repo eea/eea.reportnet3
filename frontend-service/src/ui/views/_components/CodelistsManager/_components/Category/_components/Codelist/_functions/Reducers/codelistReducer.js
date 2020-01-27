@@ -28,10 +28,12 @@ export const codelistReducer = (state, { type, payload }) => {
       return { ...state, isAddEditCodelistVisible: payload.visible, formType: payload.formType };
     case 'TOGGLE_EDITING_CODELIST_ITEM':
       return { ...state, isEditing: payload };
-    case 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE':
-      return { ...state, isDeleteCodelistItemVisible: payload };
+    case 'TOGGLE_CATEGORY_CHANGED':
+      return { ...state, isCategoryChanged: payload };
     case 'TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE':
       return { ...state, isCloneCodelistVisible: payload };
+    case 'TOGGLE_DELETE_CODELIST_ITEM_VISIBLE':
+      return { ...state, isDeleteCodelistItemVisible: payload };
     case 'TOGGLE_ERROR_DIALOG_VISIBLE':
       return {
         ...state,
@@ -48,7 +50,6 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'SET_NEW_CODELIST_ITEM':
       return { ...state, newItem: { ...state.newItem, [payload.property]: payload.value } };
     case 'SET_ERRORS_DIALOG':
-      console.log(state.error.isCodelistErrorVisible);
       return {
         ...state,
         error: {

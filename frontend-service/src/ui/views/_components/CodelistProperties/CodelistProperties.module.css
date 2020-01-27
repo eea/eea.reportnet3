@@ -1,12 +1,10 @@
-.inputsWrapper {
-  display: flex;
-  flex-direction: column;
-  margin-left: 1.5rem;
-}
-
 .codelistInput {
   margin: 1.5rem 0 0 2rem;
   width: 33%;
+}
+
+.codelistIncorrectInput {
+  border: 2px solid var(--errors) !important;
 }
 
 .codelistInputTextarea {
@@ -46,4 +44,10 @@
   line-height: 1;
   margin-left: 0.25rem;
   margin-bottom: 0.15rem;
+}
+
+.inputsWrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
 }
