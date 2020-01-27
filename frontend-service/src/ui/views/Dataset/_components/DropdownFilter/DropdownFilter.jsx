@@ -152,7 +152,7 @@ class DropdownFilter extends React.Component {
         return field;
       });
 
-      newFields = this.uncheckSelectAllIfHasAnyUncheckedFilter(newFields);
+      newFields = this.controlSelectAllChecked(newFields);
     }
 
     this.setState(
@@ -197,7 +197,7 @@ class DropdownFilter extends React.Component {
     return result;
   }
 
-  uncheckSelectAllIfHasAnyUncheckedFilter(newFields) {
+  controlSelectAllChecked(newFields) {
     if (this.hasAnyUncheckedField(newFields)) {
       newFields = newFields.map(field => {
         if (field.key !== 'selectAll') {
@@ -208,6 +208,33 @@ class DropdownFilter extends React.Component {
         }
       });
     }
+
+    const whenSelectAllIsTheOnlyOneUnchecked = fields => {
+      let isSelectAllChecked = false;
+      let isAnyOtherFieldUnchecked = false;
+
+      fields.forEach(field => {
+        if (field.key !== 'selectAll') {
+          if (field.checked === false) {
+            isAnyOtherFieldUnchecked = true;
+          }
+        } else {
+          isSelectAllChecked = field.checked;
+        }
+      });
+
+      if (isSelectAllChecked === false && isAnyOtherFieldUnchecked === false) {
+        newFields = fields.map(field => {
+          if (field.key === 'selectAll') {
+            field.checked = true;
+          }
+          return field;
+        });
+      }
+    };
+
+    whenSelectAllIsTheOnlyOneUnchecked(newFields);
+
     return newFields;
   }
 
