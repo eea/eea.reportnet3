@@ -409,7 +409,7 @@
 		"codelistServiceGetCodelistsIdsBySchemas":"Error loading codelists of schema",
 		"codelistServiceGetCodelistsByIds": "Error loading codelists of schema",
 		"codelistServiceUpdateByIdError": "Error saving codelist",
-		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing snapshot at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
+		"releaseDatasetSnapshotFailedEvent": "Failed creating and releasing <strong title='{:snapshotName}'>{:shortSnapshotName}</strong>",
 		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"userServiceOldLoginError": "Login failed. Network?",
 		"createDataCollectionInit": "Creating data collection"
