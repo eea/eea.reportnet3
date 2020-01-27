@@ -1,14 +1,14 @@
 import React from 'react';
-
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import isUndefined from 'lodash/isUndefined';
+
+import styles from './DropdownFilter.module.css';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import styles from './DropdownFilter.module.css';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 class DropdownFilter extends React.Component {
   static defaultProps = {
@@ -49,7 +49,7 @@ class DropdownFilter extends React.Component {
 
       const selectAllField = {
         checked: true,
-        label: 'Select All',
+        label: this.context.messages['selectAll'],
         key: 'selectAll'
       };
 
@@ -248,5 +248,6 @@ class DropdownFilter extends React.Component {
     );
   }
 }
+DropdownFilter.contextType = ResourcesContext;
 
 export { DropdownFilter };
