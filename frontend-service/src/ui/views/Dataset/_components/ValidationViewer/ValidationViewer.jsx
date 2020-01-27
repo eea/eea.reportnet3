@@ -154,10 +154,10 @@ const ValidationViewer = React.memo(
 
     const onLoadTypeEntitiesFilter = () => {
       const allTypeEntitiesFilterList = [
-        { label: 'Dataset', key: 'Dataset' },
-        { label: 'Table', key: 'Table' },
-        { label: 'Record', key: 'Record' },
-        { label: 'Field', key: 'Field' }
+        { label: resources.messages['dataset'], key: 'Dataset' },
+        { label: resources.messages['table'], key: 'Table' },
+        { label: resources.messages['record'], key: 'Record' },
+        { label: resources.messages['field'], key: 'Field' }
       ];
       setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
     };
