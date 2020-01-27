@@ -1,8 +1,7 @@
 import { useContext } from 'react';
 
-import { isEmpty, isUndefined, uniq } from 'lodash';
+import { isEmpty } from 'lodash';
 
-import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';

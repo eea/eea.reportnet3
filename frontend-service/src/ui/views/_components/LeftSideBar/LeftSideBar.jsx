@@ -1,11 +1,16 @@
 import React, { useState, useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 
 import styles from './LeftSideBar.module.css';
 
+import { routes } from 'ui/routes';
+
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const LeftSideBar = withRouter(
   ({
@@ -45,16 +50,26 @@ const LeftSideBar = withRouter(
         )}
         <div className="navSection">
           {isCustodian && components.includes('createDataflow') ? (
-            <Button
-              className={`${styles.columnButton} p-button-primary`}
-              icon="plus"
-              label={createDataflowButtonTitle}
-              onClick={() => onShowAddForm()}
-              style={{ textAlign: 'left' }}
-            />
+            <React.Fragment>
+              <Button
+                className={`${styles.columnButton} p-button-primary`}
+                icon="plus"
+                label={createDataflowButtonTitle}
+                onClick={() => onShowAddForm()}
+                style={{ textAlign: 'left' }}
+              />
+              <Link to={getUrl(routes.CODELISTS, {}, true)}>
+                <Button
+                  className={styles.columnButton}
+                  icon="plus"
+                  label={resources.messages['manageCodelists']}
+                  style={style}
+                />
+              </Link>
+            </React.Fragment>
           ) : null}
 
-          <Button
+          {/* <Button
             className={styles.columnButton}
             icon="plus"
             label={subscribeButtonTitle}
@@ -63,7 +78,7 @@ const LeftSideBar = withRouter(
             }}
             style={style}
             disabled
-          />
+          />           */}
         </div>
 
         <ConfirmDialog

@@ -1,0 +1,46 @@
+.codelistsActions {
+  display: flex;
+  align-items: center;
+  padding-bottom: 1rem;
+}
+
+.filterSpan {
+  width: 33%;
+}
+
+.inputFilter {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  width: 75% !important;
+}
+
+.inputFilter:enabled:focus,
+.inputFilter:focus {
+  box-shadow: 0 0 0 0 var(--blue-120) !important;
+}
+
+.newCategoryButton {
+  margin-left: auto !important;
+}
+
+.positioning {
+  position: sticky !important;
+}
+
+.switchDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto !important;
+}
+
+.switchTextInput {
+  font-size: 1em;
+  font-weight: bold;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+}

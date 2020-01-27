@@ -112,7 +112,7 @@ public interface DatasetController {
    * @return the table from any object id
    */
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
+  ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "type", required = true) TypeEntityEnum type);
 

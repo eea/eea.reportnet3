@@ -45,9 +45,13 @@ import {
   faCloudUploadAlt,
   faThList,
   faMinus,
+  faEye,
   faLayerGroup,
   faCoins,
-  faSitemap
+  faSitemap,
+  faAngleRight,
+  faAngleDown,
+  faCircleNotch
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -59,7 +63,9 @@ import {
   faQuestionCircle as farQuestionCircle,
   faCircle,
   faMinusSquare,
-  faPlusSquare
+  faPlusSquare,
+  faEyeSlash,
+  faSave
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -150,6 +156,10 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'angleDown':
+      return faAngleDown;
+    case 'angleRight':
+      return faAngleRight;
     case 'arrowDown':
       return faArrowDown;
     case 'arrowUp':
@@ -158,8 +168,14 @@ export const AwesomeIcons = icon => {
       return faToggleOff;
     case 'delete':
       return faTrashAlt;
+    case 'disk':
+      return faSave;
     case 'dropDown':
       return faCaretDown;
+    case 'eye':
+      return faEye;
+    case 'eyeSlash':
+      return faEyeSlash;
     case 'barChart':
       return faChartBar;
     case 'dataset':
@@ -242,6 +258,8 @@ export const AwesomeIcons = icon => {
       return faCoins;
     case 'siteMap':
       return faSitemap;
+    case 'spinner':
+      return faCircleNotch;
     default:
       return faFileAlt;
   }

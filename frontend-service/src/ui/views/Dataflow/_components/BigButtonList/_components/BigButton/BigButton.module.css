@@ -96,7 +96,12 @@
   transform: rotate(90deg);
 }
 .newItem .siteMap {
+  width: 2.5rem;
   transform: rotate(180deg) !important;
+}
+.newItem .spinner {
+  width: 2.5rem;
+  animation: spinnerAnimation 1s linear infinite;
 }
 
 .caption {
@@ -115,4 +120,13 @@
 
 :global .svg-inline--fa {
   min-width: 2rem;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

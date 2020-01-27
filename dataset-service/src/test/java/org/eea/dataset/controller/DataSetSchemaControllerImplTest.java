@@ -24,6 +24,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -692,4 +693,39 @@ public class DataSetSchemaControllerImplTest {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
   }
+
+
+  /**
+   * Test validate schema.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testValidateSchema() throws EEAException {
+
+    Assert.assertFalse(dataSchemaControllerImpl.validateSchema(new ObjectId().toString()));
+
+  }
+
+  /**
+   * Test validate schemas.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testValidateSchemas() throws EEAException {
+    DataFlowVO df = new DataFlowVO();
+    DesignDatasetVO ds = new DesignDatasetVO();
+    ds.setDatasetSchema(new ObjectId().toString());
+    df.setDesignDatasets(new ArrayList<>());
+    df.getDesignDatasets().add(ds);
+    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(df);
+
+    Assert.assertFalse(dataSchemaControllerImpl.validateSchemas(1L));
+
+  }
+
+
 }
+
+

@@ -55,7 +55,7 @@ public interface RecordRepository
    *
    * @return the record value
    */
-  RecordValue findByIdAndTableValue_DatasetId_Id(Long id, Long idDataset);
+  RecordValue findByIdAndTableValue_DatasetId_Id(String id, Long idDataset);
 
   /**
    * Delete record with id.

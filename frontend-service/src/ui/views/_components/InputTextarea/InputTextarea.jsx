@@ -92,7 +92,7 @@ export class InputTextarea extends Component {
 
     if (this.props.expandableOnClick) {
       this.element.style.height = `${this.props.displayedHeight}px`;
-      this.element.style.boxShadow = '0 10px 6px -6px rgba(var(--blue-120-hex), 0.2)';
+      this.element.style.boxShadow = '0 10px 6px -6px rgba(var(--blue-120-rgb), 0.2)';
     }
   }
 
@@ -205,7 +205,10 @@ export class InputTextarea extends Component {
       'p-filled':
         (this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),
-      'p-inputtextarea-resizable': this.props.autoResize
+      'p-inputtextarea-resizable': this.props.autoResize,
+      'p-disabled p-filled':
+        (this.props.disabled && (this.props.value != null && this.props.value.toString().length > 0)) ||
+        (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0)
     });
 
     let textareaProps = ObjectUtils.findDiffKeys(this.props, InputTextarea.defaultProps);

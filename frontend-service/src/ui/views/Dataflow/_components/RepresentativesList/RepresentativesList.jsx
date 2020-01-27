@@ -6,9 +6,10 @@ import styles from './RepresentativesList.module.scss';
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 import {
+  autofocusOnEmptyInput,
+  createUnusedOptionsList,
   getAllDataProviders,
   getInitialData,
-  createUnusedOptionsList,
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
@@ -23,7 +24,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId }) => {
+const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -57,15 +58,16 @@ const RepresentativesList = ({ dataflowId }) => {
   }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
-    if (!isEmpty(formState.representatives)) {
-      if (
-        isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
-        !isNull(document.getElementById('emptyInput'))
-      ) {
-        document.getElementById('emptyInput').focus();
-      }
-    }
+    autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
+
+  useEffect(() => {
+    if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
+      setHasRepresentatives(true);
+    } else {
+      setHasRepresentatives(false);
+    }
+  }, [formState.representatives]);
 
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
@@ -77,7 +79,7 @@ const RepresentativesList = ({ dataflowId }) => {
         <input
           className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
-          id={isEmpty(inputData) ? 'emptyInput' : ''}
+          id={isEmpty(inputData) && 'emptyInput'}
           onBlur={() => {
             representative.providerAccount = representative.providerAccount.toLowerCase();
             onAddProvider(formDispatcher, formState, representative, dataflowId);
@@ -171,10 +173,13 @@ const RepresentativesList = ({ dataflowId }) => {
 
       {!isNull(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
         <DataTable
-          value={formState.representatives}
+          value={
+            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+              ? formState.representatives.filter(representative => representative.representativeId !== null)
+              : formState.representatives
+          }
           scrollable={true}
-          scrollHeight="100vh"
-          rows={formState.allPossibleDataProvidersNoSelect.length}>
+          scrollHeight="100vh">
           <Column
             body={providerAccountInputColumnTemplate}
             header={resources.messages['manageRolesDialogAccountColumn']}

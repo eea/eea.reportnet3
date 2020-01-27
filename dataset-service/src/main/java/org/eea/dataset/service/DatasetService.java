@@ -97,7 +97,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  ValidationLinkVO getPositionFromAnyObjectId(Long id, @DatasetId Long idDataset,
+  ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
       TypeEntityEnum type) throws EEAException;
 
 
