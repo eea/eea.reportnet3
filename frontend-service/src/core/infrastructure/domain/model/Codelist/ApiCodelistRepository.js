@@ -110,8 +110,8 @@ const getCodelistsByIds = async codelistIds => {
       }
       return new Codelist(
         codelistDTO.id,
-        codelistDTO.name,
-        codelistDTO.description,
+        codelistDTO.category.shortCode,
+        codelistDTO.category.description,
         codelistDTO.version,
         codelistDTO.status,
         codelistItems
@@ -122,6 +122,129 @@ const getCodelistsByIds = async codelistIds => {
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
   }
 };
+
+const getCodelistsListWithSchemas = async datasetSchemas => {
+  const codelistIdsWithSchema = await getCodelistsIdsBySchemasWithSchemas(datasetSchemas);
+  if (isEmpty(codelistIdsWithSchema)) {
+    return [];
+  }
+  return codelistIdsWithSchema;
+};
+
+const getCodelistsIdsBySchema = async datasetSchema => {
+  if (isEmpty(datasetSchema)) {
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
+  }
+  try {
+    const codelistIds = [];
+    datasetSchema.tables.map(table => {
+      table.records.map(record => {
+        record.fields.map(field => {
+          if (!isNull(field.codelistId)) {
+            codelistIds.push(field.codelistId);
+          }
+        });
+      });
+    });
+    // }
+    return codelistIds;
+  } catch (error) {
+    console.log({ error });
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
+  }
+};
+
+const getCodelistsIdsBySchemasWithSchemas = async datasetSchemas => {
+  if (isEmpty(datasetSchemas)) {
+    console.log(datasetSchemas);
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
+  }
+  try {
+    const codelistList = datasetSchemas.map(async schema => {
+      const codelist = {};
+      let ids = await getCodelistsIdsBySchema(schema);
+      codelist.codelists = await getCodelistsByCodelistsIds(ids);
+      codelist.schema = schema;
+      return codelist;
+    });
+    return Promise.all(codelistList).then(codelistsListWithSchemas => codelistsListWithSchemas);
+  } catch (error) {
+    console.log({ error });
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
+  }
+};
+
+const getCodelistsByCodelistsIds = async codelistIds => {
+  if (isEmpty(codelistIds)) {
+    return [];
+  }
+  try {
+    const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
+    let codelistItems = [];
+    codelistsDTO.data.sort((a, b) => a.id - b.id);
+    const codelists = codelistsDTO.data.map(codelistDTO => {
+      if (!isEmpty(codelistDTO.items)) {
+        codelistItems = codelistDTO.items.map(
+          itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+        );
+      }
+      return new Codelist(
+        codelistDTO.id,
+        codelistDTO.name,
+        codelistDTO.description,
+        codelistDTO.version,
+        codelistDTO.status,
+        codelistItems
+      );
+    });
+    return codelists;
+  } catch (error) {
+    console.log({ error });
+    throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
+  }
+};
+
+// const getCodelistsByIdsBySchema = async codelistList => {
+//   if (isEmpty(codelistList)) {
+//     return [];
+//   }
+//   try {
+//     const codelistListWithSchemas = [];
+//     codelistList.forEach(async codelistsWithIdsAndSchema => {
+//       codelistListWithSchemas.push(await getCodelistWithSchemaByIdsBySchema(codelistsWithIdsAndSchema));
+//     });
+//     console.log({ codelistListWithSchemas });
+//     return codelistList;
+//   } catch (error) {
+//     console.log({ error });
+//     throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
+//   }
+// };
+
+// const getCodelistWithSchemaByIdsBySchema = async codelistsIds => {
+//   const codelistsDTO = await apiCodelist.getAllByIds(codelistsIds);
+//   let codelistItems = [];
+//   codelistsDTO.data.sort((a, b) => a.id - b.id);
+//   const codelists = codelistsDTO.data.map(codelistDTO => {
+//     if (!isEmpty(codelistDTO.items)) {
+//       codelistItems = codelistDTO.items.map(
+//         itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+//       );
+//     }
+//     const codelist = new Codelist(
+//       codelistDTO.id,
+//       codelistDTO.name,
+//       codelistDTO.description,
+//       codelistDTO.version,
+//       codelistDTO.status,
+//       codelistItems
+//     );
+//     const codelistWithSchema = {};
+//     codelistWithSchema.codelist = codelist;
+//     return codelist;
+//   });
+//   return codelists;
+// };
 
 const updateById = async (id, description, items, name, status, version, categoryId) => {
   const categoryDTO = new CodelistCategory(categoryId);
@@ -147,5 +270,6 @@ export const ApiCodelistRepository = {
   deleteById,
   getById,
   getCodelistsList,
+  getCodelistsListWithSchemas,
   updateById
 };

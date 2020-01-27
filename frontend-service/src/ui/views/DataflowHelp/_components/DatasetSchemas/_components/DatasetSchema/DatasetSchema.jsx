@@ -8,7 +8,7 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelistItems;
+      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelists;
       return (
         <div>
           <TreeView
@@ -29,12 +29,20 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   return renderDatasetSchema();
 };
 
-const parseDesignDataset = (design, codelistsList) => {
+const parseDesignDataset = (design, codelistsListWithSchema) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  let codelistItemsView = [];
   let codelistItemsData = [];
+  let codelistsBySchema = [];
+  if (!isUndefined(codelistsListWithSchema)) {
+    codelistsBySchema = codelistsListWithSchema.find(
+      x => x.schema.datasetSchemaName.toString() === design.datasetSchemaName.toString()
+    );
+    if (!isUndefined(codelistsBySchema)) {
+      codelistsBySchema = codelistsBySchema.codelists;
+    }
+  }
 
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
@@ -52,12 +60,12 @@ const parseDesignDataset = (design, codelistsList) => {
           if (!isEmpty(existACodelist)) {
             let fieldCodelist;
             if (fieldDTO.type === 'CODELIST') {
-              if (!isUndefined(codelistsList)) {
-                console.log({ codelistsList });
-                let codelist = codelistsList.find(codelist => codelist.id === fieldDTO.codelistId);
+              if (!isUndefined(codelistsListWithSchema) && !isEmpty(codelistsBySchema)) {
+                let codelist = codelistsBySchema.find(codelist => codelist.id === fieldDTO.codelistId);
                 if (!isUndefined(codelist)) {
-                  console.log({ codelist });
-                  fieldCodelist = `${codelist.name} (v${codelist.version})`;
+                  let codelistView = [];
+                  fieldCodelist = `${codelist.name} (${codelist.version})`;
+                  // codelists.name = fieldCodelist;
                   if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
                     codelist.items.forEach(itemDTO => {
                       let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
@@ -65,20 +73,13 @@ const parseDesignDataset = (design, codelistsList) => {
                         return;
                       }
                       let codelistItemView = {};
-                      codelistItemView.name = fieldCodelist;
-                      codelistItemView.definition = itemDTO.definition;
-                      codelistItemView.label = itemDTO.definition;
                       codelistItemView.shortCode = itemDTO.shortCode;
-                      codelistItemsView.push(codelistItemView);
-
-                      let codelistItemData = {};
-                      codelistItemData.id = itemDTO.id;
-                      codelistItemData.definition = itemDTO.definition;
-                      codelistItemData.label = itemDTO.definition;
-                      codelistItemData.shortCode = itemDTO.shortCode;
-                      codelistItemsData.push(codelistItemData);
+                      codelistItemView.label = itemDTO.definition;
+                      codelistItemView.definition = itemDTO.definition;
+                      codelistView.push(codelistItemView);
                     });
                   }
+                  parsedDataset[fieldCodelist] = codelistView;
                 }
               }
             }
@@ -101,7 +102,6 @@ const parseDesignDataset = (design, codelistsList) => {
       return table;
     });
     parsedDataset.tables = tables;
-    parsedDataset.codelists = codelistItemsView;
   }
   const dataset = {};
   dataset[design.datasetSchemaName] = parsedDataset;
