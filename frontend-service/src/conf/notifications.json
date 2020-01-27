@@ -11,72 +11,61 @@
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"RESTORE_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT",
           "navigateTo":{
             "section": "DATASET_SCHEMA",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"UPLOAD_DOCUMENT_FAILED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"DELETE_DOCUMENT_FAILED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"LOAD_SCHEMA_FAILED_EVENT",
           "navigateTo":{
             "section":"DATASET_SCHEMA",
             "parameters":["datasetId","datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"ADD_RECORDS_BY_ID_ERROR",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
-          "key":"USER_LOGOUT_ERROR",
-          "refresh":false
+          "key":"USER_LOGOUT_ERROR"
         },
         {
-          "key":"TOKEN_REFRESH_ERROR",
-          "refresh":false
+          "key":"TOKEN_REFRESH_ERROR"
         },
         {
-          "key":"DATAFLOW_CREATION_ERROR",
-          "refresh":false
+          "key":"DATAFLOW_CREATION_ERROR"
         },
         {
           "key":"SNAPSHOT_CREATION_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -84,7 +73,6 @@
         },
         {
           "key":"SNAPSHOT_DELETE_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -92,7 +80,6 @@
         },
         {
           "key":"SNAPSHOT_ALL_DESIGNER_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET_SCHEMA",
             "parameters":["dataflowId","datasetId"]
@@ -100,7 +87,6 @@
         },
         {
           "key":"SNAPSHOT_RELEASE_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -108,7 +94,6 @@
         },
         {
           "key":"DATASET_SCHEMA_CREATION_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATAFLOW",
             "parameters":["dataflowId"]
@@ -116,7 +101,6 @@
         },
         {
           "key":"DATAFLOW_DELETE_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATAFLOW",
             "parameters":["dataflowId"]
@@ -124,19 +108,16 @@
         },
         {
           "key":"EXPORT_TABLE_DATA_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
         },
         {
-          "key":"MANAGE_ROLES_ACCOUNT_ERROR",
-          "refresh":false
+          "key":"MANAGE_ROLES_ACCOUNT_ERROR"
         },
         {
           "key":"DELETE_TABLE_DATA_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -144,7 +125,6 @@
         },
         {
           "key":"DELETE_RECORD_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -152,7 +132,6 @@
         },
         {
           "key":"UPDATE_FIELD_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -160,7 +139,6 @@
         },
         {
           "key":"TABLE_DATA_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
@@ -168,43 +146,34 @@
         },
         {
           "key":"UPDATE_RECORDS_BY_ID_ERROR",
-          "refresh":false,
           "navigateTo":{
             "section":"DATASET",
             "parameters":["dataflowId","datasetId"]
           }
         },
         {
-          "key":"DOCUMENT_EDITING_ERROR",
-          "refresh":false
+          "key":"DOCUMENT_EDITING_ERROR"
         },
         {
-          "key":"DOCUMENT_UPLOADING_ERROR",
-          "refresh":false
+          "key":"DOCUMENT_UPLOADING_ERROR"
         },
         {
-          "key":"DELETE_DOCUMENT_ERROR",
-          "refresh":false
+          "key":"DELETE_DOCUMENT_ERROR"
         },
         {
-          "key":"CREATE_BY_ID_REPORTER_ERROR",
-          "refresh":false
+          "key":"CREATE_BY_ID_REPORTER_ERROR"
         },
         {
-          "key":"DELETED_BY_ID_REPORTER_ERROR",
-          "refresh":false
+          "key":"DELETED_BY_ID_REPORTER_ERROR"
         },
         {
-          "key": "ALL_REPORTER_ERROR",
-          "refresh":false
+          "key": "ALL_REPORTER_ERROR"
         },
         {
-          "key": "RELEASED_BY_ID_REPORTER_ERROR",
-          "refresh":false
+          "key": "RELEASED_BY_ID_REPORTER_ERROR"
         },
         {
-          "key": "RESTORED_BY_ID_REPORTER_ERROR",
-          "refresh":false
+          "key": "RESTORED_BY_ID_REPORTER_ERROR"
         },
         {
           "key":"ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -371,24 +340,21 @@
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"DELETE_TABLE_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
@@ -402,64 +368,56 @@
           "navigateTo":{
             "section": "DATASET_SCHEMA",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"UPLOAD_DOCUMENT_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"DELETE_DOCUMENT_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DOCUMENTS",
             "parameters":["dataflowId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"LOAD_SCHEMA_COMPLETED_EVENT",
           "navigateTo":{
             "section":"DATASET_SCHEMA",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"VALIDATION_FINISHED_EVENT",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"DELETE_TABLE_SCHEMA_COMPLETED_EVENT",
           "navigateTo":{
             "section": "DATAFLOW",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"ADD_RECORDS_BY_ID_SUCCESS",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key":"SNAPSHOT_RESTORING_SUCCESS",
           "navigateTo":{
             "section": "DATASET",
             "parameters":["dataflowId", "datasetId"]
-          },
-          "refresh":false
+          }
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT",
@@ -497,16 +455,13 @@
       "fixed":false,
       "types":[
         {
-          "key": "DATASET_DATA_LOADING_INIT",
-          "refresh":false
+          "key": "DATASET_DATA_LOADING_INIT"
         },
         {
-          "key": "DOCUMENT_UPLOADING_INIT_INFO",
-          "refresh":false
+          "key": "DOCUMENT_UPLOADING_INIT_INFO"
         },
         {
-          "key": "DELETE_DOCUMENT_INIT_INFO",
-          "refresh":false
+          "key": "DELETE_DOCUMENT_INIT_INFO"
         },
         {
           "key":"VALIDATE_DATA_INIT",
