@@ -129,7 +129,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
                   e.preventDefault();
                   breadCrumbContext.setMenuState();
                 }}
-                className={styles.cursorPointer}
+                className={styles.arrowTogleBtn}
                 title={
                   breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined
                 }>

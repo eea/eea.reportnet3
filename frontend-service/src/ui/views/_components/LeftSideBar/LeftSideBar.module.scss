@@ -120,14 +120,14 @@
 }
 
 .leftSideBarElementAnimation:hover {
-  transition: 0.3s ease-in;
-  animation: blink 0.3s;
+  transition: 0.2s ease-in;
+  animation: blink 0.2s;
   /* transform: rotate(180deg); */
 }
 
 .leftSideBarLogo:hover {
-  transition: 0.3s ease-in;
-  animation: blink 0.3s;
+  transition: 0.2s ease-in;
+  animation: blink 0.2s;
 }
 
 .notificationList {
@@ -151,13 +151,17 @@
   background-color: var(--gray-50);
 }
 
-.cursorPointer {
+.arrowTogleBtn {
   cursor: pointer;
+  :hover {
+    transition: 0.2s ease-in;
+    animation: blink 0.2s;
+  }
 }
 
 /* .notificationCounter:hover {
-  transition: 0.3s ease-in;
-  animation: blink 0.3s;
+  transition: 0.2s ease-in;
+  animation: blink 0.2s;
 } */
 
 @keyframes blink {
