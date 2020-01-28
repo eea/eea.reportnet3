@@ -85,7 +85,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderLogout = () => (
     <a
       href="#userProfilePage"
-      title="logout"
+      title={resources.messages['logout']}
       onClick={async e => {
         e.preventDefault();
         userContext.socket.disconnect(() => {});
