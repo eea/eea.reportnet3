@@ -180,6 +180,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @LockCriteria(name = "snapshotId") @PathVariable("idSnapshot") Long idSnapshot) {
 
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
