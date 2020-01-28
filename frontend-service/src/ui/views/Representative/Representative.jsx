@@ -103,7 +103,7 @@ const Representative = withRouter(({ history, match }) => {
         command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
       },
       {
-        label: resources.messages['representative'],
+        label: match.params.representative || resources.messages['representative'],
         icon: 'representative'
       }
     ]);
