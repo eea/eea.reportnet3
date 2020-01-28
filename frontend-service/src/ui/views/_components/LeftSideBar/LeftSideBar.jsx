@@ -32,7 +32,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['userSettings']}>
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['userSettings'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -50,7 +50,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['notifications']}>
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['notifications'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -65,18 +65,18 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderButtons = () =>
     leftSideBarConfig.buttons.map(button =>
       !button.isLink ? (
-        <a href="#" title={button.label}>
+        <a href="#" title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
           <div
             className={styles.leftSideBarElementWrapper}
             onClick={!isUndefined(button.onClick) ? () => button.onClick() : null}>
-            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} title={button.label} />
+            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
             <span className={styles.leftSideBarText}>{button.label}</span>
           </div>
         </a>
       ) : (
         <Link
           to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}
-          title={button.label}>
+          title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
           <div className={styles.leftSideBarElementWrapper}>
             <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
             <span className={styles.leftSideBarText}>{button.label}</span>
@@ -87,7 +87,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderLogout = () => (
     <a
       href="#userProfilePage"
-      title={resources.messages['logout']}
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['logout'] : undefined}
       onClick={async e => {
         e.preventDefault();
         userContext.socket.disconnect(() => {});
