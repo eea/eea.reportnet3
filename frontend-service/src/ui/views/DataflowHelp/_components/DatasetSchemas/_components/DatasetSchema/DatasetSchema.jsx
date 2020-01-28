@@ -8,12 +8,22 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelists;
+      let codelistNames = parseCodelistList(codelistsList, designDataset);
+
+      let codelistTitles = [];
+      if (!isUndefined(codelistNames)) {
+        codelistNames.forEach(name => {
+          codelistTitles.push(name);
+        });
+      }
+
+      let groupableProperties = ['fields'].concat(codelistTitles);
+
       return (
         <div>
           <TreeView
             excludeBottomBorder={false}
-            groupableProperties={['fields', 'codelists']}
+            groupableProperties={groupableProperties}
             key={index}
             property={parsedDesignDataset}
             propertyName={''}
@@ -27,6 +37,26 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   };
 
   return renderDatasetSchema();
+};
+
+const parseCodelistList = (codelistsList, designDataset) => {
+  if (isUndefined(codelistsList)) {
+    return;
+  }
+  let codelistsSchema = codelistsList.filter(
+    codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
+  );
+  if (isUndefined(codelistsSchema)) {
+    return;
+  }
+  let codelistNames = [];
+  codelistsSchema.forEach(codelistList => {
+    codelistList.codelists.forEach(codelist => {
+      let title = `${codelist.name} (${codelist.version})`;
+      codelistNames.push(title);
+    });
+  });
+  return codelistNames;
 };
 
 const parseDesignDataset = (design, codelistsListWithSchema) => {
@@ -65,7 +95,6 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
                 if (!isUndefined(codelist)) {
                   let codelistView = [];
                   fieldCodelist = `${codelist.name} (${codelist.version})`;
-                  // codelists.name = fieldCodelist;
                   if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
                     codelist.items.forEach(itemDTO => {
                       let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
