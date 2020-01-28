@@ -129,14 +129,14 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
                   e.preventDefault();
                   breadCrumbContext.setMenuState();
                 }}
-                className={styles.arrowTogleBtn}
+                className={styles.leftSideBarElementAnimation}
                 title={
                   breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined
                 }>
                 {breadCrumbContext.isLeftSideBarOpened ? (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} />
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} className={styles.arrowToggleBtn} />
                 ) : (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} />
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} className={styles.arrowToggleBtn} />
                 )}
               </a>
             </div>

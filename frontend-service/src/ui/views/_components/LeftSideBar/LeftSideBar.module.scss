@@ -116,18 +116,17 @@
 }
 
 .leftSideBarElementAnimation {
-  transition: transform 0.8s ease-in-out;
+  transition: all 0.08s ease;
 }
 
 .leftSideBarElementAnimation:hover {
-  transition: 0.2s ease-in;
-  animation: blink 0.2s;
-  /* transform: rotate(180deg); */
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
 }
 
 .leftSideBarLogo:hover {
-  transition: 0.2s ease-in;
-  animation: blink 0.2s;
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
 }
 
 .notificationList {
@@ -151,17 +150,13 @@
   background-color: var(--gray-50);
 }
 
-.arrowTogleBtn {
-  cursor: pointer;
-  :hover {
-    transition: 0.2s ease-in;
-    animation: blink 0.2s;
-  }
+.arrowToggleBtn {
+  cursor: pointer !important;
 }
 
 /* .notificationCounter:hover {
-  transition: 0.2s ease-in;
-  animation: blink 0.2s;
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
 } */
 
 @keyframes blink {
