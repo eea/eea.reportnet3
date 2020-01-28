@@ -33,7 +33,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const getCodelistsList = async datasetsSchemas => {
     try {
-      setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
+      setCodelistsList(await CodelistService.getCodelistsListWithSchemas(datasetsSchemas));
     } catch (error) {
       const schemaError = {
         type: error.message
