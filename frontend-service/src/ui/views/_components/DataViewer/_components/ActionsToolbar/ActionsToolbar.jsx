@@ -65,6 +65,7 @@ const ActionsToolbar = ({
     const dropdownFilter = colsSchema.map(colSchema => {
       return { label: colSchema.header, key: colSchema.field };
     });
+
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -134,17 +135,20 @@ const ActionsToolbar = ({
   };
 
   const showFilters = columnKeys => {
-    const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
-    const currentinvisibleColumns = originalColumns.filter(
+    const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
+    const currentInvisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
+
     if (!isUndefined(onSetColumns)) {
-      onSetColumns(currentinvisibleColumns);
+      onSetColumns(currentInvisibleColumns);
     }
+
     if (!isUndefined(onSetColumns)) {
-      onSetInvisibleColumns(currentinvisibleColumns);
+      onSetInvisibleColumns(currentInvisibleColumns);
     }
-    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentinvisibleColumns } });
+
+    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentInvisibleColumns } });
   };
 
   return (

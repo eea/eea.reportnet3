@@ -1,24 +1,22 @@
 import React from 'react';
-
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import isUndefined from 'lodash/isUndefined';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DropdownFilter.module.css';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 class DropdownFilter extends React.Component {
   static defaultProps = {
-    selectAll: false,
     showFilters: undefined,
     showNotCheckedFilters: undefined
   };
 
   static propTypes = {
-    selectAll: PropTypes.bool,
     showFilters: PropTypes.func,
     showNotCheckedFilters: PropTypes.func
   };
@@ -41,17 +39,28 @@ class DropdownFilter extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { filters } = this.props;
+
     if (filters && prevProps.filters !== filters) {
-      const fields = filters.map(column => ({
+      let fields = filters.map(column => ({
         checked: true,
         label: column.label,
         key: column.key
       }));
+
+      const selectAllField = {
+        checked: true,
+        label: this.context.messages['selectAll'],
+        key: 'selectAll'
+      };
+
+      fields.unshift(selectAllField);
+
       this.setState(state => {
         return { ...state, fields: fields };
       });
     }
   }
+
   hide(e) {
     if (!this.state.menuClick) {
       this.setState(
@@ -109,19 +118,42 @@ class DropdownFilter extends React.Component {
       }
     );
   }
+
   updateChecked(fieldKey) {
     const { fields } = this.state;
     const { disabled } = this.props;
+
+    let newFields;
+
     if (disabled) {
       return;
     }
 
-    const newFields = fields.map(field => {
-      if (field.key === fieldKey) {
-        field.checked = !field.checked;
+    if (fieldKey === 'selectAll') {
+      const selectAllField = fields.find(field => field.key === fieldKey);
+
+      if (selectAllField) {
+        newFields = fields.map(field => {
+          if (field.key === 'selectAll') {
+            field.checked = !field.checked;
+          } else {
+            field.checked = selectAllField.checked;
+          }
+
+          return field;
+        });
       }
-      return field;
-    });
+    } else {
+      newFields = fields.map(field => {
+        if (field.key === fieldKey) {
+          field.checked = !field.checked;
+        }
+
+        return field;
+      });
+
+      newFields = this.controlSelectAllChecked(newFields);
+    }
 
     this.setState(
       state => {
@@ -132,26 +164,87 @@ class DropdownFilter extends React.Component {
       },
       () => {
         if (!isUndefined(this.props.showFilters)) {
-          this.props.showFilters(
-            this.state.fields
-              .filter(field => field.checked)
-              .map(field => {
-                return field.key;
-              })
-          );
+          this.props.showFilters(this.filterOutCheckedFields());
         }
+
         if (!isUndefined(this.props.showNotCheckedFilters)) {
-          this.props.showNotCheckedFilters(
-            this.state.fields
-              .filter(field => !field.checked)
-              .map(field => {
-                return field.label;
-              })
-          );
+          this.props.showNotCheckedFilters(this.filterUncheckedFields());
         }
       }
     );
   }
+
+  filterUncheckedFields() {
+    return this.state.fields.filter(field => !field.checked).map(field => field.key);
+  }
+
+  filterOutCheckedFields() {
+    return this.state.fields.filter(field => field.checked).map(field => field.key);
+  }
+
+  hasAnyUncheckedField(filters) {
+    let result = false;
+
+    for (let index = 0; index < filters.length; index++) {
+      const filter = filters[index];
+
+      if (filter.key !== 'selectAll' && filter.checked) {
+        result = true;
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  controlSelectAllChecked(newFields) {
+    if (this.hasAnyUncheckedField(newFields)) {
+      newFields = newFields.map(field => {
+        if (field.key !== 'selectAll') {
+          return field;
+        } else {
+          field.checked = false;
+          return field;
+        }
+      });
+    }
+
+    const whenSelectAllIsTheOnlyOneUnchecked = fields => {
+      let isSelectAllChecked = false;
+      let isAnyOtherFieldUnchecked = false;
+
+      fields.forEach(field => {
+        if (field.key !== 'selectAll') {
+          if (field.checked === false) {
+            isAnyOtherFieldUnchecked = true;
+          }
+        } else {
+          isSelectAllChecked = field.checked;
+        }
+      });
+
+      if (isSelectAllChecked === false && isAnyOtherFieldUnchecked === false) {
+        newFields = fields.map(field => {
+          if (field.key === 'selectAll') {
+            field.checked = true;
+          }
+          return field;
+        });
+      } else if (isAnyOtherFieldUnchecked === true && isSelectAllChecked === true) {
+        newFields = fields.map(field => {
+          if (field.key === 'selectAll') {
+            field.checked = false;
+          }
+          return field;
+        });
+      }
+    };
+
+    whenSelectAllIsTheOnlyOneUnchecked(newFields);
+
+    return newFields;
+  }
+
   menuClick(e) {
     this.setState(state => {
       return {
@@ -160,8 +253,10 @@ class DropdownFilter extends React.Component {
       };
     });
   }
+
   render() {
     const { fields } = this.state;
+
     return (
       <div
         className={`${styles.dropdownFilter} p-menu-overlay-visible`}
@@ -187,5 +282,6 @@ class DropdownFilter extends React.Component {
     );
   }
 }
+DropdownFilter.contextType = ResourcesContext;
 
 export { DropdownFilter };

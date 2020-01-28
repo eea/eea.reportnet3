@@ -1,0 +1,54 @@
+.buttonsWrapper {
+  display: flex !important;
+  flex-direction: row !important;
+}
+.buttonsWrapper button {
+  border-radius: 10px !important;
+}
+.buttonsWrapper button :global .p-button-text {
+  font-size: 2rem;
+  padding: 2rem !important;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton {
+  right: 2em;
+  position: absolute;
+  height: 20px;
+  right: 0;
+  bottom: 0;
+  border-radius: 0px 0px 20px 0px !important;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton:enabled:focus {
+  box-shadow: none;
+}
+.buttonsWrapper :global .p-button-icon-left {
+  bottom: 0px;
+  top: auto;
+}
+.splitButtonWrapper {
+  margin-left: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: self-start;
+  flex-wrap: wrap;
+}
+.splitButtonWrapper:nth-last-of-type(2) {
+  margin-left: 0px;
+}
+.splitButtonWrapper .datasetItem {
+}
+
+.datasetItem {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.calendar {
+  display: flex !important;
+}
+:global body .p-datepicker .p-datepicker-header .p-datepicker-title select {
+  display: initial;
+  width: auto;
+  box-sizing: border-box;
+}

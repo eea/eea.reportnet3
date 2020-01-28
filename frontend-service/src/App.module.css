@@ -2,7 +2,7 @@
 
 html,
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'open sans', sans-serif;
 }
 
 html,
@@ -12,5 +12,5 @@ h2 {
 }
 .app {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--header-height));
 }

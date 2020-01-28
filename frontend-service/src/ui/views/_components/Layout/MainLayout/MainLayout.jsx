@@ -1,21 +1,28 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
 
-import { Navigation } from './_components';
 import { Footer } from './_components';
-import { Notifications } from 'ui/views/_components/Notifications';
+import { Header } from './_components/Header';
+import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
 import { UserService } from 'core/services/User';
+
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, leftSideBarConfig }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
+
+  const [margin, setMargin] = useState('50px');
+
   useEffect(() => {
     async function fetchData() {
       if (isUndefined(user.id)) {
@@ -36,16 +43,25 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
   }, []);
+
+  useEffect(() => {
+    if (breadCrumbContext.isLeftSideBarOpened) {
+      setMargin('200px');
+    } else {
+      setMargin('50px');
+    }
+  }, [breadCrumbContext]);
+
+  const onToggleSideBar = hover => {};
+
   useSocket();
   return (
     <Fragment>
-      <Navigation />
-      <Notifications />
-      {/* <div className={styles.disclaimer}>
-        <span className="p-messages-icon pi  pi-info-circle"></span>
-        {resources.messages['disclaimerTitle']}
-      </div> */}
-      <div className={styles.mainContent}>{children}</div>
+      <Header />
+      <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
+        <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />
+        {children}
+      </div>
       <Footer />
     </Fragment>
   );

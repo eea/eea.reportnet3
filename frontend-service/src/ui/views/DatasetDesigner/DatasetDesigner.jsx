@@ -5,22 +5,15 @@ import { isUndefined } from 'lodash';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
-import { Growl } from 'primereact/growl';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
-import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
-
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { routes } from 'ui/routes';
 import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -28,19 +21,28 @@ import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+
+import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
 export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
     params: { datasetId }
   } = match;
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const breadCrumbContext = useContext(BreadCrumbContext);
+  const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
+
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
-  const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -79,7 +81,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -160,7 +162,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

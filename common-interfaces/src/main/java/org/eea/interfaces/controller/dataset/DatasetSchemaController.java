@@ -194,4 +194,15 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
   public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
+
+
+  /**
+   * Validate schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the boolean
+   */
+  @GetMapping(value = "/validate/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
 }

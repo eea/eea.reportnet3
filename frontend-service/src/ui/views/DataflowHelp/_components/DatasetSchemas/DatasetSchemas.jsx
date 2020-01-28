@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -10,15 +10,44 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
+import { CodelistService } from 'core/services/Codelist';
+
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [codelistsList, setCodelistsList] = useState();
+
+  useEffect(() => {
+    if (!isEmpty(datasetsSchemas)) {
+      getCodelistsList(datasetsSchemas);
+    }
+  }, [datasetsSchemas]);
+
+  useEffect(() => {
+    renderDatasetSchemas();
+  }, [codelistsList]);
+
+  const getCodelistsList = async datasetsSchemas => {
+    try {
+      setCodelistsList(await CodelistService.getCodelistsList(datasetsSchemas));
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} index={i} key={i} />;
+        return <DatasetSchema designDataset={designDataset} codelistsList={codelistsList} index={i} key={i} />;
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
