@@ -50,7 +50,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['userSettings']}>
+      title={resources.messages['notifications']}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -85,7 +85,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderLogout = () => (
     <a
       href="#userProfilePage"
-      title="logout"
+      title={resources.messages['logout']}
       onClick={async e => {
         e.preventDefault();
         userContext.socket.disconnect(() => {});
@@ -126,7 +126,12 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
                 onClick={e => {
                   e.preventDefault();
                   breadCrumbContext.setMenuState();
-                }}>
+                }}
+                title={
+                  breadCrumbContext.isLeftSideBarOpened
+                    ? resources.messages['closeSidebar']
+                    : resources.messages['expandSidebar']
+                }>
                 {breadCrumbContext.isLeftSideBarOpened ? (
                   <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} />
                 ) : (
