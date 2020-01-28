@@ -9,6 +9,11 @@
   padding: 2.3rem 2.7rem;
 }
 
+.bigButton > a:hover svg {
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
+}
+
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;
@@ -80,7 +85,7 @@
 .newItem a:hover {
   background-color: var(--c-blue-200);
 }
-.newItem a:hover .newItemCross {
+/* .newItem a:hover .newItemCross {
   -webkit-transition-duration: 0.5s;
   -moz-transition-duration: 0.5s;
   -o-transition-duration: 0.5s;
@@ -94,9 +99,14 @@
   -o-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
-}
+} */
 .newItem .siteMap {
+  width: 2.5rem;
   transform: rotate(180deg) !important;
+}
+.newItem .spinner {
+  width: 2.5rem;
+  animation: spinnerAnimation 1s linear infinite;
 }
 
 .caption {
@@ -115,4 +125,13 @@
 
 :global .svg-inline--fa {
   min-width: 2rem;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

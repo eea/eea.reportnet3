@@ -5,9 +5,10 @@ import moment from 'moment';
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog, setSnapshotDataToRelease }) => {
+export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog }) => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -24,12 +25,13 @@ export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
+              disabled={isLoading}
               tooltipOptions={{ position: 'right' }}
-              icon={itemData.isReleased ? 'check' : 'cloudUpload'}
+              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() => {
-                setIsActiveReleaseSnapshotConfirmDialog(true);
-                setSnapshotDataToRelease(itemData);
+                showReleaseDialog({ isReleased: false });
+                getSnapshotData(itemData);
               }}
             />
           </div>

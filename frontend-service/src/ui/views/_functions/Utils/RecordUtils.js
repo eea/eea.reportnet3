@@ -35,9 +35,7 @@ const getCellId = (tableData, field) => {
 };
 
 const getCellItems = (colSchemaData, field) => {
-  console.log({ colSchemaData });
   const completeField = colSchemaData.filter(data => data.field === field)[0];
-  console.log({ completeField });
   return !isUndefined(completeField) ? completeField.codelistItems : undefined;
 };
 
@@ -83,8 +81,6 @@ const getCodelistItems = (colsSchema, field) => {
 };
 
 const getCodelistValue = (codelistItemsOptions, value) => {
-  console.log({ value });
-  console.log(codelistItemsOptions.filter(item => item.value === value)[0]);
   if (!isUndefined(value)) {
     return codelistItemsOptions.filter(item => item.value === value)[0];
   }
@@ -101,9 +97,7 @@ const getInitialRecordValues = (record, colsSchema) => {
   );
   filteredColumns.forEach(column => {
     if (!isUndefined(record.dataRow)) {
-      console.log(record.dataRow);
       const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-      console.log({ field });
       if (!isUndefined(field)) initialValues.push([column.field, field.fieldData[column.field]]);
     }
   });

@@ -600,7 +600,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
-        (String) ThreadPropertiesManager.getVariable("user"), true, false);
+        (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
   /**

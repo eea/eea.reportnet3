@@ -1,25 +1,24 @@
-import { isUndefined } from 'lodash';
-
 export const categoryReducer = (state, { type, payload }) => {
-  const getFilterKeys = () => {
-    return Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
-  };
+  const getFilterKeys = () => Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
 
   const checkFilters = (filteredKeys, codelist) => {
     for (let i = 0; i < filteredKeys.length; i++) {
-      console.log(codelist[filteredKeys[i]].toLowerCase().includes(state.filter[filteredKeys[i]].toLowerCase()));
-      console.log(state.filter[filteredKeys[i]]);
-      if (
-        codelist[filteredKeys[i]].toLowerCase().includes(state.filter[filteredKeys[i]].toLowerCase()) ||
-        state.filter[filteredKeys[i]] === ''
-      ) {
-        return true;
+      if (state.filter[filteredKeys[i]].toLowerCase() !== '') {
+        if (!codelist[filteredKeys[i]].toLowerCase().includes(state.filter[filteredKeys[i]].toLowerCase())) {
+          return false;
+        }
       }
     }
-    return false;
+    return true;
   };
 
   switch (type) {
+    case 'RESET_INITIAL_CATEGORY_VALUES':
+      return {
+        ...state,
+        categoryShortCode: payload.shortCode,
+        categoryDescription: payload.description
+      };
     case 'SAVE_CATEGORY':
       return {
         ...state,
@@ -38,20 +37,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, codelists: payload.data };
     case 'SET_FILTER_VALUES':
       const filteredKeys = getFilterKeys();
-      console.log({ filteredKeys });
-
-      if (payload.filter !== 'status') {
-        console.log(
-          ...state.codelists.filter(
-            codelist =>
-              codelist[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
-              [...state.filter.status.map(status => status.value.toLowerCase())].includes(
-                codelist.status.toLowerCase()
-              ) &&
-              checkFilters(filteredKeys, codelist)
-          )
-        );
-      }
 
       return {
         ...state,
@@ -64,10 +49,7 @@ export const categoryReducer = (state, { type, payload }) => {
                   codelist =>
                     [...payload.value.map(status => status.value.toLowerCase())].includes(
                       codelist.status.toLowerCase()
-                    ) &&
-                    codelist['name'].toLowerCase().includes(state.filter.name.toLowerCase()) &&
-                    codelist['version'].toLowerCase().includes(state.filter.version.toLowerCase()) &&
-                    codelist['description'].toLowerCase().includes(state.filter.description.toLowerCase())
+                    ) && checkFilters(filteredKeys, codelist)
                 )
               ]
             : [
@@ -91,8 +73,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isDeleteConfirmDialogVisible: payload };
     case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
       return { ...state, isFiltered: !state.isFiltered };
-    case 'TOGGLE_IS_EXPANDED':
-      return { ...state, isExpanded: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
     case 'UPDATE_EDITING_CODELISTS':

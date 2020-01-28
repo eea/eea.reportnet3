@@ -7,27 +7,30 @@ import styles from './DataflowDashboards.module.css';
 
 import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-
-import { DataflowService } from 'core/services/Dataflow';
 import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
 import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
+
+import { DataflowService } from 'core/services/Dataflow';
+
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowDashboards = withRouter(({ match, history }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+
   const [dashboardInitialValues, setDashboardInitialValues] = useState({});
   const [dataflowName, setDataflowName] = useState('');
   const [dataSchema, setDataSchema] = useState();
 
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -142,7 +145,6 @@ export const DataflowDashboards = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

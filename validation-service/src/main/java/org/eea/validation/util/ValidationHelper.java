@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -133,6 +134,7 @@ public class ValidationHelper {
    */
   @Async
   @LockMethod(removeWhenFinish = false, isController = false)
+  @CacheEvict(value = {"cacheStatistics_" + "#datasetId"}, key = "#datasetId")
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String uuId) {
     synchronized (processesMap) {

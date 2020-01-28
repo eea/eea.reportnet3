@@ -2,6 +2,7 @@
     "acceptDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
     "createDataflow": "/dataflow",
     "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
+    "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
     "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
     "deleteDataflow": "/dataflow/{:dataflowId}",
     "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",

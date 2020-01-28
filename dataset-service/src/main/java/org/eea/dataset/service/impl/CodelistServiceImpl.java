@@ -83,9 +83,9 @@ public class CodelistServiceImpl implements CodelistService {
    * @param version the version
    * @return the list
    */
-  private List<CodelistVO> findDuplicated(String name, String version, CodelistStatusEnum status) {
+  private List<CodelistVO> findDuplicated(String name, String version) {
     List<Codelist> codelists =
-        codelistRepository.findAllByNameAndVersionAndStatus(name, version, status).orElse(null);
+        codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
     if (null != codelists) {
       return codelistMapper.entityListToClass(codelists);
     }
@@ -155,8 +155,7 @@ public class CodelistServiceImpl implements CodelistService {
     if (codelist.getVersion() == null) {
       codelist.setVersion(oldCodelist.getVersion());
     }
-    if (!findDuplicated(codelist.getName(), codelist.getVersion(), CodelistStatusEnum.READY)
-        .isEmpty()) {
+    if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
       throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
     }
   }
@@ -209,12 +208,13 @@ public class CodelistServiceImpl implements CodelistService {
       throws EEAException {
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
-      if (codelistVO.getVersion() != null) {
-        oldCodelist.setVersion(codelistVO.getVersion());
-      }
-      if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion(), CodelistStatusEnum.READY)
-          .isEmpty()) {
+      String version =
+          codelistVO.getVersion() != null ? codelistVO.getVersion() : oldCodelist.getVersion();
+      if (!findDuplicated(codelistVO.getName(), version).isEmpty()) {
         throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
+      }
+      if (codelistVO.getVersion() != null) {
+        oldCodelist.setVersion(version);
       }
     }
     if (CodelistStatusEnum.DEPRECATED.equals(codelistVO.getStatus())) {

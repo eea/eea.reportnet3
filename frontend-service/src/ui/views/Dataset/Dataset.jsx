@@ -8,14 +8,13 @@ import styles from './Dataset.module.css';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { Growl } from 'primereact/growl';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
@@ -33,24 +32,27 @@ import { WebFormData } from './_components/WebFormData/WebFormData';
 import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { routes } from 'ui/routes';
+
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
+
 import { MetadataUtils } from 'ui/views/_functions/Utils';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
+
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
@@ -85,8 +87,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   let exportMenuRef = useRef();
 
-  let growlRef = useRef();
-
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
@@ -97,7 +97,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
-      setBreadCrumbItems([
+      breadCrumbContext.add([
         {
           label: resources.messages['dataflowList'],
           icon: 'home',
@@ -193,7 +193,7 @@ export const Dataset = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useReporterDataset(datasetId, dataflowId, growlRef);
+  } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
     try {
@@ -385,14 +385,24 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const getCodelistsList = async datasetSchemas => {
+    try {
+      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
+      return codelistsList;
+    } catch (error) {
+      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
+    }
+  };
+
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await CodelistService.getCodelistsList([datasetSchema]);
+      const codelistsList = await getCodelistsList([datasetSchema]);
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
+      console.log({ datasetStatistics });
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
@@ -509,8 +519,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

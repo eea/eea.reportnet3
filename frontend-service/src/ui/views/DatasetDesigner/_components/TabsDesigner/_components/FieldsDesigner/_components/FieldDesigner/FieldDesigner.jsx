@@ -150,7 +150,7 @@ export const FieldDesigner = ({
   const onChangeFieldType = type => {
     setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    if (type.fieldType === 'Codelist') {
+    if (type.fieldType.toLowerCase() === 'codelist') {
       onCodelistDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
@@ -168,8 +168,8 @@ export const FieldDesigner = ({
           }
         }
       }
+      // setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
     }
-    setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
     onCodelistShow(fieldId, type);
   };
 
@@ -238,12 +238,31 @@ export const FieldDesigner = ({
     }
   };
 
-  const onCodelistSelected = (codelistId, codelistName, codelistVersion) => {
+  const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
+    console.log({ codelistId, codelistName, codelistVersion, codelistItems });
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
     if (fieldId.toString() === '-1') {
-      onFieldAdd(recordId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId, codelistName, codelistVersion);
+      onFieldAdd(
+        recordId,
+        'CODELIST',
+        fieldValue,
+        fieldDescriptionValue,
+        codelistId,
+        codelistName,
+        codelistVersion,
+        codelistItems
+      );
     } else {
-      fieldUpdate(fieldId, 'CODELIST', fieldValue, fieldDescriptionValue, codelistId);
+      fieldUpdate(
+        fieldId,
+        'CODELIST',
+        fieldValue,
+        fieldDescriptionValue,
+        codelistId,
+        codelistName,
+        codelistVersion,
+        codelistItems
+      );
     }
     setIsCodelistManagerVisible(false);
   };
@@ -255,7 +274,16 @@ export const FieldDesigner = ({
     setIsCodelistManagerVisible(true);
   };
 
-  const onFieldAdd = async (recordId, type, value, description, codelistId, codelistName, codelistVersion) => {
+  const onFieldAdd = async (
+    recordId,
+    type,
+    value,
+    description,
+    codelistId,
+    codelistName,
+    codelistVersion,
+    codelistItems
+  ) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
@@ -270,7 +298,17 @@ export const FieldDesigner = ({
         setFieldValue('');
         setFieldTypeValue('');
         setFieldDescriptionValue('');
-        onNewFieldAdd(response.data, value, recordId, type, description, codelistId, codelistName, codelistVersion);
+        onNewFieldAdd(
+          response.data,
+          value,
+          recordId,
+          type,
+          description,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
@@ -400,7 +438,16 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (fieldSchemaId, type, value, description, codelistId) => {
+  const fieldUpdate = async (
+    fieldSchemaId,
+    type,
+    value,
+    description,
+    codelistId,
+    codelistName,
+    codelistVersion,
+    codelistItems
+  ) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
@@ -413,15 +460,7 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(
-          fieldId,
-          value,
-          type,
-          description,
-          selectedCodelist.codelistId,
-          selectedCodelist.codelistName,
-          selectedCodelist.codelistVersion
-        );
+        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion, codelistItems);
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);

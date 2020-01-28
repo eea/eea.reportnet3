@@ -9,6 +9,11 @@
   padding: 2.3rem 2.7rem;
 }
 
+.bigButton > a:hover svg {
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
+}
+
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;

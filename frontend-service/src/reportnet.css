@@ -86,6 +86,8 @@
   --c-chart-warning: #ffcc00;
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
+
+  --header-height: 4rem;
 }
 body {
   margin: 0px;
@@ -1847,7 +1849,7 @@ form .error {
 
 /*Tooltip*/
 .p-tooltip {
-  z-index: 4000 !important;
+  z-index: 3000 !important;
 }
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {
@@ -1877,5 +1879,9 @@ body .p-dialog.edit-table .p-dialog-content {
 
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
-  z-index: 2000 !important;
+  z-index: 3100 !important;
+}
+
+.p-sidebar-right {
+  top: var(--header-height);
 }

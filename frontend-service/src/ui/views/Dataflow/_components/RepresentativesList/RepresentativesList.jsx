@@ -24,7 +24,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId }) => {
+const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -61,6 +61,14 @@ const RepresentativesList = ({ dataflowId }) => {
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
 
+  useEffect(() => {
+    if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
+      setHasRepresentatives(true);
+    } else {
+      setHasRepresentatives(false);
+    }
+  }, [formState.representatives]);
+
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
@@ -71,7 +79,7 @@ const RepresentativesList = ({ dataflowId }) => {
         <input
           className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
-          id={isEmpty(inputData) ? 'emptyInput' : ''}
+          id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
             representative.providerAccount = representative.providerAccount.toLowerCase();
             onAddProvider(formDispatcher, formState, representative, dataflowId);

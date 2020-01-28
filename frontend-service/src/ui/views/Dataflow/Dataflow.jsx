@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined, remove } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -13,7 +13,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
@@ -31,6 +30,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,12 +42,12 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
@@ -61,9 +61,11 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
+  const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
@@ -96,7 +98,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -108,12 +110,13 @@ const Dataflow = withRouter(({ history, match }) => {
         icon: 'archive'
       }
     ]);
-  }, [history, match.params.dataflowId, resources.messages]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
-    onLoadReportingDataflow();
     onLoadDataflowsData();
+    onLoadReportingDataflow();
+    onLoadSchemasValidations();
   }, [match.params.dataflowId, isDataUpdated]);
 
   useEffect(() => {
@@ -252,12 +255,20 @@ const Dataflow = withRouter(({ history, match }) => {
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
     } catch (error) {
+      notificationContext.add({
+        type: 'RELEASED_BY_ID_REPORTER_ERROR',
+        content: {}
+      });
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const onLoadSchemasValidations = async () => {
+    setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
   };
 
   const onLoadSnapshotList = async datasetId => {
@@ -337,8 +348,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const layout = children => {
     return (
-      <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
+      <MainLayout
+        leftSideBarConfig={{
+          isCustodian,
+          buttons: []
+        }}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -350,15 +364,15 @@ const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <LeftSideBar
+      {/* <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
-      />
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+      /> */}
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
@@ -381,6 +395,8 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={match.params.dataflowId}
           designDatasetSchemas={designDatasetSchemas}
           isCustodian={isCustodian}
+          isDataSchemaCorrect={isDataSchemaCorrect}
+          hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
           onUpdateData={onUpdateData}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
@@ -396,7 +412,7 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveManageRolesDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
+          <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
         </Dialog>
 
         <Dialog

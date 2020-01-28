@@ -13,24 +13,22 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
-import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
-import { SnapshotsList } from './_components/SnapshotsList';
+import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,22 +40,21 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Representative = withRouter(({ history, match }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const notificationContext = useContext(NotificationContext);
 
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
-  const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
@@ -66,8 +63,6 @@ const Representative = withRouter(({ history, match }) => {
   const [isEditForm, setIsEditForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
-  const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
@@ -94,7 +89,7 @@ const Representative = withRouter(({ history, match }) => {
   }, [user]);
 
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -108,11 +103,11 @@ const Representative = withRouter(({ history, match }) => {
         command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
       },
       {
-        label: resources.messages['representative'],
+        label: match.params.representative || resources.messages['representative'],
         icon: 'representative'
       }
     ]);
-  }, [history, match.params.dataflowId, resources.messages]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -223,6 +218,10 @@ const Representative = withRouter(({ history, match }) => {
     setIsDataflowFormReset(false);
   };
 
+  const onHideSnapshotDialog = () => {
+    setIsActiveReleaseSnapshotDialog(false);
+  };
+
   const onLoadDataflowsData = async () => {
     try {
       const allDataflows = await DataflowService.all();
@@ -242,7 +241,6 @@ const Representative = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      console.log('[dataflow]: ', dataflow);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
       if (!isEmpty(dataflow.designDatasets)) {
@@ -262,25 +260,6 @@ const Representative = withRouter(({ history, match }) => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
-  };
-
-  const onReleaseSnapshot = async snapshotId => {
-    try {
-      await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
-      onLoadSnapshotList(datasetIdToProps);
-    } catch (error) {
-      console.log('ERROR ON RELEASE', error);
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
-    } finally {
-      setIsActiveReleaseSnapshotConfirmDialog(false);
     }
   };
 
@@ -306,8 +285,7 @@ const Representative = withRouter(({ history, match }) => {
   };
 
   const onShowReleaseSnapshotDialog = async datasetId => {
-    setDatasetIdToProps(datasetId);
-    onLoadSnapshotList(datasetId);
+    setDatasetIdToSnapshotProps(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
 
@@ -324,25 +302,12 @@ const Representative = withRouter(({ history, match }) => {
     />
   );
 
-  const releseModalFooter = (
-    <>
-      <Button
-        icon="cloudUpload"
-        label={resources.messages['yes']}
-        onClick={() => onReleaseSnapshot(snapshotDataToRelease.id)}
-      />
-      <Button
-        icon="cancel"
-        className="p-button-secondary"
-        label={resources.messages['no']}
-        onClick={() => setIsActiveReleaseSnapshotConfirmDialog(false)}
-      />
-    </>
-  );
-
   const layout = children => (
-    <MainLayout>
-      <BreadCrumb model={breadCrumbItems} />
+    <MainLayout
+      leftSideBarConfig={{
+        isCustodian,
+        buttons: []
+      }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -351,15 +316,15 @@ const Representative = withRouter(({ history, match }) => {
   }
   return layout(
     <div className="rep-row">
-      <LeftSideBar
+      {/* <LeftSideBar
         subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
-      />
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+      /> */}
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
@@ -390,36 +355,14 @@ const Representative = withRouter(({ history, match }) => {
           representative={match.params.representative}
         />
 
-        <Dialog
-          header={resources.messages['manageRolesDialogTitle']}
-          footer={closeManageRolesDialog}
-          visible={isActiveManageRolesDialog}
-          onHide={() => setIsActiveManageRolesDialog(false)}
-          style={{ width: '50vw' }}
-          maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
-        </Dialog>
-
-        <Dialog
-          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
-          className={styles.releaseSnapshotsDialog}
-          visible={isActiveReleaseSnapshotDialog}
-          onHide={() => setIsActiveReleaseSnapshotDialog(false)}
-          style={{ width: '30vw' }}>
-          {/* <ScrollPanel style={{ width: '100%', height: '50vh' }}> */}
-          {!isEmpty(snapshotsListData) ? (
-            <SnapshotsList
-              className={styles.releaseList}
-              snapshotsListData={snapshotsListData}
-              onLoadSnapshotList={onLoadSnapshotList}
-              setSnapshotDataToRelease={setSnapshotDataToRelease}
-              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
-            />
-          ) : (
-            <h3>{resources.messages['emptySnapshotList']}</h3>
-          )}
-          {/* </ScrollPanel> */}
-        </Dialog>
+        <SnapshotsDialog
+          dataflowId={match.params.dataflowId}
+          dataflowData={dataflowData}
+          datasetId={datasetIdToSnapshotProps}
+          hideSnapshotDialog={onHideSnapshotDialog}
+          isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+          setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
+        />
 
         <Dialog
           header={resources.messages['properties']}
@@ -473,23 +416,6 @@ const Representative = withRouter(({ history, match }) => {
             </ul>
           </div>
           <div className="actions"></div>
-        </Dialog>
-
-        <Dialog
-          header={`${resources.messages['releaseSnapshotMessage']}`}
-          footer={releseModalFooter}
-          visible={isActiveReleaseSnapshotConfirmDialog}
-          onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
-          <ul>
-            <li>
-              <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
-            </li>
-            <li>
-              <strong>{resources.messages['description']}: </strong>
-              {snapshotDataToRelease.description}
-            </li>
-          </ul>
         </Dialog>
 
         <Dialog

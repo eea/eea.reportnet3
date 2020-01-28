@@ -393,9 +393,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
-    NotificationVO notificationVO =
-        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-            .datasetId(idReportingDataset).build();
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
@@ -463,7 +460,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
           idReportingDataset);
       try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value, notificationVO);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
+            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                .datasetId(idReportingDataset).build());
       } catch (EEAException e) {
         LOG.error("Error realeasing event {}: ", successEventType, e);
       }
@@ -474,8 +473,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         con.rollback();
       }
       try {
-        notificationVO.setError("Error restoring the snapshot data. Rollback");
-        kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value, notificationVO);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
+            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                .datasetId(idSnapshot).error("Error restoring the snapshot data. Rollback")
+                .build());
       } catch (EEAException ex) {
         LOG.error("Error realeasing event " + failEventType, ex);
       }

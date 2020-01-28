@@ -1,22 +1,36 @@
 .Footer {
   position: absolute;
+  /* display: none; */
   bottom: 0;
   text-align: center;
-  background-color: var(--blue-120);
-  color: white;
+  color: var(--c-black-300);
   padding: 1rem 0;
   width: 100%;
-  margin-top: 2em;
+  /* margin-top: 2em; */
+  margin-left: 45px;
 }
 
+/* .Footer:hover {
+  width: 100%;
+  bottom: 0;
+  transition: 0.5s;
+} */
+
 .Footer a {
-  color: white;
+  color: var(--c-black-300);
   margin: 0.5rem;
-  font-weight: 300;
+  font-weight: normal;
   font-size: 0.9rem;
 }
 
 .Footer a:hover {
-  color: white;
+  color: var(--c-black-200);
   text-decoration: none;
+}
+
+.FooterExpanded {
+  display: block;
+}
+.FooterCollapsed {
+  display: none;
 }

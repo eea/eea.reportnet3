@@ -1,4 +1,4 @@
-import { isUndefined, camelCase, kebabCase } from 'lodash';
+import { camelCase, isNull, isUndefined, kebabCase } from 'lodash';
 
 import { config as generalConfig } from 'conf';
 
@@ -25,7 +25,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
       notificationDTO.key = type;
       const contentKeys = Object.keys(content);
 
-      if (!isUndefined(navigateTo)) {
+      if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
         const urlParameters = {};
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
@@ -36,9 +36,14 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         });
       }
       contentKeys.forEach(key => {
-        if (!navigateTo.parameters.includes(key)) {
-          const sortKey = camelCase(`sort-${kebabCase(key)}`);
-          content[sortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+        if (isUndefined(navigateTo)) {
+          const shortKey = camelCase(`short-${kebabCase(key)}`);
+          content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+        } else {
+          if (!navigateTo.parameters.includes(key)) {
+            const shortKey = camelCase(`short-${kebabCase(key)}`);
+            content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+          }
         }
       });
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
