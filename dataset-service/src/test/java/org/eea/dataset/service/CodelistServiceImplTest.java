@@ -304,6 +304,12 @@ public class CodelistServiceImplTest {
     codelist.setVersion("1L");
     codelist.setStatus(CodelistStatusEnum.DESIGN);
     codelistVO.setStatus(CodelistStatusEnum.READY);
+    Codelist codelist2 = new Codelist();
+    codelist2.setVersion("2L");
+    codelist2.setId(3L);
+    codelist2.setStatus(CodelistStatusEnum.DESIGN);
+    codelists.add(codelist2);
+    codelistsVO.add(new CodelistVO());
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
     when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(codelists));

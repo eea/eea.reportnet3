@@ -206,16 +206,18 @@ public class CodelistServiceImpl implements CodelistService {
    */
   private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist)
       throws EEAException {
+    String version =
+        codelistVO.getVersion() != null ? codelistVO.getVersion() : oldCodelist.getVersion();
+    List<CodelistVO> list = findDuplicated(codelistVO.getName(), version);
+    list.removeIf(item -> codelistVO.getId().equals(item.getId()));
+    if (!list.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
+    }
+    if (codelistVO.getVersion() != null) {
+      oldCodelist.setVersion(version);
+    }
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
-      String version =
-          codelistVO.getVersion() != null ? codelistVO.getVersion() : oldCodelist.getVersion();
-      if (!findDuplicated(codelistVO.getName(), version).isEmpty()) {
-        throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
-      }
-      if (codelistVO.getVersion() != null) {
-        oldCodelist.setVersion(version);
-      }
     }
     if (CodelistStatusEnum.DEPRECATED.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.DEPRECATED);
@@ -225,9 +227,6 @@ public class CodelistServiceImpl implements CodelistService {
     }
     if (codelistVO.getDescription() != null) {
       oldCodelist.setDescription(codelistVO.getDescription());
-    }
-    if (codelistVO.getVersion() != null) {
-      oldCodelist.setVersion(codelistVO.getVersion());
     }
     if (codelistVO.getCategory() != null) {
       oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
