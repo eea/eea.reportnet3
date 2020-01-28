@@ -27,14 +27,16 @@
   cursor: pointer;
   overflow: hidden;
   .barSection {
-    height: 75%;
-    flex: auto;
+    --top-height: 100px;
+    --botton-height: 100px;
+    --middle-height: calc(100% - var(--top-height) - var(--botton-height) - (1rem * 3));
     padding: 1rem 0;
+    height: var(--middle-height);
     &:first-of-type {
-      height: 10%;
+      height: var(--top-height);
     }
     &:last-of-type {
-      height: 15%;
+      height: var(--botton-height);
       padding-top: 0;
     }
     a {
