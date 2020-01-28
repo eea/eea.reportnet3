@@ -50,7 +50,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['userSettings']}>
+      title={resources.messages['notifications']}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
