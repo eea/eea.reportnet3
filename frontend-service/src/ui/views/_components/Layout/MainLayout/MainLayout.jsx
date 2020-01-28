@@ -57,14 +57,14 @@ const MainLayout = ({ children, leftSideBarConfig }) => {
 
   useSocket();
   return (
-    <Fragment>
+    <div id={styles.mainLayoutContainer}>
       <Header />
       <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
         <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />
         {children}
       </div>
       <Footer />
-    </Fragment>
+    </div>
   );
 };
 export { MainLayout };
