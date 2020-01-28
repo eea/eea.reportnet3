@@ -31,7 +31,7 @@ const ReportnetLogin = ({ history }) => {
     password: Yup.string().required('A password is required')
   });
   return (
-    <div className="rp-container">
+    <div className="rp-container login">
       <div className={`${styles.loginBoxContainer}`}>
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>

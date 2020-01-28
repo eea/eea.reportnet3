@@ -103,7 +103,7 @@ const Representative = withRouter(({ history, match }) => {
         command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
       },
       {
-        label: resources.messages['representative'],
+        label: match.params.representative || resources.messages['representative'],
         icon: 'representative'
       }
     ]);
@@ -324,7 +324,7 @@ const Representative = withRouter(({ history, match }) => {
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
       /> */}
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
@@ -354,16 +354,6 @@ const Representative = withRouter(({ history, match }) => {
           updatedDatasetSchema={updatedDatasetSchema}
           representative={match.params.representative}
         />
-
-        <Dialog
-          header={resources.messages['manageRolesDialogTitle']}
-          footer={closeManageRolesDialog}
-          visible={isActiveManageRolesDialog}
-          onHide={() => setIsActiveManageRolesDialog(false)}
-          style={{ width: '50vw' }}
-          maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
-        </Dialog>
 
         <SnapshotsDialog
           dataflowId={match.params.dataflowId}
