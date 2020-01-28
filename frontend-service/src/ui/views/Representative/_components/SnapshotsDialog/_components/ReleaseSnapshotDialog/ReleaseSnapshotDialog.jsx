@@ -33,7 +33,6 @@ export const ReleaseSnapshotDialog = ({
         type: 'CREATE_BY_ID_REPORTER_ERROR',
         content: {}
       });
-      // setIsLoading(false);
     } finally {
       hideReleaseDialog();
     }
@@ -41,7 +40,6 @@ export const ReleaseSnapshotDialog = ({
 
   const onReleaseSnapshot = async snapshotId => {
     try {
-      // setIsLoading(true);
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotId);
       onLoadSnapshotList(datasetId);
     } catch (error) {
@@ -49,7 +47,6 @@ export const ReleaseSnapshotDialog = ({
         type: 'RELEASED_BY_ID_REPORTER_ERROR',
         content: {}
       });
-      // setIsLoading(false);
     } finally {
       hideReleaseDialog();
     }

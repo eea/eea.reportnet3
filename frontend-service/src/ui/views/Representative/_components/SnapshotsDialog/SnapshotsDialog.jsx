@@ -71,7 +71,6 @@ export const SnapshotsDialog = ({
   };
 
   const onLoadSnapshotList = async datasetId => {
-    // setIsLoading(true);
     try {
       setSnapshotsListData(await SnapshotService.allReporter(datasetId));
     } catch (error) {
