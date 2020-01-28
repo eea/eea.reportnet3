@@ -7,13 +7,23 @@ import { TreeView } from 'ui/views/_components/TreeView';
 const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelistItems;
+      const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
+      const codelistNames = parseCodelistList(codelistsList, designDataset);
+
+      const codelistTitles = [];
+      if (!isUndefined(codelistNames)) {
+        codelistNames.forEach(name => {
+          codelistTitles.push(name);
+        });
+      }
+
+      const groupableProperties = ['fields'].concat(codelistTitles);
+
       return (
         <div>
           <TreeView
             excludeBottomBorder={false}
-            groupableProperties={['fields', 'codelists']}
+            groupableProperties={groupableProperties}
             key={index}
             property={parsedDesignDataset}
             propertyName={''}
@@ -29,12 +39,40 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   return renderDatasetSchema();
 };
 
-const parseDesignDataset = (design, codelistsList) => {
+const parseCodelistList = (codelistsList, designDataset) => {
+  if (isUndefined(codelistsList)) {
+    return;
+  }
+  const codelistsSchema = codelistsList.filter(
+    codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
+  );
+  if (isUndefined(codelistsSchema)) {
+    return;
+  }
+  const codelistNames = [];
+  codelistsSchema.forEach(codelistList => {
+    codelistList.codelists.forEach(codelist => {
+      let title = `${codelist.name} (${codelist.version})`;
+      codelistNames.push(title);
+    });
+  });
+  return codelistNames;
+};
+
+const parseDesignDataset = (design, codelistsListWithSchema) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  let codelistItemsView = [];
-  let codelistItemsData = [];
+  const codelistItemsData = [];
+  let codelistsBySchema = [];
+  if (!isUndefined(codelistsListWithSchema)) {
+    codelistsBySchema = codelistsListWithSchema.find(
+      x => x.schema.datasetSchemaName.toString() === design.datasetSchemaName.toString()
+    );
+    if (!isUndefined(codelistsBySchema)) {
+      codelistsBySchema = codelistsBySchema.codelists;
+    }
+  }
 
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
@@ -52,31 +90,25 @@ const parseDesignDataset = (design, codelistsList) => {
           if (!isEmpty(existACodelist)) {
             let fieldCodelist;
             if (fieldDTO.type === 'CODELIST') {
-              if (!isUndefined(codelistsList)) {
-                let codelist = codelistsList.find(codelist => codelist.id === fieldDTO.codelistId);
+              if (!isUndefined(codelistsListWithSchema) && !isEmpty(codelistsBySchema)) {
+                let codelist = codelistsBySchema.find(codelist => codelist.id === fieldDTO.codelistId);
                 if (!isUndefined(codelist)) {
-                  fieldCodelist = `${codelist.name} (v${codelist.version})`;
-                  if (!isEmpty(codelist.items)) {
+                  let codelistView = [];
+                  fieldCodelist = `${codelist.name} (${codelist.version})`;
+                  if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
                     codelist.items.forEach(itemDTO => {
                       let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
                       if (!isUndefined(isRepeatedCodelistItem) && isRepeatedCodelistItem.length > 0) {
                         return;
                       }
                       let codelistItemView = {};
-                      codelistItemView.name = fieldCodelist;
-                      codelistItemView.definition = itemDTO.definition;
-                      codelistItemView.label = itemDTO.definition;
                       codelistItemView.shortCode = itemDTO.shortCode;
-                      codelistItemsView.push(codelistItemView);
-
-                      let codelistItemData = {};
-                      codelistItemData.id = itemDTO.id;
-                      codelistItemData.definition = itemDTO.definition;
-                      codelistItemData.label = itemDTO.definition;
-                      codelistItemData.shortCode = itemDTO.shortCode;
-                      codelistItemsData.push(codelistItemData);
+                      codelistItemView.label = itemDTO.definition;
+                      codelistItemView.definition = itemDTO.definition;
+                      codelistView.push(codelistItemView);
                     });
                   }
+                  parsedDataset[fieldCodelist] = codelistView;
                 }
               }
             }
@@ -99,7 +131,6 @@ const parseDesignDataset = (design, codelistsList) => {
       return table;
     });
     parsedDataset.tables = tables;
-    parsedDataset.codelists = codelistItemsView;
   }
   const dataset = {};
   dataset[design.datasetSchemaName] = parsedDataset;
