@@ -69,7 +69,6 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @CacheEvict(value = {"cacheStatistics_" + "#datasetId"})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   public void validateDataSetData(

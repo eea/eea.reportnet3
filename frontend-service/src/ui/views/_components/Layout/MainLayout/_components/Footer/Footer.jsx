@@ -20,7 +20,10 @@ export const Footer = () => {
       <footer className={`${styles.FooterExpanded} ${styles.Footer}`}>
         {footerLinks.map((footerLink, i) => (
           <>
-            <a href=".">{resources.messages[footerLink.text]}</a> {i < footerLinks ? '·' : ''}
+            <a type="button" disabled style={{ cursor: 'pointer' }}>
+              {resources.messages[footerLink.text]}
+            </a>
+            {i < footerLinks ? '·' : ''}
           </>
         ))}
       </footer>

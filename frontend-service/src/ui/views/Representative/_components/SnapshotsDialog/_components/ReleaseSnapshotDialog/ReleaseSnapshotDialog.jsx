@@ -17,6 +17,7 @@ export const ReleaseSnapshotDialog = ({
   isReleased,
   isReleasedDialogVisible,
   onLoadSnapshotList,
+  setIsLoading,
   snapshotDataToRelease,
   snapshotDescription
 }) => {
@@ -56,7 +57,9 @@ export const ReleaseSnapshotDialog = ({
       <Button
         icon="cloudUpload"
         label={resources.messages['yes']}
-        onClick={() => (!isReleased ? onReleaseSnapshot(snapshotDataToRelease.id) : onBuildSnapshot())}
+        onClick={() =>
+          (!isReleased ? onReleaseSnapshot(snapshotDataToRelease.id) : onBuildSnapshot()) && setIsLoading(true)
+        }
       />
       <Button
         icon="cancel"
