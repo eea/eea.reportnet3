@@ -65,16 +65,18 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderButtons = () =>
     leftSideBarConfig.buttons.map(button =>
       !button.isLink ? (
-        <a href="#">
+        <a href="#" title={button.label}>
           <div
             className={styles.leftSideBarElementWrapper}
             onClick={!isUndefined(button.onClick) ? () => button.onClick() : null}>
-            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
+            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} title={button.label} />
             <span className={styles.leftSideBarText}>{button.label}</span>
           </div>
         </a>
       ) : (
-        <Link to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}>
+        <Link
+          to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}
+          title={button.label}>
           <div className={styles.leftSideBarElementWrapper}>
             <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
             <span className={styles.leftSideBarText}>{button.label}</span>
