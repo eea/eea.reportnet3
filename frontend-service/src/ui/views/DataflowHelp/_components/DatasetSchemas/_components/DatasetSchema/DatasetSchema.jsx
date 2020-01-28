@@ -7,17 +7,17 @@ import { TreeView } from 'ui/views/_components/TreeView';
 const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      let codelistNames = parseCodelistList(codelistsList, designDataset);
+      const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
+      const codelistNames = parseCodelistList(codelistsList, designDataset);
 
-      let codelistTitles = [];
+      const codelistTitles = [];
       if (!isUndefined(codelistNames)) {
         codelistNames.forEach(name => {
           codelistTitles.push(name);
         });
       }
 
-      let groupableProperties = ['fields'].concat(codelistTitles);
+      const groupableProperties = ['fields'].concat(codelistTitles);
 
       return (
         <div>
@@ -43,13 +43,13 @@ const parseCodelistList = (codelistsList, designDataset) => {
   if (isUndefined(codelistsList)) {
     return;
   }
-  let codelistsSchema = codelistsList.filter(
+  const codelistsSchema = codelistsList.filter(
     codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
   );
   if (isUndefined(codelistsSchema)) {
     return;
   }
-  let codelistNames = [];
+  const codelistNames = [];
   codelistsSchema.forEach(codelistList => {
     codelistList.codelists.forEach(codelist => {
       let title = `${codelist.name} (${codelist.version})`;
@@ -63,7 +63,7 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  let codelistItemsData = [];
+  const codelistItemsData = [];
   let codelistsBySchema = [];
   if (!isUndefined(codelistsListWithSchema)) {
     codelistsBySchema = codelistsListWithSchema.find(
