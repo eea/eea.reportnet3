@@ -203,7 +203,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Cacheable(value = "cacheStatistics_" + "#datasetId", key = "#datasetId")
+  @Cacheable(value = "cacheStatistics", key = "#datasetId")
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
 
     StatisticsVO statistics = null;

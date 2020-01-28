@@ -134,7 +134,7 @@ public class ValidationHelper {
    */
   @Async
   @LockMethod(removeWhenFinish = false, isController = false)
-  @CacheEvict(value = {"cacheStatistics_" + "#datasetId"}, key = "#datasetId")
+  @CacheEvict(value = {"cacheStatistics"}, key = "#datasetId")
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String uuId) {
     synchronized (processesMap) {
