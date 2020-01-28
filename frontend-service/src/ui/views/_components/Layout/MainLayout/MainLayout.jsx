@@ -42,6 +42,7 @@ const MainLayout = ({ children, leftSideBarConfig }) => {
     fetchData();
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
+    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
