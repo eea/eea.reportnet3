@@ -24,7 +24,6 @@
   transition: 0.5s;
   overflow-x: hidden;
   white-space: nowrap;
-  cursor: pointer;
   overflow: hidden;
   .barSection {
     --top-height: 100px;
@@ -150,6 +149,10 @@
 
 .notificationList li:hover {
   background-color: var(--gray-50);
+}
+
+.cursorPointer {
+  cursor: pointer;
 }
 
 /* .notificationCounter:hover {

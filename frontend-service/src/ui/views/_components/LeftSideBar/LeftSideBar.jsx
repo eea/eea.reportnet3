@@ -129,10 +129,9 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
                   e.preventDefault();
                   breadCrumbContext.setMenuState();
                 }}
+                className={styles.cursorPointer}
                 title={
-                  breadCrumbContext.isLeftSideBarOpened
-                    ? resources.messages['closeSidebar']
-                    : resources.messages['expandSidebar']
+                  breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined
                 }>
                 {breadCrumbContext.isLeftSideBarOpened ? (
                   <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} />
