@@ -38,9 +38,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
           icon={AwesomeIcons('user-profile')}
         />
-        <span className={styles.leftSideBarUserText}>
-          {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
-        </span>
+        <span className={styles.leftSideBarUserText}>{resources.messages['userSettings']}</span>
       </div>
     </a>
   );
