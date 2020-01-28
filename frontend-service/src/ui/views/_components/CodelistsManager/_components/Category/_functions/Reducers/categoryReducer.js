@@ -73,8 +73,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isDeleteConfirmDialogVisible: payload };
     case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
       return { ...state, isFiltered: !state.isFiltered };
-    case 'TOGGLE_IS_EXPANDED':
-      return { ...state, isExpanded: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
     case 'UPDATE_EDITING_CODELISTS':

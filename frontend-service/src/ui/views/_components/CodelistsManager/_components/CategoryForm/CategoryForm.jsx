@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { capitalize, isNull, isUndefined } from 'lodash';
 
-import styles from './CodelistsForm.module.css';
+import styles from './CategoryForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -9,18 +9,36 @@ import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const CodelistsForm = ({ newCategory, columns, onChangeCategoryForm, onHideDialog, onSaveCategory, visible }) => {
+const CategoryForm = ({
+  checkCategoryDuplicates,
+  columns,
+  isIncorrect,
+  newCategory,
+  onChangeCategoryForm,
+  onHideDialog,
+  onSaveCategory,
+  onToggleIncorrect,
+  visible
+}) => {
   const resources = useContext(ResourcesContext);
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['save']}
+        disabled={isIncorrect}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => {
           onSaveCategory();
         }}
       />
-      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => onHideDialog()} />
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          onToggleIncorrect(false);
+          onHideDialog();
+        }}
+      />
     </div>
   );
 
@@ -29,7 +47,11 @@ const CodelistsForm = ({ newCategory, columns, onChangeCategoryForm, onHideDialo
       <React.Fragment key={column}>
         <span className={`${styles.categoryInput} p-float-label`}>
           <InputText
+            className={isIncorrect && column === 'shortCode' ? styles.categoryIncorrectInput : null}
             id={`${column}Input`}
+            onBlur={() =>
+              column === 'shortCode' ? onToggleIncorrect(checkCategoryDuplicates(newCategory[column])) : null
+            }
             onChange={e => onChangeCategoryForm(column, e.target.value)}
             // required={true}
             value={
@@ -64,4 +86,4 @@ const CodelistsForm = ({ newCategory, columns, onChangeCategoryForm, onHideDialo
   return renderDialog;
 };
 
-export { CodelistsForm };
+export { CategoryForm };
