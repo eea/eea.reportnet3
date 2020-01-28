@@ -418,6 +418,7 @@
 		"releaseDatasetSnapshotFailedEvent": "Failed releasing <strong title='{:snapshotName}'>{:shortSnapshotName}</strong>",
 		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"userServiceOldLoginError": "Login failed. Network?",
-		"createDataCollectionInit": "Creating data collection"
+		"createDataCollectionInit": "Creating data collection",
+		"loadSnapshotsListError": "Error loading dataset copies"
 	}
 }

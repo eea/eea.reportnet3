@@ -74,7 +74,10 @@ export const SnapshotsDialog = ({
     try {
       setSnapshotsListData(await SnapshotService.allReporter(datasetId));
     } catch (error) {
-      console.log('error', error);
+      notificationContext.add({
+        type: 'LOAD_SNAPSHOTS_LIST_ERROR',
+        content: {}
+      });
     } finally {
       setIsLoading(false);
     }
