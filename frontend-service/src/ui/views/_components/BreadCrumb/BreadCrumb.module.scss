@@ -9,6 +9,8 @@
     list-style: none;
     li {
       a {
+        display: flex;
+        align-items: center;
         color: var(--c-corporate-blue);
       }
     }
