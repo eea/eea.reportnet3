@@ -8,7 +8,7 @@ import { Button } from 'ui/views/_components/Button';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SnapshotItem = ({ getSnapshotData, itemData, showReleaseDialog }) => {
+export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog }) => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -25,8 +25,9 @@ export const SnapshotItem = ({ getSnapshotData, itemData, showReleaseDialog }) =
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
+              disabled={isLoading}
               tooltipOptions={{ position: 'right' }}
-              icon={itemData.isReleased ? 'check' : 'cloudUpload'}
+              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() => {
                 showReleaseDialog({ isReleased: false });

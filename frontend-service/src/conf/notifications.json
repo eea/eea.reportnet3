@@ -327,6 +327,9 @@
         },
         {
           "key": "CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR"
+        },
+        {
+          "key": "LOAD_SNAPSHOTS_LIST_ERROR"
         }
       ]
     },
