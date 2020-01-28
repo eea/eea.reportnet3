@@ -1849,7 +1849,7 @@ form .error {
 
 /*Tooltip*/
 .p-tooltip {
-  z-index: 4000 !important;
+  z-index: 3000 !important;
 }
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {
@@ -1879,5 +1879,5 @@ body .p-dialog.edit-table .p-dialog-content {
 
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
-  z-index: 2000 !important;
+  z-index: 3100 !important;
 }

@@ -112,16 +112,16 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
     <div className={`${styles.leftSideBar}${breadCrumbContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
       {
         <>
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {renderUserProfile()}
             {renderUserNotifications()}
           </div>
           <hr />
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
           </div>
           <hr />
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {renderLogout()}
             <div className={styles.leftSideBarElementWrapper}>
               <a
