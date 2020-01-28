@@ -849,7 +849,7 @@ body .p-spinner .p-spinner-button.p-spinner-button.p-spinner-button-down {
   border-bottom-right-radius: 3px;
 }
 body .p-spinner .p-spinner-button.p-spinner-button:focus {
-  z-index: 1;
+  z-index:  1001;
 }
 body .p-fluid .p-spinner .p-spinner-input {
   padding-right: 2.429em;
@@ -1210,7 +1210,7 @@ body .p-inputgroup .p-button:last-child {
   border-bottom-right-radius: 3px;
 }
 body .p-inputgroup .p-inputtext:focus {
-  z-index: 1;
+  z-index:  1001;
 }
 body .p-fluid .p-inputgroup .p-button {
   width: auto;
@@ -1380,7 +1380,7 @@ body .p-selectbutton .p-button:focus {
   -webkit-box-shadow: 0 0 0 0.2em #004494;
   -moz-box-shadow: 0 0 0 0.2em #004494;
   box-shadow: 0 0 0 0.2em #004494;
-  z-index: 1;
+  z-index:  1001;
 }
 body .p-selectbutton .p-button.p-highlight {
   background-color: #004494;
@@ -1434,7 +1434,7 @@ body .p-splitbutton.p-buttonset .p-button.p-splitbutton-menubutton {
   border-bottom-left-radius: 0;
 }
 body .p-splitbutton.p-buttonset .p-button:focus {
-  z-index: 1;
+  z-index:  1001;
 }
 body .p-splitbutton.p-buttonset .p-menu {
   min-width: 100%;
@@ -4005,7 +4005,7 @@ body .p-panelmenu .p-panelmenu-header > a:focus {
   -webkit-box-shadow: 0 0 0 0.2em #004494;
   -moz-box-shadow: 0 0 0 0.2em #004494;
   box-shadow: 0 0 0 0.2em #004494;
-  z-index: 100;
+  z-index: 1000;
 }
 body .p-panelmenu .p-panelmenu-header:not(.p-highlight) > a:hover {
   outline: 0 none;

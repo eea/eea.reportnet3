@@ -12,7 +12,7 @@
   /* position: fixed !important; */
   background: white;
   /* width: 90vw; */
-  z-index: 999;
+  z-index: 2000;
   font-size: 1rem;
   font-weight: 600 !important;
 }
