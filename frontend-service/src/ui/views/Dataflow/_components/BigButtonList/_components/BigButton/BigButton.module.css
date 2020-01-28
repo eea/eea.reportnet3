@@ -104,6 +104,9 @@
   width: 2.5rem;
   transform: rotate(180deg) !important;
 }
+.newItem a:hover .siteMap {
+  transform: rotate(180deg) scale(1.25) !important;
+}
 .newItem .spinner {
   width: 2.5rem;
   animation: spinnerAnimation 1s linear infinite;

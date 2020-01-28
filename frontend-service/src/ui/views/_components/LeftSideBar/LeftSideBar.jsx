@@ -38,9 +38,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
           icon={AwesomeIcons('user-profile')}
         />
-        <span className={styles.leftSideBarUserText}>
-          {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
-        </span>
+        <span className={styles.leftSideBarUserText}>{resources.messages['userSettings']}</span>
       </div>
     </a>
   );
@@ -52,11 +50,10 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       }}
       title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['notifications'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
-        <FontAwesomeIcon
-          className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
-          icon={AwesomeIcons('notifications')}
-        />
-        <span className={styles.notificationCounter}>10</span>
+        <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
+          <FontAwesomeIcon className={`${styles.leftSideBarUserIcon}`} icon={AwesomeIcons('notifications')} />
+          <span className={styles.notificationCounter}>10</span>
+        </div>
         <span className={styles.leftSideBarUserText}>{resources.messages['notifications']}</span>
       </div>
       {/* <div className={styles.notificationList}><ul><li>Notification 1</li><li>Notification 2</li><li>Notification 2</li><li>Notification 2</li></ul></div> */}
