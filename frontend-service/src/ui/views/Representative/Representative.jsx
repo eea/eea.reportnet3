@@ -355,16 +355,6 @@ const Representative = withRouter(({ history, match }) => {
           representative={match.params.representative}
         />
 
-        <Dialog
-          header={resources.messages['manageRolesDialogTitle']}
-          footer={closeManageRolesDialog}
-          visible={isActiveManageRolesDialog}
-          onHide={() => setIsActiveManageRolesDialog(false)}
-          style={{ width: '50vw' }}
-          maximizable>
-          <RepresentativesList dataflowId={dataflowData.id} />
-        </Dialog>
-
         <SnapshotsDialog
           dataflowId={match.params.dataflowId}
           dataflowData={dataflowData}
