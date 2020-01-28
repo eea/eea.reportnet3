@@ -17,24 +17,25 @@
   position: fixed;
   height: calc(100% - var(--header-height));
   width: 50px;
-  z-index: 1;
+  z-index: 3001;
   left: 0;
   top: var(--header-height);
   background-color: var(--c-corporate-blue);
   transition: 0.5s;
   overflow-x: hidden;
   white-space: nowrap;
-  cursor: pointer;
   overflow: hidden;
   .barSection {
-    height: 75%;
-    flex: auto;
+    --top-height: 100px;
+    --botton-height: 100px;
+    --middle-height: calc(100% - var(--top-height) - var(--botton-height) - (1rem * 3));
     padding: 1rem 0;
+    height: var(--middle-height);
     &:first-of-type {
-      height: 10%;
+      height: var(--top-height);
     }
     &:last-of-type {
-      height: 15%;
+      height: var(--botton-height);
       padding-top: 0;
     }
     a {
@@ -48,7 +49,6 @@
         color: var(--white);
       }
       &:nth-of-type(2) {
-        font-style: italic;
         color: var(--white);
       }
       &:nth-of-type(3) {
@@ -116,13 +116,12 @@
 }
 
 .leftSideBarElementAnimation {
-  transition: transform 0.8s ease-in-out;
+  transition: all 0.08s ease;
 }
 
 .leftSideBarElementAnimation:hover {
-  transition: 0.3s ease-in;
-  animation: blink 0.3s;
-  /* transform: rotate(180deg); */
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
 }
 
 .leftSideBarLogo:hover {
@@ -138,7 +137,7 @@
   flex-direction: column;
   left: 3rem;
   border: 2px solid var(--gray-50);
-  z-index: 9999;
+  z-index: 3003;
   max-height: 200px;
 }
 .notificationList li {
@@ -149,6 +148,10 @@
 
 .notificationList li:hover {
   background-color: var(--gray-50);
+}
+
+.arrowToggleBtn {
+  cursor: pointer !important;
 }
 
 /* .notificationCounter:hover {

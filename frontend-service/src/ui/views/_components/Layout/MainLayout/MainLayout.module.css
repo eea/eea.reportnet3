@@ -1,5 +1,9 @@
+#mainLayoutContainer {
+  position: relative;
+  top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+}
 .mainContent {
-  margin-top: var(--header-height);
 }
 .disclaimer {
   padding: 0.5em;

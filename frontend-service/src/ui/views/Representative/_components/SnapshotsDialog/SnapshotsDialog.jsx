@@ -27,6 +27,7 @@ export const SnapshotsDialog = ({
   const resources = useContext(ResourcesContext);
 
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
@@ -70,7 +71,16 @@ export const SnapshotsDialog = ({
   };
 
   const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
+    try {
+      setSnapshotsListData(await SnapshotService.allReporter(datasetId));
+    } catch (error) {
+      notificationContext.add({
+        type: 'LOAD_SNAPSHOTS_LIST_ERROR',
+        content: {}
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onShowReleaseDialog = ({ isReleased }) => {
@@ -146,6 +156,7 @@ export const SnapshotsDialog = ({
         <SnapshotsList
           className={styles.releaseList}
           getSnapshotData={setSnapshotDataToRelease}
+          isLoading={isLoading}
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
         />
@@ -157,6 +168,7 @@ export const SnapshotsDialog = ({
         isReleased={isReleased}
         hideReleaseDialog={onHideReleaseDialog}
         onLoadSnapshotList={onLoadSnapshotList}
+        setIsLoading={setIsLoading}
         snapshotDataToRelease={snapshotDataToRelease}
         snapshotDescription={snapshotDescription}
       />

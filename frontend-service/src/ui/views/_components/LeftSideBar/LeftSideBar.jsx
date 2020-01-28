@@ -32,7 +32,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['userSettings']}>
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['userSettings'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -50,7 +50,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick={async e => {
         e.preventDefault();
       }}
-      title={resources.messages['userSettings']}>
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['notifications'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
         <FontAwesomeIcon
           className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -65,7 +65,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderButtons = () =>
     leftSideBarConfig.buttons.map(button =>
       !button.isLink ? (
-        <a href="#">
+        <a href="#" title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
           <div
             className={styles.leftSideBarElementWrapper}
             onClick={!isUndefined(button.onClick) ? () => button.onClick() : null}>
@@ -74,7 +74,9 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
           </div>
         </a>
       ) : (
-        <Link to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}>
+        <Link
+          to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}
+          title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
           <div className={styles.leftSideBarElementWrapper}>
             <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
             <span className={styles.leftSideBarText}>{button.label}</span>
@@ -85,7 +87,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const renderLogout = () => (
     <a
       href="#userProfilePage"
-      title="logout"
+      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['logout'] : undefined}
       onClick={async e => {
         e.preventDefault();
         userContext.socket.disconnect(() => {});
@@ -110,27 +112,31 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
     <div className={`${styles.leftSideBar}${breadCrumbContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
       {
         <>
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {renderUserProfile()}
             {renderUserNotifications()}
           </div>
           <hr />
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
           </div>
           <hr />
-          <div class={styles.barSection}>
+          <div className={styles.barSection}>
             {renderLogout()}
             <div className={styles.leftSideBarElementWrapper}>
               <a
                 onClick={e => {
                   e.preventDefault();
                   breadCrumbContext.setMenuState();
-                }}>
+                }}
+                className={styles.leftSideBarElementAnimation}
+                title={
+                  breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined
+                }>
                 {breadCrumbContext.isLeftSideBarOpened ? (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} />
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} className={styles.arrowToggleBtn} />
                 ) : (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} />
+                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} className={styles.arrowToggleBtn} />
                 )}
               </a>
             </div>

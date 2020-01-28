@@ -7,13 +7,23 @@ import { TreeView } from 'ui/views/_components/TreeView';
 const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      let parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      designDataset.codelistItems = parsedDesignDataset[designDataset.datasetSchemaName].codelists;
+      const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
+      const codelistNames = parseCodelistList(codelistsList, designDataset);
+
+      const codelistTitles = [];
+      if (!isUndefined(codelistNames)) {
+        codelistNames.forEach(name => {
+          codelistTitles.push(name);
+        });
+      }
+
+      const groupableProperties = ['fields'].concat(codelistTitles);
+
       return (
         <div>
           <TreeView
             excludeBottomBorder={false}
-            groupableProperties={['fields', 'codelists']}
+            groupableProperties={groupableProperties}
             key={index}
             property={parsedDesignDataset}
             propertyName={''}
@@ -29,11 +39,31 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   return renderDatasetSchema();
 };
 
+const parseCodelistList = (codelistsList, designDataset) => {
+  if (isUndefined(codelistsList)) {
+    return;
+  }
+  const codelistsSchema = codelistsList.filter(
+    codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
+  );
+  if (isUndefined(codelistsSchema)) {
+    return;
+  }
+  const codelistNames = [];
+  codelistsSchema.forEach(codelistList => {
+    codelistList.codelists.forEach(codelist => {
+      let title = `${codelist.name} (${codelist.version})`;
+      codelistNames.push(title);
+    });
+  });
+  return codelistNames;
+};
+
 const parseDesignDataset = (design, codelistsListWithSchema) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  let codelistItemsData = [];
+  const codelistItemsData = [];
   let codelistsBySchema = [];
   if (!isUndefined(codelistsListWithSchema)) {
     codelistsBySchema = codelistsListWithSchema.find(
@@ -65,7 +95,6 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
                 if (!isUndefined(codelist)) {
                   let codelistView = [];
                   fieldCodelist = `${codelist.name} (${codelist.version})`;
-                  // codelists.name = fieldCodelist;
                   if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
                     codelist.items.forEach(itemDTO => {
                       let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
