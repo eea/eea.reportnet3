@@ -31,7 +31,6 @@ const arrayShift = (arr, initialIdx, endIdx) => {
 };
 
 const checkDuplicates = (fields, name, fieldId) => {
-  console.log({ fields });
   if (!isUndefined(fields) && !isNull(fields)) {
     const inmFields = [...fields];
     const repeteadElements = inmFields.filter(field => name.toLowerCase() === field.name.toLowerCase());

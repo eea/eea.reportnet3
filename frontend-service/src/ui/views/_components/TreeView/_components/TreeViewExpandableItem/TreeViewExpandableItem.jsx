@@ -11,9 +11,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const TreeViewExpandableItem = ({
+  blockExpand = false,
   buttons,
-  expanded = true,
   children,
+  expanded = true,
   infoButtons,
   items,
   className,
@@ -97,14 +98,22 @@ const TreeViewExpandableItem = ({
           isOpen ? (
             <FontAwesomeIcon
               icon={AwesomeIcons('angleDown')}
-              style={{ cursor: 'pointer' }}
-              onClick={() => setIsOpen(!isOpen)}
+              style={{
+                cursor: 'pointer',
+                color: blockExpand ? 'var(--errors)' : 'inherit',
+                opacity: blockExpand ? '0.7' : '1'
+              }}
+              onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
             />
           ) : (
             <FontAwesomeIcon
               icon={AwesomeIcons('angleRight')}
-              style={{ cursor: 'pointer' }}
-              onClick={() => setIsOpen(!isOpen)}
+              style={{
+                cursor: 'pointer',
+                color: blockExpand ? 'var(--errors)' : 'inherit',
+                opacity: blockExpand ? '0.7' : '1'
+              }}
+              onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
             />
           )
         ) : (

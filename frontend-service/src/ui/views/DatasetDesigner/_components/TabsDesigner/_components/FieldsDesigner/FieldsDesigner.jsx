@@ -211,7 +211,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const previewData = () => {
-    console.log({ fields });
     const tableSchemaColumns =
       !isUndefined(fields) && !isNull(fields)
         ? fields.map(field => {
@@ -228,7 +227,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
             };
           })
         : [];
-    console.log({ tableSchemaColumns });
 
     return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
       <DataViewer
@@ -320,11 +318,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const renderFields = () => {
-    // console.log(
-    //   fields.filter(field => field.type === 'CODELIST').length,
-    //   fields.filter(field => field.type === 'CODELIST')
-    // );
-    console.log(fields);
     const renderedFields =
       !isUndefined(fields) && !isNull(fields) ? (
         fields.map((field, index) => (
