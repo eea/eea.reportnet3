@@ -1,11 +1,12 @@
 const parseKey = item => item.toString().toUpperCase();
 
-const filterByText = (data, filterText) =>
-  data.filter(function f(o) {
+const filterByText = (data, filterText) => {
+  const filteredData = data.filter(function f(o) {
+    if (o.shortCode && parseKey(o.shortCode).includes(filterText)) return true;
     if (o.name && parseKey(o.name).includes(filterText)) return true;
     if (o.description && parseKey(o.description).includes(filterText)) return true;
     if (o.version && parseKey(o.version).includes(filterText)) return true;
-    if (o.status && parseKey(o.status).includes(filterText)) return true;
+    // if (o.status && parseKey(o.status).includes(filterText)) return true;
     if (o.code && parseKey(o.code).includes(filterText)) return true;
     if (o.label && parseKey(o.label).includes(filterText)) return true;
     if (o.definition && parseKey(o.definition).includes(filterText)) return true;
@@ -17,7 +18,18 @@ const filterByText = (data, filterText) =>
       return (o.items = o.items.filter(f)).length;
     }
   });
+  return filteredData;
+};
+
+const getCategoryById = (categories, categoryId) => {
+  return categories
+    .map(e => {
+      return e.id;
+    })
+    .indexOf(categoryId);
+};
 
 export const CodelistsManagerUtils = {
-  filterByText
+  filterByText,
+  getCategoryById
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer } from 'react';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined, cloneDeep } from 'lodash';
 
 import styles from './Category.module.css';
 
@@ -34,17 +34,20 @@ const Category = ({
   onCodelistError,
   onCodelistSelected,
   onLoadCategories,
+  // onLoadCategory,
   onToggleIncorrect
 }) => {
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
     categoryShortCode: '',
-    filteredCodelists: [],
+    filteredCodelists: cloneDeep(category.codelists),
     filter: {
       name: '',
       version: '',
-      status: [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+      status: !isInDesign
+        ? [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }]
+        : [{ statusType: 'Ready', value: 'ready' }],
       description: ''
     },
     isAddCodelistDialogVisible: '',
@@ -52,7 +55,7 @@ const Category = ({
     isEditingDialogVisible: false,
     isFiltered: true,
     isKeyFiltered: false,
-    codelists: [],
+    codelists: cloneDeep(category.codelists),
     codelistsInEdition: 0,
     codelistName: '',
     codelistVersion: '',
@@ -70,18 +73,14 @@ const Category = ({
   ];
 
   useEffect(() => {
-    onLoadCodelists();
-  }, []);
+    if (!isIncorrect) {
+      onLoadCodelists();
+    }
+  }, [category.codelists]);
 
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
   }, [onLoadCategories]);
-
-  // useEffect(() => {
-  //   if (!isNull(categoryState.categoryId)) {
-  //     onLoadCodelists();
-  //   }
-  // }, [categoryState.isFiltered]);
 
   useEffect(() => {
     if (categoryState.isEditingDialogVisible) {
@@ -118,20 +117,10 @@ const Category = ({
 
   const onLoadCategoryInfo = () => {
     setCategoryInputs(category.description, category.shortCode, category.id);
-    // try {
-    //   const response = await CodelistCategoryService.getCategoryInfo(categoryState.categoryId);
-    //   if (response.status >= 200 && response.status <= 299) {
-    //     setCategoryInputs(response.data.description, response.data.shortCode, response.data.id);
-    //   }
-    // } catch (error) {
-    //   notificationContext.add({
-    //     type: 'CODELIST_CATEGORY_SERVICE_GET_CATEGORY_INFO_ERROR'
-    //   });
-    // }
   };
 
   const onLoadCodelists = () => {
-    changeFilterValues('status', categoryState.filter.status);
+    changeFilterValues('status', categoryState.filter.status, category.codelists);
     dispatchCategory({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: category.codelists }
@@ -146,11 +135,12 @@ const Category = ({
 
   const onRefreshCodelist = (codelistId, newCodelist) => {
     const inmCodelists = [...categoryState.codelists];
+    const updatedCodelists = inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist));
     dispatchCategory({
       type: 'SET_CODELISTS_IN_CATEGORY',
-      payload: { data: inmCodelists.map(codelist => (newCodelist.id === codelist.id ? newCodelist : codelist)) }
+      payload: { data: updatedCodelists }
     });
-    changeFilterValues('status', categoryState.filter.status);
+    changeFilterValues('status', categoryState.filter.status, updatedCodelists);
   };
 
   const onSaveCategory = async () => {
@@ -238,10 +228,10 @@ const Category = ({
     </div>
   );
 
-  const changeFilterValues = (filter, value) => {
+  const changeFilterValues = (filter, value, data) => {
     dispatchCategory({
       type: 'SET_FILTER_VALUES',
-      payload: { filter, value }
+      payload: { data, filter, value }
     });
   };
 
@@ -289,6 +279,7 @@ const Category = ({
         onCodelistError={onCodelistError}
         onCodelistSelected={onCodelistSelected}
         onLoadCategories={onLoadCategories}
+        // onLoadCategory={onLoadCategory}
         onLoadCodelists={onLoadCodelists}
         onRefreshCodelist={onRefreshCodelist}
         onToggleIncorrect={onToggleIncorrect}
@@ -335,7 +326,7 @@ const Category = ({
         {renderFilters()}
         <div className={styles.categories}>
           {categoryState.filteredCodelists.map((codelist, i) => {
-            return getCodelists(codelist, i);
+            return getCodelists(cloneDeep(codelist), i);
           })}
         </div>
       </React.Fragment>
@@ -386,7 +377,7 @@ const Category = ({
           <InputText
             className={styles.inputFilter}
             id={'filterNameInput'}
-            onChange={e => changeFilterValues('name', e.target.value)}
+            onChange={e => changeFilterValues('name', e.target.value, categoryState.codelists)}
             value={categoryState.filter.name}
           />
           <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
@@ -395,7 +386,7 @@ const Category = ({
           <InputText
             className={styles.inputFilter}
             id={'filterVersionInput'}
-            onChange={e => changeFilterValues('version', e.target.value)}
+            onChange={e => changeFilterValues('version', e.target.value, categoryState.codelists)}
             value={categoryState.filter.version}
           />
           <label htmlFor={'filterVersionInput'}>{resources.messages['codelistVersion']}</label>
@@ -405,7 +396,7 @@ const Category = ({
             className={styles.multiselectFilter}
             filter={false}
             itemTemplate={statusTemplate}
-            onChange={e => changeFilterValues('status', e.value)}
+            onChange={e => changeFilterValues('status', e.value, categoryState.codelists)}
             optionLabel="statusType"
             options={statusTypes}
             placeholder={resources.messages['codelistStatus']}
@@ -418,7 +409,7 @@ const Category = ({
           <InputText
             className={styles.inputFilter}
             id={'filterDescriptionInput'}
-            onChange={e => changeFilterValues('description', e.target.value)}
+            onChange={e => changeFilterValues('description', e.target.value, categoryState.codelists)}
             value={categoryState.filter.description}
           />
           <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
@@ -442,9 +433,6 @@ const Category = ({
   return (
     <React.Fragment>
       <TreeViewExpandableItem
-        className={styles.categoryExpandable}
-        expanded={false}
-        items={[{ label: categoryState.categoryShortCode }, { label: categoryState.categoryDescription }]}
         buttons={[
           {
             disabled: !checkNoCodelistEditing(),
@@ -471,7 +459,11 @@ const Category = ({
             visible: !isInDesign || isEditionModeOn
           }
         ]}
-        onExpandTree={() => onLoadCodelists()}>
+        className={styles.categoryExpandable}
+        expanded={false}
+        items={[{ label: categoryState.categoryShortCode }, { label: categoryState.categoryDescription }]}
+        // onExpandTree={() => onLoadCodelists()}
+      >
         {
           <React.Fragment>
             {categoryState.codelists.length > 0 ? (

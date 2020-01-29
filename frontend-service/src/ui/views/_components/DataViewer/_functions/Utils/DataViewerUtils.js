@@ -22,7 +22,7 @@ const parseCodelistValue = (field, colsSchema) => {
       return field.fieldData[field.fieldData.fieldSchemaId];
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
