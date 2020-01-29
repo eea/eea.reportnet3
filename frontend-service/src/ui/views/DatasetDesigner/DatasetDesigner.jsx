@@ -199,7 +199,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-          value={datasetDescription}
+          value={datasetDescription || ''}
         />
         <Toolbar>
           <div className="p-toolbar-group-right">
