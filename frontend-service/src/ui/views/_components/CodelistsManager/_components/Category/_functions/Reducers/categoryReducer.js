@@ -45,7 +45,7 @@ export const categoryReducer = (state, { type, payload }) => {
         filteredCodelists:
           payload.filter === 'status'
             ? [
-                ...state.codelists.filter(
+                ...payload.data.filter(
                   codelist =>
                     [...payload.value.map(status => status.value.toLowerCase())].includes(
                       codelist.status.toLowerCase()
@@ -53,7 +53,7 @@ export const categoryReducer = (state, { type, payload }) => {
                 )
               ]
             : [
-                ...state.codelists.filter(
+                ...payload.data.filter(
                   codelist =>
                     codelist[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
                     [...state.filter.status.map(status => status.value.toLowerCase())].includes(
@@ -75,8 +75,6 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isFiltered: !state.isFiltered };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
-    case 'UPDATE_EDITING_CODELISTS':
-      return { ...state, codelistsInEdition: state.codelistsInEdition + payload };
     default:
       return state;
   }

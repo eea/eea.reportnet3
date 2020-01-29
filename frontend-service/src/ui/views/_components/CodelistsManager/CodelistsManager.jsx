@@ -1,14 +1,16 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined, isNull } from 'lodash';
+import { isUndefined, isNull, cloneDeep } from 'lodash';
 
 import styles from './CodelistsManager.module.css';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CategoryForm } from './_components/CategoryForm';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -21,22 +23,35 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { codelistsManagerReducer } from './_functions/Reducers/codelistsManagerReducer';
+
+import { CodelistsManagerUtils } from './_functions/Utils/CodelistsManagerUtils';
+
 const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodelistSelected }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [categories, setCategories] = useState([]);
+  const [codelistsInEdition, setCodelistsInEdition] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
-  const [filter, setFilter] = useState();
-  const [filteredCategories, setFilteredCategories] = useState([]);
   const [isEditionModeOn, setIsEditionModeOn] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
   const [isIncorrect, setIsIncorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
+
+  const initialCodelistsManagerState = {
+    categories: [],
+    filter: undefined,
+    filteredCategories: [],
+    isFiltered: false,
+    order: 1
+  };
+  const [codelistsManagerState, dispatchCodelistsManager] = useReducer(
+    codelistsManagerReducer,
+    initialCodelistsManagerState
+  );
 
   useEffect(() => {
     try {
@@ -46,6 +61,12 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     } finally {
     }
   }, []);
+
+  useEffect(() => {
+    if (codelistsManagerState.isFiltered) {
+      onFilter(codelistsManagerState.filter);
+    }
+  }, [codelistsManagerState.categories]);
 
   useEffect(() => {
     if (isErrorDialogVisible) {
@@ -66,20 +87,19 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const onFilter = filter => {
-    const inmCategories = [...categories];
-    const filteredCategories = inmCategories.filter(category =>
-      category.shortCode.toLowerCase().includes(filter.toLowerCase())
-    );
-    setFilteredCategories(filteredCategories);
-    setFilter(filter);
-    setIsFiltered(filter !== '');
+    const inmCategories = cloneDeep(codelistsManagerState.categories);
+    // const filteredCategories = inmCategories.filter(category =>
+    //   category.shortCode.toLowerCase().includes(filter.toLowerCase())
+    // );
+    const filteredCategories = CodelistsManagerUtils.filterByText(cloneDeep(inmCategories), filter.toUpperCase());
+    dispatchCodelistsManager({ type: 'SET_FILTER', payload: { data: filteredCategories, filter } });
   };
 
   const onLoadCategories = async () => {
     try {
       setIsLoading(true);
       const loadedCategories = await CodelistCategoryService.all();
-      setCategories(loadedCategories);
+      dispatchCodelistsManager({ type: 'SET_CATEGORIES', payload: { categories: loadedCategories } });
     } catch (error) {
       console.error(error);
       notificationContext.add({
@@ -89,6 +109,27 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       setIsLoading(false);
     }
   };
+
+  const onOrderCategories = order => {
+    dispatchCodelistsManager({ type: 'ORDER_CATEGORIES', payload: { order } });
+  };
+
+  // const onLoadCategory = async (categoryId) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const loadedCategory = await CodelistCategoryService.allInCategory(categoryId);
+  //     const inmCategories = cloneDeep(categories);
+  //     inmCategories[CodelistsManagerUtils.getCategoryById(inmCategories,categoryId)] = loadedCategory;
+  //     setCategories(inmCategories);
+  //   } catch (error) {
+  //     console.error(error);
+  //     notificationContext.add({
+  //       type: 'CODELIST_CATEGORY_SERVICE_ALL_IN_CATEGORY_ERROR'
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const onSaveCategory = async () => {
     try {
@@ -111,7 +152,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const checkCategoryDuplicates = (categoryShortCode, categoryId) => {
-    const inmCategories = [...categories];
+    const inmCategories = [...codelistsManagerState.categories];
     const repeatedElements = inmCategories.filter(category => category.shortCode.toLowerCase() === categoryShortCode);
     return isUndefined(categoryId)
       ? repeatedElements.length > 0
@@ -119,8 +160,8 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const checkDuplicates = (codelistName, codelistVersion, codelistId, isCloning) => {
-    if (!isUndefined(categories) && !isNull(categories)) {
-      const inmCategories = [...categories];
+    if (!isUndefined(codelistsManagerState.categories) && !isNull(codelistsManagerState.categories)) {
+      const inmCategories = [...codelistsManagerState.categories];
       const codelists = inmCategories.map(category => category.codelists).flat();
       const repeatedElements = codelists.filter(
         codelist =>
@@ -134,6 +175,8 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       return false;
     }
   };
+
+  const checkNoCodelistEditing = () => codelistsInEdition === 0;
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -151,12 +194,13 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     data.map((category, i) => {
       return (
         <Category
-          categoriesDropdown={categories.map(category => {
+          categoriesDropdown={codelistsManagerState.categories.map(category => {
             return { categoryType: category.shortCode, value: category.id };
           })}
-          category={category}
+          category={cloneDeep(category)}
           checkCategoryDuplicates={checkCategoryDuplicates}
           checkDuplicates={checkDuplicates}
+          checkNoCodelistEditing={checkNoCodelistEditing}
           isDataCustodian={isDataCustodian}
           isEditionModeOn={isEditionModeOn}
           isIncorrect={isIncorrect}
@@ -165,7 +209,9 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           onCodelistError={onCodelistError}
           onCodelistSelected={onCodelistSelected}
           onLoadCategories={onLoadCategories}
+          // onLoadCategory={onLoadCategory}
           onToggleIncorrect={onToggleIncorrect}
+          updateEditingCodelists={updateEditingCodelists}
         />
       );
     });
@@ -183,8 +229,29 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     );
   };
 
+  const updateEditingCodelists = isNewEditingCodelist => {
+    if (isNewEditingCodelist) {
+      setCodelistsInEdition(codelistsInEdition + 1);
+    } else {
+      setCodelistsInEdition(codelistsInEdition - 1);
+    }
+  };
+
   return (
     <React.Fragment>
+      {isDataCustodian && isInDesign ? (
+        <div className={styles.codelistsActions}>
+          <div className={styles.switchDiv}>
+            <span className={styles.switchTextInput}>{resources.messages['editCodelists']}</span>
+            <InputSwitch
+              checked={isEditionModeOn}
+              onChange={e => {
+                setIsEditionModeOn(e.value);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <div className={styles.codelistsActions}>
         {
           <span className={`${styles.filterSpan} p-float-label`}>
@@ -192,39 +259,36 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
               className={styles.inputFilter}
               id="filterInput"
               onChange={e => onFilter(e.target.value)}
-              value={filter}
+              value={codelistsManagerState.filter}
             />
             <label htmlFor="filterInput">{resources.messages['filterCategories']}</label>
           </span>
         }
-        {isDataCustodian ? (
-          !isInDesign ? (
-            <Button
-              className={styles.newCategoryButton}
-              icon="add"
-              label={resources.messages['newCategory']}
-              onClick={() => setNewCategoryVisible(true)}
-              style={{ marginRight: '1.5rem' }}
-            />
-          ) : (
-            <div className={styles.switchDiv}>
-              <span className={styles.switchTextInput}>{resources.messages['editCodelists']}</span>
-              <InputSwitch
-                checked={isEditionModeOn}
-                onChange={e => {
-                  setIsEditionModeOn(e.value);
-                }}
-              />
-            </div>
-          )
-        ) : null}
+        {
+          <FontAwesomeIcon
+            className={styles.orderIcon}
+            icon={AwesomeIcons(codelistsManagerState.order === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown')}
+            onClick={() => onOrderCategories(codelistsManagerState.order)}
+          />
+        }
+        {
+          <Button
+            className={styles.newCategoryButton}
+            disabled={!checkNoCodelistEditing()}
+            icon="add"
+            label={resources.messages['newCategory']}
+            onClick={() => setNewCategoryVisible(true)}
+            style={{ marginRight: '1.5rem' }}
+            visible={!isInDesign || isEditionModeOn}
+          />
+        }
       </div>
       {isLoading ? (
         <Spinner className={styles.positioning} />
-      ) : isFiltered ? (
-        renderCategories(filteredCategories)
+      ) : codelistsManagerState.isFiltered ? (
+        renderCategories(codelistsManagerState.filteredCategories)
       ) : (
-        renderCategories(categories)
+        renderCategories(codelistsManagerState.categories)
       )}
       {/* {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)} */}
       <CategoryForm
