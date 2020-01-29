@@ -14,6 +14,9 @@
   width: 100%;
   cursor: grab;
 }
+.draggableFieldDiv :global .p-dropdown {
+  align-self: center;
+}
 
 .draggableFieldDiv:active {
   cursor: grabbing;
