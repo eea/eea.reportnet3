@@ -15,8 +15,9 @@ const useSocket = () => {
   React.useEffect(() => {
     if (isUndefined(userContext.socket)) {
       const token = UserService.getToken();
-      const ws = new WebSocket(socket_url);
-      const stompClient = Stomp.over(ws);
+      const stompClient = Stomp.over(() => {
+        return new WebSocket(socket_url);
+      });
       userContext.onAddSocket(stompClient);
 
       stompClient.debug = str => {
