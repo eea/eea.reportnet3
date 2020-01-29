@@ -52,7 +52,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       <div className={styles.leftSideBarElementWrapper}>
         <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
           <FontAwesomeIcon className={`${styles.leftSideBarUserIcon}`} icon={AwesomeIcons('notifications')} />
-          <span className={styles.notificationCounter}>10</span>
+          <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
         </div>
         <span className={styles.leftSideBarUserText}>{resources.messages['notifications']}</span>
       </div>
