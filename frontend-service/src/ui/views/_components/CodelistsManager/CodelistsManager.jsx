@@ -5,12 +5,10 @@ import { isUndefined, isNull, cloneDeep } from 'lodash';
 
 import styles from './CodelistsManager.module.css';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Category } from './_components/Category';
 import { CategoryForm } from './_components/CategoryForm';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -43,10 +41,14 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const initialCodelistsManagerState = {
     categories: [],
+    categoriesExpandStatus: [],
+    collapseAll: false,
     filter: undefined,
     filteredCategories: [],
     isFiltered: false,
-    order: 1
+    order: 1,
+    expandAll: false,
+    toggleExpandCollapseAll: 0
   };
   const [codelistsManagerState, dispatchCodelistsManager] = useReducer(
     codelistsManagerReducer,
@@ -66,6 +68,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     if (codelistsManagerState.isFiltered) {
       onFilter(codelistsManagerState.filter);
     }
+    onCalculateInitialExpandedStatus();
   }, [codelistsManagerState.categories]);
 
   useEffect(() => {
@@ -73,6 +76,14 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
       renderErrors(errorMessageTitle, errorMessage);
     }
   }, [isErrorDialogVisible]);
+
+  const onCalculateInitialExpandedStatus = () => {
+    dispatchCodelistsManager({ type: 'SET_INITIAL_EXPANDED_STATUS' });
+  };
+
+  const onCalculateExpandedStatus = (categoryId, expanded) => {
+    dispatchCodelistsManager({ type: 'SET_EXPANDED_STATUS', payload: { categoryId, expanded } });
+  };
 
   const onChangeCategoryForm = (property, value) => {
     const inmNewCategory = { ...newCategory };
@@ -151,6 +162,13 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
     setIsIncorrect(isIncorrect);
   };
 
+  const onToggleExpandCollapseAll = () => {
+    console.log(codelistsManagerState.toggleExpandCollapseAll);
+    dispatchCodelistsManager({
+      type: codelistsManagerState.toggleExpandCollapseAll === 0 ? 'EXPAND_ALL' : 'COLLAPSE_ALL'
+    });
+  };
+
   const checkCategoryDuplicates = (categoryShortCode, categoryId) => {
     const inmCategories = [...codelistsManagerState.categories];
     const repeatedElements = inmCategories.filter(category => category.shortCode.toLowerCase() === categoryShortCode);
@@ -198,14 +216,18 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
             return { categoryType: category.shortCode, value: category.id };
           })}
           category={cloneDeep(category)}
+          expandedStatus={codelistsManagerState.categoriesExpandStatus}
           checkCategoryDuplicates={checkCategoryDuplicates}
           checkDuplicates={checkDuplicates}
           checkNoCodelistEditing={checkNoCodelistEditing}
+          collapseAll={codelistsManagerState.collapseAll}
+          expandAll={codelistsManagerState.expandAll}
           isDataCustodian={isDataCustodian}
           isEditionModeOn={isEditionModeOn}
           isIncorrect={isIncorrect}
           isInDesign={isInDesign}
           key={i}
+          onCalculateExpandedStatus={onCalculateExpandedStatus}
           onCodelistError={onCodelistError}
           onCodelistSelected={onCodelistSelected}
           onLoadCategories={onLoadCategories}
@@ -265,12 +287,29 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           </span>
         }
         {
-          <FontAwesomeIcon
-            className={styles.orderIcon}
-            icon={AwesomeIcons(codelistsManagerState.order === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown')}
-            onClick={() => onOrderCategories(codelistsManagerState.order)}
-          />
+          <div>
+            <Button
+              className={`p-button-secondary ${styles.orderIcon}`}
+              icon={codelistsManagerState.order === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
+              onClick={() => onOrderCategories(codelistsManagerState.order)}
+              style={{ fontSize: '12pt' }}
+              tooltip={resources.messages['orderAlphabetically']}
+              tooltipOptions={{ position: 'bottom' }}
+            />
+            <Button
+              className={`p-button-secondary ${styles.orderIcon}`}
+              icon={codelistsManagerState.toggleExpandCollapseAll === 1 ? 'angleRight' : 'angleDown'}
+              onClick={() => onToggleExpandCollapseAll()}
+              tooltip={
+                codelistsManagerState.toggleExpandCollapseAll === 1
+                  ? resources.messages['collapseAll']
+                  : resources.messages['expandAll']
+              }
+              tooltipOptions={{ position: 'bottom' }}
+            />
+          </div>
         }
+
         {
           <Button
             className={styles.newCategoryButton}

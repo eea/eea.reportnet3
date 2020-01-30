@@ -9,9 +9,8 @@ import { Codelist } from './_components/Codelist';
 import { CodelistProperties } from 'ui/views/_components/CodelistProperties';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { MultiSelect } from 'primereact/multiselect';
 import { InputText } from 'ui/views/_components/InputText';
-import { Spinner } from 'ui/views/_components/Spinner';
+import { MultiSelect } from 'primereact/multiselect';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { CodelistCategoryService } from 'core/services/CodelistCategory';
@@ -22,26 +21,39 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { categoryReducer } from './_functions/Reducers/categoryReducer';
 
+import { CategoryUtils } from './_functions/Utils/CategoryUtils';
+
 const Category = ({
   categoriesDropdown,
   category,
   checkCategoryDuplicates,
   checkDuplicates,
+  collapseAll,
+  expandAll,
+  expandedStatus,
   isDataCustodian,
   isEditionModeOn,
   isIncorrect,
   isInDesign,
+  onCalculateExpandedStatus,
   onCodelistError,
   onCodelistSelected,
   onLoadCategories,
   // onLoadCategory,
-  onToggleIncorrect
+  onToggleIncorrect,
+  toggleExpandAll
 }) => {
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
     categoryShortCode: '',
-    filteredCodelists: cloneDeep(category.codelists),
+    codelists: cloneDeep(category.codelists),
+    codelistName: '',
+    codelistDescription: '',
+    codelistStatus: { statusType: 'design', value: 'DESIGN' },
+    codelistsInEdition: 0,
+    codelistVersion: '',
+    expanded: false,
     filter: {
       name: '',
       version: '',
@@ -50,17 +62,13 @@ const Category = ({
         : [{ statusType: 'Ready', value: 'ready' }],
       description: ''
     },
+    filteredCodelists: cloneDeep(category.codelists),
     isAddCodelistDialogVisible: '',
     isDeleteConfirmDialogVisible: false,
     isEditingDialogVisible: false,
     isFiltered: true,
     isKeyFiltered: false,
-    codelists: cloneDeep(category.codelists),
-    codelistsInEdition: 0,
-    codelistName: '',
-    codelistVersion: '',
-    codelistStatus: { statusType: 'design', value: 'DESIGN' },
-    codelistDescription: ''
+    order: { name: 1, version: 1, status: 1, description: 1 }
   };
   const [categoryState, dispatchCategory] = useReducer(categoryReducer, initialCategoryState);
   const notificationContext = useContext(NotificationContext);
@@ -87,6 +95,10 @@ const Category = ({
       onLoadCategoryInfo();
     }
   }, [categoryState.isEditingDialogVisible]);
+
+  const onChangeExpandedStatus = expanded => {
+    dispatchCategory({ type: 'TOGGLE_EXPANDED', payload: { expanded } });
+  };
 
   const onConfirmDeleteCategory = async () => {
     try {
@@ -125,6 +137,10 @@ const Category = ({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: category.codelists }
     });
+  };
+
+  const onOrderCodelists = (order, property) => {
+    dispatchCategory({ type: 'ORDER_CODELISTS', payload: { order, property } });
   };
 
   const onRefreshCategories = response => {
@@ -370,6 +386,19 @@ const Category = ({
     ) : null;
   };
 
+  const renderFilterOrder = property => {
+    return (
+      <Button
+        className={`p-button-secondary ${styles.orderIcon}`}
+        icon={categoryState.order[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
+        onClick={() => onOrderCodelists(categoryState.order[property], property)}
+        style={{ fontSize: '12pt' }}
+        tooltip={resources.messages['orderAlphabetically']}
+        tooltipOptions={{ position: 'bottom' }}
+      />
+    );
+  };
+
   const renderFilters = () => {
     return (
       <div className={styles.codelistHeader}>
@@ -382,6 +411,7 @@ const Category = ({
           />
           <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
         </span>
+        {renderFilterOrder('name')}
         <span className={`${styles.categoryInput} p-float-label`}>
           <InputText
             className={styles.inputFilter}
@@ -391,6 +421,7 @@ const Category = ({
           />
           <label htmlFor={'filterVersionInput'}>{resources.messages['codelistVersion']}</label>
         </span>
+        {renderFilterOrder('version')}
         <span className={`${styles.categoryInput}`}>
           <MultiSelect
             className={styles.multiselectFilter}
@@ -404,7 +435,7 @@ const Category = ({
             value={categoryState.filter.status}
           />
         </span>
-
+        {renderFilterOrder('status')}
         <span className={`${styles.categoryInput} p-float-label`}>
           <InputText
             className={styles.inputFilter}
@@ -414,6 +445,7 @@ const Category = ({
           />
           <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
         </span>
+        {renderFilterOrder('description')}
       </div>
     );
   };
@@ -460,8 +492,16 @@ const Category = ({
           }
         ]}
         className={styles.categoryExpandable}
-        expanded={false}
+        // expanded={CategoryUtils.getCategoryById(expandedStatus, categoryState.categoryId).expanded}
+        expanded={collapseAll ? false : expandAll ? true : categoryState.expanded}
         items={[{ label: categoryState.categoryShortCode }, { label: categoryState.categoryDescription }]}
+        onExpandTree={() => onChangeExpandedStatus(true)}
+        onCollapseTree={() => onChangeExpandedStatus(false)}
+        // onCalculateExpandedStatus(
+        //   categoryState.categoryId,
+        //   CategoryUtils.getCategoryById(expandedStatus, categoryState.categoryId).expanded
+        // )
+        // }
         // onExpandTree={() => onLoadCodelists()}
       >
         {

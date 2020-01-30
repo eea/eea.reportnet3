@@ -27,13 +27,23 @@
 
 .orderIcon {
   /* margin-left: -5rem; */
-  margin-top: 1rem;
+  margin-top: 0.4rem !important;
   opacity: 0.7;
-  cursor: pointer;
+  font-size: 16pt !important;
 }
 
 .orderIcon:hover {
   opacity: 1;
+}
+
+.orderIcon:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.orderIcon:enabled:active,
+.orderIcon:enabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .positioning {
