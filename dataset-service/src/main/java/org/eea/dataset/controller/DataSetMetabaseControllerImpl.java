@@ -22,7 +22,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -203,7 +202,6 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Cacheable(value = "cacheStatistics_" + "#datasetId", key = "#datasetId")
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
 
     StatisticsVO statistics = null;

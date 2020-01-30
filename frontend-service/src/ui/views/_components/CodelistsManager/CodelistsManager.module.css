@@ -5,7 +5,7 @@
 }
 
 .filterSpan {
-  width: 33%;
+  width: 25%;
 }
 
 .inputFilter {
@@ -13,7 +13,7 @@
   border-left: 0 !important;
   border-right: 0 !important;
   border-radius: 0 !important;
-  width: 75% !important;
+  width: 100% !important;
 }
 
 .inputFilter:enabled:focus,
@@ -25,6 +25,17 @@
   margin-left: auto !important;
 }
 
+.orderIcon {
+  /* margin-left: -5rem; */
+  margin-top: 1rem;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.orderIcon:hover {
+  opacity: 1;
+}
+
 .positioning {
   position: sticky !important;
 }
@@ -33,6 +44,7 @@
   display: flex;
   align-items: center;
   margin-left: auto !important;
+  margin-right: 1.5rem;
 }
 
 .switchTextInput {

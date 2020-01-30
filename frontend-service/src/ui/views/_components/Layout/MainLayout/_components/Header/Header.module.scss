@@ -24,4 +24,14 @@
       font-size: 1.5rem;
     }
   }
+  .userWrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    span {
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--gray-110);
+    }
+  }
 }

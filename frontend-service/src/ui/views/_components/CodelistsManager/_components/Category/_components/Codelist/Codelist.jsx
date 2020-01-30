@@ -1,4 +1,4 @@
-import React, { useContext, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import { capitalize, isUndefined, cloneDeep } from 'lodash';
 
@@ -44,7 +44,6 @@ const Codelist = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
   const initialCodelistState = {
     clonedCodelist: {
       codelistId: codelist.id,
@@ -76,12 +75,12 @@ const Codelist = ({
   };
   const [codelistState, dispatchCodelist] = useReducer(codelistReducer, initialCodelistState);
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatchCodelist({
       type: 'RESET_INITIAL_VALUES',
       payload: initialCodelistState
     });
-  }, [codelist]);
+  }, [codelist.name, codelist.description, codelist.status, codelist.version]);
 
   const onAddCodelistItemClick = () => {
     toggleDialogWithFormType('TOGGLE_ADD_EDIT_CODELIST_ITEM_VISIBLE', true, 'ADD');
@@ -216,6 +215,14 @@ const Codelist = ({
           codelistState.codelistCategoryId
         );
         if (response.status >= 200 && response.status <= 299) {
+          if (!isUndefined(updateEditingCodelists)) {
+            updateEditingCodelists(false);
+          }
+          if (codelistState.isCategoryChanged) {
+            onLoadCategories();
+          } else {
+            onLoadCodelist();
+          }
           toggleDialog('TOGGLE_EDITING_CODELIST_ITEM', false);
         }
       } catch (error) {
@@ -223,14 +230,6 @@ const Codelist = ({
           type: 'CODELIST_SERVICE_UPDATE_BY_ID_ERROR'
         });
       } finally {
-        if (!isUndefined(updateEditingCodelists)) {
-          updateEditingCodelists(false);
-        }
-        if (codelistState.isCategoryChanged) {
-          onLoadCategories();
-        } else {
-          onLoadCodelist();
-        }
       }
     }
   };
@@ -530,8 +529,8 @@ const Codelist = ({
             icon: 'clone',
             disabled: codelistState.isEditing,
             onClick: () => {
-              onToggleIncorrect(true);
               toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', true);
+              onToggleIncorrect(true);
             },
             tooltip: resources.messages['clone'],
             visible: !isInDesign || isEditionModeOn

@@ -239,7 +239,6 @@ export const FieldDesigner = ({
   };
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
-    console.log({ codelistId, codelistName, codelistVersion, codelistItems });
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
     if (fieldId.toString() === '-1') {
       onFieldAdd(
@@ -612,7 +611,7 @@ export const FieldDesigner = ({
           onHide={() => setIsCodelistManagerVisible(false)}
           style={{ width: '80%' }}
           visible={isCodelistManagerVisible}
-          zIndex={999}>
+          zIndex={3003}>
           {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
         </Dialog>
       ) : null}

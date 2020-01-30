@@ -54,7 +54,10 @@ import {
   faAngleDown,
   faCircleNotch,
   faAngleDoubleRight,
-  faAngleDoubleLeft
+  faAngleDoubleLeft,
+  faSortAlphaDown,
+  faSortAlphaUp,
+  faSortAlphaUpAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -160,6 +163,10 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'alphabeticOrderDown':
+      return faSortAlphaDown;
+    case 'alphabeticOrderUp':
+      return faSortAlphaUpAlt;
     case 'angleUp':
       return faAngleDoubleUp;
     case 'angleDown':
