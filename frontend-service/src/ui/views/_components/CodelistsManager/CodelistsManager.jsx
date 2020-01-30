@@ -309,16 +309,37 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
             />
           </div>
         }
-
+        {console.log(codelistsInEdition)}
         {
           <Button
             className={styles.newCategoryButton}
             disabled={!checkNoCodelistEditing()}
+            icon="refresh"
+            label={resources.messages['refresh']}
+            onClick={() => onLoadCategories()}
+            style={{ marginRight: '0.5rem' }}
+            visible={!isInDesign}
+          />
+        }
+        {
+          <Button
+            disabled={!checkNoCodelistEditing()}
             icon="add"
             label={resources.messages['newCategory']}
             onClick={() => setNewCategoryVisible(true)}
-            style={{ marginRight: '1.5rem' }}
+            style={{ marginRight: !checkNoCodelistEditing() ? '0.5rem' : '1.5rem' }}
             visible={!isInDesign || isEditionModeOn}
+          />
+        }
+        {
+          <Button
+            className={`p-button-danger ${styles.unsavedChanges}`}
+            icon="save"
+            // onClick={() => setNewCategoryVisible(true)}
+            style={{ marginRight: '1.5rem' }}
+            tooltip={resources.messages['unsavedChanges']}
+            tooltipOptions={{ position: 'bottom' }}
+            visible={!checkNoCodelistEditing()}
           />
         }
       </div>

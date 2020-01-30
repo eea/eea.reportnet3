@@ -41,7 +41,8 @@ const Category = ({
   onLoadCategories,
   // onLoadCategory,
   onToggleIncorrect,
-  toggleExpandAll
+  toggleExpandAll,
+  updateEditingCodelists
 }) => {
   const initialCategoryState = {
     categoryId: null,
@@ -454,13 +455,13 @@ const Category = ({
     <span className={`${getStatusStyle(option.value)} ${styles.statusBox}`}>{option.statusType}</span>
   );
 
-  const updateEditingCodelists = isNewEditingCodelist => {
-    if (isNewEditingCodelist) {
-      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: 1 });
-    } else {
-      dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: -1 });
-    }
-  };
+  // const updateEditingCodelists = isNewEditingCodelist => {
+  //   if (isNewEditingCodelist) {
+  //     dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: 1 });
+  //   } else {
+  //     dispatchCategory({ type: 'UPDATE_EDITING_CODELISTS', payload: -1 });
+  //   }
+  // };
 
   return (
     <React.Fragment>

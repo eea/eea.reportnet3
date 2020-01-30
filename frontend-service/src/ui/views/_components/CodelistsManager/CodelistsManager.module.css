@@ -66,3 +66,23 @@
   margin-inline-end: 0px;
   padding: 5px;
 }
+
+.unsavedChanges {
+  transition: 0.2s ease-in-out;
+  animation: blink 0.2s;
+}
+
+@keyframes blink {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}
