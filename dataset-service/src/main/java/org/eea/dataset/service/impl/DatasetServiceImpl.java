@@ -728,7 +728,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public ValidationLinkVO getPositionFromAnyObjectId(final Long id, final Long idDataset,
+  public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
       final TypeEntityEnum type) throws EEAException {
 
     ValidationLinkVO validationLink = new ValidationLinkVO();
@@ -737,7 +737,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     // TABLE
     if (TypeEntityEnum.TABLE == type) {
-      TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
+      TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
       records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
       if (records != null && !records.isEmpty()) {
         record = records.get(0);
@@ -1453,6 +1453,11 @@ public class DatasetServiceImpl implements DatasetService {
       field.setIdFieldSchema(idFieldSchema);
       field.setType(typeField);
       RecordValue recordAux = new RecordValue();
+      TableValue tableAux = new TableValue();
+      DatasetValue datasetAux = new DatasetValue();
+      datasetAux.setId(datasetId);
+      tableAux.setDatasetId(datasetAux);
+      recordAux.setTableValue(tableAux);
       recordAux.setId(r.getId());
       field.setRecord(recordAux);
 

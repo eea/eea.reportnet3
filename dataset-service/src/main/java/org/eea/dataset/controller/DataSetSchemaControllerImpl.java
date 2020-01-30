@@ -470,4 +470,41 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           e);
     }
   }
+
+
+  /**
+   * Validate schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the boolean
+   */
+  @Override
+  @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
+    return dataschemaService.validateSchema(datasetSchemaId);
+  }
+
+
+  /**
+   * Validate schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the boolean
+   */
+  @Override
+  @GetMapping(value = "/validate/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
+    // Recover the designs datasets of the dataflowId given. And then, for each design dataset
+    // executes a validation.
+    // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    Boolean isValid = false;
+    if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
+      isValid = !dataflow.getDesignDatasets().parallelStream()
+          .anyMatch(ds -> dataschemaService.validateSchema(ds.getDatasetSchema()) == false);
+    }
+    return isValid;
+  }
+
 }

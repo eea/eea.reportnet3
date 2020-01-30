@@ -1,0 +1,137 @@
+.bigButton {
+  border-radius: 10px;
+  font-size: 2rem;
+  max-width: fit-content;
+  cursor: pointer;
+  margin-right: 1rem !important;
+}
+.bigButton > a {
+  padding: 2.3rem 2.7rem;
+}
+
+.bigButton > a:hover svg {
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
+}
+
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
+  padding: 0px !important;
+  height: 0px !important;
+}
+
+.defaultBigButton {
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.defaultBigButton a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.defaultBigButton a:hover {
+  color: var(--white);
+}
+
+.menuBigButton {
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.menuBigButton a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.menuBigButton a:hover {
+  color: var(--white);
+}
+
+.createDataCollection {
+  background-color: var(--c-red-200);
+}
+.createDataCollection a:hover {
+  background-color: var(--c-red-300);
+}
+
+.dashboard {
+  background-color: var(--c-purple-400);
+}
+.dashboard a:hover {
+  background-color: var(--c-purple-300);
+}
+
+.dataCollection {
+  background-color: var(--c-green);
+}
+.dataCollection a:hover {
+  background-color: var(--c-khaki-300);
+}
+
+.dataflowHelp {
+  background-color: var(--c-orange-200);
+}
+.dataflowHelp a:hover {
+  background-color: var(--c-orange-300);
+}
+
+.dataset {
+  background-color: var(--c-corporate-blue);
+}
+.dataset a:hover {
+  background-color: var(--c-blue-400);
+}
+
+.schemaDataset {
+  background-color: var(--c-blue-green);
+}
+.schemaDataset a:hover {
+  background-color: var(--c-aquamarine);
+}
+
+.newItem {
+  background-color: var(--c-blue-300);
+}
+.newItem a:hover {
+  background-color: var(--c-blue-200);
+}
+.newItem a:hover .siteMap {
+  transform: rotate(180deg) scale(1.25) !important;
+}
+.newItem a:hover .newItemCross {
+  -webkit-transition-duration: 0.5s;
+  -moz-transition-duration: 0.5s;
+  -o-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+  -webkit-transition-property: -webkit-transform;
+  -moz-transition-property: -moz-transform;
+  -o-transition-property: -o-transform;
+  transition-property: transform;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.caption {
+  text-align: center;
+  margin: 0.75rem 0.5rem;
+  word-wrap: break-word;
+  max-width: 100px;
+  box-sizing: content-box;
+}
+
+.inputText {
+  word-wrap: break-word;
+  max-width: fit-content;
+  margin: 0.25rem !important;
+}
+
+:global .svg-inline--fa {
+  min-width: 2rem;
+}

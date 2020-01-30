@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataset.mapper.CodelistCategoryFullMapper;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
@@ -13,6 +14,7 @@ import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.interfaces.vo.dataset.enums.CodelistStatusEnum;
@@ -50,8 +52,13 @@ public class CodelistServiceImpl implements CodelistService {
   @Autowired
   private CodelistCategoryMapper codelistCategoryMapper;
 
+  /** The codelist category full mapper. */
+  @Autowired
+  private CodelistCategoryFullMapper codelistCategoryFullMapper;
+
   /**
    * Gets the by id.
+   *
    *
    * @param codelistId the codelist id
    * @return the by id
@@ -76,9 +83,9 @@ public class CodelistServiceImpl implements CodelistService {
    * @param version the version
    * @return the list
    */
-  private List<CodelistVO> findDuplicated(String name, String version, CodelistStatusEnum status) {
+  private List<CodelistVO> findDuplicated(String name, String version) {
     List<Codelist> codelists =
-        codelistRepository.findAllByNameAndVersionAndStatus(name, version, status).orElse(null);
+        codelistRepository.findAllByNameAndVersion(name, version).orElse(null);
     if (null != codelists) {
       return codelistMapper.entityListToClass(codelists);
     }
@@ -148,8 +155,7 @@ public class CodelistServiceImpl implements CodelistService {
     if (codelist.getVersion() == null) {
       codelist.setVersion(oldCodelist.getVersion());
     }
-    if (!findDuplicated(codelist.getName(), codelist.getVersion(), CodelistStatusEnum.READY)
-        .isEmpty()) {
+    if (!findDuplicated(codelist.getName(), codelist.getVersion()).isEmpty()) {
       throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
     }
   }
@@ -200,24 +206,27 @@ public class CodelistServiceImpl implements CodelistService {
    */
   private void modifyCodelistDesignState(CodelistVO codelistVO, Codelist oldCodelist)
       throws EEAException {
+    String version =
+        codelistVO.getVersion() != null ? codelistVO.getVersion() : oldCodelist.getVersion();
+    List<CodelistVO> list = findDuplicated(codelistVO.getName(), version);
+    list.removeIf(item -> codelistVO.getId().equals(item.getId()));
+    if (!list.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
+    }
+    if (codelistVO.getVersion() != null) {
+      oldCodelist.setVersion(version);
+    }
     if (CodelistStatusEnum.READY.equals(codelistVO.getStatus())) {
       oldCodelist.setStatus(CodelistStatusEnum.READY);
-      if (codelistVO.getVersion() != null) {
-        oldCodelist.setVersion(codelistVO.getVersion());
-      }
-      if (!findDuplicated(codelistVO.getName(), oldCodelist.getVersion(), CodelistStatusEnum.READY)
-          .isEmpty()) {
-        throw new EEAException(EEAErrorMessage.CODELIST_VERSION_DUPLICATED);
-      }
+    }
+    if (CodelistStatusEnum.DEPRECATED.equals(codelistVO.getStatus())) {
+      oldCodelist.setStatus(CodelistStatusEnum.DEPRECATED);
     }
     if (codelistVO.getName() != null) {
       oldCodelist.setName(codelistVO.getName());
     }
     if (codelistVO.getDescription() != null) {
       oldCodelist.setDescription(codelistVO.getDescription());
-    }
-    if (codelistVO.getVersion() != null) {
-      oldCodelist.setVersion(codelistVO.getVersion());
     }
     if (codelistVO.getCategory() != null) {
       oldCodelist.setCategory(codelistCategoryMapper.classToEntity(codelistVO.getCategory()));
@@ -352,5 +361,18 @@ public class CodelistServiceImpl implements CodelistService {
     List<Codelist> codelists = codelistRepository.findAllByCategory_Id(codelistCategoryId)
         .orElse(new ArrayList<Codelist>());
     return codelistMapper.entityListToClass(codelists);
+  }
+
+  /**
+   * Gets the all categories complete.
+   *
+   * @return the all categories complete
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional(transactionManager = "metabaseDataSetsTransactionManager")
+  public List<CodelistCategoryFullVO> getAllCategoriesComplete() throws EEAException {
+    List<CodelistCategory> codelistCategories = codelistCategoryRepository.findAll();
+    return codelistCategoryFullMapper.entityListToClass(codelistCategories);
   }
 }

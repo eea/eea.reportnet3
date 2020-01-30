@@ -1,0 +1,53 @@
+.codelistInput {
+  margin: 1.5rem 0 0 2rem;
+  width: 33%;
+}
+
+.codelistIncorrectInput {
+  border: 2px solid var(--errors) !important;
+}
+
+.codelistInputTextarea {
+  margin: 1.5rem 0 0 2rem;
+  width: 66%;
+}
+
+.codelistDropdown {
+  margin: 0.5rem 0 0 2rem;
+  width: 16%;
+  display: flex;
+  flex-direction: column;
+}
+
+.codelistInputDialog {
+  margin: 1.5rem 0 0 2rem;
+  width: 60%;
+}
+
+.codelistInputTextareaDialog {
+  margin: 1.5rem 0 0 2rem;
+  width: 80%;
+}
+
+.codelistDropdownDialog {
+  margin: 0.5rem 0 0 2rem;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+.codelistDropdownLabel {
+  font-size: 12px;
+  font-weight: normal;
+  pointer-events: none;
+  color: var(--gray-65);
+  line-height: 1;
+  margin-left: 0.25rem;
+  margin-bottom: 0.15rem;
+}
+
+.inputsWrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
+}

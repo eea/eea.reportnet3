@@ -1,24 +1,23 @@
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { isUndefined, camelCase, kebabCase } from 'lodash';
+import { camelCase, isNull, isUndefined, kebabCase } from 'lodash';
 
 import { config as generalConfig } from 'conf';
 
-import { apiNotification } from 'core/infrastructure/api/domain/model/Notification';
 import { Notification } from 'core/domain/model/Notification/Notification';
+
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 const all = async () => {};
 const removeById = async () => {};
 const removeAll = async () => {};
 const readById = async () => {};
 const readAll = async () => {};
-const parse = ({ type, content, message, config, routes }) => {
+const parse = ({ type, content = {}, message, config, routes }) => {
   const notificationDTO = {};
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
     if (notificationTypeConfig) {
       const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
       const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
-      const newContent = {};
       notificationDTO.message = message;
       notificationDTO.type = key;
       notificationDTO.fixed = typeFixed || fixed;
@@ -26,7 +25,7 @@ const parse = ({ type, content, message, config, routes }) => {
       notificationDTO.key = type;
       const contentKeys = Object.keys(content);
 
-      if (!isUndefined(navigateTo)) {
+      if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
         const urlParameters = {};
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
@@ -37,17 +36,16 @@ const parse = ({ type, content, message, config, routes }) => {
         });
       }
       contentKeys.forEach(key => {
-        if (navigateTo && !navigateTo.parameters.includes(key)) {
-          const sortKey = camelCase(`sort-${kebabCase(key)}`);
-          content[sortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+        if (isUndefined(navigateTo)) {
+          const shortKey = camelCase(`short-${kebabCase(key)}`);
+          content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+        } else {
+          if (!navigateTo.parameters.includes(key)) {
+            const shortKey = camelCase(`short-${kebabCase(key)}`);
+            content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+          }
         }
       });
-      // if (!isUndefined(downloadLinkSchema)) {
-      //   notificationDTO.downloadLink = content.downloadLink;
-      //   notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
-      //     downloadLink: notificationDTO.downloadLink
-      //   });
-      // }
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
     }
   });

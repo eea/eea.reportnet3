@@ -1,9 +1,9 @@
 .draggableFieldDiv .inputField {
-  width: 20vw;
+  width: 20%;
 }
 .inputFieldDescription {
   margin-left: 0.4rem !important;
-  width: 30vw;
+  width: 30%;
 }
 .draggableFieldDiv {
   display: flex;
@@ -11,7 +11,7 @@
   flex-flow: wrap-reverse;
   align-items: baseline;
   margin: 0px 0 5px 0;
-  width: 100vw;
+  width: 100%;
   cursor: grab;
 }
 
@@ -27,7 +27,24 @@
 
 .dropdownFieldType {
   margin-left: 0.4rem;
-  width: 20vw;
+  width: 20%;
+}
+
+.codelistButton {
+  margin-left: 0.4rem !important;
+  color: #404040;
+  background-color: var(--gray-5) !important;
+  border: 1px solid var(--gray-25) !important;
+  width: 8%;
+  height: 1.95rem;
+}
+
+.codelistButton span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 8rem;
+  font-size: 13px;
 }
 
 .deleteButton {
@@ -46,11 +63,11 @@
 }
 
 .fieldSeparator {
-  box-shadow: 1px 1px rgba(var(--blue-120-hex), 0.2), 2px 2px rgba(var(--blue-120-hex), 0.2),
-    3px 3px rgba(var(--blue-120-hex), 0.2);
+  box-shadow: 1px 1px rgba(var(--blue-120-rgb), 0.2), 2px 2px rgba(var(--blue-120-rgb), 0.2),
+    3px 3px rgba(var(--blue-120-rgb), 0.2);
   width: 74.5vw;
   height: 30px;
-  background-color: rgba(var(--blue-120-hex), 0.2);
+  background-color: rgba(var(--blue-120-rgb), 0.2);
   margin: 5px 0 5px 2rem;
   padding: 5px;
   order: 2;

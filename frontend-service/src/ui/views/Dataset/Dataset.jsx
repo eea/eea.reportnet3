@@ -8,14 +8,13 @@ import styles from './Dataset.module.css';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { Growl } from 'primereact/growl';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
@@ -24,32 +23,36 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabsSchema } from './_components/TabsSchema';
+import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { routes } from 'ui/routes';
+
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
+
 import { MetadataUtils } from 'ui/views/_functions/Utils';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
+
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
@@ -80,43 +83,75 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
+  const [metaData, setMetaData] = useState({});
 
   let exportMenuRef = useRef();
 
-  let growlRef = useRef();
+  const callSetMetaData = async () => {
+    setMetaData(await getMetadata({ datasetId, dataflowId }));
+  };
 
   useEffect(() => {
-    setBreadCrumbItems([
-      {
-        label: resources.messages['dataflowList'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'archive',
-        href: getUrl(
-          routes.DATAFLOW,
-          {
-            dataflowId: match.params.dataflowId
-          },
-          true
-        ),
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
-      },
-      { label: resources.messages['dataset'], icon: 'dataset' }
-    ]);
+    callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metaData.dataset)) {
+      breadCrumbContext.add([
+        {
+          label: resources.messages['dataflowList'],
+          icon: 'home',
+          href: getUrl(routes.DATAFLOWS),
+          command: () => history.push(getUrl(routes.DATAFLOWS))
+        },
+        {
+          label: resources.messages['dataflow'],
+          icon: 'archive',
+          href: getUrl(
+            routes.DATAFLOW,
+            {
+              dataflowId
+            },
+            true
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.DATAFLOW,
+                {
+                  dataflowId
+                },
+                true
+              )
+            )
+        },
+        {
+          label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
+          icon: 'representative',
+          href: getUrl(
+            routes.REPRESENTATIVE,
+            {
+              dataflowId,
+              representative: metaData.dataset.name
+            },
+            true
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.REPRESENTATIVE,
+                {
+                  dataflowId,
+                  representative: metaData.dataset.name
+                },
+                true
+              )
+            )
+        },
+        { label: resources.messages['dataset'], icon: 'dataset' }
+      ]);
+    }
+  }, [metaData]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -158,7 +193,7 @@ export const Dataset = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useReporterDataset(datasetId, dataflowId, growlRef);
+  } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
     try {
@@ -246,14 +281,23 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
+      notificationContext.add({
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
         content: {
@@ -321,12 +365,40 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDatasetSchema = async () => {
+  const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
-      const datasetStatistics = await DatasetService.errorStatisticsById(
+      return datasetSchema;
+    } catch (error) {
+      throw new Error('SCHEMA_BY_ID_ERROR');
+    }
+  };
+
+  const getStatisticsById = async (datasetId, tableSchemaNames) => {
+    try {
+      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return datasetStatistics;
+    } catch (error) {
+      throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
+    }
+  };
+
+  const getCodelistsList = async datasetSchemas => {
+    try {
+      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
+      return codelistsList;
+    } catch (error) {
+      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
+    }
+  };
+
+  const onLoadDatasetSchema = async () => {
+    try {
+      const datasetSchema = await getDataSchema();
+      const codelistsList = await getCodelistsList([datasetSchema]);
+      const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
@@ -350,12 +422,20 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
+            let codelist = {};
+            if (field.type === 'CODELIST') {
+              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
+            }
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              codelistId: field.codelistId,
+              codelistName: codelist.name,
+              codelistVersion: codelist.version,
+              codelistItems: codelist.items
             };
           });
         })
@@ -363,38 +443,27 @@ export const Dataset = withRouter(({ match, history }) => {
 
       setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
-      const metadata = await getMetadata({ dataflowId, datasetId });
-      console.log('[metadata]: ', metadata);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metadata;
-      const {
-        response,
-        response: {
-          data: { path }
-        }
-      } = error;
+      } = await getMetadata({ dataflowId, datasetId });
+      setDatasetName(datasetName);
       const datasetError = {
-        type: '',
+        type: error.message,
         content: {
-          dataflowId,
+          // dataflowId,
           datasetId,
           dataflowName,
           datasetName
         }
       };
-      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
-        datasetError.type = 'SCHEMA_BY_ID_ERROR';
-      } else {
-        datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
-      }
       notificationContext.add(datasetError);
-      if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const onSetVisible = (fnUseState, visible) => {
@@ -449,8 +518,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

@@ -7,28 +7,28 @@ import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
-
 import { DataflowService } from 'core/services/Dataflow';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+
 const Dataflows = withRouter(({ match, history }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [acceptedContent, setacceptedContent] = useState([]);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
@@ -81,8 +81,8 @@ const Dataflows = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataflowList'], icon: 'home' }]);
-  }, [history, match.params.dataflowId, resources.messages]);
+    breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -121,8 +121,25 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
+      <MainLayout
+        leftSideBarConfig={{
+          isCustodian,
+          buttons: [
+            {
+              isLink: false,
+              onClick: () => onShowAddForm(),
+              icon: 'plus',
+              label: resources.messages['createNewDataflow']
+            },
+            {
+              isLink: true,
+              onClick: () => onShowAddForm(),
+              icon: 'settings',
+              label: resources.messages['manageCodelists'],
+              linkTo: { route: 'CODELISTS', children: {}, isRoute: true }
+            }
+          ]
+        }}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -134,16 +151,7 @@ const Dataflows = withRouter(({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <LeftSideBar
-        createDataflowButtonTitle={resources.messages['createNewDataflow']}
-        components={['search', 'createDataflow']}
-        isCustodian={isCustodian}
-        navTitle={resources.messages['dataflowList']}
-        onShowAddForm={onShowAddForm}
-        subscribeButtonTitle={resources.messages['subscribeButton']}
-        style={{ textAlign: 'left' }}
-      />
-      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-10`}>
+      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>

@@ -166,8 +166,20 @@ export const apiDataflow = {
     });
     return response.data;
   },
+  schemasValidation: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.dataSchemasValidation, {
+        dataflowId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
   update: async (dataflowId, name, description) => {
-    console.log(name, description);
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),

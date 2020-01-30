@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.eea.dataset.mapper.CodelistCategoryFullMapper;
 import org.eea.dataset.mapper.CodelistCategoryMapper;
 import org.eea.dataset.mapper.CodelistItemMapper;
 import org.eea.dataset.mapper.CodelistMapper;
@@ -18,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.CodelistRepository;
 import org.eea.dataset.service.impl.CodelistServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CodelistCategoryFullVO;
 import org.eea.interfaces.vo.dataset.CodelistCategoryVO;
 import org.eea.interfaces.vo.dataset.CodelistItemVO;
 import org.eea.interfaces.vo.dataset.CodelistVO;
@@ -67,6 +69,10 @@ public class CodelistServiceImplTest {
   @Mock
   private CodelistCategoryMapper codelistCategoryMapper;
 
+  /** The codelist category full mapper. */
+  @Mock
+  CodelistCategoryFullMapper codelistCategoryFullMapper;
+
   /** The codelist VO. */
   private CodelistVO codelistVO;
 
@@ -93,6 +99,7 @@ public class CodelistServiceImplTest {
 
   /** The codelist categories VO. */
   List<CodelistCategoryVO> codelistCategoriesVO;
+
 
   /**
    * Inits the mocks.
@@ -126,7 +133,7 @@ public class CodelistServiceImplTest {
    * @return the by id exception 1 test
    */
   @Test
-  public void getByIdException1Test() {
+  public void getByIdExceptionNullTest() {
     try {
       codelistServiceImpl.getById(null);
     } catch (EEAException e) {
@@ -140,7 +147,7 @@ public class CodelistServiceImplTest {
    * @return the by id exception 2 test
    */
   @Test
-  public void getByIdException2Test() {
+  public void getByIdExceptionNotFoundTest() {
     when(codelistRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
       codelistServiceImpl.getById(1L);
@@ -179,7 +186,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createException1Test() throws EEAException {
+  public void createExceptionCloneNotFoundTest() throws EEAException {
     codelist.setItems(items);
     codelist.setId(1L);
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
@@ -197,7 +204,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createSuccess1Test() throws EEAException {
+  public void createSuccessCreateEmptyTest() throws EEAException {
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
     Assert.assertEquals((Long) 1L, codelistServiceImpl.create(codelistVO, null));
@@ -209,7 +216,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createSuccess2Test() throws EEAException {
+  public void createSuccessCreateWitItemsTest() throws EEAException {
     codelist.setItems(items);
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
@@ -222,7 +229,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createException2Test() throws EEAException {
+  public void createExceptionCloneVersionDuplicatedTest() throws EEAException {
     codelist.setItems(null);
     codelist.setId(1L);
     codelist.setVersion("1L");
@@ -234,8 +241,8 @@ public class CodelistServiceImplTest {
     codelistOld.setName("name");
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelistOld));
-    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(Optional.of(codelists));
+    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(codelists));
     when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
     try {
       codelistServiceImpl.create(codelistVO, 1L);
@@ -250,7 +257,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createSuccess4Test() throws EEAException {
+  public void createSuccessCloneNotDuplicatedTest() throws EEAException {
     codelist.setItems(items);
     codelist.setId(1L);
     codelist.setVersion(null);
@@ -260,8 +267,8 @@ public class CodelistServiceImplTest {
     codelistOld.setItems(items);
     when(codelistMapper.classToEntity((Mockito.any()))).thenReturn(codelist);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelistOld));
-    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(Optional.empty());
+    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
     Assert.assertEquals((Long) 1L, codelistServiceImpl.create(codelistVO, 1L));
   }
@@ -272,7 +279,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateException1Test() throws EEAException {
+  public void updateExceptionNotFoundTest() throws EEAException {
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.empty());
     try {
       codelistServiceImpl.update(codelistVO);
@@ -282,14 +289,62 @@ public class CodelistServiceImplTest {
   }
 
   /**
+   * Update exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateExceptionVersionDuplicatedTest() throws EEAException {
+    codelistVO.setCategory(new CodelistCategoryVO());
+    codelistVO.setVersion("1L");
+    codelistVO.setStatus(CodelistStatusEnum.DESIGN);
+    codelistVO.setDescription("Desc");
+    codelistVO.setName("name");
+    codelistVO.setItems(codelistItemsVO);
+    codelist.setVersion("1L");
+    codelist.setStatus(CodelistStatusEnum.DESIGN);
+    codelistVO.setStatus(CodelistStatusEnum.READY);
+    Codelist codelist2 = new Codelist();
+    codelist2.setVersion("2L");
+    codelist2.setId(3L);
+    codelist2.setStatus(CodelistStatusEnum.DESIGN);
+    codelists.add(codelist2);
+    codelistsVO.add(new CodelistVO());
+    when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
+    when(codelistRepository.findAllByNameAndVersion(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(codelists));
+    when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
+    try {
+      codelistServiceImpl.update(codelistVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e.getMessage());
+    }
+  }
+
+  /**
    * Update success 1 test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess1Test() throws EEAException {
+  public void updateSuccessReadyToDeprecatedTest() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.READY);
+    codelistVO.setStatus(CodelistStatusEnum.DEPRECATED);
+    when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
+    when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
+    Assert.assertEquals((Long) 1L, codelistServiceImpl.update(codelistVO));
+  }
+
+  /**
+   * Update success 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateSuccessDesignToDeprecatedTest() throws EEAException {
+    codelist.setItems(items);
+    codelist.setStatus(CodelistStatusEnum.DESIGN);
     codelistVO.setStatus(CodelistStatusEnum.DEPRECATED);
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
@@ -303,7 +358,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess2Test() throws EEAException {
+  public void updateSuccessWithItemsTest() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.READY);
     codelistVO.setStatus(CodelistStatusEnum.READY);
@@ -318,7 +373,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess3Test() throws EEAException {
+  public void updateSuccessDeprecatedToReadyTest() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DEPRECATED);
     codelistVO.setStatus(CodelistStatusEnum.READY);
@@ -333,7 +388,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess4Test() throws EEAException {
+  public void updateSuccessNoChangesTest() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DEPRECATED);
     codelistVO.setStatus(CodelistStatusEnum.DEPRECATED);
@@ -348,41 +403,14 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess5Test() throws EEAException {
+  public void updateSuccessToReadyTest() throws EEAException {
     codelist.setItems(items);
     codelist.setStatus(CodelistStatusEnum.DESIGN);
     codelistVO.setStatus(CodelistStatusEnum.READY);
+    codelistVO.setVersion("1L");
     when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
     when(codelistRepository.save((Mockito.any()))).thenReturn(codelist);
     Assert.assertEquals((Long) 1L, codelistServiceImpl.update(codelistVO));
-  }
-
-
-  /**
-   * Update exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateException2Test() throws EEAException {
-    codelistVO.setCategory(new CodelistCategoryVO());
-    codelistVO.setVersion("1L");
-    codelistVO.setStatus(CodelistStatusEnum.DESIGN);
-    codelistVO.setDescription("Desc");
-    codelistVO.setName("name");
-    codelistVO.setItems(codelistItemsVO);
-    codelist.setVersion("1L");
-    codelist.setStatus(CodelistStatusEnum.DESIGN);
-    codelistVO.setStatus(CodelistStatusEnum.READY);
-    when(codelistRepository.findById((Mockito.any()))).thenReturn(Optional.of(codelist));
-    when(codelistRepository.findAllByNameAndVersionAndStatus(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(Optional.of(codelists));
-    when(codelistMapper.entityListToClass(Mockito.any())).thenReturn(codelistsVO);
-    try {
-      codelistServiceImpl.update(codelistVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.CODELIST_VERSION_DUPLICATED, e.getMessage());
-    }
   }
 
   /**
@@ -391,7 +419,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateSuccess7Test() throws EEAException {
+  public void updateSuccessDesignFullFieldsTest() throws EEAException {
     codelistVO.setCategory(new CodelistCategoryVO());
     codelistVO.setVersion("1L");
     codelistVO.setStatus(CodelistStatusEnum.DESIGN);
@@ -465,7 +493,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateCategoryException1Test() throws EEAException {
+  public void updateCategoryExceptionNotFoundTest() throws EEAException {
     when(codelistCategoryRepository.findById((Mockito.any()))).thenReturn(Optional.empty());
     try {
       codelistServiceImpl.updateCategory(codelistCategoryVO);
@@ -480,7 +508,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateCategorySuccess1Test() throws EEAException {
+  public void updateCategorySuccessNoEntryTest() throws EEAException {
     when(codelistCategoryRepository.findById((Mockito.any())))
         .thenReturn(Optional.of(codelistCategory));
     when(codelistCategoryRepository.save((Mockito.any()))).thenReturn(codelistCategory);
@@ -493,7 +521,7 @@ public class CodelistServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateCategorySuccess2Test() throws EEAException {
+  public void updateCategorySuccessWithDataTest() throws EEAException {
     codelistCategory.setShortCode("short");
     codelistCategory.setDescription("desc");
     when(codelistCategoryRepository.findById((Mockito.any())))
@@ -571,4 +599,21 @@ public class CodelistServiceImplTest {
     assertEquals("not equal", new ArrayList<CodelistVO>(),
         codelistServiceImpl.getAllByCategoryId(1L));
   }
+
+  /**
+   * Gets the all categories complete success test.
+   *
+   * @return the all categories complete success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllCategoriesCompleteSuccessTest() throws EEAException {
+    when(codelistCategoryRepository.findAll()).thenReturn(new ArrayList<CodelistCategory>());
+    List<CodelistCategoryFullVO> codelistCategoriesFullVO = new ArrayList<>();
+    when(codelistCategoryFullMapper.entityListToClass(Mockito.any()))
+        .thenReturn(codelistCategoriesFullVO);
+    assertEquals("not equal", codelistCategoriesFullVO,
+        codelistServiceImpl.getAllCategoriesComplete());
+  }
+
 }

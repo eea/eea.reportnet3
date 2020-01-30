@@ -1,24 +1,46 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
+
+// import { Calendar } from 'ui/views/_components/Calendar';
+import { Dropdown } from 'ui/views/_components/Dropdown';
+import { InputText } from 'ui/views/_components/InputText';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-// import { Calendar } from 'ui/views/_components/Calendar';
-import { InputText } from 'ui/views/_components/InputText';
-
 const FieldEditor = ({
   cells,
+  colsSchema,
   record,
   onEditorValueChange,
   onEditorSubmitValue,
   onEditorValueFocus,
   onEditorKeyChange
 }) => {
+  const resources = useContext(ResourcesContext);
+  const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
+  const [codelistItemValue, setCodelistItemValue] = useState();
+
+  useEffect(() => {
+    if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
+    setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
+  }, []);
+
   let fieldType = {};
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
+
+  const getCodelistItemsWithEmptyOption = () => {
+    const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
+    codelistsItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    return codelistsItems;
+  };
 
   const getFilter = type => {
     switch (type) {
@@ -72,11 +94,32 @@ const FieldEditor = ({
           //     //   onChange={e => onEditorValueChange(cells, e.value)}
           //     dateFormat="yy-mm-dd"
           //     monthNavigator={true}
-          //     onChange={e => console.log(e.value)}
           //     value={RecordUtils.getCellValue(cells, cells.field)}
           //     yearNavigator={true}
           //     yearRange="2010:2030"
           //   />
+        );
+      case 'CODELIST':
+        return (
+          <Dropdown
+            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
+            // disabled={initialStatus !== 'design'}
+            appendTo={document.body}
+            onChange={e => {
+              setCodelistItemValue(e.target.value.value);
+              onEditorValueChange(cells, e.target.value.value);
+              onEditorSubmitValue(cells, e.target.value.value, record);
+            }}
+            onMouseDown={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            optionLabel="itemType"
+            options={getCodelistItemsWithEmptyOption()}
+            // required={true}
+            // placeholder={resources.messages['category']}
+            value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
+          />
         );
       default:
         return (

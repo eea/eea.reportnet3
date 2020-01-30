@@ -9,6 +9,7 @@ import styles from './ReportnetLogin.module.css';
 import logo from 'assets/images/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
@@ -19,6 +20,7 @@ import { routes } from 'ui/routes';
 const ReportnetLogin = ({ history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const notificationContext = useContext(NotificationContext);
   const [loginError, setLoginError] = useState();
   const initialValues = {
     userName: '',
@@ -29,7 +31,7 @@ const ReportnetLogin = ({ history }) => {
     password: Yup.string().required('A password is required')
   });
   return (
-    <div className="rp-container">
+    <div className="rp-container login">
       <div className={`${styles.loginBoxContainer}`}>
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>
@@ -49,6 +51,10 @@ const ReportnetLogin = ({ history }) => {
                 history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
+                notificationContext.add({
+                  type: 'USER_SERVICE_OLD_LOGIN_ERROR',
+                  content: {}
+                });
                 user.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.status === 500) {

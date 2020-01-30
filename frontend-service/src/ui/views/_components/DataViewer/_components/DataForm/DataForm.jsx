@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { isUndefined, isNull } from 'lodash';
 
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { RecordUtils } from 'ui/views/_functions/Utils';
+
 const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, onChangeForm, records }) => {
+  const resources = useContext(ResourcesContext);
+
+  const getCodelistItemsWithEmptyOption = (colsSchema, field) => {
+    const codelistsItems = RecordUtils.getCodelistItems(colsSchema, field);
+    codelistsItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    return codelistsItems;
+  };
+
+  const renderDropdown = (field, fieldValue) => {
+    return (
+      <Dropdown
+        appendTo={document.body}
+        onChange={e => {
+          onChangeForm(field, e.target.value.value);
+        }}
+        optionLabel="itemType"
+        options={getCodelistItemsWithEmptyOption(colsSchema, field)}
+        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItems(colsSchema, field), fieldValue)}
+      />
+    );
+  };
+
   const editRecordForm = colsSchema.map((column, i) => {
     //Avoid row id Field and dataSetPartitionId
     if (editDialogVisible) {
@@ -16,15 +46,24 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
                 <label htmlFor={column.field}>{column.header}</label>
               </div>
               <div className="p-col-8" style={{ padding: '.5em' }}>
-                <InputText
-                  id={column.field}
-                  value={
+                {column.type === 'CODELIST' ? (
+                  renderDropdown(
+                    column.field,
                     isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
                       ? ''
                       : field.fieldData[column.field]
-                  }
-                  onChange={e => onChangeForm(column.field, e.target.value)}
-                />
+                  )
+                ) : (
+                  <InputText
+                    id={column.field}
+                    value={
+                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
+                        ? ''
+                        : field.fieldData[column.field]
+                    }
+                    onChange={e => onChangeForm(column.field, e.target.value)}
+                  />
+                )}
               </div>
             </React.Fragment>
           );
@@ -44,7 +83,16 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
                 <label htmlFor={column.field}>{column.header}</label>
               </div>
               <div className="p-col-8" style={{ padding: '.5em' }}>
-                <InputText id={column.field} onChange={e => onChangeForm(column.field, e.target.value, field)} />
+                {column.type === 'CODELIST' ? (
+                  renderDropdown(
+                    column.field,
+                    isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
+                      ? ''
+                      : field.fieldData[column.field]
+                  )
+                ) : (
+                  <InputText id={column.field} onChange={e => onChangeForm(column.field, e.target.value, field)} />
+                )}
               </div>
             </React.Fragment>
           );

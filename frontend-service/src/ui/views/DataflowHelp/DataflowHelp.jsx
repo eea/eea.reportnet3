@@ -5,33 +5,36 @@ import { withRouter } from 'react-router-dom';
 import { isUndefined, isEmpty, sortBy } from 'lodash';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
-import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { Title } from 'ui/views/_components/Title';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { UserService } from 'core/services/User';
 import { WebLinks } from './_components/WebLinks';
+
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { DocumentService } from 'core/services/Document';
+import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { routes } from 'ui/routes';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const notificationContext = useContext(NotificationContext);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+
   const [dataflowName, setDataflowName] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
@@ -57,7 +60,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([
+    breadCrumbContext.add([
       {
         label: resources.messages['dataflowList'],
         icon: 'home',
@@ -87,7 +90,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
-  }, [history, match.params.dataflowId, resources.messages]);
+  }, []);
 
   const fetchDocumentsData = () => {
     setIsLoading(true);
@@ -206,7 +209,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <BreadCrumb model={breadCrumbItems} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

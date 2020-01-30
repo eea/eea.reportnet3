@@ -5,9 +5,9 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 100vw;
+  width: 100%;
   flex-wrap: wrap-reverse;
-  z-index: 9999;
+  z-index: 3000;
 }
 
 .fieldDesignerWrapper:last-child {
