@@ -18,7 +18,6 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
-import { DatasetContext } from 'ui/views/_functions/Contexts//DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
@@ -466,6 +465,16 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+    setDataViewerOptions({
+      recordPositionId: posIdRecord,
+      selectedRecordErrorId: selectedRecordErrorId,
+      activeIndex: tableSchemaId
+    });
+    setIsValidationSelected(true);
+    onSetVisible(setValidationsVisible, false);
+  };
+
   const onSetVisible = (fnUseState, visible) => {
     fnUseState(visible);
   };
@@ -501,15 +510,17 @@ export const Dataset = withRouter(({ match, history }) => {
       return (
         <TabsSchema
           activeIndex={dataViewerOptions.activeIndex}
+          hasWritePermissions={hasWritePermissions}
+          isValidationSelected={isValidationSelected}
+          isWebFormMMR={isWebFormMMR}
+          levelErrorTypes={levelErrorTypes}
+          onLoadTableData={onLoadTableData}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={dataViewerOptions.recordPositionId}
           selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+          setIsValidationSelected={setIsValidationSelected}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
-          isWebFormMMR={isWebFormMMR}
-          hasWritePermissions={hasWritePermissions}
-          levelErrorTypes={levelErrorTypes}
-          onLoadTableData={onLoadTableData}
         />
       );
     }
@@ -630,41 +641,26 @@ export const Dataset = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
       </Dialog>
-      <DatasetContext.Provider
-        value={{
-          isValidationSelected: isValidationSelected,
-          setIsValidationSelected: setIsValidationSelected,
-          onValidationsVisible: () => {
-            onSetVisible(setValidationsVisible, false);
-          },
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setDataViewerOptions({
-              recordPositionId: posIdRecord,
-              selectedRecordErrorId: selectedRecordErrorId,
-              activeIndex: tableSchemaId
-            });
-          }
-        }}>
-        {showWebFormInputSwitch()}
-        {isWebForm()}
-        <Dialog
-          className={styles.paginatorValidationViewer}
-          dismissableMask={true}
-          header={resources.messages['titleValidations']}
-          maximizable
-          onHide={() => onSetVisible(setValidationsVisible, false)}
-          style={{ width: '80%' }}
-          visible={validationsVisible}>
-          <ValidationViewer
-            datasetId={datasetId}
-            datasetName={datasetName}
-            visible={validationsVisible}
-            hasWritePermissions={hasWritePermissions}
-            tableSchemaNames={tableSchemaNames}
-            levelErrorTypes={levelErrorTypes}
-          />
-        </Dialog>
-      </DatasetContext.Provider>
+      {showWebFormInputSwitch()}
+      {isWebForm()}
+      <Dialog
+        className={styles.paginatorValidationViewer}
+        dismissableMask={true}
+        header={resources.messages['titleValidations']}
+        maximizable
+        onHide={() => onSetVisible(setValidationsVisible, false)}
+        style={{ width: '80%' }}
+        visible={validationsVisible}>
+        <ValidationViewer
+          datasetId={datasetId}
+          datasetName={datasetName}
+          hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
+          onSelectValidation={onSelectValidation}
+          tableSchemaNames={tableSchemaNames}
+          visible={validationsVisible}
+        />
+      </Dialog>
       <ConfirmDialog
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}

@@ -1815,6 +1815,12 @@ textarea {
   resize: none;
 }
 
+input,
+select,
+textarea {
+  font-family: 'Open Sans', sans-serif;
+}
+
 hr {
   border: 0.5px solid var(--gray-50);
 }
