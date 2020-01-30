@@ -10,6 +10,7 @@ import { routes } from 'ui/routes';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
+import { NotificationsList } from './_components/NotificationsList';
 
 import { UserService } from 'core/services/User';
 
@@ -25,6 +26,8 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   const renderUserProfile = () => (
     <a
@@ -47,6 +50,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       href="#"
       onClick={async e => {
         e.preventDefault();
+        if (notificationContext.all.length > 0) setIsNotificationVisible(true);
       }}
       title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['notifications'] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>
@@ -138,6 +142,10 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
               </a>
             </div>
           </div>
+          <NotificationsList
+            isNotificationVisible={isNotificationVisible}
+            setIsNotificationVisible={setIsNotificationVisible}
+          />
         </>
       }
     </div>
