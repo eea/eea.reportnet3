@@ -11,7 +11,6 @@ import { Column } from 'primereact/column';
 
 import { Button } from 'ui/views/_components/Button';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
@@ -19,15 +18,15 @@ import { DatasetService } from 'core/services/Dataset';
 
 const ValidationViewer = React.memo(
   ({
-    visible,
+    buttonsList = undefined,
     datasetId,
     datasetName,
-    buttonsList = undefined,
-    levelErrorTypes,
     hasWritePermissions,
-    tableSchemaNames
+    levelErrorTypes,
+    onSelectValidation,
+    tableSchemaNames,
+    visible
   }) => {
-    const datasetContext = useContext(DatasetContext);
     const resources = useContext(ResourcesContext);
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
@@ -289,14 +288,11 @@ const ValidationViewer = React.memo(
         case 'FIELD':
         case 'RECORD':
           const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-          datasetContext.setIsValidationSelected(true);
-          datasetContext.onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
-          datasetContext.onValidationsVisible();
+          onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
           break;
 
         case 'TABLE':
-          datasetContext.onSelectValidation(event.data.tableSchemaId, -1, -1);
-          datasetContext.onValidationsVisible();
+          onSelectValidation(event.data.tableSchemaId, -1, -1);
           break;
 
         default:

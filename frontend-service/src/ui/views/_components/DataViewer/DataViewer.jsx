@@ -25,7 +25,6 @@ import { InfoTable } from './_components/InfoTable';
 
 import { DatasetService } from 'core/services/Dataset';
 
-import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
@@ -44,12 +43,14 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isPreviewModeOn = false,
     isDataCollection,
+    isValidationSelected,
     isWebFormMMR,
     levelErrorTypes = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
     levelErrorTypesWithCorrects = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
     onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
+    setIsValidationSelected,
     tableHasErrors,
     tableId,
     tableName,
@@ -81,6 +82,7 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
+    const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
     const [invisibleColumns, setInvisibleColumns] = useState([]);
 
@@ -103,7 +105,6 @@ const DataViewer = withRouter(
       sortOrder: undefined
     });
 
-    const datasetContext = useContext(DatasetContext);
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
@@ -130,12 +131,16 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      if (datasetContext.isValidationSelected) {
+      setRecordErrorPositionId(recordPositionId);
+    }, [recordPositionId]);
+
+    useEffect(() => {
+      if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        datasetContext.setIsValidationSelected(false);
+        setIsValidationSelected(false);
       }
-    }, [datasetContext.isValidationSelected]);
+    }, [isValidationSelected]);
 
     useEffect(() => {
       setMenu([
@@ -166,22 +171,22 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
-      if (isUndefined(recordPositionId) || recordPositionId === -1) {
+      if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
         return;
       }
       dispatchRecords({
         type: 'SET_FIRST_PAGE_RECORD',
-        payload: Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage
+        payload: Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
       });
       dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
       onFetchData(
         undefined,
         undefined,
-        Math.floor(recordPositionId / records.recordsPerPage) * records.recordsPerPage,
+        Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage,
         records.recordsPerPage,
         levelErrorTypesWithCorrects
       );
-    }, [recordPositionId]);
+    }, [recordErrorPositionId]);
 
     useEffect(() => {
       const maxWidths = [];
@@ -297,13 +302,19 @@ const DataViewer = withRouter(
 
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
-      setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypesWithCorrects.length);
+      const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
+      setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorTypesWithCorrects.length);
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      setLevelErrorValidations(filteredKeys);
+      setLevelErrorValidations(filteredKeysWithoutSelectAll);
+      if (recordErrorPositionId !== -1) {
+        setRecordErrorPositionId(-1);
+      }
     };
 
     useEffect(() => {
-      onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      if (recordErrorPositionId === -1) {
+        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      }
     }, [levelErrorValidations]);
 
     useEffect(() => {
@@ -474,7 +485,6 @@ const DataViewer = withRouter(
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
-
       setIsLoading(true);
       try {
         let fields;
@@ -489,7 +499,6 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
-
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           onLoadTableData(true);
         }
@@ -517,7 +526,6 @@ const DataViewer = withRouter(
         if (tableData.totalRecords !== records.totalRecords) {
           dispatchRecords({ type: 'SET_TOTAL', payload: tableData.totalRecords });
         }
-
         if (tableData.totalFilteredRecords !== records.totalFilteredRecords) {
           dispatchRecords({ type: 'SET_FILTERED', payload: tableData.totalFilteredRecords });
         }
@@ -909,6 +917,7 @@ const DataViewer = withRouter(
           dataflowId={dataflowId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
+          isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
           isLoading={isLoading}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
@@ -920,6 +929,7 @@ const DataViewer = withRouter(
           records={records}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportDialogVisible={setImportDialogVisible}
+          setRecordErrorPositionId={setRecordErrorPositionId}
           showValidationFilter={showValidationFilter}
           tableHasErrors={tableHasErrors}
           tableId={tableId}

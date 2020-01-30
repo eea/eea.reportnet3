@@ -11,7 +11,6 @@ import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { Menu } from 'primereact/menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
@@ -27,8 +26,9 @@ const ActionsToolbar = ({
   dataflowId,
   hasWritePermissions,
   isFilterValidationsActive,
-  isWebFormMMR,
   isLoading,
+  isValidationSelected,
+  isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
   onSetColumns,
@@ -53,7 +53,6 @@ const ActionsToolbar = ({
     visibilityColumnIcon: 'eye'
   });
 
-  const datasetContext = useContext(DatasetContext);
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -70,10 +69,10 @@ const ActionsToolbar = ({
   }, []);
 
   useEffect(() => {
-    if (datasetContext.isValidationSelected) {
+    if (isValidationSelected) {
       dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
     }
-  }, [datasetContext.isValidationSelected]);
+  }, [isValidationSelected]);
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
