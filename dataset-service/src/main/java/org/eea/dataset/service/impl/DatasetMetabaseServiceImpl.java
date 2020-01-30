@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -351,6 +352,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
     List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
+    Set<ResourceAssignationVO> resourcesDataflow = new HashSet<>();
     datasetIdsEmail.forEach((Long id, String email) -> {
 
       ResourceAssignationVO resourceDP =
@@ -359,7 +361,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
       ResourceAssignationVO resourceDFP =
           fillResourceAssignation(dataflowId, email, ResourceGroupEnum.DATAFLOW_PROVIDER);
-      resourcesProviders.add(resourceDFP);
+      resourcesDataflow.add(resourceDFP);
 
       ResourceAssignationVO resourceDC =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
@@ -368,6 +370,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     });
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
+    userManagementControllerZuul
+        .addContributorsToResources(resourcesDataflow.stream().collect(Collectors.toList()));
     List<Long> ids = new ArrayList<>();
     ids.addAll(datasetIds);
     userManagementControllerZuul.addUserToResources(resourcesCustodian);
@@ -548,13 +552,25 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
-    reportingDatasetRepository.save(dataset);
+    Long idDataset = saveReportingDatasetIntoMetabase(dataset);
     datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
-    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+    recordStoreControllerZull.createEmptyDataset("dataset_" + idDataset, datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
-        dataset.getId(), provider.getLabel());
+        idDataset, provider.getLabel());
 
     return datasetIdsEmail;
+  }
+
+
+  /**
+   * Save reporting dataset into metabase.
+   *
+   * @param dataset the dataset
+   * @return the long
+   */
+  private Long saveReportingDatasetIntoMetabase(ReportingDataset dataset) {
+
+    return reportingDatasetRepository.save(dataset).getId();
   }
 
 

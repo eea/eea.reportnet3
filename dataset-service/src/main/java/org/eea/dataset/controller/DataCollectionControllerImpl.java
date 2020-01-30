@@ -113,7 +113,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
     // only if there are design datasets and providers
-    int i = designs.size() - 1;
+    int iteration = designs.size() - 1;
     Boolean schemasIntegrity = true;
     for (DesignDatasetVO design : designs) {
       if (!schemaService.validateSchema(design.getDatasetSchema())) {
@@ -131,12 +131,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           // Create the DC per design dataset
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
               "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, i);
+              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, iteration);
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
-              i);
-          i--;
+              iteration);
+          iteration--;
         }
         // 4. Update the dataflow status to DRAFT
         dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
