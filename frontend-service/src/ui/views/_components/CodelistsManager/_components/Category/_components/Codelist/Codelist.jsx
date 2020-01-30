@@ -311,19 +311,6 @@ const Codelist = ({
     </div>
   );
 
-  const cloneCodelistForm = (
-    <CodelistProperties
-      categoriesDropdown={categoriesDropdown}
-      checkDuplicates={checkDuplicates}
-      isCloning={true}
-      isIncorrect={isIncorrect}
-      onToggleIncorrect={onToggleIncorrect}
-      onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
-      onKeyChange={() => {}}
-      state={cloneDeep(codelistState)}
-    />
-  );
-
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -356,7 +343,19 @@ const Codelist = ({
         style={{ width: '60%' }}
         visible={codelistState.isCloneCodelistVisible}
         zIndex={999}>
-        <div className="p-grid p-fluid">{cloneCodelistForm}</div>
+        <div className="p-grid p-fluid">
+          <CodelistProperties
+            categoriesDropdown={categoriesDropdown}
+            checkDuplicates={checkDuplicates}
+            isCloning={true}
+            isIncorrect={isIncorrect}
+            onToggleIncorrect={onToggleIncorrect}
+            onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
+            onKeyChange={() => {}}
+            state={cloneDeep(codelistState)}
+            toggleCategoryChange={toggleCategoryChange}
+          />
+        </div>
       </Dialog>
     ) : null;
   };
