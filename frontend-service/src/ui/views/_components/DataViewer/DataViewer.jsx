@@ -1109,14 +1109,14 @@ const DataViewer = withRouter(
           <Dialog
             className="edit-table"
             blockScroll={false}
-            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+            contentStyle={{ maxHeight: '80vh', overflow: 'auto' }}
             footer={addRowDialogFooter}
             header={resources.messages['addNewRow']}
             modal={true}
             onHide={() => setAddDialogVisible(false)}
             style={{ width: '50%' }}
             visible={addDialogVisible}
-            zIndex={999}>
+            zIndex={3003}>
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
