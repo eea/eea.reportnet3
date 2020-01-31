@@ -98,14 +98,14 @@ const Documents = ({
           type="button"
           icon="edit"
           className={`p-button-rounded p-button-secondary ${styles.editRowButton}`}
-          disabled={isDeletingDocument}
+          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
           onClick={e => onEditDocument()}
         />
         <Button
           type="button"
-          icon={isDeletingDocument ? 'spinnerAnimate' : 'trash'}
+          icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
           className={`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}
-          disabled={isDeletingDocument}
+          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
           onClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
