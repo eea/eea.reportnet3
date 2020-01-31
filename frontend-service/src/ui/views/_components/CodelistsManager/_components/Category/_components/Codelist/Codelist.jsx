@@ -334,7 +334,6 @@ const Codelist = ({
       <Dialog
         className="edit-table"
         blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={cloneCodelistDialogFooter}
         header={resources.messages['cloneCodelist']}
@@ -342,7 +341,7 @@ const Codelist = ({
         onHide={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
         visible={codelistState.isCloneCodelistVisible}
-        zIndex={999}>
+        zIndex={3003}>
         <div className="p-grid p-fluid">
           <CodelistProperties
             categoriesDropdown={categoriesDropdown}

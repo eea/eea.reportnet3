@@ -355,7 +355,6 @@ const Category = ({
       <Dialog
         className="edit-table"
         blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={addCodelistDialogFooter}
         header={resources.messages['addNewCodelist']}
@@ -363,7 +362,7 @@ const Category = ({
         onHide={() => toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
         visible={categoryState.isAddCodelistDialogVisible}
-        zIndex={999}>
+        zIndex={3003}>
         <div className="p-grid p-fluid">{addCodelistForm}</div>
       </Dialog>
     ) : null;
@@ -374,7 +373,6 @@ const Category = ({
       <Dialog
         className="edit-table"
         blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={categoryDialogFooter}
         header={resources.messages['editCategory']}

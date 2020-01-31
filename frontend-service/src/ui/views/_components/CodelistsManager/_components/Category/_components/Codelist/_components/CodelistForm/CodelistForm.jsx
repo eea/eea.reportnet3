@@ -67,7 +67,6 @@ const CodelistForm = ({
     <Dialog
       className="edit-table"
       blockScroll={false}
-      contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
       footer={codelistDialogFooter}
       header={formType === 'EDIT' ? resources.messages['editItem'] : resources.messages['addNewItem']}
       modal={true}

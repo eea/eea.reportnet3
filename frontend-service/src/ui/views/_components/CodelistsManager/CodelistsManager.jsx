@@ -323,6 +323,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         }
         {
           <Button
+            className={isEditionModeOn ? styles.newCategoryButton : null}
             disabled={!checkNoCodelistEditing()}
             icon="add"
             label={resources.messages['newCategory']}
