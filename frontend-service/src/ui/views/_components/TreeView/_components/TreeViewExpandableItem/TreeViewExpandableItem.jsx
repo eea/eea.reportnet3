@@ -36,6 +36,10 @@ const TreeViewExpandableItem = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setIsOpen(expanded);
+  }, [expanded]);
+
   const renderHeader = () => {
     const width = 90 / items.length;
     return items.map((item, i) =>
@@ -123,10 +127,12 @@ const TreeViewExpandableItem = ({
         {renderButtons()}
         {renderInfoButtons()}
       </div>
-      {isOpen ? children : null}
+      {/* <div className={styles.treeChildrenWrapper}> */}
+      {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
       {React.Children.count(children) === 0 && isOpen && !isUndefined(items[0])
         ? `${resources.messages['emptyDatasetDesign']} ${items[0].label}`
         : null}
+      {/* </div> */}
     </React.Fragment>
   );
 };
