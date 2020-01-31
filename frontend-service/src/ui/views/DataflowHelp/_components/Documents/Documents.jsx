@@ -27,12 +27,14 @@ import { DocumentService } from 'core/services/Document';
 const Documents = ({
   documents,
   isCustodian,
-  match,
+  isDeletingDocument,
+  dataflowId,
   onLoadDocuments,
-  sortFieldDocuments,
+  setIsDeletingDocument,
   setSortFieldDocuments,
-  sortOrderDocuments,
-  setSortOrderDocuments
+  setSortOrderDocuments,
+  sortFieldDocuments,
+  sortOrderDocuments
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -72,6 +74,7 @@ const Documents = ({
     try {
       await DocumentService.deleteDocument(documentData.id);
     } catch (error) {
+      setIsDeletingDocument(false);
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
@@ -95,14 +98,14 @@ const Documents = ({
           type="button"
           icon="edit"
           className={`p-button-rounded p-button-secondary ${styles.editRowButton}`}
-          onClick={e => {
-            onEditDocument();
-          }}
+          disabled={isDeletingDocument}
+          onClick={e => onEditDocument()}
         />
         <Button
           type="button"
-          icon="trash"
+          icon={isDeletingDocument ? 'spinnerAnimate' : 'trash'}
           className={`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}
+          disabled={isDeletingDocument}
           onClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
@@ -303,7 +306,7 @@ const Documents = ({
         dismissableMask={false}
         onHide={onCancelDialog}>
         <DocumentFileUpload
-          dataflowId={match.params.dataflowId}
+          dataflowId={dataflowId}
           onUpload={onUploadDocument}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
@@ -318,7 +321,10 @@ const Documents = ({
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         maximizable={false}
-        onConfirm={() => onDeleteDocument(rowDataState)}
+        onConfirm={() => {
+          onDeleteDocument(rowDataState);
+          setIsDeletingDocument(true);
+        }}
         onHide={onHideDeleteDialog}
         visible={deleteDialogVisible}>
         {resources.messages['deleteDocument']}

@@ -27,6 +27,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
@@ -36,15 +38,17 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const user = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
+  const [datasetsSchemas, setDatasetsSchemas] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
+  const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
-  const [datasetsSchemas, setDatasetsSchemas] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -110,15 +114,20 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     fetchDocumentsData();
   }, [isCustodian]);
 
+  useCheckNotifications(
+    ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
+    setIsDeletingDocument,
+    false
+  );
+  useCheckNotifications(
+    ['UPLOAD_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
+    setIsDataUpdated,
+    !isDataUpdated
+  );
+
   useEffect(() => {
-    const refresh = notificationContext.toShow.find(
-      notification =>
-        notification.key === 'UPLOAD_DOCUMENT_COMPLETED_EVENT' || notification.key === 'DELETE_DOCUMENT_COMPLETED_EVENT'
-    );
-    if (refresh) {
-      fetchDocumentsData();
-    }
-  }, [notificationContext]);
+    fetchDocumentsData();
+  }, [isDataUpdated]);
 
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
@@ -225,14 +234,16 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         <TabView activeIndex={0}>
           <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
-              onLoadDocuments={onLoadDocuments}
-              match={match}
+              dataflowId={match.params.dataflowId}
               documents={documents}
               isCustodian={isCustodian}
-              sortFieldDocuments={sortFieldDocuments}
+              isDeletingDocument={isDeletingDocument}
+              onLoadDocuments={onLoadDocuments}
+              setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
-              sortOrderDocuments={sortOrderDocuments}
               setSortOrderDocuments={setSortOrderDocuments}
+              sortFieldDocuments={sortFieldDocuments}
+              sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
