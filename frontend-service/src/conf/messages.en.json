@@ -425,6 +425,9 @@
 		"releaseDatasetSnapshotCompletedEvent": "Dataset copy released successfully at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
 		"userServiceOldLoginError": "Login failed. Network?",
 		"createDataCollectionInit": "Creating data collection",
-		"loadSnapshotsListError": "Error loading dataset copies"
+		"loadSnapshotsListError": "Error loading dataset copies",
+		"message": "Message",
+		"notificationLevel": "Level"
+
 	}
 }
