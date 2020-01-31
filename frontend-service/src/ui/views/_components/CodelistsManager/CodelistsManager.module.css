@@ -27,13 +27,23 @@
 
 .orderIcon {
   /* margin-left: -5rem; */
-  margin-top: 1rem;
+  margin-top: 0.4rem !important;
   opacity: 0.7;
-  cursor: pointer;
+  font-size: 16pt !important;
 }
 
 .orderIcon:hover {
   opacity: 1;
+}
+
+.orderIcon:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.orderIcon:enabled:active,
+.orderIcon:enabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .positioning {
@@ -55,4 +65,24 @@
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   padding: 5px;
+}
+
+.unsavedChanges {
+  transition: 0.2s ease-in-out;
+  animation: blink 0.2s;
+}
+
+@keyframes blink {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
 }

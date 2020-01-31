@@ -1,3 +1,19 @@
+const sortCodelists = (data, order, property) => {
+  if (order === 1) {
+    return data.sort((a, b) => {
+      const textA = a[property].toUpperCase();
+      const textB = b[property].toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+  } else {
+    return data.sort((a, b) => {
+      const textA = a[property].toUpperCase();
+      const textB = b[property].toUpperCase();
+      return textA < textB ? 1 : textA > textB ? -1 : 0;
+    });
+  }
+};
+
 export const categoryReducer = (state, { type, payload }) => {
   const getFilterKeys = () => Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
 
@@ -13,6 +29,13 @@ export const categoryReducer = (state, { type, payload }) => {
   };
 
   switch (type) {
+    case 'ORDER_CODELISTS':
+      return {
+        ...state,
+        filteredCodelists: sortCodelists([...state.filteredCodelists], payload.order, payload.property),
+        codelists: sortCodelists([...state.codelists], payload.order, payload.property),
+        order: { ...state.order, [payload.property]: -payload.order }
+      };
     case 'RESET_INITIAL_CATEGORY_VALUES':
       return {
         ...state,
@@ -71,6 +94,8 @@ export const categoryReducer = (state, { type, payload }) => {
       return { ...state, isAddCodelistDialogVisible: payload };
     case 'TOGGLE_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteConfirmDialogVisible: payload };
+    case 'TOGGLE_EXPANDED':
+      return { ...state, expanded: payload.expanded };
     case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
       return { ...state, isFiltered: !state.isFiltered };
     case 'EDIT_NEW_CODELIST':
