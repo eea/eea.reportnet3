@@ -65,6 +65,7 @@
   --c-lilac-200: #b4b5df;
   --c-lilac-100: #dbe2e9;
   /* black-rose */
+  --c-black-rose-500: #252525;
   --c-black-rose-400: #31261d;
   --c-black-rose-300: #63513d;
   --c-black-rose-200: #c09c83;
@@ -75,6 +76,7 @@
   --c-black-200: #b1b3b3;
   --c-black-100: #d0d0ce;
   /* individuals */
+  --c-darkest-blue: #282c35;
   --c-dark-blue: #272b57;
   --c-purple: #733d85;
   --c-aquamarine: #007a86;
@@ -88,6 +90,33 @@
   --c-custom-gray: #c8c8c8;
 
   --header-height: 4rem;
+
+  /* Theme switcher */
+  --bg: var(--white);
+  --main-font-color: var(--gray-110);
+  --breadCrumb-font-color: var(--c-corporate-blue);
+  --leftSideBar-bg: var(--c-corporate-blue);
+  --leftSideBar-box-shadow: 0 0 0 rgba(255, 255, 255, 0.1);
+  --header-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  --icon-title-color: var(--gray-110);
+  --title-color: var(--gray-110);
+  --subtitle-color: var(--c-corporate-blue);
+  --secondary-button-color: var(--gray-110);
+  --secondary-button-bg: var(--white);
+  --secondary-button-border: 1px solid var(--white);
+  --tabview-bg: var(--white);
+  --tabview-border: 1px solid var(--c-custom-gray);
+  --tabview-color: var(--gray-110);
+  --tabview-highlight-bg: var(--c-corporate-blue);
+  --tabview-highlight-border: 1px solid var(--c-corporate-blue);
+  --tabview-highlight-color: var(--white);
+  --inputswitch-checked: var(--black);
+  --datatable-header-bg: var(--gray-10);
+  --datatable-header-color: var(--gray-110);
+  --datatable-header-border: 1px solid var(--c-custom-gray);
+  --datatable-body-border: 1px solid var(--white);
+  --datatable-body-color: var(--c-custom-gray);
+  --datatable-body-bg: var(--white);
 }
 body {
   margin: 0px;

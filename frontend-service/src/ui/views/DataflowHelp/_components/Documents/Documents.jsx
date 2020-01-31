@@ -180,7 +180,7 @@ const Documents = ({
   return (
     <>
       {isCustodian ? (
-        <Toolbar>
+        <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}

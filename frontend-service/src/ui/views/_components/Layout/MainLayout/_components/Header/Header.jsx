@@ -7,15 +7,19 @@ import styles from './Header.module.scss';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const Header = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+  const themeContext = useContext(ThemeContext);
+
   const loadTitle = () => (
     <a
       href={getUrl(routes.DATAFLOWS)}
@@ -31,6 +35,12 @@ const Header = withRouter(({ history }) => {
   );
   const loadUser = () => (
     <div className={styles.userWrapper}>
+      {console.log(themeContext)}
+      <InputSwitch
+        checked={themeContext.currentTheme === 'dark'}
+        onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
+        style={{ marginRight: '1rem' }}
+      />
       <span>{`@${userContext.preferredUsername}`}</span>
     </div>
   );

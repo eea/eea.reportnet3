@@ -20,11 +20,12 @@
   z-index: 3002;
   left: 0;
   top: var(--header-height);
-  background-color: var(--c-corporate-blue);
+  background-color: var(--leftSideBar-bg);
   transition: 0.5s;
   overflow-x: hidden;
   white-space: nowrap;
   overflow: hidden;
+  box-shadow: var(--leftSideBar-box-shadow);
   .barSection {
     --top-height: 100px;
     --botton-height: 100px;

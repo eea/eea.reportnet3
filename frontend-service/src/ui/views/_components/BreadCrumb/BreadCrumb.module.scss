@@ -11,8 +11,9 @@
       a {
         display: flex;
         align-items: center;
-        color: var(--c-corporate-blue);
+        color: var(--breadCrumb-font-color);
       }
+      color: var(--breadCrumb-font-color);
     }
   }
 }

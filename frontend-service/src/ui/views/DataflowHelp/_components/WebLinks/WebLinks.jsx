@@ -199,7 +199,7 @@ export const WebLinks = ({
   return (
     <>
       {isCustodian ? (
-        <Toolbar>
+        <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
