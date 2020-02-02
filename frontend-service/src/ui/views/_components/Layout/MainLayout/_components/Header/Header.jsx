@@ -39,7 +39,14 @@ const Header = withRouter(({ history }) => {
       <InputSwitch
         checked={themeContext.currentTheme === 'dark'}
         onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
+        sliderCheckedClassName={styles.themeSwitcherInputSwitch}
         style={{ marginRight: '1rem' }}
+        tooltip={
+          themeContext.currentTheme === 'light'
+            ? resources.messages['toggleDarkTheme']
+            : resources.messages['toggleLightTheme']
+        }
+        tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
       />
       <span>{`@${userContext.preferredUsername}`}</span>
     </div>
