@@ -19,7 +19,6 @@ import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementF
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
-import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsList } from './_components/SnapshotsList';

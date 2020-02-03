@@ -155,6 +155,7 @@ export const BigButtonList = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonList({
+              hasWritePermissions,
               dataflowData: dataflowData,
               dataflowId: dataflowId,
               dataflowStatus: dataflowStatus,
