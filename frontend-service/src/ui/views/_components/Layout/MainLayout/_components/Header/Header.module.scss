@@ -41,6 +41,7 @@
   }
 
   .themeSwitcherInputSwitch:before {
+    background-color: var(--black);
     box-shadow: var(--inputswitch-dark-theme-checked);
   }
 }

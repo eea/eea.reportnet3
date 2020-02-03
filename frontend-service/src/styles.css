@@ -253,7 +253,7 @@ body .p-inputswitch .p-inputswitch-slider {
   -webkit-transition: background-color 0.2s, box-shadow 0.2s;
   transition: background-color 0.2s, box-shadow 0.2s;
   border-radius: 30px;
-  background: var(--inputswitch-unchecked-bg);
+  background: var(--inputswitch-unchecked-bg); 
 }
 body .p-inputswitch .p-inputswitch-slider:before {
   background-color: #ffffff;

@@ -112,8 +112,8 @@
   --tabview-highlight-border: 1px solid var(--c-corporate-blue);
   --tabview-highlight-color: var(--white);
   --inputswitch-checked: var(--black);
-  --inputswitch-checked-before-bg: var(--gray-25);
-  --inputswitch-dark-theme-checked: inset 4px 0px var(--black), inset 4px 0px var(--black);
+  --inputswitch-checked-before-bg: var(--white);
+  --inputswitch-dark-theme-checked: inset 4px 0px var(--white);
   --inputswitch-unchecked-bg: var(--gray-25);
   --datatable-header-bg: var(--gray-10);
   --datatable-header-color: var(--gray-110);
