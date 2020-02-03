@@ -78,7 +78,6 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
-    const [menu, setMenu] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
@@ -111,7 +110,8 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
-    const { colsSchema, columnOptions } = useInitialLoadColsSchemas(tableSchemaColumns);
+    const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
+    const { menu } = useContextMenu(resources, records, setEditDialogVisible, setConfirmDeleteVisible);
 
     useEffect(() => {
       setRecordErrorPositionId(recordPositionId);
@@ -124,23 +124,6 @@ const DataViewer = withRouter(
         setIsValidationSelected(false);
       }
     }, [isValidationSelected]);
-
-    useEffect(() => {
-      setMenu([
-        {
-          label: resources.messages['edit'],
-          icon: config.icons['edit'],
-          command: () => {
-            setEditDialogVisible(true);
-          }
-        },
-        {
-          label: resources.messages['delete'],
-          icon: config.icons['trash'],
-          command: () => setConfirmDeleteVisible(true)
-        }
-      ]);
-    }, [records.selectedRecord]);
 
     useEffect(() => {
       if (records.isRecordDeleted) {
@@ -286,9 +269,11 @@ const DataViewer = withRouter(
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
+
       setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorTypesWithCorrects.length);
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       setLevelErrorValidations(filteredKeysWithoutSelectAll);
+
       if (recordErrorPositionId !== -1) {
         setRecordErrorPositionId(-1);
       }
@@ -1140,7 +1125,7 @@ const DataViewer = withRouter(
 
 export { DataViewer };
 
-const useInitialLoadColsSchemas = tableSchemaColumns => {
+const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [columnOptions, setColumnOptions] = useState([{}]);
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
 
@@ -1164,4 +1149,28 @@ const useInitialLoadColsSchemas = tableSchemaColumns => {
     colsSchema,
     columnOptions
   };
+};
+
+const useContextMenu = (resources, records, setEditDialogVisible, setConfirmDeleteVisible) => {
+  const [menu, setMenu] = useState();
+
+  useEffect(() => {
+    setMenu([
+      {
+        label: resources.messages['edit'],
+        icon: config.icons['edit'],
+        command: () => {
+          setEditDialogVisible(true);
+        }
+      },
+
+      {
+        label: resources.messages['delete'],
+        icon: config.icons['trash'],
+        command: () => setConfirmDeleteVisible(true)
+      }
+    ]);
+  }, [records.selectedRecord]);
+
+  return { menu };
 };
