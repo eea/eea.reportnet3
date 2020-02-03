@@ -1855,7 +1855,7 @@ form .error {
 
 /*Tooltip*/
 .p-tooltip {
-  z-index: 3000 !important;
+  z-index: 4000 !important;
 }
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {
