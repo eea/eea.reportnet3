@@ -120,10 +120,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     } catch (error) {
       notificationContext.add({
         type: 'DATAFLOW_DETAILS_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
+        content: {}
       });
     }
   };
