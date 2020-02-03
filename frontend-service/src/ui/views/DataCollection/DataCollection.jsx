@@ -23,7 +23,6 @@ import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-import { DatasetContext } from 'ui/views/_functions/Contexts/DatasetContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
@@ -121,10 +120,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     } catch (error) {
       notificationContext.add({
         type: 'DATAFLOW_DETAILS_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
+        content: {}
       });
     }
   };
@@ -330,21 +326,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <DatasetContext.Provider
-        value={{
-          isValidationSelected: isValidationSelected,
-          setIsValidationSelected: setIsValidationSelected,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setDataViewerOptions({
-              recordPositionId: posIdRecord,
-              selectedRecordErrorId: selectedRecordErrorId,
-              activeIndex: tableSchemaId
-            });
-          },
-          onValidationsVisible: () => {}
-        }}>
-        {onRenderTabsSchema}
-      </DatasetContext.Provider>
+      {onRenderTabsSchema}
     </SnapshotContext.Provider>
   );
 });

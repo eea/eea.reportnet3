@@ -1,7 +1,7 @@
 .spinnerWrap {
   position: absolute;
   width: 100vw;
-  height: 100%;
+  height: 100vh;
   z-index: 5000;
   background-color: rgba(0, 0, 0, 0.8) !important;
   display: flex;

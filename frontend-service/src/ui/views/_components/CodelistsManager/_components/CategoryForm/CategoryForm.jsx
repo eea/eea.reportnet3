@@ -72,7 +72,6 @@ const CategoryForm = ({
     <Dialog
       className="edit-table"
       blockScroll={false}
-      contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
       footer={categoryDialogFooter}
       header={resources.messages['addNewCategory']}
       modal={true}

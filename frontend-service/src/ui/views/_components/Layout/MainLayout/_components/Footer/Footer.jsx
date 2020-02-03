@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, Fragment } from 'react';
 
 import styles from './Footer.module.css';
 
@@ -16,17 +16,17 @@ export const Footer = () => {
     { text: 'copyrightContact' }
   ];
   return (
-    <React.Fragment>
+    <Fragment>
       <footer className={`${styles.FooterExpanded} ${styles.Footer}`}>
         {footerLinks.map((footerLink, i) => (
-          <>
+          <Fragment key={i}>
             <a type="button" disabled style={{ cursor: 'pointer' }}>
               {resources.messages[footerLink.text]}
             </a>
             {i < footerLinks ? '·' : ''}
-          </>
+          </Fragment>
         ))}
       </footer>
-    </React.Fragment>
+    </Fragment>
   );
 };

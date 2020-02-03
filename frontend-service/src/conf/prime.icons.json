@@ -1,6 +1,10 @@
 {
 	"icons": {
 		"add": "pi pi-plus",
+		"angleDown": "pi pi-chevron-down",
+		"angleRight":"pi pi-chevron-right",
+		"alphabeticOrderDown":"pi pi-sort-alpha-down",
+		"alphabeticOrderUp":"pi pi-sort-alpha-down-alt",
 		"archive": "pi pi-file",
 		"banned": "pi pi-ban",
 		"cancel": "pi pi-times",

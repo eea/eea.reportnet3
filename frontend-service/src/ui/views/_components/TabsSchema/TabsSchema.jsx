@@ -16,11 +16,13 @@ export const TabsSchema = ({
   levelErrorTypes,
   hasWritePermissions,
   isDataCollection,
+  isValidationSelected,
   isWebFormMMR,
   onLoadTableData,
   onTabChange,
   recordPositionId,
   selectedRecordErrorId,
+  setIsValidationSelected,
   tables,
   tableSchemaColumns
 }) => {
@@ -41,6 +43,7 @@ export const TabsSchema = ({
                   isDataCollection={isDataCollection}
                   isWebFormMMR={isWebFormMMR}
                   key={table.id}
+                  isValidationSelected={isValidationSelected}
                   onLoadTableData={onLoadTableData}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
@@ -54,6 +57,7 @@ export const TabsSchema = ({
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
+                  setIsValidationSelected={setIsValidationSelected}
                 />
               </div>
             </TabPanel>
