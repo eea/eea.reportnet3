@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined, isEmpty, sortBy } from 'lodash';
+import { isEmpty, isUndefined, sortBy } from 'lodash';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -11,8 +11,8 @@ import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
+import { TabView } from 'ui/views/_components/TabView';
 import { Title } from 'ui/views/_components/Title';
 import { WebLinks } from './_components/WebLinks';
 
@@ -23,7 +23,6 @@ import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -33,7 +32,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -45,8 +43,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
-  const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
 
@@ -96,6 +94,21 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     ]);
   }, []);
 
+  useEffect(() => {
+    fetchDocumentsData();
+  }, [isCustodian, isDataUpdated]);
+
+  useCheckNotifications(
+    ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
+    setIsDeletingDocument,
+    false
+  );
+  useCheckNotifications(
+    ['UPLOAD_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
+    setIsDataUpdated,
+    !isDataUpdated
+  );
+
   const fetchDocumentsData = () => {
     setIsLoading(true);
     try {
@@ -110,54 +123,28 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   };
 
-  useEffect(() => {
-    fetchDocumentsData();
-  }, [isCustodian]);
-
-  useCheckNotifications(
-    ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
-    setIsDeletingDocument,
-    false
-  );
-  useCheckNotifications(
-    ['UPLOAD_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
-    setIsDataUpdated,
-    !isDataUpdated
-  );
-
-  useEffect(() => {
-    fetchDocumentsData();
-  }, [isDataUpdated]);
-
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
     setDataflowName(dataflowData.name);
   };
 
-  const onLoadWebLinks = async () => {
+  const onLoadDatasetSchema = async datasetId => {
     try {
-      let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
-      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
-      setWebLinks(loadedWebLinks);
-    } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        console.error('error', error.response);
+      const datasetSchema = await DatasetService.schemaById(datasetId);
+      if (!isEmpty(datasetSchema)) {
+        if (isCustodian) {
+          const datasetMetaData = await DatasetService.getMetaData(datasetId);
+          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+        }
+        // const datasetMetaData = await DatasetService.getMetaData(datasetId);
+        // datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+        return datasetSchema;
       }
-    }
-  };
-
-  const onLoadDocuments = async () => {
-    try {
-      let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
-      loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
-      setDocuments(loadedDocuments);
     } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(routes.DATAFLOWS));
-        console.error('error', error.response);
-      }
+      // if (error.response.status === 401 || error.response.status === 403) {
+      //   history.push(getUrl(routes.DATAFLOWS));
+      // }
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -195,23 +182,30 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadDatasetSchema = async datasetId => {
+  const onLoadDocuments = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      if (!isEmpty(datasetSchema)) {
-        if (isCustodian) {
-          const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
-        }
-        // const datasetMetaData = await DatasetService.getMetaData(datasetId);
-        // datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
-        return datasetSchema;
-      }
+      let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
+      loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
+      setDocuments(loadedDocuments);
     } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
+        console.error('error', error.response);
+      }
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onLoadWebLinks = async () => {
+    try {
+      let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
+      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
+      setWebLinks(loadedWebLinks);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        console.error('error', error.response);
+      }
     }
   };
 
@@ -248,14 +242,14 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
             <WebLinks
-              onLoadWebLinks={onLoadWebLinks}
-              isCustodian={isCustodian}
               dataflowId={match.params.dataflowId}
-              webLinks={webLinks}
-              sortFieldWeblinks={sortFieldWeblinks}
+              isCustodian={isCustodian}
+              onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
-              sortOrderWeblinks={sortOrderWeblinks}
               setSortOrderWeblinks={setSortOrderWeblinks}
+              sortFieldWeblinks={sortFieldWeblinks}
+              sortOrderWeblinks={sortOrderWeblinks}
+              webLinks={webLinks}
             />
           </TabPanel>
           <TabPanel header={resources.messages['datasetSchemas']}>

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { isUndefined, isEmpty } from 'lodash';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
@@ -14,15 +14,14 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
-
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { DocumentService } from 'core/services/Document';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
-import { DocumentService } from 'core/services/Document';
 
 const Documents = ({
   documents,
@@ -56,39 +55,12 @@ const Documents = ({
     }
   }, [fileToDownload]);
 
-  const onUploadDocument = () => {
-    setIsUploadDialogVisible(false);
+  const createFileName = title => {
+    return `${title.split(' ').join('_')}`;
   };
 
-  const onCancelDialog = () => {
-    setIsUploadDialogVisible(false);
-    setIsFormReset(false);
-  };
-
-  const onDeleteDocument = async documentData => {
-    setDeleteDialogVisible(false);
-    notificationContext.add({
-      type: 'DELETE_DOCUMENT_INIT_INFO',
-      content: {}
-    });
-    try {
-      await DocumentService.deleteDocument(documentData.id);
-    } catch (error) {
-      setIsDeletingDocument(false);
-      notificationContext.add({
-        type: 'DELETE_DOCUMENT_ERROR',
-        content: {}
-      });
-    }
-  };
-
-  const onHideDeleteDialog = () => {
-    setDeleteDialogVisible(false);
-  };
-
-  const onEditDocument = () => {
-    setIsEditForm(true);
-    setIsUploadDialogVisible(true);
+  const dateColumnTemplate = rowData => {
+    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
   };
 
   const documentsEditButtons = rowData => {
@@ -115,26 +87,6 @@ const Documents = ({
     );
   };
 
-  const onDownloadDocument = async rowData => {
-    try {
-      setIsDownloading(rowData.id);
-      setFileName(createFileName(rowData.title));
-      setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      setIsDownloading('');
-    }
-  };
-
-  const createFileName = title => {
-    return `${title.split(' ').join('_')}`;
-  };
-
-  const titleColumnTemplate = rowData => {
-    return <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
-  };
-
   const downloadColumnTemplate = rowData => {
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
@@ -145,14 +97,6 @@ const Documents = ({
         )}
       </span>
     );
-  };
-
-  const isPublicColumnTemplate = rowData => {
-    return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
-  };
-
-  const dateColumnTemplate = rowData => {
-    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
   };
 
   const formatBytes = bytes => {
@@ -171,6 +115,57 @@ const Documents = ({
     return result;
   };
 
+  const isPublicColumnTemplate = rowData => {
+    return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
+  };
+
+  const onCancelDialog = () => {
+    setIsFormReset(false);
+    setIsUploadDialogVisible(false);
+  };
+
+  const onDeleteDocument = async documentData => {
+    setDeleteDialogVisible(false);
+    notificationContext.add({
+      type: 'DELETE_DOCUMENT_INIT_INFO',
+      content: {}
+    });
+    try {
+      await DocumentService.deleteDocument(documentData.id);
+    } catch (error) {
+      notificationContext.add({
+        type: 'DELETE_DOCUMENT_ERROR',
+        content: {}
+      });
+      setIsDeletingDocument(false);
+    }
+  };
+
+  const onDownloadDocument = async rowData => {
+    try {
+      setIsDownloading(rowData.id);
+      setFileName(createFileName(rowData.title));
+      setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+    } catch (error) {
+      console.error(error.response);
+    } finally {
+      setIsDownloading('');
+    }
+  };
+
+  const onEditDocument = () => {
+    setIsEditForm(true);
+    setIsUploadDialogVisible(true);
+  };
+
+  const onHideDeleteDialog = () => {
+    setDeleteDialogVisible(false);
+  };
+
+  const onUploadDocument = () => {
+    setIsUploadDialogVisible(false);
+  };
+
   const sizeColumnTemplate = rowData => {
     const formatedRowData = formatBytes(rowData.size);
     return (
@@ -180,6 +175,10 @@ const Documents = ({
     );
   };
 
+  const titleColumnTemplate = rowData => {
+    return <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
+  };
+
   return (
     <>
       {isCustodian ? (
@@ -187,7 +186,6 @@ const Documents = ({
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
               icon={'export'}
               label={resources.messages['upload']}
               onClick={() => {
@@ -199,7 +197,6 @@ const Documents = ({
           <div className="p-toolbar-group-right">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={async () => {
@@ -300,19 +297,19 @@ const Documents = ({
       </DataTable>
 
       <Dialog
-        header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
         className={styles.dialog}
-        visible={isUploadDialogVisible}
         dismissableMask={false}
-        onHide={onCancelDialog}>
+        header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
+        onHide={onCancelDialog}
+        visible={isUploadDialogVisible}>
         <DocumentFileUpload
           dataflowId={dataflowId}
-          onUpload={onUploadDocument}
+          documentInitialValues={documentInitialValues}
           isEditForm={isEditForm}
           isFormReset={isFormReset}
-          documentInitialValues={documentInitialValues}
-          setIsUploadDialogVisible={setIsUploadDialogVisible}
           isUploadDialogVisible={isUploadDialogVisible}
+          onUpload={onUploadDocument}
+          setIsUploadDialogVisible={setIsUploadDialogVisible}
         />
       </Dialog>
 
