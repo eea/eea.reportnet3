@@ -68,7 +68,6 @@ const DataViewer = withRouter(
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [fetchedData, setFetchedData] = useState([]);
-    const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
@@ -779,7 +778,6 @@ const DataViewer = withRouter(
                 />
               ) : null
             }
-            header={header}
             lazy={true}
             loading={isLoading}
             onContextMenu={
