@@ -79,7 +79,6 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
-    const [visibleColumns, setVisibleColumns] = useState([]);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       totalRecords: 0,
@@ -151,7 +150,6 @@ const DataViewer = withRouter(
       colsSchema,
       columnOptions,
       hasWritePermissions,
-      visibleColumns,
       initialCellValue,
       isDataCollection,
       isWebFormMMR,
@@ -749,8 +747,7 @@ const DataViewer = withRouter(
           isLoading={isLoading}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
-          onSetColumns={currentColumns => setColumns(currentColumns)}
-          onSetVisibleColumns={visibleColumns => setVisibleColumns(visibleColumns)}
+          setColumns={setColumns}
           onSetVisible={onSetVisible}
           originalColumns={originalColumns}
           records={records}
@@ -1041,7 +1038,6 @@ const useSetColumns = (
   colsSchema,
   columnOptions,
   hasWritePermissions,
-  visibleColumns,
   initialCellValue,
   isDataCollection,
   isWebFormMMR,
@@ -1163,6 +1159,7 @@ const useSetColumns = (
         />
       );
     });
+
     let providerCode = (
       <Column
         body={providerCodeTemplate}
@@ -1173,6 +1170,7 @@ const useSetColumns = (
         style={{ width: '100px' }}
       />
     );
+
     let editCol = (
       <Column
         body={row => actionTemplate(row)}
@@ -1183,6 +1181,7 @@ const useSetColumns = (
         style={{ width: '100px' }}
       />
     );
+
     let validationCol = (
       <Column
         body={validationsTemplate}
@@ -1193,21 +1192,17 @@ const useSetColumns = (
         style={{ width: '100px' }}
       />
     );
+
     if (!isDataCollection && !isWebFormMMR) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
+
     if (isDataCollection && !isWebFormMMR) {
       columnsArr.unshift(providerCode);
     }
-    if (visibleColumns.length > 0 && columnsArr.length !== visibleColumns.length) {
-      const visibleKeys = visibleColumns.map(column => {
-        return column.key;
-      });
-      setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
-    } else {
-      setColumns(columnsArr);
-      setOriginalColumns(columnsArr);
-    }
+
+    setColumns(columnsArr);
+    setOriginalColumns(columnsArr);
     // }
   }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
 

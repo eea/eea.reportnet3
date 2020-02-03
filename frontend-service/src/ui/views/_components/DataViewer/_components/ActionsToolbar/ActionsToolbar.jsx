@@ -31,8 +31,7 @@ const ActionsToolbar = ({
   isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
-  onSetColumns,
-  onSetVisibleColumns,
+  setColumns,
   onSetVisible,
   originalColumns,
   records,
@@ -139,14 +138,8 @@ const ActionsToolbar = ({
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
 
-    console.log('originalColumns', originalColumns);
-
-    if (!isUndefined(onSetColumns)) {
-      onSetColumns(currentVisibleColumns);
-    }
-
-    if (!isUndefined(onSetColumns)) {
-      onSetVisibleColumns(currentVisibleColumns);
+    if (!isUndefined(setColumns)) {
+      setColumns(currentVisibleColumns);
     }
 
     dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
