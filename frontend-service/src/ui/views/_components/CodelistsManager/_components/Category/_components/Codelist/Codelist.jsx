@@ -311,19 +311,6 @@ const Codelist = ({
     </div>
   );
 
-  const cloneCodelistForm = (
-    <CodelistProperties
-      categoriesDropdown={categoriesDropdown}
-      checkDuplicates={checkDuplicates}
-      isCloning={true}
-      isIncorrect={isIncorrect}
-      onToggleIncorrect={onToggleIncorrect}
-      onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
-      onKeyChange={() => {}}
-      state={cloneDeep(codelistState)}
-    />
-  );
-
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -347,7 +334,6 @@ const Codelist = ({
       <Dialog
         className="edit-table"
         blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         closeOnEscape={false}
         footer={cloneCodelistDialogFooter}
         header={resources.messages['cloneCodelist']}
@@ -355,8 +341,20 @@ const Codelist = ({
         onHide={() => toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false)}
         style={{ width: '60%' }}
         visible={codelistState.isCloneCodelistVisible}
-        zIndex={999}>
-        <div className="p-grid p-fluid">{cloneCodelistForm}</div>
+        zIndex={3003}>
+        <div className="p-grid p-fluid">
+          <CodelistProperties
+            categoriesDropdown={categoriesDropdown}
+            checkDuplicates={checkDuplicates}
+            isCloning={true}
+            isIncorrect={isIncorrect}
+            onToggleIncorrect={onToggleIncorrect}
+            onEditorPropertiesInputChange={onEditorPropertiesClonedInputChange}
+            onKeyChange={() => {}}
+            state={cloneDeep(codelistState)}
+            toggleCategoryChange={toggleCategoryChange}
+          />
+        </div>
       </Dialog>
     ) : null;
   };

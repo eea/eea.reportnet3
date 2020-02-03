@@ -22,6 +22,7 @@ const filterByText = (data, filterText) => {
 };
 
 const getCategoryById = (categories, categoryId) => {
+  console.log(categories, categoryId);
   return categories
     .map(e => {
       return e.id;
