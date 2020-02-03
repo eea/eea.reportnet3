@@ -15,8 +15,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -113,7 +111,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
     // only if there are design datasets and providers
-    int i = designs.size() - 1;
+    int iteration = designs.size() - 1;
     Boolean schemasIntegrity = true;
     for (DesignDatasetVO design : designs) {
       if (!schemaService.validateSchema(design.getDatasetSchema())) {
@@ -131,12 +129,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           // Create the DC per design dataset
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
               "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, i);
+              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, iteration);
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
-              i);
-          i--;
+              iteration);
+          iteration--;
         }
         // 4. Update the dataflow status to DRAFT
         dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
@@ -145,15 +143,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
             e.getMessage(), e);
-        // Error notification
-        try {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
-              null,
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .dataflowId(dataCollectionVO.getIdDataflow()).error(e.getMessage()).build());
-        } catch (EEAException e1) {
-          LOG_ERROR.error("Error releasing notification", e1);
-        }
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.EXECUTION_ERROR);
       }
