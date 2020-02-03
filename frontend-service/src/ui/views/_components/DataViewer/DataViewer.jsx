@@ -63,7 +63,6 @@ const DataViewer = withRouter(
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [codelistInfo, setCodelistInfo] = useState({});
-    const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -113,6 +112,58 @@ const DataViewer = withRouter(
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
     const { menu } = useContextMenu(resources, records, setEditDialogVisible, setConfirmDeleteVisible);
 
+    const cellDataEditor = (cells, record) => {
+      return (
+        <FieldEditor
+          cells={cells}
+          colsSchema={colsSchema}
+          record={record}
+          onEditorSubmitValue={onEditorSubmitValue}
+          onEditorValueChange={onEditorValueChange}
+          onEditorValueFocus={onEditorValueFocus}
+          onEditorKeyChange={onEditorKeyChange}
+        />
+      );
+    };
+
+    const actionTemplate = () => (
+      <ActionsColumn
+        onDeleteClick={() => setConfirmDeleteVisible(true)}
+        onEditClick={() => setEditDialogVisible(true)}
+      />
+    );
+
+    //Template for Record validation
+    const validationsTemplate = recordData => {
+      const validationsGroup = DataViewerUtils.groupValidations(
+        recordData,
+        resources.messages['recordBlockers'],
+        resources.messages['recordErrors'],
+        resources.messages['recordWarnings'],
+        resources.messages['recordInfos']
+      );
+      return getIconsValidationsErrors(validationsGroup);
+    };
+
+    const { columns, setColumns } = useSetColumns(
+      actionTemplate,
+      cellDataEditor,
+      codelistInfo,
+      colsSchema,
+      columnOptions,
+      hasWritePermissions,
+      invisibleColumns,
+      initialCellValue,
+      isDataCollection,
+      isWebFormMMR,
+      records,
+      resources,
+      setCodelistInfo,
+      setIsCodelistInfoVisible,
+      setOriginalColumns,
+      validationsTemplate
+    );
+
     useEffect(() => {
       setRecordErrorPositionId(recordPositionId);
     }, [recordPositionId]);
@@ -155,116 +206,16 @@ const DataViewer = withRouter(
     }, [recordErrorPositionId]);
 
     useEffect(() => {
-      const maxWidths = [];
-      // if (!isEditing) {
-      //Calculate the max width of the shown data
-      // colsSchema.forEach(col => {
-      //   const bulkData = fetchedData.map(data => data.dataRow.map(d => d.fieldData).flat()).flat();
-      //   const filteredBulkData = bulkData
-      //     .filter(data => col.field === Object.keys(data)[0])
-      //     .map(filteredData => Object.values(filteredData)[0]);
-      //   if (filteredBulkData.length > 0) {
-      //     const maxDataWidth = filteredBulkData.map(data => getTextWidth(data, '14pt Open Sans'));
-      //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);
-      //   }
-      // });
-      //Calculate the max width of data column
-      const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
-      const maxWidth = Math.max(...textMaxWidth) + 30;
-      let columnsArr = colsSchema.map((column, i) => {
-        let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
-        let invisibleColumn =
-          column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
-        return (
-          <Column
-            body={dataTemplate}
-            className={invisibleColumn}
-            editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
-            field={column.field}
-            header={
-              column.type === 'CODELIST' ? (
-                <React.Fragment>
-                  {column.header}
-                  <Button
-                    className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
-                    icon="infoCircle"
-                    onClick={() => {
-                      const inmCodeListInfo = cloneDeep(codelistInfo);
-                      inmCodeListInfo.name = column.codelistName;
-                      inmCodeListInfo.version = column.codelistVersion;
-                      inmCodeListInfo.items = column.codelistItems;
-                      setCodelistInfo(inmCodeListInfo);
-                      setIsCodelistInfoVisible(true);
-                    }}
-                    tooltip={`${column.codelistName} (${column.codelistVersion})`}
-                    tooltipOptions={{ position: 'top' }}
-                  />
-                </React.Fragment>
-              ) : (
-                // `${column.header}-${column.codelistName}(${column.codelistVersion})`
-                column.header
-              )
-            }
-            key={column.field}
-            sortable={sort}
-            style={{
-              width: !invisibleColumn
-                ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
-                : '1px'
-            }}
-          />
-        );
-      });
-      let providerCode = (
-        <Column
-          body={providerCodeTemplate}
-          className={styles.providerCode}
-          header={resources.messages['countryCode']}
-          key="providerCode"
-          sortable={false}
-          style={{ width: '100px' }}
-        />
-      );
-      let editCol = (
-        <Column
-          body={row => actionTemplate(row)}
-          className={styles.validationCol}
-          header={resources.messages['actions']}
-          key="actions"
-          sortable={false}
-          style={{ width: '100px' }}
-        />
-      );
-      let validationCol = (
-        <Column
-          body={validationsTemplate}
-          header={resources.messages['errors']}
-          field="validations"
-          key="recordValidation"
-          sortable={false}
-          style={{ width: '100px' }}
-        />
-      );
-
-      if (!isDataCollection && !isWebFormMMR) {
-        hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      if (recordErrorPositionId === -1) {
+        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
       }
+    }, [levelErrorValidations]);
 
-      if (isDataCollection && !isWebFormMMR) {
-        columnsArr.unshift(providerCode);
+    useEffect(() => {
+      if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
+        dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
       }
-
-      if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
-        const visibleKeys = invisibleColumns.map(column => {
-          return column.key;
-        });
-        setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
-      } else {
-        setColumns(columnsArr);
-        setOriginalColumns(columnsArr);
-      }
-      // }
-    }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
+    }, [confirmPasteVisible]);
 
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
@@ -278,18 +229,6 @@ const DataViewer = withRouter(
         setRecordErrorPositionId(-1);
       }
     };
-
-    useEffect(() => {
-      if (recordErrorPositionId === -1) {
-        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
-      }
-    }, [levelErrorValidations]);
-
-    useEffect(() => {
-      if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
-        dispatchRecords({ type: 'EMPTY_PASTED_RECORDS', payload: [] });
-      }
-    }, [confirmPasteVisible]);
 
     const onCancelRowEdit = () => {
       let updatedValue = RecordUtils.changeRecordInTable(
@@ -663,13 +602,6 @@ const DataViewer = withRouter(
       });
     };
 
-    const actionTemplate = () => (
-      <ActionsColumn
-        onDeleteClick={() => setConfirmDeleteVisible(true)}
-        onEditClick={() => setEditDialogVisible(true)}
-      />
-    );
-
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -689,20 +621,6 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const cellDataEditor = (cells, record) => {
-      return (
-        <FieldEditor
-          cells={cells}
-          colsSchema={colsSchema}
-          record={record}
-          onEditorSubmitValue={onEditorSubmitValue}
-          onEditorValueChange={onEditorValueChange}
-          onEditorValueFocus={onEditorValueFocus}
-          onEditorKeyChange={onEditorKeyChange}
-        />
-      );
-    };
-
     const codelistInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -714,43 +632,6 @@ const DataViewer = withRouter(
         />
       </div>
     );
-
-    //Template for Field validation
-    const dataTemplate = (rowData, column) => {
-      let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-        const message = DataViewerUtils.formatValidations(validations);
-        const levelError = DataViewerUtils.getLevelError(validations);
-
-        return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-            {' '}
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}{' '}
-            <IconTooltip levelError={levelError} message={message} />
-          </div>
-        );
-      } else {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}
-          </div>
-        );
-      }
-    };
 
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
@@ -777,26 +658,6 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }
       setFetchedData(dataFiltered);
-    };
-
-    const providerCodeTemplate = rowData => {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {!isUndefined(rowData) ? rowData.providerCode : null}
-        </div>
-      );
-    };
-
-    //Template for Record validation
-    const validationsTemplate = recordData => {
-      const validationsGroup = DataViewerUtils.groupValidations(
-        recordData,
-        resources.messages['recordBlockers'],
-        resources.messages['recordErrors'],
-        resources.messages['recordWarnings'],
-        resources.messages['recordInfos']
-      );
-      return getIconsValidationsErrors(validationsGroup);
     };
 
     const addIconLevelError = (validation, levelError, message) => {
@@ -1173,4 +1034,187 @@ const useContextMenu = (resources, records, setEditDialogVisible, setConfirmDele
   }, [records.selectedRecord]);
 
   return { menu };
+};
+
+const useSetColumns = (
+  actionTemplate,
+  cellDataEditor,
+  codelistInfo,
+  colsSchema,
+  columnOptions,
+  hasWritePermissions,
+  invisibleColumns,
+  initialCellValue,
+  isDataCollection,
+  isWebFormMMR,
+  records,
+  resources,
+  setCodelistInfo,
+  setIsCodelistInfoVisible,
+  setOriginalColumns,
+  validationsTemplate
+) => {
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    const maxWidths = [];
+
+    const providerCodeTemplate = rowData => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {!isUndefined(rowData) ? rowData.providerCode : null}
+        </div>
+      );
+    };
+
+    // if (!isEditing) {
+    //Calculate the max width of the shown data
+    // colsSchema.forEach(col => {
+    //   const bulkData = fetchedData.map(data => data.dataRow.map(d => d.fieldData).flat()).flat();
+    //   const filteredBulkData = bulkData
+    //     .filter(data => col.field === Object.keys(data)[0])
+    //     .map(filteredData => Object.values(filteredData)[0]);
+    //   if (filteredBulkData.length > 0) {
+    //     const maxDataWidth = filteredBulkData.map(data => getTextWidth(data, '14pt Open Sans'));
+    //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);
+    //   }
+    // });
+
+    //Template for Field validation
+    const dataTemplate = (rowData, column) => {
+      let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+        const message = DataViewerUtils.formatValidations(validations);
+        const levelError = DataViewerUtils.getLevelError(validations);
+
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+            {' '}
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}{' '}
+            <IconTooltip levelError={levelError} message={message} />
+          </div>
+        );
+      } else {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {field
+              ? field.fieldData.type === 'CODELIST'
+                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
+                : field.fieldData[column.field]
+              : null}
+          </div>
+        );
+      }
+    };
+
+    //Calculate the max width of data column
+    const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
+    const maxWidth = Math.max(...textMaxWidth) + 30;
+
+    let columnsArr = colsSchema.map((column, i) => {
+      let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
+      let invisibleColumn =
+        column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
+      return (
+        <Column
+          body={dataTemplate}
+          className={invisibleColumn}
+          editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
+          field={column.field}
+          header={
+            column.type === 'CODELIST' ? (
+              <React.Fragment>
+                {column.header}
+                <Button
+                  className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
+                  icon="infoCircle"
+                  onClick={() => {
+                    const inmCodeListInfo = cloneDeep(codelistInfo);
+                    inmCodeListInfo.name = column.codelistName;
+                    inmCodeListInfo.version = column.codelistVersion;
+                    inmCodeListInfo.items = column.codelistItems;
+                    setCodelistInfo(inmCodeListInfo);
+                    setIsCodelistInfoVisible(true);
+                  }}
+                  tooltip={`${column.codelistName} (${column.codelistVersion})`}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              </React.Fragment>
+            ) : (
+              // `${column.header}-${column.codelistName}(${column.codelistVersion})`
+              column.header
+            )
+          }
+          key={column.field}
+          sortable={sort}
+          style={{
+            width: !invisibleColumn
+              ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
+              : '1px'
+          }}
+        />
+      );
+    });
+    let providerCode = (
+      <Column
+        body={providerCodeTemplate}
+        className={styles.providerCode}
+        header={resources.messages['countryCode']}
+        key="providerCode"
+        sortable={false}
+        style={{ width: '100px' }}
+      />
+    );
+    let editCol = (
+      <Column
+        body={row => actionTemplate(row)}
+        className={styles.validationCol}
+        header={resources.messages['actions']}
+        key="actions"
+        sortable={false}
+        style={{ width: '100px' }}
+      />
+    );
+    let validationCol = (
+      <Column
+        body={validationsTemplate}
+        header={resources.messages['errors']}
+        field="validations"
+        key="recordValidation"
+        sortable={false}
+        style={{ width: '100px' }}
+      />
+    );
+    if (!isDataCollection && !isWebFormMMR) {
+      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+    }
+    if (isDataCollection && !isWebFormMMR) {
+      columnsArr.unshift(providerCode);
+    }
+    if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
+      const visibleKeys = invisibleColumns.map(column => {
+        return column.key;
+      });
+      setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
+    } else {
+      setColumns(columnsArr);
+      setOriginalColumns(columnsArr);
+    }
+    // }
+  }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
+
+  return {
+    columns,
+    setColumns
+  };
 };
