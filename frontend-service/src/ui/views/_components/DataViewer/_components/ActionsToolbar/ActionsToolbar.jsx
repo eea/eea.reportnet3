@@ -32,7 +32,7 @@ const ActionsToolbar = ({
   levelErrorTypesWithCorrects,
   onRefresh,
   onSetColumns,
-  onSetInvisibleColumns,
+  onSetVisibleColumns,
   onSetVisible,
   originalColumns,
   records,
@@ -135,19 +135,21 @@ const ActionsToolbar = ({
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
-    const currentInvisibleColumns = originalColumns.filter(
+    const currentVisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
 
+    console.log('originalColumns', originalColumns);
+
     if (!isUndefined(onSetColumns)) {
-      onSetColumns(currentInvisibleColumns);
+      onSetColumns(currentVisibleColumns);
     }
 
     if (!isUndefined(onSetColumns)) {
-      onSetInvisibleColumns(currentInvisibleColumns);
+      onSetVisibleColumns(currentVisibleColumns);
     }
 
-    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentInvisibleColumns } });
+    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
   };
 
   return (

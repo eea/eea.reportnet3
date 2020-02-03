@@ -77,10 +77,9 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
-
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
-    const [invisibleColumns, setInvisibleColumns] = useState([]);
+    const [visibleColumns, setVisibleColumns] = useState([]);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       totalRecords: 0,
@@ -152,7 +151,7 @@ const DataViewer = withRouter(
       colsSchema,
       columnOptions,
       hasWritePermissions,
-      invisibleColumns,
+      visibleColumns,
       initialCellValue,
       isDataCollection,
       isWebFormMMR,
@@ -751,7 +750,7 @@ const DataViewer = withRouter(
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
           onSetColumns={currentColumns => setColumns(currentColumns)}
-          onSetInvisibleColumns={currentInvisibleColumns => setInvisibleColumns(currentInvisibleColumns)}
+          onSetVisibleColumns={visibleColumns => setVisibleColumns(visibleColumns)}
           onSetVisible={onSetVisible}
           originalColumns={originalColumns}
           records={records}
@@ -1042,7 +1041,7 @@ const useSetColumns = (
   colsSchema,
   columnOptions,
   hasWritePermissions,
-  invisibleColumns,
+  visibleColumns,
   initialCellValue,
   isDataCollection,
   isWebFormMMR,
@@ -1200,8 +1199,8 @@ const useSetColumns = (
     if (isDataCollection && !isWebFormMMR) {
       columnsArr.unshift(providerCode);
     }
-    if (invisibleColumns.length > 0 && columnsArr.length !== invisibleColumns.length) {
-      const visibleKeys = invisibleColumns.map(column => {
+    if (visibleColumns.length > 0 && columnsArr.length !== visibleColumns.length) {
+      const visibleKeys = visibleColumns.map(column => {
         return column.key;
       });
       setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
