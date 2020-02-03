@@ -4,6 +4,7 @@
   min-height: calc(100vh - var(--header-height));
 }
 .mainContent {
+  background-color: var(--bg);
 }
 .disclaimer {
   padding: 0.5em;

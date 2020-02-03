@@ -36,4 +36,11 @@
       color: var(--main-font-color);
     }
   }
+  .themeSwitcherTooltip {
+    z-index: 3004;
+  }
+
+  .themeSwitcherInputSwitch:before {
+    box-shadow: var(--inputswitch-dark-theme-checked);
+  }
 }

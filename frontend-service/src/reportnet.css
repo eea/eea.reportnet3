@@ -76,8 +76,9 @@
   --c-black-200: #b1b3b3;
   --c-black-100: #d0d0ce;
   /* individuals */
-  --c-darkest-blue: #282c35;
-  --c-dark-blue: #272b57;
+  --c-darkest-blue: #15171b;
+  --c-darker-blue: #1a1c22;
+  --c-dark-blue: #282c35;
   --c-purple: #733d85;
   --c-aquamarine: #007a86;
   --c-green: #637e22;
@@ -111,12 +112,22 @@
   --tabview-highlight-border: 1px solid var(--c-corporate-blue);
   --tabview-highlight-color: var(--white);
   --inputswitch-checked: var(--black);
+  --inputswitch-checked-before-bg: var(--gray-25);
+  --inputswitch-dark-theme-checked: inset 4px 0px var(--black), inset 4px 0px var(--black);
+  --inputswitch-unchecked-bg: var(--gray-25);
   --datatable-header-bg: var(--gray-10);
   --datatable-header-color: var(--gray-110);
   --datatable-header-border: 1px solid var(--c-custom-gray);
-  --datatable-body-border: 1px solid var(--white);
-  --datatable-body-color: var(--c-custom-gray);
+  --datatable-body-border: 1px solid var(--c-custom-gray);
+  --datatable-body-color: var(--black);
   --datatable-body-bg: var(--white);
+  --datatable-body-even-bg: var(--gray-10);
+  --datatable-body-highlight-bg: var(--gray-25);
+  --inputtext-color: var(--main-font-color);
+  --inputtext-bg: var(--bg);
+  --inputtext-border: 1px solid var(--gray-25);
+  --treeview-expandable-color: var(--c-corporate-blue);
+  --documenticon-color: var(--c-corporate-blue);
 }
 body {
   margin: 0px;

@@ -1,5 +1,6 @@
 .descriptionLabel {
   margin: 0.5vw 0 0.5vw 1vw;
+  color: var(--main-font-color);
 }
 .fieldDesignerWrapper {
   display: flex;
