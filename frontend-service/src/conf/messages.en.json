@@ -429,7 +429,9 @@
 		"createDataCollectionInit": "Creating data collection",
 		"loadSnapshotsListError": "Error loading dataset copies",
 		"message": "Message",
-		"notificationLevel": "Level"
-
+		"notificationLevel": "Level",
+		"loadDatasetsError": "Error loading datasets",
+		"loadDocumentsError": "Error loading documents",
+		"loadWebLinksError": "Error loading web links"
 	}
 }
