@@ -77,7 +77,7 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
-    const [originalColumns, setOriginalColumns] = useState([]);
+
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
     const [invisibleColumns, setInvisibleColumns] = useState([]);
@@ -145,7 +145,7 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const { columns, setColumns } = useSetColumns(
+    const { columns, setColumns, originalColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       codelistInfo,
@@ -160,7 +160,6 @@ const DataViewer = withRouter(
       resources,
       setCodelistInfo,
       setIsCodelistInfoVisible,
-      setOriginalColumns,
       validationsTemplate
     );
 
@@ -1051,10 +1050,10 @@ const useSetColumns = (
   resources,
   setCodelistInfo,
   setIsCodelistInfoVisible,
-  setOriginalColumns,
   validationsTemplate
 ) => {
   const [columns, setColumns] = useState([]);
+  const [originalColumns, setOriginalColumns] = useState([]);
 
   useEffect(() => {
     const maxWidths = [];
@@ -1215,6 +1214,7 @@ const useSetColumns = (
 
   return {
     columns,
-    setColumns
+    setColumns,
+    originalColumns
   };
 };
