@@ -238,11 +238,7 @@
           }
         },
         {
-          "key":"DATAFLOW_DETAILS_ERROR",
-          "navigateTo":{
-            "section":"DATASET",
-            "parameters":["dataflowId","datasetId"]
-          }
+          "key":"DATAFLOW_DETAILS_ERROR"
         },
         {
           "key":"REPORTING_ERROR",
@@ -330,6 +326,15 @@
         },
         {
           "key": "LOAD_SNAPSHOTS_LIST_ERROR"
+        },
+        {
+          "key": "LOAD_DATASETS_ERROR"
+        },
+        {
+          "key": "LOAD_DOCUMENTS_ERROR"
+        },
+        {
+          "key": "LOAD_WEB_LINKS_ERROR"
         }
       ]
     },

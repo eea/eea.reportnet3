@@ -23,6 +23,7 @@ import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -32,6 +33,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -95,7 +97,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     fetchDocumentsData();
+    setIsLoading(false);
   }, [isCustodian, isDataUpdated]);
 
   useCheckNotifications(
@@ -110,22 +114,22 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   );
 
   const fetchDocumentsData = () => {
-    setIsLoading(true);
-    try {
-      getDataflowName();
-      onLoadDocuments();
-      onLoadWebLinks();
-      onLoadDatasetsSchemas();
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      setIsLoading(false);
-    }
+    getDataflowName();
+    onLoadDocuments();
+    onLoadWebLinks();
+    onLoadDatasetsSchemas();
   };
 
   const getDataflowName = async () => {
-    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
-    setDataflowName(dataflowData.name);
+    try {
+      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+      setDataflowName(dataflowData.name);
+    } catch (error) {
+      notificationContext.add({
+        type: 'DATAFLOW_DETAILS_ERROR',
+        content: {}
+      });
+    }
   };
 
   const onLoadDatasetSchema = async datasetId => {
@@ -144,6 +148,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       // if (error.response.status === 401 || error.response.status === 403) {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
+      notificationContext.add({
+        type: 'LOAD_SCHEMA_FAILED_EVENT',
+        content: {
+          datasetId
+        }
+      });
     } finally {
     }
   };
@@ -177,6 +187,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       // if (error.response.status === 401 || error.response.status === 403) {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
+      notificationContext.add({
+        type: 'LOAD_DATASETS_ERROR',
+        content: {}
+      });
     } finally {
       setIsLoading(false);
     }
@@ -188,9 +202,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
       setDocuments(loadedDocuments);
     } catch (error) {
+      notificationContext.add({
+        type: 'LOAD_DOCUMENTS_ERROR',
+        content: {}
+      });
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
-        console.error('error', error.response);
       }
     } finally {
       setIsLoading(false);
@@ -203,6 +220,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
       setWebLinks(loadedWebLinks);
     } catch (error) {
+      notificationContext.add({
+        type: 'LOAD_WEB_LINKS_ERROR',
+        content: {}
+      });
       if (error.response.status === 401 || error.response.status === 403) {
         console.error('error', error.response);
       }
