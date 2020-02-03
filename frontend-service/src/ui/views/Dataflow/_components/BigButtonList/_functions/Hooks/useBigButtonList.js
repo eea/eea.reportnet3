@@ -321,10 +321,10 @@ const useBigButtonList = ({
   return [
     ...buttonList,
     ...designDatasetModels,
-    ...dataCollectionModels,
-    ...dashboardModels,
     ...groupByRepresentativeModels,
-    ...createDataCollection
+    ...createDataCollection,
+    ...dataCollectionModels,
+    ...dashboardModels
   ];
 };
 
