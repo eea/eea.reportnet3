@@ -118,4 +118,15 @@ public class JwtTokenProvider {
     tokenDataVO.setExpiration(token.getExpiration());
     return tokenDataVO;
   }
+
+  /**
+   * Retrieve access token string.
+   *
+   * @param keyToken the key token
+   *
+   * @return the string
+   */
+  public String retrieveAccessToken(String keyToken) {
+    return securityRedisTemplate.opsForValue().get(keyToken).getAccessToken();
+  }
 }
