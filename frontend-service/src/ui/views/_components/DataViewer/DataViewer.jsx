@@ -63,8 +63,6 @@ const DataViewer = withRouter(
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [codelistInfo, setCodelistInfo] = useState({});
-    const [columnOptions, setColumnOptions] = useState([{}]);
-    const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -113,22 +111,7 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
-    useEffect(() => {
-      let colOptions = [];
-      let dropdownFilter = [];
-      for (let colSchema of colsSchema) {
-        colOptions.push({ label: colSchema.header, value: colSchema });
-        dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
-      }
-      setColumnOptions(colOptions);
-
-      const inmTableSchemaColumns = [...tableSchemaColumns];
-      if (!isEmpty(inmTableSchemaColumns)) {
-        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-        inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
-      }
-      setColsSchema(inmTableSchemaColumns);
-    }, []);
+    const { colsSchema, columnOptions } = useInitialLoadColsSchemas(tableSchemaColumns);
 
     useEffect(() => {
       setRecordErrorPositionId(recordPositionId);
@@ -1156,3 +1139,29 @@ const DataViewer = withRouter(
 );
 
 export { DataViewer };
+
+const useInitialLoadColsSchemas = tableSchemaColumns => {
+  const [columnOptions, setColumnOptions] = useState([{}]);
+  const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
+
+  useEffect(() => {
+    let colOptions = [];
+    let dropdownFilter = [];
+    for (let colSchema of colsSchema) {
+      colOptions.push({ label: colSchema.header, value: colSchema });
+      dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
+    }
+    setColumnOptions(colOptions);
+    const inmTableSchemaColumns = [...tableSchemaColumns];
+    if (!isEmpty(inmTableSchemaColumns)) {
+      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
+      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
+    }
+    setColsSchema(inmTableSchemaColumns);
+  }, []);
+
+  return {
+    colsSchema,
+    columnOptions
+  };
+};
