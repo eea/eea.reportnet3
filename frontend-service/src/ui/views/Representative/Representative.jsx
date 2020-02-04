@@ -7,9 +7,10 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Representative.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import colors from 'conf/colors.json';
 import { config } from 'conf';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
@@ -125,7 +126,7 @@ const Representative = withRouter(({ history, match }) => {
   }, [notificationContext]);
 
   const dropDownItems =
-    isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
+    isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']
       ? [
           {
             label: resources.messages['edit'],
@@ -369,7 +370,7 @@ const Representative = withRouter(({ history, match }) => {
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === config.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"

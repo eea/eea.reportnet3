@@ -6,6 +6,8 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './DataflowManagementForm.module.css';
 
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { Button } from 'ui/views/_components/Button';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -99,7 +101,7 @@ const DataflowManagementForm = ({
           }
         } catch (error) {
           setDataflowHasErrors(true);
-          if (error.response.data.message.toLowerCase() == 'Dataflow name already exists'.toLowerCase()) {
+          if (error.response.data.message == DataflowConf.errorTypes['dataflowExists']) {
             setIsNameDuplicated(true);
             notificationContext.add({
               type: 'DATAFLOW_NAME_EXISTS'
@@ -136,6 +138,7 @@ const DataflowManagementForm = ({
                 onChange={event => {
                   handleChange(event);
                   setIsNameDuplicated(false);
+                  setDataflowHasErrors(false);
                 }}
                 type="text"
                 value={values.name}

@@ -7,6 +7,7 @@ import styles from './BigButton.module.css';
 
 import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
@@ -171,7 +172,7 @@ export const BigButton = ({
       ) : (
         <p
           className={styles.caption}
-          onDoubleClick={dataflowStatus === config.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
+          onDoubleClick={dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
