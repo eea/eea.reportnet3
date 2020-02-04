@@ -43,7 +43,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(new Date(Date.now()));
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(new Date());
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -239,7 +239,7 @@ export const BigButtonList = ({
           className={styles.calendar}
           inline={true}
           monthNavigator={true}
-          minDate={new Date(Date.now())}
+          minDate={new Date()}
           onChange={event => setDataCollectionDueDate(event.target.value)}
           showWeek={true}
           value={dataCollectionDueDate}
