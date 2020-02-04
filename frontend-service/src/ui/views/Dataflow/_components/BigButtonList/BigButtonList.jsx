@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 
-import { remove } from 'lodash';
+import { isUndefined, remove } from 'lodash';
 
 import styles from './BigButtonList.module.css';
 
@@ -43,7 +43,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(new Date(Date.now()));
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -228,6 +228,7 @@ export const BigButtonList = ({
 
       <ConfirmDialog
         header={resources.messages['createDataCollection']}
+        disabledConfirm={isUndefined(dataCollectionDueDate)}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
