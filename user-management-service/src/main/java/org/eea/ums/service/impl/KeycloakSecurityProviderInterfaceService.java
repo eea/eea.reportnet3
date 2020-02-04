@@ -98,9 +98,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     }
 
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     LOG.info("User {} logged in and cached succesfully ", username);
     return tokenVO;
   }
@@ -118,8 +118,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     }
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+
     LOG.info("User {} logged in and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
@@ -137,8 +138,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     }
-    tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+
     LOG.info("Session for User {} renewed and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
@@ -153,30 +155,34 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
     TokenDataVO token = null;
+    TokenVO tokenVO = new TokenVO();
     try {
       token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
     } catch (VerificationException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Error trying to parse token", e);
     }
 
-    Set<String> eeaGroups = new HashSet<>();
-    Optional.ofNullable((List<String>) token.getOtherClaims().get("user_groups"))
-        .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-          groups.stream().map(group -> {
-            if (group.startsWith("/")) {
-              group = group.substring(1);
-            }
-            return group.toUpperCase();
-          }).forEach(eeaGroups::add);
-        });
-    TokenVO tokenVO = new TokenVO();
-    tokenVO.setRoles(token.getRoles());
-    tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
-    tokenVO.setGroups(eeaGroups);
-    tokenVO.setPreferredUsername(token.getPreferredUsername());
-    tokenVO.setAccessTokenExpiration(token.getExpiration());
-    tokenVO.setUserId(token.getUserId());
-    tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    if (null != token) {
+      Set<String> eeaGroups = new HashSet<>();
+      Optional.ofNullable(token.getOtherClaims())
+          .map(claims -> (List<String>) claims.get("user_groups"))
+          .filter(groups -> groups.size() > 0).ifPresent(groups -> {
+        groups.stream().map(group -> {
+          if (group.startsWith("/")) {
+            group = group.substring(1);
+          }
+          return group.toUpperCase();
+        }).forEach(eeaGroups::add);
+      });
+
+      tokenVO.setRoles(token.getRoles());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO.setGroups(eeaGroups);
+      tokenVO.setPreferredUsername(token.getPreferredUsername());
+      tokenVO.setAccessTokenExpiration(token.getExpiration());
+      tokenVO.setUserId(token.getUserId());
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    }
     return tokenVO;
   }
 
@@ -479,7 +485,6 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       keycloakConnectorService.createGroupDetail(groupInfo);
     }
   }
-
 
 
 }
