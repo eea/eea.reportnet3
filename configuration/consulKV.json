@@ -1068,23 +1068,23 @@
     "value": "ZmFsc2U="
   },
   {
-    "key": "spring.redis.jedis.pool.max-active",
+    "key": "config/application/spring.redis.jedis.pool.max-active",
     "value": "JHtSRURJU19QT09MX01BWF9BQ1RJVkU6MjB9"
   },
   {
-    "key": "spring.redis.jedis.pool.max-idle",
+    "key": "config/application/spring.redis.jedis.pool.max-idle",
     "value": "JHtSRURJU19QT09MX01BWF9JRExFOjIwfQ=="
   },
   {
-    "key": "spring.redis.jedis.pool.max-wait",
+    "key": "config/application/spring.redis.jedis.pool.max-wait",
     "value": "JHtSRURJU19QT09MX01BWF9XQUlUOjUwMDB9"
   },
   {
-    "key": "spring.redis.jedis.pool.min-evitable-idle-time",
+    "key": "config/application/spring.redis.jedis.pool.min-evitable-idle-time",
     "value": "JHtSRURJU19QT09MX01JTl9FVklUQUJMRV9JRExFX1RJTUU6MzAwMDAwfQ=="
   },
   {
-    "key": "spring.redis.jedis.pool.min-idle",
+    "key": "config/application/spring.redis.jedis.pool.min-idle",
     "value": "JHtSRURJU19QT09MX01JTl9JRExFOjV9"
   }
 ]
