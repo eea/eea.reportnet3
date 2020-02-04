@@ -2,7 +2,6 @@ package org.eea.interfaces.controller.ums;
 
 import java.io.IOException;
 import java.util.List;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -185,15 +184,5 @@ public interface UserManagementController {
   @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
   void addUserToResources(@RequestBody List<ResourceAssignationVO> resources);
 
-
-  /**
-   * Adds the contributors to dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @param representatives the representatives
-   */
-  @RequestMapping(value = "/add_contributors_to_dataflow", method = RequestMethod.PUT)
-  void addContributorsToDataflow(@RequestParam("dataflowId") Long dataflowId,
-      @RequestBody List<RepresentativeVO> representatives);
 
 }

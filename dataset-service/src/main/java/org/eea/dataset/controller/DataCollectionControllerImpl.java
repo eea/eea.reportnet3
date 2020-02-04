@@ -1,6 +1,9 @@
 package org.eea.dataset.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -16,6 +19,8 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +114,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
     // only if there are design datasets and providers
-    int iterationDC = designs.size() - 1;
+    int numberOfDesignsToIterate = designs.size() - 1;
     Boolean schemasIntegrity = true;
     for (DesignDatasetVO design : designs) {
       if (!schemaService.validateSchema(design.getDatasetSchema())) {
@@ -127,16 +132,26 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           // Create the DC per design dataset
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
               "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, iterationDC);
+              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null,
+              numberOfDesignsToIterate);
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
-              iterationDC);
-          iterationDC--;
+              numberOfDesignsToIterate);
+          numberOfDesignsToIterate--;
         }
         // Add the dataflow to the providers
-        userManagementControllerZuul.addContributorsToDataflow(dataCollectionVO.getIdDataflow(),
-            representatives);
+        Set<ResourceAssignationVO> resourcesDataflow = new HashSet<>();
+        for (RepresentativeVO representative : representatives) {
+          ResourceAssignationVO resourceDFP =
+              fillResourceAssignation(dataCollectionVO.getIdDataflow(),
+                  representative.getProviderAccount(), ResourceGroupEnum.DATAFLOW_PROVIDER);
+          resourcesDataflow.add(resourceDFP);
+        }
+        userManagementControllerZuul
+            .addContributorsToResources(resourcesDataflow.stream().collect(Collectors.toList()));
+
+
 
         // 4. Update the dataflow status to DRAFT
         dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
@@ -168,6 +183,26 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
 
+  }
+
+
+  /**
+   * Fill resource assignation.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
+      ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
   }
 
 }

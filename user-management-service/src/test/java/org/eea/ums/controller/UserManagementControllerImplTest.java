@@ -4,12 +4,10 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -254,21 +252,5 @@ public class UserManagementControllerImplTest {
         .addUserToUserGroup("userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
   }
 
-
-  @Test
-  public void addContributorsToDataflow() throws EEAException {
-    UsernamePasswordAuthenticationToken authenticationToken =
-        new UsernamePasswordAuthenticationToken("user1", null, null);
-    Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
-    authenticationToken.setDetails(details);
-    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-    RepresentativeVO representative = new RepresentativeVO();
-    representative.setDataProviderId(1L);
-    userManagementController.addContributorsToDataflow(1L, Arrays.asList(representative));
-    Mockito.verify(securityProviderInterfaceService, Mockito.times(1)).addContributorsToDataflow(1L,
-        Arrays.asList(representative));
-  }
 
 }

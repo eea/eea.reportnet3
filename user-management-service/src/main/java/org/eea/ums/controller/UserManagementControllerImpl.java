@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -323,24 +322,6 @@ public class UserManagementControllerImpl implements UserManagementController {
     for (ResourceAssignationVO resource : resources) {
       securityProviderInterfaceService.addUserToUserGroup(userId,
           resource.getResourceGroup().getGroupName(resource.getResourceId()));
-    }
-  }
-
-
-  /**
-   * Adds the contributors to dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @param representatives the representatives
-   */
-  @Override
-  @RequestMapping(value = "/add_contributors_to_dataflow", method = RequestMethod.PUT)
-  public void addContributorsToDataflow(@RequestParam("dataflowId") Long dataflowId,
-      @RequestBody List<RepresentativeVO> representatives) {
-    try {
-      securityProviderInterfaceService.addContributorsToDataflow(dataflowId, representatives);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
     }
   }
 

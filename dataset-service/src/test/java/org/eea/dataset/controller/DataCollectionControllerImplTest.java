@@ -126,9 +126,6 @@ public class DataCollectionControllerImplTest {
     Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
         Mockito.any());
 
-    Mockito.doNothing().when(userManagementControllerZuul)
-        .addContributorsToDataflow(Mockito.anyLong(), Mockito.any());
-
     Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 
     dataCollectionControllerImpl.createEmptyDataCollection(dc);

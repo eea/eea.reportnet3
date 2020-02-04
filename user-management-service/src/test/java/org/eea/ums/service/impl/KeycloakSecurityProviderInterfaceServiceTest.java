@@ -1,10 +1,7 @@
 package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -18,7 +15,6 @@ import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -220,26 +216,6 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     keycloakSecurityProviderInterfaceService.deleteResourceInstancesByName(resourceNames);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
-  }
-
-
-  @Test
-  public void addContributorsToDataflow() throws EEAException {
-
-    RepresentativeVO representative = new RepresentativeVO();
-    representative.setDataProviderId(1L);
-    representative.setProviderAccount("test@reportnet.net");
-
-    UserRepresentation[] users = new UserRepresentation[1];
-    UserRepresentation user = new UserRepresentation();
-    user.setEmail("test@reportnet.net");
-    users[0] = user;
-
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
-
-    keycloakSecurityProviderInterfaceService.addContributorsToDataflow(1L,
-        Arrays.asList(representative));
-
   }
 
 }
