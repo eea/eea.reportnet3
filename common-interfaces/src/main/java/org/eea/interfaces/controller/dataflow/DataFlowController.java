@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -116,13 +117,15 @@ public interface DataFlowController {
       @RequestParam(value = "idContributor") String userId);
 
 
+
   /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
 
 

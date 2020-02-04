@@ -334,7 +334,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createDataFlowThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setDeadlineDate(new Date(-1));
@@ -347,7 +347,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     try {
@@ -364,7 +364,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createDataFlowDateTodayThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     Date date = new Date();
@@ -385,7 +385,7 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    * @throws ParseException the parse exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createDataThrowRepeatName() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
