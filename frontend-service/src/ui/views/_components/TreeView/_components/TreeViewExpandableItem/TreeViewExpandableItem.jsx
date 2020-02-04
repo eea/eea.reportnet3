@@ -44,11 +44,21 @@ const TreeViewExpandableItem = ({
     const width = 90 / items.length;
     return items.map((item, i) =>
       !isUndefined(item.type) && item.type === 'box' ? (
-        <div key={i} style={{ width: `${width}%` }}>
+        <div
+          className={styles.defaultHeaderItem}
+          key={i}
+          style={{
+            width: `${width}%`
+          }}>
           <span className={item.className}>{item.label}</span>
         </div>
       ) : (
-        <span key={i} style={{ width: `${width}%` }}>
+        <span
+          className={styles.defaultHeaderItem}
+          key={i}
+          style={{
+            width: `${width}%`
+          }}>
           {item.label}
         </span>
       )

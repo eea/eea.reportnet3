@@ -17,6 +17,13 @@
   animation: show 0.2s;
 }
 
+.defaultHeaderItem {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-right: 2rem;
+}
+
 .defaultInfoButton {
   transition: 0.2s ease-in-out;
   animation: blink 0.2s;
