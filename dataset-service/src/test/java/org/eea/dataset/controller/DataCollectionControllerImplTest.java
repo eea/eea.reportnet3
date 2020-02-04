@@ -15,6 +15,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -66,6 +67,9 @@ public class DataCollectionControllerImplTest {
 
   @Mock
   private DatasetSchemaService schemaService;
+
+  @Mock
+  private UserManagementControllerZull userManagementControllerZuul;
 
   /** The security context. */
   SecurityContext securityContext;
@@ -121,6 +125,9 @@ public class DataCollectionControllerImplTest {
         .thenReturn(Arrays.asList(design));
     Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
         Mockito.any());
+
+    Mockito.doNothing().when(userManagementControllerZuul)
+        .addContributorsToDataflow(Mockito.anyLong(), Mockito.any());
 
     Mockito.when(schemaService.validateSchema(Mockito.any())).thenReturn(true);
 

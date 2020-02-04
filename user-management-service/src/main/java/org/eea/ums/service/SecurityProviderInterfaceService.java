@@ -4,6 +4,7 @@ package org.eea.ums.service;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -156,4 +157,15 @@ public interface SecurityProviderInterfaceService {
    * @param resourceInfoVOs the resource info V os
    */
   void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs);
+
+
+  /**
+   * Adds the contributors to dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @param representatives the representatives
+   * @throws EEAException the EEA exception
+   */
+  void addContributorsToDataflow(Long dataflowId, List<RepresentativeVO> representatives)
+      throws EEAException;
 }

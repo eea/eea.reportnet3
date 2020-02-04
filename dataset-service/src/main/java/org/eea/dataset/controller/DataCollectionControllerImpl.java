@@ -10,12 +10,12 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +59,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
-
-
   /** The schema service. */
   @Autowired
   private DatasetSchemaService schemaService;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
 
 
 
@@ -111,7 +109,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
     // 2. Create reporting datasets as many providers are by design dataset
     // only if there are design datasets and providers
-    int iteration = designs.size() - 1;
+    int iterationDC = designs.size() - 1;
     Boolean schemasIntegrity = true;
     for (DesignDatasetVO design : designs) {
       if (!schemaService.validateSchema(design.getDatasetSchema())) {
@@ -129,13 +127,17 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           // Create the DC per design dataset
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
               "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, iteration);
+              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null, iterationDC);
 
           datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
               design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
-              iteration);
-          iteration--;
+              iterationDC);
+          iterationDC--;
         }
+        // Add the dataflow to the providers
+        userManagementControllerZuul.addContributorsToDataflow(dataCollectionVO.getIdDataflow(),
+            representatives);
+
         // 4. Update the dataflow status to DRAFT
         dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
             TypeStatusEnum.DRAFT);

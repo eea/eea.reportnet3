@@ -3,15 +3,19 @@ package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -25,6 +29,8 @@ import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +52,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KeycloakSecurityProviderInterfaceService.class);
 
   /**
    * Do login.
@@ -361,8 +370,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
         .findFirst();
     contributor.orElseThrow(() -> new EEAException("Error, user not found"));
-
-    this.addUserToUserGroup(contributor.get().getId(), groupName);
+    if (contributor.isPresent()) {
+      LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
+          contributor.get().getEmail(), groupName);
+      this.addUserToUserGroup(contributor.get().getId(), groupName);
+    } else {
+      LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
+          groupName);
+    }
 
   }
 
@@ -388,5 +403,49 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     }
   }
 
+
+  /**
+   * Adds the contributors to dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @param representatives the representatives
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorsToDataflow(Long dataflowId, List<RepresentativeVO> representatives)
+      throws EEAException {
+
+    Set<ResourceAssignationVO> resourcesDataflow = new HashSet<>();
+    for (RepresentativeVO representative : representatives) {
+      ResourceAssignationVO resourceDFP = fillResourceAssignation(dataflowId,
+          representative.getProviderAccount(), ResourceGroupEnum.DATAFLOW_PROVIDER);
+      resourcesDataflow.add(resourceDFP);
+    }
+
+    for (ResourceAssignationVO resource : resourcesDataflow.stream().collect(Collectors.toList())) {
+      this.addContributorToUserGroup(resource.getEmail(),
+          resource.getResourceGroup().getGroupName(resource.getResourceId()));
+    }
+
+  }
+
+  /**
+   * Fill resource assignation.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
+      ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
 
 }
