@@ -2,26 +2,18 @@ package org.eea.security.jwt.utils;
 
 import static org.keycloak.TokenVerifier.IS_ACTIVE;
 import static org.keycloak.TokenVerifier.SUBJECT_EXISTS_CHECK;
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.security.jwt.data.TokenDataVO;
 import org.keycloak.TokenVerifier;
-import org.keycloak.TokenVerifier.TokenTypeCheck;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Jwt token provider.
@@ -58,8 +52,8 @@ public class JwtTokenProvider {
   @PostConstruct
   private void createPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
-    X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(
-        Base64.getDecoder().decode(publicKeyValue.getBytes()));
+    X509EncodedKeySpec X509publicKey =
+        new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyValue.getBytes()));
     KeyFactory kf = null;
     kf = KeyFactory.getInstance("RSA");
     this.publicKey = kf.generatePublic(X509publicKey);
@@ -77,11 +71,11 @@ public class JwtTokenProvider {
    * @throws VerificationException the verification exception
    */
   public TokenDataVO retrieveToken(String authToken) throws VerificationException {
-    CacheTokenVO cacheTokenVO = securityRedisTemplate.opsForValue().get(authToken);
+    String cachedToken = retrieveAccessToken(authToken);
 
     TokenDataVO tokenDataVO = new TokenDataVO();
-    if (null != cacheTokenVO) {
-      tokenDataVO = parseToken(cacheTokenVO.getAccessToken());
+    if (StringUtils.hasText(cachedToken)) {
+      tokenDataVO = parseToken(cachedToken);
     } else {
       throw new VerificationException("Error: Could not retrieve token from Cache");
     }
@@ -100,11 +94,8 @@ public class JwtTokenProvider {
    */
   public TokenDataVO parseToken(String jwt) throws VerificationException {
 
-    TokenVerifier tokenVerifier = TokenVerifier
-        .create(jwt, AccessToken.class)
-        .publicKey(publicKey)
-        .withChecks(SUBJECT_EXISTS_CHECK,
-            IS_ACTIVE).verify();
+    TokenVerifier tokenVerifier = TokenVerifier.create(jwt, AccessToken.class).publicKey(publicKey)
+        .withChecks(SUBJECT_EXISTS_CHECK, IS_ACTIVE).verify();
 
     AccessToken token = (AccessToken) tokenVerifier.getToken();
 
@@ -120,13 +111,16 @@ public class JwtTokenProvider {
   }
 
   /**
-   * Retrieve access token string.
+   * Retrieve access token string from redis if exists, otherwise retrieves keyToken input
+   * parameter.
    *
    * @param keyToken the key token
    *
    * @return the string
    */
   public String retrieveAccessToken(String keyToken) {
-    return securityRedisTemplate.opsForValue().get(keyToken).getAccessToken();
+    CacheTokenVO result = securityRedisTemplate.opsForValue().get(keyToken);
+
+    return null != result ? result.getAccessToken() : keyToken;
   }
 }

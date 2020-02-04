@@ -1,15 +1,8 @@
 package org.eea.ums.service.impl;
 
 
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +32,11 @@ import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
 import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -58,8 +49,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory
-      .getLogger(KeycloakSecurityProviderInterfaceService.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KeycloakSecurityProviderInterfaceService.class);
   /**
    * The Constant LOG_ERROR.
    */
@@ -108,6 +99,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
     }
+
     tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     LOG.info("User {} logged in and cached succesfully ", username);
     return tokenVO;
@@ -170,13 +162,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Set<String> eeaGroups = new HashSet<>();
     Optional.ofNullable((List<String>) token.getOtherClaims().get("user_groups"))
         .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-      groups.stream().map(group -> {
-        if (group.startsWith("/")) {
-          group = group.substring(1);
-        }
-        return group.toUpperCase();
-      }).forEach(eeaGroups::add);
-    });
+          groups.stream().map(group -> {
+            if (group.startsWith("/")) {
+              group = group.substring(1);
+            }
+            return group.toUpperCase();
+          }).forEach(eeaGroups::add);
+        });
     TokenVO tokenVO = new TokenVO();
     tokenVO.setRoles(token.getRoles());
     tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
@@ -184,7 +176,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     tokenVO.setPreferredUsername(token.getPreferredUsername());
     tokenVO.setAccessTokenExpiration(token.getExpiration());
     tokenVO.setUserId(token.getUserId());
-
+    tokenVO.setAccessToken(tokenInfo.getAccessToken());
     return tokenVO;
   }
 
@@ -194,21 +186,20 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
     cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
     String key = calculateCacheKey(tokenVO.getRefreshToken());
-    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn,
-        TimeUnit.SECONDS);
+    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
     return key;
   }
 
   private String calculateCacheKey(String refreshToken) {
-//    MessageDigest messageDigest = null;
-//    String key = "";
-//    try {
-//      messageDigest = MessageDigest.getInstance("SHA-256");
-//      messageDigest.update(refreshToken.getBytes());
-//      key = new String(messageDigest.digest());
-//    } catch (NoSuchAlgorithmException e) {
-//      LOG_ERROR.error("Error creating hash key before saving token to cache");
-//    }
+    // MessageDigest messageDigest = null;
+    // String key = "";
+    // try {
+    // messageDigest = MessageDigest.getInstance("SHA-256");
+    // messageDigest.update(refreshToken.getBytes());
+    // key = new String(messageDigest.digest());
+    // } catch (NoSuchAlgorithmException e) {
+    // LOG_ERROR.error("Error creating hash key before saving token to cache");
+    // }
     return UUID.randomUUID().toString();
   }
 
@@ -219,9 +210,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public void doLogout(String authToken) {
-    CacheTokenVO cacheTokenVO = securityRedisTemplate.opsForValue().get(authToken);
-    keycloakConnectorService.logout(cacheTokenVO.getRefreshToken());
-    securityRedisTemplate.delete(authToken);
+    keycloakConnectorService.logout(authToken);
     LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
   }
 

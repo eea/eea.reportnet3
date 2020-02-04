@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -167,8 +166,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test
   public void checkAccessPermission() {
     Mockito.when(keycloakConnectorService.checkUserPermision("Dataflow",
-        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn("PERMIT");
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn("PERMIT");
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         keycloakSecurityProviderInterfaceService.checkAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -229,14 +228,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   @Test
   public void doLogout() {
-    ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
-    CacheTokenVO cacheTokenVO = new CacheTokenVO();
-    cacheTokenVO.setRefreshToken("refreshToken");
-    Mockito.when(operations.get("authToken")).thenReturn(cacheTokenVO);
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
     keycloakSecurityProviderInterfaceService.doLogout("authToken");
-    Mockito.verify(keycloakConnectorService, Mockito.times(1)).logout("refreshToken");
-    Mockito.verify(securityRedisTemplate, Mockito.times(1)).delete("authToken");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).logout("authToken");
   }
 
   @Test

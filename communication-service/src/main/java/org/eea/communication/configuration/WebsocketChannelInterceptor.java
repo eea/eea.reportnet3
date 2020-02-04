@@ -2,7 +2,6 @@ package org.eea.communication.configuration;
 
 import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,9 +103,8 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
    */
   private boolean doLogin(StompHeaderAccessor accessor) {
     try {
-      accessor.setUser(new StompPrincipal(
-          ((AccessToken) jwtTokenProvider.retrieveToken(accessor.getFirstNativeHeader("token")))
-              .getPreferredUsername()));
+      accessor.setUser(new StompPrincipal(jwtTokenProvider
+          .retrieveToken(accessor.getFirstNativeHeader("token")).getPreferredUsername()));
       logger.info("Message received: User={}, SessionId={}, Command={}", accessor.getUser(),
           accessor.getSessionId(), accessor.getCommand());
     } catch (VerificationException e) {
