@@ -447,8 +447,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
         .findFirst();
     contributor.orElseThrow(() -> new EEAException("Error, user not found"));
-
-    this.addUserToUserGroup(contributor.get().getId(), groupName);
+    if (contributor.isPresent()) {
+      LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
+          contributor.get().getEmail(), groupName);
+      this.addUserToUserGroup(contributor.get().getId(), groupName);
+    } else {
+      LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
+          groupName);
+    }
 
   }
 
@@ -473,6 +479,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       keycloakConnectorService.createGroupDetail(groupInfo);
     }
   }
+
 
 
 }

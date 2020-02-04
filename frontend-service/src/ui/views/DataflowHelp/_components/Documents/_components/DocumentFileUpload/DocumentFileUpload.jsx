@@ -1,30 +1,31 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
-import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull, isPlainObject, sortBy, isUndefined } from 'lodash';
+import * as Yup from 'yup';
 
 import styles from './DocumentFileUpload.module.scss';
 
 import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { DocumentService } from 'core/services/Document';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
-  onUpload,
-  isFormReset,
-  setIsUploadDialogVisible,
   isEditForm = false,
-  isUploadDialogVisible
+  isFormReset,
+  isUploadDialogVisible,
+  onUpload,
+  setIsUploadDialogVisible
 }) => {
-  const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
   const inputRef = useRef();
@@ -64,17 +65,6 @@ const DocumentFileUpload = ({
     document.querySelector('.uploadFile').value = '';
   }
 
-  const IsPublicCheckbox = ({ field, type, checked }) => {
-    return (
-      <>
-        <input id="isPublic" {...field} type={type} checked={checked} />
-        <label htmlFor="isPublic" style={{ display: 'block' }}>
-          {resources.messages['documentUploadCheckboxIsPublic']}
-        </label>
-      </>
-    );
-  };
-
   const buildInitialValue = documentInitialValues => {
     let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
@@ -90,6 +80,17 @@ const DocumentFileUpload = ({
   };
 
   const initialValuesWithLangField = buildInitialValue(documentInitialValues);
+
+  const IsPublicCheckbox = ({ field, type, checked }) => {
+    return (
+      <>
+        <input id="isPublic" {...field} type={type} checked={checked} />
+        <label htmlFor="isPublic" style={{ display: 'block' }}>
+          {resources.messages['documentUploadCheckboxIsPublic']}
+        </label>
+      </>
+    );
+  };
 
   return (
     <Formik
@@ -145,11 +146,11 @@ const DocumentFileUpload = ({
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
-                name="description"
-                type="text"
-                placeholder={resources.messages['fileDescription']}
-                value={values.description}
                 innerRef={inputRef}
+                name="description"
+                placeholder={resources.messages['fileDescription']}
+                type="text"
+                value={values.description}
               />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
@@ -169,12 +170,12 @@ const DocumentFileUpload = ({
                 {() => (
                   <input
                     className="uploadFile"
-                    type="file"
                     name="uploadFile"
-                    placeholder="file upload"
                     onChange={event => {
                       setFieldValue('uploadFile', event.currentTarget.files[0]);
                     }}
+                    placeholder="file upload"
+                    type="file"
                   />
                 )}
               </Field>
@@ -196,15 +197,15 @@ const DocumentFileUpload = ({
                       : styles.disabledButton
                     : styles.disabledButton
                 }
-                label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 disabled={isSubmitting}
                 icon={isEditForm ? 'save' : 'add'}
+                label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
                 className={`${styles.cancelButton} p-button-secondary`}
-                label={resources.messages['cancel']}
                 icon="cancel"
+                label={resources.messages['cancel']}
                 onClick={() => setIsUploadDialogVisible(false)}
               />
             </div>

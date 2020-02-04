@@ -54,10 +54,9 @@
   margin: 1rem 0rem 0rem 0rem;
 }
 .codelistHeader > span {
-  width: 22%;
+  width: 14%;
   display: flex;
   font-size: 10pt;
-  /* color: var(--gray-65); */
 }
 
 .inputFilter {
@@ -65,7 +64,7 @@
   border-left: 0 !important;
   border-right: 0 !important;
   border-radius: 0 !important;
-  width: 65% !important;
+  width: 100% !important;
 }
 
 .inputFilter:enabled:focus,
@@ -89,11 +88,32 @@
   border-right: 0 !important;
   border-radius: 0 !important;
   color: var(--gray-65) !important;
+  width: 100% !important;
 }
 
 .codelistInputTextareaDialog {
   margin: 1.5rem 0 0 2rem;
   width: 80%;
+}
+
+.orderIcon {
+  opacity: 0.7;
+  margin-right: 4.5% !important;
+  font-size: 12pt !important;
+}
+
+.orderIcon:hover {
+  opacity: 1;
+}
+
+.orderIcon:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.orderIcon:enabled:active,
+.orderIcon:enabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .p-multiselect-item,

@@ -301,4 +301,5 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
+
 }
