@@ -125,7 +125,7 @@ const DataflowManagementForm = ({
           setSubmitting(false);
         }
       }}>
-      {({ isSubmitting, errors, touched, values }) => (
+      {({ errors, handleChange, isSubmitting, touched, values }) => (
         <Form>
           <fieldset>
             <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
@@ -133,7 +133,10 @@ const DataflowManagementForm = ({
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
-                onClick={() => setIsNameDuplicated(false)}
+                onChange={event => {
+                  handleChange(event);
+                  setIsNameDuplicated(false);
+                }}
                 type="text"
                 value={values.name}
               />
