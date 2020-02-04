@@ -119,9 +119,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
       tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+      LOG.info("User {} logged in and cached succesfully", tokenVO.getPreferredUsername());
     }
 
-    LOG.info("User {} logged in and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
 
@@ -139,9 +139,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
       tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+      LOG.info("Session for User {} renewed and cached succesfully",
+          tokenVO.getPreferredUsername());
     }
 
-    LOG.info("Session for User {} renewed and cached succesfully", tokenVO.getPreferredUsername());
     return tokenVO;
   }
 
