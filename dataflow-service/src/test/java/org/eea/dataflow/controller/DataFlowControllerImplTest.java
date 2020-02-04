@@ -355,7 +355,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
     }
   }
 
@@ -375,7 +374,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
     }
   }
 
@@ -400,7 +398,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
-      throw ex;
     }
   }
 
