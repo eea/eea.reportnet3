@@ -238,9 +238,10 @@ export const BigButtonList = ({
         <Calendar
           className={styles.calendar}
           inline={true}
+          monthNavigator={true}
+          minDate={new Date(Date.now())}
           onChange={event => setDataCollectionDueDate(event.target.value)}
           showWeek={true}
-          monthNavigator={true}
           value={dataCollectionDueDate}
           yearNavigator={true}
           yearRange="2020:2030"
