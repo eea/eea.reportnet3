@@ -229,7 +229,14 @@ const Category = ({
 
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button disabled={isIncorrect} label={resources.messages['save']} icon="save" onClick={() => onSaveCategory()} />
+      <Button
+        disabled={
+          isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
+        }
+        label={resources.messages['save']}
+        icon="save"
+        onClick={() => onSaveCategory()}
+      />
       <Button
         label={resources.messages['cancel']}
         icon="cancel"
