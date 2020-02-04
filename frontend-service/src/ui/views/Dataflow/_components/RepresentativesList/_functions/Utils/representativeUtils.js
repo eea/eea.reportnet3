@@ -7,7 +7,13 @@ export const autofocusOnEmptyInput = formState => {
       isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
       !isNull(document.getElementById('emptyInput'))
     ) {
-      document.getElementById('emptyInput').focus();
+      const activeElement = document.activeElement;
+
+      if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT') {
+        return;
+      } else {
+        document.getElementById('emptyInput').focus();
+      }
     }
   }
 };

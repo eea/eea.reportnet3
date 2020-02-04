@@ -75,7 +75,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     return (
-      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus={isNull(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
