@@ -182,23 +182,100 @@ const DataViewer = withRouter(
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
 
-    useEffect(() => {
-      if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
-        return;
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
+      const removeSelectAllFromList = levelErrorValidations => {
+        levelErrorValidations = levelErrorValidations
+          .map(error => error.toUpperCase())
+          .filter(error => error !== 'SELECTALL')
+          .join(',');
+        return levelErrorValidations;
+      };
+
+      const filterDataResponse = data => {
+        const dataFiltered = DataViewerUtils.parseData(data);
+        if (dataFiltered.length > 0) {
+          dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
+        } else {
+          setFetchedData([]);
+        }
+        setFetchedData(dataFiltered);
+      };
+
+      levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
+
+      setIsLoading(true);
+      try {
+        let fields;
+        if (!isUndefined(sField) && sField !== null) {
+          fields = `${sField}:${sOrder}`;
+        }
+        const tableData = await DatasetService.tableDataById(
+          datasetId,
+          tableId,
+          Math.floor(fRow / nRows),
+          nRows,
+          fields,
+          levelErrorValidations
+        );
+        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
+          onLoadTableData(true);
+        }
+        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
+          if (!isUndefined(tableData.records)) {
+            if (tableData.records.length > 0) {
+              dispatchRecords({
+                type: 'SET_NEW_RECORD',
+                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+              });
+            }
+          } else {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
+          }
+        }
+        if (!isUndefined(tableData.records)) {
+          filterDataResponse(tableData);
+        } else {
+          setFetchedData([]);
+        }
+
+        if (tableData.totalRecords !== records.totalRecords) {
+          dispatchRecords({ type: 'SET_TOTAL', payload: tableData.totalRecords });
+        }
+        if (tableData.totalFilteredRecords !== records.totalFilteredRecords) {
+          dispatchRecords({ type: 'SET_FILTERED', payload: tableData.totalFilteredRecords });
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName
+          }
+        });
+      } finally {
+        setIsLoading(false);
       }
-      dispatchRecords({
-        type: 'SET_FIRST_PAGE_RECORD',
-        payload: Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
-      });
-      dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
-      onFetchData(
-        undefined,
-        undefined,
-        Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage,
-        records.recordsPerPage,
-        levelErrorTypesWithCorrects
-      );
-    }, [recordErrorPositionId]);
+    };
+
+    useRecordErrorPosition(
+      recordErrorPositionId,
+      dispatchRecords,
+      records,
+      dispatchSort,
+      onFetchData,
+      levelErrorTypesWithCorrects
+    );
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
@@ -374,81 +451,6 @@ const DataViewer = withRouter(
       setInitialCellValue(value);
       if (!isEditing) {
         setIsEditing(true);
-      }
-    };
-
-    const removeSelectAllFromList = levelErrorValidations => {
-      levelErrorValidations = levelErrorValidations
-        .map(error => error.toUpperCase())
-        .filter(error => error !== 'SELECTALL')
-        .join(',');
-      return levelErrorValidations;
-    };
-
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
-      levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
-      setIsLoading(true);
-      try {
-        let fields;
-        if (!isUndefined(sField) && sField !== null) {
-          fields = `${sField}:${sOrder}`;
-        }
-        const tableData = await DatasetService.tableDataById(
-          datasetId,
-          tableId,
-          Math.floor(fRow / nRows),
-          nRows,
-          fields,
-          levelErrorValidations
-        );
-        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
-          onLoadTableData(true);
-        }
-        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
-          if (!isUndefined(tableData.records)) {
-            if (tableData.records.length > 0) {
-              dispatchRecords({
-                type: 'SET_NEW_RECORD',
-                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
-              });
-            }
-          } else {
-            dispatchRecords({
-              type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            });
-          }
-        }
-        if (!isUndefined(tableData.records)) {
-          filterDataResponse(tableData);
-        } else {
-          setFetchedData([]);
-        }
-
-        if (tableData.totalRecords !== records.totalRecords) {
-          dispatchRecords({ type: 'SET_TOTAL', payload: tableData.totalRecords });
-        }
-        if (tableData.totalFilteredRecords !== records.totalFilteredRecords) {
-          dispatchRecords({ type: 'SET_FILTERED', payload: tableData.totalFilteredRecords });
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'TABLE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName
-          }
-        });
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -645,16 +647,6 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const filterDataResponse = data => {
-      const dataFiltered = DataViewerUtils.parseData(data);
-      if (dataFiltered.length > 0) {
-        dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
-      } else {
-        setFetchedData([]);
-      }
-      setFetchedData(dataFiltered);
-    };
-
     const addIconLevelError = (validation, levelError, message) => {
       let icon = [];
       if (!isEmpty(validation)) {
@@ -818,7 +810,8 @@ const DataViewer = withRouter(
             {columns}
           </DataTable>
         </div>
-        {isCodelistInfoVisible ? (
+
+        {isCodelistInfoVisible && (
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
@@ -848,9 +841,9 @@ const DataViewer = withRouter(
               ))}
             </DataTable>
           </Dialog>
-        ) : null}
+        )}
 
-        {importDialogVisible ? (
+        {importDialogVisible && (
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
@@ -871,63 +864,9 @@ const DataViewer = withRouter(
               })}`}
             />
           </Dialog>
-        ) : null}
+        )}
 
-        {deleteDialogVisible ? (
-          <ConfirmDialog
-            header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
-            onConfirm={onConfirmDeleteTable}
-            onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-            visible={deleteDialogVisible}>
-            {resources.messages['deleteDatasetTableConfirm']}
-          </ConfirmDialog>
-        ) : null}
-
-        {confirmDeleteVisible ? (
-          <ConfirmDialog
-            onConfirm={onConfirmDeleteRow}
-            onHide={() => setConfirmDeleteVisible(false)}
-            visible={confirmDeleteVisible}
-            header={resources.messages['deleteRow']}
-            labelConfirm={resources.messages['yes']}
-            labelCancel={resources.messages['no']}>
-            {resources.messages['confirmDeleteRow']}
-          </ConfirmDialog>
-        ) : null}
-
-        {confirmPasteVisible ? (
-          <ConfirmDialog
-            className="edit-table"
-            header={resources.messages['pasteRecords']}
-            hasPasteOption={true}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
-            onConfirm={onPasteAccept}
-            onHide={onPasteCancel}
-            onPaste={onPaste}
-            onPasteAsync={onPasteAsync}
-            divRef={divRef}
-            visible={confirmPasteVisible}>
-            <InfoTable
-              data={records.pastedRecords}
-              filteredColumns={colsSchema.filter(
-                column =>
-                  column.field !== 'actions' &&
-                  column.field !== 'recordValidation' &&
-                  column.field !== 'id' &&
-                  column.field !== 'datasetPartitionId'
-              )}
-              numCopiedRecords={records.numCopiedRecords}
-              onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
-            <br />
-            <br />
-            <hr />
-          </ConfirmDialog>
-        ) : null}
-
-        {addDialogVisible ? (
+        {addDialogVisible && (
           <Dialog
             className="edit-table"
             blockScroll={false}
@@ -948,8 +887,9 @@ const DataViewer = withRouter(
               />
             </div>
           </Dialog>
-        ) : null}
-        {editDialogVisible ? (
+        )}
+
+        {editDialogVisible && (
           <Dialog
             blockScroll={false}
             className="edit-table"
@@ -971,7 +911,59 @@ const DataViewer = withRouter(
               />
             </div>
           </Dialog>
-        ) : null}
+        )}
+
+        {deleteDialogVisible && (
+          <ConfirmDialog
+            header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteTable}
+            onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+            visible={deleteDialogVisible}>
+            {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
+        )}
+
+        {confirmDeleteVisible && (
+          <ConfirmDialog
+            header={resources.messages['deleteRow']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteRow}
+            onHide={() => setConfirmDeleteVisible(false)}
+            visible={confirmDeleteVisible}>
+            {resources.messages['confirmDeleteRow']}
+          </ConfirmDialog>
+        )}
+
+        {confirmPasteVisible && (
+          <ConfirmDialog
+            className="edit-table"
+            divRef={divRef}
+            header={resources.messages['pasteRecords']}
+            hasPasteOption={true}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onPasteAccept}
+            onHide={onPasteCancel}
+            onPaste={onPaste}
+            onPasteAsync={onPasteAsync}
+            visible={confirmPasteVisible}>
+            <InfoTable
+              data={records.pastedRecords}
+              filteredColumns={colsSchema.filter(
+                column =>
+                  column.field !== 'actions' &&
+                  column.field !== 'recordValidation' &&
+                  column.field !== 'id' &&
+                  column.field !== 'datasetPartitionId'
+              )}
+              numCopiedRecords={records.numCopiedRecords}
+              onDeletePastedRecord={onDeletePastedRecord}
+            />
+          </ConfirmDialog>
+        )}
       </SnapshotContext.Provider>
     );
   }
@@ -1209,4 +1201,34 @@ const useSetColumns = (
     setColumns,
     originalColumns
   };
+};
+
+const useRecordErrorPosition = (
+  recordErrorPositionId,
+  dispatchRecords,
+  records,
+  dispatchSort,
+  onFetchData,
+  levelErrorTypesWithCorrects
+) => {
+  useEffect(() => {
+    if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
+      return;
+    }
+
+    dispatchRecords({
+      type: 'SET_FIRST_PAGE_RECORD',
+      payload: Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
+    });
+
+    dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
+
+    onFetchData(
+      undefined,
+      undefined,
+      Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage,
+      records.recordsPerPage,
+      levelErrorTypesWithCorrects
+    );
+  }, [recordErrorPositionId]);
 };

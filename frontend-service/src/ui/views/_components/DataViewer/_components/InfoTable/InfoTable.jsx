@@ -93,8 +93,6 @@ export const InfoTable = ({ data, filteredColumns, numCopiedRecords, onDeletePas
   return (
     <React.Fragment>
       <InfoTableMessages data={data} filteredColumns={filteredColumns} numCopiedRecords={numCopiedRecords} />
-      <hr />
-      <br />
       {!isUndefined(data) && data.length > 0 ? (
         <DataTable
           className={styles.infoTableData}
