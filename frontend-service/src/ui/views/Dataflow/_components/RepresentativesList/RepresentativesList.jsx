@@ -77,7 +77,6 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
-          className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
