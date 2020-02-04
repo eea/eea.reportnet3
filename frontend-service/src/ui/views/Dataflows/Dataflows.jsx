@@ -20,11 +20,15 @@ import { UserService } from 'core/services/User';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 const Dataflows = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSliderBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -82,6 +86,26 @@ const Dataflows = withRouter(({ match, history }) => {
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
+    if (isCustodian) {
+      leftSliderBarContext.addModels([
+        {
+          onClick: () => onShowAddForm(),
+          icon: 'plus',
+          label: 'createNewDataflow'
+        },
+        {
+          onClick: e => {
+            e.preventDefault();
+            history.push(getUrl(routes['CODELISTS']));
+          },
+          icon: 'settings',
+          label: 'manageCodelists',
+          href: getUrl(routes['CODELISTS'])
+        }
+      ]);
+    } else {
+      leftSliderBarContext.removeModels();
+    }
   }, []);
 
   useEffect(() => {
@@ -121,25 +145,7 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout
-        leftSideBarConfig={{
-          isCustodian,
-          buttons: [
-            {
-              isLink: false,
-              onClick: () => onShowAddForm(),
-              icon: 'plus',
-              label: resources.messages['createNewDataflow']
-            },
-            {
-              isLink: true,
-              onClick: () => onShowAddForm(),
-              icon: 'settings',
-              label: resources.messages['manageCodelists'],
-              linkTo: { route: 'CODELISTS', children: {}, isRoute: true }
-            }
-          ]
-        }}>
+      <MainLayout>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

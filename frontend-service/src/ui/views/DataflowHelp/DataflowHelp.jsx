@@ -23,6 +23,7 @@ import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -33,6 +34,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -94,6 +96,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
+    leftSideBarContext.addModels([]);
   }, []);
 
   useEffect(() => {
