@@ -25,6 +25,8 @@ import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KeycloakSecurityProviderInterfaceService.class);
 
   /**
    * Do login.
@@ -361,8 +366,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
         .findFirst();
     contributor.orElseThrow(() -> new EEAException("Error, user not found"));
-
-    this.addUserToUserGroup(contributor.get().getId(), groupName);
+    if (contributor.isPresent()) {
+      LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
+          contributor.get().getEmail(), groupName);
+      this.addUserToUserGroup(contributor.get().getId(), groupName);
+    } else {
+      LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
+          groupName);
+    }
 
   }
 
@@ -387,6 +398,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       keycloakConnectorService.createGroupDetail(groupInfo);
     }
   }
+
 
 
 }

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -355,28 +354,20 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
     List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
-    Set<ResourceAssignationVO> resourcesDataflow = new HashSet<>();
+
     datasetIdsEmail.forEach((Long id, String email) -> {
 
       ResourceAssignationVO resourceDP =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
       resourcesProviders.add(resourceDP);
 
-      ResourceAssignationVO resourceDFP =
-          fillResourceAssignation(dataflowId, email, ResourceGroupEnum.DATAFLOW_PROVIDER);
-      resourcesDataflow.add(resourceDFP);
-
       ResourceAssignationVO resourceDC =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
       resourcesCustodian.add(resourceDC);
 
-
     });
+
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
-    userManagementControllerZuul
-        .addContributorsToResources(resourcesDataflow.stream().collect(Collectors.toList()));
-    List<Long> ids = new ArrayList<>();
-    ids.addAll(datasetIds);
     userManagementControllerZuul.addUserToResources(resourcesCustodian);
   }
 
@@ -471,10 +462,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         switch (datasetType) {
           case REPORTING:
             for (RepresentativeVO representative : representatives) {
-
               datasetIdsEmail
-                  .putAll(fillReportingDataset(representative, dataflowId, datasetSchemaId));
-
+                  .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
             }
             this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
             if (iterationDC == 0) {
@@ -550,16 +539,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+
   /**
-   * Fill reporting dataset.
+   * Fill and save reporting dataset.
    *
    * @param representative the representative
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
    * @return the map
    */
-  private Map<Long, String> fillReportingDataset(RepresentativeVO representative, Long dataflowId,
-      String datasetSchemaId) {
+  private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
+      Long dataflowId, String datasetSchemaId) {
 
     ReportingDataset dataset = new ReportingDataset();
     Map<Long, String> datasetIdsEmail = new HashMap<>();
@@ -568,8 +558,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
-    Long idDataset = saveReportingDatasetIntoMetabase(dataset);
-    datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
+    Long idDataset = reportingDatasetRepository.save(dataset).getId();
+    datasetIdsEmail.put(idDataset, representative.getProviderAccount());
     recordStoreControllerZull.createEmptyDataset("dataset_" + idDataset, datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
         idDataset, provider.getLabel());
@@ -577,17 +567,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return datasetIdsEmail;
   }
 
-
-  /**
-   * Save reporting dataset into metabase.
-   *
-   * @param dataset the dataset
-   * @return the long
-   */
-  private Long saveReportingDatasetIntoMetabase(ReportingDataset dataset) {
-
-    return reportingDatasetRepository.save(dataset).getId();
-  }
 
 
 }
