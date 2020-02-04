@@ -7,6 +7,8 @@ export const Calendar = ({
   dateFormat,
   inline,
   key,
+  maxDate,
+  minDate,
   monthNavigator,
   onChange,
   showWeek,
@@ -20,6 +22,8 @@ export const Calendar = ({
       dateFormat={dateFormat}
       inline={inline}
       key={key}
+      maxDate={maxDate}
+      minDate={minDate}
       monthNavigator={monthNavigator}
       onChange={onChange}
       showWeek={showWeek}
