@@ -40,6 +40,7 @@
   border: 1px solid var(--gray-25) !important;
   width: 8%;
   height: 1.95rem;
+  width: 8rem;
 }
 
 .codelistButton span {
