@@ -1054,5 +1054,37 @@
   {
     "key": "config/apiGateway/zuul.routes.codelist.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.path",
+    "value": "L3dlYmxpbmsvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "spring.redis.jedis.pool.max-active",
+    "value": "JHtSRURJU19QT09MX01BWF9BQ1RJVkU6MjB9"
+  },
+  {
+    "key": "spring.redis.jedis.pool.max-idle",
+    "value": "JHtSRURJU19QT09MX01BWF9JRExFOjIwfQ=="
+  },
+  {
+    "key": "spring.redis.jedis.pool.max-wait",
+    "value": "JHtSRURJU19QT09MX01BWF9XQUlUOjUwMDB9"
+  },
+  {
+    "key": "spring.redis.jedis.pool.min-evitable-idle-time",
+    "value": "JHtSRURJU19QT09MX01JTl9FVklUQUJMRV9JRExFX1RJTUU6MzAwMDAwfQ=="
+  },
+  {
+    "key": "spring.redis.jedis.pool.min-idle",
+    "value": "JHtSRURJU19QT09MX01JTl9JRExFOjV9"
   }
 ]
