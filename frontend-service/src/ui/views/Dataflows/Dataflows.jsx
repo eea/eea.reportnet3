@@ -196,8 +196,8 @@ const Dataflows = withRouter(({ match, history }) => {
         <DataflowManagementForm
           isDialogVisible={isDataflowDialogVisible}
           isFormReset={isFormReset}
-          onCreate={onCreateDataflow}
           onCancel={onHideDialog}
+          onCreate={onCreateDataflow}
         />
       </Dialog>
     </div>

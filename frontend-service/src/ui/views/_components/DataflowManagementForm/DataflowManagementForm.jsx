@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -10,8 +10,8 @@ import { Button } from 'ui/views/_components/Button';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DataflowManagementForm = ({
   dataflowId,
@@ -27,6 +27,9 @@ const DataflowManagementForm = ({
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
+
   const form = useRef(null);
   const inputRef = useRef();
 
@@ -36,7 +39,7 @@ const DataflowManagementForm = ({
         inputRef.current.focus();
       }
     }
-  }, [isDialogVisible]);
+  }, [isDialogVisible, dataflowHasErrors]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: isEditForm
@@ -95,21 +98,29 @@ const DataflowManagementForm = ({
             onCreate();
           }
         } catch (error) {
-          const notification = isEditForm
-            ? {
-                type: 'DATAFLOW_UPDATING_ERROR',
-                content: {
-                  dataflowId,
-                  dataflowName: values.name
+          setDataflowHasErrors(true);
+          if (error.response.data.message.toLowerCase() == 'Dataflow name already exists'.toLowerCase()) {
+            setIsNameDuplicated(true);
+            notificationContext.add({
+              type: 'DATAFLOW_NAME_EXISTS'
+            });
+          } else {
+            const notification = isEditForm
+              ? {
+                  type: 'DATAFLOW_UPDATING_ERROR',
+                  content: {
+                    dataflowId,
+                    dataflowName: values.name
+                  }
                 }
-              }
-            : {
-                type: 'DATAFLOW_CREATION_ERROR',
-                content: {
-                  dataflowName: values.name
-                }
-              };
-          notificationContext.add(notification);
+              : {
+                  type: 'DATAFLOW_CREATION_ERROR',
+                  content: {
+                    dataflowName: values.name
+                  }
+                };
+            notificationContext.add(notification);
+          }
         } finally {
           setSubmitting(false);
         }
@@ -117,11 +128,12 @@ const DataflowManagementForm = ({
       {({ isSubmitting, errors, touched, values }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.name) && touched.name ? ' error' : ''}`}>
+            <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
               <Field
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
+                onClick={() => setIsNameDuplicated(false)}
                 type="text"
                 value={values.name}
               />

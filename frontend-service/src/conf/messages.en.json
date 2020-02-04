@@ -430,6 +430,7 @@
 		"notificationLevel": "Level",
 		"loadDatasetsError": "Error loading datasets",
 		"loadDocumentsError": "Error loading documents",
-		"loadWebLinksError": "Error loading web links"
+		"loadWebLinksError": "Error loading web links",
+		"dataflowNameExists": "Dataflow name already exists, please choose another one"
 	}
 }
