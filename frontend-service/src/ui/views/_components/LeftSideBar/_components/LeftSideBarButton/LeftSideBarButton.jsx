@@ -31,7 +31,6 @@ const LeftSideBarButton = ({ buttonType = 'default', href, onClick, title, icon,
   );
 
   const buttonsLayouts = { defaultLayout, notificationsLayout };
-  console.log('buttonsLayouts', buttonsLayouts[`${buttonType}Layout`]);
 
   return (
     <a href={href} onClick={onClick} title={title}>
