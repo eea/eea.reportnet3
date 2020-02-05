@@ -34,4 +34,9 @@
       color: var(--gray-110);
     }
   }
+  .logoutWrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
 }

@@ -17,12 +17,14 @@ import { DatasetValidationDashboard } from './_components/DatasetValidationDashb
 import { DataflowService } from 'core/services/Dataflow';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowDashboards = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
   const [dashboardInitialValues, setDashboardInitialValues] = useState({});
@@ -63,6 +65,7 @@ export const DataflowDashboards = withRouter(({ match, history }) => {
         icon: 'barChart'
       }
     ]);
+    leftSideBarContext.removeModels();
   }, []);
 
   useEffect(() => {
