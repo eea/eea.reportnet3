@@ -23,6 +23,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
@@ -36,6 +37,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   } = match;
 
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -98,6 +100,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataCollection'], icon: 'dataCollection' }
     ]);
+    leftSideBarContext.removeModels();
   }, []);
 
   useEffect(() => {

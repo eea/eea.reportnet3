@@ -6,6 +6,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from 'ui/views/_components/Title';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -13,6 +14,7 @@ import { routes } from 'ui/routes';
 
 const Codelists = withRouter(({ match, history, isCustodian = false }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
@@ -25,6 +27,7 @@ const Codelists = withRouter(({ match, history, isCustodian = false }) => {
       },
       { label: resources.messages['codelists'], icon: 'list' }
     ]);
+    leftSideBarContext.removeModels();
   }, []);
 
   const layout = children => {

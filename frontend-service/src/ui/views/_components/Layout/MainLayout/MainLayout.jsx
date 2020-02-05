@@ -16,7 +16,7 @@ import { UserService } from 'core/services/User';
 
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
-const MainLayout = ({ children, leftSideBarConfig }) => {
+const MainLayout = ({ children }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
@@ -60,7 +60,7 @@ const MainLayout = ({ children, leftSideBarConfig }) => {
     <div id={styles.mainLayoutContainer}>
       <Header />
       <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
-        <LeftSideBar leftSideBarConfig={leftSideBarConfig} onToggleSideBar={onToggleSideBar} />
+        <LeftSideBar onToggleSideBar={onToggleSideBar} />
         {children}
       </div>
       <Footer />

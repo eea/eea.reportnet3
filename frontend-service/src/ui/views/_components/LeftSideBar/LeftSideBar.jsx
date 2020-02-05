@@ -1,95 +1,62 @@
 import React, { useState, useContext } from 'react';
-import { withRouter, Link } from 'react-router-dom';
-
-import { isUndefined } from 'lodash';
+import { withRouter } from 'react-router-dom';
 
 import styles from './LeftSideBar.module.scss';
 
-import { routes } from 'ui/routes';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Icon } from 'ui/views/_components/Icon';
+import { LeftSideBarButton } from './_components/LeftSideBarButton';
 import { NotificationsList } from './_components/NotificationsList';
 
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
-const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
+const LeftSideBar = withRouter(() => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
-  const renderUserProfile = () => (
-    <a
-      href="#userProfilePage"
-      onClick={async e => {
+  const renderUserProfile = () => {
+    const userButtonProps = {
+      href: '#userProfilePage',
+      onClick: async e => {
         e.preventDefault();
-      }}
-      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['userSettings'] : undefined}>
-      <div className={styles.leftSideBarElementWrapper}>
-        <FontAwesomeIcon
-          className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
-          icon={AwesomeIcons('user-profile')}
-        />
-        <span className={styles.leftSideBarUserText}>{resources.messages['userSettings']}</span>
-      </div>
-    </a>
-  );
-  const renderUserNotifications = () => (
-    <a
-      href="#"
-      onClick={async e => {
+      },
+      title: 'userSettings',
+      icon: 'user-profile',
+      label: 'userSettings'
+    };
+    return <LeftSideBarButton {...userButtonProps} />;
+  };
+  const renderUserNotifications = () => {
+    const userNotificationsProps = {
+      buttonType: 'notifications',
+      href: '#',
+      onClick: async e => {
         e.preventDefault();
         if (notificationContext.all.length > 0) setIsNotificationVisible(true);
-      }}
-      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['notifications'] : undefined}>
-      <div className={styles.leftSideBarElementWrapper}>
-        <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
-          <FontAwesomeIcon className={`${styles.leftSideBarUserIcon}`} icon={AwesomeIcons('notifications')} />
-          <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
-        </div>
-        <span className={styles.leftSideBarUserText}>{resources.messages['notifications']}</span>
-      </div>
-      {/* <div className={styles.notificationList}><ul><li>Notification 1</li><li>Notification 2</li><li>Notification 2</li><li>Notification 2</li></ul></div> */}
-    </a>
-  );
-  const renderButtons = () =>
-    leftSideBarConfig.buttons.map(button =>
-      !button.isLink ? (
-        <a href="#" title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
-          <div
-            className={styles.leftSideBarElementWrapper}
-            onClick={!isUndefined(button.onClick) ? () => button.onClick() : null}>
-            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
-            <span className={styles.leftSideBarText}>{button.label}</span>
-          </div>
-        </a>
-      ) : (
-        <Link
-          to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}
-          title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
-          <div className={styles.leftSideBarElementWrapper}>
-            <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
-            <span className={styles.leftSideBarText}>{button.label}</span>
-          </div>
-        </Link>
-      )
-    );
-  const renderLogout = () => (
-    <a
-      href="#userProfilePage"
-      title={breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['logout'] : undefined}
-      onClick={async e => {
+      },
+      title: 'userSettings',
+      icon: 'notifications',
+      label: 'notifications'
+    };
+    return <LeftSideBarButton {...userNotificationsProps} />;
+  };
+
+  const renderSectionButtons = () => {
+    return leftSideBarContext.models.map(model => <LeftSideBarButton {...model} />);
+  };
+  const renderLogout = () => {
+    const logoutProps = {
+      href: '#',
+      onClick: async e => {
         e.preventDefault();
         userContext.socket.disconnect(() => {});
         try {
@@ -101,13 +68,26 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
         } finally {
           userContext.onLogout();
         }
-      }}>
-      <div className={styles.leftSideBarElementWrapper}>
-        <Icon icon="logout" className={styles.leftSideBarElementAnimation} />
-        <span className={styles.leftSideBarText}>{resources.messages['logout']}</span>
-      </div>
-    </a>
-  );
+      },
+      title: 'logout',
+      icon: 'logout',
+      label: 'logout'
+    };
+    return <LeftSideBarButton {...logoutProps} />;
+  };
+  const renderOpenClose = () => {
+    const openCloseProps = {
+      href: '#',
+      onClick: e => {
+        e.preventDefault();
+        breadCrumbContext.setMenuState();
+      },
+      title: 'expandSidebar',
+      icon: breadCrumbContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
+      label: ''
+    };
+    return <LeftSideBarButton {...openCloseProps} />;
+  };
 
   return (
     <div className={`${styles.leftSideBar}${breadCrumbContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
@@ -118,29 +98,11 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
             {renderUserNotifications()}
           </div>
           <hr />
-          <div className={styles.barSection}>
-            {!isUndefined(leftSideBarConfig) && leftSideBarConfig.isCustodian ? renderButtons() : null}
-          </div>
+          <div className={styles.barSection}>{renderSectionButtons()}</div>
           <hr />
           <div className={styles.barSection}>
             {renderLogout()}
-            <div className={styles.leftSideBarElementWrapper}>
-              <a
-                onClick={e => {
-                  e.preventDefault();
-                  breadCrumbContext.setMenuState();
-                }}
-                className={styles.leftSideBarElementAnimation}
-                title={
-                  breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined
-                }>
-                {breadCrumbContext.isLeftSideBarOpened ? (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleLeft')} className={styles.arrowToggleBtn} />
-                ) : (
-                  <FontAwesomeIcon icon={AwesomeIcons('angleDoubleRight')} className={styles.arrowToggleBtn} />
-                )}
-              </a>
-            </div>
+            <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
           </div>
           <NotificationsList
             isNotificationVisible={isNotificationVisible}
