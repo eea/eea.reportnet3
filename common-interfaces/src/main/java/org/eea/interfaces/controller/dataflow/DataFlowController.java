@@ -133,9 +133,10 @@ public interface DataFlowController {
    * Update data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
   /**
    * Gets the metabase by id.
