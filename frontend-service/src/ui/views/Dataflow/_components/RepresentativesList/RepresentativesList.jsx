@@ -105,11 +105,14 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
       option => option.dataProviderId === representative.dataProviderId
     );
 
+    let hasError = formState.representativeHasError.includes(representative.representativeId);
+
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
 
     return (
       <>
         <select
+          disabled={hasError}
           className="p-dropdown-items p-dropdown-list p-component"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
