@@ -78,6 +78,13 @@ export const reducer = (state, { type, payload }) => {
         representativeIdToDelete: ''
       };
 
+    case 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG':
+      return {
+        ...state,
+
+        refresher: !state.refresher
+      };
+
     case 'INITIAL_LOAD':
       const group = state.dataProvidersTypesList.filter(
         dataProviderType => dataProviderType.dataProviderGroupId === payload.response.group.dataProviderGroupId

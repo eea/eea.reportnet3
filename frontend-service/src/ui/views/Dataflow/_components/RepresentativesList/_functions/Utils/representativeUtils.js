@@ -7,7 +7,13 @@ export const autofocusOnEmptyInput = formState => {
       isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
       !isNull(document.getElementById('emptyInput'))
     ) {
-      document.getElementById('emptyInput').focus();
+      const activeElement = document.activeElement;
+
+      if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT') {
+        return;
+      } else {
+        document.getElementById('emptyInput').focus();
+      }
     }
   }
 };
@@ -122,6 +128,12 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   if (event.key === 'Enter') {
     onAddProvider(formDispatcher, formState, representative, dataflowId);
   }
+};
+
+export const onCloseManageRolesDialog = async formDispatcher => {
+  formDispatcher({
+    type: 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG'
+  });
 };
 
 const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
