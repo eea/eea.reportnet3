@@ -57,7 +57,11 @@ import {
   faAngleDoubleLeft,
   faSortAlphaDown,
   faSortAlphaUp,
-  faSortAlphaUpAlt
+  faSortAlphaUpAlt,
+  faPowerOff,
+  faCog,
+  faPen,
+  faUsersCog
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -279,6 +283,14 @@ export const AwesomeIcons = icon => {
       return faAngleDoubleLeft;
     case 'angleDoubleRight':
       return faAngleDoubleRight;
+    case 'logout':
+      return faPowerOff;
+    case 'settings':
+      return faCog;
+    case 'edit':
+      return faPen;
+    case 'manageRoles':
+      return faUsersCog;
     default:
       return faFileAlt;
   }
