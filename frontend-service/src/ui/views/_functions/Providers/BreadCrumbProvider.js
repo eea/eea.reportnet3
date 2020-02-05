@@ -1,9 +1,4 @@
-import React, { useReducer, useContext } from 'react';
-
-import { config } from 'conf';
-import { routes } from 'ui/routes';
-
-import { camelCase } from 'lodash';
+import React, { useReducer } from 'react';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext.js';
 

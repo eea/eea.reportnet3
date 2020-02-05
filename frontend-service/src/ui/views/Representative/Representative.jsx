@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Representative.module.scss';
 
 import colors from 'conf/colors.json';
 import { config } from 'conf';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
@@ -19,7 +17,6 @@ import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementF
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
@@ -111,7 +108,7 @@ const Representative = withRouter(({ history, match }) => {
     ]);
   }, []);
   useEffect(() => {
-    if (isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']) {
+    if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
         {
           label: 'edit',
@@ -119,23 +116,26 @@ const Representative = withRouter(({ history, match }) => {
           onClick: e => {
             onShowEditForm();
             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-          }
+          },
+          title: 'edit'
         },
         {
           label: 'manageRoles',
           icon: 'manageRoles',
-          show: hasWritePermissions,
           onClick: () => {
             onShowContributorsDialog();
-          }
+          },
+          show: hasWritePermissions,
+          title: 'manageRoles'
         },
         {
           label: 'settings',
           icon: 'settings',
-          show: true,
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          show: true,
+          title: 'settings'
         }
       ]);
     } else {
@@ -145,7 +145,8 @@ const Representative = withRouter(({ history, match }) => {
           icon: 'settings',
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          title: 'settings'
         }
       ]);
     }
@@ -363,7 +364,7 @@ const Representative = withRouter(({ history, match }) => {
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === config.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"

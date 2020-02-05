@@ -1,15 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { withRouter, Link } from 'react-router-dom';
-
-import { isUndefined } from 'lodash';
+import { withRouter } from 'react-router-dom';
 
 import styles from './LeftSideBar.module.scss';
 
-import { routes } from 'ui/routes';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Icon } from 'ui/views/_components/Icon';
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 import { NotificationsList } from './_components/NotificationsList';
 
@@ -21,12 +14,10 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
-const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
+const LeftSideBar = withRouter(() => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const notificationContext = useContext(NotificationContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -38,7 +29,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
       onClick: async e => {
         e.preventDefault();
       },
-      title: breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['userSettings'] : undefined,
+      title: 'userSettings',
       icon: 'user-profile',
       label: 'userSettings'
     };
@@ -52,33 +43,12 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
         e.preventDefault();
         if (notificationContext.all.length > 0) setIsNotificationVisible(true);
       },
-      title: breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['userSettings'] : undefined,
+      title: 'userSettings',
       icon: 'notifications',
       label: 'notifications'
     };
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
-  const renderButtons = () => leftSideBarContext.models.map(model => <LeftSideBarButton {...model} />);
-  // leftSideBarConfig.buttons.map(button =>
-  //   !button.isLink ? (
-  //     <a href="#" title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
-  //       <div
-  //         className={styles.leftSideBarElementWrapper}
-  //         onClick={!isUndefined(button.onClick) ? () => button.onClick() : null}>
-  //         <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
-  //         <span className={styles.leftSideBarText}>{button.label}</span>
-  //       </div>
-  //     </a>
-  //   ) : (
-  //     <Link
-  //       to={getUrl(routes[button.linkTo.route], button.linkTo.children, button.linkTo.isRoute)}
-  //       title={breadCrumbContext.isLeftSideBarOpened === false ? button.label : undefined}>
-  //       <div className={styles.leftSideBarElementWrapper}>
-  //         <Icon icon={button.icon} className={styles.leftSideBarElementAnimation} />
-  //         <span className={styles.leftSideBarText}>{button.label}</span>
-  //       </div>
-  //     </Link>
-  //   )
 
   const renderSectionButtons = () => {
     return leftSideBarContext.models.map(model => <LeftSideBarButton {...model} />);
@@ -99,7 +69,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
           userContext.onLogout();
         }
       },
-      title: breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['logout'] : undefined,
+      title: 'logout',
       icon: 'logout',
       label: 'logout'
     };
@@ -112,7 +82,7 @@ const LeftSideBar = withRouter(({ leftSideBarConfig, onToggleSideBar }) => {
         e.preventDefault();
         breadCrumbContext.setMenuState();
       },
-      title: breadCrumbContext.isLeftSideBarOpened === false ? resources.messages['expandSidebar'] : undefined,
+      title: 'expandSidebar',
       icon: breadCrumbContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
       label: ''
     };
