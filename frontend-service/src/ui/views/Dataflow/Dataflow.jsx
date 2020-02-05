@@ -145,7 +145,7 @@ const Dataflow = withRouter(({ history, match }) => {
             icon: 'users',
             show: hasWritePermissions,
             command: () => {
-              onShowContributorsDialog();
+              onShowManageRolesDialog();
             }
           },
           {
@@ -307,9 +307,22 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataflowDialogVisible(true);
   };
 
-  const onShowContributorsDialog = () => {
+  const onShowManageRolesDialog = () => {
     setIsActiveManageRolesDialog(true);
   };
+
+  const onHideManageRolesDialog = () => {
+    setIsActiveManageRolesDialog(false);
+  };
+
+  const closeBtnManageRolesDialog = (
+    <Button
+      className="p-button-primary"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onHideManageRolesDialog()}
+    />
+  );
 
   const onShowReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToProps(datasetId);
@@ -320,15 +333,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
   };
-
-  const closeManageRolesDialog = (
-    <Button
-      className="p-button-primary"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsActiveManageRolesDialog(false)}
-    />
-  );
 
   const releseModalFooter = (
     <>
@@ -407,9 +411,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <Dialog
           header={resources.messages['manageRolesDialogTitle']}
-          footer={closeManageRolesDialog}
+          footer={closeBtnManageRolesDialog}
           visible={isActiveManageRolesDialog}
-          onHide={() => setIsActiveManageRolesDialog(false)}
+          onHide={() => onHideManageRolesDialog()}
           contentStyle={{ maxHeight: '60vh' }}>
           <div className={styles.dialog}>
             <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
