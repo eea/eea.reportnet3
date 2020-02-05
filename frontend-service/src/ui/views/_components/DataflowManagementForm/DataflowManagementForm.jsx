@@ -18,19 +18,20 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const DataflowManagementForm = ({
   dataflowId,
   dataflowValues,
+  hasErrors,
   isDialogVisible,
   isEditForm,
   isFormReset,
+  isNameDuplicated,
   onCreate,
   onCancel,
   onEdit,
-  selectedDataflow
+  selectedDataflow,
+  setHasErrors,
+  setIsNameDuplicated
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
-  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
-  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef();
@@ -41,22 +42,11 @@ const DataflowManagementForm = ({
         inputRef.current.focus();
       }
     }
-  }, [isDialogVisible, dataflowHasErrors]);
+  }, [isDialogVisible, hasErrors]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: isEditForm
-      ? Yup.string()
-          .required(' ')
-          .test('isEditFormDuplicated', resources.messages['duplicatedDataflow'], value => {
-            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
-              const repeatedResults = Object.keys(dataflowValues)
-                .filter(key => dataflowValues[key].id != dataflowId)
-                .map(key => dataflowValues[key].name)
-                .filter(item => typeof item === 'string')
-                .some(item => item.toLowerCase() === value.toLowerCase());
-              return !repeatedResults;
-            }
-          })
+      ? Yup.string().required(' ')
       : Yup.string()
           .required(' ')
           .test('isNewFormDuplicated', resources.messages['duplicatedDataflow'], value => {
@@ -100,8 +90,11 @@ const DataflowManagementForm = ({
             onCreate();
           }
         } catch (error) {
-          setDataflowHasErrors(true);
-          if (error.response.data.message == DataflowConf.errorTypes['dataflowExists']) {
+          setHasErrors(true);
+          if (
+            error.response.data == DataflowConf.errorTypes['dataflowExists'] ||
+            error.response.data.message == DataflowConf.errorTypes['dataflowExists']
+          ) {
             setIsNameDuplicated(true);
             notificationContext.add({
               type: 'DATAFLOW_NAME_EXISTS'
@@ -138,7 +131,7 @@ const DataflowManagementForm = ({
                 onChange={event => {
                   handleChange(event);
                   setIsNameDuplicated(false);
-                  setDataflowHasErrors(false);
+                  setHasErrors(false);
                 }}
                 type="text"
                 value={values.name}

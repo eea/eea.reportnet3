@@ -30,10 +30,12 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const [acceptedContent, setacceptedContent] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -99,6 +101,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsFormReset(false);
+    setDataflowHasErrors(false);
+    setIsNameDuplicated(false);
   };
 
   const onRefreshToken = async () => {
@@ -114,6 +118,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const onShowAddForm = () => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
+    setIsFormReset(true);
     dataflowDispatch({
       type: 'ON_RESET_DATAFLOW_DATA'
     });
@@ -194,10 +199,14 @@ const Dataflows = withRouter(({ match, history }) => {
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowManagementForm
+          hasErrors={dataflowHasErrors}
           isDialogVisible={isDataflowDialogVisible}
           isFormReset={isFormReset}
+          isNameDuplicated={isNameDuplicated}
           onCancel={onHideDialog}
           onCreate={onCreateDataflow}
+          setHasErrors={setDataflowHasErrors}
+          setIsNameDuplicated={setIsNameDuplicated}
         />
       </Dialog>
     </div>
