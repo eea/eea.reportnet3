@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(FileBasedSecurityConfiguration.class)
+@Import({FileBasedSecurityConfiguration.class, CacheClientSecurityConfiguration.class})
 public @interface EeaEnableSecurity {
 
 

@@ -2171,7 +2171,7 @@ body .p-datatable .p-datatable-thead > tr > th {
   border: 1px solid #c8c8c8;
   font-weight: 700;
   color: #404040;
-  background-color: #f4f4f4;
+  /* background-color: #f4f4f4; */
   text-align: center;
 }
 body .p-datatable .p-datatable-tfoot > tr > td {
