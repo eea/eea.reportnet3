@@ -286,35 +286,44 @@ public class DataFlowControllerImpl implements DataFlowController {
     return new ResponseEntity<>(message, status);
   }
 
+
   /**
    * Update data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
-  public void updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  public ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
+
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+
     if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
         || dataFlowVO.getDeadlineDate().equals(dateToday))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATE_AFTER_INCORRECT);
+      message = EEAErrorMessage.DATE_AFTER_INCORRECT;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     if (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     try {
       dataflowService.updateDataFlow(dataFlowVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed");
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Update dataflow failed. ", e.getCause());
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
   /**
