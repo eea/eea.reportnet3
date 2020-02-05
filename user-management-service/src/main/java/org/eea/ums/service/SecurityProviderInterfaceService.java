@@ -116,9 +116,9 @@ public interface SecurityProviderInterfaceService {
   /**
    * Do logout.
    *
-   * @param refreshToken the refresh token
+   * @param authToken the auth token
    */
-  void doLogout(String refreshToken);
+  void doLogout(String authToken);
 
 
   /**
@@ -146,6 +146,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userMail the user mail
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   void addContributorToUserGroup(String userMail, String groupName) throws EEAException;
@@ -156,4 +157,6 @@ public interface SecurityProviderInterfaceService {
    * @param resourceInfoVOs the resource info V os
    */
   void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs);
+
+
 }

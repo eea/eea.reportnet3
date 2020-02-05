@@ -26,6 +26,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -50,10 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -351,25 +354,20 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
     List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
+
     datasetIdsEmail.forEach((Long id, String email) -> {
 
       ResourceAssignationVO resourceDP =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
       resourcesProviders.add(resourceDP);
 
-      ResourceAssignationVO resourceDFP =
-          fillResourceAssignation(dataflowId, email, ResourceGroupEnum.DATAFLOW_PROVIDER);
-      resourcesProviders.add(resourceDFP);
-
       ResourceAssignationVO resourceDC =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
       resourcesCustodian.add(resourceDC);
 
-
     });
+
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
-    List<Long> ids = new ArrayList<>();
-    ids.addAll(datasetIds);
     userManagementControllerZuul.addUserToResources(resourcesCustodian);
   }
 
@@ -455,56 +453,67 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
 
+
     if (datasetType != null && dataflowId != null) {
-      DataSetMetabase dataset;
-      Map<Long, String> datasetIdsEmail = new HashMap<>();
-      Long idDesignDataset = 0L;
-      switch (datasetType) {
-        case REPORTING:
-          for (RepresentativeVO representative : representatives) {
+      try {
+        DataSetMetabase dataset;
+        Map<Long, String> datasetIdsEmail = new HashMap<>();
+        Long idDesignDataset = 0L;
+        switch (datasetType) {
+          case REPORTING:
+            for (RepresentativeVO representative : representatives) {
+              datasetIdsEmail
+                  .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
+            }
+            this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
+            if (iterationDC == 0) {
+              // Notification
+              kafkaSenderUtils.releaseNotificableKafkaEvent(
+                  EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+                  NotificationVO.builder()
+                      .user((String) ThreadPropertiesManager.getVariable("user"))
+                      .dataflowId(dataflowId).build());
 
-            datasetIdsEmail
-                .putAll(fillReportingDataset(representative, dataflowId, datasetSchemaId));
+            }
+            break;
+          case DESIGN:
+            dataset = new DesignDataset();
+            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+            designDatasetRepository.save((DesignDataset) dataset);
+            recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
+                datasetSchemaId);
+            this.createSchemaGroupAndAddUser(dataset.getId());
+            idDesignDataset = dataset.getId();
+            break;
+          case COLLECTION:
+            dataset = new DataCollection();
+            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+            ((DataCollection) dataset).setDueDate(dueDate);
+            dataCollectionRepository.save((DataCollection) dataset);
+            recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
+                datasetSchemaId);
+            LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
+                dataflowId, dataset.getId(), datasetName);
+            this.createGroupDcAndAddUser(dataset.getId());
+            break;
+          default:
+            throw new EEAException("Unsupported datasetType: " + datasetType);
+        }
 
-          }
-          this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
-          if (iterationDC == 0) {
-            // Notification
-            kafkaSenderUtils
-                .releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
-                    NotificationVO.builder()
-                        .user((String) ThreadPropertiesManager.getVariable("user"))
-                        .dataflowId(dataflowId).build());
+        return new AsyncResult<>(idDesignDataset);
 
-          }
-          break;
-        case DESIGN:
-          dataset = new DesignDataset();
-          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-          designDatasetRepository.save((DesignDataset) dataset);
-          recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
-              datasetSchemaId);
-          this.createSchemaGroupAndAddUser(dataset.getId());
-          idDesignDataset = dataset.getId();
-          break;
-        case COLLECTION:
-          dataset = new DataCollection();
-          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-          ((DataCollection) dataset).setDueDate(dueDate);
-          dataCollectionRepository.save((DataCollection) dataset);
-          recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
-              datasetSchemaId);
-          LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
-              dataflowId, dataset.getId(), datasetName);
-          this.createGroupDcAndAddUser(dataset.getId());
-          break;
-        default:
-          throw new EEAException("Unsupported datasetType: " + datasetType);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+            e.getMessage(), e);
+        // Error notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
+            null,
+            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                .dataflowId(dataflowId).error(e.getMessage()).build());
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            EEAErrorMessage.EXECUTION_ERROR);
       }
-
-      return new AsyncResult<>(idDesignDataset);
     }
-
     throw new EEAException("createEmptyDataset: Bad arguments");
 
   }
@@ -530,16 +539,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+
   /**
-   * Fill reporting dataset.
+   * Fill and save reporting dataset.
    *
    * @param representative the representative
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
    * @return the map
    */
-  private Map<Long, String> fillReportingDataset(RepresentativeVO representative, Long dataflowId,
-      String datasetSchemaId) {
+  private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
+      Long dataflowId, String datasetSchemaId) {
 
     ReportingDataset dataset = new ReportingDataset();
     Map<Long, String> datasetIdsEmail = new HashMap<>();
@@ -548,14 +558,15 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
-    reportingDatasetRepository.save(dataset);
-    datasetIdsEmail.put(dataset.getId(), representative.getProviderAccount());
-    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+    Long idDataset = reportingDatasetRepository.save(dataset).getId();
+    datasetIdsEmail.put(idDataset, representative.getProviderAccount());
+    recordStoreControllerZull.createEmptyDataset("dataset_" + idDataset, datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
-        dataset.getId(), provider.getLabel());
+        idDataset, provider.getLabel());
 
     return datasetIdsEmail;
   }
+
 
 
 }
