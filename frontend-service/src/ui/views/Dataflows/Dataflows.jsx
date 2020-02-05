@@ -28,16 +28,18 @@ import { routes } from 'ui/routes';
 
 const Dataflows = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const leftSliderBarContext = useContext(LeftSideBarContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [acceptedContent, setacceptedContent] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -96,24 +98,26 @@ const Dataflows = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (isCustodian) {
-      leftSliderBarContext.addModels([
+      leftSideBarContext.addModels([
         {
-          onClick: () => onShowAddForm(),
           icon: 'plus',
-          label: 'createNewDataflow'
+          label: 'createNewDataflow',
+          onClick: () => onShowAddForm(),
+          title: 'createNewDataflow'
         },
         {
+          href: getUrl(routes['CODELISTS']),
+          icon: 'settings',
+          label: 'manageCodelists',
           onClick: e => {
             e.preventDefault();
             history.push(getUrl(routes['CODELISTS']));
           },
-          icon: 'settings',
-          label: 'manageCodelists',
-          href: getUrl(routes['CODELISTS'])
+          title: 'manageCodelists'
         }
       ]);
     } else {
-      leftSliderBarContext.removeModels();
+      leftSideBarContext.removeModels();
     }
   }, [isCustodian]);
 
@@ -126,6 +130,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsFormReset(false);
+    setDataflowHasErrors(false);
+    setIsNameDuplicated(false);
   };
 
   const onRefreshToken = async () => {
@@ -141,6 +147,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const onShowAddForm = () => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
+    setIsFormReset(true);
     dataflowDispatch({
       type: 'ON_RESET_DATAFLOW_DATA'
     });
@@ -203,10 +210,14 @@ const Dataflows = withRouter(({ match, history }) => {
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowManagementForm
+          hasErrors={dataflowHasErrors}
           isDialogVisible={isDataflowDialogVisible}
           isFormReset={isFormReset}
-          onCreate={onCreateDataflow}
+          isNameDuplicated={isNameDuplicated}
           onCancel={onHideDialog}
+          onCreate={onCreateDataflow}
+          setHasErrors={setDataflowHasErrors}
+          setIsNameDuplicated={setIsNameDuplicated}
         />
       </Dialog>
     </div>

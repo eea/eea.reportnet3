@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { isEmpty, isUndefined, uniq } from 'lodash';
 
-import { config } from 'conf';
+import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -49,7 +49,7 @@ const useBigButtonList = ({
           disabled: true
         }
       ],
-      visibility: isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
+      visibility: isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']
     },
     {
       layout: 'defaultBigButton',
@@ -129,7 +129,7 @@ const useBigButtonList = ({
       {
         label: resources.messages['rename'],
         icon: 'pencil',
-        disabled: dataflowStatus !== config.dataflowStatus['DESIGN']
+        disabled: dataflowStatus !== DataflowConf.dataflowStatus['DESIGN']
       },
       {
         label: resources.messages['duplicate'],
@@ -139,7 +139,7 @@ const useBigButtonList = ({
       {
         label: resources.messages['delete'],
         icon: 'trash',
-        disabled: dataflowStatus !== config.dataflowStatus['DESIGN'],
+        disabled: dataflowStatus !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       },
       {

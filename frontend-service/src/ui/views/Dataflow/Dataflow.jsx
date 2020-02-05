@@ -8,6 +8,7 @@ import styles from './Dataflow.module.scss';
 
 import colors from 'conf/colors.json';
 import { config } from 'conf';
+import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
@@ -48,6 +49,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [dataflowData, setDataflowData] = useState();
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
@@ -64,6 +66,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
@@ -112,7 +115,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']) {
+    if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
         {
           label: 'edit',
@@ -120,23 +123,25 @@ const Dataflow = withRouter(({ history, match }) => {
           onClick: e => {
             onShowEditForm();
             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-          }
+          },
+          title: 'edit'
         },
         {
           label: 'manageRoles',
           icon: 'manageRoles',
-          show: hasWritePermissions,
           onClick: () => {
             onShowManageRolesDialog();
-          }
+          },
+          title: 'manageRoles'
         },
         {
           label: 'settings',
           icon: 'settings',
-          show: true,
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          show: true,
+          title: 'settings'
         }
       ]);
     } else {
@@ -146,7 +151,8 @@ const Dataflow = withRouter(({ history, match }) => {
           icon: 'settings',
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          title: 'settings'
         }
       ]);
     }
@@ -220,6 +226,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsDataflowFormReset(false);
+    setDataflowHasErrors(false);
+    setIsNameDuplicated(false);
   };
 
   const onLoadDataflowsData = async () => {
@@ -305,6 +313,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onShowEditForm = () => {
     setIsEditForm(true);
     setIsDataflowDialogVisible(true);
+    setIsDataflowFormReset(true);
   };
 
   const onShowManageRolesDialog = () => {
@@ -446,7 +455,7 @@ const Dataflow = withRouter(({ history, match }) => {
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === config.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
@@ -521,12 +530,16 @@ const Dataflow = withRouter(({ history, match }) => {
           <DataflowManagementForm
             dataflowId={match.params.dataflowId}
             dataflowValues={dataflowState}
+            hasErrors={dataflowHasErrors}
             isDialogVisible={isDataflowDialogVisible}
             isEditForm={isEditForm}
             isFormReset={isDataflowFormReset}
+            isNameDuplicated={isNameDuplicated}
             onCancel={onHideDialog}
             onEdit={onEditDataflow}
             selectedDataflow={dataflowState.selectedDataflow}
+            setHasErrors={setDataflowHasErrors}
+            setIsNameDuplicated={setIsNameDuplicated}
           />
         </Dialog>
 
