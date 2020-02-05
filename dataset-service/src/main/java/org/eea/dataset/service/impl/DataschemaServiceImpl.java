@@ -753,6 +753,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
+          if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
+              && fieldSchema.containsKey("idCodeList")) {
+            fieldSchema.remove("idCodeList");
+          }
         }
         if (fieldSchemaVO.getDescription() != null) {
           fieldSchema.put("description", fieldSchemaVO.getDescription());
