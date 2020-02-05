@@ -4,11 +4,15 @@ package org.eea.security.jwt.utils;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import org.eea.security.jwt.data.TokenDataVO;
 import org.eea.utils.TestUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,16 +56,19 @@ public class JwtAuthenticationFilterTest {
     String token = TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, "user1");
     Mockito.when(request.getHeader("Authorization")).thenReturn(
         "Bearer " + token);
-    AccessToken jwt = new AccessToken();
+    TokenDataVO jwt = new TokenDataVO();
 
     jwt.setPreferredUsername("user1");
     List<String> userGroups = new ArrayList<>();
     userGroups.add("DATAFLOW_1_DATA_PROVIDER");
-    jwt.setOtherClaims("user_groups", userGroups);
-    jwt.setSubject("userId_123");
-    Access realmAccess = new Access();
-    realmAccess.addRole("DATA_PROVIDER");
-    jwt.setRealmAccess(realmAccess);
+    Map<String, Object> otherClaims = new HashMap<>();
+    otherClaims.put("user_groups", userGroups);
+    jwt.setOtherClaims(otherClaims);
+    jwt.setUserId("userId_123");
+
+    Set<String> roles = new HashSet<>();
+    roles.add("DATA_PROVIDER");
+    jwt.setRoles(roles);
     Mockito.when(tokenProvider.retrieveToken(Mockito.anyString())).thenReturn(jwt);
     jwtAuthenticationFilter.doFilterInternal(request, null, filterChain);
     UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) SecurityContextHolder

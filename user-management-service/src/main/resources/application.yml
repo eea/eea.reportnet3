@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: ums
+  redis:
+    jedis:
+      pool:
+        max-active: 8
+
 
 eea:
   security:

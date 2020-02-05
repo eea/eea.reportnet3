@@ -132,6 +132,9 @@ public class DatasetMetabaseServiceTest {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(1L);
+    Mockito.when(reportingDatasetRepository.save(Mockito.any())).thenReturn(reporting);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
     representative.setProviderAccount("test@reportnet.net");

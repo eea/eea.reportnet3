@@ -184,4 +184,5 @@ public interface UserManagementController {
   @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
   void addUserToResources(@RequestBody List<ResourceAssignationVO> resources);
 
+
 }
