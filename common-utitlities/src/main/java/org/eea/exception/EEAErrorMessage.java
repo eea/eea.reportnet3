@@ -107,6 +107,9 @@ public final class EEAErrorMessage {
   /** The Constant WRONG_DATASET_SCHEMA. */
   public static final String INVALID_OBJECTID = "A given ObjectId is not valid";
 
+  /** The Constant FIELD_NAME_NULL. */
+  public static final String FIELD_NAME_NULL = "The name of fieldSchema should be filled";
+
   /** The Constant FORBIDDEN. */
   public static final String FORBIDDEN = "The user has no permissions";
 
