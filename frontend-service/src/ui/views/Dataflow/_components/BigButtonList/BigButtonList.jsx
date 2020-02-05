@@ -43,7 +43,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(new Date());
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
