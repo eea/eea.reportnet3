@@ -3,6 +3,10 @@ package org.eea.security.jwt.utils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.eea.security.jwt.data.CacheTokenVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -19,13 +23,17 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_TOKEN_TYPE = "Bearer";
 
+  @Autowired
+  @Qualifier("securityRedisTemplate")
+  private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
+
   @Override
   public void apply(RequestTemplate template) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
 
     if (authentication != null && authentication instanceof UsernamePasswordAuthenticationToken) {
-      log.debug("Securing invocation to {}",template.url());
+      log.debug("Securing invocation to {}", template.url());
       template.header(AUTHORIZATION_HEADER,
           String.format("%s %s", BEARER_TOKEN_TYPE,
               authentication.getCredentials()));
