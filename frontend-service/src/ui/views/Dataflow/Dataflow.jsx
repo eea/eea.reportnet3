@@ -50,6 +50,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [dataflowData, setDataflowData] = useState();
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
@@ -66,6 +67,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
@@ -221,6 +223,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsDataflowFormReset(false);
+    setDataflowHasErrors(false);
+    setIsNameDuplicated(false);
   };
 
   const onLoadDataflowsData = async () => {
@@ -306,6 +310,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onShowEditForm = () => {
     setIsEditForm(true);
     setIsDataflowDialogVisible(true);
+    setIsDataflowFormReset(true);
   };
 
   const onShowContributorsDialog = () => {
@@ -518,12 +523,16 @@ const Dataflow = withRouter(({ history, match }) => {
           <DataflowManagementForm
             dataflowId={match.params.dataflowId}
             dataflowValues={dataflowState}
+            hasErrors={dataflowHasErrors}
             isDialogVisible={isDataflowDialogVisible}
             isEditForm={isEditForm}
             isFormReset={isDataflowFormReset}
+            isNameDuplicated={isNameDuplicated}
             onCancel={onHideDialog}
             onEdit={onEditDataflow}
             selectedDataflow={dataflowState.selectedDataflow}
+            setHasErrors={setDataflowHasErrors}
+            setIsNameDuplicated={setIsNameDuplicated}
           />
         </Dialog>
 
