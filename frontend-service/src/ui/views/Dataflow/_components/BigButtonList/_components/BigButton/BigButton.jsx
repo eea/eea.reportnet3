@@ -5,7 +5,6 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 
-import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import DataflowConf from 'conf/dataflow.config.json';
 
