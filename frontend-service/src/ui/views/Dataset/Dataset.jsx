@@ -98,6 +98,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
+      console.info('dataset.Metadata: %o', metaData);
       breadCrumbContext.add([
         {
           label: resources.messages['dataflowList'],
@@ -485,8 +486,8 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetName;
+    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
+    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
   };
 
   const showWebFormInputSwitch = () => {
@@ -559,7 +560,7 @@ export const Dataset = withRouter(({ match, history }) => {
       }}>
       <Title
         title={`${datasetTitle()}`}
-        subtitle={`${dataflowName} - ${datasetSchemaName}`}
+        subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
       />
