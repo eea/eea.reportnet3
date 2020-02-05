@@ -34,6 +34,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -48,6 +49,7 @@ export const Dataset = withRouter(({ match, history }) => {
   } = match;
 
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -96,7 +98,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
-      breadCrumbContext.add([
+      console.info('dataset.Metadata: %o', metaData);
+      const breadCrums = [
         {
           label: resources.messages['dataflowList'],
           icon: 'home',
@@ -123,8 +126,10 @@ export const Dataset = withRouter(({ match, history }) => {
                 true
               )
             )
-        },
-        {
+        }
+      ];
+      if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
+        breadCrums.push({
           label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
           icon: 'representative',
           href: getUrl(
@@ -134,21 +139,12 @@ export const Dataset = withRouter(({ match, history }) => {
               representative: metaData.dataset.name
             },
             true
-          ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.REPRESENTATIVE,
-                {
-                  dataflowId,
-                  representative: metaData.dataset.name
-                },
-                true
-              )
-            )
-        },
-        { label: resources.messages['dataset'], icon: 'dataset' }
-      ]);
+          )
+        });
+      }
+      breadCrums.push({ label: resources.messages['dataset'], icon: 'dataset' });
+      breadCrumbContext.add(breadCrums);
+      leftSideBarContext.removeModels();
     }
   }, [metaData]);
 
@@ -482,8 +478,8 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetName;
+    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
+    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
   };
 
   const showWebFormInputSwitch = () => {
@@ -556,7 +552,7 @@ export const Dataset = withRouter(({ match, history }) => {
       }}>
       <Title
         title={`${datasetTitle()}`}
-        subtitle={`${dataflowName} - ${datasetSchemaName}`}
+        subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
       />

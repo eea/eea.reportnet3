@@ -24,7 +24,9 @@ const useBigButtonList = ({
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  updatedDatasetSchema
+  updatedDatasetSchema,
+  hasWritePermissions,
+  showReleaseSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -155,6 +157,56 @@ const useBigButtonList = ({
       return dataset.datasetSchemaName;
     });
     const uniqRepresentatives = uniq(representatives);
+    if (uniqRepresentatives.length === 1) {
+      const [representative] = uniqRepresentatives;
+      return datasets.map(dataset => {
+        const datasetName = isCustodian ? representative : dataset.name;
+        return {
+          layout: 'defaultBigButton',
+          buttonClass: 'dataset',
+          buttonIcon: 'dataset',
+          caption: datasetName,
+          isReleased: dataset.isReleased,
+          handleRedirect: () => {
+            handleRedirect(
+              getUrl(
+                routes.DATASET,
+                {
+                  dataflowId: dataflowId,
+                  datasetId: dataset.datasetId
+                },
+                true
+              )
+            );
+          },
+          onWheel: getUrl(
+            routes.DATASET,
+            {
+              dataflowId: dataflowId,
+              datasetId: dataset.datasetId
+            },
+            true
+          ),
+          model: hasWritePermissions
+            ? [
+                {
+                  label: resources.messages['releaseDataCollection'],
+                  icon: 'cloudUpload',
+                  command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                  disabled: false
+                }
+              ]
+            : [
+                {
+                  label: resources.messages['properties'],
+                  icon: 'info',
+                  disabled: true
+                }
+              ],
+          visibility: !isEmpty(dataflowData.datasets)
+        };
+      });
+    }
     return uniqRepresentatives.map(representative => ({
       layout: 'defaultBigButton',
       buttonClass: 'dataset',
@@ -183,6 +235,7 @@ const useBigButtonList = ({
       visibility: !isEmpty(dataflowData.datasets)
     }));
   };
+
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
 
   const dashboardModels = [
@@ -268,10 +321,10 @@ const useBigButtonList = ({
   return [
     ...buttonList,
     ...designDatasetModels,
-    ...dataCollectionModels,
-    ...dashboardModels,
     ...groupByRepresentativeModels,
-    ...createDataCollection
+    ...createDataCollection,
+    ...dataCollectionModels,
+    ...dashboardModels
   ];
 };
 
