@@ -86,6 +86,15 @@ const Dataflows = withRouter(({ match, history }) => {
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
+  }, []);
+
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (isCustodian) {
       leftSliderBarContext.addModels([
         {
@@ -106,13 +115,7 @@ const Dataflows = withRouter(({ match, history }) => {
     } else {
       leftSliderBarContext.removeModels();
     }
-  }, []);
-
-  useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
-    }
-  }, [user]);
+  }, [isCustodian]);
 
   const onCreateDataflow = () => {
     setIsDataflowDialogVisible(false);
