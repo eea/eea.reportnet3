@@ -91,10 +91,7 @@ const DataflowManagementForm = ({
           }
         } catch (error) {
           setHasErrors(true);
-          if (
-            error.response.data == DataflowConf.errorTypes['dataflowExists'] ||
-            error.response.data.message == DataflowConf.errorTypes['dataflowExists']
-          ) {
+          if (error.response.data == DataflowConf.errorTypes['dataflowExists']) {
             setIsNameDuplicated(true);
             notificationContext.add({
               type: 'DATAFLOW_NAME_EXISTS'
