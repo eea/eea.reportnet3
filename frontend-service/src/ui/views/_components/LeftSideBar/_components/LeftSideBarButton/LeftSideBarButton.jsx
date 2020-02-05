@@ -5,12 +5,15 @@ import styles from './LeftSideBarButton.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const LeftSideBarButton = ({ buttonType = 'default', href, onClick, title, icon, label }) => {
+  const breadCrumbContext = useContext(BreadCrumbContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
   const defaultLayout = (
     <>
       <FontAwesomeIcon
@@ -33,7 +36,10 @@ const LeftSideBarButton = ({ buttonType = 'default', href, onClick, title, icon,
   const buttonsLayouts = { defaultLayout, notificationsLayout };
 
   return (
-    <a href={href} onClick={onClick} title={title}>
+    <a
+      href={href}
+      onClick={onClick}
+      title={!breadCrumbContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
     </a>
   );

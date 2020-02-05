@@ -96,7 +96,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
-    leftSideBarContext.addModels([]);
+    leftSideBarContext.removeModels();
   }, []);
 
   useEffect(() => {

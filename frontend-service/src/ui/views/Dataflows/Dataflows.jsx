@@ -28,7 +28,7 @@ import { routes } from 'ui/routes';
 
 const Dataflows = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const leftSliderBarContext = useContext(LeftSideBarContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -98,24 +98,26 @@ const Dataflows = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (isCustodian) {
-      leftSliderBarContext.addModels([
+      leftSideBarContext.addModels([
         {
-          onClick: () => onShowAddForm(),
           icon: 'plus',
-          label: 'createNewDataflow'
+          label: 'createNewDataflow',
+          onClick: () => onShowAddForm(),
+          title: 'createNewDataflow'
         },
         {
+          href: getUrl(routes['CODELISTS']),
+          icon: 'settings',
+          label: 'manageCodelists',
           onClick: e => {
             e.preventDefault();
             history.push(getUrl(routes['CODELISTS']));
           },
-          icon: 'settings',
-          label: 'manageCodelists',
-          href: getUrl(routes['CODELISTS'])
+          title: 'manageCodelists'
         }
       ]);
     } else {
-      leftSliderBarContext.removeModels();
+      leftSideBarContext.removeModels();
     }
   }, [isCustodian]);
 

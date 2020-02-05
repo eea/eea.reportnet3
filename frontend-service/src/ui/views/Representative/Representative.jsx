@@ -116,23 +116,26 @@ const Representative = withRouter(({ history, match }) => {
           onClick: e => {
             onShowEditForm();
             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-          }
+          },
+          title: 'edit'
         },
         {
           label: 'manageRoles',
           icon: 'manageRoles',
-          show: hasWritePermissions,
           onClick: () => {
             onShowContributorsDialog();
-          }
+          },
+          show: hasWritePermissions,
+          title: 'manageRoles'
         },
         {
           label: 'settings',
           icon: 'settings',
-          show: true,
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          show: true,
+          title: 'settings'
         }
       ]);
     } else {
@@ -142,7 +145,8 @@ const Representative = withRouter(({ history, match }) => {
           icon: 'settings',
           onClick: e => {
             setIsActivePropertiesDialog(true);
-          }
+          },
+          title: 'settings'
         }
       ]);
     }
