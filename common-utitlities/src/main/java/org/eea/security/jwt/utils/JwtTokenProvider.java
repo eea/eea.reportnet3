@@ -2,6 +2,7 @@ package org.eea.security.jwt.utils;
 
 import static org.keycloak.TokenVerifier.IS_ACTIVE;
 import static org.keycloak.TokenVerifier.SUBJECT_EXISTS_CHECK;
+
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -73,13 +74,11 @@ public class JwtTokenProvider {
   public TokenDataVO retrieveToken(String authToken) throws VerificationException {
     String cachedToken = retrieveAccessToken(authToken);
 
-    TokenDataVO tokenDataVO = new TokenDataVO();
     if (StringUtils.hasText(cachedToken)) {
-      tokenDataVO = parseToken(cachedToken);
+      return parseToken(cachedToken);
     } else {
       throw new VerificationException("Error: Could not retrieve token from Cache");
     }
-    return tokenDataVO;
   }
 
   /**
