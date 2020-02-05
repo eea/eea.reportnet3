@@ -127,7 +127,7 @@ const Dataflow = withRouter(({ history, match }) => {
           icon: 'manageRoles',
           show: hasWritePermissions,
           onClick: () => {
-            onShowContributorsDialog();
+            onShowManageRolesDialog();
           }
         },
         {
@@ -307,9 +307,22 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataflowDialogVisible(true);
   };
 
-  const onShowContributorsDialog = () => {
+  const onShowManageRolesDialog = () => {
     setIsActiveManageRolesDialog(true);
   };
+
+  const onHideManageRolesDialog = () => {
+    setIsActiveManageRolesDialog(false);
+  };
+
+  const closeBtnManageRolesDialog = (
+    <Button
+      className="p-button-primary"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onHideManageRolesDialog()}
+    />
+  );
 
   const onShowReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToProps(datasetId);
@@ -321,16 +334,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated(!isDataUpdated);
   };
 
-  const closeManageRolesDialog = (
-    <Button
-      className="p-button-primary"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsActiveManageRolesDialog(false)}
-    />
-  );
-
-  const releseModalFooter = (
+  const releaseModalFooter = (
     <>
       <Button
         icon="cloudUpload"
@@ -403,12 +407,16 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <Dialog
           header={resources.messages['manageRolesDialogTitle']}
-          footer={closeManageRolesDialog}
+          footer={closeBtnManageRolesDialog}
           visible={isActiveManageRolesDialog}
-          onHide={() => setIsActiveManageRolesDialog(false)}
+          onHide={() => onHideManageRolesDialog()}
           contentStyle={{ maxHeight: '60vh' }}>
           <div className={styles.dialog}>
-            <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
+            <RepresentativesList
+              dataflowId={dataflowData.id}
+              setHasRepresentatives={setHasRepresentatives}
+              isActiveManageRolesDialog={isActiveManageRolesDialog}
+            />
           </div>
         </Dialog>
 
@@ -489,7 +497,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <Dialog
           header={`${resources.messages['releaseSnapshotMessage']}`}
-          footer={releseModalFooter}
+          footer={releaseModalFooter}
           visible={isActiveReleaseSnapshotConfirmDialog}
           onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
           <ul>
