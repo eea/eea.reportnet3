@@ -1,3 +1,5 @@
+import { isUndefined } from 'lodash';
+
 const sortCodelists = (data, order, property) => {
   if (order === 1) {
     return data.sort((a, b) => {
@@ -52,9 +54,9 @@ export const categoryReducer = (state, { type, payload }) => {
     case 'SET_CATEGORY_INPUTS':
       return {
         ...state,
-        categoryDescription: payload.description ? payload.description : state.categoryDescription,
-        categoryId: payload.id ? payload.id : state.categoryId,
-        categoryShortCode: payload.shortCode ? payload.shortCode : state.categoryShortCode
+        categoryDescription: !isUndefined(payload.description) ? payload.description : state.categoryDescription,
+        categoryId: !isUndefined(payload.id) ? payload.id : state.categoryId,
+        categoryShortCode: !isUndefined(payload.shortCode) ? payload.shortCode : state.categoryShortCode
       };
     case 'SET_CODELISTS_IN_CATEGORY':
       return { ...state, codelists: payload.data };

@@ -75,7 +75,7 @@ const Representative = withRouter(({ history, match }) => {
         UserService.hasPermission(
           user,
           [config.permissions.PROVIDER],
-          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
         )
       );
     }
@@ -84,7 +84,7 @@ const Representative = withRouter(({ history, match }) => {
       const custodian = UserService.hasPermission(
         user,
         [config.permissions.CUSTODIAN],
-        `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+        `${config.permissions.DATAFLOW}${match.params.dataflowId}`
       );
       setIsCustodian(true);
     }
@@ -323,7 +323,7 @@ const Representative = withRouter(({ history, match }) => {
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
-        entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
+        entity={`${config.permissions.DATAFLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
       /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
@@ -394,14 +394,14 @@ const Representative = withRouter(({ history, match }) => {
             <ul>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)}{' '}
+                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)}{' '}
                   functionality:
                 </strong>
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)} type:
+                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)} type:
                 </strong>
               </li>
               <li>

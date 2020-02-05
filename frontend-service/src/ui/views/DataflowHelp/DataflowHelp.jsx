@@ -58,7 +58,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         UserService.hasPermission(
           user,
           [config.permissions.CUSTODIAN],
-          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
         )
       );
     }

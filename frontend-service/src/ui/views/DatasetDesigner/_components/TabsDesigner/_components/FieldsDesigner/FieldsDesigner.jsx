@@ -235,6 +235,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
         isWebFormMMR={false}
         key={table.id}
         levelErrorTypes={levelErrorTypes}
+        recordPositionId={-1}
         tableId={table.tableSchemaId}
         tableName={table.tableSchemaName}
         tableSchemaColumns={tableSchemaColumns}
