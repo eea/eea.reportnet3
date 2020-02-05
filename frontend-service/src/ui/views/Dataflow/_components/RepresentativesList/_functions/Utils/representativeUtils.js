@@ -130,6 +130,12 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
+export const onCloseManageRolesDialog = async formDispatcher => {
+  formDispatcher({
+    type: 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG'
+  });
+};
+
 const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
   try {
     await RepresentativeService.updateDataProviderId(parseInt(representativeId), parseInt(newDataProviderId));

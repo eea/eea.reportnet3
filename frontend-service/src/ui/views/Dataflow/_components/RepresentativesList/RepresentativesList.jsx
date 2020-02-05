@@ -11,6 +11,7 @@ import {
   getAllDataProviders,
   getInitialData,
   onAddProvider,
+  onCloseManageRolesDialog,
   onDataProviderIdChange,
   onDeleteConfirm,
   onKeyDown
@@ -24,7 +25,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
+const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManageRolesDialog }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -46,6 +47,12 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
+
+  useEffect(() => {
+    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativeHasError)) {
+      onCloseManageRolesDialog(formDispatcher);
+    }
+  }, [isActiveManageRolesDialog]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {

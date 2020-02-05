@@ -416,7 +416,11 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => onHideManageRolesDialog()}
           contentStyle={{ maxHeight: '60vh' }}>
           <div className={styles.dialog}>
-            <RepresentativesList dataflowId={dataflowData.id} setHasRepresentatives={setHasRepresentatives} />
+            <RepresentativesList
+              dataflowId={dataflowData.id}
+              setHasRepresentatives={setHasRepresentatives}
+              isActiveManageRolesDialog={isActiveManageRolesDialog}
+            />
           </div>
         </Dialog>
 
