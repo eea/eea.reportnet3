@@ -179,9 +179,10 @@ pipeline {
                      env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.frontend.version -q -DforceStdout', returnStdout: true
                      
                      echo 'valor de las variables de version'
-                     echo $DATAFLOW_VERSION
-                     echo $FRONTEND_VERSION
-                     echo $DATASET_VERSION
+                     echo "dataflow=${DATAFLOW_VERSION}"
+                     echo "frontend=${FRONTEND_VERSION}"
+                     echo "dataset=${DATASET_VERSION}"
+                    
                   }
                 }
             }
