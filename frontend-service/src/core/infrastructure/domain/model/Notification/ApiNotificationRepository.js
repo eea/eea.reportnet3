@@ -20,7 +20,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
       const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
       notificationDTO.message = message;
       notificationDTO.type = key;
-      notificationDTO.fixed = typeFixed || fixed;
+      notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
       notificationDTO.lifeTime = typeLifeTime || lifeTime;
       notificationDTO.key = type;
       const contentKeys = Object.keys(content);

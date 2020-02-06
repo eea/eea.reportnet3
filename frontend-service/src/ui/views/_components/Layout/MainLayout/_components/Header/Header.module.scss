@@ -36,6 +36,11 @@
       color: var(--main-font-color);
     }
   }
+  .logoutWrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
   .themeSwitcherTooltip {
     z-index: 3004;
   }

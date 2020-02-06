@@ -134,7 +134,7 @@ export const FieldDesigner = ({
             const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
             if (!isUndefined(dropdownChilds)) {
               for (let k = 0; k < dropdownChilds.length; k++) {
-                for (let l = 0; l < dropdownChilds[i].childNodes.length; l++) {
+                for (let l = 0; l < dropdownChilds[k].childNodes.length; l++) {
                   if (!isUndefined(dropdownChilds[k].childNodes[l])) {
                     dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
                   }
@@ -185,11 +185,27 @@ export const FieldDesigner = ({
             !isNull(fieldValue) &&
             fieldValue !== ''
           ) {
-            onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
+            onFieldAdd(
+              recordId,
+              parseGeospatialTypes(fieldTypeValue.fieldType),
+              fieldValue,
+              fieldDescriptionValue,
+              selectedCodelist.codelistId,
+              selectedCodelist.codelistName,
+              selectedCodelist.codelistVersion
+            );
           }
         } else {
           if (description !== initialDescriptionValue) {
-            fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, description);
+            fieldUpdate(
+              fieldId,
+              parseGeospatialTypes(fieldTypeValue.fieldType),
+              fieldValue,
+              description,
+              selectedCodelist.codelistId,
+              selectedCodelist.codelistName,
+              selectedCodelist.codelistVersion
+            );
           }
         }
       }
@@ -206,7 +222,15 @@ export const FieldDesigner = ({
             // if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
             if (!checkDuplicates(name, fieldId)) {
               if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
-                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue, fieldDescriptionValue);
+                onFieldAdd(
+                  recordId,
+                  parseGeospatialTypes(fieldTypeValue.fieldType),
+                  fieldValue,
+                  fieldDescriptionValue,
+                  selectedCodelist.codelistId,
+                  selectedCodelist.codelistName,
+                  selectedCodelist.codelistVersion
+                );
               }
             } else {
               onShowDialogError(
@@ -223,7 +247,15 @@ export const FieldDesigner = ({
           } else {
             if (name !== initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate(fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                fieldUpdate(
+                  fieldId,
+                  parseGeospatialTypes(fieldTypeValue.fieldType),
+                  fieldValue,
+                  fieldDescriptionValue,
+                  selectedCodelist.codelistId,
+                  selectedCodelist.codelistName,
+                  selectedCodelist.codelistVersion
+                );
               } else {
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
@@ -240,28 +272,32 @@ export const FieldDesigner = ({
 
   const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
     setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
-    if (fieldId.toString() === '-1') {
-      onFieldAdd(
-        recordId,
-        'CODELIST',
-        fieldValue,
-        fieldDescriptionValue,
-        codelistId,
-        codelistName,
-        codelistVersion,
-        codelistItems
-      );
+    if (fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
-      fieldUpdate(
-        fieldId,
-        'CODELIST',
-        fieldValue,
-        fieldDescriptionValue,
-        codelistId,
-        codelistName,
-        codelistVersion,
-        codelistItems
-      );
+      if (fieldId.toString() === '-1') {
+        onFieldAdd(
+          recordId,
+          'CODELIST',
+          fieldValue,
+          fieldDescriptionValue,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
+      } else {
+        fieldUpdate(
+          fieldId,
+          'CODELIST',
+          fieldValue,
+          fieldDescriptionValue,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
+      }
     }
     setIsCodelistManagerVisible(false);
   };

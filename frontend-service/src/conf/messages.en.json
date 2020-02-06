@@ -390,7 +390,7 @@
 		"deleteDocumentFailedEvent":"Error deleting document at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
 		"uploadDocumentFailedEvent":"Error uploading {:fileName} document at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
 		"uploadDocumentCompletedEvent":"{:fileName} Document uploaded at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
-		"dataflowUpdatingError":"Failed updating dataflow at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+		"dataflowUpdatingError":"Failed updating dataflow name",
 		"dataflowCreationError":"Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
 		"restoreDatasetSchemaSnapshotCompletedEvent":"Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
 		"restoreDatasetSchemaSnapshotFailedEvent":"Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -432,6 +432,7 @@
 		"notificationLevel": "Level",
 		"loadDatasetsError": "Error loading datasets",
 		"loadDocumentsError": "Error loading documents",
-		"loadWebLinksError": "Error loading web links"
+		"loadWebLinksError": "Error loading web links",
+		"dataflowNameExists": "Dataflow name already exists, please choose another one"
 	}
 }

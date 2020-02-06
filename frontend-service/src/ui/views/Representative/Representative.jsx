@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Representative.module.scss';
 
 import colors from 'conf/colors.json';
 import { config } from 'conf';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
 import { BigButtonList } from './_components/BigButtonList';
@@ -17,18 +15,18 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,6 +40,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 const Representative = withRouter(({ history, match }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -73,7 +72,7 @@ const Representative = withRouter(({ history, match }) => {
         UserService.hasPermission(
           user,
           [config.permissions.PROVIDER],
-          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
         )
       );
     }
@@ -82,7 +81,7 @@ const Representative = withRouter(({ history, match }) => {
       const custodian = UserService.hasPermission(
         user,
         [config.permissions.CUSTODIAN],
-        `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+        `${config.permissions.DATAFLOW}${match.params.dataflowId}`
       );
       setIsCustodian(true);
     }
@@ -108,6 +107,50 @@ const Representative = withRouter(({ history, match }) => {
       }
     ]);
   }, []);
+  useEffect(() => {
+    if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
+      leftSideBarContext.addModels([
+        {
+          label: 'edit',
+          icon: 'edit',
+          onClick: e => {
+            onShowEditForm();
+            dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
+          },
+          title: 'edit'
+        },
+        {
+          label: 'manageRoles',
+          icon: 'manageRoles',
+          onClick: () => {
+            onShowContributorsDialog();
+          },
+          show: hasWritePermissions,
+          title: 'manageRoles'
+        },
+        {
+          label: 'settings',
+          icon: 'settings',
+          onClick: e => {
+            setIsActivePropertiesDialog(true);
+          },
+          show: true,
+          title: 'settings'
+        }
+      ]);
+    } else {
+      leftSideBarContext.addModels([
+        {
+          label: 'settings',
+          icon: 'settings',
+          onClick: e => {
+            setIsActivePropertiesDialog(true);
+          },
+          title: 'settings'
+        }
+      ]);
+    }
+  }, [isCustodian, dataflowStatus]);
 
   useEffect(() => {
     setLoading(true);
@@ -123,46 +166,6 @@ const Representative = withRouter(({ history, match }) => {
       onUpdateData();
     }
   }, [notificationContext]);
-
-  const dropDownItems =
-    isCustodian && dataflowStatus === config.dataflowStatus['DESIGN']
-      ? [
-          {
-            label: resources.messages['edit'],
-            icon: 'edit',
-            disabled: !isCustodian,
-            command: () => {
-              onShowEditForm();
-              dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-            }
-          },
-          {
-            label: resources.messages['manageRoles'],
-            icon: 'users',
-            show: hasWritePermissions,
-            command: () => {
-              onShowContributorsDialog();
-            }
-          },
-          {
-            label: resources.messages['settings'],
-            icon: 'settings',
-            show: true,
-            command: e => {
-              setIsActivePropertiesDialog(true);
-            }
-          }
-        ]
-      : [
-          {
-            label: resources.messages['settings'],
-            icon: 'settings',
-            show: true,
-            command: e => {
-              setIsActivePropertiesDialog(true);
-            }
-          }
-        ];
 
   const handleRedirect = target => {
     history.push(target);
@@ -321,24 +324,16 @@ const Representative = withRouter(({ history, match }) => {
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages['dataflow']}
         components={[]}
-        entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
+        entity={`${config.permissions.DATAFLOW}${dataflowData.id}`}
         style={{ textAlign: 'left' }}
       /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        {/* <Title title={`${dataflowData.name}`} icon="representative" iconSize="3.5rem" subtitle={dataflowData.name} /> */}
-        <div className={styles.titleBar}>
-          <div className={styles.title_wrapper}>
-            <h2 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('representative')} style={{ fontSize: '1.2rem' }} />
-              {!isUndefined(dataflowState[match.params.dataflowId])
-                ? `${match.params.representative} - ${TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)}`
-                : null}
-            </h2>
-          </div>
-          <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} disabled={false} />
-          </div>
-        </div>
+        <Title
+          title={!isUndefined(dataflowState[match.params.dataflowId]) ? `${match.params.representative}` : null}
+          subtitle={` ${TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)}`}
+          icon="representative"
+          iconSize="4rem"
+        />
 
         <BigButtonList
           dataflowData={dataflowData}
@@ -369,7 +364,7 @@ const Representative = withRouter(({ history, match }) => {
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === config.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
@@ -400,14 +395,14 @@ const Representative = withRouter(({ history, match }) => {
             <ul>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)}{' '}
+                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)}{' '}
                   functionality:
                 </strong>
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)} type:
+                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)} type:
                 </strong>
               </li>
               <li>

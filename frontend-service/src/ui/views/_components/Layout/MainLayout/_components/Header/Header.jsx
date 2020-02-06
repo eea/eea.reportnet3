@@ -1,14 +1,20 @@
 import React, { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
 
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { UserService } from 'core/services/User';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
@@ -16,6 +22,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const Header = withRouter(({ history }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
@@ -34,8 +41,8 @@ const Header = withRouter(({ history }) => {
     </a>
   );
   const loadUser = () => (
-    <div className={styles.userWrapper}>
-      {console.log(themeContext)}
+    <>
+      <div className={styles.userWrapper}>
       <InputSwitch
         checked={themeContext.currentTheme === 'dark'}
         onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
@@ -48,8 +55,27 @@ const Header = withRouter(({ history }) => {
         }
         tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
       />
-      <span>{`@${userContext.preferredUsername}`}</span>
-    </div>
+        <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
+      </div>
+      <div className={styles.logoutWrapper}>
+        <FontAwesomeIcon
+          onClick={async e => {
+            e.preventDefault();
+            userContext.socket.disconnect(() => {});
+            try {
+              await UserService.logout();
+            } catch (error) {
+              notificationContext.add({
+                type: 'USER_LOGOUT_ERROR'
+              });
+            } finally {
+              userContext.onLogout();
+            }
+          }}
+          icon={AwesomeIcons('logout')}
+        />
+      </div>
+    </>
   );
   return (
     <div id="header" className={styles.header}>

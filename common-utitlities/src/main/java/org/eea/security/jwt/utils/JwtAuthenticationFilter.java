@@ -9,6 +9,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.eea.security.jwt.data.TokenDataVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
@@ -40,16 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    PermissionEvaluator q;
     try {
       String jwt = getJwtFromRequest(request);
-      AccessToken token = null;
+      TokenDataVO token = null;
       if (StringUtils.hasText(jwt)
-          && (token = (AccessToken) tokenProvider.retrieveToken(jwt)) != null) {
+          && (token = tokenProvider.retrieveToken(jwt)) != null) {
         String username = token.getPreferredUsername();
         Map<String, Object> otherClaims = token.getOtherClaims();
 
-        Set<String> roles = token.getRealmAccess().getRoles();
+        Set<String> roles = token.getRoles();
         List<String> groups = (List<String>) otherClaims.get("user_groups");
         if (null != groups && groups.size() > 0) {
           groups.stream().map(group -> {
@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
         Map<String, String> details = new HashMap<>();
-        details.put("userId", token.getSubject());
+        details.put("userId", token.getUserId());
         authentication.setDetails(details);
         authentication.getDetails();
         SecurityContextHolder.getContext().setAuthentication(authentication);
