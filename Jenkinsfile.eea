@@ -130,7 +130,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/inspire-harvester:" + env.INSPIRE_VERSION, "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-" + env.INSPIRE_VERSION + ".jar --build-arg MS_PORT=8050 -f .")
+                    image = docker.build("eeacms/inspire-harvester:" + env.INSPIRE_VERSION, "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-" + env.INSPIRE_VERSION + ".jar --build-arg MS_PORT=8050 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -138,7 +138,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/collaboration-service:" + env.COLLABORATION_VERSION, "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-" + env.COLLABORATION_VERSION + ".jar --build-arg MS_PORT=9010 -f .")
+                    image = docker.build("eeacms/collaboration-service:" + env.COLLABORATION_VERSION, "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-" + env.COLLABORATION_VERSION + ".jar --build-arg MS_PORT=9010 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -146,7 +146,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/user-management-service:" + env.UMS_VERSION, "--build-arg JAR_FILE=user-management-service/target/user-management-service-" + env.UMS_VERSION + ".jar --build-arg MS_PORT=9010 -f .")
+                    image = docker.build("eeacms/user-management-service:" + env.UMS_VERSION, "--build-arg JAR_FILE=user-management-service/target/user-management-service-" + env.UMS_VERSION + ".jar --build-arg MS_PORT=9010 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
