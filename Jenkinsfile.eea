@@ -51,10 +51,8 @@ pipeline {
                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
                     env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
-                    env.COLLABORATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=collaboration.version -q -DforceStdout', returnStdout: true
                     env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=document.version -q -DforceStdout', returnStdout: true
                     env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=api-gateway.version -q -DforceStdout', returnStdout: true
-                    env.INSPIRE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=inspire.version -q -DforceStdout', returnStdout: true
                     env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=communication.version -q -DforceStdout', returnStdout: true
                     env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=indexsearch.version -q -DforceStdout', returnStdout: true
                     env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=ums.version -q -DforceStdout', returnStdout: true
@@ -123,22 +121,6 @@ pipeline {
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
                     image = docker.build("eeacms/indexsearch-service:" + env.INDEXSEARCH_VERSION, "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-" + env.INDEXSEARCH_VERSION + ".jar --build-arg MS_PORT=9030 .")
-                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
-                        image.push()
-                        image.push(date)
-                    }
-                }
-                script {
-                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/inspire-harvester:" + env.INSPIRE_VERSION, "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-" + env.INSPIRE_VERSION + ".jar --build-arg MS_PORT=8050 .")
-                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
-                        image.push()
-                        image.push(date)
-                    }
-                }
-                script {
-                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/collaboration-service:" + env.COLLABORATION_VERSION, "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-" + env.COLLABORATION_VERSION + ".jar --build-arg MS_PORT=9010 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
