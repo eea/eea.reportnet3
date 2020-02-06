@@ -18,10 +18,12 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.domain.Document;
+import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
+import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
@@ -141,6 +143,8 @@ public class DataFlowServiceImplTest {
   @Mock
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
+  @Mock
+  private RepresentativeRepository representativeRepository;
   /**
    * The dataflows.
    */
@@ -725,6 +729,12 @@ public class DataFlowServiceImplTest {
     dcVO.setId(1L);
     dataFlowVO.setDataCollections(Arrays.asList(dcVO));
 
+    Dataflow dataflowEntity = new Dataflow();
+    Set<Representative> representatives = new HashSet();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representatives.add(representative);
+    dataflowEntity.setRepresentatives(representatives);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -734,13 +744,66 @@ public class DataFlowServiceImplTest {
         .thenReturn(designDatasetVOs);
     when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
         .thenReturn(Arrays.asList(dcVO));
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
-    doThrow(MockitoException.class).when(dataflowRepository).deleteById(Mockito.any());
+    doNothing().when(representativeRepository).deleteById(Mockito.anyLong());
+    doThrow(MockitoException.class).when(dataflowRepository).delete(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {
       assertEquals("Error Deleting dataflow ", ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void deleteDataFlowThrowsDeleteRepresentative() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasetVOs.add(designDatasetVO);
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    List<DocumentVO> listDocument = new ArrayList<>();
+    listDocument.add(document);
+    dataFlowVO.setDocuments(listDocument);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    resourceList.add(resource);
+    DataCollectionVO dcVO = new DataCollectionVO();
+    dcVO.setId(1L);
+    dataFlowVO.setDataCollections(Arrays.asList(dcVO));
+
+    Dataflow dataflowEntity = new Dataflow();
+    Set<Representative> representatives = new HashSet();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representatives.add(representative);
+    dataflowEntity.setRepresentatives(representatives);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resourceList);
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
+        .thenReturn(Arrays.asList(dcVO));
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
+    dataflowServiceImpl.deleteDataFlow(1L);
+    doThrow(MockitoException.class).when(representativeRepository).deleteById(Mockito.anyLong());
+    try {
+      dataflowServiceImpl.deleteDataFlow(1L);
+    } catch (EEAException ex) {
+      assertEquals("Error Deleting representative with id 1", ex.getMessage());
       throw ex;
     }
   }
