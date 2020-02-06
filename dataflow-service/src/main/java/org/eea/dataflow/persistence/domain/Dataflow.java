@@ -30,12 +30,6 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
@@ -69,19 +63,19 @@ public class Dataflow {
   private TypeStatusEnum status;
 
   /** The submission agreement. */
-  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private SubmissionAgreement submissionAgreement;
 
   /** The contributors. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Contributor> contributors;
 
   /** The documents. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Document> documents;
 
   /** The weblinks. */
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Weblink> weblinks;
 
   /** The user requests. */
@@ -89,6 +83,10 @@ public class Dataflow {
   @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
   private Set<UserRequest> userRequests;
+
+  /** The dataflow representatives. */
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
+  private Set<Representative> representatives;
 
   /**
    * Equals.

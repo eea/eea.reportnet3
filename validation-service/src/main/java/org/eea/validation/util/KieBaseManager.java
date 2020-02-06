@@ -100,7 +100,8 @@ public class KieBaseManager {
           && tableSchema.getRecordSchema().getFieldSchema() != null) {
         tableSchema.getRecordSchema().getFieldSchema().stream()
             .filter(fieldSchema -> fieldSchema.getIdFieldSchema() != null
-                && StringUtils.isNotBlank(fieldSchema.getIdFieldSchema().toString()))
+                && StringUtils.isNotBlank(fieldSchema.getIdFieldSchema().toString())
+                && fieldSchema.getRuleField() != null)
             .forEach(fieldSchema -> {
               fieldSchema.getRuleField().forEach(ruleField -> {
                 ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),

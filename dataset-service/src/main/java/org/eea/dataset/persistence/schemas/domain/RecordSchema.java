@@ -5,7 +5,6 @@ package org.eea.dataset.persistence.schemas.domain;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.springframework.data.annotation.Id;
@@ -44,20 +43,6 @@ public class RecordSchema {
   /** The rule record. */
   @Field(value = "rules")
   private List<RuleRecord> ruleRecord;
-
-
-  /**
-   * To JSON.
-   *
-   * @return the string
-   */
-  public String toJSON() {
-    return "{\"_id\": {\"$oid\":\"" + idRecordSchema + "\"}, \"fieldSchemas\": ["
-        + ((fieldSchema != null) && !fieldSchema.isEmpty() ? fieldSchema.stream()
-            .filter(Objects::nonNull).map(FieldSchema::toJSON).collect(Collectors.joining(","))
-            : "")
-        + "], \"rules\": []}";
-  }
 
   /**
    * Hash code.

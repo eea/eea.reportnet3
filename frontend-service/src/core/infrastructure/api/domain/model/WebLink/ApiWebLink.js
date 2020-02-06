@@ -1,6 +1,6 @@
-import { DataflowConfig } from 'conf/domain/model/DataFlow';
+import { DataflowConfig } from 'conf/domain/model/Dataflow';
 import { WeblinkConfig } from 'conf/domain/model/Weblink';
-import { getUrl } from 'core/infrastructure/api/getUrl';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
@@ -20,7 +20,7 @@ export const apiWebLink = {
     });
     return response.data.weblinks;
   },
-  create: async (dataflowId, weblinkToCreate) => {
+  create: async (dataflowId, weblink) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
@@ -28,8 +28,8 @@ export const apiWebLink = {
           dataflowId
         }),
         data: {
-          description: weblinkToCreate.description,
-          url: weblinkToCreate.url
+          description: weblink.description,
+          url: weblink.url.toString().toLowerCase()
         },
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`

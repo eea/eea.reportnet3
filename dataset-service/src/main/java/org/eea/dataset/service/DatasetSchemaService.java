@@ -72,7 +72,6 @@ public interface DatasetSchemaService {
    */
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
-
   /**
    * Replace schema.
    *
@@ -175,4 +174,30 @@ public interface DatasetSchemaService {
   Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
       throws EEAException;
 
+  /**
+   * Update dataset schema description.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param description the description
+   * @return the boolean
+   */
+  Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
+
+  /**
+   * Gets the table schema name.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the table schema name
+   */
+  String getTableSchemaName(String datasetSchemaId, String tableSchemaId);
+
+
+  /**
+   * Validate schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the boolean
+   */
+  public Boolean validateSchema(String datasetSchemaId);
 }

@@ -14,19 +14,19 @@ const timeOut = time => {
 };
 
 const login = async code => {
-  const userTokensDTO = await apiUser.login(code);
-  const userDTO = jwt_decode(userTokensDTO.accessToken);
+  const userDTO = await apiUser.login(code);
+  const { accessToken, refreshToken } = userDTO;
   const user = new User(
-    userDTO.sub,
-    userDTO.name,
-    userDTO.realm_access.roles,
-    userDTO.user_groups,
-    userDTO.preferred_username,
-    userDTO.exp
+    userDTO.userId,
+    userDTO.preferredUsername,
+    userDTO.roles,
+    userDTO.groups,
+    userDTO.preferredUsername,
+    userDTO.accessTokenExpiration
   );
-  userStorage.set(userTokensDTO);
+  userStorage.set({ accessToken, refreshToken });
   //calculate difference between now and expiration
-  const remain = userDTO.exp - moment().unix();
+  const remain = userDTO.accessTokenExpiration - moment().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
@@ -38,38 +38,39 @@ const logout = async () => {
   return response;
 };
 const oldLogin = async (userName, password) => {
-  const userTokensDTO = await apiUser.oldLogin(userName, password);
-  const userDTO = jwt_decode(userTokensDTO.accessToken);
+  const userDTO = await apiUser.oldLogin(userName, password);
+  const { accessToken, refreshToken } = userDTO;
   const user = new User(
-    userDTO.sub,
-    userDTO.name,
-    userDTO.realm_access.roles,
-    userDTO.user_groups,
-    userDTO.preferred_username,
-    userDTO.exp
+    userDTO.userId,
+    userDTO.preferredUsername,
+    userDTO.roles,
+    userDTO.groups,
+    userDTO.preferredUsername,
+    userDTO.accessTokenExpiration
   );
-  userStorage.set(userTokensDTO);
+  userStorage.set({ accessToken, refreshToken });
   //calculate difference between now and expiration
-  const remain = userDTO.exp - moment().unix();
+  const remain = userDTO.accessTokenExpiration - moment().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
 const refreshToken = async refreshToken => {
   try {
     const currentTokens = userStorage.get();
-    const userTokensDTO = await apiUser.refreshToken(currentTokens.refreshToken);
-    const userDTO = jwt_decode(userTokensDTO.accessToken);
+    const userDTO = await apiUser.refreshToken(currentTokens.refreshToken);
+    const { accessToken, refreshToken } = userDTO;
     const user = new User(
-      userDTO.sub,
-      userDTO.name,
-      userDTO.realm_access.roles,
-      userDTO.user_groups,
-      userDTO.preferred_username,
-      userDTO.exp
+      userDTO.userId,
+      userDTO.preferredUsername,
+      userDTO.roles,
+      userDTO.groups,
+      userDTO.preferredUsername,
+      userDTO.accessTokenExpiration
     );
-    const remain = userDTO.exp - moment().unix();
+    userStorage.set({ accessToken, refreshToken });
+    //calculate difference between now and expiration
+    const remain = userDTO.accessTokenExpiration - moment().unix();
     timeOut((remain - 10) * 1000);
-    userStorage.set(userTokensDTO);
     return user;
   } catch (error) {
     userStorage.remove();
@@ -98,11 +99,16 @@ const userRole = (user, entity) => {
   return;
 };
 
+const getToken = () => {
+  return userStorage.get().accessToken;
+};
+
 export const ApiUserRepository = {
   login,
   logout,
   oldLogin,
   refreshToken,
   hasPermission,
+  getToken,
   userRole
 };

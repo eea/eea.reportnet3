@@ -55,7 +55,7 @@ public interface RecordRepository
    *
    * @return the record value
    */
-  RecordValue findByIdAndTableValue_DatasetId_Id(Long id, Long idDataset);
+  RecordValue findByIdAndTableValue_DatasetId_Id(String id, Long idDataset);
 
   /**
    * Delete record with id.
@@ -64,7 +64,7 @@ public interface RecordRepository
    */
   @Modifying
   @Query("delete from RecordValue record where record.id = ?1")
-  void deleteRecordWithId(Long recordId);
+  void deleteRecordWithId(String recordId);
 
   /**
    * Delete record values to restore snapshot.
@@ -85,5 +85,15 @@ public interface RecordRepository
   @Query("delete from RecordValue r where r.tableValue in "
       + "(select t from TableValue t where t.idTableSchema= :idTableSchema)")
   void deleteRecordWithIdTableSchema(@Param("idTableSchema") String idTableSchema);
+
+
+  /**
+   * Delete by data provider code.
+   *
+   * @param dataProviderCode the data provider code
+   */
+  @Modifying
+  @Query("delete from RecordValue r where r.dataProviderCode = :dataProviderCode")
+  void deleteByDataProviderCode(@Param("dataProviderCode") String dataProviderCode);
 
 }

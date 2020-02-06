@@ -11,8 +11,10 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
@@ -95,7 +97,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  ValidationLinkVO getPositionFromAnyObjectId(Long id, @DatasetId Long idDataset,
+  ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
       TypeEntityEnum type) throws EEAException;
 
 
@@ -155,7 +157,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  void deleteRecord(@DatasetId Long datasetId, Long recordId) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, String recordId) throws EEAException;
 
   /**
    * Delete table by schema.
@@ -320,4 +322,44 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteAllTableValues(@DatasetId Long datasetId);
+
+
+  /**
+   * Checks if is reporting dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is reporting dataset
+   */
+  boolean isReportingDataset(Long datasetId);
+
+  /**
+   * Prepare new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
+  void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException;
+
+  /**
+   * Save new field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
+      String idFieldSchema, TypeData typeField);
+
+
+  /**
+   * Delete record values.
+   *
+   * @param datasetId the dataset id
+   * @param providerCode the provider code
+   */
+  void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 }

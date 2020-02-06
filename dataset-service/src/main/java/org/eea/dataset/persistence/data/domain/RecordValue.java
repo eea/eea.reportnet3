@@ -11,10 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -34,11 +34,11 @@ public class RecordValue {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
-      allocationSize = 1)
+  @GenericGenerator(name = "record_sequence_generator",
+      strategy = "org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
+  private String id;
 
   /**
    * The id mongo.
@@ -51,6 +51,11 @@ public class RecordValue {
    */
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
+
+
+  /** The data provider code. */
+  @Column(name = "DATA_PROVIDER_CODE")
+  private String dataProviderCode;
 
   /**
    * The table value.

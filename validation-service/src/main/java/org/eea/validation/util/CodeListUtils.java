@@ -1,11 +1,10 @@
 package org.eea.validation.util;
-
 import java.util.Arrays;
 import java.util.List;
-
 /**
  * The Class ValidationRuleDrools.
  */
+
 public class CodeListUtils {
 
   /** The Constant listBWDStatus. */

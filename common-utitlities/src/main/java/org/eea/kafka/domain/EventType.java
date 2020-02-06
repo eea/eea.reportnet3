@@ -35,6 +35,16 @@ public enum EventType {
   LOAD_DATA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_data_failed_key", true),
 
   /**
+   * The load schema completed event.
+   */
+  LOAD_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_schema_completed_key", true),
+
+  /**
+   * The load schema failed event.
+   */
+  LOAD_SCHEMA_FAILED_EVENT("DATA_REPORTING_TOPIC", "load_schema_failed_key", true),
+
+  /**
    * The load record completed event.
    */
   RECORD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_record_completed_key", true),
@@ -50,9 +60,15 @@ public enum EventType {
   RECORD_DELETED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key", true),
 
   /**
-   * The deleted table.
+   * The delete table completed event.
    */
-  DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table", true),
+  DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+
+  /**
+   * The delete table schema completed event.
+   */
+  DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",
+      true),
 
   /**
    * The field updated completed event.
@@ -62,7 +78,50 @@ public enum EventType {
   /**
    * The snapshot restored event.
    */
-  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key", true),
+  RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore dataset snapshot failed event.
+   */
+  RESTORE_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_restored_failed_key", true),
+
+  /**
+   * The restore dataset schema snapshot completed event.
+   */
+  RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_schema_snapshot_restored_completed_key", true),
+
+  /**
+   * The restore dataset schema snapshot failed event.
+   */
+  RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_schema_snapshot_restored_failed_key", true),
+
+  /**
+   * The add dataset snapshot completed event.
+   */
+  ADD_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_snapshot_completed_event", true),
+
+  /**
+   * The add dataset snapshot failed event.
+   */
+  ADD_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_dataset_snapshot_failed_event",
+      true),
+
+  /**
+   * The add dataset schema snapshot completed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_completed_event", true),
+
+  /**
+   * The add dataset schema snapshot failed event.
+   */
+  ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "add_dataset_schema_snapshot_failed_event", true),
 
   /**
    * The command execute validation.
@@ -137,7 +196,49 @@ public enum EventType {
   /**
    * The unlock entity.
    */
-  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true);
+  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity", true),
+
+  /**
+   * The upload document completed event.
+   */
+  UPLOAD_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_document_completed_event", true),
+
+  /**
+   * The upload document failed event.
+   */
+  UPLOAD_DOCUMENT_FAILED_EVENT("DATA_REPORTING_TOPIC", "upload_document_failed_event", true),
+
+  /**
+   * The delete document completed event.
+   */
+  DELETE_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_document_completed_event", true),
+
+  /**
+   * The delete document failed event.
+   */
+  DELETE_DOCUMENT_FAILED_EVENT("DATA_REPORTING_TOPIC", "delete_document_failed_event", true),
+
+  /** The command execute new design field propagation. */
+  COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "execute_new_field_propagation",
+      false),
+
+  /** The release dataset snapshot completed event. */
+  RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_released_completed_key", true),
+
+  /** The release dataset snapshot failed event. */
+  RELEASE_DATASET_SNAPSHOT_FAILED_EVENT("DATA_REPORTING_TOPIC",
+      "dataset_snapshot_released_failed_key", true),
+
+  /** The command new design field propagation. */
+  COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false),
+
+  /** The add datacollection completed event. */
+  ADD_DATACOLLECTION_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_completed_event",
+      true),
+
+  /** The add datacollection failed event. */
+  ADD_DATACOLLECTION_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_failed_event", true);
 
   /**
    * The topic.

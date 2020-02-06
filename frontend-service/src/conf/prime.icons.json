@@ -1,6 +1,10 @@
 {
 	"icons": {
 		"add": "pi pi-plus",
+		"angleDown": "pi pi-chevron-down",
+		"angleRight":"pi pi-chevron-right",
+		"alphabeticOrderDown":"pi pi-sort-alpha-down",
+		"alphabeticOrderUp":"pi pi-sort-alpha-down-alt",
 		"archive": "pi pi-file",
 		"banned": "pi pi-ban",
 		"cancel": "pi pi-times",
@@ -10,6 +14,7 @@
 		"camera": "pi pi-camera",
 		"check": "pi pi-check",
 		"checkCircle": "pi pi-check-circle",
+		"checkSquare": "pi pi-check-square",
 		"clipboard": "pi pi-paperclip",
 		"clock": "pi pi-clock",
 		"clone": "pi pi-clone",
@@ -28,6 +33,7 @@
 		"home": "pi pi-home",
 		"import": "pi pi-upload",
 		"info": "pi pi-info",
+		"infoCircle": "pi pi-info-circle",
 		"logout": "pi pi-power-off",
 		"openFolder": "pi pi-folder-open",
 		"pencil": "pi pi-pencil",

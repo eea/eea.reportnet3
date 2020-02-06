@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -33,7 +34,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableJpaRepositories(entityManagerFactoryRef = "metadataSetsEntityManagerFactory",
     transactionManagerRef = "metabaseDataSetsTransactionManager",
     basePackages = "org.eea.dataset.persistence.metabase.repository")
-
+@EnableCaching
 public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
 
   /** The dll. */

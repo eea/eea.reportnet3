@@ -40,9 +40,8 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
     return EventType.VALIDATION_FINISHED_EVENT;
   }
 
-
   /**
-   * Execute.
+   * Perform action.
    *
    * @param eeaEventVO the eea event VO
    */

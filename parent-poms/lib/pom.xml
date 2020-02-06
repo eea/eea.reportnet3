@@ -85,6 +85,7 @@
               org.eea.kafka.domain.*
             </exclude>
           </excludes>
+
         </configuration>
         <executions>
           <execution>
@@ -103,6 +104,7 @@
           </execution>
 
         </executions>
+
       </plugin>
     </plugins>
   </build>
@@ -111,6 +113,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+
         <reportSets>
           <reportSet>
             <reports>

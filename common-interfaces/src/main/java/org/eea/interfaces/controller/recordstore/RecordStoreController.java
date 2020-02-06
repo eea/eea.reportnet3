@@ -84,12 +84,18 @@ public interface RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param user the user
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long partitionId,
-      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType);
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
+      @RequestParam(value = "user", required = true) String user,
+      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
+      @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData);
 
   /**
    * Delete snapshot data.
@@ -108,5 +114,7 @@ public interface RecordStoreController {
    */
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName);
+
+
 
 }

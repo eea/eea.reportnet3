@@ -1,76 +1,66 @@
-import React, { useState, useReducer } from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
-import { AccessPoint } from 'ui/views/AccessPoint';
-import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
-import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
+import { AccessPoint } from 'ui/views/Login/AccessPoint';
+import { Codelists } from 'ui/views/Codelists';
+import { DataCollection } from 'ui/views/DataCollection';
+import { Dataflow } from 'ui/views/Dataflow';
+import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
+import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
+import { Dataflows } from 'ui/views/Dataflows';
+import { Dataset } from 'ui/views/Dataset';
 import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
-import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
-import { Eulogin } from 'ui/views/Eulogin';
-import { LoadingProvider } from 'ui/views/_components/_provider/LoadingProvider';
-import { Login } from 'ui/views/Login';
-import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
-import { ReportingDataflow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { userReducer } from 'ui/views/_components/_context/UserReducer';
+import { EULogin } from 'ui/views/Login/EULogin';
+import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
+import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
+import { LeftSideBarProvider } from 'ui/views/_functions/Providers/LeftSideBarProvider';
 
-import langResources from 'conf/messages.en.json';
+import { NotificationProvider } from 'ui/views/_functions/Providers/NotificationProvider';
+import { Notifications } from 'ui/views/_components/Notifications';
+import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
+import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
+import { Representative } from 'ui/views/Representative/Representative';
+import { ResourcesProvider } from 'ui/views/_functions/Providers/ResourcesProvider';
+import { UserProvider } from 'ui/views/_functions/Providers/UserProvider';
 
 const App = () => {
-  const [resources] = useState({ ...langResources });
-  const [state, dispatch] = useReducer(userReducer, {});
   return (
     <div className={styles.app}>
-      <UserContext.Provider
-        value={{
-          ...state,
-          onLogin: user => {
-            dispatch({
-              type: 'LOGIN',
-              payload: {
-                user
-              }
-            });
-          },
-          onLogout: () => {
-            dispatch({
-              type: 'LOGOUT',
-              payload: {
-                user: {}
-              }
-            });
-          },
-          onTokenRefresh: user => {
-            dispatch({
-              type: 'REFRESH_TOKEN',
-              payload: {
-                user
-              }
-            });
-          }
-        }}>
-        <ResourcesContext.Provider value={resources}>
-          <LoadingProvider>
-            <Router>
-              <Switch>
-                <Route exact path="/" component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : Login} />
-                <Route exact path={routes.EULOGIN} component={Eulogin} />
-                <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
-                <PrivateRoute exact path={routes.DASHBOARDS} component={DataCustodianDashboards} />
-                <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
-                <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
-                <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
-                <PrivateRoute exact path={routes.DOCUMENTS} component={DocumentationDataset} />
-              </Switch>
-            </Router>
-          </LoadingProvider>
-        </ResourcesContext.Provider>
-      </UserContext.Provider>
+      <ResourcesProvider>
+        <UserProvider>
+          <NotificationProvider>
+            <LeftSideBarProvider>
+              <LoadingProvider>
+                <BreadCrumbProvider>
+                  <Notifications />
+                  <Router>
+                    <Switch>
+                      <Route
+                        exact
+                        path="/"
+                        component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
+                      />
+                      <Route exact path={routes.EULOGIN} component={EULogin} />
+                      <PrivateRoute exact path={routes.CODELISTS} component={Codelists} />
+                      <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
+                      <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
+                      <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
+                      <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                      <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
+                      <PrivateRoute exact path={routes.REPRESENTATIVE} component={Representative} />
+                      <PrivateRoute exact path={routes.DATASET} component={Dataset} />
+                      <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
+                    </Switch>
+                  </Router>
+                </BreadCrumbProvider>
+              </LoadingProvider>
+            </LeftSideBarProvider>
+          </NotificationProvider>
+        </UserProvider>
+      </ResourcesProvider>
     </div>
   );
 };

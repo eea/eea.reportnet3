@@ -7,6 +7,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.11.2",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.4",
+    "@stomp/stompjs": "^5.4.2",
     "axios": "^0.19.0",
     "bootstrap": "^4.3.1",
     "chart.js": "^2.8.0",
@@ -26,6 +27,8 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",
     "react-tooltip": "^3.11.1",
+    "sanitize-html": "^1.20.1",
+    "uuid": "^3.3.3",
     "yup": "^0.27.0"
   },
   "scripts": {
@@ -34,7 +37,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "sonar-scanner": "sonar-scanner"
   },
   "eslintConfig": {
     "extends": "react-app"

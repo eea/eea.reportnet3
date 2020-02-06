@@ -17,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,7 @@ public class DocumentServiceImplTest {
    */
   @Before
   public void initMocks() throws RepositoryException {
+    ThreadPropertiesManager.setVariable("user", "user");
     fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     documentVO = new DocumentVO();
     MockitoAnnotations.initMocks(this);
@@ -159,38 +161,6 @@ public class DocumentServiceImplTest {
   }
 
   /**
-   * Update document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void updateDocumentException2Test() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(null);
-    try {
-      documentService.updateDocument(documentVO);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
-    }
-  }
-
-  /**
-   * Update document exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void updateDocumentException3Test() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(0L);
-    try {
-      documentService.updateDocument(documentVO);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
-    }
-  }
-
-  /**
    * Update document success test.
    *
    * @throws EEAException the EEA exception
@@ -198,9 +168,9 @@ public class DocumentServiceImplTest {
    */
   @Test
   public void updateDocumentSuccessTest() throws EEAException, IOException {
-    when(dataflowController.insertDocument(Mockito.any())).thenReturn(1L);
+    doNothing().when(dataflowController).updateDocument(Mockito.any());
     documentService.updateDocument(documentVO);
-    verify(dataflowController, times(1)).insertDocument(documentVO);
+    verify(dataflowController, times(1)).updateDocument(documentVO);
   }
 
   /**
@@ -267,35 +237,17 @@ public class DocumentServiceImplTest {
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
+  @Test
+  public void deleteDocumentExceptionTest() throws RepositoryException, EEAException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
     doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
-  }
-
-  /**
-   * Delete document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentException2Test() throws EEAException, RepositoryException, IOException {
-    doNothing().when(dataflowController).deleteDocument(Mockito.any());
-    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
-    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
-    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
-    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
   }
 
   /**
@@ -313,7 +265,7 @@ public class DocumentServiceImplTest {
         Mockito.any());
     doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument(1L, 1L);
+    documentService.deleteDocument(1L, 1L, Boolean.TRUE);
     Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
   }
 

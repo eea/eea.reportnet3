@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.ums;
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,4 +64,26 @@ public interface ResourceManagementController {
   @GetMapping("/details")
   ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
+
+
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   * @return the groups by id resource type
+   */
+  @GetMapping("/getResourceInfoVOByResource")
+  List<ResourceInfoVO> getGroupsByIdResourceType(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceType") ResourceTypeEnum resourceType);
+
+
+  /**
+   * Creates the resources.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs);
 }

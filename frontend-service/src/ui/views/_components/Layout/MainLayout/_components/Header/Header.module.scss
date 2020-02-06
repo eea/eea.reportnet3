@@ -1,0 +1,42 @@
+.header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  width: 100%;
+  height: var(--header-height);
+  padding: 0.5rem;
+  overflow: hidden;
+  background-color: var(--white);
+  box-shadow: 0 0 0.5rem rgba($color: #000000, $alpha: 0.1);
+  z-index: 3002;
+  .title {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    img {
+      height: 3rem;
+      margin-right: 1rem;
+    }
+    h1 {
+      margin: 0px;
+      font-size: 1.5rem;
+    }
+  }
+  .userWrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    span {
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--gray-110);
+    }
+  }
+  .logoutWrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+}

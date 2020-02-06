@@ -129,6 +129,11 @@
       <artifactId>sentry-logback</artifactId>
       <version>1.7.22</version>
     </dependency>
+    <!--<dependency>-->
+    <!--<groupId>de.siegmar</groupId>-->
+    <!--<artifactId>logback-gelf</artifactId>-->
+    <!--<version>2.2.0</version>-->
+    <!--</dependency>-->
 
     <!-- Lombook -->
     <dependency>
@@ -212,6 +217,7 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.4</version>
+
         <configuration>
           <excludes>
             <exclude>
@@ -223,7 +229,6 @@
             <exclude>
               org.eea.*.service.vo
             </exclude>
-
             <exclude>
               org.eea.*.mapper
             </exclude>
@@ -237,6 +242,7 @@
               org.eea.indexsearch.io.kafka.domain.**
             </exclude>
           </excludes>
+
         </configuration>
         <executions>
           <execution>
@@ -260,7 +266,7 @@
       <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.7.0.1746</version>
       </plugin>
 
     </plugins>
@@ -271,6 +277,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+
         <reportSets>
           <reportSet>
             <reports>

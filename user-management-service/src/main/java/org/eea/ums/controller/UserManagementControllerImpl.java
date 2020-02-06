@@ -2,23 +2,32 @@ package org.eea.ums.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +53,19 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Autowired
   private BackupManagmentService backupManagmentControlerService;
+
+
+  /**
+   * The keycloak connector service.
+   */
+  @Autowired
+  private KeycloakConnectorService keycloakConnectorService;
+
+  /**
+   * The user representation mapper.
+   */
+  @Autowired
+  private UserRepresentationMapper userRepresentationMapper;
 
   /**
    * The Constant LOG_ERROR.
@@ -198,8 +220,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resourceGroupEnum the resource group enum
    */
   @Override
-  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
-  public void addContributorToResource(@RequestParam("idResource") Long idResource,
+  @RequestMapping(value = "/add_user_to_resource", method = RequestMethod.PUT)
+  public void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -236,6 +258,71 @@ public class UserManagementControllerImpl implements UserManagementController {
     InputStream is = file.getInputStream();
     backupManagmentControlerService.readAndSaveUsers(is);
 
+  }
+
+
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
+  public List<UserRepresentationVO> getUsers() {
+
+    UserRepresentation[] a = keycloakConnectorService.getUsers();
+
+    ArrayList<UserRepresentation> arrayList = new ArrayList<>(Arrays.asList(a));
+
+    return userRepresentationMapper.entityListToClass(arrayList);
+  }
+
+
+  /**
+   * Adds the contributor to resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   * @param userMail the user mail
+   */
+  @Override
+  @RequestMapping(value = "/add_contributor_to_resource", method = RequestMethod.PUT)
+  public void addContributorToResource(Long idResource, ResourceGroupEnum resourceGroupEnum,
+      String userMail) {
+    try {
+      securityProviderInterfaceService.addContributorToUserGroup(userMail,
+          resourceGroupEnum.getGroupName(idResource));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @RequestMapping(value = "/add_contributors_to_resources", method = RequestMethod.PUT)
+  public void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources) {
+    try {
+      for (ResourceAssignationVO resource : resources) {
+        securityProviderInterfaceService.addContributorToUserGroup(resource.getEmail(),
+            resource.getResourceGroup().getGroupName(resource.getResourceId()));
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
+  public void addUserToResources(@RequestBody List<ResourceAssignationVO> resources) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    for (ResourceAssignationVO resource : resources) {
+      securityProviderInterfaceService.addUserToUserGroup(userId,
+          resource.getResourceGroup().getGroupName(resource.getResourceId()));
+    }
   }
 
 

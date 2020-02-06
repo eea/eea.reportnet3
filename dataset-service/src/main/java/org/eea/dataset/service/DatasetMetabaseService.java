@@ -1,7 +1,11 @@
 package org.eea.dataset.service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -19,19 +23,6 @@ public interface DatasetMetabaseService {
    */
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
 
-
-  /**
-   * Creates the empty dataset.
-   *
-   * @param datasetType the dataset type
-   * @param datasetName the dataset name
-   * @param datasetSchemaId the dataset schema id
-   * @param dataflowId the dataflow id
-   * @return the long
-   * @throws EEAException the EEA exception
-   */
-  Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
-      Long dataflowId) throws EEAException;
 
   /**
    * Gets the dataset name.
@@ -84,5 +75,49 @@ public interface DatasetMetabaseService {
    */
   List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
+
+  /**
+   * Creates the group dc and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  void createGroupDcAndAddUser(Long datasetId);
+
+
+  /**
+   * Creates the schema group and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  void createSchemaGroupAndAddUser(Long datasetId);
+
+
+  /**
+   * Creates the empty dataset.
+   *
+   * @param datasetType the dataset type
+   * @param datasetName the dataset name
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @param representatives the representatives
+   * @param iterationDC the iteration DC
+   * @return the future
+   * @throws EEAException the EEA exception
+   */
+  Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+      String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
+      Integer iterationDC) throws EEAException;
+
+
+  /**
+   * Creates the group provider and add user.
+   *
+   * @param datasetIdsEmail the dataset ids email
+   * @param representatives the representatives
+   * @param idDataflow the id dataflow
+   */
+  void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail,
+      List<RepresentativeVO> representatives, Long idDataflow);
 
 }

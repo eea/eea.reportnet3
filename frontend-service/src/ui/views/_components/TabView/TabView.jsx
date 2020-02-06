@@ -2,13 +2,13 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import { isUndefined, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import UniqueComponentId from 'ui/UniqueComponentId';
+import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
 
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Icon } from 'ui/views/_components/Icon';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Tab } from './_components/Tab';
 
 export const TabView = ({
@@ -87,7 +87,21 @@ export const TabView = ({
         }
       }
     } else {
-      setActiveIdx(index);
+      if (!tab.props.disabled) {
+        if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+          onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+        }
+        if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+          onTabChange({ originalEvent: event, index: index });
+        } else {
+          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+            onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+          }
+        }
+        if (isUndefined(onTabChange) || isNull(onTabChange)) {
+          setActiveIdx(index);
+        }
+      }
     }
     event.preventDefault();
   };

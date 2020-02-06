@@ -1,3 +1,5 @@
+import { isUndefined } from 'lodash';
+
 export const CoreUtils = (() => {
   const UtilsAPI = {
     getDashboardLevelErrorByDataset: datasetDTO => {
@@ -68,6 +70,13 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    onGroupBy: key => array =>
+      array.reduce((objectsByKeyValue, obj) => {
+        const value = obj[key];
+        objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+        return objectsByKeyValue;
+      }, {}),
+
     orderLevelErrors: levelErrors => {
       const levelErrorsWithPriority = [
         { id: 'CORRECT', index: 0 },
@@ -100,7 +109,9 @@ export const CoreUtils = (() => {
     },
 
     transposeMatrix: matrix => {
-      return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      if (!isUndefined(matrix[0])) {
+        return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
+      }
     }
   };
   return UtilsAPI;

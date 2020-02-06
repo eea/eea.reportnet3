@@ -30,11 +30,12 @@ public class ResourceManagementControllerImplTest {
   @Test
   public void getGroupDetail() {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    Mockito.when(securityProviderInterfaceService
-        .getResourceDetails(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(1l)))
+    Mockito
+        .when(securityProviderInterfaceService
+            .getResourceDetails(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(1l)))
         .thenReturn(resourceInfoVO);
-    ResourceInfoVO result = resourceManagementControllerImpl
-        .getResourceDetail(1L, ResourceGroupEnum.DATAFLOW_PROVIDER);
+    ResourceInfoVO result =
+        resourceManagementControllerImpl.getResourceDetail(1L, ResourceGroupEnum.DATAFLOW_PROVIDER);
     Assert.assertNotNull(result);
   }
 
@@ -51,5 +52,10 @@ public class ResourceManagementControllerImplTest {
   @Test
   public void deleteResourceByName() {
     resourceManagementControllerImpl.deleteResourceByName(new ArrayList<>());
+  }
+
+  @Test
+  public void createResources() {
+    resourceManagementControllerImpl.createResources(new ArrayList<ResourceInfoVO>());
   }
 }

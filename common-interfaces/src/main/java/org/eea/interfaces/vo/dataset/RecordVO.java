@@ -29,7 +29,7 @@ public class RecordVO implements Serializable {
   /**
    * The id.
    */
-  private Long id;
+  private String id;
 
   /**
    * The fields.
@@ -40,6 +40,9 @@ public class RecordVO implements Serializable {
    * The id partition.
    */
   private Long datasetPartitionId;
+
+  /** The data provider code. */
+  private String dataProviderCode;
 
   /**
    * The validations.

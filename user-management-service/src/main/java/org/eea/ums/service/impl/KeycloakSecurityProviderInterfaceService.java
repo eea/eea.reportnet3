@@ -3,12 +3,18 @@ package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -16,13 +22,22 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.jwt.data.CacheTokenVO;
+import org.eea.security.jwt.data.TokenDataVO;
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.ums.mapper.GroupInfoMapper;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,7 +46,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class KeycloakSecurityProviderInterfaceService implements SecurityProviderInterfaceService {
 
-
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KeycloakSecurityProviderInterfaceService.class);
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   /**
    * The keycloak connector service.
    */
@@ -43,6 +66,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
+
+
+  @Autowired
+  @Qualifier("securityRedisTemplate")
+  private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
+
+  @Autowired
+  private JwtTokenProvider jwtTokenProvider;
 
   /**
    * Do login.
@@ -67,7 +98,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
     }
+
+    LOG.info("User {} logged in and cached succesfully ", username);
     return tokenVO;
   }
 
@@ -84,7 +118,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+      LOG.info("User {} logged in and cached succesfully", tokenVO.getPreferredUsername());
     }
+
     return tokenVO;
   }
 
@@ -101,25 +138,87 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);
+      tokenVO.setAccessToken(addTokenInfoToCache(tokenVO, tokenInfo.getRefreshExpiresIn()));
+      LOG.info("Session for User {} renewed and cached succesfully",
+          tokenVO.getPreferredUsername());
+    }
+
+    return tokenVO;
+  }
+
+  /**
+   * Map token to VO.
+   *
+   * @param tokenInfo the token info
+   *
+   * @return the token VO
+   */
+
+  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
+    TokenDataVO token = null;
+    TokenVO tokenVO = new TokenVO();
+    try {
+      token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
+    } catch (VerificationException e) {
+      LOG_ERROR.error("Error trying to parse token", e);
+    }
+
+    if (null != token) {
+      Set<String> eeaGroups = new HashSet<>();
+      Optional.ofNullable(token.getOtherClaims())
+          .map(claims -> (List<String>) claims.get("user_groups"))
+          .filter(groups -> groups.size() > 0).ifPresent(groups -> {
+        groups.stream().map(group -> {
+          if (group.startsWith("/")) {
+            group = group.substring(1);
+          }
+          return group.toUpperCase();
+        }).forEach(eeaGroups::add);
+      });
+
+      tokenVO.setRoles(token.getRoles());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO.setGroups(eeaGroups);
+      tokenVO.setPreferredUsername(token.getPreferredUsername());
+      tokenVO.setAccessTokenExpiration(token.getExpiration());
+      tokenVO.setUserId(token.getUserId());
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
     }
     return tokenVO;
   }
 
-  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
-    TokenVO tokenVO = new TokenVO();
-    tokenVO.setAccessToken(tokenInfo.getAccessToken());
-    tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
-    return tokenVO;
+  private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
+    CacheTokenVO cacheTokenVO = new CacheTokenVO();
+    cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
+    cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
+    cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
+    String key = calculateCacheKey(tokenVO.getRefreshToken());
+    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
+    return key;
+  }
+
+  private String calculateCacheKey(String refreshToken) {
+    // MessageDigest messageDigest = null;
+    // String key = "";
+    // try {
+    // messageDigest = MessageDigest.getInstance("SHA-256");
+    // messageDigest.update(refreshToken.getBytes());
+    // key = new String(messageDigest.digest());
+    // } catch (NoSuchAlgorithmException e) {
+    // LOG_ERROR.error("Error creating hash key before saving token to cache");
+    // }
+    return UUID.randomUUID().toString();
   }
 
   /**
    * Do logout.
    *
-   * @param refreshToken the refresh token
+   * @param authToken the auth token
    */
   @Override
-  public void doLogout(String refreshToken) {
-    keycloakConnectorService.logout(refreshToken);
+  public void doLogout(String authToken) {
+    keycloakConnectorService.logout(authToken);
+    LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
   }
 
   /**
@@ -194,6 +293,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     groupInfo.setPath("/" + groupName);
     groupInfo.setAttributes(resourceInfoVO.getAttributes());
     keycloakConnectorService.createGroupDetail(groupInfo);
+    LOG.info("Resource {} created succesfully", resourceInfoVO);
+
   }
 
   /**
@@ -208,8 +309,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(Collectors.toList());
     if (null != resourceNames && !resourceNames.isEmpty()) {
       deleteResourceInstancesByName(resourceNames);
-
     }
+    LOG.info("Resources {} removed succesfully", resourceInfoVO);
   }
 
   /**
@@ -247,16 +348,17 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
-    //Retrieve the groups available in keycloak. Keycloak does not support queries on groups
+    // Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
-      //Retrieve the group id of the group where the user will be added
+      // Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.equalsIgnoreCase(groupInfo.getName()))
           .map(GroupInfo::getId).findFirst().orElse("");
-      //Finally add the user to the group
+      // Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
+        LOG.info("User {} added to group {} succesfully", userId, groupName);
       }
     }
 
@@ -299,6 +401,90 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   *
+   * @return the groups by id resource type
+   */
+  @Override
+  public List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource,
+      ResourceTypeEnum resourceType) {
+    // we get all groups
+    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    List<ResourceInfoVO> resourceReturn = new ArrayList<>();
+    // ge create the resource that we are looking for it to filter
+    String resourceToContain = resourceType + "-" + idResource.toString() + "-";
+
+    // we do a for and find the data that we need
+    if (null != groups && groups.length > 0) {
+      Arrays.asList(groups).stream().forEach(groupInfo -> {
+        if (groupInfo.getName().contains(resourceToContain)) {
+          ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+          resourceInfoVO.setName(groupInfo.getName());
+          resourceInfoVO.setResourceId(idResource);
+          resourceInfoVO.setResourceTypeEnum(resourceType);
+          resourceInfoVO.setPath(groupInfo.getPath());
+          resourceInfoVO.setAttributes(groupInfo.getAttributes());
+          resourceReturn.add(resourceInfoVO);
+        }
+      });
+
+    }
+
+    return resourceReturn;
+  }
+
+  /**
+   * Adds the contributor to user group.
+   *
+   * @param userMail the user mail
+   * @param groupName the group name
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
+    UserRepresentation[] users = keycloakConnectorService.getUsers();
+    Optional<UserRepresentation> contributor = Arrays.asList(users).stream()
+        .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+        .findFirst();
+    contributor.orElseThrow(() -> new EEAException("Error, user not found"));
+    if (contributor.isPresent()) {
+      LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
+          contributor.get().getEmail(), groupName);
+      this.addUserToUserGroup(contributor.get().getId(), groupName);
+    } else {
+      LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
+          groupName);
+    }
+
+  }
+
+
+  /**
+   * Creates the resource instance.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  @Override
+  public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) {
+    for (ResourceInfoVO resourceInfoVO : resourceInfoVOs) {
+      GroupInfo groupInfo = new GroupInfo();
+      String groupName =
+          ResourceGroupEnum
+              .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
+                  resourceInfoVO.getSecurityRoleEnum())
+              .getGroupName(resourceInfoVO.getResourceId());
+      groupInfo.setName(groupName);
+      groupInfo.setPath("/" + groupName);
+      groupInfo.setAttributes(resourceInfoVO.getAttributes());
+      keycloakConnectorService.createGroupDetail(groupInfo);
+    }
   }
 
 

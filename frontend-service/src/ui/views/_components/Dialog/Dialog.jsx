@@ -25,25 +25,27 @@ export const Dialog = ({
   rtl,
   showHeader,
   style,
-  visible
+  visible,
+  zIndex = 3050
 }) => {
   const maskStyle = {
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1050
+    zIndex
   };
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
-    zIndex: 1050
+    zIndex
   };
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
       <PrimeDialog
         className={className}
         closeOnEscape={closeOnEscape}
+        contentStyle={contentStyle}
         dismissableMask={dismissableMask}
         focusOnShow={focusOnShow}
         footer={footer}

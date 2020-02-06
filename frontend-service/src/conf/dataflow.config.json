@@ -1,0 +1,9 @@
+{
+    "dataflowStatus": {
+        "DESIGN": "DESIGN",
+        "DRAFT": "DRAFT"
+    },
+    "errorTypes": {
+        "dataflowExists": "Dataflow name already exists"
+    }
+}

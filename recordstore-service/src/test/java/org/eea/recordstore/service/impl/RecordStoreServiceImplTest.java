@@ -240,7 +240,7 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void restoreDataSnapshotTest()
       throws RecordStoreAccessException, SQLException, IOException {
-    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN);
+    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN, false, false);
   }
 
   /**

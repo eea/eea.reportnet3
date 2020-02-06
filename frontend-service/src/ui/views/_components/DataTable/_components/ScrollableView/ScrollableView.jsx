@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class ScrollableView extends Component {
   static defaultProps = {

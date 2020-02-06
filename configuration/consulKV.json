@@ -1014,5 +1014,77 @@
   {
     "key": "config/application/spring.redis.port",
     "value": "JHtSRURJU19QT1JUOjMyNTYyfQ=="
+  },
+   {
+    "key": "config/dataset/dataset.propagation.fieldBatchSize",
+    "value": "JHtEQVRBU0NIRU1BX0ZJRUxEX0JBVENIX1NJWkU6MzAwMH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datacollection.path",
+    "value": "L2RhdGFjb2xsZWN0aW9uLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datacollection.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datacollection.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.path",
+    "value": "L3JlcHJlc2VudGF0aXZlLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.representative.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.path",
+    "value": "L2NvZGVsaXN0Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.codelist.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.path",
+    "value": "L3dlYmxpbmsvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.weblink.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/application/spring.redis.jedis.pool.max-active",
+    "value": "JHtSRURJU19QT09MX01BWF9BQ1RJVkU6MjB9"
+  },
+  {
+    "key": "config/application/spring.redis.jedis.pool.max-idle",
+    "value": "JHtSRURJU19QT09MX01BWF9JRExFOjIwfQ=="
+  },
+  {
+    "key": "config/application/spring.redis.jedis.pool.max-wait",
+    "value": "JHtSRURJU19QT09MX01BWF9XQUlUOjUwMDB9"
+  },
+  {
+    "key": "config/application/spring.redis.jedis.pool.min-evitable-idle-time",
+    "value": "JHtSRURJU19QT09MX01JTl9FVklUQUJMRV9JRExFX1RJTUU6MzAwMDAwfQ=="
+  },
+  {
+    "key": "config/application/spring.redis.jedis.pool.min-idle",
+    "value": "JHtSRURJU19QT09MX01JTl9JRExFOjV9"
   }
 ]

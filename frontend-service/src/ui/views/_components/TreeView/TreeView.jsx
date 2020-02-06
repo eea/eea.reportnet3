@@ -26,13 +26,13 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
               <span style={{ color: 'black', fontSize: '14px', fontWeight: 'bold' }}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
-              {property.toString()}
+              {property !== '' ? property.toString() : '-'}
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem
-              title={!Number.isInteger(Number(propertyName)) ? camelCaseToNormal(propertyName) : ''}
+              items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}
               expanded={true}>
-              {groupableProperties.indexOf(propertyName.toLowerCase()) > -1
+              {groupableProperties.indexOf(propertyName) > -1
                 ? groupFields(property)
                 : !isUndefined(property)
                 ? Object.values(property).map((proper, index, { length }) => (
@@ -65,7 +65,8 @@ const getFieldTypeValue = value => {
     { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' }
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
   ];
 
   if (value.toUpperCase() === 'COORDINATE_LONG') {
@@ -80,7 +81,7 @@ const getFieldTypeValue = value => {
 const groupFields = fields => {
   if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
     return (
-      <DataTable value={fields} style={{ width: '50%', marginTop: '1rem', marginBottom: '1rem' }}>
+      <DataTable value={fields} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }}>
         {renderColumns(fields)}
       </DataTable>
     );
@@ -100,7 +101,7 @@ const renderColumns = fields =>
       filterMatchMode="contains"
       header={capitalize(field)}
       sortable={true}
-      style={{ width: '150px' }}
+      style={{ width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%' }}
     />
   ));
 

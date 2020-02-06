@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
+import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,6 +14,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface FieldRepository extends PagingAndSortingRepository<FieldValue, Integer> {
 
+
   /**
    * Find by id and record table value dataset id id.
    *
@@ -20,7 +22,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @param idDataset the id dataset
    * @return the field value
    */
-  FieldValue findByIdAndRecord_TableValue_DatasetId_Id(Long id, Long idDataset);
+  FieldValue findByIdAndRecord_TableValue_DatasetId_Id(String id, Long idDataset);
 
   /**
    * Find by id field schema.
@@ -54,7 +56,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    */
   @Modifying
   @Query(nativeQuery = true, value = "update field_value set value = :value where id = :id")
-  void saveValue(@Param("id") Long id, @Param("value") String value);
+  void saveValue(@Param("id") String id, @Param("value") String value);
 
   /**
    * Delete by field schema id.
@@ -62,6 +64,17 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @param fieldSchemaId the field schema id
    */
   void deleteByIdFieldSchema(@Param("idFieldSchema") String fieldSchemaId);
+
+  /**
+   * Delete by id field schema native.
+   *
+   * @param fieldSchemaId the field schema id
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "delete from field_value where id_field_schema = :idFieldSchema")
+  void deleteByIdFieldSchemaNative(@Param("idFieldSchema") String fieldSchemaId);
 
   /**
    * Update field value type.

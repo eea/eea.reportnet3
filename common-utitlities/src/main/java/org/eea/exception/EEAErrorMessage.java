@@ -107,11 +107,41 @@ public final class EEAErrorMessage {
   /** The Constant WRONG_DATASET_SCHEMA. */
   public static final String INVALID_OBJECTID = "A given ObjectId is not valid";
 
+  /** The Constant FIELD_NAME_NULL. */
+  public static final String FIELD_NAME_NULL = "The name of fieldSchema should be filled";
+
   /** The Constant FORBIDDEN. */
   public static final String FORBIDDEN = "The user has no permissions";
 
   /** The Constant ID_LINK_NOT_FOUND. */
   public static final String ID_LINK_NOT_FOUND = "WebLink not found";
+
+  /** The Constant NOT_ENOUGH_PERMISSION. */
+  public static final String NOT_ENOUGH_PERMISSION = "Not enough permission to perform";
+
+  /** The Constant METHOD_LOCKED. */
+  public static final String METHOD_LOCKED = "Method locked";
+
+  /** The Constant REPRESENTATIVE_TYPE_INCORRECT. */
+  public static final String REPRESENTATIVE_TYPE_INCORRECT = "Representative type incorrect";
+
+  /** The Constant REPRESENTATIVE_NOT_FOUND. */
+  public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
+
+  /** The Constant REPRESENTATIVE_DUPLICATED. */
+  public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
+
+  /** The Constant CODELIST_NOT_FOUND. */
+  public static final String CODELIST_NOT_FOUND = "Codelist not found";
+
+  /** The Constant REPRESENTATIVE_DUPLICATED. */
+  public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
+
+  /** The Constant CODELIST_CATEGORY_NOT_FOUND. */
+  public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
+
+  /** The Constant CODELIST_VERSION_DUPLICATED. */
+  public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
   /**
    * Instantiates a new EEA error message.

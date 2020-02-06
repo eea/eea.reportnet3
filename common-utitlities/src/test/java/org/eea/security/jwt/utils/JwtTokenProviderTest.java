@@ -4,13 +4,19 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
+import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.utils.TestUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.common.VerificationException;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -21,6 +27,9 @@ public class JwtTokenProviderTest {
 
   private JwtTokenProvider jwtTokenProvider;
 
+  @Mock
+  private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
+
   @Before
   public void init() {
     this.jwtTokenProvider = new JwtTokenProvider();
@@ -30,8 +39,10 @@ public class JwtTokenProviderTest {
   @Test
   public void createPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", SUPER_SECRET_PUBLIC_KEY);
+    ReflectionTestUtils.setField(jwtTokenProvider, "securityRedisTemplate", securityRedisTemplate);
     ReflectionTestUtils.invokeMethod(jwtTokenProvider, "createPublicKey");
     Assert.assertNotNull(ReflectionTestUtils.getField(jwtTokenProvider, "publicKey"));
+    Mockito.reset(securityRedisTemplate);
   }
 
   @Test(expected = InvalidKeySpecException.class)
@@ -54,16 +65,27 @@ public class JwtTokenProviderTest {
       throws NoSuchAlgorithmException, VerificationException {
     Map<String, Object> keys = TestUtils.getRSAKeys();
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKey", keys.get("public"));
+    ReflectionTestUtils.setField(jwtTokenProvider, "securityRedisTemplate", securityRedisTemplate);
+    ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
+    CacheTokenVO tokenVO = new CacheTokenVO();
+    tokenVO
+        .setAccessToken(TestUtils.generateToken(keys, System.currentTimeMillis() + 10000, "user1"));
+    Mockito.when(operations.get("auxUUID")).thenReturn(tokenVO);
+    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
     Assert.assertNotNull(this.jwtTokenProvider
-        .retrieveToken(TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, "user1")));
+        .retrieveToken("auxUUID"));
   }
 
   @Test(expected = VerificationException.class)
   public void retrieveTokenKoInactive()
       throws InvalidKeySpecException, NoSuchAlgorithmException, VerificationException {
+    ReflectionTestUtils.setField(jwtTokenProvider, "securityRedisTemplate", securityRedisTemplate);
     Map<String, Object> keys = TestUtils.getRSAKeys();
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKey", keys.get("public"));
+    ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
+    Mockito.when(operations.get(Mockito.anyString())).thenReturn(null);
+    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
     Assert.assertNotNull(
         this.jwtTokenProvider
@@ -76,10 +98,16 @@ public class JwtTokenProviderTest {
       throws InvalidKeySpecException, NoSuchAlgorithmException, VerificationException {
     Map<String, Object> keys = TestUtils.getRSAKeys();
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKey", keys.get("public"));
+    ReflectionTestUtils.setField(jwtTokenProvider, "securityRedisTemplate", securityRedisTemplate);
+    ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
+    CacheTokenVO tokenVO = new CacheTokenVO();
+    tokenVO
+        .setAccessToken(TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, null));
+    Mockito.when(operations.get("auxUUID")).thenReturn(tokenVO);
+    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
-    Assert.assertNotNull(
-        this.jwtTokenProvider
-            .retrieveToken(TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, null)));
+    Assert.assertNotNull(this.jwtTokenProvider
+        .retrieveToken("auxUUID"));
   }
 
 

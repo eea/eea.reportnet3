@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -35,15 +37,16 @@ public interface DatasetSnapshotController {
   List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
 
 
+
   /**
    * Creates the snapshot.
    *
    * @param datasetId the dataset id
-   * @param description the description
+   * @param createSnapshot the create snapshot
    */
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("description") String description);
+      @RequestBody CreateSnapshotVO createSnapshot);
 
   /**
    * Delete snapshot.
@@ -123,11 +126,12 @@ public interface DatasetSnapshotController {
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
-   * @throws Exception
+   * @throws Exception the exception
    */
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
   void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
+
 
 
 }

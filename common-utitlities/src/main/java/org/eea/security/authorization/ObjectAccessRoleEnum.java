@@ -41,7 +41,13 @@ public enum ObjectAccessRoleEnum {
   DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN"),
 
   /** The dataschema provider. */
-  DATASCHEMA_PROVIDER("ROLE_DATASCHEMA-%s-DATA_PROVIDER");
+  DATASCHEMA_PROVIDER("ROLE_DATASCHEMA-%s-DATA_PROVIDER"),
+
+  /** The datacollection custodian. */
+  DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
+
+  /** The datacollection provider. */
+  DATACOLLECTION_PROVIDER("ROLE_DATACOLLECTION-%s-DATA_PROVIDER");
 
 
   /** The expression. */

@@ -6,21 +6,31 @@ import styles from './FieldDesigner.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'ui/views/_components/Button';
+import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
-import { DatasetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/Dataset';
 
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
+  codelistId,
+  codelistName,
+  codelistVersion,
   datasetId,
   fieldId,
+  fieldDescription,
   fieldName,
   fieldType,
   index,
   initialFieldIndexDragged,
+  isCodelistSelected,
+  onCodelistShow,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
@@ -39,7 +49,8 @@ export const FieldDesigner = ({
     { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' }
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
     // { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' },
@@ -62,13 +73,23 @@ export const FieldDesigner = ({
   };
 
   const [animation] = useState('');
-  const [fieldValue, setFieldValue] = useState(fieldName);
+
+  const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
+  const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
+  const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
+  const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
+  const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
+  const [selectedCodelist, setSelectedCodelist] = useState({
+    codelistId: !isUndefined(codelistId) ? codelistId : 1,
+    codelistName: !isUndefined(codelistName) ? codelistName : '',
+    codelistVersion: !isUndefined(codelistVersion) ? codelistVersion : ''
+  });
 
   const fieldRef = useRef();
   const inputRef = useRef();
@@ -113,7 +134,7 @@ export const FieldDesigner = ({
             const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
             if (!isUndefined(dropdownChilds)) {
               for (let k = 0; k < dropdownChilds.length; k++) {
-                for (let l = 0; l < dropdownChilds[i].childNodes.length; l++) {
+                for (let l = 0; l < dropdownChilds[k].childNodes.length; l++) {
                   if (!isUndefined(dropdownChilds[k].childNodes[l])) {
                     dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
                   }
@@ -127,19 +148,65 @@ export const FieldDesigner = ({
   }, [isDragging]);
 
   const onChangeFieldType = type => {
+    setFieldPreviousTypeValue(fieldTypeValue);
     setFieldTypeValue(type);
-    if (fieldId === '-1') {
-      if (type !== '') {
-        if (!isUndefined(fieldValue) && fieldValue !== '') {
-          onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue);
+    if (type.fieldType.toLowerCase() === 'codelist') {
+      onCodelistDropdownSelected(type);
+    } else {
+      if (fieldId === '-1') {
+        if (type !== '') {
+          if (!isUndefined(fieldValue) && fieldValue !== '') {
+            onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
+          }
+        }
+      } else {
+        if (type !== '' && type !== fieldValue) {
+          fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+        } else {
+          if (type !== '') {
+            onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+          }
         }
       }
-    } else {
-      if (type !== '' && type !== fieldValue) {
-        fieldUpdate(recordId, fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
-      } else {
-        if (type !== '') {
-          onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+      // setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
+    }
+    onCodelistShow(fieldId, type);
+  };
+
+  const onBlurFieldDescription = description => {
+    if (!isUndefined(description)) {
+      if (!isDragging) {
+        //New field
+        if (fieldId === '-1') {
+          if (
+            !isUndefined(fieldTypeValue) &&
+            !isNull(fieldTypeValue) &&
+            (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+            !isNull(fieldValue) &&
+            fieldValue !== ''
+          ) {
+            onFieldAdd(
+              recordId,
+              parseGeospatialTypes(fieldTypeValue.fieldType),
+              fieldValue,
+              fieldDescriptionValue,
+              selectedCodelist.codelistId,
+              selectedCodelist.codelistName,
+              selectedCodelist.codelistVersion
+            );
+          }
+        } else {
+          if (description !== initialDescriptionValue) {
+            fieldUpdate(
+              fieldId,
+              parseGeospatialTypes(fieldTypeValue.fieldType),
+              fieldValue,
+              description,
+              selectedCodelist.codelistId,
+              selectedCodelist.codelistName,
+              selectedCodelist.codelistVersion
+            );
+          }
         }
       }
     }
@@ -148,7 +215,6 @@ export const FieldDesigner = ({
   const onBlurFieldName = name => {
     if (!isUndefined(name)) {
       if (!isDragging) {
-        //New field
         if (fieldId === '-1') {
           if (name === '' && fieldTypeValue !== '' && !isUndefined(fieldTypeValue)) {
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -156,7 +222,15 @@ export const FieldDesigner = ({
             // if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
             if (!checkDuplicates(name, fieldId)) {
               if (!isUndefined(fieldTypeValue) && !isNull(fieldTypeValue) && fieldTypeValue !== '') {
-                onFieldAdd(recordId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                onFieldAdd(
+                  recordId,
+                  parseGeospatialTypes(fieldTypeValue.fieldType),
+                  fieldValue,
+                  fieldDescriptionValue,
+                  selectedCodelist.codelistId,
+                  selectedCodelist.codelistName,
+                  selectedCodelist.codelistVersion
+                );
               }
             } else {
               onShowDialogError(
@@ -173,7 +247,15 @@ export const FieldDesigner = ({
           } else {
             if (name !== initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate(recordId, fieldId, parseGeospatialTypes(fieldTypeValue.fieldType), fieldValue);
+                fieldUpdate(
+                  fieldId,
+                  parseGeospatialTypes(fieldTypeValue.fieldType),
+                  fieldValue,
+                  fieldDescriptionValue,
+                  selectedCodelist.codelistId,
+                  selectedCodelist.codelistName,
+                  selectedCodelist.codelistVersion
+                );
               } else {
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
@@ -188,19 +270,80 @@ export const FieldDesigner = ({
     }
   };
 
-  const onFieldAdd = async (recordId, type, value) => {
+  const onCodelistSelected = (codelistId, codelistName, codelistVersion, codelistItems) => {
+    setSelectedCodelist({ codelistId: codelistId, codelistName: codelistName, codelistVersion: codelistVersion });
+    if (fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+    } else {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd(
+          recordId,
+          'CODELIST',
+          fieldValue,
+          fieldDescriptionValue,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
+      } else {
+        fieldUpdate(
+          fieldId,
+          'CODELIST',
+          fieldValue,
+          fieldDescriptionValue,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
+      }
+    }
+    setIsCodelistManagerVisible(false);
+  };
+
+  const onCodelistDropdownSelected = fieldType => {
+    if (!isUndefined(fieldType)) {
+      onCodelistShow(fieldId, fieldType);
+    }
+    setIsCodelistManagerVisible(true);
+  };
+
+  const onFieldAdd = async (
+    recordId,
+    type,
+    value,
+    description,
+    codelistId,
+    codelistName,
+    codelistVersion,
+    codelistItems
+  ) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         recordId,
         name: value,
-        type: type
+        type,
+        description,
+        codelistId
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
       } else {
         setFieldValue('');
         setFieldTypeValue('');
-        onNewFieldAdd(response.data, value, recordId, type);
+        setFieldDescriptionValue('');
+        onNewFieldAdd(
+          response.data,
+          value,
+          recordId,
+          type,
+          description,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems
+        );
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
@@ -282,14 +425,30 @@ export const FieldDesigner = ({
     // setPosition(fieldRef.current.getBoundingClientRect());
   };
 
-  const onKeyChange = event => {
+  const onKeyChange = (event, input) => {
     if (event.key === 'Escape') {
-      setFieldValue(initialFieldValue);
+      input === 'NAME' ? setFieldValue(initialFieldValue) : setFieldDescriptionValue(initialDescriptionValue);
     } else if (event.key == 'Enter') {
-      event.preventDefault();
-      onBlurFieldName(event.target.value);
+      if (input === 'NAME') {
+        onBlurFieldName(event.target.value);
+      }
     }
   };
+
+  const codelistDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          if (selectedCodelist.codelistName === '' && selectedCodelist.codelistVersion === '') {
+            setFieldTypeValue(fieldPreviousTypeValue);
+          }
+          setIsCodelistManagerVisible(false);
+        }}
+      />
+    </div>
+  );
 
   const parseGeospatialTypes = value => {
     if (value.toUpperCase() === 'LONGITUDE') {
@@ -314,19 +473,29 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async (recordId, fieldSchemaId, type, value) => {
+  const fieldUpdate = async (
+    fieldSchemaId,
+    type,
+    value,
+    description,
+    codelistId,
+    codelistName,
+    codelistVersion,
+    codelistItems
+  ) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
-        recordId,
         fieldSchemaId,
         name: value,
-        type: type
+        type: type,
+        description,
+        codelistId
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type);
+        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion, codelistItems);
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -376,7 +545,8 @@ export const FieldDesigner = ({
         <InputText
           autoFocus={false}
           className={styles.inputField}
-          key={fieldId}
+          // key={`${fieldId}_${index}`} --> Problem with DOM modification
+          ref={inputRef}
           onBlur={e => {
             setIsEditing(false);
             onBlurFieldName(e.target.value);
@@ -386,10 +556,29 @@ export const FieldDesigner = ({
             setInitialFieldValue(e.target.value);
             setIsEditing(true);
           }}
-          onKeyDown={e => onKeyChange(e, index)}
+          onKeyDown={e => onKeyChange(e, 'NAME')}
           placeholder={resources.messages['newFieldPlaceHolder']}
-          inputRef={inputRef}
+          required={!isUndefined(fieldValue) ? fieldValue === '' : fieldName === ''}
           value={!isUndefined(fieldValue) ? fieldValue : fieldName}
+        />
+        <InputTextarea
+          autoFocus={false}
+          collapsedHeight={30}
+          expandableOnClick={true}
+          className={styles.inputFieldDescription}
+          key={fieldId}
+          onBlur={e => {
+            setIsEditing(false);
+            onBlurFieldDescription(e.target.value);
+          }}
+          onChange={e => setFieldDescriptionValue(e.target.value)}
+          onFocus={e => {
+            setInitialDescriptionValue(e.target.value);
+            setIsEditing(true);
+          }}
+          onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
+          placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
+          value={!isUndefined(fieldDescriptionValue) ? fieldDescriptionValue : fieldDescription}
         />
         <Dropdown
           className={styles.dropdownFieldType}
@@ -404,11 +593,32 @@ export const FieldDesigner = ({
           }}
           optionLabel="fieldType"
           options={fieldTypes}
+          required={true}
           placeholder={resources.messages['newFieldTypePlaceHolder']}
           // showClear={true}
           scrollHeight="450px"
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
+        {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
+          <Button
+            className={`${styles.codelistButton} p-button-secondary`}
+            label={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            onClick={() => onCodelistDropdownSelected()}
+            style={{ pointerEvents: 'auto' }}
+            tooltip={
+              !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
+                ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
+                : resources.messages['codelistSelection']
+            }
+            tooltipOptions={{ position: 'top' }}
+          />
+        ) : isCodelistSelected ? (
+          <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
+        ) : null}
         {!addField ? (
           <a
             draggable={true}
@@ -426,6 +636,21 @@ export const FieldDesigner = ({
           </a>
         ) : null}
       </div>
+      {isCodelistManagerVisible ? (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={codelistDialogFooter}
+          header={resources.messages['codelistsManager']}
+          modal={true}
+          onHide={() => setIsCodelistManagerVisible(false)}
+          style={{ width: '80%' }}
+          visible={isCodelistManagerVisible}
+          zIndex={3003}>
+          {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+        </Dialog>
+      ) : null}
     </React.Fragment>
   );
   // });

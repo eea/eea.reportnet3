@@ -173,9 +173,10 @@ public class RecordStoreControllerImplTest {
 
   @Test
   public void testRestoreSnapshot() throws SQLException, IOException, RecordStoreAccessException {
-    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, TypeDatasetEnum.DESIGN);
+    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, TypeDatasetEnum.DESIGN, "", true,
+        false);
     Mockito.verify(recordStoreService, times(1)).restoreDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test

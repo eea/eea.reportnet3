@@ -1,14 +1,17 @@
+.descriptionLabel {
+  margin: 0.5vw 0 0.5vw 1vw;
+}
 .fieldDesignerWrapper {
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 70%;
+  width: 100%;
   flex-wrap: wrap-reverse;
-  z-index: 9999;
+  z-index: 3000;
 }
 
 .fieldDesignerWrapper:last-child {
-  margin-bottom: 1em;
+  margin-bottom: 1rem;
 }
 
 .fieldsWrapper {
@@ -16,18 +19,23 @@
   padding: 10px 0; */
 }
 
-.InputSwitchContainer {
-  width: 100%;
+.switchContainerInput {
+  width: 100vw;
 }
 
-.InputSwitchDiv {
+.switchDivInput {
   display: flex;
   align-items: center;
-  margin-left: 84%;
+  margin: 0 0 2vw 1vw;
+}
+.switchDiv {
+  display: flex;
+  align-items: center;
   margin-right: 0;
+  margin-left: 3vw;
 }
 
-.InputSwitchText {
+.switchTextInput {
   font-size: 1em;
   font-weight: bold;
   margin-block-start: 0.5em;
@@ -36,7 +44,9 @@
   margin-inline-end: 0px;
   padding: 5px;
 }
-
+.tableDescriptionInput {
+  width: 68vw;
+}
 .positioning {
   top: 0 !important;
 }

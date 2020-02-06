@@ -1,7 +1,5 @@
 package org.eea.kafka.io;
 
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -58,7 +55,6 @@ public class KafkaSenderTest {
     PartitionInfo partition = new PartitionInfo("1", 1, null, null, null);
     infoList.add(partition);
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
-    when(kafkaTemplate.partitionsFor(Mockito.any())).thenReturn(infoList);
     kafkaSender.sendMessage(event);
   }
 

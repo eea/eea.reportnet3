@@ -9,12 +9,14 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -71,7 +73,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-
     // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
@@ -134,7 +135,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
-
     try {
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
@@ -157,14 +157,19 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
+  @PostMapping("/dataset/{datasetId}/snapshot/restore")
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType) {
+      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
+      @RequestParam(value = "user", required = true) String user,
+      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
+      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
 
     try {
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType);
+      ThreadPropertiesManager.setVariable("user", user);
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType,
+          isSchemaSnapshot, deleteData);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

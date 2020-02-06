@@ -1,0 +1,42 @@
+.leftSideBarElementWrapper {
+  display: flex;
+  align-items: center;
+}
+.leftSideBarUserIcon {
+  margin-right: 12px;
+}
+
+.leftSideBarElementAnimation {
+  transition: all 0.08s ease;
+}
+
+.leftSideBarElementAnimation:hover {
+  transform: scale(1.25);
+  transition: 0.08s ease-in;
+}
+
+.leftSideBarLogo:hover {
+  transition: 0.3s ease-in;
+  animation: blink 0.3s;
+}
+.leftSideBarUserText {
+  font-size: 14px;
+}
+.notificationCounter {
+  position: absolute;
+  top: 8px;
+  background-color: var(--errors);
+  color: var(--white);
+  border-radius: 3px;
+  padding: 1px 3px;
+  font: 8px Verdana;
+}
+.notificationIconWrapper {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 3px;
+}

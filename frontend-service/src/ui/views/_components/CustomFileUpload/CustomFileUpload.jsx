@@ -9,7 +9,7 @@ import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class CustomFileUpload extends Component {
   static defaultProps = {
@@ -90,9 +90,11 @@ export class CustomFileUpload extends Component {
   }
 
   clearInputElement() {
-    this.fileInput.value = '';
-    if (this.props.mode === 'basic') {
-      this.fileInput.style.display = 'inline';
+    if (this.fileInput) {
+      this.fileInput.value = '';
+      if (this.props.mode === 'basic') {
+        this.fileInput.style.display = 'inline';
+      }
     }
   }
 

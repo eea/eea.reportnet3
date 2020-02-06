@@ -13,8 +13,8 @@ import { TableLoadingBody } from './_components/TableLoadingBody';
 
 import classNames from 'classnames';
 
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import PropTypes from 'prop-types';
 
 export class DataTable extends Component {
@@ -29,7 +29,6 @@ export class DataTable extends Component {
     tableClassName: null,
     paginator: false,
     paginatorPosition: 'bottom',
-    pasteHeader: '',
     alwaysShowPaginator: true,
     paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown',
     paginatorLeft: null,
@@ -87,6 +86,7 @@ export class DataTable extends Component {
     tabIndex: '0',
     stateKey: null,
     stateStorage: 'session',
+    editMode: 'cell',
     onColumnResizeEnd: null,
     onSort: null,
     onPage: null,
@@ -101,7 +101,11 @@ export class DataTable extends Component {
     onContextMenu: null,
     onColReorder: null,
     onRowReorder: null,
-    onValueChange: null
+    onValueChange: null,
+    rowEditorValidator: null,
+    onRowEditInit: null,
+    onRowEditSave: null,
+    onRowEditCancel: null
   };
 
   static propTypes = {
@@ -115,7 +119,6 @@ export class DataTable extends Component {
     tableClassName: PropTypes.string,
     paginator: PropTypes.bool,
     paginatorPosition: PropTypes.string,
-    pasteHeader: PropTypes.string,
     alwaysShowPaginator: PropTypes.bool,
     paginatorTemplate: PropTypes.string,
     paginatorLeft: PropTypes.any,
@@ -144,7 +147,7 @@ export class DataTable extends Component {
     frozenHeaderColumnGroup: PropTypes.any,
     frozenFooterColumnGroup: PropTypes.any,
     rowExpansionTemplate: PropTypes.func,
-    expandedRows: PropTypes.array,
+    expandedRows: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
     onRowToggle: PropTypes.func,
     responsive: PropTypes.bool,
     resizableColumns: PropTypes.bool,
@@ -171,6 +174,7 @@ export class DataTable extends Component {
     tabIndex: PropTypes.string,
     stateKey: PropTypes.string,
     stateStorage: PropTypes.string,
+    editMode: PropTypes.string,
     onColumnResizeEnd: PropTypes.func,
     onSort: PropTypes.func,
     onPage: PropTypes.func,
@@ -185,37 +189,34 @@ export class DataTable extends Component {
     onContextMenu: PropTypes.func,
     onColReorder: PropTypes.func,
     onRowReorder: PropTypes.func,
-    onValueChange: PropTypes.func
+    onValueChange: PropTypes.func,
+    rowEditorValidator: PropTypes.func,
+    onRowEditInit: PropTypes.func,
+    onRowEditSave: PropTypes.func,
+    onRowEditCancel: PropTypes.func
   };
 
   constructor(props) {
     super(props);
-    let state = {
-      confirmVisible: false,
-      pastedData: []
-    };
+    this.state = {};
 
     if (!this.props.onPage) {
-      state.first = props.first;
-      state.rows = props.rows;
+      this.state.first = props.first;
+      this.state.rows = props.rows;
     }
 
     if (!this.props.onSort) {
-      state.sortField = props.sortField;
-      state.sortOrder = props.sortOrder;
-      state.multiSortMeta = props.multiSortMeta;
+      this.state.sortField = props.sortField;
+      this.state.sortOrder = props.sortOrder;
+      this.state.multiSortMeta = props.multiSortMeta;
     }
 
     if (!this.props.onFilter) {
-      state.filters = props.filters;
+      this.state.filters = props.filters;
     }
 
     if (this.isStateful()) {
-      this.restoreState(state);
-    }
-
-    if (Object.keys(state).length) {
-      this.state = state;
+      this.restoreState(this.state);
     }
 
     this.onPageChange = this.onPageChange.bind(this);
@@ -228,14 +229,7 @@ export class DataTable extends Component {
     this.onColumnDragLeave = this.onColumnDragLeave.bind(this);
     this.onColumnDrop = this.onColumnDrop.bind(this);
     this.onVirtualScroll = this.onVirtualScroll.bind(this);
-    this.onPasteAccept = this.onPasteAccept.bind(this);
-    this.onPasteCancel = this.onPasteCancel.bind(this);
     this.frozenSelectionMode = null;
-    this.checkPastedColumnsErrors = this.checkPastedColumnsErrors.bind(this);
-    this.previewPastedDataBody = this.previewPastedDataBody.bind(this);
-    this.previewPastedDataHeaders = this.previewPastedDataHeaders.bind(this);
-    this.previewPastedData = this.previewPastedData.bind(this);
-    //document.addEventListener('paste', event => this.onPaste(event));
   }
 
   getFirst() {
@@ -417,8 +411,8 @@ export class DataTable extends Component {
         if (this.props.scrollable) {
           this.setScrollableItemsWidthOnExpandResize(null, this.tableWidthState, 0);
         } else {
-          this.tableViewChild.nativeElement.style.width = this.tableWidthState;
-          this.containerViewChild.nativeElement.style.width = this.tableWidthState;
+          this.table.style.width = this.tableWidthState;
+          this.container.style.width = this.tableWidthState;
         }
       }
 
@@ -435,169 +429,12 @@ export class DataTable extends Component {
     }
   }
 
-  onPaste(event) {
-    //Preview data
-    // this.props.pastedRecords;
-    // this.props.recordsPreviewNumber;
-    // this.props.columnsPreviewNumber;
-
-    if (this.props.onPaste) {
-      this.props.onPaste();
-      this.setState({
-        confirmVisible: true,
-        pastedData: this.props.pastedData
-      });
-    } else {
-      //Default component paste
-    }
-  }
-
-  onPasteAccept() {
-    if (this.props.onPasteAccept) {
-      this.props.onPasteAccept();
-    } else {
-      //Default paste Accept
-    }
-
-    this.setState({
-      confirmVisible: false
-    });
-
-    // let auxFiltered = {}
-    // let auxArrayFiltered = [];
-    // dataFiltered.forEach(dat => {
-    //   dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
-    //   auxArrayFiltered.push(auxFiltered);
-    //   auxFiltered={};
-    // });
-  }
-
-  onPasteCancel() {
-    if (this.state.confirmVisible) {
-      this.setState({
-        confirmVisible: false
-      });
-    }
-  }
-
   onPageChange(event) {
     if (this.props.onPage) this.props.onPage(event);
     else this.setState({ first: event.first, rows: event.rows });
 
     if (this.props.onValueChange) {
       this.props.onValueChange();
-    }
-  }
-
-  previewPastedData() {
-    return (
-      <div className="p-datatable-wrapper">
-        <table className="p-datatable" style={{ width: '100%' }}>
-          <thead className="p-datatable-thead">
-            <tr>{this.previewPastedDataHeaders()}</tr>
-          </thead>
-          <tbody className="p-datatable-tbody">{this.previewPastedDataBody()}</tbody>
-        </table>
-      </div>
-    );
-  }
-
-  previewPastedDataHeaders() {
-    if (this.props.pastedRecords) {
-      if (this.props.pastedRecords.length > 0) {
-        const filteredColumns = this.props.children.filter(
-          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
-        );
-        let columns = filteredColumns.slice(0, this.props.recordsPreviewNumber);
-
-        columns = columns.map((column, i) => {
-          return (
-            <th key={i} className="p-resizable-column">
-              {column.props.header}
-            </th>
-          );
-        });
-        if (filteredColumns.length > this.props.columnsPreviewNumber) {
-          columns.push(<th key="previewColumn">...</th>);
-        }
-        return columns;
-      }
-    }
-  }
-
-  previewPastedDataBody() {
-    if (this.props.pastedRecords) {
-      if (this.props.pastedRecords.length > 0) {
-        const filteredColumns = this.props.children.filter(
-          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
-        );
-        let records = this.props.pastedRecords.slice(0, this.props.recordsPreviewNumber);
-        if (records) {
-          records = records.map((record, i) => {
-            return (
-              <tr key={i} className="p-datatable-row">
-                {record.dataRow
-                  .slice(
-                    0,
-                    filteredColumns.length < this.props.columnsPreviewNumber
-                      ? filteredColumns.length
-                      : this.props.columnsPreviewNumber
-                  )
-                  .map((column, j) => {
-                    return <td key={j}>{Object.values(column.fieldData)[0]}</td>;
-                  })}
-              </tr>
-            );
-          });
-        }
-        if (this.props.pastedRecords.length > this.props.recordsPreviewNumber) {
-          records.push(
-            <tr key="preview">
-              <td style={{ colSpan: this.props.columnsPreviewNumber }}>...</td>
-            </tr>
-          );
-        }
-        return records;
-      }
-    }
-  }
-
-  checkPastedColumnsErrors() {
-    let correctColumns = true;
-    if (this.props.pastedRecords) {
-      if (this.props.pastedRecords.length > 0) {
-        let i = 0;
-        //Data columns minus "actions", "recordValidations" and "id" columnns
-        const columns = this.props.children.filter(
-          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
-        );
-        do {
-          if (!isUndefined(this.props.pastedRecords[i])) {
-            const pastedColumns = this.props.pastedRecords[i].dataRow.filter(d => Object.values(d.fieldData)[0]);
-            if (pastedColumns.length !== columns.length) {
-              correctColumns = false;
-            }
-            i++;
-          }
-        } while (i < this.props.pastedRecords.length && correctColumns);
-      }
-    }
-
-    if (!correctColumns) {
-      return (
-        <div>
-          <p style={{ fontWeight: 'bold', color: colors.errors }}>
-            Warning! There are rows with a wrong number of columns
-          </p>
-          <p>Do you still want to paste this data?</p>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <p>Do you want to paste this data?</p>
-        </div>
-      );
     }
   }
 
@@ -748,11 +585,7 @@ export class DataTable extends Component {
     let currentFilters = this.getFilters();
     let newFilters = currentFilters ? { ...currentFilters } : {};
 
-    if (!this.isFilterBlank(event.value))
-      newFilters[event.field] = {
-        value: event.value,
-        matchMode: event.matchMode
-      };
+    if (!this.isFilterBlank(event.value)) newFilters[event.field] = { value: event.value, matchMode: event.matchMode };
     else if (newFilters[event.field]) delete newFilters[event.field];
 
     if (this.props.onFilter) {
@@ -776,7 +609,7 @@ export class DataTable extends Component {
   }
 
   hasFilter() {
-    let filters = this.getFilters();
+    let filters = this.getFilters() || this.props.globalFilter;
 
     return filters && Object.keys(filters).length > 0;
   }
@@ -798,19 +631,27 @@ export class DataTable extends Component {
       if (this.props.footerColumnGroup) {
         return true;
       } else {
-        if (this.props.children instanceof Array) {
-          for (let i = 0; i < this.props.children.length; i++) {
-            if (this.props.children[i].props.footer) {
-              return true;
-            }
-          }
-        } else {
-          return this.props.children.props.footer !== null;
-        }
+        return this.hasChildrenFooter(this.props.children);
       }
     } else {
       return false;
     }
+  }
+
+  hasChildrenFooter(children) {
+    let hasFooter = false;
+
+    if (children) {
+      if (children instanceof Array) {
+        for (let i = 0; i < children.length; i++) {
+          hasFooter = hasFooter || this.hasChildrenFooter(children[i]);
+        }
+      } else {
+        return children.props && children.props.footer !== null;
+      }
+    }
+
+    return hasFooter;
   }
 
   onColumnResizeStart(event) {
@@ -1080,6 +921,7 @@ export class DataTable extends Component {
 
         if (this.props.onColReorder) {
           this.props.onColReorder({
+            originalEvent: event,
             dragIndex: dragIndex,
             dropIndex: dropIndex,
             columns: columns
@@ -1163,7 +1005,9 @@ export class DataTable extends Component {
   }
 
   closeEditingCell() {
-    document.body.click();
+    if (this.props.editMode !== 'row') {
+      document.body.click();
+    }
   }
 
   onHeaderCheckboxClick(event) {
@@ -1177,9 +1021,12 @@ export class DataTable extends Component {
     }
 
     if (this.props.onSelectionChange) {
+      const { originalEvent, ...rest } = event;
+
       this.props.onSelectionChange({
-        originalEvent: event,
-        value: selection
+        originalEvent,
+        value: selection,
+        ...rest
       });
     }
   }
@@ -1275,27 +1122,27 @@ export class DataTable extends Component {
 
   getFrozenColumns(columns) {
     let frozenColumns = null;
-    if (Array.isArray(columns)) {
-      for (let col of columns) {
-        if (col.props.frozen) {
-          frozenColumns = frozenColumns || [];
-          frozenColumns.push(col);
-        }
+
+    for (let col of columns) {
+      if (col.props.frozen) {
+        frozenColumns = frozenColumns || [];
+        frozenColumns.push(col);
       }
     }
+
     return frozenColumns;
   }
 
   getScrollableColumns(columns) {
     let scrollableColumns = null;
-    if (Array.isArray(columns)) {
-      for (let col of columns) {
-        if (!col.props.frozen) {
-          scrollableColumns = scrollableColumns || [];
-          scrollableColumns.push(col);
-        }
+
+    for (let col of columns) {
+      if (!col.props.frozen) {
+        scrollableColumns = scrollableColumns || [];
+        scrollableColumns.push(col);
       }
     }
+
     return scrollableColumns;
   }
 
@@ -1342,6 +1189,7 @@ export class DataTable extends Component {
         first={this.getFirst()}
         rows={this.getRows()}
         lazy={this.props.lazy}
+        paginator={this.props.paginator}
         dataKey={this.props.dataKey}
         compareSelectionBy={this.props.compareSelectionBy}
         selectionMode={this.props.selectionMode}
@@ -1373,7 +1221,11 @@ export class DataTable extends Component {
         sortField={this.getSortField()}
         rowClassName={this.props.rowClassName}
         onRowReorder={this.props.onRowReorder}
-        onPaste={this.props.onPaste}>
+        editMode={this.props.editMode}
+        rowEditorValidator={this.props.rowEditorValidator}
+        onRowEditInit={this.props.onRowEditInit}
+        onRowEditSave={this.props.onRowEditSave}
+        onRowEditCancel={this.props.onRowEditCancel}>
         {columns}
       </TableBody>
     );
@@ -1381,7 +1233,7 @@ export class DataTable extends Component {
 
   createTableLoadingBody(columns) {
     if (this.props.virtualScroll) {
-      return <TableLoadingBody columns={columns} rows={this.getRows()} />;
+      return <TableLoadingBody columns={columns} rows={this.getRows()}></TableLoadingBody>;
     } else {
       return null;
     }
@@ -1411,8 +1263,7 @@ export class DataTable extends Component {
         rows={this.props.rows}
         totalRecords={totalRecords}
         onVirtualScroll={this.onVirtualScroll}
-        loading={this.props.loading}
-      />
+        loading={this.props.loading}></ScrollableView>
     );
   }
 
@@ -1478,9 +1329,9 @@ export class DataTable extends Component {
 
     return (
       <div className="p-datatable-loading">
-        <div className="p-datatable-loading-overlay p-component-overlay" />
+        <div className="p-datatable-loading-overlay p-component-overlay"></div>
         <div className="p-datatable-loading-content">
-          <i className={iconClassName} />
+          <i className={iconClassName}></i>
         </div>
       </div>
     );
@@ -1490,7 +1341,6 @@ export class DataTable extends Component {
     if (this.isStateful() && this.props.resizableColumns) {
       this.restoreColumnWidths();
     }
-    //this.container.addEventListener('paste', event => this.onPaste(event));
   }
 
   componentDidUpdate() {
@@ -1528,8 +1378,7 @@ export class DataTable extends Component {
           this.resizerHelper = el;
         }}
         className="p-column-resizer-helper p-highlight"
-        style={{ display: 'none' }}
-      />
+        style={{ display: 'none' }}></div>
     );
     let tableContent = null;
     let resizeIndicatorUp = this.props.reorderableColumns && (
@@ -1556,91 +1405,78 @@ export class DataTable extends Component {
       loader = this.renderLoader();
     }
 
-    if (this.props.scrollable) {
-      this.frozenSelectionMode = this.frozenSelectionMode || this.getFrozenSelectionModeInColumn(columns);
-      let frozenColumns = this.getFrozenColumns(columns);
-      let scrollableColumns = frozenColumns ? this.getScrollableColumns(columns) : columns;
-      let frozenView, scrollableView;
-      if (frozenColumns) {
-        frozenView = this.createScrollableView(
+    if (Array.isArray(columns)) {
+      if (this.props.scrollable) {
+        this.frozenSelectionMode = this.frozenSelectionMode || this.getFrozenSelectionModeInColumn(columns);
+        let frozenColumns = this.getFrozenColumns(columns);
+        let scrollableColumns = frozenColumns ? this.getScrollableColumns(columns) : columns;
+        let frozenView, scrollableView;
+        if (frozenColumns) {
+          frozenView = this.createScrollableView(
+            value,
+            frozenColumns,
+            true,
+            this.props.frozenHeaderColumnGroup,
+            this.props.frozenFooterColumnGroup,
+            totalRecords
+          );
+        }
+
+        scrollableView = this.createScrollableView(
           value,
-          frozenColumns,
-          true,
-          this.props.frozenHeaderColumnGroup,
-          this.props.frozenFooterColumnGroup,
+          scrollableColumns,
+          false,
+          this.props.headerColumnGroup,
+          this.props.footerColumnGroup,
           totalRecords
         );
+
+        tableContent = (
+          <div className="p-datatable-scrollable-wrapper">
+            {frozenView}
+            {scrollableView}
+          </div>
+        );
+      } else {
+        let tableHeader = this.createTableHeader(value, columns, this.props.headerColumnGroup);
+        let tableBody = this.createTableBody(value, columns);
+        let tableFooter = this.createTableFooter(columns, this.props.footerColumnGroup);
+
+        tableContent = (
+          <div className="p-datatable-wrapper">
+            <table
+              style={this.props.tableStyle}
+              className={this.props.tableClassName}
+              ref={el => {
+                this.table = el;
+              }}>
+              {tableHeader}
+              {tableFooter}
+              {tableBody}
+            </table>
+          </div>
+        );
       }
-
-      scrollableView = this.createScrollableView(
-        value,
-        scrollableColumns,
-        false,
-        this.props.headerColumnGroup,
-        this.props.footerColumnGroup,
-        totalRecords
-      );
-
-      tableContent = (
-        <div className="p-datatable-scrollable-wrapper">
-          {frozenView}
-          {scrollableView}
-        </div>
-      );
-    } else {
-      let tableHeader = this.createTableHeader(value, columns, this.props.headerColumnGroup);
-      let tableBody = this.createTableBody(value, columns);
-      let tableFooter = this.createTableFooter(columns, this.props.footerColumnGroup);
-
-      tableContent = (
-        <div className="p-datatable-wrapper">
-          <table
-            style={this.props.tableStyle}
-            className={this.props.tableClassName}
-            ref={el => {
-              this.table = el;
-            }}>
-            {tableHeader}
-            {tableFooter}
-            {tableBody}
-          </table>
-        </div>
-      );
     }
 
     return (
-      <React.Fragment>
-        <div
-          id={this.props.id}
-          className={className}
-          style={this.props.style}
-          ref={el => {
-            this.container = el;
-          }}>
-          {loader}
-          {headerFacet}
-          {paginatorTop}
-          {tableContent}
-          {paginatorBottom}
-          {footerFacet}
-          {resizeHelper}
-          {resizeIndicatorUp}
-          {resizeIndicatorDown}
-        </div>
-        <ConfirmDialog
-          onConfirm={this.onPasteAccept}
-          onHide={this.onPasteCancel}
-          visible={this.state.confirmVisible}
-          header={this.props.pasteHeader}
-          maximizable={false}
-          labelConfirm="Yes"
-          labelCancel="No">
-          <p>Copied records: {this.props.pastedRecords ? this.props.pastedRecords.length : null}</p>
-          {this.checkPastedColumnsErrors()}
-          <hr />
-          {this.previewPastedData()}
-        </ConfirmDialog>
-      </React.Fragment>
+      <div
+        id={this.props.id}
+        className={className}
+        style={this.props.style}
+        ref={el => {
+          this.container = el;
+        }}>
+        {loader}
+        {headerFacet}
+        {paginatorTop}
+        {tableContent}
+        {paginatorBottom}
+        {footerFacet}
+        {resizeHelper}
+        {resizeIndicatorUp}
+        {resizeIndicatorDown}
+      </div>
     );
   }
 }

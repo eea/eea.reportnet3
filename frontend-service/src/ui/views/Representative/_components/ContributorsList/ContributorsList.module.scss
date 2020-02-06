@@ -1,0 +1,39 @@
+.listContainer {
+  padding-left: 0px;
+  list-style: none;
+}
+.addContributorButton {
+  border-radius: 5px !important;
+  padding: 0 0 0.1rem 0.3rem !important;
+  color: white;
+
+  &:hover {
+    box-shadow: none !important;
+    box-sizing: border-box;
+    border: 1px solid var(--c-orange-200) !important;
+  }
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+.btnDelete {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0em var(--blue-100) !important;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+.addContributorWrapper {
+  display: flex;
+  justify-items: center;
+  align-self: center;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.addContributorWrapper :global .formField {
+  width: 42%;
+}

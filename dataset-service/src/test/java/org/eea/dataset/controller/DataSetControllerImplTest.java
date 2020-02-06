@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -25,6 +27,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -57,20 +61,28 @@ public class DataSetControllerImplTest {
   @Mock
   DatasetServiceImpl datasetService;
 
+  /** The design dataset service. */
+  @Mock
+  DesignDatasetServiceImpl designDatasetService;
+
   /** The records. */
   List<RecordVO> records;
 
   /** The record ids. */
-  Long recordId;
+  String recordId;
 
+  /** The update record helper. */
   @Mock
   UpdateRecordHelper updateRecordHelper;
 
+  /** The file treatment helper. */
   @Mock
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The security context. */
   SecurityContext securityContext;
 
+  /** The authentication. */
   Authentication authentication;
 
   /**
@@ -80,7 +92,7 @@ public class DataSetControllerImplTest {
   public void initMocks() {
     records = new ArrayList<>();
     records.add(new RecordVO());
-    recordId = 1L;
+    recordId = "1L";
     authentication = Mockito.mock(Authentication.class);
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
@@ -95,6 +107,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
@@ -107,6 +121,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException2() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
     dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
@@ -119,6 +135,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException3() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.loadTableData(1L, null, null);
   }
 
@@ -129,6 +147,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataSuccess() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
     dataSetControllerImpl.loadTableData(1L, file, "example");
@@ -142,12 +162,12 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testLoadDatasetDataSuccess2() throws Exception {
-    final EEAMockMultipartFile file =
-        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    final EEAMockMultipartFile file =
+        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
@@ -447,7 +467,7 @@ public class DataSetControllerImplTest {
 
     when(datasetService.getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new ValidationLinkVO());
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
     Mockito.verify(datasetService, times(1)).getPositionFromAnyObjectId(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -474,7 +494,7 @@ public class DataSetControllerImplTest {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
         .getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
   }
 
 
@@ -485,32 +505,49 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException3() throws Exception {
-    dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
+  /** The delete helper. */
   @Mock
   private DeleteHelper deleteHelper;
 
   /**
    * Test delete import table.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testDeleteImportTable() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(deleteHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
 
   }
 
+  /**
+   * Test delete import table id schema null.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableIdSchemaNull() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.deleteImportTable(1L, null);
 
   }
 
+  /**
+   * Test delete import table throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableThrow() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(deleteHelper).executeDeleteProcess(Mockito.any(),
         Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
@@ -524,6 +561,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableThrowNonProvided() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.deleteImportTable(null, "");
   }
 
@@ -535,24 +574,46 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableThrowInvalid() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.deleteImportTable(-2L, "");
   }
 
+  /**
+   * Testupdate records null entry.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNullEntry() throws Exception {
     dataSetControllerImpl.updateRecords(null, new ArrayList<RecordVO>());
   }
 
+  /**
+   * Testupdate records null.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNull() throws Exception {
     dataSetControllerImpl.updateRecords(-2L, null);
   }
 
+  /**
+   * Testupdate records empty.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsEmpty() throws Exception {
     dataSetControllerImpl.updateRecords(1L, new ArrayList<RecordVO>());
   }
 
+  /**
+   * Testupdate records success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testupdateRecordsSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeUpdateProcess(Mockito.any(), Mockito.any());
@@ -560,6 +621,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(updateRecordHelper, times(1)).executeUpdateProcess(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Testupdate records not found exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeUpdateProcess(Mockito.any(),
@@ -568,16 +634,31 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Testdelete record null entry.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNullEntry() throws Exception {
-    dataSetControllerImpl.deleteRecord(null, 1L);
+    dataSetControllerImpl.deleteRecord(null, "1L");
   }
 
+  /**
+   * Testdelete record null.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNull() throws Exception {
     dataSetControllerImpl.deleteRecord(-2L, null);
   }
 
+  /**
+   * Testdelete record success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testdeleteRecordSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
@@ -585,6 +666,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Testdelete record not found exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
@@ -592,21 +678,41 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.deleteRecord(1L, recordId);
   }
 
+  /**
+   * Testinsert records null entry.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNullEntry() throws Exception {
     dataSetControllerImpl.insertRecords(null, "id", new ArrayList<RecordVO>());
   }
 
+  /**
+   * Testinsert records null.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNull() throws Exception {
     dataSetControllerImpl.insertRecords(-2L, "id", null);
   }
 
+  /**
+   * Testinsert records empty.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsEmpty() throws Exception {
     dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<RecordVO>());
   }
 
+  /**
+   * Testinsert records success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testinsertRecordsSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any(),
@@ -616,6 +722,11 @@ public class DataSetControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Testinsert records not found exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
@@ -623,24 +734,78 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.insertRecords(1L, "id", records);
   }
 
+  /**
+   * Export file reporting.
+   *
+   * @throws Exception the exception
+   */
   @Test
-  public void exportFile() throws Exception {
+  public void exportFileReporting() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
     dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(datasetService, times(1)).getFileName(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
+  /**
+   * Export file design.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void exportFileDesign() throws Exception {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("".getBytes());
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(false);
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
+    Mockito.verify(designDatasetService, times(1)).getFileNameDesign(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
 
+  /**
+   * Export file test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFileTest() throws EEAException, IOException {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      dataSetControllerImpl.exportFile(1L, "id", "csv");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+  }
+
+  /**
+   * Testupdate field null entry.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNullEntry() throws Exception {
     dataSetControllerImpl.updateField(null, new FieldVO());
   }
 
+  /**
+   * Testupdate field null.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNull() throws Exception {
     dataSetControllerImpl.updateField(-2L, null);
   }
 
+  /**
+   * Testupdate field success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testupdateFieldSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any());
@@ -649,6 +814,11 @@ public class DataSetControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Testupdate field not found exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
@@ -656,6 +826,11 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.updateField(1L, new FieldVO());
   }
 
+  /**
+   * Insert id data schema.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertIdDataSchema() throws EEAException {
     doNothing().when(datasetService).insertSchema(Mockito.anyLong(), Mockito.any());
@@ -663,6 +838,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).insertSchema(Mockito.anyLong(), Mockito.any());
   }
 
+  /**
+   * Insert id data schema throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void insertIdDataSchemaThrow() throws EEAException {
     doThrow(EEAException.class).when(datasetService).insertSchema(Mockito.anyLong(), Mockito.any());

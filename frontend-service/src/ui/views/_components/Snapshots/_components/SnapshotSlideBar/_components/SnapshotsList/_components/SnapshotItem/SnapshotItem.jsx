@@ -7,8 +7,8 @@ import styles from './SnapshotItem.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
 export function SnapshotItem({ itemData, isReleaseVisible }) {
   const snapshotContext = useContext(SnapshotContext);

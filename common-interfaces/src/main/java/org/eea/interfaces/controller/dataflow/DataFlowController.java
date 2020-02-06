@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -116,14 +117,26 @@ public interface DataFlowController {
       @RequestParam(value = "idContributor") String userId);
 
 
+
   /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
+
+
+  /**
+   * Update data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   * @return the response entity
+   */
+  @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
   /**
    * Gets the metabase by id.
@@ -134,5 +147,25 @@ public interface DataFlowController {
   @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("id") Long id);
 
+
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
+
+
+  /**
+   * Update data flow status.
+   *
+   * @param idDataflow the id dataflow
+   * @param status the status
+   */
+  @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
+      @RequestParam(value = "status", required = true) TypeStatusEnum status);
 
 }

@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -52,7 +54,6 @@ public class DataFlowControllerImpl implements DataFlowController {
   private DataflowService dataflowService;
 
 
-
   /**
    * Find by id.
    *
@@ -63,7 +64,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTER'))")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
     if (id == null) {
@@ -243,38 +244,87 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+
   /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  public ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
 
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
     if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
         || dataFlowVO.getDeadlineDate().equals(dateToday))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATE_AFTER_INCORRECT);
+
+      message = EEAErrorMessage.DATE_AFTER_INCORRECT;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     if (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     try {
       dataflowService.createDataFlow(dataFlowVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed");
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
+
+  /**
+   * Update data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
+  public ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+    final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
+
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+
+    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
+      message = EEAErrorMessage.DATE_AFTER_INCORRECT;
+      status = HttpStatus.BAD_REQUEST;
+    }
+
+    if (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      status = HttpStatus.BAD_REQUEST;
+    }
+
+    try {
+      dataflowService.updateDataFlow(dataFlowVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Update dataflow failed. ", e.getCause());
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    return new ResponseEntity<>(message, status);
+  }
 
   /**
    * Gets the metabase by id.
@@ -302,5 +352,40 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return result;
   }
+
+
+  /**
+   * Delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_CUSTODIAN')")
+  public void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow) {
+    try {
+      dataflowService.deleteDataFlow(idDataflow);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Update data flow status.
+   *
+   * @param idDataflow the id dataflow
+   * @param status the status
+   */
+  @Override
+  @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
+      @RequestParam(value = "status", required = true) TypeStatusEnum status) {
+    try {
+      dataflowService.updateDataFlowStatus(idDataflow, status);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
 
 }

@@ -2,9 +2,9 @@ import React, { useContext, forwardRef } from 'react';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ConfirmDialog = forwardRef((props, _) => {
+const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
     className,
@@ -14,6 +14,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     header,
     iconCancel,
     iconConfirm,
+    disabledConfirm,
     labelCancel,
     labelConfirm,
     maximizable,
@@ -21,6 +22,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     onHide,
     onPaste,
     onPasteAsync,
+    styleConfirm,
     visible
   } = props;
   const resources = useContext(ResourcesContext);
@@ -66,7 +68,13 @@ export const ConfirmDialog = forwardRef((props, _) => {
           tooltip={!isChrome() ? resources.messages['pasteDisableButtonMessage'] : null}
         />
       ) : null}
-      <Button label={labelConfirm} icon={iconConfirm ? iconConfirm : 'check'} onClick={onConfirm} />
+      <Button
+        label={labelConfirm}
+        icon={iconConfirm ? iconConfirm : 'check'}
+        onClick={onConfirm}
+        disabled={disabledConfirm}
+        style={styleConfirm}
+      />
       <Button
         className="p-button-secondary"
         icon={iconCancel ? iconCancel : 'cancel'}
@@ -92,3 +100,5 @@ export const ConfirmDialog = forwardRef((props, _) => {
     </div>
   );
 });
+
+export { ConfirmDialog };

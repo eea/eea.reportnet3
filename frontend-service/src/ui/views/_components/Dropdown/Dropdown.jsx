@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
+
+import { isNull } from 'lodash';
+
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import classNames from 'classnames';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -589,13 +592,18 @@ export class Dropdown extends Component {
       });
 
       return (
-        <label className={className}>
-          {label || this.props.placeholder || 'empty'}{' '}
+        <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
+          {label || `${this.props.placeholder}` || 'empty'}{' '}
+          {this.props.required && isNull(selectedOption) ? (
+            <FontAwesomeIcon icon={AwesomeIcons('infoCircle')} style={{ float: 'right', color: 'var(--errors)' }} />
+          ) : null}
           {selectedOption ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
-              style={{ float: 'right', marginTop: '2px' }}
-            />
+            selectedOption.fieldTypeIcon ? (
+              <FontAwesomeIcon
+                icon={AwesomeIcons(selectedOption.fieldTypeIcon)}
+                style={{ float: 'right', marginTop: '2px' }}
+              />
+            ) : null
           ) : null}
         </label>
       );

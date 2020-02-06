@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { BodyCell } from './_components/BodyCell';
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class BodyRow extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      editing: false
+    };
+
     this.onClick = this.onClick.bind(this);
     this.onDoubleClick = this.onDoubleClick.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
@@ -16,6 +20,9 @@ export class BodyRow extends Component {
     this.onDragLeave = this.onDragLeave.bind(this);
     this.onDrop = this.onDrop.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
+    this.onRowEditInit = this.onRowEditInit.bind(this);
+    this.onRowEditSave = this.onRowEditSave.bind(this);
+    this.onRowEditCancel = this.onRowEditCancel.bind(this);
   }
 
   onClick(event) {
@@ -125,7 +132,6 @@ export class BodyRow extends Component {
           this.onClick(event);
           break;
         case 9:
-          //console.log('Tab!');
           //this.findNextSelectableCell(row);
           break;
         default:
@@ -137,7 +143,6 @@ export class BodyRow extends Component {
 
   findNextSelectableCell(cell) {
     // let nextCell = cell.nextElementSibling;
-    //console.log(nextCell);
   }
 
   findNextSelectableRow(row) {
@@ -160,6 +165,58 @@ export class BodyRow extends Component {
     }
   }
 
+  onRowEditInit(event) {
+    if (this.props.onRowEditInit) {
+      this.props.onRowEditInit({
+        originalEvent: event,
+        data: this.props.rowData
+      });
+    }
+
+    this.setState({
+      editing: true
+    });
+
+    event.preventDefault();
+  }
+
+  onRowEditSave(event) {
+    let valid = true;
+
+    if (this.props.rowEditorValidator) {
+      valid = this.props.rowEditorValidator(this.props.rowData);
+    }
+
+    if (this.props.onRowEditSave) {
+      this.props.onRowEditSave({
+        originalEvent: event,
+        data: this.props.rowData
+      });
+    }
+
+    this.setState({
+      editing: !valid
+    });
+
+    event.preventDefault();
+  }
+
+  onRowEditCancel(event) {
+    if (this.props.onRowEditCancel) {
+      this.props.onRowEditCancel({
+        originalEvent: event,
+        data: this.props.rowData,
+        index: this.props.rowIndex
+      });
+    }
+
+    this.setState({
+      editing: false
+    });
+
+    event.preventDefault();
+  }
+
   render() {
     let columns = React.Children.toArray(this.props.children);
     let conditionalStyles = {
@@ -180,8 +237,12 @@ export class BodyRow extends Component {
       let rowSpan;
       if (hasRowSpanGrouping) {
         if (this.props.sortField === column.props.field) {
-          if (this.props.groupRowSpan) rowSpan = this.props.groupRowSpan;
-          else continue;
+          if (this.props.groupRowSpan) {
+            rowSpan = this.props.groupRowSpan;
+            className += ' p-datatable-rowspan-group';
+          } else {
+            continue;
+          }
         }
       }
 
@@ -199,6 +260,11 @@ export class BodyRow extends Component {
           onCheckboxClick={this.props.onCheckboxClick}
           responsive={this.props.responsive}
           selected={this.props.selected}
+          editMode={this.props.editMode}
+          editing={this.state.editing}
+          onRowEditInit={this.onRowEditInit}
+          onRowEditSave={this.onRowEditSave}
+          onRowEditCancel={this.onRowEditCancel}
         />
       );
 

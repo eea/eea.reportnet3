@@ -42,7 +42,26 @@ import {
   faDrawPolygon,
   faBars,
   faHome,
-  faCloudUploadAlt
+  faCloudUploadAlt,
+  faThList,
+  faMinus,
+  faEye,
+  faAngleDoubleUp,
+  faLayerGroup,
+  faCoins,
+  faSitemap,
+  faAngleRight,
+  faAngleDown,
+  faCircleNotch,
+  faAngleDoubleRight,
+  faAngleDoubleLeft,
+  faSortAlphaDown,
+  faSortAlphaUp,
+  faSortAlphaUpAlt,
+  faPowerOff,
+  faCog,
+  faPen,
+  faUsersCog
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -52,7 +71,12 @@ import {
   faClone,
   faComments,
   faQuestionCircle as farQuestionCircle,
-  faCircle
+  faCircle,
+  faMinusSquare,
+  faPlusSquare,
+  faEyeSlash,
+  faBell,
+  faSave
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -143,6 +167,16 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'alphabeticOrderDown':
+      return faSortAlphaDown;
+    case 'alphabeticOrderUp':
+      return faSortAlphaUpAlt;
+    case 'angleUp':
+      return faAngleDoubleUp;
+    case 'angleDown':
+      return faAngleDown;
+    case 'angleRight':
+      return faAngleRight;
     case 'arrowDown':
       return faArrowDown;
     case 'arrowUp':
@@ -151,14 +185,24 @@ export const AwesomeIcons = icon => {
       return faToggleOff;
     case 'delete':
       return faTrashAlt;
+    case 'disk':
+      return faSave;
     case 'dropDown':
       return faCaretDown;
+    case 'eye':
+      return faEye;
+    case 'eyeSlash':
+      return faEyeSlash;
     case 'barChart':
       return faChartBar;
     case 'dataset':
       return faDatabase;
     case 'plus':
       return faPlus;
+    case 'minusSquare':
+      return faMinusSquare;
+    case 'plusSquare':
+      return faPlusSquare;
     case 'square':
       return farSquareRegular;
     case 'checkedSquare':
@@ -193,6 +237,8 @@ export const AwesomeIcons = icon => {
       return faMapMarkedAlt;
     case 'move':
       return faBars;
+    case 'notifications':
+      return faBell;
     case 'number':
       return faDiceSix;
     case 'percentage':
@@ -215,6 +261,8 @@ export const AwesomeIcons = icon => {
       return faInfo;
     case 'infoCircle':
       return faInfoCircle;
+    case 'list':
+      return faThList;
     case 'question':
       return faQuestion;
     case 'questionCircle':
@@ -223,6 +271,26 @@ export const AwesomeIcons = icon => {
       return faHome;
     case 'released':
       return faCloudUploadAlt;
+    case 'dataCollection':
+      return faLayerGroup;
+    case 'representative':
+      return faCoins;
+    case 'siteMap':
+      return faSitemap;
+    case 'spinner':
+      return faCircleNotch;
+    case 'angleDoubleLeft':
+      return faAngleDoubleLeft;
+    case 'angleDoubleRight':
+      return faAngleDoubleRight;
+    case 'logout':
+      return faPowerOff;
+    case 'settings':
+      return faCog;
+    case 'edit':
+      return faPen;
+    case 'manageRoles':
+      return faUsersCog;
     default:
       return faFileAlt;
   }

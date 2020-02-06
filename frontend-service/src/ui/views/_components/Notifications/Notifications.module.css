@@ -1,0 +1,39 @@
+.notificationWrapper {
+  width: 100%;
+  padding: 1rem;
+  display: none;
+}
+.notificationWrapper.error {
+  background-color: var(--errors);
+  color: var(--white);
+}
+.notificationWrapper.warning {
+  background-color: var(--warning-color);
+}
+
+.notificationWrapper.success {
+  background-color: var(--success-color);
+}
+
+.notificationWrapper.info {
+  background-color: var(--informative-color);
+}
+.notificationWrapper.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.notificationWrapper .header {
+  width: 100%;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.notificationWrapper .header a {
+  color: var(--white);
+  cursor: pointer;
+}

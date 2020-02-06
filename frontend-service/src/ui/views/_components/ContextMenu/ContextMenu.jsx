@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ReactDOM from 'react-dom';
-import DomHandler from 'ui/DomHandler';
+import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 class ContextMenuSub extends Component {
   static defaultProps = {

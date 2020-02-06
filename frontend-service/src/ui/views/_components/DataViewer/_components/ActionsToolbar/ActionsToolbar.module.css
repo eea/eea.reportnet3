@@ -1,0 +1,13 @@
+.actionsToolbar {
+  border-top: 1px solid var(--gray-25) !important;
+  border-left: 1px solid var(--gray-25) !important;
+  border-right: 1px solid var(--gray-25) !important;
+  border-bottom: 0px !important;
+  border-top-left-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+.filterInactive {
+  opacity: 0.5;
+}

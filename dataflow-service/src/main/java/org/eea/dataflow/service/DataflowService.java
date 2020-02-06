@@ -109,8 +109,27 @@ public interface DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
    */
   void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
+
+
+  /**
+   * Delete data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   * @throws Exception
+   */
+  void deleteDataFlow(Long idDataflow) throws Exception;
+
+  /**
+   * Update data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
   /**
    * Gets the reporting datasets id.
@@ -130,6 +149,16 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   DataFlowVO getMetabaseById(Long id) throws EEAException;
+
+
+  /**
+   * Update data flow status.
+   *
+   * @param id the id
+   * @param status the status
+   * @throws EEAException the EEA exception
+   */
+  void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException;
 
 
 }

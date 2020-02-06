@@ -2,12 +2,13 @@ package org.eea.ums.service;
 
 
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.vo.UserVO;
 
 /**
@@ -115,9 +116,9 @@ public interface SecurityProviderInterfaceService {
   /**
    * Do logout.
    *
-   * @param refreshToken the refresh token
+   * @param authToken the auth token
    */
-  void doLogout(String refreshToken);
+  void doLogout(String authToken);
 
 
   /**
@@ -128,4 +129,34 @@ public interface SecurityProviderInterfaceService {
    * @return the resource details
    */
   ResourceInfoVO getResourceDetails(String groupId);
+
+
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   *
+   * @return the groups by id resource type
+   */
+  List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource, ResourceTypeEnum resourceType);
+
+  /**
+   * Add contributor to user group.
+   *
+   * @param userMail the user mail
+   * @param groupName the group name
+   *
+   * @throws EEAException the EEA exception
+   */
+  void addContributorToUserGroup(String userMail, String groupName) throws EEAException;
+
+  /**
+   * Creates the resource instance.
+   *
+   * @param resourceInfoVOs the resource info V os
+   */
+  void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs);
+
+
 }

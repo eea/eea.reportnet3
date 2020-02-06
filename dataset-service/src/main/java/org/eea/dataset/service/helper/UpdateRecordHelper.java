@@ -1,16 +1,22 @@
 package org.eea.dataset.service.helper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,16 +30,30 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   private static final Logger LOG = LoggerFactory.getLogger(UpdateRecordHelper.class);
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  /** The processes map. */
+  private ConcurrentHashMap<String, Integer> processesMap;
+
+  /** The field batch size. */
+  @Value("${dataset.propagation.fieldBatchSize}")
+  private int fieldBatchSize;
+
 
   /**
    * Instantiates a new file loader helper.
    */
   public UpdateRecordHelper() {
     super();
+    processesMap = new ConcurrentHashMap<>();
   }
 
 
@@ -76,7 +96,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  public void executeDeleteProcess(Long datasetId, Long recordId) throws EEAException {
+  public void executeDeleteProcess(Long datasetId, String recordId) throws EEAException {
     datasetService.deleteRecord(datasetId, recordId);
     LOG.info("Records have been deleted");
     // after the records have been deleted, an event is sent to notify it
@@ -97,5 +117,75 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }
+
+  /**
+   * Gets the processes map.
+   *
+   * @return the processes map
+   */
+  public ConcurrentHashMap<String, Integer> getProcessesMap() {
+    return processesMap;
+  }
+
+
+
+  /**
+   * Propagate new field design.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param sizeRecords the size records
+   * @param numPag the num pag
+   * @param uuId the uu id
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  @Async
+  public void propagateNewFieldDesign(Long datasetId, String idTableSchema, Integer sizeRecords,
+      Integer numPag, String uuId, String idFieldSchema, TypeData typeField) {
+
+    synchronized (processesMap) {
+      processesMap.put(uuId, 0);
+    }
+
+    if (fieldBatchSize != 0) {
+      for (int numPage = 0; sizeRecords >= 0; sizeRecords = sizeRecords - fieldBatchSize) {
+        releaseFieldPropagation(datasetId, uuId, numPage, idTableSchema, idFieldSchema, typeField);
+        numPage++;
+      }
+    }
+
+
+
+  }
+
+  /**
+   * Release field propagation.
+   *
+   * @param datasetId the dataset id
+   * @param uuid the uuid
+   * @param numPag the num pag
+   * @param idTableSchema the id table schema
+   * @param idFieldSchema the id field schema
+   * @param typeField the type field
+   */
+  public void releaseFieldPropagation(final Long datasetId, final String uuid, int numPag,
+      String idTableSchema, String idFieldSchema, TypeData typeField) {
+
+    Map<String, Object> value = new HashMap<>();
+    value.put("dataset_id", datasetId);
+    value.put("idTableSchema", idTableSchema);
+    value.put("numPag", numPag);
+    value.put("idFieldSchema", idFieldSchema);
+    value.put("typeField", typeField);
+    value.put("uuId", uuid);
+    synchronized (processesMap) {
+      processesMap.merge(uuid, 1, Integer::sum);
+    }
+    releaseKafkaEvent(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION, value);
+
+  }
+
+
 
 }

@@ -1,14 +1,17 @@
 package org.eea.dataset.service.helper;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
@@ -19,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRecordHelperTest {
@@ -45,6 +49,7 @@ public class UpdateRecordHelperTest {
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
     records = new ArrayList<>();
+    ReflectionTestUtils.setField(updateRecordHelper, "fieldBatchSize", 1);
   }
 
   @Test
@@ -66,7 +71,7 @@ public class UpdateRecordHelperTest {
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(datasetService).deleteRecord(Mockito.any(), Mockito.any());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeDeleteProcess(1L, 1L);
+    updateRecordHelper.executeDeleteProcess(1L, "1L");
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
@@ -77,5 +82,20 @@ public class UpdateRecordHelperTest {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     updateRecordHelper.executeFieldUpdateProcess(1L, new FieldVO());
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
+
+  @Test
+  public void propagateNewFieldDesignTest() {
+    updateRecordHelper.propagateNewFieldDesign(1L, "5cf0e9b3b793310e9ceca190", 1, 1, "testUuid",
+        "5cf0e9b3b793310e9ceca190", TypeData.TEXT);
+    Mockito.verify(kafkaSender, times(2)).sendMessage(Mockito.any());
+  }
+
+  @Test
+  public void processesMapTest() {
+    ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<>();;
+    ReflectionTestUtils.setField(updateRecordHelper, "processesMap", processesMap);
+    updateRecordHelper.getProcessesMap();
+    assertEquals(processesMap, updateRecordHelper.getProcessesMap());
   }
 }
