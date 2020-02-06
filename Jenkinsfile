@@ -166,23 +166,18 @@ pipeline {
                   } else {
                      env.TAG_SUFIX=""
                      env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
-                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=properties.dataset.version -q -DforceStdout', returnStdout: true
-                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.recordstore.version -q -DforceStdout', returnStdout: true
-                     env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.validation.version -q -DforceStdout', returnStdout: true
-                     env.COLLABORATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.collaboration.version -q -DforceStdout', returnStdout: true
-                     env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.document.version -q -DforceStdout', returnStdout: true
-                     env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.api-gateway.version -q -DforceStdout', returnStdout: true
-                     env.INSPIRE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.inspire.version -q -DforceStdout', returnStdout: true
-                     env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.communication.version -q -DforceStdout', returnStdout: true
-                     env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.indexsearch.version -q -DforceStdout', returnStdout: true
-                     env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.ums.version -q -DforceStdout', returnStdout: true
-                     env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.frontend.version -q -DforceStdout', returnStdout: true
-                     
-                     echo 'valor de las variables de version'
-                     echo "dataflow=${DATAFLOW_VERSION}"
-                     echo "frontend=${FRONTEND_VERSION}"
-                     echo "dataset=${DATASET_VERSION}"
-                    
+                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
+                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
+                     env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
+                     env.COLLABORATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=collaboration.version -q -DforceStdout', returnStdout: true
+                     env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=document.version -q -DforceStdout', returnStdout: true
+                     env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=api-gateway.version -q -DforceStdout', returnStdout: true
+                     env.INSPIRE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=inspire.version -q -DforceStdout', returnStdout: true
+                     env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=communication.version -q -DforceStdout', returnStdout: true
+                     env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=indexsearch.version -q -DforceStdout', returnStdout: true
+                     env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=ums.version -q -DforceStdout', returnStdout: true
+                     env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=frontend.version -q -DforceStdout', returnStdout: true
+
                   }
                 }
             }
