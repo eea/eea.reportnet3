@@ -11,10 +11,11 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
-import org.eea.dataflow.persistence.domain.Document;
+import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -48,6 +49,9 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
+
+  @Autowired
+  private RepresentativeRepository representativeRepository;
 
   /**
    * The dataflow repository.
@@ -518,9 +522,25 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
+    // WE TAKE THE DATAFLOW OBJECT
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
+
+    // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
+    if (null != dataflow.getRepresentatives() && !dataflow.getRepresentatives().isEmpty()) {
+      for (Representative representative : dataflow.getRepresentatives()) {
+        try {
+          representativeRepository.deleteById(representative.getId());
+        } catch (Exception e) {
+          LOG.error("Error deleting representative with id {}", representative.getId());
+          throw new EEAException(new StringBuilder().append("Error Deleting representative")
+              .append(" with id ").append(representative.getId()).toString(), e);
+        }
+      }
+    }
     try {
-      //this is necessary since the deletion of documents requires dataflow to be updated in Hibernate Cache before removing the entity itself
-      dataflowRepository.delete(dataflowRepository.findById(idDataflow).get());
+      // this is necessary since the deletion of documents requires dataflow to be updated in
+      // Hibernate Cache before removing the entity itself
+      dataflowRepository.delete(dataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
