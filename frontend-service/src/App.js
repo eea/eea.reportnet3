@@ -30,8 +30,8 @@ const App = () => {
   return (
     <div className={styles.app}>
       <ResourcesProvider>
-        <UserProvider>
-          <NotificationProvider>
+        <NotificationProvider>
+          <UserProvider>
             <LeftSideBarProvider>
               <LoadingProvider>
                 <BreadCrumbProvider>
@@ -58,8 +58,8 @@ const App = () => {
                 </BreadCrumbProvider>
               </LoadingProvider>
             </LeftSideBarProvider>
-          </NotificationProvider>
-        </UserProvider>
+          </UserProvider>
+        </NotificationProvider>
       </ResourcesProvider>
     </div>
   );
