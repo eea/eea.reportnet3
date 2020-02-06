@@ -165,10 +165,7 @@ pipeline {
                       env.TAG_SUFIX="_sandbox"
                   } else {
                      env.TAG_SUFIX=""
-                     sh '''
-                        DATAFLOW_VERSION=$(mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout)
-                     '''
-                     
+                     env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
                      // env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                      // env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
                      // env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
@@ -197,7 +194,7 @@ pipeline {
                         script {
                             echo 'Dataflow Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/dataflow-service:$DATAFLOW_VERSION$TAG_SUFIX", "--build-arg JAR_FILE=target/dataflow-service-$DATAFLOW_VERSION.jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
+                            app = docker.build("k8s-swi001:5000/dataflow-service:" + env.DATAFLOW_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/dataflow-service-" + env.DATAFLOW_VERSION + ".jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
                             app.push()
                         }
                         // script {
