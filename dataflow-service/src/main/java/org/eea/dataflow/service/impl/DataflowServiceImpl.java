@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -117,7 +118,6 @@ public class DataflowServiceImpl implements DataflowService {
 
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
-
 
 
   /**
@@ -478,16 +478,17 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
+  @Transactional
   public void deleteDataFlow(Long idDataflow) throws Exception {
     // take the jpa entity
     final DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
-    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
+
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
-      for (Document document : dataflow.getDocuments()) {
+    if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
+      for (DocumentVO document : dataflowVO.getDocuments()) {
         try {
           // we pass bolean to say dont delete metabase because jpa entiti will be delete the
           // property document
@@ -518,7 +519,8 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
     try {
-      dataflowRepository.deleteById(idDataflow);
+      //this is necessary since the deletion of documents requires dataflow to be updated in Hibernate Cache before removing the entity itself
+      dataflowRepository.delete(dataflowRepository.findById(idDataflow).get());
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
@@ -544,6 +546,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param id the id
    * @param status the status
+   *
    * @throws EEAException the EEA exception
    */
   @Override
