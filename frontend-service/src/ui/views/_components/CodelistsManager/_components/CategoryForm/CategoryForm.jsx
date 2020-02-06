@@ -24,7 +24,7 @@ const CategoryForm = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        disabled={isIncorrect}
+        disabled={isIncorrect || Object.values(newCategory).includes('')}
         icon="save"
         label={resources.messages['save']}
         onClick={() => {

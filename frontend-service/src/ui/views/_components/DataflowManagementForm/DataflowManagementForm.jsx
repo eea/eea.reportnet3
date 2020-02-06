@@ -6,23 +6,29 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './DataflowManagementForm.module.css';
 
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { Button } from 'ui/views/_components/Button';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DataflowManagementForm = ({
   dataflowId,
   dataflowValues,
+  hasErrors,
   isDialogVisible,
   isEditForm,
   isFormReset,
+  isNameDuplicated,
   onCreate,
   onCancel,
   onEdit,
-  selectedDataflow
+  selectedDataflow,
+  setHasErrors,
+  setIsNameDuplicated
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -36,22 +42,11 @@ const DataflowManagementForm = ({
         inputRef.current.focus();
       }
     }
-  }, [isDialogVisible]);
+  }, [isDialogVisible, hasErrors]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: isEditForm
-      ? Yup.string()
-          .required(' ')
-          .test('isEditFormDuplicated', resources.messages['duplicatedDataflow'], value => {
-            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
-              const repeatedResults = Object.keys(dataflowValues)
-                .filter(key => dataflowValues[key].id != dataflowId)
-                .map(key => dataflowValues[key].name)
-                .filter(item => typeof item === 'string')
-                .some(item => item.toLowerCase() === value.toLowerCase());
-              return !repeatedResults;
-            }
-          })
+      ? Yup.string().required(' ')
       : Yup.string()
           .required(' ')
           .test('isNewFormDuplicated', resources.messages['duplicatedDataflow'], value => {
@@ -95,33 +90,46 @@ const DataflowManagementForm = ({
             onCreate();
           }
         } catch (error) {
-          const notification = isEditForm
-            ? {
-                type: 'DATAFLOW_UPDATING_ERROR',
-                content: {
-                  dataflowId,
-                  dataflowName: values.name
+          setHasErrors(true);
+          if (error.response.data == DataflowConf.errorTypes['dataflowExists']) {
+            setIsNameDuplicated(true);
+            notificationContext.add({
+              type: 'DATAFLOW_NAME_EXISTS'
+            });
+          } else {
+            const notification = isEditForm
+              ? {
+                  type: 'DATAFLOW_UPDATING_ERROR',
+                  content: {
+                    dataflowId,
+                    dataflowName: values.name
+                  }
                 }
-              }
-            : {
-                type: 'DATAFLOW_CREATION_ERROR',
-                content: {
-                  dataflowName: values.name
-                }
-              };
-          notificationContext.add(notification);
+              : {
+                  type: 'DATAFLOW_CREATION_ERROR',
+                  content: {
+                    dataflowName: values.name
+                  }
+                };
+            notificationContext.add(notification);
+          }
         } finally {
           setSubmitting(false);
         }
       }}>
-      {({ isSubmitting, errors, touched, values }) => (
+      {({ errors, handleChange, isSubmitting, touched, values }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.name) && touched.name ? ' error' : ''}`}>
+            <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
               <Field
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
+                onChange={event => {
+                  handleChange(event);
+                  setIsNameDuplicated(false);
+                  setHasErrors(false);
+                }}
                 type="text"
                 value={values.name}
               />

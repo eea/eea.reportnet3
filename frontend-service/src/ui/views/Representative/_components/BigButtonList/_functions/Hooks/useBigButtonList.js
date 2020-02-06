@@ -17,8 +17,6 @@ const useBigButtonList = ({
   representative
 }) => {
   const resources = useContext(ResourcesContext);
-  console.log(dataflowData);
-
   const helpButton = {
     layout: 'defaultBigButton',
     buttonClass: 'dataflowHelp',

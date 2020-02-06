@@ -6,6 +6,7 @@ import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.factory.EEAEventCommandFactory;
 import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class EEAEventHandlerImpl implements EEAEventHandler {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(EEAEventHandlerImpl.class);
 
-  /** The eea eent command factory. */
+  /**
+   * The eea eent command factory.
+   */
   @Autowired
   private EEAEventCommandFactory eeaEentCommandFactory;
+
+  @Autowired
+  private JwtTokenProvider jwtTokenProvider;
 
   /**
    * Gets the type.
@@ -41,6 +49,7 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
    * Process message.
    *
    * @param message the message
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -53,11 +62,14 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
         ThreadPropertiesManager.setVariable("user", user);
       }
       if (message.getData().containsKey("token")) {
-        SecurityContextHolder.getContext()
-            .setAuthentication(new UsernamePasswordAuthenticationToken(
-                EeaUserDetails.create(user, new HashSet<String>()),
-                String.valueOf(message.getData().get("token")), null));
+        String token =
+            jwtTokenProvider.retrieveAccessToken(message.getData().get("token").toString());
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                token, null));
+        message.getData().put("token", token);
       }
+
       command.execute(message);
     }
   }

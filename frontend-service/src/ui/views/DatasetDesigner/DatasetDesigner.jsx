@@ -22,6 +22,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
@@ -34,6 +35,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     params: { datasetId }
   } = match;
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -111,6 +113,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       },
       { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
     ]);
+    leftSideBarContext.removeModels();
     getDataflowName();
     onLoadDatasetSchemaName();
   }, []);

@@ -20,20 +20,26 @@ import { UserService } from 'core/services/User';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 const Dataflows = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [acceptedContent, setacceptedContent] = useState([]);
   const [completedContent, setcompletedContent] = useState([]);
+  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -90,6 +96,31 @@ const Dataflows = withRouter(({ match, history }) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (isCustodian) {
+      leftSideBarContext.addModels([
+        {
+          icon: 'plus',
+          label: 'createNewDataflow',
+          onClick: () => onShowAddForm(),
+          title: 'createNewDataflow'
+        },
+        {
+          href: getUrl(routes['CODELISTS']),
+          icon: 'settings',
+          label: 'manageCodelists',
+          onClick: e => {
+            e.preventDefault();
+            history.push(getUrl(routes['CODELISTS']));
+          },
+          title: 'manageCodelists'
+        }
+      ]);
+    } else {
+      leftSideBarContext.removeModels();
+    }
+  }, [isCustodian]);
+
   const onCreateDataflow = () => {
     setIsDataflowDialogVisible(false);
     dataFetch();
@@ -99,6 +130,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsFormReset(false);
+    setDataflowHasErrors(false);
+    setIsNameDuplicated(false);
   };
 
   const onRefreshToken = async () => {
@@ -114,6 +147,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const onShowAddForm = () => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
+    setIsFormReset(true);
     dataflowDispatch({
       type: 'ON_RESET_DATAFLOW_DATA'
     });
@@ -121,25 +155,7 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout
-        leftSideBarConfig={{
-          isCustodian,
-          buttons: [
-            {
-              isLink: false,
-              onClick: () => onShowAddForm(),
-              icon: 'plus',
-              label: resources.messages['createNewDataflow']
-            },
-            {
-              isLink: true,
-              onClick: () => onShowAddForm(),
-              icon: 'settings',
-              label: resources.messages['manageCodelists'],
-              linkTo: { route: 'CODELISTS', children: {}, isRoute: true }
-            }
-          ]
-        }}>
+      <MainLayout>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -194,10 +210,14 @@ const Dataflows = withRouter(({ match, history }) => {
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
         <DataflowManagementForm
+          hasErrors={dataflowHasErrors}
           isDialogVisible={isDataflowDialogVisible}
           isFormReset={isFormReset}
-          onCreate={onCreateDataflow}
+          isNameDuplicated={isNameDuplicated}
           onCancel={onHideDialog}
+          onCreate={onCreateDataflow}
+          setHasErrors={setDataflowHasErrors}
+          setIsNameDuplicated={setIsNameDuplicated}
         />
       </Dialog>
     </div>

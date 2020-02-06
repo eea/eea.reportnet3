@@ -16,6 +16,8 @@ import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
 import { EULogin } from 'ui/views/Login/EULogin';
 import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
+import { LeftSideBarProvider } from 'ui/views/_functions/Providers/LeftSideBarProvider';
+
 import { NotificationProvider } from 'ui/views/_functions/Providers/NotificationProvider';
 import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
@@ -30,30 +32,32 @@ const App = () => {
       <ResourcesProvider>
         <UserProvider>
           <NotificationProvider>
-            <LoadingProvider>
-              <BreadCrumbProvider>
-                <Notifications />
-                <Router>
-                  <Switch>
-                    <Route
-                      exact
-                      path="/"
-                      component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
-                    />
-                    <Route exact path={routes.EULOGIN} component={EULogin} />
-                    <PrivateRoute exact path={routes.CODELISTS} component={Codelists} />
-                    <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
-                    <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
-                    <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
-                    <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
-                    <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
-                    <PrivateRoute exact path={routes.REPRESENTATIVE} component={Representative} />
-                    <PrivateRoute exact path={routes.DATASET} component={Dataset} />
-                    <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
-                  </Switch>
-                </Router>
-              </BreadCrumbProvider>
-            </LoadingProvider>
+            <LeftSideBarProvider>
+              <LoadingProvider>
+                <BreadCrumbProvider>
+                  <Notifications />
+                  <Router>
+                    <Switch>
+                      <Route
+                        exact
+                        path="/"
+                        component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
+                      />
+                      <Route exact path={routes.EULOGIN} component={EULogin} />
+                      <PrivateRoute exact path={routes.CODELISTS} component={Codelists} />
+                      <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
+                      <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
+                      <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
+                      <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                      <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
+                      <PrivateRoute exact path={routes.REPRESENTATIVE} component={Representative} />
+                      <PrivateRoute exact path={routes.DATASET} component={Dataset} />
+                      <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
+                    </Switch>
+                  </Router>
+                </BreadCrumbProvider>
+              </LoadingProvider>
+            </LeftSideBarProvider>
           </NotificationProvider>
         </UserProvider>
       </ResourcesProvider>
