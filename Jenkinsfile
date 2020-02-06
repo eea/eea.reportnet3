@@ -166,7 +166,7 @@ pipeline {
                   } else {
                      env.TAG_SUFIX=""
                      sh '''
-                        DATAFLOW_VERSION=$(mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout')
+                        DATAFLOW_VERSION=$(mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout)
                      '''
                      
                      // env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
