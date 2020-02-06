@@ -15,6 +15,8 @@ import { SnapshotService } from 'core/services/Snapshot';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 export const SnapshotsDialog = ({
   dataflowData,
   dataflowId,
@@ -33,6 +35,16 @@ export const SnapshotsDialog = ({
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDescription, setSnapshotDescription] = useState();
+
+  useCheckNotifications(
+    [
+      'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT',
+      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT',
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
+    setIsLoading,
+    false
+  );
 
   useEffect(() => {
     if (isSnapshotDialogVisible) {
@@ -78,8 +90,6 @@ export const SnapshotsDialog = ({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
         content: {}
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

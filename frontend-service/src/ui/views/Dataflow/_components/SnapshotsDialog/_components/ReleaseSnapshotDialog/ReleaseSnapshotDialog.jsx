@@ -25,10 +25,12 @@ export const ReleaseSnapshotDialog = ({
   const resources = useContext(ResourcesContext);
 
   const onBuildSnapshot = async () => {
+    setIsLoading(true);
     try {
       await SnapshotService.createByIdReporter(datasetId, snapshotDescription, isReleased);
       onLoadSnapshotList(datasetId);
     } catch (error) {
+      setIsLoading(false);
       notificationContext.add({
         type: 'CREATE_BY_ID_REPORTER_ERROR',
         content: {}
@@ -39,10 +41,12 @@ export const ReleaseSnapshotDialog = ({
   };
 
   const onReleaseSnapshot = async snapshotId => {
+    setIsLoading(true);
     try {
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotId);
       onLoadSnapshotList(datasetId);
     } catch (error) {
+      setIsLoading(false);
       notificationContext.add({
         type: 'RELEASED_BY_ID_REPORTER_ERROR',
         content: {}
@@ -57,9 +61,7 @@ export const ReleaseSnapshotDialog = ({
       <Button
         icon="cloudUpload"
         label={resources.messages['yes']}
-        onClick={() =>
-          (!isReleased ? onReleaseSnapshot(snapshotDataToRelease.id) : onBuildSnapshot()) && setIsLoading(true)
-        }
+        onClick={() => (!isReleased ? onReleaseSnapshot(snapshotDataToRelease.id) : onBuildSnapshot())}
       />
       <Button
         icon="cancel"
