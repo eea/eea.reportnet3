@@ -87,7 +87,18 @@ export const TabView = ({
         }
       }
     } else {
-      setActiveIdx(index);
+      if (!tab.props.disabled) {
+        if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+          onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+        }
+        if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+          onTabChange({ originalEvent: event, index: index });
+        } else {
+          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+            onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+          }
+        }
+      }
     }
     event.preventDefault();
   };

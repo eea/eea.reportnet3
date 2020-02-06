@@ -19,6 +19,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
+import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
@@ -53,6 +54,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
@@ -230,6 +232,10 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsNameDuplicated(false);
   };
 
+  const onHideSnapshotDialog = () => {
+    setIsActiveReleaseSnapshotDialog(false);
+  };
+
   const onLoadDataflowsData = async () => {
     try {
       const allDataflows = await DataflowService.all();
@@ -320,6 +326,11 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsActiveManageRolesDialog(true);
   };
 
+  const onShowReleaseSnapshotDialog = async datasetId => {
+    setDatasetIdToSnapshotProps(datasetId);
+    setIsActiveReleaseSnapshotDialog(true);
+  };
+
   const onHideManageRolesDialog = () => {
     setIsActiveManageRolesDialog(false);
   };
@@ -332,12 +343,6 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => onHideManageRolesDialog()}
     />
   );
-
-  const onShowReleaseSnapshotDialog = async datasetId => {
-    setDatasetIdToProps(datasetId);
-    onLoadSnapshotList(datasetId);
-    setIsActiveReleaseSnapshotDialog(true);
-  };
 
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
@@ -414,6 +419,15 @@ const Dataflow = withRouter(({ history, match }) => {
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
 
+        <SnapshotsDialog
+          dataflowId={match.params.dataflowId}
+          dataflowData={dataflowData}
+          datasetId={datasetIdToSnapshotProps}
+          hideSnapshotDialog={onHideSnapshotDialog}
+          isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+          setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
+        />
+
         <Dialog
           header={resources.messages['manageRolesDialogTitle']}
           footer={closeBtnManageRolesDialog}
@@ -429,13 +443,13 @@ const Dataflow = withRouter(({ history, match }) => {
           </div>
         </Dialog>
 
-        <Dialog
+        {/* <Dialog
           header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
           className={styles.releaseSnapshotsDialog}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
-          {/* <ScrollPanel style={{ width: '100%', height: '50vh' }}> */}
+           <ScrollPanel style={{ width: '100%', height: '50vh' }}> 
           {!isEmpty(snapshotsListData) ? (
             <SnapshotsList
               className={styles.releaseList}
@@ -447,8 +461,8 @@ const Dataflow = withRouter(({ history, match }) => {
           ) : (
             <h3>{resources.messages['emptySnapshotList']}</h3>
           )}
-          {/* </ScrollPanel> */}
-        </Dialog>
+           </ScrollPanel> 
+        </Dialog> */}
 
         <Dialog
           header={resources.messages['properties']}
