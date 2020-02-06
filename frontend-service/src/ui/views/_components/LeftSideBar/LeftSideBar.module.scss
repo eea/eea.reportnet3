@@ -41,8 +41,9 @@
     a {
       padding: 8px;
       text-decoration: none;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       color: var(--white);
+      cursor: pointer;
       display: block;
       &:first-of-type {
         top: 1rem;

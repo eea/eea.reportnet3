@@ -93,6 +93,7 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The dataset schema VO. */
   private DataSetSchemaVO datasetSchemaVO;
 
   /**
@@ -465,8 +466,12 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
   }
+
+
 
   /**
    * Creates the field schema test 2.
@@ -477,8 +482,10 @@ public class DataSetSchemaControllerImplTest {
   public void createFieldSchemaTest2() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any())).thenReturn("");
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
     try {
-      dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+      dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
@@ -495,7 +502,24 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn("FieldId");
-    assertEquals("FieldId", dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO()));
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    assertEquals("FieldId", dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO));
+  }
+
+  /**
+   * Creates the field schema test 4.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void createFieldSchemaTest4() throws EEAException {
+    try {
+      dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.FIELD_NAME_NULL, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
   }
 
   /**

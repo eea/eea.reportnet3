@@ -11,6 +11,7 @@ import {
   getAllDataProviders,
   getInitialData,
   onAddProvider,
+  onCloseManageRolesDialog,
   onDataProviderIdChange,
   onDeleteConfirm,
   onKeyDown
@@ -24,7 +25,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
+const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManageRolesDialog }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -46,6 +47,12 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
+
+  useEffect(() => {
+    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativeHasError)) {
+      onCloseManageRolesDialog(formDispatcher);
+    }
+  }, [isActiveManageRolesDialog]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -75,9 +82,8 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     return (
-      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
-          className={styles.toLower}
           autoFocus={isNull(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
@@ -106,11 +112,14 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives }) => {
       option => option.dataProviderId === representative.dataProviderId
     );
 
+    let hasError = formState.representativeHasError.includes(representative.representativeId);
+
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
 
     return (
       <>
         <select
+          disabled={hasError}
           className="p-dropdown-items p-dropdown-list p-component"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
