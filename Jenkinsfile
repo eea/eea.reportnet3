@@ -123,7 +123,7 @@ pipeline {
             }
         }
         
-        stage('Install in Nexus') {
+        /*stage('Install in Nexus') {
             when {
                 branch 'develop1' 
             }
@@ -268,7 +268,7 @@ pipeline {
                 }
             
             }
-        }
+        }*/
         
         
     }

@@ -5,7 +5,7 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
@@ -18,7 +18,7 @@
 
   <groupId>org.eea.inspire</groupId>
   <artifactId>inspire-harvester</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${inspire.version}</version>
   <dependencies>
     <dependency>
       <groupId>com.rometools</groupId>

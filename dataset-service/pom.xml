@@ -5,14 +5,14 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.dataset</groupId>
   <artifactId>dataset-service</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${dataset.version}</version>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:dataset-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>

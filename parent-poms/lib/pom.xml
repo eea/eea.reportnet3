@@ -4,15 +4,25 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+
+    <groupId>org.eea</groupId>
+    <artifactId>eea-pom</artifactId>
+    <version>3.0.0</version>
+    <relativePath>..</relativePath>
+  </parent>
+
   <groupId>org.eea</groupId>
   <artifactId>library-pom</artifactId>
   <packaging>pom</packaging>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.0.0</version>
   <properties>
     <spring.version>5.1.5.RELEASE</spring.version>
     <java.version>1.8</java.version>
     <feign_version>10.1.0</feign_version>
     <projectlombok.version>1.18.0</projectlombok.version>
+
+
   </properties>
 
   <dependencies>
