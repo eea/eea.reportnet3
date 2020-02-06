@@ -18,11 +18,11 @@ pipeline {
                     steps {
                         sh 'mvn clean -B -V verify'
                     }
-                    post {
-                        success {
-                            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-                        }
-                    }
+                    //post {
+                    //    success {
+                    //        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                    //    }
+                    //}
                 }
                 stage('Build Frontend') {
                     agent { node { label 'eea'} }
@@ -43,11 +43,30 @@ pipeline {
                 }
             }
         }
+        stage('Setup sandbox docker images build'){
+            steps{
+                script {
+                    
+                    env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
+                    env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
+                    env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
+                    env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
+                    env.COLLABORATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=collaboration.version -q -DforceStdout', returnStdout: true
+                    env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=document.version -q -DforceStdout', returnStdout: true
+                    env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=api-gateway.version -q -DforceStdout', returnStdout: true
+                    env.INSPIRE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=inspire.version -q -DforceStdout', returnStdout: true
+                    env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=communication.version -q -DforceStdout', returnStdout: true
+                    env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=indexsearch.version -q -DforceStdout', returnStdout: true
+                    env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=ums.version -q -DforceStdout', returnStdout: true
+                    env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=frontend.version -q -DforceStdout', returnStdout: true
+                }
+            }
+        }
         stage('Docker push') {
             steps {
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/dataflow-service:1.0", "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 .")
+                    image = docker.build("eeacms/dataflow-service:" + env.DATAFLOW_VERSION, "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-" + env.DATAFLOW_VERSION + ".jar --build-arg MS_PORT=8020 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -55,7 +74,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/api-gateway:1.0", "--build-arg JAR_FILE=api-gateway/target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 .")
+                    image = docker.build("eeacms/api-gateway:" + env.API_GATEWAY_VERSION, "--build-arg JAR_FILE=api-gateway/target/api-gateway-" + env.API_GATEWAY_VERSION + ".jar --build-arg MS_PORT=8010 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -63,7 +82,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/dataset-service:1.0", "--build-arg JAR_FILE=dataset-service/target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 .")
+                    image = docker.build("eeacms/dataset-service:" + env.DATASET_VERSION, "--build-arg JAR_FILE=dataset-service/target/dataset-service-" + env.DATASET_VERSION + ".jar --build-arg MS_PORT=8030 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -71,7 +90,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                    image = docker.build("eeacms/recordstore-service:" + env.RECORDSTORE_VERSION, "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-" + env.RECORDSTORE_VERSION + ".jar --build-arg MS_PORT=8090 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -79,7 +98,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=9000 .")
+                    image = docker.build("eeacms/validation-service:" + env.VALIDATION_VERSION, "--build-arg JAR_FILE=validation-service/target/validation-service-" + env.VALIDATION_VERSION + ".jar --build-arg MS_PORT=9000 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -87,7 +106,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
+                    image = docker.build("eeacms/document-container-service:" + env.DOCUMENT_VERSION, "--build-arg JAR_FILE=document-container-service/target/document-container-service-" + env.DOCUMENT_VERSION + ".jar --build-arg MS_PORT=9040 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -95,7 +114,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/user-management-service:3.0", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
+                    image = docker.build("eeacms/communication-service:" + env.COMMUNICATION_VERSION, "--build-arg JAR_FILE=communication-service/target/communication-service-" + env.COMMUNICATION_VERSION + ".jar --build-arg MS_PORT=9020 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -103,7 +122,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/communication-service:3.0", "--build-arg JAR_FILE=communication-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 .")
+                    image = docker.build("eeacms/indexsearch-service:" + env.INDEXSEARCH_VERSION, "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-" + env.INDEXSEARCH_VERSION + ".jar --build-arg MS_PORT=9030 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -111,7 +130,7 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/indexsearch-service:3.0", "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                    image = docker.build("eeacms/inspire-harvester:" + env.INSPIRE_VERSION, "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-" + env.INSPIRE_VERSION + ".jar --build-arg MS_PORT=8050 -f .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
@@ -119,7 +138,23 @@ pipeline {
                 }
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/reportnet-frontend-service:3.0", " ./frontend-service/")
+                    image = docker.build("eeacms/collaboration-service:" + env.COLLABORATION_VERSION, "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-" + env.COLLABORATION_VERSION + ".jar --build-arg MS_PORT=9010 -f .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/user-management-service:" + env.UMS_VERSION, "--build-arg JAR_FILE=user-management-service/target/user-management-service-" + env.UMS_VERSION + ".jar --build-arg MS_PORT=9010 -f .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/reportnet-frontend-service:" + env.FRONTEND_VERSION, " ./frontend-service/")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
