@@ -184,7 +184,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == release/3.0.0-RC.1.1
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == "release/3.0.0-RC.1.1"
                 }
             }
             parallel {
