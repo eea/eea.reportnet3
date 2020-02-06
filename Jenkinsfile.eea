@@ -1,0 +1,131 @@
+pipeline {
+
+    agent { node { label 'docker' } }
+    tools {
+        maven 'maven3'
+        jdk 'Java8'
+    }
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '2'))
+        timeout(time: 60, unit: 'MINUTES')
+    }
+    stages {
+        //Project Build
+        stage('Project Build') {
+            parallel {
+                stage('Build Microservices') {
+                    steps {
+                        sh 'mvn clean -B -V verify'
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                        }
+                    }
+                }
+                stage('Build Frontend') {
+                    agent { node { label 'eea'} }
+                    steps {
+                        sh '''
+                            npm install frontend-service/
+                        '''
+                    }
+                }
+            }
+            
+        }
+        stage('Report to SonarQube') {
+            steps {
+                withSonarQubeEnv('Sonarqube') {
+                    // requires SonarQube Scanner for Maven 3.2+
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                }
+            }
+        }
+        stage('Docker push') {
+            steps {
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/dataflow-service:1.0", "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/api-gateway:1.0", "--build-arg JAR_FILE=api-gateway/target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/dataset-service:1.0", "--build-arg JAR_FILE=dataset-service/target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=9000 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/user-management-service:3.0", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/communication-service:3.0", "--build-arg JAR_FILE=communication-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/indexsearch-service:3.0", "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/reportnet-frontend-service:3.0", " ./frontend-service/")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+            }
+        }
+    }
+}
