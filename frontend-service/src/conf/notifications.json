@@ -335,6 +335,11 @@
         },
         {
           "key": "LOAD_WEB_LINKS_ERROR"
+        },
+        {
+          "key": "DATAFLOW_NAME_EXISTS",
+          "lifeTime": 5000,
+          "fixed": false
         }
       ]
     },

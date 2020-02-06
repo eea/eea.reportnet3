@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 
-import { remove } from 'lodash';
+import { isUndefined, remove } from 'lodash';
 
 import styles from './BigButtonList.module.css';
 
@@ -155,6 +155,7 @@ export const BigButtonList = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonList({
+              hasWritePermissions,
               dataflowData: dataflowData,
               dataflowId: dataflowId,
               dataflowStatus: dataflowStatus,
@@ -228,6 +229,7 @@ export const BigButtonList = ({
 
       <ConfirmDialog
         header={resources.messages['createDataCollection']}
+        disabledConfirm={isUndefined(dataCollectionDueDate)}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
@@ -237,9 +239,10 @@ export const BigButtonList = ({
         <Calendar
           className={styles.calendar}
           inline={true}
+          monthNavigator={true}
+          minDate={new Date()}
           onChange={event => setDataCollectionDueDate(event.target.value)}
           showWeek={true}
-          monthNavigator={true}
           value={dataCollectionDueDate}
           yearNavigator={true}
           yearRange="2020:2030"

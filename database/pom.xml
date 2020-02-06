@@ -20,7 +20,7 @@
         <artifactId>flyway-maven-plugin</artifactId>
         <version>6.2.0</version>
         <configuration>
-          <url>jdbc:postgresql://${POSTGRES_HOST}/metabase</url>
+          <url>jdbc:postgresql://${POSTGRES_SERVER}/metabase</url>
           <user>${POSTGRES_USER}</user>
           <password>${POSTGRES_PASS}</password>
           <schemas>

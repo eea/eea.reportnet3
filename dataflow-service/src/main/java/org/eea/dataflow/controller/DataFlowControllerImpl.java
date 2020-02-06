@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -243,36 +244,46 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+
   /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  public ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
 
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
     if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
         || dataFlowVO.getDeadlineDate().equals(dateToday))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATE_AFTER_INCORRECT);
+
+      message = EEAErrorMessage.DATE_AFTER_INCORRECT;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     if (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME);
+
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      status = HttpStatus.BAD_REQUEST;
     }
 
     try {
       dataflowService.createDataFlow(dataFlowVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed");
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
   /**
