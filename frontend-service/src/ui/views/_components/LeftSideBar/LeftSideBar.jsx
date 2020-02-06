@@ -80,17 +80,17 @@ const LeftSideBar = withRouter(() => {
       href: '#',
       onClick: e => {
         e.preventDefault();
-        breadCrumbContext.setMenuState();
+        leftSideBarContext.setMenuState();
       },
       title: 'expandSidebar',
-      icon: breadCrumbContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
+      icon: leftSideBarContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
       label: ''
     };
     return <LeftSideBarButton {...openCloseProps} />;
   };
 
   return (
-    <div className={`${styles.leftSideBar}${breadCrumbContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
+    <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
       {
         <>
           <div className={styles.barSection}>

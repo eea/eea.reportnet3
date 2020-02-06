@@ -8,7 +8,7 @@ import { Footer } from './_components';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -17,7 +17,7 @@ import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
   const user = useContext(UserContext);
 
@@ -46,12 +46,12 @@ const MainLayout = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (breadCrumbContext.isLeftSideBarOpened) {
+    if (leftSideBarContext.isLeftSideBarOpened) {
       setMargin('200px');
     } else {
       setMargin('50px');
     }
-  }, [breadCrumbContext]);
+  }, [leftSideBarContext]);
 
   const onToggleSideBar = hover => {};
 
