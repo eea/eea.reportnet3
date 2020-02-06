@@ -12,18 +12,19 @@ import { InfoTableMessages } from './_components/InfoTableMessages';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const InfoTable = ({ data, filteredColumns, numCopiedRecords, onDeletePastedRecord }) => {
+export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, onDeletePastedRecord }) => {
   const resources = useContext(ResourcesContext);
 
   const actionTemplate = record => {
     return (
       <div className={styles.infoTableCellCorrect}>
         <Button
-          type="button"
+          disabled={isPasting}
           icon="trash"
           onClick={() => {
             onDeletePastedRecord(record.recordId);
           }}
+          type="button"
         />
       </div>
     );
