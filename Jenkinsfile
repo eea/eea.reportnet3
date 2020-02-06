@@ -165,7 +165,7 @@ pipeline {
                       env.TAG_SUFIX="_sandbox"
                   } else {
                      env.TAG_SUFIX=""
-                     env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.dataflow.version -q -DforceStdout', returnStdout: true
+                     env.DATAFLOW_VERSION = sh('script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.dataflow.version -q -DforceStdout', returnStdout: true')
                      env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.dataset.version -q -DforceStdout', returnStdout: true
                      env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.recordstore.version -q -DforceStdout', returnStdout: true
                      env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.validation.version -q -DforceStdout', returnStdout: true
@@ -176,7 +176,7 @@ pipeline {
                      env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.communication.version -q -DforceStdout', returnStdout: true
                      env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.indexsearch.version -q -DforceStdout', returnStdout: true
                      env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.ums.version -q -DforceStdout', returnStdout: true
-                     env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.frontend.version -q -DforceStdout', returnStdout: true
+                     env.FRONTEND_VERSION = sh('script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=project.properties.frontend.version -q -DforceStdout', returnStdout: true')
                   }
                 }
             }
