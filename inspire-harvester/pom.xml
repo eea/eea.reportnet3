@@ -48,11 +48,6 @@
       <artifactId>net.opengis.wfs</artifactId>
       <version>${geotools.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.eea.interfaces</groupId>
-      <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
   </dependencies>
   <repositories>
     <repository>
