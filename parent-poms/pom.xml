@@ -15,6 +15,7 @@
   <properties>
     <api-gateway.version>1.0.0</api-gateway.version>
     <communication.version>1.0.0</communication.version>
+    <collaboration.version>1.0.0</collaboration.version>
     <dataflow.version>1.0.0</dataflow.version>
     <dataset.version>1.0.0</dataset.version>
     <document.version>1.0.0</document.version>
