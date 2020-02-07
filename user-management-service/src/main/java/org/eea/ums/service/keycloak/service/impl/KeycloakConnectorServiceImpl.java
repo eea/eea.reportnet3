@@ -78,7 +78,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String GENERATE_TOKEN_URL =
       "/auth/realms/{realm}/protocol/openid-connect/token";
   private static final String LOGOUT_URL = "/auth/realms/{realm}/protocol/openid-connect/logout";
-  private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users";
+  private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users?max=500";
   private static final String LIST_USER_GROUPS_URL = "";
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
