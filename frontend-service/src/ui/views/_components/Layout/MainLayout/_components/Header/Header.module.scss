@@ -26,6 +26,9 @@
       color: var(--main-font-color);
     }
   }
+  svg {
+    color: var(--main-font-color);
+  }
   .userWrapper {
     display: flex;
     align-items: center;
