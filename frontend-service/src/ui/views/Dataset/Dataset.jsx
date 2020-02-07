@@ -139,7 +139,17 @@ export const Dataset = withRouter(({ match, history }) => {
               representative: metaData.dataset.name
             },
             true
-          )
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.REPRESENTATIVE,
+                {
+                  dataflowId
+                },
+                true
+              )
+            )
         });
       }
       breadCrums.push({ label: resources.messages['dataset'], icon: 'dataset' });
