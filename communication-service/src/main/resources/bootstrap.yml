@@ -4,6 +4,8 @@ spring:
       discovery:
         preferIpAddress: true
         instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: communication
       host: ${CONSUL_HOST:localhost}
       port: ${CONSUL_PORT:8500}
 
