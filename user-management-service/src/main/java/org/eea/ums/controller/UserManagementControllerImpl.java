@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -25,6 +26,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -226,8 +229,14 @@ public class UserManagementControllerImpl implements UserManagementController {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
-    securityProviderInterfaceService.addUserToUserGroup(userId,
-        resourceGroupEnum.getGroupName(idResource));
+    try {
+      securityProviderInterfaceService.addUserToUserGroup(userId,
+          resourceGroupEnum.getGroupName(idResource));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
   }
 
   /**
@@ -291,7 +300,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void addContributorToResource(Long idResource, ResourceGroupEnum resourceGroupEnum,
       String userMail) {
     try {
-      securityProviderInterfaceService.addContributorToUserGroup(userMail,
+      securityProviderInterfaceService.addContributorToUserGroup(null, userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
@@ -303,10 +312,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @RequestMapping(value = "/add_contributors_to_resources", method = RequestMethod.PUT)
   public void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources) {
     try {
-      for (ResourceAssignationVO resource : resources) {
-        securityProviderInterfaceService.addContributorToUserGroup(resource.getEmail(),
-            resource.getResourceGroup().getGroupName(resource.getResourceId()));
-      }
+      securityProviderInterfaceService.addContributorsToUserGroup(resources);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
     }
@@ -320,8 +326,14 @@ public class UserManagementControllerImpl implements UserManagementController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
     for (ResourceAssignationVO resource : resources) {
-      securityProviderInterfaceService.addUserToUserGroup(userId,
-          resource.getResourceGroup().getGroupName(resource.getResourceId()));
+      try {
+        securityProviderInterfaceService.addUserToUserGroup(userId,
+            resource.getResourceGroup().getGroupName(resource.getResourceId()));
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            EEAErrorMessage.PERMISSION_NOT_CREATED);
+      }
     }
   }
 

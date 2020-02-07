@@ -143,6 +143,9 @@ public final class EEAErrorMessage {
   /** The Constant CODELIST_VERSION_DUPLICATED. */
   public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
+  /** The Constant PERMISSION_NOT_CREATED. */
+  public static final String PERMISSION_NOT_CREATED = "Permission not created";
+
   /**
    * Instantiates a new EEA error message.
    */

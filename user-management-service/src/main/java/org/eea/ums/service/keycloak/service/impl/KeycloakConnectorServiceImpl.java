@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
@@ -116,8 +118,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     // such as clientId, resources...
     TokenInfo tokenInfo = this.generateToken(adminUser, adminPass);
 
-    String adminToken =
-        Optional.ofNullable(tokenInfo).map(TokenInfo::getAccessToken).orElse("");
+    String adminToken = Optional.ofNullable(tokenInfo).map(TokenInfo::getAccessToken).orElse("");
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
@@ -357,19 +358,23 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   /**
    * Creates the group detail.
-   *
+   * 
    * @param groupInfo the group info
+   * @throws EEAException
    */
   @Override
-  public void createGroupDetail(GroupInfo groupInfo) {
+  public void createGroupDetail(GroupInfo groupInfo) throws EEAException {
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<GroupInfo> request = createHttpRequest(groupInfo, uriParams);
-    this.restTemplate.postForEntity(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
-
+    try {
+      this.restTemplate.postForEntity(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+          .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
+    } catch (Exception e) {
+      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } ;
   }
 
   /**
@@ -401,20 +406,24 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param userId the user id
    * @param groupId the group id
+   * @throws EEAException
    */
   @Override
-  public void addUserToGroup(String userId, String groupId) {
+  public void addUserToGroup(String userId, String groupId) throws EEAException {
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put(URI_PARAM_GROUP_ID, groupId);
     uriParams.put(URI_PARAM_USER_ID, userId);
     HttpEntity<Void> request = createHttpRequest(null, uriParams);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-
-    this.restTemplate.exchange(
-        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
-        HttpMethod.PUT, request, Void.class);
+    try {
+      this.restTemplate.exchange(
+          uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+              .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+          HttpMethod.PUT, request, Void.class);
+    } catch (Exception e) {
+      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
 
   }
 
@@ -431,7 +440,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -471,7 +480,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -515,19 +524,17 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     TokenInfo responseBody = null;
     try {
       ResponseEntity<TokenInfo> tokenInfo =
-          this.restTemplate
-              .postForEntity(
-                  uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-                      .path(GENERATE_TOKEN_URL).buildAndExpand(uriParams).toString(),
-                  request, TokenInfo.class);
+          this.restTemplate.postForEntity(
+              uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                  .path(GENERATE_TOKEN_URL).buildAndExpand(uriParams).toString(),
+              request, TokenInfo.class);
       if (null != tokenInfo && null != tokenInfo.getBody()) {
         responseBody = tokenInfo.getBody();
       }
     } catch (RestClientException e) {
-      LOG_ERROR
-          .error(
-              "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
-              keycloakHost, e.getMessage(), map, e);
+      LOG_ERROR.error(
+          "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
+          keycloakHost, e.getMessage(), map, e);
     }
 
     return responseBody;

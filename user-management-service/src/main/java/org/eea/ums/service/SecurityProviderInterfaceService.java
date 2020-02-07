@@ -2,14 +2,17 @@ package org.eea.ums.service;
 
 
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.vo.UserVO;
+import org.keycloak.representations.idm.UserRepresentation;
 
 /**
  * The interface Security provider interface service.
@@ -60,8 +63,9 @@ public interface SecurityProviderInterfaceService {
    * Create resource instance.
    *
    * @param resourceInfoVO the resource info vo
+   * @throws EEAException
    */
-  void createResourceInstance(ResourceInfoVO resourceInfoVO);
+  void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException;
 
   /**
    * Delete resource instances.
@@ -83,8 +87,9 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupName the group name
+   * @throws EEAException
    */
-  void addUserToUserGroup(String userId, String groupName);
+  void addUserToUserGroup(String userId, String groupName) throws EEAException;
 
   /**
    * Remove user from user group.
@@ -141,22 +146,34 @@ public interface SecurityProviderInterfaceService {
    */
   List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource, ResourceTypeEnum resourceType);
 
-  /**
-   * Add contributor to user group.
-   *
-   * @param userMail the user mail
-   * @param groupName the group name
-   *
-   * @throws EEAException the EEA exception
-   */
-  void addContributorToUserGroup(String userMail, String groupName) throws EEAException;
 
   /**
    * Creates the resource instance.
    *
    * @param resourceInfoVOs the resource info V os
+   * @throws EEAException
    */
-  void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs);
+  void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException;
+
+  /**
+   * Adds the contributosr to user group.
+   *
+   * @param resources the resources
+   * @throws EEAException
+   */
+  void addContributorsToUserGroup(List<ResourceAssignationVO> resources) throws EEAException;
+
+
+  /**
+   * Adds the contributor to user group.
+   *
+   * @param contributor the contributor
+   * @param userMail the user mail
+   * @param groupName the group name
+   * @throws EEAException the EEA exception
+   */
+  void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
+      String groupName) throws EEAException;
 
 
 }

@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -168,13 +169,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-        groups.stream().map(group -> {
-          if (group.startsWith("/")) {
-            group = group.substring(1);
-          }
-          return group.toUpperCase();
-        }).forEach(eeaGroups::add);
-      });
+            groups.stream().map(group -> {
+              if (group.startsWith("/")) {
+                group = group.substring(1);
+              }
+              return group.toUpperCase();
+            }).forEach(eeaGroups::add);
+          });
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
@@ -282,9 +283,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVO the resource info vo
+   * @throws EEAException
    */
   @Override
-  public void createResourceInstance(ResourceInfoVO resourceInfoVO) {
+  public void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException {
     GroupInfo groupInfo = new GroupInfo();
     String groupName =
         ResourceGroupEnum.fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
@@ -345,9 +347,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userId the user resourceId
    * @param groupName the group name
+   * @throws EEAException
    */
   @Override
-  public void addUserToUserGroup(String userId, String groupName) {
+  public void addUserToUserGroup(String userId, String groupName) throws EEAException {
     // Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
@@ -448,11 +451,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @throws EEAException the EEA exception
    */
   @Override
-  public void addContributorToUserGroup(String userMail, String groupName) throws EEAException {
-    UserRepresentation[] users = keycloakConnectorService.getUsers();
-    Optional<UserRepresentation> contributor = Arrays.asList(users).stream()
-        .filter(user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
-        .findFirst();
+  public void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
+      String groupName) throws EEAException {
+    if (!contributor.isPresent()) {
+      UserRepresentation[] users = keycloakConnectorService.getUsers();
+      contributor = Arrays.asList(users).stream()
+          .filter(
+              user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+          .findFirst();
+    }
     contributor.orElseThrow(() -> new EEAException("Error, user not found"));
     if (contributor.isPresent()) {
       LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
@@ -465,26 +472,68 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+  /**
+   * Adds the contributors to user group.
+   *
+   * @param resources the resources
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorsToUserGroup(List<ResourceAssignationVO> resources)
+      throws EEAException {
+
+    List<UserRepresentation> contributors = new ArrayList<>();
+    int cont = 0;
+    for (ResourceAssignationVO resourceAssignationVO : resources) {
+      UserRepresentation[] users = keycloakConnectorService.getUsers();
+      Optional<UserRepresentation> contributor =
+          Arrays.asList(users).stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+              && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+      if (contributor.isPresent()) {
+        contributors.add(contributor.get());
+      }
+      try {
+
+        addContributorToUserGroup(contributor, resources.get(cont).getEmail(), resources.get(cont)
+            .getResourceGroup().getGroupName(resources.get(cont).getResourceId()));
+      } catch (EEAException e) {
+        for (int j = 0; j < resources.subList(0, cont).size(); j++) {
+          removeUserFromUserGroup(contributors.get(j).getId(),
+              resources.get(j).getResourceGroup().getGroupName(resources.get(j).getResourceId()));
+        }
+        throw e;
+      }
+      cont++;
+    }
+  }
+
 
   /**
    * Creates the resource instance.
-   *
+   * 
    * @param resourceInfoVOs the resource info V os
+   * @throws EEAException
    */
   @Override
-  public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) {
-    for (ResourceInfoVO resourceInfoVO : resourceInfoVOs) {
+  public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException {
+    for (int i = 0; i < resourceInfoVOs.size(); i++) {
       GroupInfo groupInfo = new GroupInfo();
-      String groupName =
-          ResourceGroupEnum
-              .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
-                  resourceInfoVO.getSecurityRoleEnum())
-              .getGroupName(resourceInfoVO.getResourceId());
+      String groupName = ResourceGroupEnum
+          .fromResourceTypeAndSecurityRole(resourceInfoVOs.get(i).getResourceTypeEnum(),
+              resourceInfoVOs.get(i).getSecurityRoleEnum())
+          .getGroupName(resourceInfoVOs.get(i).getResourceId());
       groupInfo.setName(groupName);
       groupInfo.setPath("/" + groupName);
-      groupInfo.setAttributes(resourceInfoVO.getAttributes());
-      keycloakConnectorService.createGroupDetail(groupInfo);
+      groupInfo.setAttributes(resourceInfoVOs.get(i).getAttributes());
+      try {
+        keycloakConnectorService.createGroupDetail(groupInfo);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Creation error");
+        deleteResourceInstances(resourceInfoVOs.subList(0, i));
+        throw e;
+      }
     }
+
   }
 
 
