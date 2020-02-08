@@ -2030,15 +2030,15 @@ body .p-card {
 
 body .p-paginator {
   /*  background-color: #f4f4f4;*/
-  background-color: var(--blue-75);
-  border: 1px solid var(--blue-75);
+  background-color: var(--paginator-bg);
+  border: var(--paginator-border);
   padding: 0;
 }
 body .p-paginator .p-paginator-first,
 body .p-paginator .p-paginator-prev,
 body .p-paginator .p-paginator-next,
 body .p-paginator .p-paginator-last {
-  color: #ffffff;
+  color: var(--paginator-color);
   height: 2.286em;
   min-width: 2.286em;
   border: 0 none;
@@ -2058,19 +2058,19 @@ body .p-paginator .p-paginator-first:not(.p-disabled):not(.p-highlight):hover,
 body .p-paginator .p-paginator-prev:not(.p-disabled):not(.p-highlight):hover,
 body .p-paginator .p-paginator-next:not(.p-disabled):not(.p-highlight):hover,
 body .p-paginator .p-paginator-last:not(.p-disabled):not(.p-highlight):hover {
-  background-color: #e0e0e0;
-  color: #404040;
+  background-color: var(--paginator-bg-hover);
+  color: var(--paginator-color-hover);
 }
 body .p-paginator .p-dropdown {
   border: 1 none;
 }
 body .p-paginator .p-dropdown .p-dropdown-trigger,
 body .p-paginator .p-dropdown .p-dropdown-label {
-  color: #404040;
+  color: var(--paginator-dropdown-label-color);
 }
 body .p-paginator .p-dropdown:hover .p-dropdown-trigger,
 body .p-paginator .p-dropdown:hover .p-dropdown-label {
-  color: #404040;
+  color: var(--paginator-dropdown-label-color-hover);
 }
 body .p-paginator .p-paginator-first:before {
   position: relative;
@@ -2101,7 +2101,7 @@ body .p-paginator .p-paginator-pages {
   padding: 0;
 }
 body .p-paginator .p-paginator-pages .p-paginator-page {
-  color: #ffffff;
+  color: var(--paginator-pages-color);
   height: 2.286em;
   min-width: 3em;
   border: 0 none;
@@ -2118,14 +2118,16 @@ body .p-paginator .p-paginator-pages .p-paginator-page {
   border-radius: 0;
 }
 body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-  background-color: #004494;
-  color: #ffffff;
+  background-color: var(--paginator-pages-highlight-bg);
+  color: var(--paginator-pages-highlight-color);
+  box-shadow: var(--paginator-pages-highlight-box-shadow);
 }
 body .p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover {
-  background-color: #e0e0e0;
-  color: #404040;
-  border: 1px solid var(--blue-120);
+  background-color: var(--paginator-pages-not-highlight-hover-bg);  
+  color: var(--paginator-pages-not-highlight-hover-color);  
+  border: var(--paginator-pages-not-highlight-hover-border);  
 }
+
 body .p-paginator .p-dropdown {
   margin-left: 0.5em;
   height: 2.286em;
@@ -2141,9 +2143,9 @@ body .p-datatable table {
 
 body .p-datatable .p-datatable-header,
 body .p-datatable .p-datatable-footer {
-  background-color: #f4f4f4;
-  color: #404040;
-  border: 1px solid #c8c8c8;
+  background-color: var(--datatable-header-footer-bg);
+  color: var(--datatable-header-footer-color);
+  border: var(--datatable-header-footer-border);
   padding: 0.571em 1em;
   text-align: center;
 }
@@ -2190,14 +2192,14 @@ body .p-datatable .p-sortable-column {
   transition: background-color 0.2s, box-shadow 0.2s;
 }
 body .p-datatable .p-sortable-column .p-sortable-column-icon {
-  color: #848484;
+  color: var(--datatable-column-sortable-icon-color);
 }
 body .p-datatable .p-sortable-column:not(.p-highlight):hover {
-  background-color: var(--yellow-120);
-  color: #404040;
+  background-color: var(--datatable-column-sortable-hightlight-bg-hover);
+  color: var(--datatable-column-sortable-hightlight-color-hover);
 }
 body .p-datatable .p-sortable-column:not(.p-highlight):hover .p-sortable-column-icon {
-  color: #404040;
+  color: var(--datatable-column-sortable-icon-hightlight-color-hover);
 }
 body .p-datatable .p-sortable-column:focus {
   outline: 0 none;
@@ -2233,47 +2235,41 @@ body .p-datatable .p-datatable-tbody > tr > td {
   word-break: break-word;
 }
 body .p-datatable .p-datatable-tbody > tr > td > div .infoTableCellError {
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0) 10px,
-    rgba(218, 33, 49, 0.3) 10px,
-    rgba(218, 33, 49, 0.3) 15px
-  ) !important;
-  border: 1px solid #c8c8c8;
+  background: var(--datatable-body-row-toggler-infotable-bg);
+  border: var(--datatable-body-row-toggler-infotable-border);
   padding: 0.429em 0.857em;
 }
 body .p-datatable .p-datatable-tbody > tr > td .p-row-toggler {
-  color: #848484;
+  color: var(--datatable-body-row-toggler-color);
   -moz-transition: color 0.2s, box-shadow 0.2s;
   -o-transition: color 0.2s, box-shadow 0.2s;
   -webkit-transition: color 0.2s, box-shadow 0.2s;
   transition: color 0.2s, box-shadow 0.2s;
 }
 body .p-datatable .p-datatable-tbody > tr > td .p-row-toggler:hover {
-  color: #404040;
+  color: var(--datatable-body-row-toggler-color-hover);
 }
 
 body .p-datatable .p-datatable-tbody > tr {
   transition: border-width 1s linear;
-  border: 1px solid rgba(0, 0, 0, 0);
+  border: var(--datatable-body-row-border);  
 }
 
 body .p-datatable .p-datatable-tbody > tr.p-highlight {
-  background-color: rgba(240, 233, 145, 0.3);
-  color: #404040;
+  background-color: var(--datatable-body-row-highlight-bg);
+  color: var(--datatable-body-row-highlight-color);
   font-weight: bold;
 }
 
 body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler {
-  color: #004494;
+  color: var(--datatable-body-row-toggler-hightlight-color);
 }
 body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler:hover {
-  color: #ffffff;
+  color: var(--datatable-body-row-toggler-hightlight-color-hover);
 }
 body .p-datatable .p-datatable-tbody > tr.p-highlight-contextmenu {
-  background-color: #004494;
-  color: #ffffff;
+  background-color: var(--datatable-body-row-contextmenu-hightlight-bg);
+  color: var(--datatable-body-row-contextmenu-hightlight-color);
 }
 body .p-datatable .p-datatable-tbody > tr.p-datatable-dragpoint-bottom > td {
   box-shadow: inset 0 -2px 0 0 #004494;
@@ -2311,7 +2307,7 @@ body
   color: var(--datatable-body-color);
 }
 body .p-datatable .p-column-resizer-helper {
-  background-color: #004494;
+  background-color: var(--datatable-column-resizer-bg);
 }
 body .p-datatable .p-datatable-scrollable-header,
 body .p-datatable .p-datatable-scrollable-footer {
