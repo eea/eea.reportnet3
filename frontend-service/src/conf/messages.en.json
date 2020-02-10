@@ -195,6 +195,7 @@
 		"language": "Language",
 		"levelError": "Level error",
 		"loading": "Loading...",
+		"localhostAlert": "Local environment",
 		"login": "Login",
 		"logout": "Logout",
 		"linkInEulogin":"Access to EU Login",

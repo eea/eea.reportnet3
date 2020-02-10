@@ -61,7 +61,8 @@ import {
   faPowerOff,
   faCog,
   faPen,
-  faUsersCog
+  faUsersCog,
+  faIgloo
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -291,6 +292,8 @@ export const AwesomeIcons = icon => {
       return faPen;
     case 'manageRoles':
       return faUsersCog;
+    case 'localhostAlert':
+      return faIgloo;
     default:
       return faFileAlt;
   }
