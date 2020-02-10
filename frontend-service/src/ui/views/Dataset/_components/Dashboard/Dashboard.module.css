@@ -54,4 +54,5 @@
 }
 .dashboardTitle {
   margin: 0px;
+  color: var(--main-font-color);
 }

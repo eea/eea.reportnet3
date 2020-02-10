@@ -154,7 +154,7 @@ const ActionsToolbar = ({
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={!hasWritePermissions || isWebFormMMR}
           icon={'export'}
           label={resources.messages['import']}
@@ -164,7 +164,7 @@ const ActionsToolbar = ({
         <Button
           disabled={!hasWritePermissions}
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
@@ -184,7 +184,7 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords)}
           icon={'trash'}
           label={resources.messages['deleteTable']}
@@ -192,7 +192,7 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={false}
           icon={filter.visibilityColumnIcon}
           label={resources.messages['showHideColumns']}
@@ -212,7 +212,7 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={'p-button-rounded p-button-secondary'}
+          className={'p-button-rounded p-button-secondary-transparent'}
           disabled={!tableHasErrors}
           icon="filter"
           iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
@@ -233,21 +233,21 @@ const ActionsToolbar = ({
           }}
         />
         {/* <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon={'groupBy'}
           label={resources.messages['groupBy']}
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon={'sort'}
           label={resources.messages['sort']}
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon="filter"
           label={resources.messages['filters']}
@@ -256,7 +256,7 @@ const ActionsToolbar = ({
       </div>
       <div className="p-toolbar-group-right">
         {/* <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon={'refresh'}
           label={resources.messages['refresh']}

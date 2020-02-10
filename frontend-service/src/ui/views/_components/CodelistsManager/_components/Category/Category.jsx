@@ -59,7 +59,10 @@ const Category = ({
       name: '',
       version: '',
       status: !isInDesign
-        ? [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }]
+        ? [
+            { statusType: 'Design', value: 'design' },
+            { statusType: 'Ready', value: 'ready' }
+          ]
         : [{ statusType: 'Ready', value: 'ready' }],
       description: ''
     },
@@ -207,8 +210,9 @@ const Category = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button disabled={isIncorrect} icon="save" label={resources.messages['save']} onClick={onSaveCodelist} />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-secondary"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false);
         }}
@@ -437,7 +441,7 @@ const Category = ({
             optionLabel="statusType"
             options={statusTypes}
             placeholder={resources.messages['codelistStatus']}
-            style={{ fontSize: '10pt', color: 'var(--gray-65)' }}
+            style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
             value={categoryState.filter.status}
           />
         </span>

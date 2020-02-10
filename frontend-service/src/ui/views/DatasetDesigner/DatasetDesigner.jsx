@@ -207,14 +207,14 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-right">
             {/* <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
             /> */}
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'validate'}
               label={resources.messages['validate']}
@@ -224,14 +224,14 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             />
 
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
