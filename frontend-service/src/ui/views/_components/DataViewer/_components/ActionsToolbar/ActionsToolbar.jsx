@@ -31,8 +31,7 @@ const ActionsToolbar = ({
   isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
-  onSetColumns,
-  onSetInvisibleColumns,
+  setColumns,
   onSetVisible,
   originalColumns,
   records,
@@ -135,19 +134,15 @@ const ActionsToolbar = ({
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
-    const currentInvisibleColumns = originalColumns.filter(
+    const currentVisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
 
-    if (!isUndefined(onSetColumns)) {
-      onSetColumns(currentInvisibleColumns);
+    if (!isUndefined(setColumns)) {
+      setColumns(currentVisibleColumns);
     }
 
-    if (!isUndefined(onSetColumns)) {
-      onSetInvisibleColumns(currentInvisibleColumns);
-    }
-
-    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentInvisibleColumns } });
+    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
   };
 
   return (
