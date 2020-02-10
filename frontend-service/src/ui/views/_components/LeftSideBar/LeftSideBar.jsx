@@ -51,7 +51,7 @@ const LeftSideBar = withRouter(() => {
   };
 
   const renderSectionButtons = () => {
-    return leftSideBarContext.models.map(model => <LeftSideBarButton {...model} />);
+    return leftSideBarContext.models.map((model, i) => <LeftSideBarButton key={i} {...model} />);
   };
   const renderLogout = () => {
     const logoutProps = {
