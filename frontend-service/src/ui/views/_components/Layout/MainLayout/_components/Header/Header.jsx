@@ -36,8 +36,27 @@ const Header = withRouter(({ history }) => {
       <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
     </a>
   );
+  const isLocalEnvironment = () => {
+    let url = window.location.href;
+    if (url.toString().includes('localhost')) {
+      return true;
+    }
+    return false;
+  };
+  const localhostEnvironmentAlert = () => {
+    if (!isLocalEnvironment()) {
+      return;
+    } else
+      return (
+        <div className={styles.localhostAlert}>
+          <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
+          {/* <span>(local)</span> */}
+        </div>
+      );
+  };
   const loadUser = () => (
     <>
+      {localhostEnvironmentAlert()}
       <div className={styles.userWrapper}>
         <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
       </div>

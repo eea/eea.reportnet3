@@ -24,6 +24,16 @@
       font-size: 1.5rem;
     }
   }
+  .localhostAlert {
+    display: flex;
+    align-items: center;
+    color: var(--gray-110);
+    span {
+      font-weight: 300;
+      font-size: 1rem;
+      color: var(--gray-110);
+    }
+  }
   .userWrapper {
     display: flex;
     align-items: center;
