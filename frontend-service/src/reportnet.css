@@ -178,6 +178,43 @@
   --paginator-pages-highlight-color: var(--black);
   --paginator-pages-color: var(--white);
 
+  /* Dropdown */
+  /* --dropdown-trigger-bg: var(--c-corporate-blu);
+  --dropdown-trigger-color: var(--white);
+  --dropdown-trigger-clear-icon-color: var(--white);
+  --dropdown-panel-border: 1px solid var(--c-corporate-blue);
+  --dropdown-panel-bg: var(--white);
+  --dropdown-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --dropdown-panel-filter-border: 1px solid var(--gray-10);
+  --dropdown-panel-filter-color: var(--gray-110);
+  --dropdown-panel-filter-bg: var(--white);
+  --dropdown-panel-filter-icon-color: var(--c-corporate-blue);
+  --dropdown-panel-items-group-color: var(--gray-110);
+  --dropdown-panel-items-group-highlight-color: var(--white);
+  --dropdown-panel-items-group-highlight-bg: var(--c-corporate-blue);
+  --dropdown-panel-items-group-not-highlight-color-hover: var(--gray-110);
+  --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-10); */
+
+  --dropdown-bg: var(--bg);
+  --dropdown-border: 1px solid var(--bg);
+  --dropdown-bg-hover: var(--white);
+  --dropdown-bg-focus: var(--white);
+  --dropdown-trigger-bg: var(--c-dark-blue);
+  --dropdown-trigger-color: var(--white);
+  --dropdown-trigger-clear-icon-color: var(--white);
+  --dropdown-panel-border: 1px solid var(--gray-10);
+  --dropdown-panel-bg: var(--c-dark-blue);
+  --dropdown-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --dropdown-panel-filter-border: 1px solid var(--gray-10);
+  --dropdown-panel-filter-color: var(--gray-110);
+  --dropdown-panel-filter-bg: var(--white);
+  --dropdown-panel-filter-icon-color: var(--c-corporate-blue);
+  --dropdown-panel-items-group-color: var(--white);
+  --dropdown-panel-items-group-highlight-color: var(--white);
+  --dropdown-panel-items-group-highlight-bg: var(--c-corporate-blue);
+  --dropdown-panel-items-group-not-highlight-color-hover: var(--black);
+  --dropdown-panel-items-group-not-highlight-bg-hover: var(--white);
+
   /* Floating label */
   --floating-label-color: var(--gray-65);
 
