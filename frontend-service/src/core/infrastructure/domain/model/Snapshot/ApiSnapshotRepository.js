@@ -34,7 +34,17 @@ const allReporter = async datasetId => {
   const snapshotsDTO = await apiSnapshot.allReporter(datasetId);
 
   return snapshotsDTO.map(
-    snapshotDTO => new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
+    snapshotDTO =>
+      new Snapshot(
+        snapshotDTO.id,
+        snapshotDTO.creationDate,
+        snapshotDTO.description,
+        snapshotDTO.release,
+        undefined,
+        undefined,
+        undefined,
+        snapshotDTO.isValid
+      )
   );
 };
 
