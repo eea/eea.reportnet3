@@ -54,7 +54,6 @@ const Header = withRouter(({ history }) => {
       return (
         <div className={styles.localhostAlert}>
           <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
-          {/* <span>(local)</span> */}
         </div>
       );
   };
