@@ -145,7 +145,8 @@ export const Dataset = withRouter(({ match, history }) => {
               getUrl(
                 routes.REPRESENTATIVE,
                 {
-                  dataflowId
+                  dataflowId,
+                  representative: metaData.dataset.name
                 },
                 true
               )
