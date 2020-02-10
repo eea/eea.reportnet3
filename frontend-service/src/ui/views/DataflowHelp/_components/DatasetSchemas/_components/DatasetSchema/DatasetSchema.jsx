@@ -66,9 +66,7 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
   const codelistItemsData = [];
   let codelistsBySchema = [];
   if (!isUndefined(codelistsListWithSchema)) {
-    codelistsBySchema = codelistsListWithSchema.find(
-      x => x.schema.datasetSchemaName.toString() === design.datasetSchemaName.toString()
-    );
+    codelistsBySchema = codelistsListWithSchema.find(x => x.schema.datasetSchemaName === design.datasetSchemaName);
     if (!isUndefined(codelistsBySchema)) {
       codelistsBySchema = codelistsBySchema.codelists;
     }

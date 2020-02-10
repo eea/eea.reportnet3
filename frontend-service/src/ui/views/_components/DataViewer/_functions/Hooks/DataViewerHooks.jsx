@@ -159,7 +159,7 @@ export const useSetColumns = (
               <React.Fragment>
                 {column.header}
                 <Button
-                  className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary`}
+                  className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
                   onClick={() => {
                     const inmCodeListInfo = cloneDeep(codelistInfo);
