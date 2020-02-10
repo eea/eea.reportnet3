@@ -19,6 +19,11 @@ const leftSideBarReducer = (state, { type, payload }) => {
         ...state,
         models: []
       };
+    case 'SET_MENU_STATE':
+      return {
+        ...state,
+        isLeftSideBarOpened: payload.isLeftSideBarOpened
+      };
     default:
       return state;
   }
@@ -41,6 +46,12 @@ const LeftSideBarProvider = ({ children }) => {
           dispatch({
             type: 'REMOVE_MODEL',
             payload: []
+          });
+        },
+        setMenuState: () => {
+          dispatch({
+            type: 'SET_MENU_STATE',
+            payload: { isLeftSideBarOpened: !state.isLeftSideBarOpened }
           });
         }
       }}>

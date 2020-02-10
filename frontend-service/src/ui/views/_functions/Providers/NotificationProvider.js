@@ -34,6 +34,12 @@ const notificationReducer = (state, { type, payload }) => {
         ...state,
         toShow: []
       };
+    case 'DESTROY':
+      return {
+        ...state,
+        toShow: [],
+        all: []
+      };
 
     default:
       return state;
@@ -71,7 +77,7 @@ const NotificationProvider = ({ children }) => {
             }
           });
         },
-        remove: notificationId => {
+        removeById: notificationId => {
           dispatch({
             type: 'REMOVE',
             payload: {
@@ -83,6 +89,11 @@ const NotificationProvider = ({ children }) => {
           dispatch({
             type: 'CLEAR_TO_SHOW',
             payload: {}
+          });
+        },
+        deleteAll: () => {
+          dispatch({
+            type: 'DESTROY'
           });
         }
       }}>

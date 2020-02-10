@@ -401,7 +401,6 @@ const Dataflow = withRouter(({ history, match }) => {
           icon="archive"
           iconSize="4rem"
         />
-
         <BigButtonList
           dataflowData={dataflowData}
           handleRedirect={handleRedirect}
