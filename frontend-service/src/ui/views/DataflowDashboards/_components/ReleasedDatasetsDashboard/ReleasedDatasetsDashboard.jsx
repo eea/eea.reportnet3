@@ -7,16 +7,19 @@ import styles from './ReleasedDatasetsDashboard.module.css';
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { StatusList } from 'ui/views/_components/StatusList';
 
-import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
-
 import { DataflowService } from 'core/services/Dataflow';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+
+import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 export const ReleasedDatasetsDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
+  const themeContext = useContext(ThemeContext);
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
@@ -90,7 +93,11 @@ export const ReleasedDatasetsDashboard = dataflowId => {
       xAxes: [
         {
           stacked: true,
-          maxBarThickness: 100
+          maxBarThickness: 100,
+          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
+          ticks: {
+            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+          }
         }
       ],
       yAxes: [
@@ -104,8 +111,10 @@ export const ReleasedDatasetsDashboard = dataflowId => {
                 return value;
               }
             },
-            stepSize: 1
-          }
+            stepSize: 1,
+            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+          },
+          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
         }
       ]
     }

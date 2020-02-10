@@ -285,13 +285,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'import'}
               label={resources.messages['export']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
@@ -299,7 +299,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'validate'}
               iconClasses={null}
@@ -307,7 +307,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'warning'}
               iconClasses={''}
@@ -315,13 +315,13 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'camera'}
               label={resources.messages['snapshots']}

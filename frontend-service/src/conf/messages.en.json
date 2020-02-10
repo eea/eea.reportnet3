@@ -316,6 +316,8 @@
 		"titleHeader": "Reportnet",
 		"titleDashboard": "Error/Warning dashboard",
 		"titleValidations": "Validations",
+		"toggleDarkTheme": "Switch to dark mode",
+		"toggleLightTheme": "Switch to light mode",
 		"tooLargeFileValidationError":"File size is too large",		
 		"totalRecords": "Total:",
 		"totalPastedRecords": "Pasted records:",

@@ -7,8 +7,9 @@
   height: var(--header-height);
   padding: 0.5rem;
   overflow: hidden;
-  background-color: var(--white);
-  box-shadow: 0 0 0.5rem rgba($color: #000000, $alpha: 0.1);
+  background-color: var(--bg);
+  transition: 0.5s;
+  box-shadow: var(--header-box-shadow);
   z-index: 3002;
   .title {
     display: flex;
@@ -22,17 +23,13 @@
     h1 {
       margin: 0px;
       font-size: 1.5rem;
+      color: var(--main-font-color);
     }
   }
   .localhostAlert {
     display: flex;
     align-items: center;
     color: var(--gray-110);
-    span {
-      font-weight: 300;
-      font-size: 1rem;
-      color: var(--gray-110);
-    }
   }
   .userWrapper {
     display: flex;
@@ -41,12 +38,26 @@
     span {
       font-weight: 500;
       font-size: 0.8rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
+    }
+    svg {
+      color: var(--main-font-color);
     }
   }
   .logoutWrapper {
     display: flex;
     align-items: center;
     cursor: pointer;
+    svg {
+      color: var(--main-font-color);
+    }
+  }
+  .themeSwitcherTooltip {
+    z-index: 3004;
+  }
+
+  .themeSwitcherInputSwitch:before {
+    background-color: var(--black);
+    box-shadow: var(--inputswitch-dark-theme-checked);
   }
 }
