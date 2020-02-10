@@ -560,7 +560,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
@@ -576,7 +576,7 @@ export const Dataset = withRouter(({ match, history }) => {
               }}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
               disabled={!hasWritePermissions || isWebFormMMR}
@@ -585,14 +585,14 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             {/* <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
             /> */}
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
@@ -601,7 +601,7 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={!datasetHasErrors || isWebFormMMR}
               icon={'warning'}
               label={resources.messages['showValidations']}
@@ -610,14 +610,14 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={isWebFormMMR || !datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}

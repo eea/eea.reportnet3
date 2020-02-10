@@ -202,7 +202,7 @@ export const WebLinks = ({
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               style={{ float: 'left' }}
               label={resources.messages['add']}
               icon="add"
@@ -213,7 +213,7 @@ export const WebLinks = ({
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}

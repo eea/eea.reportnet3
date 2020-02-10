@@ -257,7 +257,7 @@ body .p-inputswitch .p-inputswitch-slider {
   background: var(--inputswitch-unchecked-bg); 
 }
 body .p-inputswitch .p-inputswitch-slider:before {
-  background-color: #ffffff;
+  background-color: var(--inputswitch-slider-bg);
   height: 1.25em;
   width: 1.25em;
   left: 0.25em;
@@ -285,7 +285,7 @@ body .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
   background-color: #b7b7b7;
 }
 body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-  background-color: var(--inputswitch-checked);
+  background-color: var(--inputswitch-checked-bg);
 }
 body .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider {
   background-color: #116fbf;
@@ -1480,6 +1480,31 @@ body .p-buttonset.p-button-info > .p-button {
   background-color: #004494;
   border: 1px solid #004494;
 }
+body .p-button.p-button-secondary-transparent,
+body .p-buttonset.p-button-secondary-transparent > .p-button {
+  color: var(--button-secondary-transparent-color);
+  background-color: var(--button-secondary-transparent-bg);
+  border: var(--button-secondary-transparent-border);
+}
+body .p-button.p-button-secondary-transparent:enabled:hover,
+body .p-buttonset.p-button-secondary-transparent > .p-button:enabled:hover {
+  background-color: var(--button-secondary-transparent-bg-hover);
+  color: var(--button-secondary-transparent-color-hover);
+  border-color: var(--button-secondary-transparent-border-color-hover);
+}
+body .p-button.p-button-secondary-transparent:enabled:focus,
+body .p-buttonset.p-button-secondary-transparent > .p-button:enabled:focus {
+  -webkit-box-shadow: var(--button-secondary-transparent-box-shadow-focus);
+  -moz-box-shadow: var(--button-secondary-transparent-box-shadow-focus);
+  box-shadow: var(--button-secondary-transparent-box-shadow-focus);
+}
+body .p-button.p-button-secondary-transparent:enabled:active,
+body .p-buttonset.p-button-secondary-transparent > .p-button:enabled:active {
+  background-color: var(--button-secondary-transparent-bg-active);
+  color: var(--button-secondary-transparent-color-active);
+  border-color: var(--button-secondary-transparent-border-color-active);
+}
+
 body .p-button.p-button-info:enabled:hover,
 body .p-buttonset.p-button-info > .p-button:enabled:hover {
   background-color: #116fbf;
@@ -2006,7 +2031,8 @@ body .p-tabview .p-tabview-panels .p-tabview-panel {
   padding: 0;
 }
 body .p-toolbar {
-  border: 1px solid #c8c8c8;
+  background-color: var(--bg);
+  border: var(--toolbar-border);
   padding: 0.571em 1em;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -2279,8 +2305,8 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
   background-color: var(--datatable-body-even-bg);
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight {
-  background-color: rgba(240, 233, 145, 0.3);
-  color: #404040;
+  background-color: var(--datatable-body-row-highlight-bg);
+  color: var(--datatable-body-row-highlight-color);
   font-weight: bold;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight .p-row-toggler {
@@ -4214,4 +4240,10 @@ font-size:12px;
 .p-float-label > textarea:-webkit-autofill ~ label {
 top:-.75em;
 font-size:12px;
+}
+
+.p-chart {
+  position: relative;
+  background-color: var(--chart-bg);
+  color: var(--chart-color);
 }

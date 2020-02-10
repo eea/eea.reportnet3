@@ -185,7 +185,7 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               icon={'export'}
               label={resources.messages['upload']}
               onClick={() => {
@@ -196,7 +196,7 @@ const Documents = ({
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={async () => {
