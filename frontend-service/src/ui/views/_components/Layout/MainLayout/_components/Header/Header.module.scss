@@ -26,8 +26,10 @@
       color: var(--main-font-color);
     }
   }
-  svg {
-    color: var(--main-font-color);
+  .localhostAlert {
+    display: flex;
+    align-items: center;
+    color: var(--gray-110);
   }
   .userWrapper {
     display: flex;
@@ -38,11 +40,17 @@
       font-size: 0.8rem;
       color: var(--main-font-color);
     }
+    svg {
+      color: var(--main-font-color);
+    }
   }
   .logoutWrapper {
     display: flex;
     align-items: center;
     cursor: pointer;
+    svg {
+      color: var(--main-font-color);
+    }
   }
   .themeSwitcherTooltip {
     z-index: 3004;

@@ -31,8 +31,8 @@ const App = () => {
   return (
     <div className={styles.app}>
       <ResourcesProvider>
-        <UserProvider>
-          <NotificationProvider>
+        <NotificationProvider>
+          <UserProvider>
             <ThemeProvider>
               <LeftSideBarProvider>
                 <LoadingProvider>
@@ -61,8 +61,8 @@ const App = () => {
                 </LoadingProvider>
               </LeftSideBarProvider>
             </ThemeProvider>
-          </NotificationProvider>
-        </UserProvider>
+          </UserProvider>
+        </NotificationProvider>
       </ResourcesProvider>
     </div>
   );

@@ -40,21 +40,40 @@ const Header = withRouter(({ history }) => {
       <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
     </a>
   );
+  const isLocalEnvironment = () => {
+    let url = window.location.href;
+    if (url.toString().includes('localhost')) {
+      return true;
+    }
+    return false;
+  };
+  const localhostEnvironmentAlert = () => {
+    if (!isLocalEnvironment()) {
+      return;
+    } else
+      return (
+        <div className={styles.localhostAlert}>
+          <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
+          {/* <span>(local)</span> */}
+        </div>
+      );
+  };
   const loadUser = () => (
     <>
       <div className={styles.userWrapper}>
-      <InputSwitch
-        checked={themeContext.currentTheme === 'dark'}
-        onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
-        sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-        style={{ marginRight: '1rem' }}
-        tooltip={
-          themeContext.currentTheme === 'light'
-            ? resources.messages['toggleDarkTheme']
-            : resources.messages['toggleLightTheme']
-        }
-        tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-      />
+        <InputSwitch
+          checked={themeContext.currentTheme === 'dark'}
+          onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
+          sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+          style={{ marginRight: '1rem' }}
+          tooltip={
+            themeContext.currentTheme === 'light'
+              ? resources.messages['toggleDarkTheme']
+              : resources.messages['toggleLightTheme']
+          }
+          tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+        />
+        {localhostEnvironmentAlert()}
         <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
       </div>
       <div className={styles.logoutWrapper}>
