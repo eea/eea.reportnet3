@@ -131,21 +131,78 @@
   --datatable-body-even-bg: var(--gray-10);
   --datatable-body-highlight-bg: var(--gray-25);
 
-  /* --datatable-column-sortable-hightlight-bg: var(--c-corporate-blue);
-  --datatable-column-sortable-hightlight-color: var(--white);
-  --datatable-column-sortable-hightlight-icon-color: var(--white);
-  --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25); */
-
-  /* DARK*/
-  --datatable-column-sortable-hightlight-bg: var(--gray-50);
+  --datatable-column-sortable-hightlight-bg: var(--c-corporate-blue);
   --datatable-column-sortable-hightlight-color: var(--white);
   --datatable-column-sortable-hightlight-icon-color: var(--white);
   --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25);
+  --datatable-header-footer-bg: var(--gray-10);
+  --datatable-header-footer-color: var(--gray-110);
+  --datatable-header-footer-border: 1px solid var(--gray-10);
+  --datatable-column-sortable-icon-color: var(--gray-110);
+  --datatable-column-sortable-hightlight-bg-hover: var(--yellow-120);
+  --datatable-column-sortable-hightlight-color-hover: var(--gray-110);
+  --datatable-column-sortable-icon-hightlight-color-hover: var(--gray-110);
+  --datatable-body-row-toggler-infotable-bg: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0) 10px,
+    rgba(218, 33, 49, 0.3) 10px,
+    rgba(218, 33, 49, 0.3) 15px
+  ) !important;
+  --datatable-body-row-toggler-infotable-border: 1px solid var(--gray-10);
+  --datatable-body-row-toggler-color: var(--gray-10);
+  --datatable-body-row-toggler-color-hover: var(--gray-110);
+  --datatable-body-row-border: 1px solid rgba(0, 0, 0, 0);
+  --datatable-body-row-highlight-bg: rgba(240, 233, 145, 0.3);
+  --datatable-body-row-highlight-color: var(gray-110);
+  --datatable-body-row-toggler-hightlight-color: var(--c-corporate-blue);
+  --datatable-body-row-toggler-hightlight-color-hover: var(--white);
+  --datatable-body-row-contextmenu-hightlight-bg: var(--c-corporate-blue);
+  --datatable-body-row-contextmenu-hightlight-color: var(--white);
+  --datatable-column-resizer-bg: var(--c-corporate-blue);
+
+  /* Paginator */
+
+  --paginator-bg: var(--c-corporate-blue);
+  --paginator-border: 1px solid var(--blue-75);
+  --paginator-color: var(--white);
+  --paginator-bg-hover: var(--gray-10);
+  --paginator-color-hover: var(--gray-110);
+  --paginator-dropdown-label-color: var(--gray-110);
+  --paginator-dropdown-label-color-hover: var(--gray-110);
+  --paginator-pages-not-highlight-hover-bg: var(--white);
+  --paginator-pages-not-highlight-hover-color: var(--gray-110);
+  --paginator-pages-not-highlight-hover-border: 1px solid var(--c-corporate-blue);
+  --paginator-pages-highlight-box-shadow: inset 0 0 0 0.1em var(--gray-75);
+  --paginator-pages-highlight-bg: var(--white);
+  --paginator-pages-highlight-color: var(--black);
+  --paginator-pages-color: var(--white);
+
+  /* Floating label */
+  --floating-label-color: var(--gray-65);
+
+  /* Growl */
+  --growl-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
+  --growl-info-bg: var(--c-corporate-blue);
+  --growl-info-color: var(--black);
+  --growl-info-icon-color: var(--black);
+  --growl-success-bg: var(--success-color);
+  --growl-success-color: var(--black);
+  --growl-success-icon-color: var(--black);
+  --growl-warning-bg: var(--yellow-120);
+  --growl-warning-color: var(--black);
+  --growl-warning-icon-color: var(--black);
+  --growl-error-bg: var(--c-red-200);
+  --growl-error-color: var(--black);
+  --growl-error-icon-color: var(--black);
 
   /* Inputtext */
   --inputtext-color: var(--main-font-color);
   --inputtext-bg: var(--bg);
-  --inputtext-border: 1px solid var(--gray-25);
+  --inputtext-border: 1px solid var(--gray-50);
+  --inputtext-border-color-hover: var(--gray-110);
+  --inputtext-border-color-focus: var(--c-corporate-blue);
+  --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue);
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);

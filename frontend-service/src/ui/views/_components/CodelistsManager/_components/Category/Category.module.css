@@ -87,7 +87,7 @@
   border-left: 0 !important;
   border-right: 0 !important;
   border-radius: 0 !important;
-  color: var(--gray-65) !important;
+  color: var(--floating-label-color) !important;
   width: 100% !important;
 }
 
