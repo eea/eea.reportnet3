@@ -98,6 +98,9 @@ export const TabView = ({
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
         }
+        if (isUndefined(onTabChange) || isNull(onTabChange)) {
+          setActiveIdx(index);
+        }
       }
     }
     event.preventDefault();

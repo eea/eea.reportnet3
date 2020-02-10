@@ -79,6 +79,7 @@ const DataViewer = withRouter(
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isPasting, setIsPasting] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [menu, setMenu] = useState();
     const [originalColumns, setOriginalColumns] = useState([]);
@@ -565,11 +566,13 @@ const DataViewer = withRouter(
 
     const onPasteAccept = async () => {
       try {
+        setIsPasting(true);
         const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
         if (!recordsAdded) {
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
         } else {
           onRefresh();
+          setIsPasting(false);
         }
       } catch (error) {
         const {
@@ -1080,6 +1083,7 @@ const DataViewer = withRouter(
             className="edit-table"
             header={resources.messages['pasteRecords']}
             hasPasteOption={true}
+            isPasting={isPasting}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={onPasteAccept}
@@ -1097,6 +1101,7 @@ const DataViewer = withRouter(
                   column.field !== 'id' &&
                   column.field !== 'datasetPartitionId'
               )}
+              isPasting={isPasting}
               numCopiedRecords={records.numCopiedRecords}
               onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
             <br />
