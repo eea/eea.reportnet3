@@ -3,22 +3,13 @@ package org.eea.dataset.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -35,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -96,13 +88,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
-    // Check if the dataflow status is correct, the schema is correct and there are representatives
-    // selected
-    if (!designs.isEmpty() && !representatives.isEmpty() && schemasIntegrity
-        && TypeStatusEnum.DESIGN.equals(
-            dataflowControllerZuul.getMetabaseById(dataCollectionVO.getIdDataflow()).getStatus())) {
-      try {
-        for (DesignDatasetVO design : designs) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",

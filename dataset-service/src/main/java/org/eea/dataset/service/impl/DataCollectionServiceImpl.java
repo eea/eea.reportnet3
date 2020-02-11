@@ -1,6 +1,17 @@
 package org.eea.dataset.service.impl;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -24,6 +35,8 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /** The Class DataCollectionServiceImpl. */
@@ -47,13 +60,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The record store controller zull. */
-  @Autowired
-  private DataCollectionMapper dataCollectionMapper;
-
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The record store controller zull. */
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /** The dataflow controller zuul. */
   @Autowired

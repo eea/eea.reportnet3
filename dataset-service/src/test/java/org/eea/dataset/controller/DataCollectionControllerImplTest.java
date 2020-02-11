@@ -50,9 +50,6 @@ public class DataCollectionControllerImplTest {
   @Mock
   private DatasetSchemaService schemaService;
 
-  @Mock
-  private UserManagementControllerZull userManagementControllerZuul;
-
   /** The security context. */
   SecurityContext securityContext;
 

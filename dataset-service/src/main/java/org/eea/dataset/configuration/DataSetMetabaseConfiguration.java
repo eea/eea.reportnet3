@@ -73,6 +73,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Primary
+  @Qualifier("metabaseDataSource")
   public DataSource metaBaseDataSource() {
     DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
     metaDataSource.setDriverClassName(driver);
