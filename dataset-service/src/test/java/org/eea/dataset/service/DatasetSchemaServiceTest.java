@@ -392,7 +392,7 @@ public class DatasetSchemaServiceTest {
         .thenReturn(Optional.of(metabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     DataSetSchemaVO value = new DataSetSchemaVO();
-    value.setRuleDataSet(new ArrayList<>());
+    // value.setRuleDataSet(new ArrayList<>());
     Mockito.doReturn(value).when(dataSchemaMapper).entityToClass(Mockito.any(DataSetSchema.class));
     assertEquals(value, dataSchemaServiceImpl.getDataSchemaByDatasetId(true, 1L));
 
@@ -417,7 +417,7 @@ public class DatasetSchemaServiceTest {
         .entityToClass(Mockito.any(DataSetSchema.class));
     DataSetSchemaVO result = dataSchemaServiceImpl.getDataSchemaByDatasetId(false, 1L);
     Assert.assertNotNull(result);
-    Assert.assertNull(result.getRuleDataSet());
+    // Assert.assertNull(result.getRuleDataSet());
     Mockito.verify(dataSchemaMapper, Mockito.times(0))
         .entityToClass(Mockito.any(DataSetSchema.class));
     Mockito.verify(noRulesDataSchemaMapper, Mockito.times(1))
