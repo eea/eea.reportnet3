@@ -304,6 +304,8 @@ public class UserManagementControllerImpl implements UserManagementController {
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -315,6 +317,8 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.addContributorsToUserGroup(resources);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 

@@ -338,12 +338,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Creates the group provider and add user.
    *
    * @param datasetIdsEmail the dataset ids email
-   * @param representatives the representatives
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail,
-      List<RepresentativeVO> representatives, Long dataflowId) {
+  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long dataflowId) {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     Set<Long> datasetIds = datasetIdsEmail.keySet();
@@ -353,7 +351,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
-    List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
 
     datasetIdsEmail.forEach((Long id, String email) -> {
 
@@ -363,12 +360,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
       ResourceAssignationVO resourceDC =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
-      resourcesCustodian.add(resourceDC);
+      resourcesProviders.add(resourceDC);
 
     });
 
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
-    userManagementControllerZuul.addUserToResources(resourcesCustodian);
   }
 
 
@@ -465,7 +461,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
               datasetIdsEmail
                   .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
             }
-            this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
+            this.createGroupProviderAndAddUser(datasetIdsEmail, dataflowId);
             if (iterationDC == 0) {
               // Notification
               kafkaSenderUtils.releaseNotificableKafkaEvent(

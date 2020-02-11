@@ -16,6 +16,7 @@ import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DataCollectionService;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -72,6 +73,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
   /** The lock service. */
   @Autowired
   private LockService lockService;
@@ -117,13 +122,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Creates the permissions.
    *
    * @param datasetIdsEmails the dataset ids emails
+   * @param dataCollectionIds the data collection ids
+   * @param dataflowId the dataflow id
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  private boolean createPermissions(Map<Long, String> datasetIdsEmails,
-      List<Long> dataCollectionIds) throws EEAException {
-    return true;
-    // throw new EEAException("TODO");
+  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
+      Long dataflowId) throws EEAException {
+    try {
+      datasetMetabaseService.createGroupProviderAndAddUser(datasetIdsEmails, dataflowId);
+      for (Long dataCollectionId : dataCollectionIds) {
+        datasetMetabaseService.createGroupDcAndAddUser(dataCollectionId);
+      }
+    } catch (Exception e) {
+      throw new EEAException(e);
+    }
   }
 
   /**
@@ -278,7 +291,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         statement.executeBatch();
         // 7. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds);
+        createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
         connection.commit();
         LOG.info("Metabase changes completed on DataCollection creation");
 
