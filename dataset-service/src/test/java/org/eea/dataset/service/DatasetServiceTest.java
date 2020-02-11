@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -37,9 +36,7 @@ import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
@@ -73,7 +70,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
@@ -168,14 +164,6 @@ public class DatasetServiceTest {
   /** The pageable. */
   @Mock
   private Pageable pageable;
-
-  /** The data set metabase table collection. */
-  @Mock
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
-
-  /** The data set tables mapper. */
-  @Mock
-  private DataSetTablesMapper dataSetTablesMapper;
 
   /** The field repository. */
   @Mock
@@ -851,20 +839,6 @@ public class DatasetServiceTest {
     tableVO.setRecords(recordVOs);
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
         listFields, errorfilter));
-  }
-
-
-  /**
-   * Test set dataschema tables.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testSetDataschemaTables() throws Exception {
-    when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
-    when(dataSetMetabaseTableCollection.save(Mockito.any())).thenReturn(new TableCollection());
-    datasetService.setDataschemaTables(1L, 1L, new TableCollectionVO());
-    Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
 
   /**

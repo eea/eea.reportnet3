@@ -115,6 +115,18 @@ public interface RecordStoreController {
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName);
 
-
-
+  /**
+   * Creates a schema for each entry in the list by executing the queries contained in an external
+   * file. Also releases events to feed the new schemas. Uses the dataflow to release the lock and
+   * send the finish notification.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  @PutMapping("/dataset/create/dataCollection/{dataflowId}")
+  void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
+      @PathVariable("dataflowId") Long dataflowId);
 }

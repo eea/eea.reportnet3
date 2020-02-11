@@ -110,6 +110,16 @@ public interface RecordStoreService {
    */
   void deleteDataset(String datasetSchemaName);
 
-
-
+  /**
+   * Creates a schema for each entry in the list by executing the queries contained in an external
+   * file. Also releases events to feed the new schemas. Uses the dataflow to release the lock and
+   * send the finish notification.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId);
 }

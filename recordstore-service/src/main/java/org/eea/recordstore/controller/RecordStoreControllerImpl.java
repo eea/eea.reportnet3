@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -209,5 +210,30 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   public void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName) {
     recordStoreService.deleteDataset(datasetSchemaName);
+  }
+
+  /**
+   * Creates a schema for each entry in the list by executing the queries contained in an external
+   * file. Also releases events to feed the new schemas. Uses the dataflow to release the lock and
+   * send the finish notification.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/dataset/create/dataCollection/{dataflowId}")
+  public void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
+      @PathVariable("dataflowId") Long dataflowId) {
+
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    // This method will release the lock
+    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId);
   }
 }

@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,10 +18,10 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
-import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.interfaces.vo.ums.ResourceAssignationVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,78 +50,51 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private DataCollectionService dataCollectionService;
 
-  /** The representative controller zuul. */
   @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
+  private LockService lockService;
 
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /** The dataset metabase service. */
-  @Autowired
-  private DatasetMetabaseService datasetMetabaseService;
-
-  /** The design dataset service. */
-  @Autowired
-  private DesignDatasetService designDatasetService;
-
-  /** The schema service. */
-  @Autowired
-  private DatasetSchemaService schemaService;
-
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZuul;
-
-
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * The Constant LOG.
-   */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
 
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
-  /**
-   * Creates the empty data collection.
-   *
-   * @param dataCollectionVO the data collection VO
-   */
   @Override
-  @HystrixCommand
-  @PostMapping(value = "/create")
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO) {
+  @PutMapping("/rollback/dataflow/{dataflowId}")
+  public void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
+      @PathVariable("dataflowId") Long dataflowId) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (dataCollectionVO.getIdDataflow() == null) {
+    // This method will release the lock
+    dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId);
+  }
+
+  @Override
+  @HystrixCommand
+  @PostMapping("/create/dataflow/{dataflowId}/{dueDate}")
+  @LockMethod(removeWhenFinish = false)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void createEmptyDataCollection(
+      @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId,
+      @PathVariable("dueDate") Long dueDate) {
+
+    // Check if the date is after actual date
+    Date date = new Date(dueDate);
+    if (new Date(System.currentTimeMillis()).compareTo(date) > 0) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+          EEAErrorMessage.DATE_AFTER_INCORRECT);
     }
 
-    // 1. Get the design datasets
-    List<DesignDatasetVO> designs =
-        designDatasetService.getDesignDataSetIdByDataflowId(dataCollectionVO.getIdDataflow());
-
-    // Get the providers who are going to provide data
-    List<RepresentativeVO> representatives = representativeControllerZuul
-        .findRepresentativesByIdDataFlow(dataCollectionVO.getIdDataflow());
-    // 2. Create reporting datasets as many providers are by design dataset
-    // only if there are design datasets and providers
-    int numberOfDesignsToIterate = designs.size() - 1;
-    Boolean schemasIntegrity = true;
-    for (DesignDatasetVO design : designs) {
-      if (!schemaService.validateSchema(design.getDatasetSchema())) {
-        schemasIntegrity = false;
-      }
+    // Continue if the dataflow exists and is DESIGN
+    if (!dataCollectionService.isDesignDataflow(dataflowId)) {
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
+      criteria.add(dataflowId);
+      lockService.removeLockByCriteria(criteria);
+      LOG_ERROR.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
     // Check if the dataflow status is correct, the schema is correct and there are representatives
     // selected
@@ -129,45 +104,13 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       try {
         for (DesignDatasetVO design : designs) {
 
-          // Create the DC per design dataset
-          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION,
-              "Data Collection" + " - " + design.getDataSetName(), design.getDatasetSchema(),
-              dataCollectionVO.getIdDataflow(), dataCollectionVO.getDueDate(), null,
-              numberOfDesignsToIterate);
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
-          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, null,
-              design.getDatasetSchema(), dataCollectionVO.getIdDataflow(), null, representatives,
-              numberOfDesignsToIterate);
-          numberOfDesignsToIterate--;
-        }
-        // Add the dataflow to the providers
-        Set<ResourceAssignationVO> resourcesDataflow = new HashSet<>();
-        for (RepresentativeVO representative : representatives) {
-          ResourceAssignationVO resourceDFP =
-              fillResourceAssignation(dataCollectionVO.getIdDataflow(),
-                  representative.getProviderAccount(), ResourceGroupEnum.DATAFLOW_PROVIDER);
-          resourcesDataflow.add(resourceDFP);
-        }
-        userManagementControllerZuul
-            .addContributorsToResources(resourcesDataflow.stream().collect(Collectors.toList()));
-
-
-
-        // 4. Update the dataflow status to DRAFT
-        dataflowControllerZuul.updateDataFlowStatus(dataCollectionVO.getIdDataflow(),
-            TypeStatusEnum.DRAFT);
-        LOG.info("Dataflow {} changed status to DRAFT", dataCollectionVO.getIdDataflow());
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-            e.getMessage(), e);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            EEAErrorMessage.EXECUTION_ERROR);
-      }
-    } else {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATA_COLLECTION_NOT_CREATED);
-    }
-
+    // This method will release the lock
+    dataCollectionService.createEmptyDataCollection(dataflowId, date);
+    LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 
   /**

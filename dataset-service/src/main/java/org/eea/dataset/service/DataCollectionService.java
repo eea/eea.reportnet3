@@ -18,6 +18,19 @@ public interface DataCollectionService {
    */
   List<DataCollectionVO> getDataCollectionIdByDataflowId(Long idFlow);
 
+  /**
+   * Checks if is design dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is design dataflow
+   */
+  boolean isDesignDataflow(Long dataflowId);
 
-
+  /**
+   * Undo data collection creation.
+   *
+   * @param datasetIds the dataset ids
+   * @param dataflowId the dataflow id
+   */
+  void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId);
 }

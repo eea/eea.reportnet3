@@ -370,4 +370,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
+  /**
+   * Creates the schemas.
+   *
+   * @param data the data
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  public void createSchemas(Map<Long, String> data, Long dataflowId) {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  }
 }
