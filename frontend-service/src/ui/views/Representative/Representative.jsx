@@ -51,7 +51,6 @@ const Representative = withRouter(({ history, match }) => {
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
@@ -118,15 +117,6 @@ const Representative = withRouter(({ history, match }) => {
             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
           },
           title: 'edit'
-        },
-        {
-          label: 'manageRoles',
-          icon: 'manageRoles',
-          onClick: () => {
-            onShowContributorsDialog();
-          },
-          show: hasWritePermissions,
-          title: 'manageRoles'
         },
         {
           label: 'settings',
@@ -283,10 +273,6 @@ const Representative = withRouter(({ history, match }) => {
     setIsDataflowDialogVisible(true);
   };
 
-  const onShowContributorsDialog = () => {
-    setIsActiveManageRolesDialog(true);
-  };
-
   const onShowReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToSnapshotProps(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
@@ -295,15 +281,6 @@ const Representative = withRouter(({ history, match }) => {
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
   };
-
-  const closeManageRolesDialog = (
-    <Button
-      className="p-button-primary"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsActiveManageRolesDialog(false)}
-    />
-  );
 
   const layout = children => (
     <MainLayout
@@ -319,14 +296,6 @@ const Representative = withRouter(({ history, match }) => {
   }
   return layout(
     <div className="rep-row">
-      {/* <LeftSideBar
-        subscribeButtonTitle={resources.messages['subscribeThisButton']}
-        dataflowTitle={dataflowData.name}
-        navTitle={resources.messages['dataflow']}
-        components={[]}
-        entity={`${config.permissions.DATAFLOW}${dataflowData.id}`}
-        style={{ textAlign: 'left' }}
-      /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
           title={!isUndefined(dataflowState[match.params.dataflowId]) ? `${match.params.representative}` : null}
@@ -364,14 +333,14 @@ const Representative = withRouter(({ history, match }) => {
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
                     style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
                     onClick={() => onShowDeleteDataflowDialog()}
                   />
-                ) : null}
+                )}
               </div>
               <Button className="p-button-text-only" label="Generate new API-key" disabled />
               <Button className="p-button-text-only" label="Open Metadata" disabled />
@@ -387,9 +356,7 @@ const Representative = withRouter(({ history, match }) => {
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
           <div className="description">
-            {!isUndefined(dataflowState[match.params.dataflowId])
-              ? dataflowState[match.params.dataflowId].description
-              : null}
+            {!isUndefined(dataflowState[match.params.dataflowId]) && dataflowState[match.params.dataflowId].description}
           </div>
           <div className="features">
             <ul>
@@ -431,7 +398,7 @@ const Representative = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) && (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
@@ -457,8 +424,6 @@ const Representative = withRouter(({ history, match }) => {
               />
             </p>
           </ConfirmDialog>
-        ) : (
-          <></>
         )}
       </div>
     </div>
