@@ -51,6 +51,12 @@ public class RecordValue {
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
 
+
+  /** The data provider code. */
+  @Column(name = "DATA_PROVIDER_CODE")
+  private String dataProviderCode;
+
+
   /**
    * The table value.
    */
