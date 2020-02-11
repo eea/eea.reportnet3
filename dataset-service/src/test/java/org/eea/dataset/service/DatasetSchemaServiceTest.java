@@ -385,7 +385,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDatasetId() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
-    dataSetSchema.setRuleDataSet(new ArrayList<>());
+    // dataSetSchema.setRuleDataSet(new ArrayList<>());
     DataSetMetabase metabase = new DataSetMetabase();
     metabase.setDatasetSchema(new ObjectId().toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
@@ -406,7 +406,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDataFlowNoRules() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
-    dataSetSchema.setRuleDataSet(new ArrayList<>());
+    // dataSetSchema.setRuleDataSet(new ArrayList<>());
     DataSetMetabase metabase = new DataSetMetabase();
     metabase.setDatasetSchema(new ObjectId().toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))

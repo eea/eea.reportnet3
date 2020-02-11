@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,21 +15,35 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
-public class Rule {
 
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+@ToString
+@Document(collection = "Rules")
+public class Rule {
   /** The rule id. */
   @Id
   @Field(value = "_id")
   private ObjectId ruleId;
 
-  /** The id data flow. */
-  @Field(value = "id_DataFlow")
-  private Long dataFlowId;
+  /** The dataset schem id. */
+  @Field(value = "referenceId")
+  private ObjectId referenceId;
 
   /** The rule name. */
   @Field(value = "ruleName")
   private String ruleName;
+
+  /** The automatic. */
+  @Field(value = "automatic")
+  private Boolean automatic;
+
+  /** The enabled. */
+  @Field(value = "enabled")
+  private Boolean enabled;
 
   /** The when condition. */
   @Field(value = "whenCondition")
@@ -39,8 +53,7 @@ public class Rule {
   @Field(value = "thenCondition")
   private List<String> thenCondition;
 
-  @Field(value = "scope")
-  private TypeEntityEnum scope;
+
 
   /**
    * Hash code.
@@ -49,7 +62,8 @@ public class Rule {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(dataFlowId, ruleId, ruleName, thenCondition, whenCondition, scope);
+    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, whenCondition,
+        thenCondition);
   }
 
   /**
@@ -67,10 +81,10 @@ public class Rule {
       return false;
     }
     Rule other = (Rule) obj;
-    return Objects.equals(dataFlowId, other.dataFlowId) && Objects.equals(ruleId, other.ruleId)
-        && Objects.equals(ruleName, other.ruleName)
-        && Objects.equals(thenCondition, other.thenCondition)
-        && Objects.equals(whenCondition, other.whenCondition) && Objects.equals(scope, other.scope);
-
+    return Objects.equals(ruleId, other.ruleId) && Objects.equals(referenceId, other.referenceId)
+        && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
+        && Objects.equals(enabled, other.enabled)
+        && Objects.equals(whenCondition, other.whenCondition)
+        && Objects.equals(thenCondition, other.thenCondition);
   }
 }
