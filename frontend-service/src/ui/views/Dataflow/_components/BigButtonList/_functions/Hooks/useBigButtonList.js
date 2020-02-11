@@ -19,6 +19,7 @@ const useBigButtonList = ({
   isCreateButtonActive,
   isCustodian,
   isDataSchemaCorrect,
+  isDownloadingReceipt,
   onDatasetSchemaNameError,
   onDuplicateName,
   onSaveName,
@@ -166,7 +167,6 @@ const useBigButtonList = ({
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
           caption: datasetName,
-          isReleased: dataset.isReleased,
           handleRedirect: () => {
             handleRedirect(
               getUrl(
@@ -179,6 +179,8 @@ const useBigButtonList = ({
               )
             );
           },
+          infoStatus: dataset.isReleased,
+          infoStatusIcon: true,
           onWheel: getUrl(
             routes.DATASET,
             {
@@ -237,6 +239,19 @@ const useBigButtonList = ({
   };
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
+
+  const confirmationReceipt = [
+    {
+      layout: 'defaultBigButton',
+      buttonClass: 'schemaDataset',
+      buttonIcon: 'fileDownload',
+      caption: resources.messages['confirmationReceipt'],
+      handleRedirect: () => {},
+      infoStatus: true,
+      infoStatusIcon: false,
+      visibility: !isCustodian
+    }
+  ];
 
   const dashboardModels = [
     {
@@ -322,6 +337,7 @@ const useBigButtonList = ({
     ...buttonList,
     ...designDatasetModels,
     ...groupByRepresentativeModels,
+    ...confirmationReceipt,
     ...createDataCollection,
     ...dataCollectionModels,
     ...dashboardModels

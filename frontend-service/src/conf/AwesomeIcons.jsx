@@ -62,7 +62,8 @@ import {
   faCog,
   faPen,
   faUsersCog,
-  faIgloo
+  faIgloo,
+  faFileDownload
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -294,6 +295,8 @@ export const AwesomeIcons = icon => {
       return faUsersCog;
     case 'localhostAlert':
       return faIgloo;
+    case 'fileDownload':
+      return faFileDownload;
     default:
       return faFileAlt;
   }

@@ -23,7 +23,8 @@ export const BigButton = ({
   datasetSchemaInfo,
   handleRedirect,
   index,
-  isReleased,
+  infoStatus,
+  infoStatusIcon,
   layout,
   model,
   onDuplicateName,
@@ -135,21 +136,30 @@ export const BigButton = ({
           onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </a>
-        {model ? (
-          <>
-            <DropdownButton
-              icon="caretDown"
-              model={designModel}
-              buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-              iconStyle={{ fontSize: '1.8rem' }}
-            />
-            {isReleased && (
-              <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
-            )}
-          </>
-        ) : (
-          <></>
+        {model && (
+          <DropdownButton
+            icon="caretDown"
+            model={designModel}
+            buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+            iconStyle={{ fontSize: '1.8rem' }}
+          />
         )}
+        {infoStatus &&
+          (infoStatusIcon ? (
+            <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
+          ) : (
+            <p
+              style={{
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                fontSize: '1.3rem',
+                margin: '0 0.5rem',
+                fontWeight: '600'
+              }}>
+              {resources.messages['new'].toUpperCase()}
+            </p>
+          ))}
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
