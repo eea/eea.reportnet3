@@ -382,20 +382,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      {/* <LeftSideBar
-        subscribeButtonTitle={resources.messages['subscribeThisButton']}
-        dataflowTitle={dataflowData.name}
-        navTitle={resources.messages['dataflow']}
-        components={[]}
-        entity={`${config.permissions.DATAFLOW}${dataflowData.id}`}
-        style={{ textAlign: 'left' }}
-      /> */}
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
           title={
-            !isUndefined(dataflowState[match.params.dataflowId])
-              ? TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
-              : null
+            !isUndefined(dataflowState[match.params.dataflowId]) &&
+            TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
           }
           subtitle={resources.messages['dataflow']}
           icon="archive"
@@ -442,40 +433,19 @@ const Dataflow = withRouter(({ history, match }) => {
           </div>
         </Dialog>
 
-        {/* <Dialog
-          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
-          className={styles.releaseSnapshotsDialog}
-          visible={isActiveReleaseSnapshotDialog}
-          onHide={() => setIsActiveReleaseSnapshotDialog(false)}
-          style={{ width: '30vw' }}>
-           <ScrollPanel style={{ width: '100%', height: '50vh' }}> 
-          {!isEmpty(snapshotsListData) ? (
-            <SnapshotsList
-              className={styles.releaseList}
-              snapshotsListData={snapshotsListData}
-              onLoadSnapshotList={onLoadSnapshotList}
-              setSnapshotDataToRelease={setSnapshotDataToRelease}
-              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
-            />
-          ) : (
-            <h3>{resources.messages['emptySnapshotList']}</h3>
-          )}
-           </ScrollPanel> 
-        </Dialog> */}
-
         <Dialog
           header={resources.messages['properties']}
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
                     style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
                     onClick={() => onShowDeleteDataflowDialog()}
                   />
-                ) : null}
+                )}
               </div>
               <Button className="p-button-text-only" label="Generate new API-key" disabled />
               <Button className="p-button-text-only" label="Open Metadata" disabled />
@@ -491,9 +461,7 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
           <div className="description">
-            {!isUndefined(dataflowState[match.params.dataflowId])
-              ? dataflowState[match.params.dataflowId].description
-              : null}
+            {!isUndefined(dataflowState[match.params.dataflowId]) && dataflowState[match.params.dataflowId].description}
           </div>
           <div className="features">
             <ul>
@@ -556,7 +524,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) && (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
@@ -582,8 +550,6 @@ const Dataflow = withRouter(({ history, match }) => {
               />
             </p>
           </ConfirmDialog>
-        ) : (
-          <></>
         )}
       </div>
     </div>
