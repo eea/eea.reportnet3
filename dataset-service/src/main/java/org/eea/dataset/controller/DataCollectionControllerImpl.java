@@ -74,6 +74,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     // Check if the date is after actual date
     Date date = new Date(dueDate);
     if (new Date(System.currentTimeMillis()).compareTo(date) > 0) {
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
+      criteria.add(dataflowId);
+      lockService.removeLockByCriteria(criteria);
+      LOG_ERROR.error("Error creating DataCollection: Invalid date");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATE_AFTER_INCORRECT);
     }

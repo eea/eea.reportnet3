@@ -351,6 +351,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
     resourceManagementControllerZuul.createResources(groups);
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+    List<ResourceAssignationVO> resourcesCustodian = new ArrayList<>();
 
     datasetIdsEmail.forEach((Long id, String email) -> {
 
@@ -360,11 +361,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
       ResourceAssignationVO resourceDC =
           fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_CUSTODIAN);
-      resourcesProviders.add(resourceDC);
+      resourcesCustodian.add(resourceDC);
 
     });
 
     userManagementControllerZuul.addContributorsToResources(resourcesProviders);
+    userManagementControllerZuul.addUserToResources(resourcesCustodian);
   }
 
 
