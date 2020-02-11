@@ -28,21 +28,8 @@ public class RulesSchema {
   private ObjectId idDatasetSchema;
 
   /** The rules dataset. */
-  @Field(value = "rulesDataset")
-  private List<Rule> rulesDataset;
-
-  /** The rules tables. */
-  @Field(value = "rulesTables")
-  private List<Rule> rulesTables;
-
-  /** The rules records. */
-  @Field(value = "rulesRecords")
-  private List<Rule> rulesRecords;
-
-  /** The rules fields. */
-  @Field(value = "rulesFields")
-  private List<Rule> rulesFields;
-
+  @Field(value = "rules")
+  private List<Rule> rules;
 
   /**
    * Hash code.
@@ -51,8 +38,7 @@ public class RulesSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(rulesSchemaId, idDatasetSchema, rulesDataset, rulesTables, rulesRecords,
-        rulesFields);
+    return Objects.hash(rulesSchemaId, idDatasetSchema, rules);
   }
 
   /**
@@ -72,9 +58,6 @@ public class RulesSchema {
     RulesSchema other = (RulesSchema) obj;
     return Objects.equals(rulesSchemaId, other.rulesSchemaId)
         && Objects.equals(idDatasetSchema, other.idDatasetSchema)
-        && Objects.equals(rulesDataset, other.rulesDataset)
-        && Objects.equals(rulesTables, other.rulesTables)
-        && Objects.equals(rulesRecords, other.rulesRecords)
-        && Objects.equals(rulesFields, other.rulesFields);
+        && Objects.equals(rules, other.rules);
   }
 }

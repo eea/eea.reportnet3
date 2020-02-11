@@ -58,52 +58,36 @@ public class KieBaseManager {
     RulesSchema schemaRules = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchema));
 
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    if (schemaRules.getRulesDataset() != null) {
-      schemaRules.getRulesDataset().stream().forEach(rule -> {
+    if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
+      schemaRules.getRules().stream().forEach(rule -> {
         if (Boolean.TRUE.equals(rule.getEnabled())) {
+          String schemasDrools = "";
+          TypeValidation typeValidation = null;
+          switch (rule.getType()) {
+            case DATASET:
+              schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
+              typeValidation = TypeValidation.DATASET;
+              break;
+            case TABLE:
+              schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
+              typeValidation = TypeValidation.TABLE;
+              break;
+            case RECORD:
+              schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
+              typeValidation = TypeValidation.RECORD;
+              break;
+            case FIELD:
+              schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
+              typeValidation = TypeValidation.FIELD;
+              break;
+          }
           ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), TypeValidation.DATASET,
-              SchemasDrools.ID_DATASET_SCHEMA.getValue(), rule.getWhenCondition(),
+              rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
               rule.getThenCondition().get(0), rule.getThenCondition().get(1),
               null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
         }
       });
     }
-
-    if (schemaRules.getRulesTables() != null) {
-      schemaRules.getRulesTables().stream().forEach(rule -> {
-        if (Boolean.TRUE.equals(rule.getEnabled())) {
-          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), TypeValidation.TABLE,
-              SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
-              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
-        }
-      });
-    }
-    if (schemaRules.getRulesRecords() != null) {
-      schemaRules.getRulesRecords().stream().forEach(rule -> {
-        if (Boolean.TRUE.equals(rule.getEnabled())) {
-          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), TypeValidation.RECORD,
-              SchemasDrools.ID_RECORD_SCHEMA.getValue(), rule.getWhenCondition(),
-              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
-        }
-      });
-    }
-    if (schemaRules.getRulesFields() != null) {
-      schemaRules.getRulesFields().stream().forEach(rule -> {
-        if (Boolean.TRUE.equals(rule.getEnabled())) {
-          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), TypeValidation.FIELD,
-              SchemasDrools.ID_FIELD_SCHEMA.getValue(), rule.getWhenCondition(),
-              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
-        }
-      });
-    }
-
 
     ObjectDataCompiler compiler = new ObjectDataCompiler();
 

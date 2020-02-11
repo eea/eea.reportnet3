@@ -17,6 +17,12 @@ import lombok.ToString;
  *
  * @return the java.lang. string
  */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class FieldSchemaVO {
 
@@ -38,6 +44,8 @@ public class FieldSchemaVO {
   /** The id code list. */
   private Long idCodeList;
 
+
+  /** The required. */
   private Boolean required;
 
   /**

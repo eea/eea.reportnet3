@@ -29,7 +29,6 @@ public class RuleVO {
   /** The rule name. */
   private String ruleName;
 
-
   /** The automatic. */
   private Boolean automatic;
 

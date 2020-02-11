@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -43,85 +44,52 @@ public class KieBaseManagerTest {
     listString.add("ERROR VALIDATION");
     listString.add("ERROR");
     // RULES DATASET
-    List<Rule> ruleDataSetList = new ArrayList<>();
+    List<Rule> ruleKiebase = new ArrayList<>();
     Rule ruleDataset = new Rule();
     ruleDataset.setReferenceId(new ObjectId());
     ruleDataset.setRuleId(new ObjectId());
     ruleDataset.setRuleName("regla dataset");
     ruleDataset.setEnabled(Boolean.TRUE);
+    ruleDataset.setType(TypeEntityEnum.DATASET);
     ruleDataset.setWhenCondition("id == null");
     ruleDataset.setThenCondition(listString);
-    ruleDataSetList.add(ruleDataset);
+    ruleKiebase.add(ruleDataset);
     // RULE TABLE
-    List<Rule> ruleTableList = new ArrayList<>();
+
     Rule ruleTable = new Rule();
     ruleTable.setReferenceId(new ObjectId());
     ruleTable.setRuleId(new ObjectId());
     ruleTable.setRuleName("regla tadasñe");
     ruleTable.setEnabled(Boolean.TRUE);
+    ruleTable.setType(TypeEntityEnum.TABLE);
     ruleTable.setWhenCondition("id == null");
     ruleTable.setThenCondition(listString);
-    ruleTableList.add(ruleTable);
+    ruleKiebase.add(ruleTable);
 
     // RULES RECORDS
-    List<Rule> ruleRecordList = new ArrayList<>();
     Rule ruleRecord = new Rule();
     ruleRecord.setReferenceId(new ObjectId());
     ruleRecord.setRuleId(new ObjectId());
     ruleRecord.setRuleName("regla recordasda");
     ruleRecord.setEnabled(Boolean.TRUE);
+    ruleRecord.setType(TypeEntityEnum.RECORD);
     ruleRecord.setWhenCondition("id == null");
     ruleRecord.setThenCondition(listString);
-    ruleRecordList.add(ruleRecord);
+    ruleKiebase.add(ruleRecord);
 
     // RULES FIELDS
-    List<Rule> ruleFieldList = new ArrayList<>();
     ruleDataset.setReferenceId(new ObjectId());
     Rule ruleField = new Rule();
     ruleField.setReferenceId(new ObjectId());
     ruleField.setRuleId(new ObjectId());
     ruleField.setRuleName("regla field");
     ruleField.setEnabled(Boolean.TRUE);
+    ruleField.setType(TypeEntityEnum.FIELD);
     ruleField.setWhenCondition("id == null");
     ruleField.setThenCondition(listString);
-    ruleFieldList.add(ruleField);
+    ruleKiebase.add(ruleField);
 
-    rulesSchemas.setRulesFields(ruleFieldList);;
-    rulesSchemas.setRulesRecords(ruleRecordList);
-    rulesSchemas.setRulesDataset(ruleDataSetList);
-    rulesSchemas.setRulesTables(ruleTableList);
-    // CALL SERVICES
-    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
-    when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchemas);
-    kieBaseManager.reloadRules(1L, new ObjectId().toString());
-  }
-
-  @Test()
-  public void testKieBaseManagerNotEnable() throws FileNotFoundException {
-    RulesSchema rulesSchemas = new RulesSchema();
-    // LIST STRINGS
-    List<String> listString = new ArrayList<>();
-    listString.add("ERROR VALIDATION");
-    listString.add("ERROR");
-    // RULES DATASET
-    Rule rule = new Rule();
-    List<Rule> ruleDataSetList = new ArrayList<>();
-    ruleDataSetList.add(rule);
-    // RULE TABLE
-    List<Rule> ruleTableList = new ArrayList<>();
-    ruleTableList.add(rule);
-    // RULES RECORDS
-    List<Rule> ruleRecordList = new ArrayList<>();
-    ruleRecordList.add(rule);
-    // RULES FIELDS
-    List<Rule> ruleFieldList = new ArrayList<>();
-    ruleFieldList.add(rule);
-
-    rulesSchemas.setRulesFields(ruleFieldList);;
-    rulesSchemas.setRulesRecords(ruleRecordList);
-    rulesSchemas.setRulesDataset(ruleDataSetList);
-    rulesSchemas.setRulesTables(ruleTableList);
+    rulesSchemas.setRules(ruleKiebase);;
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
@@ -132,10 +100,8 @@ public class KieBaseManagerTest {
   @Test()
   public void testKieBaseManagerNull() throws FileNotFoundException {
     RulesSchema rulesSchemas = new RulesSchema();
-    rulesSchemas.setRulesFields(null);;
-    rulesSchemas.setRulesRecords(null);
-    rulesSchemas.setRulesDataset(null);
-    rulesSchemas.setRulesTables(null);
+    rulesSchemas.setRules(null);
+
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);

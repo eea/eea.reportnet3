@@ -17,29 +17,6 @@ import lombok.ToString;
 @Getter
 @Setter
 
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Document(collection = "Rules")
 public class Rule {
