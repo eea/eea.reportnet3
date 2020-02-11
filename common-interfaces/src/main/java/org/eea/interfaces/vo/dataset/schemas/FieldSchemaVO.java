@@ -1,9 +1,7 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
-import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleFieldVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -37,9 +35,6 @@ public class FieldSchemaVO {
   /** The type. */
   private TypeData type;
 
-  /** The rule field. */
-  private List<RuleFieldVO> ruleField;
-
   /** The id code list. */
   private Long idCodeList;
 
@@ -51,7 +46,7 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, idRecord, name, ruleField, type, idCodeList);
+    return Objects.hash(id, description, idRecord, name, type, idCodeList);
   }
 
   /**
@@ -71,7 +66,6 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type)
-        && Objects.equals(idCodeList, other.idCodeList);
+        && Objects.equals(type, other.type) && Objects.equals(idCodeList, other.idCodeList);
   }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -15,6 +16,24 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 
 /**
  * To string.
@@ -45,6 +64,22 @@ public class Rule {
   @Field(value = "enabled")
   private Boolean enabled;
 
+  /** The salience. */
+  @Field(value = "salience")
+  private Integer salience;
+
+  /** The activation_group. */
+  @Field(value = "activationGroup")
+  private String activationGroup;
+
+  /** The order. */
+  @Field(value = "order")
+  private Integer order;
+
+  /** The type. */
+  @Field(value = "type")
+  private TypeEntityEnum type;
+
   /** The when condition. */
   @Field(value = "whenCondition")
   private String whenCondition;
@@ -62,8 +97,8 @@ public class Rule {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, whenCondition,
-        thenCondition);
+    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
+        activationGroup, order, type, whenCondition, thenCondition);
   }
 
   /**
@@ -83,7 +118,9 @@ public class Rule {
     Rule other = (Rule) obj;
     return Objects.equals(ruleId, other.ruleId) && Objects.equals(referenceId, other.referenceId)
         && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
-        && Objects.equals(enabled, other.enabled)
+        && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
+        && Objects.equals(activationGroup, other.activationGroup)
+        && Objects.equals(order, other.order) && Objects.equals(type, other.type)
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(thenCondition, other.thenCondition);
   }
