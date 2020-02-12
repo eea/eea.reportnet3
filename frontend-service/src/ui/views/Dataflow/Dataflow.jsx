@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined } from 'lodash';
+import ReactToPdf from 'react-to-pdf';
 
 import styles from './Dataflow.module.scss';
 
@@ -23,6 +24,7 @@ import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
+import { ConfirmationReceipt } from './_components/ConfirmationReceipt';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -77,6 +79,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+
+  const pdfRef = React.createRef();
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -392,6 +396,14 @@ const Dataflow = withRouter(({ history, match }) => {
           icon="archive"
           iconSize="4rem"
         />
+
+        <ReactToPdf targetRef={pdfRef} filename="code-example.pdf">
+          {({ toPdf }) => (
+            <Button className="p-button-secondary" icon="cancel" label="Confirmation Receipt" onClick={toPdf} />
+          )}
+        </ReactToPdf>
+        <ConfirmationReceipt pdfRef={pdfRef} className={styles.none} />
+
         <BigButtonList
           dataflowData={dataflowData}
           dataflowStatus={dataflowStatus}
