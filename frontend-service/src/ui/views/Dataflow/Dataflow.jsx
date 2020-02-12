@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined } from 'lodash';
-import ReactToPdf from 'react-to-pdf';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './Dataflow.module.scss';
 
@@ -211,6 +211,20 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onDownloadReceipt = () => (
+    <PDFDownloadLink document={<ConfirmationReceipt dataflowData={dataflowData} />} fileName={'test.pdf'}>
+      {({ blob, url, loading, error }) =>
+        loading ? 'Loading document...' : <button className="button">DOWNLOAD NEW PDF</button>
+      // <Button
+      //   className="p-button-primary"
+      //   icon={loading ? 'import' : 'spinner'}
+      //   label={resources.messages['download']}
+      //   onClick={() => }
+      // />
+      }
+    </PDFDownloadLink>
+  );
+
   if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
   }
@@ -397,12 +411,9 @@ const Dataflow = withRouter(({ history, match }) => {
           iconSize="4rem"
         />
 
-        <ReactToPdf targetRef={pdfRef} filename="code-example.pdf">
-          {({ toPdf }) => (
-            <Button className="p-button-secondary" icon="cancel" label="Confirmation Receipt" onClick={toPdf} />
-          )}
-        </ReactToPdf>
-        <ConfirmationReceipt pdfRef={pdfRef} className={styles.none} />
+        <PDFDownloadLink document={<ConfirmationReceipt dataflowData={dataflowData} />} fileName={'test.pdf'}>
+          {({ blob, url, loading, error }) => (loading ? 'Loading document...' : <Button className="button" />)}
+        </PDFDownloadLink>
 
         <BigButtonList
           dataflowData={dataflowData}
@@ -414,12 +425,15 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
+          onDownloadReceipt={onDownloadReceipt}
           onUpdateData={onUpdateData}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           onSaveName={onSaveName}
           updatedDatasetSchema={updatedDatasetSchema}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
+
+        {/* <ConfirmationReceipt className={styles.none} dataflowData={dataflowData} /> */}
 
         <SnapshotsDialog
           dataflowId={match.params.dataflowId}

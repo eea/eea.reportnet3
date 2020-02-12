@@ -1,14 +1,30 @@
 import React from 'react';
-import styles from './ConfirmationReceipt.module.scss';
-const ConfirmationReceipt = ({ pdfRef, receiptData }) => {
+
+import logo from 'assets/images/logo.png';
+
+import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+
+const ConfirmationReceipt = ({ dataflowData }) => {
+  const styles = StyleSheet.create({
+    image: { width: '30vmin', height: '30vmin' },
+    page: { backgroundColor: '#61dafb' },
+    section: { textAlign: 'center', margin: 30 }
+  });
+
   return (
-    <div ref={pdfRef} className={styles.pdf}>
-      <div id="html-page">
-        <h3>REPORTNET 3</h3>
-        <h4>Confirmation receipt</h4>
-        <h5>Name</h5>
-      </div>
-    </div>
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={[styles.section, { color: 'black' }]}>
+          <Image style={styles.image} src={logo} />
+          <Text>REPORTNET 3</Text>
+          <Text>Confirmation receipt - {dataflowData.description}</Text>
+          <Text>{dataflowData.name}</Text>
+          {/* {dataflowData.datasets.map(dataset => (
+            <Text style={{ color: 'teal', textAlign: 'left' }}>{dataset.datasetName}</Text>
+          ))}  */}
+        </View>
+      </Page>
+    </Document>
   );
 };
 

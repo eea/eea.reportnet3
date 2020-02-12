@@ -19,8 +19,8 @@ const useBigButtonList = ({
   isCreateButtonActive,
   isCustodian,
   isDataSchemaCorrect,
-  isDownloadingReceipt,
   onDatasetSchemaNameError,
+  onDownloadReceipt,
   onDuplicateName,
   onSaveName,
   onShowDataCollectionModal,
@@ -246,10 +246,10 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: 'fileDownload',
       caption: resources.messages['confirmationReceipt'],
-      handleRedirect: () => {},
+      handleRedirect: () => onDownloadReceipt(),
       infoStatus: true,
       infoStatusIcon: false,
-      visibility: !isCustodian
+      visibility: isCustodian
     }
   ];
 
