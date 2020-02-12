@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'primereact/checkbox';
 import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
@@ -76,6 +77,7 @@ export const FieldDesigner = ({
 
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
+  const [fieldRequired, setFieldRequired] = useState(false);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
@@ -542,6 +544,20 @@ export const FieldDesigner = ({
           // }}
         ></div>
         {!addField ? <FontAwesomeIcon icon={AwesomeIcons('move')} /> : <div style={{ width: '32px' }}></div>}
+        {
+          <React.Fragment>
+            <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
+            <Checkbox
+              checked={fieldRequired}
+              inputId={`${fieldId}_check`}
+              label="Default"
+              onChange={e => {
+                setFieldRequired(e.checked);
+              }}
+              style={{ marginLeft: '0.4rem', marginRight: '0.4rem', alignSelf: !isEditing ? 'center' : 'auto' }}
+            />
+          </React.Fragment>
+        }
         <InputText
           autoFocus={false}
           className={styles.inputField}
@@ -563,7 +579,7 @@ export const FieldDesigner = ({
         />
         <InputTextarea
           autoFocus={false}
-          collapsedHeight={30}
+          collapsedHeight={33}
           expandableOnClick={true}
           className={styles.inputFieldDescription}
           key={fieldId}
@@ -597,6 +613,7 @@ export const FieldDesigner = ({
           placeholder={resources.messages['newFieldTypePlaceHolder']}
           // showClear={true}
           scrollHeight="450px"
+          style={{ alignSelf: !isEditing ? 'center' : 'auto' }}
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
         {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
@@ -619,10 +636,19 @@ export const FieldDesigner = ({
         ) : isCodelistSelected ? (
           <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
         ) : null}
+        {
+          <Button
+            className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            icon="palette"
+            style={{ marginLeft: '0.4rem' }}
+            tooltip={resources.messages['unsavedChanges']}
+            tooltipOptions={{ position: 'bottom' }}
+          />
+        }
         {!addField ? (
           <a
             draggable={true}
-            className={styles.deleteButton}
+            className={`${styles.button} ${styles.deleteButton}`}
             href="#"
             onClick={e => {
               e.preventDefault();

@@ -31,6 +31,7 @@
 .dropdownFieldType {
   margin-left: 0.4rem;
   width: 20%;
+  height: 33px;
 }
 
 .codelistButton {
@@ -51,14 +52,23 @@
   font-size: 13px;
 }
 
-.deleteButton {
-  color: var(--errors);
+.button {
   padding-top: 0.3rem;
   padding-bottom: 0.3rem;
   margin-left: 0.4rem;
   border-radius: 3px;
   height: 1.95rem;
   border: 1px solid var(--c-custom-gray);
+  color: var(--main-font-color);
+}
+
+.button:hover {
+  background-color: var(--c-custom-gray);
+  color: var(--main-font-color);
+}
+
+.deleteButton {
+  color: var(--errors);
 }
 
 .deleteButton:hover {
@@ -102,6 +112,11 @@
 
 .flip {
   animation: flip 0.5s;
+}
+
+.qcButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  align-self: center;
 }
 
 @keyframes fadeInOpacity {

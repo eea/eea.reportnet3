@@ -289,7 +289,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         {
           <div>
             <Button
-              className={`p-button-secondary ${styles.orderIcon}`}
+              className={`p-button-secondary-transparent ${styles.orderIcon}`}
               icon={codelistsManagerState.order === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
               onClick={() => onOrderCategories(codelistsManagerState.order)}
               style={{ fontSize: '12pt' }}
@@ -297,7 +297,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
               tooltipOptions={{ position: 'bottom' }}
             />
             <Button
-              className={`p-button-secondary ${styles.orderIcon}`}
+              className={`p-button-secondary-transparent ${styles.orderIcon}`}
               icon={codelistsManagerState.toggleExpandCollapseAll === 1 ? 'angleRight' : 'angleDown'}
               onClick={() => onToggleExpandCollapseAll()}
               tooltip={
