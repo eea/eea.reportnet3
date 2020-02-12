@@ -204,6 +204,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     resourceInfoVO.setResourceId(datasetId);
     resourceInfoVO.setResourceTypeEnum(type);
     resourceInfoVO.setSecurityRoleEnum(role);
+    resourceInfoVO.setName(type + "-" + datasetId + "-" + role);
 
     return resourceInfoVO;
   }
