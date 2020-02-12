@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,14 +15,7 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
-@Document(collection = "Rules")
 public class Rule {
   /** The rule id. */
   @Id
