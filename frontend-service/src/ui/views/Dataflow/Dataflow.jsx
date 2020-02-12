@@ -394,12 +394,12 @@ const Dataflow = withRouter(({ history, match }) => {
         />
         <BigButtonList
           dataflowData={dataflowData}
-          handleRedirect={handleRedirect}
           dataflowStatus={dataflowStatus}
           dataflowId={match.params.dataflowId}
           designDatasetSchemas={designDatasetSchemas}
           isCustodian={isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}
+          handleRedirect={handleRedirect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
           onUpdateData={onUpdateData}
