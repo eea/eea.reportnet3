@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
@@ -22,12 +23,19 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -77,6 +85,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The resource management controller zuul. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZuul;
+
+  /** The user management controller zuul. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
+
   /** The lock service. */
   @Autowired
   private LockService lockService;
@@ -123,20 +139,83 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
-   * @param dataflowId the dataflow id
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
-      Long dataflowId) throws EEAException {
+  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds)
+      throws EEAException {
+
+    List<ResourceInfoVO> groups = new ArrayList<>();
+    List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
+    List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
+
+    // Create DataCollection groups and assign custodian to self user
+    for (Long dataCollectionId : dataCollectionIds) {
+      groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
+          SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments.add(
+          createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+    }
+
+    // Create Dataset groups and assign provider to representatives and custodian to self user
+    for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+      providerAssignments.add(
+          createAssignments(entry.getKey(), entry.getValue(), ResourceGroupEnum.DATASET_PROVIDER));
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments
+          .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
+    }
+
+    // Persist changes in KeyCloack guaranteeing transactionality
+    // Insert in chunks to prevent Hystrix timeout
+    int size = groups.size();
+    int i = 0;
     try {
-      datasetMetabaseService.createGroupProviderAndAddUser(datasetIdsEmails, dataflowId);
-      for (Long dataCollectionId : dataCollectionIds) {
-        datasetMetabaseService.createGroupDcAndAddUser(dataCollectionId);
+      // Persist groups
+      for (i = 0; i < size; i += 10) {
+        resourceManagementControllerZuul
+            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
       }
+
+      // Persist provider assignments
+      userManagementControllerZuul.addContributorsToResources(providerAssignments);
+
+      // Persist custodian assignments
+      userManagementControllerZuul.addUserToResources(custodianAssignments);
     } catch (Exception e) {
+      // Rollback group creation
+      List<Long> rollback = groups.subList(0, i > size ? size : i).stream()
+          .map(ResourceInfoVO::getResourceId).collect(Collectors.toList());
+      size = rollback.size();
+      for (i = 0; i < size; i += 10) {
+        resourceManagementControllerZuul
+            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
+      }
       throw new EEAException(e);
     }
+  }
+
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+
+    return resourceInfoVO;
+  }
+
+  private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
   }
 
   /**
@@ -239,6 +318,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
     }
 
+    int size = datasetIds.size();
+    for (int i = 0; i < size; i += 10) {
+      resourceManagementControllerZuul
+          .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
+    }
     dataCollectionRepository.deleteDatasetById(datasetIds);
     dataCollectionRepository.updateDataflowStatus(dataflowId, TypeStatusEnum.DESIGN.getValue());
   }
@@ -291,7 +375,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         statement.executeBatch();
         // 7. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
+        createPermissions(datasetIdsEmails, dataCollectionIds);
         connection.commit();
         LOG.info("Metabase changes completed on DataCollection creation");
 

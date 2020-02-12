@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +74,13 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @ResponseStatus(HttpStatus.OK)
   public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
+  }
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/delete_by_dataset_id")
+  public void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds) {
+    securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
   }
 
   /**

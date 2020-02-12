@@ -343,6 +343,29 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   /**
+   * Delete resource instances containing the ID in the name.
+   * <p>
+   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-DATA_PROVIDER would be deleted if the list
+   * contains the ID 1.
+   * </p>
+   *
+   * @param datasetIds the dataset ids
+   */
+  @Override
+  public void deleteResourceInstancesByDatasetId(List<Long> datasetIds) {
+    if (datasetIds != null && !datasetIds.isEmpty()) {
+      Set<Long> set = new HashSet<>(datasetIds);
+      GroupInfo[] groups = keycloakConnectorService.getGroups();
+      for (int i = 0; i < groups.length; i++) {
+        if (set.contains(Long.parseLong(groups[i].getName().split("-")[1]))) {
+          keycloakConnectorService.deleteGroupDetail(groups[i].getId());
+          LOG.info("Group {} with id {} deleted", groups[i].getName(), groups[i].getId());
+        }
+      }
+    }
+  }
+
+  /**
    * Adds the user to user group.
    *
    * @param userId the user resourceId

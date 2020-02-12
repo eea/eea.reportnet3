@@ -63,7 +63,7 @@ public interface SecurityProviderInterfaceService {
    * Create resource instance.
    *
    * @param resourceInfoVO the resource info vo
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException;
 
@@ -87,7 +87,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupName the group name
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void addUserToUserGroup(String userId, String groupName) throws EEAException;
 
@@ -151,7 +151,7 @@ public interface SecurityProviderInterfaceService {
    * Creates the resource instance.
    *
    * @param resourceInfoVOs the resource info V os
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException;
 
@@ -159,7 +159,7 @@ public interface SecurityProviderInterfaceService {
    * Adds the contributosr to user group.
    *
    * @param resources the resources
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void addContributorsToUserGroup(List<ResourceAssignationVO> resources) throws EEAException;
 
@@ -175,5 +175,14 @@ public interface SecurityProviderInterfaceService {
   void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
       String groupName) throws EEAException;
 
-
+  /**
+   * Delete resource instances containing the ID in the name.
+   * <p>
+   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-DATA_PROVIDER would be deleted if the list
+   * contains the ID 1.
+   * </p>
+   *
+   * @param datasetIds the dataset ids
+   */
+  void deleteResourceInstancesByDatasetId(List<Long> datasetIds);
 }
