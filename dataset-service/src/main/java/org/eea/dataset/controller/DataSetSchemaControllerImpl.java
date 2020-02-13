@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -498,23 +497,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
-  }
-
-  /**
-   * Find rule schema by dataset id.
-   *
-   * @param idDatasetSchema the id dataset schema
-   * @return the rules schema VO
-   */
-  @Override
-  @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
-  public RulesSchemaVO findRuleSchemaByDatasetId(String idDatasetSchema) {
-    if (StringUtils.isBlank(idDatasetSchema)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else {
-      return dataschemaService.getRulesSchemaByDatasetId(idDatasetSchema);
-    }
   }
 
 }

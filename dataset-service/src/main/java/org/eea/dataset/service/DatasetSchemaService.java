@@ -194,11 +194,4 @@ public interface DatasetSchemaService {
    */
   Boolean validateSchema(String datasetSchemaId);
 
-  /**
-   * Gets the rules schema by dataset id.
-   *
-   * @param idDatasetSchema the dataset id
-   * @return the rules schema by dataset id
-   */
-  RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema);
 }
