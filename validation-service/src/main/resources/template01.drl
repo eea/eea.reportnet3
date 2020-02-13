@@ -16,10 +16,6 @@ import org.eea.validation.util.*;
 import java.util.regex.*;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.validation.persistence.data.domain.RecordValue;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
