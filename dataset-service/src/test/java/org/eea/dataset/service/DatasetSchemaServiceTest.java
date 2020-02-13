@@ -23,7 +23,6 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -159,10 +158,6 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private TableSchemaVO tableSchemaVO;
-
-  /** The rules repository. */
-  @Mock
-  private RulesRepository rulesRepository;
 
   @Spy
   private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
@@ -319,7 +314,6 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
-    Mockito.when(rulesRepository.save(Mockito.any())).thenReturn(null);
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 
