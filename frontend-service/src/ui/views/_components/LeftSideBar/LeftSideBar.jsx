@@ -1,10 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
-
+import { routes } from 'ui/routes';
 import styles from './LeftSideBar.module.scss';
 
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 import { NotificationsList } from './_components/NotificationsList';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import { UserService } from 'core/services/User';
 
@@ -14,7 +15,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const LeftSideBar = withRouter(() => {
+const LeftSideBar = withRouter(({history}) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -25,15 +26,19 @@ const LeftSideBar = withRouter(() => {
 
   const renderUserProfile = () => {
     const userButtonProps = {
-      href: '#userProfilePage',
-      onClick: async e => {
+      href: getUrl(routes['SETTINGS']),
+      onClick: e => {
+
         e.preventDefault();
+        history.push(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings',
       icon: 'user-profile',
       label: 'userSettings'
     };
     return <LeftSideBarButton {...userButtonProps} />;
+  
+    
   };
   const renderUserNotifications = () => {
     const userNotificationsProps = {

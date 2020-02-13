@@ -39,6 +39,7 @@
 		"collapseAll": "Collapse all",
 		"completedDataflowText": "These are the completed dataflows",
 		"completedDataflowTitle": "Completed dataflows",
+		"configUserSettngs":"Config user settings",
 		"confirmDeleteCategory": "Are you sure you want to delete this category?",
 		"confirmDeleteRow": "Are you sure you want to delete this row?",
 		"contributorLoginValidationMax": "Login is too long!",

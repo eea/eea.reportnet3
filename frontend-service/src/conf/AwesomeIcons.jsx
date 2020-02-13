@@ -14,6 +14,7 @@ import {
   faTrashAlt,
   faCaretDown,
   faChartBar,
+  faCogs,
   faPlus,
   faArchive,
   faBroom,
@@ -296,8 +297,10 @@ export const AwesomeIcons = icon => {
       return faUsersCog;
     case 'localhostAlert':
       return faIgloo;
-      case'palette':
+    case 'palette':
       return faPalette
+    case 'cofings':
+      return faCogs
     default:
       return faFileAlt;
   }
