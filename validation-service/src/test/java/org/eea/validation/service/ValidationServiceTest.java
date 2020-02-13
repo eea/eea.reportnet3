@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,13 +38,11 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
-import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -146,12 +143,6 @@ public class ValidationServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
-
-  /**
-   * The table validation querys drools repository.
-   */
-  @Mock
-  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
    * /** The table validation repository.
    */
@@ -227,11 +218,6 @@ public class ValidationServiceTest {
 
   private Map<String, List<String>> attributes;
 
-  /**
-   * The dataset repository impl.
-   */
-  @Mock
-  private DatasetRepositoryImpl datasetRepositoryImpl;
   @Mock
   private FieldRepository fieldRepository;
   @Mock
@@ -860,113 +846,6 @@ public class ValidationServiceTest {
     validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
   }
 
-
-  /**
-   * Table validation query period monitoring.
-   */
-  @Test
-  public void tableValidationQueryPeriodMonitoring() {
-    List<BigInteger> listRecords = new ArrayList<>();
-    listRecords.add(new BigInteger("1"));
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(listRecords);
-    when(recordRepository.findByIdValidation(Mockito.anyLong()))
-        .thenReturn(Optional.of(new RecordValue()));
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-  }
-
-
-  /**
-   * Table validation query period monitoring fail.
-   */
-  @Test
-  public void tableValidationQueryPeriodMonitoringFail() {
-    List<BigInteger> listRecords = new ArrayList<>();
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(listRecords);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(null);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-  }
-
-
-  /**
-   * Dataset validation DO 02 query test.
-   */
-  @Test
-  public void datasetValidationDO02QueryTest() {
-    validationServiceImpl.datasetValidationDO02Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DO 03 query test.
-   */
-  @Test
-  public void datasetValidationDO03QueryTest() {
-    validationServiceImpl.datasetValidationDO03Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 01 A query test.
-   */
-  @Test
-  public void datasetValidationDC01AQueryTest() {
-    validationServiceImpl.datasetValidationDC01AQuery(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 01 B query test.
-   */
-  @Test
-  public void datasetValidationDC01BQueryTest() {
-    validationServiceImpl.datasetValidationDC01BQuery(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 02 query test.
-   */
-  @Test
-  public void datasetValidationDC02QueryTest() {
-    validationServiceImpl.datasetValidationDC02Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 03 B query test.
-   */
-  @Test
-  public void datasetValidationDC03BQueryTest() {
-    validationServiceImpl.datasetValidationDC03Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Table validation DR 01 AB query test.
-   */
-  @Test
-  public void tableValidationDR01ABQueryTest() {
-    validationServiceImpl.tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
-    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
-        .tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Table validation query non return result test.
-   */
-  @Test
-  public void tableValidationQueryNonReturnResultTest() {
-    validationServiceImpl.tableValidationQueryNonReturnResult(Mockito.any());
-    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
-        .tableValidationQueryNonReturnResult(Mockito.any());
-  }
 
   /**
    * Force validations test.

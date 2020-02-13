@@ -1,9 +1,9 @@
 package org.eea.validation.service.impl;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -19,13 +19,29 @@ import org.springframework.stereotype.Service;
 @Service("RulesService")
 public class RulesServiceImpl implements RulesService {
 
+  /** The rules repository. */
   @Autowired
-  private RulesRepository rulesRepository;
+  RulesRepository rulesRepository;
 
+  /** The rules schema mapper. */
+  @Autowired
+  RulesSchemaMapper rulesSchemaMapper;
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * Gets the rules schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the rules schema by dataset id
+   */
+  @Override
+  public RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema) {
+    return rulesSchemaMapper
+        .entityToClass(rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema)));
+  }
 
   @Override
   public void createEmptyRulesScehma(ObjectId schemaId, ObjectId ruleSchemaId) {

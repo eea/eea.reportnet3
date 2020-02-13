@@ -26,6 +26,7 @@ public class RuleVO {
 
   /** The reference id. */
   private String referenceId;
+
   /** The rule name. */
   private String ruleName;
 
