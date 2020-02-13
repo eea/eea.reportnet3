@@ -1,12 +1,14 @@
 import React, { useContext, useState } from 'react';
 
 import { isUndefined, remove } from 'lodash';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { ConfirmationReceipt } from '../ConfirmationReceipt';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
@@ -32,7 +34,6 @@ export const BigButtonList = ({
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
-  onDownloadReceipt,
   onUpdateData,
   onSaveName,
   showReleaseSnapshotDialog,
@@ -150,37 +151,53 @@ export const BigButtonList = ({
     setDataCollectionDialog(true);
   };
 
+  const onUpdatedButtonList = () => {
+    const receiptButton = (
+      <PDFDownloadLink
+        document={<ConfirmationReceipt dataflowData={dataflowData} />}
+        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
+        {({ blob, url, loading, error }) => (
+          <BigButton
+            layout="defaultBigButton"
+            buttonClass="schemaDataset"
+            buttonIcon={loading ? 'spinner' : 'fileDownload'}
+            buttonIconClass={loading ? 'spinner' : ''}
+            caption={resources.messages['confirmationReceipt']}
+            visibility={!isCustodian}
+          />
+        )}
+      </PDFDownloadLink>
+    );
+    return [...bigButtonList, receiptButton];
+  };
+
+  const bigButtonList = useBigButtonList({
+    dataflowData: dataflowData,
+    dataflowId: dataflowId,
+    dataflowStatus: dataflowStatus,
+    getDeleteSchemaIndex: getDeleteSchemaIndex,
+    handleRedirect: handleRedirect,
+    hasRepresentatives: hasRepresentatives,
+    hasWritePermissions: hasWritePermissions,
+    isCreateButtonActive: isCreateButtonActive,
+    isCustodian: isCustodian,
+    isDataSchemaCorrect: isDataSchemaCorrect,
+    onDatasetSchemaNameError: onDatasetSchemaNameError,
+    onDuplicateName: onDuplicateName,
+    onSaveName: onSaveName,
+    onShowDataCollectionModal: onShowDataCollectionModal,
+    onShowNewSchemaDialog: onShowNewSchemaDialog,
+    showReleaseSnapshotDialog: showReleaseSnapshotDialog,
+    updatedDatasetSchema: updatedDatasetSchema
+  })
+    .filter(button => button.visibility)
+    .map((button, i) => <BigButton key={i} {...button} />);
+
   return (
     <>
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
-          <div className={styles.datasetItem}>
-            {useBigButtonList({
-              hasWritePermissions,
-              dataflowData: dataflowData,
-              dataflowId: dataflowId,
-              dataflowStatus: dataflowStatus,
-              getDeleteSchemaIndex: getDeleteSchemaIndex,
-              handleRedirect: handleRedirect,
-              hasRepresentatives: hasRepresentatives,
-              hasWritePermissions: hasWritePermissions,
-              isCreateButtonActive: isCreateButtonActive,
-              isCustodian: isCustodian,
-              isDataSchemaCorrect: isDataSchemaCorrect,
-              onDatasetSchemaNameError: onDatasetSchemaNameError,
-              onDownloadReceipt: onDownloadReceipt,
-              onDuplicateName: onDuplicateName,
-              onSaveName: onSaveName,
-              onShowDataCollectionModal: onShowDataCollectionModal,
-              onShowNewSchemaDialog: onShowNewSchemaDialog,
-              showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema
-            })
-              .filter(button => button.visibility)
-              .map((button, i) => (
-                <BigButton key={i} {...button} />
-              ))}
-          </div>
+          <div className={styles.datasetItem}>{onUpdatedButtonList()}</div>
         </div>
       </div>
 
