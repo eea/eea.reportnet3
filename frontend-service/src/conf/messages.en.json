@@ -291,6 +291,7 @@
 		"selectFile": "Select or drag here your dataset (.csv)",
 		"selectLang": "Select language",
 		"settings": "Settings",
+		"settingsUser":"User settings",
 		"showDeprecatedCodelists": "Show deprecated codelists",
 		"showHideColumns": "Show/Hide columns",
 		"showValidations": "Show validations",

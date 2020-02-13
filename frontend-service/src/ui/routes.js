@@ -8,6 +8,7 @@ export const routes = {
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATAFLOWS: '/dataflows',
   DATAFLOW: '/dataflow/:dataflowId',
+  SETTINGS: '/settings',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
   REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative'

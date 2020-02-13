@@ -58,11 +58,13 @@ import {
   faSortAlphaDown,
   faSortAlphaUp,
   faSortAlphaUpAlt,
+  faPalette,
   faPowerOff,
   faCog,
   faPen,
   faUsersCog,
-  faIgloo
+  faIgloo,
+  
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -294,6 +296,8 @@ export const AwesomeIcons = icon => {
       return faUsersCog;
     case 'localhostAlert':
       return faIgloo;
+      case'palette':
+      return faPalette
     default:
       return faFileAlt;
   }

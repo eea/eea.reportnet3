@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter,Link } from 'react-router-dom';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -20,6 +20,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { Settings } from 'ui/views/Settings/Settings';
 
 const Header = withRouter(({ history }) => {
   const notificationContext = useContext(NotificationContext);
@@ -73,7 +74,9 @@ const Header = withRouter(({ history }) => {
           tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
         />
         {localhostEnvironmentAlert()}
-        <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
+       
+        <FontAwesomeIcon icon={AwesomeIcons('user-profile')} />  <Link to={routes.SETTINGS}><span>{userContext.preferredUsername}</span></Link>
+        
       </div>
       <div className={styles.logoutWrapper}>
         <FontAwesomeIcon
