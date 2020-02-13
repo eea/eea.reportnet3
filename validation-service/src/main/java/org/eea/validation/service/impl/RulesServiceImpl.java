@@ -1,10 +1,14 @@
 package org.eea.validation.service.impl;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,5 +45,20 @@ public class RulesServiceImpl implements RulesService {
         .entityToClass(rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema)));
   }
 
+  /**
+   * Creates the empty rules scehma.
+   *
+   * @param schemaId the schema id
+   * @param ruleSchemaId the rule schema id
+   */
+  @Override
+  public void createEmptyRulesScehma(ObjectId schemaId, ObjectId ruleSchemaId) {
+    RulesSchema rSchema = new RulesSchema();
+    rSchema.setIdDatasetSchema(schemaId);
+    rSchema.setRulesSchemaId(ruleSchemaId);
+    List<Rule> ruleList = new ArrayList<>();
+    rSchema.setRules(ruleList);
 
+    rulesRepository.save(rSchema);
+  }
 }
