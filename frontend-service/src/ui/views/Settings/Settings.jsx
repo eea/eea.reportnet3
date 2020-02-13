@@ -32,28 +32,7 @@ const Settings = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
 
-  /* useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setHasWritePermissions(
-        UserService.hasPermission(
-          user,
-          [config.permissions.PROVIDER],
-          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
-        )
-      );
-    }
-
-    if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(
-        UserService.hasPermission(
-          user,
-          [config.permissions.CUSTODIAN],
-          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
-        )
-      );
-    }
-  }, [user]);
-*/
+  
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([
@@ -71,6 +50,32 @@ const Settings = withRouter(({ history, match }) => {
     }
     ]);
   }, []);
+
+  useEffect ( () => {
+    leftSideBarContext.addModels([
+      {
+        icon: 'palette',
+        label: 'design',
+        onClick: (e) => {
+          e.preventDefault();
+          
+        },
+        title: 'design'
+      },
+      {
+        href: getUrl(routes['CODELISTS']),
+        icon: 'configs',
+        label: 'configUserSettngs',
+        onClick: e => {
+          e.preventDefault();
+          history.push(getUrl(routes['CODELISTS']));
+        },
+        title: 'configUserSettngs'
+      }
+    ]);
+  },[]
+
+  )
 
 //   useEffect(() => {
 //     if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
