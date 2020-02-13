@@ -467,7 +467,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             if (iterationDC == 0) {
               // Notification
               kafkaSenderUtils.releaseNotificableKafkaEvent(
-                  EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+                  EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, null,
                   NotificationVO.builder()
                       .user((String) ThreadPropertiesManager.getVariable("user"))
                       .dataflowId(dataflowId).build());
@@ -504,8 +504,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
             e.getMessage(), e);
         // Error notification
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
-            null,
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+            EventType.DATA_COLLECTION_CREATION_FAILED_EVENT, null,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .dataflowId(dataflowId).error(e.getMessage()).build());
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

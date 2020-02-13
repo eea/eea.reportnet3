@@ -8,8 +8,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.ums.ResourceAssignationVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -113,29 +111,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataCollectionVO> findDataCollectionIdByDataflowId(Long idDataflow) {
-
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
-
   }
-
-
-  /**
-   * Fill resource assignation.
-   *
-   * @param id the id
-   * @param email the email
-   * @param group the group
-   * @return the resource assignation VO
-   */
-  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
-      ResourceGroupEnum group) {
-
-    ResourceAssignationVO resource = new ResourceAssignationVO();
-    resource.setResourceId(id);
-    resource.setEmail(email);
-    resource.setResourceGroup(group);
-
-    return resource;
-  }
-
 }

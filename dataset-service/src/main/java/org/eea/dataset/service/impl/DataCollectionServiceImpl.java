@@ -17,7 +17,6 @@ import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -81,10 +80,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The dataset metabase service. */
-  @Autowired
-  private DatasetMetabaseService datasetMetabaseService;
-
   /** The resource management controller zuul. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
@@ -135,163 +130,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
 
   /**
-   * Creates the permissions.
+   * Checks if is design dataflow.
    *
-   * @param datasetIdsEmails the dataset ids emails
-   * @param dataCollectionIds the data collection ids
-   * @return true, if successful
-   * @throws EEAException the EEA exception
+   * @param dataflowId the dataflow id
+   * @return true, if is design dataflow
    */
-  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds)
-      throws EEAException {
-
-    List<ResourceInfoVO> groups = new ArrayList<>();
-    List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
-    List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
-
-    // Create DataCollection groups and assign custodian to self user
-    for (Long dataCollectionId : dataCollectionIds) {
-      groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
-          SecurityRoleEnum.DATA_CUSTODIAN));
-      custodianAssignments.add(
-          createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
-    }
-
-    // Create Dataset groups and assign provider to representatives and custodian to self user
-    for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
-      groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
-      providerAssignments.add(
-          createAssignments(entry.getKey(), entry.getValue(), ResourceGroupEnum.DATASET_PROVIDER));
-      groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
-      custodianAssignments
-          .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
-    }
-
-    // Persist changes in KeyCloack guaranteeing transactionality
-    // Insert in chunks to prevent Hystrix timeout
-    int size = groups.size();
-    int i = 0;
-    try {
-      // Persist groups
-      for (i = 0; i < size; i += 10) {
-        resourceManagementControllerZuul
-            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
-      }
-
-      // Persist provider assignments
-      userManagementControllerZuul.addContributorsToResources(providerAssignments);
-
-      // Persist custodian assignments
-      userManagementControllerZuul.addUserToResources(custodianAssignments);
-    } catch (Exception e) {
-      // Rollback group creation
-      List<Long> rollback = groups.subList(0, i > size ? size : i).stream()
-          .map(ResourceInfoVO::getResourceId).collect(Collectors.toList());
-      size = rollback.size();
-      for (i = 0; i < size; i += 10) {
-        resourceManagementControllerZuul
-            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
-      }
-      throw new EEAException(e);
-    }
-  }
-
-  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
-
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    resourceInfoVO.setResourceId(datasetId);
-    resourceInfoVO.setResourceTypeEnum(type);
-    resourceInfoVO.setSecurityRoleEnum(role);
-    resourceInfoVO.setName(type + "-" + datasetId + "-" + role);
-
-    return resourceInfoVO;
-  }
-
-  private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
-
-    ResourceAssignationVO resource = new ResourceAssignationVO();
-    resource.setResourceId(id);
-    resource.setEmail(email);
-    resource.setResourceGroup(group);
-
-    return resource;
+  @Override
+  public boolean isDesignDataflow(Long dataflowId) {
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    return (dataflowVO != null && TypeStatusEnum.DESIGN.equals(dataflowVO.getStatus()));
   }
 
   /**
-   * Persist DC.
+   * Gets the data collection id by dataflow id.
    *
-   * @param metabaseStatement the metabase statement
-   * @param design the design
-   * @param time the time
-   * @param dataflowId the dataflow id
-   * @param dueDate the due date
-   * @return the long
-   * @throws SQLException the SQL exception
+   * @param idFlow the id flow
+   * @return the data collection id by dataflow id
    */
-  private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
-      Long dataflowId, Date dueDate) throws SQLException {
-    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
-        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema()))) {
-      rs.next();
-      Long datasetId = rs.getLong(1);
-      metabaseStatement.addBatch(String.format(INSERT_DC_INTO_DATA_COLLECTION, datasetId, dueDate));
-      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
-      return datasetId;
-    }
-  }
-
-  /**
-   * Persist RD.
-   *
-   * @param metabaseStatement the metabase statement
-   * @param design the design
-   * @param representative the representative
-   * @param time the time
-   * @param dataflowId the dataflow id
-   * @return the long
-   * @throws SQLException the SQL exception
-   */
-  private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
-      RepresentativeVO representative, String time, Long dataflowId) throws SQLException {
-    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time,
-        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema(),
-        representative.getId()))) {
-      rs.next();
-      Long datasetId = rs.getLong(1);
-      metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
-      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
-      return datasetId;
-    }
-  }
-
-  /**
-   * Release lock and rollback.
-   *
-   * @param connection the connection
-   * @param dataflowId the dataflow id
-   * @throws SQLException the SQL exception
-   */
-  private void releaseLockAndRollback(Connection connection, Long dataflowId) throws SQLException {
-
-    // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DATA_COLLECTION_CREATION_FAILED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).error("Error creating datasets on the metabase").build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ",
-          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
-    }
-
-    connection.rollback();
+  @Override
+  public List<DataCollectionVO> getDataCollectionIdByDataflowId(Long idFlow) {
+    List<DataCollection> datacollections = dataCollectionRepository.findByDataflowId(idFlow);
+    return dataCollectionMapper.entityListToClass(datacollections);
   }
 
   /**
@@ -398,29 +257,187 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
-   * Checks if is design dataflow.
+   * Release lock and rollback.
    *
+   * @param connection the connection
    * @param dataflowId the dataflow id
-   * @return true, if is design dataflow
+   * @throws SQLException the SQL exception
    */
-  @Override
-  public boolean isDesignDataflow(Long dataflowId) {
-    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    return (dataflowVO != null && TypeStatusEnum.DESIGN.equals(dataflowVO.getStatus()));
+  private void releaseLockAndRollback(Connection connection, Long dataflowId) throws SQLException {
+
+    // Release the lock
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
+
+    // Release the notification
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DATA_COLLECTION_CREATION_FAILED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).error("Error creating datasets on the metabase").build());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing {} event: ",
+          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
+    }
+
+    connection.rollback();
   }
 
   /**
-   * Gets the data collection id by dataflow id.
+   * Persist DC.
    *
-   * @param idFlow the id flow
-   * @return the data collection id by dataflow id
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @return the long
+   * @throws SQLException the SQL exception
    */
-  @Override
-  public List<DataCollectionVO> getDataCollectionIdByDataflowId(Long idFlow) {
-    List<DataCollection> datacollections = dataCollectionRepository.findByDataflowId(idFlow);
-    return dataCollectionMapper.entityListToClass(datacollections);
+  private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
+      Long dataflowId, Date dueDate) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
+        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_DC_INTO_DATA_COLLECTION, datasetId, dueDate));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
+    }
   }
 
+  /**
+   * Persist RD.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param representative the representative
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
+  private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
+      RepresentativeVO representative, String time, Long dataflowId) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time,
+        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema(),
+        representative.getId()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
+    }
+  }
 
+  /**
+   * Creates the permissions.
+   *
+   * @param datasetIdsEmails the dataset ids emails
+   * @param dataCollectionIds the data collection ids
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds)
+      throws EEAException {
 
+    List<ResourceInfoVO> groups = new ArrayList<>();
+    List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
+    List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
+
+    // Create DataCollection groups and assign custodian to self user
+    for (Long dataCollectionId : dataCollectionIds) {
+      groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
+          SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments.add(
+          createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+    }
+
+    // Create Dataset groups and assign provider to representatives and custodian to self user
+    for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+      providerAssignments.add(
+          createAssignments(entry.getKey(), entry.getValue(), ResourceGroupEnum.DATASET_PROVIDER));
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments
+          .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
+    }
+
+    // Persist changes in KeyCloak guaranteeing transactionality
+    // Insert in chunks to prevent Hystrix timeout
+    int chunks = 0;
+    try {
+
+      // Persist groups
+      int size = groups.size();
+      for (int i = 0; i < size; i += 10, chunks++) {
+        resourceManagementControllerZuul
+            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
+      }
+
+      // Persist provider assignments
+      size = providerAssignments.size();
+      for (int i = 0; i < size; i += 10) {
+        userManagementControllerZuul.addContributorsToResources(
+            providerAssignments.subList(i, i + 10 > size ? size : i + 10));
+      }
+
+      // Persist custodian assignments
+      size = custodianAssignments.size();
+      for (int i = 0; i < size; i += 10) {
+        userManagementControllerZuul
+            .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
+      }
+    } catch (Exception e) {
+      // Undo group creation
+      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
+      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
+          .collect(Collectors.toList());
+      for (int i = 0; i < size; i += 10) {
+        resourceManagementControllerZuul
+            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
+      }
+      throw new EEAException(e);
+    }
+  }
+
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+    resourceInfoVO.setName(type + "-" + datasetId + "-" + role);
+
+    return resourceInfoVO;
+  }
+
+  /**
+   * Creates the assignments.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
 }
