@@ -39,12 +39,12 @@ const Category = ({
   onCodelistError,
   onCodelistSelected,
   onLoadCategories,
+  onRefreshCategory,
   // onLoadCategory,
   onToggleIncorrect,
   toggleExpandAll,
   updateEditingCodelists
 }) => {
-  console.log({ isEditionModeOn });
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
@@ -85,18 +85,25 @@ const Category = ({
   useEffect(() => {
     if (!isIncorrect) {
       onLoadCodelists();
+      // onRefreshCategory(category);
     }
   }, [category.codelists]);
 
+  // useEffect(() => {
+  //   onRefreshCategory(category);
+  // }, []);
+
   useEffect(() => {
-    if (isEditionModeOn) {
-      changeFilterValues(
-        'status',
-        [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
-        category.codelists
-      );
-    } else {
-      changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+    if (!isUndefined(isEditionModeOn)) {
+      if (isEditionModeOn) {
+        changeFilterValues(
+          'status',
+          [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+          category.codelists
+        );
+      } else {
+        changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+      }
     }
   }, [isEditionModeOn]);
 
@@ -170,6 +177,7 @@ const Category = ({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: updatedCodelists }
     });
+    onRefreshCategory(category, updatedCodelists);
     changeFilterValues('status', categoryState.filter.status, updatedCodelists);
   };
 

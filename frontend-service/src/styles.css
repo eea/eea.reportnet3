@@ -2616,14 +2616,14 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   transform: none;
 }
 body .p-sidebar {
-  background-color: #ffffff;
-  color: #404040;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-color);
   padding: 0.571em 1em;
-  border: 1px solid #c8c8c8;
-  -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
-  -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
-  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
-  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  border: var(--sidebar-border);
+  -webkit-box-shadow: var(--sidebar-box-shadow);
+  -moz-box-shadow: var(--sidebar-box-shadow);
+  box-shadow: var(--sidebar-box-shadow);
+  scrollbar-color: var(--sidebar-scrollbar-color);
   scrollbar-width: thin;
 }
 
@@ -2633,22 +2633,22 @@ body .p-sidebar::-webkit-scrollbar {
 }
 
 body .p-sidebar::-webkit-scrollbar-track {
-  background: var(--c-custom-gray);
+  background: var(--sidebar-scrollbar-bg);
 }
 
 body .p-sidebar::-webkit-scrollbar-thumb {
-  background: var(--gray-50);
+  background: var(--sidebar-scrollbar-thumb-bg); 
 }
 
 body .p-sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-75);
+  background: var(--sidebar-scrollbar-thumb-bg-hover);
 }
 
 body .p-sidebar .p-sidebar-close {
-  color: #848484;
+  color: var(--sidebar-close-icon-color);
 }
 body .p-sidebar .p-sidebar-close:hover {
-  color: #404040;
+  color: var(--sidebar-close-icon-color-hover);
 }
 body .p-tooltip .p-tooltip-text {
   background-color: #404040;

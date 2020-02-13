@@ -56,7 +56,7 @@ export const ThemeProvider = ({ children }) => {
         'datatable-column-sortable-hightlight-box-shadow-focus': ' inset 0 0 0 0.1em var(--gray-25)',
         'datatable-header-footer-bg': 'var(--gray-10)',
         'datatable-header-footer-color': 'var(--gray-110)',
-        'datatable-header-footer-border': ' 1px solid var(--gray-10)',
+        'datatable-header-footer-border': ' 1px solid var(--gray-25)',
         'datatable-column-sortable-icon-color': 'var(--gray-110)',
         'datatable-column-sortable-hightlight-bg-hover': 'var(--yellow-120)',
         'datatable-column-sortable-hightlight-color-hover': 'var(--gray-110)',
@@ -221,7 +221,19 @@ export const ThemeProvider = ({ children }) => {
         'inputtextarea-box-shadow': '0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.2)',
         'field-designer-separator-box-shadow':
           '1px 1px rgba(var(--c-corporate-blue-rgb), 0.2), 2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2)',
-        'field-designer-separator-bg': 'rgba(var(--c-corporate-blue-rgb), 0.2)'
+        'field-designer-separator-bg': 'rgba(var(--c-corporate-blue-rgb), 0.2)',
+        'sidebar-bg': 'var(--white)',
+        'sidebar-color': 'var(--gray-110)',
+        'sidebar-border': '1px solid var(--gray-50)',
+        'sidebar-boxshadow': '0 0 6px 0 rgba(0, 0, 0, 0.16)',
+        'sidebar-scrollbar-color': 'var(--gray-75) var(--c-custom-gray)',
+        'sidebar-scrollbar-bg': 'var(--c-custom-gray)',
+        'sidebar-scrollbar-thumb-bg': 'var(--gray-50)',
+        'sidebar-scrollbar-thumb-bg-hover': 'var(--gray-75)',
+        'sidebar-close-icon-color': 'var(--gray-50)',
+        'sidebar-close-icon-color-hover': 'var(--gray-110)',
+        'form-field-bg': 'var(--white)',
+        'form-field-color': 'var(--black)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -427,7 +439,19 @@ export const ThemeProvider = ({ children }) => {
         'inputtextarea-box-shadow': '0 10px 6px -6px rgba(255, 255, 255, 0.1)',
         'field-designer-separator-box-shadow':
           '1px 1px rgba(255, 255, 255, 0.2), 2px 2px rgba(255, 255, 255, 0.2), 3px 3px rgba(255, 255, 255, 0.2)',
-        'field-designer-separator-bg': 'rgba(255, 255, 255, 0.4)'
+        'field-designer-separator-bg': 'rgba(255, 255, 255, 0.4)',
+        'sidebar-bg': 'var(--c-dark-blue)',
+        'sidebar-color': 'var(--white)',
+        'sidebar-border': '1px solid var(--gray-50)',
+        'sidebar-boxshadow': '0 0 6px 0 rgba(0, 0, 0, 0.16)',
+        'sidebar-scrollbar-color': 'var(--gray-75) var(--c-custom-gray)',
+        'sidebar-scrollbar-bg': 'var(--c-custom-gray)',
+        'sidebar-scrollbar-thumb-bg': 'var(--gray-50)',
+        'sidebar-scrollbar-thumb-bg-hover': 'var(--gray-75)',
+        'sidebar-close-icon-color': 'var(--gray-50)',
+        'sidebar-close-icon-color-hover': 'var(--gray-110)',
+        'form-field-bg': 'var(--c-dark-blue)',
+        'form-field-color': 'var(--white)'
       }
     }
   });

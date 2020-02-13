@@ -68,6 +68,11 @@
   }
 }
 
+.formField {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
+
 .snapshotForm {
   margin-bottom: 0px !important;
 }
