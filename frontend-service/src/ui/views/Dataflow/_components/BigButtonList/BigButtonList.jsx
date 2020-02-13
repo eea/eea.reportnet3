@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 
-import { isUndefined, remove } from 'lodash';
+import { isUndefined, remove, uniq } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
@@ -156,16 +156,23 @@ export const BigButtonList = ({
       <PDFDownloadLink
         document={<ConfirmationReceipt dataflowData={dataflowData} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-        {({ blob, url, loading, error }) => (
-          <BigButton
-            layout="defaultBigButton"
-            buttonClass="schemaDataset"
-            buttonIcon={loading ? 'spinner' : 'fileDownload'}
-            buttonIconClass={loading ? 'spinner' : ''}
-            caption={resources.messages['confirmationReceipt']}
-            visibility={!isCustodian}
-          />
-        )}
+        {({ blob, url, loading, error }) => {
+          const { datasets } = dataflowData;
+          const representatives = datasets.map(dataset => {
+            return dataset.datasetSchemaName;
+          });
+          if (!isCustodian && uniq(representatives).length === 1) {
+            return (
+              <BigButton
+                layout="defaultBigButton"
+                buttonClass="schemaDataset"
+                buttonIcon={loading ? 'spinner' : 'fileDownload'}
+                buttonIconClass={loading ? 'spinner' : ''}
+                caption={resources.messages['confirmationReceipt']}
+              />
+            );
+          }
+        }}
       </PDFDownloadLink>
     );
     return [...bigButtonList, receiptButton];
