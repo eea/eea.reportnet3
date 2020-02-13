@@ -1,6 +1,8 @@
 package org.eea.validation.service.impl;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -43,6 +45,12 @@ public class RulesServiceImpl implements RulesService {
         .entityToClass(rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema)));
   }
 
+  /**
+   * Creates the empty rules scehma.
+   *
+   * @param schemaId the schema id
+   * @param ruleSchemaId the rule schema id
+   */
   @Override
   public void createEmptyRulesScehma(ObjectId schemaId, ObjectId ruleSchemaId) {
     RulesSchema rSchema = new RulesSchema();
