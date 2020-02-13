@@ -37,7 +37,7 @@ public interface RulesController {
    * @param idDatasetSchema the id dataset schema
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
 
 }

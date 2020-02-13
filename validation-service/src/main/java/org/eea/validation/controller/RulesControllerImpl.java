@@ -58,7 +58,7 @@ public class RulesControllerImpl implements RulesController {
    * @return the rules schema VO
    */
   @Override
-  @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
   public RulesSchemaVO findRuleSchemaByDatasetId(
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
     if (StringUtils.isBlank(idDatasetSchema)) {
