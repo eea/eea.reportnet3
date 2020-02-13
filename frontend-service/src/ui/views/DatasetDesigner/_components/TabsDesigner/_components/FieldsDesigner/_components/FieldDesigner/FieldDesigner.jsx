@@ -115,6 +115,7 @@ export const FieldDesigner = ({
     // const dropdownFilterItems = fieldRef.current.getElementsByClassName('p-dropdown-items')[0];
     const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
+    console.log(document.getElementsByClassName('requiredCheckbox'), childs);
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
         for (let j = 2; j < childs[i].childNodes.length; j++) {
@@ -143,6 +144,18 @@ export const FieldDesigner = ({
                 }
               }
             }
+          }
+        }
+      }
+    }
+    const requiredCheckboxes = document.getElementsByClassName('requiredCheckbox');
+    if (!isUndefined(requiredCheckboxes)) {
+      for (let i = 0; i < requiredCheckboxes.length; i++) {
+        for (let j = 0; j < requiredCheckboxes[i].childNodes.length; j++) {
+          if (isDragging) {
+            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
+          } else {
+            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
           }
         }
       }
@@ -543,21 +556,30 @@ export const FieldDesigner = ({
           //   animationDuration: '400ms'
           // }}
         ></div>
-        {!addField ? <FontAwesomeIcon icon={AwesomeIcons('move')} /> : <div style={{ width: '32px' }}></div>}
-        {
-          <React.Fragment>
-            <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
-            <Checkbox
-              checked={fieldRequired}
-              inputId={`${fieldId}_check`}
-              label="Default"
-              onChange={e => {
-                setFieldRequired(e.checked);
-              }}
-              style={{ marginLeft: '0.4rem', marginRight: '0.4rem', alignSelf: !isEditing ? 'center' : 'auto' }}
-            />
-          </React.Fragment>
-        }
+
+        <div className="requiredCheckbox">
+          {!addField ? (
+            <FontAwesomeIcon icon={AwesomeIcons('move')} />
+          ) : (
+            <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
+          )}
+          <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
+          <Checkbox
+            checked={fieldRequired}
+            inputId={`${fieldId}_check`}
+            label="Default"
+            onChange={e => {
+              setFieldRequired(e.checked);
+            }}
+            style={{
+              marginLeft: '0.4rem',
+              marginRight: '0.4rem'
+              // alignSelf: !isEditing ? 'center' : 'flex-end',
+              // justifySelf: 'flex-end'
+            }}
+          />
+        </div>
+
         <InputText
           autoFocus={false}
           className={styles.inputField}
@@ -639,9 +661,10 @@ export const FieldDesigner = ({
         {
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
-            icon="palette"
-            style={{ marginLeft: '0.4rem' }}
-            tooltip={resources.messages['unsavedChanges']}
+            faIcon="delete"
+            // icon="palette"
+            style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
+            tooltip={resources.messages['editFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
           />
         }
