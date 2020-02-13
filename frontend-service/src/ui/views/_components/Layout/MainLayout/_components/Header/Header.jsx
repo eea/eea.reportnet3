@@ -74,10 +74,18 @@ const Header = withRouter(({ history }) => {
           tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
         />
         {localhostEnvironmentAlert()}
-       
-        <FontAwesomeIcon icon={AwesomeIcons('user-profile')} />  <Link to={routes.SETTINGS}><span>{userContext.preferredUsername}</span></Link>
-        
+
+        <a
+          href={getUrl(routes.SETTINGS)}      
+          title="User profile details"
+          onClick={async e => {
+            e.preventDefault();
+            history.push(getUrl(routes.SETTINGS));
+          }}>
+            <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
+        </a>
       </div>
+
       <div className={styles.logoutWrapper}>
         <FontAwesomeIcon
           onClick={async e => {
