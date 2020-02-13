@@ -20,7 +20,6 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -30,6 +29,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -91,6 +91,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
@@ -137,10 +142,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     schemasRepository.save(dataSetSchema);
 
-    RulesSchema rulesSchema = new RulesSchema();
+    // TO-DO - service to create Rule Schema in mongodb
 
-    rulesSchema.setRulesSchemaId(idDataSetSchema);
-    rulesSchema.setRulesSchemaId(new ObjectId());
+    rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
+        new ObjectId().toString());
 
     return idDataSetSchema;
   }
