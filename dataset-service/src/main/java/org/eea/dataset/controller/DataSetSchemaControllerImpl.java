@@ -92,20 +92,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/createDataSchema/{id}")
-  public void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId) {
-    dataschemaService.createDataSchema(datasetId, dataflowId);
-  }
-
-  /**
    * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
@@ -507,8 +493,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      isValid = !dataflow.getDesignDatasets().parallelStream()
-          .anyMatch(ds -> dataschemaService.validateSchema(ds.getDatasetSchema()) == false);
+      isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(
+          ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
   }

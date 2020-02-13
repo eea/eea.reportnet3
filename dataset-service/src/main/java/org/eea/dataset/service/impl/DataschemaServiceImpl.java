@@ -15,7 +15,6 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -57,11 +56,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-  /**
-   * The data set metabase table collection.
-   */
-  @Autowired
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /** The resource management controller zull. */
   @Autowired
@@ -112,51 +106,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-
-  /**
-   * The Constant GENERAL_WARNING.
-   */
-  private static final String GENERAL_WARNING = "WARNING";
-
-  /**
-   * The Constant VALIDATION_WARNING.
-   */
-  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-
-  /**
-   * The Constant GENERAL_ERROR.
-   */
-  private static final String GENERAL_ERROR = "ERROR";
-
-  /**
-   * The Constant INTEGER_ERROR.
-   */
-  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-
-  /**
-   * The Constant BOOLEAN_ERROR.
-   */
-  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-
-  /**
-   * The Constant COORDINATE_LAT_ERROR.
-   */
-  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-
-  /**
-   * The Constant COORDINATE_LONG_ERROR.
-   */
-  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-
-  /**
-   * The Constant DATE_ERROR.
-   */
-  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
-
-  /**
-   * The Constant NULL.
-   */
-  private static final String NULL = "id == null";
 
   /**
    * The data set metabase repository.
@@ -249,15 +198,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return resourceInfoVO;
   }
-
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  public void createDataSchema(Long datasetId, Long dataflowId) {}
 
 
   /**
@@ -680,4 +620,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return isValid;
   }
+
 }

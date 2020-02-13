@@ -6,20 +6,13 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 
 /**
  * The Interface DataschemaService.
  */
 public interface DatasetSchemaService {
-
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  void createDataSchema(Long datasetId, Long dataflowId);
 
   /**
    * Creates the empty data set schema.
@@ -199,5 +192,6 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @return the boolean
    */
-  public Boolean validateSchema(String datasetSchemaId);
+  Boolean validateSchema(String datasetSchemaId);
+
 }
