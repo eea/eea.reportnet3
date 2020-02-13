@@ -53,14 +53,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
-  const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
@@ -72,8 +70,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
-  const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
@@ -285,25 +281,6 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
   };
 
-  const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
-  };
-
-  const onReleaseSnapshot = async snapshotId => {
-    try {
-      await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
-      onLoadSnapshotList(datasetIdToProps);
-    } catch (error) {
-      console.log('ERROR ON RELEASE', error);
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
-    } finally {
-      setIsActiveReleaseSnapshotConfirmDialog(false);
-    }
-  };
-
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
     const titles = [...updatedDatasetSchema];
@@ -347,22 +324,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const onUpdateData = () => {
     setIsDataUpdated(!isDataUpdated);
   };
-
-  const releaseModalFooter = (
-    <>
-      <Button
-        icon="cloudUpload"
-        label={resources.messages['yes']}
-        onClick={() => onReleaseSnapshot(snapshotDataToRelease.id)}
-      />
-      <Button
-        icon="cancel"
-        className="p-button-secondary"
-        label={resources.messages['no']}
-        onClick={() => setIsActiveReleaseSnapshotConfirmDialog(false)}
-      />
-    </>
-  );
 
   const layout = children => {
     return (
@@ -484,23 +445,6 @@ const Dataflow = withRouter(({ history, match }) => {
             </ul>
           </div>
           <div className="actions"></div>
-        </Dialog>
-
-        <Dialog
-          header={`${resources.messages['releaseSnapshotMessage']}`}
-          footer={releaseModalFooter}
-          visible={isActiveReleaseSnapshotConfirmDialog}
-          onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
-          <ul>
-            <li>
-              <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
-            </li>
-            <li>
-              <strong>{resources.messages['description']}: </strong>
-              {snapshotDataToRelease.description}
-            </li>
-          </ul>
         </Dialog>
 
         <Dialog

@@ -7,7 +7,7 @@ import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/render
 const ConfirmationReceipt = ({ dataflowData }) => {
   const styles = StyleSheet.create({
     image: { width: '30vmin', height: '30vmin' },
-    page: { backgroundColor: '#61dafb' },
+    page: { backgroundColor: 'white' },
     section: { textAlign: 'center', margin: 30 }
   });
 
