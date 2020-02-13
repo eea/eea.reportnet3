@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,16 +29,6 @@ public interface DatasetSchemaController {
   interface DataSetSchemaControllerZuul extends DatasetSchemaController {
 
   }
-
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @PostMapping(value = "/createDataSchema/{id}")
-  void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId);
 
   /**
    * Creates the empty data schema.
@@ -193,7 +184,7 @@ public interface DatasetSchemaController {
    * @return the boolean
    */
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
+  Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
 
 
   /**
@@ -204,5 +195,15 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+  Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find rule schema by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rules schema VO
+   */
+  @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
+
 }

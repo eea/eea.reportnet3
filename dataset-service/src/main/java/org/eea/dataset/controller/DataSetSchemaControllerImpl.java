@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,20 +91,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
-
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/createDataSchema/{id}")
-  public void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId) {
-    dataschemaService.createDataSchema(datasetId, dataflowId);
-  }
 
   /**
    * Creates the empty dataset schema.
@@ -507,10 +494,27 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      isValid = !dataflow.getDesignDatasets().parallelStream()
-          .anyMatch(ds -> dataschemaService.validateSchema(ds.getDatasetSchema()) == false);
+      isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(
+          ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
+  }
+
+  /**
+   * Find rule schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the rules schema VO
+   */
+  @Override
+  @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  public RulesSchemaVO findRuleSchemaByDatasetId(String idDatasetSchema) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    } else {
+      return dataschemaService.getRulesSchemaByDatasetId(idDatasetSchema);
+    }
   }
 
 }

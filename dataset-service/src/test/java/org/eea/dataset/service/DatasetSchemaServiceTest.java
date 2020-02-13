@@ -16,8 +16,6 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
-import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -25,6 +23,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -161,6 +160,10 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaVO tableSchemaVO;
 
+  /** The rules repository. */
+  @Mock
+  private RulesRepository rulesRepository;
+
   @Spy
   private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
 
@@ -178,191 +181,7 @@ public class DatasetSchemaServiceTest {
     validationCommands.add(command);
   }
 
-  /**
-   * Test create data schema.
-   */
-  @Test
-  public void testCreateDataSchema() {
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
 
-    header.setHeaderName("test");
-    header.setId(1L);
-    // header.setTableId(1L);
-    header.setHeaderType(TypeData.TEXT);
-    headers.add(header);
-    List<TableCollection> tables = new ArrayList<>();
-    TableCollection table = new TableCollection();
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables.add(table);
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema integer.
-   */
-  @Test
-  public void testCreateDataSchemaInteger() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.NUMBER);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema boolean.
-   */
-  @Test
-  public void testCreateDataSchemaBoolean() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.BOOLEAN);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema coordinate lat.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateLat() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.COORDINATE_LAT);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-  /**
-   * Test create data schema coordinate long.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateLong() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.COORDINATE_LONG);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-  /**
-   * Test create data schema coordinate date.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateDate() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.DATE);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
 
   /**
    * Test find data schema by id.
@@ -500,6 +319,7 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
+    Mockito.when(rulesRepository.save(Mockito.any())).thenReturn(null);
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 

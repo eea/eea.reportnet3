@@ -22,7 +22,6 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
-import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -58,8 +57,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-  @Autowired
-  private RulesRepository rulesRepository;
   /**
    * The data set metabase table collection.
    */
@@ -195,8 +192,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     rulesSchema.setRulesSchemaId(idDataSetSchema);
     rulesSchema.setRulesSchemaId(new ObjectId());
-
-    rulesRepository.save(rulesSchema);
 
     return idDataSetSchema;
   }
