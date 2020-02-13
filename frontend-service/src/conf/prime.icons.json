@@ -31,6 +31,7 @@
 		"filter": "pi pi-filter",
 		"groupBy": "pi pi-sitemap",
 		"home": "pi pi-home",
+		"horizontalSliders": "pi pi-sliders-h",
 		"import": "pi pi-upload",
 		"info": "pi pi-info",
 		"infoCircle": "pi pi-info-circle",

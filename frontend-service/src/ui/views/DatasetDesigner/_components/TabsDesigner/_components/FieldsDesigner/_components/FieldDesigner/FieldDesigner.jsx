@@ -27,6 +27,7 @@ export const FieldDesigner = ({
   fieldId,
   fieldDescription,
   fieldName,
+  fieldRequired,
   fieldType,
   index,
   initialFieldIndexDragged,
@@ -77,7 +78,7 @@ export const FieldDesigner = ({
 
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
-  const [fieldRequired, setFieldRequired] = useState(false);
+  const [fieldRequiredValue, setFieldRequiredValue] = useState(fieldRequired);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
@@ -115,7 +116,6 @@ export const FieldDesigner = ({
     // const dropdownFilterItems = fieldRef.current.getElementsByClassName('p-dropdown-items')[0];
     const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
-    console.log(document.getElementsByClassName('requiredCheckbox'), childs);
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
         for (let j = 2; j < childs[i].childNodes.length; j++) {
@@ -299,7 +299,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          fieldRequiredValue
         );
       } else {
         fieldUpdate(
@@ -310,7 +311,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          fieldRequiredValue
         );
       }
     }
@@ -332,7 +334,8 @@ export const FieldDesigner = ({
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
@@ -340,7 +343,8 @@ export const FieldDesigner = ({
         name: value,
         type,
         description,
-        codelistId
+        codelistId,
+        required
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -357,7 +361,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          required
         );
       }
     } catch (error) {
@@ -450,6 +455,45 @@ export const FieldDesigner = ({
     }
   };
 
+  const onRequiredChange = checked => {
+    if (!isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isUndefined(fieldTypeValue) &&
+          !isNull(fieldTypeValue) &&
+          (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+          !isNull(fieldValue) &&
+          fieldValue !== ''
+        ) {
+          onFieldAdd(
+            recordId,
+            parseGeospatialTypes(fieldTypeValue.fieldType),
+            fieldValue,
+            fieldDescriptionValue,
+            selectedCodelist.codelistId,
+            selectedCodelist.codelistName,
+            selectedCodelist.codelistVersion,
+            undefined,
+            checked
+          );
+        }
+      } else {
+        fieldUpdate(
+          fieldId,
+          parseGeospatialTypes(fieldTypeValue.fieldType),
+          fieldValue,
+          fieldDescriptionValue,
+          selectedCodelist.codelistId,
+          selectedCodelist.codelistName,
+          selectedCodelist.codelistVersion,
+          undefined,
+          checked
+        );
+      }
+    }
+    setFieldRequiredValue(checked);
+  };
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -496,21 +540,34 @@ export const FieldDesigner = ({
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
+    console.log({ required, fieldSchemaId });
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
         name: value,
         type: type,
         description,
-        codelistId
+        codelistId,
+        required
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion, codelistItems);
+        onFieldUpdate(
+          fieldId,
+          value,
+          type,
+          description,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems,
+          required
+        );
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -565,11 +622,11 @@ export const FieldDesigner = ({
           )}
           <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
           <Checkbox
-            checked={fieldRequired}
+            checked={fieldRequiredValue}
             inputId={`${fieldId}_check`}
             label="Default"
             onChange={e => {
-              setFieldRequired(e.checked);
+              onRequiredChange(e.checked);
             }}
             style={{
               marginLeft: '0.4rem',
@@ -656,18 +713,17 @@ export const FieldDesigner = ({
             tooltipOptions={{ position: 'top' }}
           />
         ) : isCodelistSelected ? (
-          <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
+          <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
         ) : null}
-        {
+        {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
-            faIcon="delete"
-            // icon="palette"
+            icon="horizontalSliders"
             style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['editFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
           />
-        }
+        ) : null}
         {!addField ? (
           <a
             draggable={true}

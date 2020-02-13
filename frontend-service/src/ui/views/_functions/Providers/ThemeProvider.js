@@ -218,7 +218,10 @@ export const ThemeProvider = ({ children }) => {
         'checkbox-box-highlight-border-color-hover': 'var(--c-corporate-blue-lighter)',
         'checkbox-box-highlight-bg-hover': 'var(--c-corporate-blue-lighter)',
         'checkbox-box-highlight-color-hover': 'var(--white)',
-        'inputtextarea-box-shadow': '0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.2)'
+        'inputtextarea-box-shadow': '0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.2)',
+        'field-designer-separator-box-shadow':
+          '1px 1px rgba(var(--c-corporate-blue-rgb), 0.2), 2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2)',
+        'field-designer-separator-bg': 'rgba(var(--c-corporate-blue-rgb), 0.2)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -421,7 +424,10 @@ export const ThemeProvider = ({ children }) => {
         'checkbox-box-highlight-border-color-hover': 'var(--gray-110)',
         'checkbox-box-highlight-bg-hover': 'var(--gray-110)',
         'checkbox-box-highlight-color-hover': 'var(--white)',
-        'inputtextarea-box-shadow': '0 10px 6px -6px rgba(255, 255, 255, 0.1)'
+        'inputtextarea-box-shadow': '0 10px 6px -6px rgba(255, 255, 255, 0.1)',
+        'field-designer-separator-box-shadow':
+          '1px 1px rgba(255, 255, 255, 0.2), 2px 2px rgba(255, 255, 255, 0.2), 3px 3px rgba(255, 255, 255, 0.2)',
+        'field-designer-separator-bg': 'rgba(255, 255, 255, 0.4)'
       }
     }
   });

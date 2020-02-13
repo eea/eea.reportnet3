@@ -44,6 +44,7 @@ const Category = ({
   toggleExpandAll,
   updateEditingCodelists
 }) => {
+  console.log({ isEditionModeOn });
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
@@ -86,6 +87,18 @@ const Category = ({
       onLoadCodelists();
     }
   }, [category.codelists]);
+
+  useEffect(() => {
+    if (isEditionModeOn) {
+      changeFilterValues(
+        'status',
+        [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+        category.codelists
+      );
+    } else {
+      changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+    }
+  }, [isEditionModeOn]);
 
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
