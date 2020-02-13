@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined } from 'lodash';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './Dataflow.module.scss';
 
@@ -24,7 +23,6 @@ import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
-import { ConfirmationReceipt } from './_components/ConfirmationReceipt';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -79,8 +77,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
-
-  const pdfRef = React.createRef();
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -210,20 +206,6 @@ const Dataflow = withRouter(({ history, match }) => {
       hideLoading();
     }
   };
-
-  const onDownloadReceipt = () => (
-    <PDFDownloadLink document={<ConfirmationReceipt dataflowData={dataflowData} />} fileName={'test.pdf'}>
-      {({ blob, url, loading, error }) =>
-        loading ? 'Loading document...' : <button className="button">DOWNLOAD NEW PDF</button>
-      // <Button
-      //   className="p-button-primary"
-      //   icon={loading ? 'import' : 'spinner'}
-      //   label={resources.messages['download']}
-      //   onClick={() => }
-      // />
-      }
-    </PDFDownloadLink>
-  );
 
   if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
@@ -411,10 +393,6 @@ const Dataflow = withRouter(({ history, match }) => {
           iconSize="4rem"
         />
 
-        <PDFDownloadLink document={<ConfirmationReceipt dataflowData={dataflowData} />} fileName={'test.pdf'}>
-          {({ blob, url, loading, error }) => (loading ? 'Loading document...' : <Button className="button" />)}
-        </PDFDownloadLink>
-
         <BigButtonList
           dataflowData={dataflowData}
           dataflowStatus={dataflowStatus}
@@ -425,15 +403,12 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
-          onDownloadReceipt={onDownloadReceipt}
           onUpdateData={onUpdateData}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           onSaveName={onSaveName}
           updatedDatasetSchema={updatedDatasetSchema}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
-
-        {/* <ConfirmationReceipt className={styles.none} dataflowData={dataflowData} /> */}
 
         <SnapshotsDialog
           dataflowId={match.params.dataflowId}

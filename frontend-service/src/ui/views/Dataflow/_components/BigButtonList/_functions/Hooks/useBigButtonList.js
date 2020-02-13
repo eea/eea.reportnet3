@@ -5,9 +5,9 @@ import { isEmpty, isUndefined, uniq } from 'lodash';
 import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowData,
@@ -20,7 +20,6 @@ const useBigButtonList = ({
   isCustodian,
   isDataSchemaCorrect,
   onDatasetSchemaNameError,
-  onDownloadReceipt,
   onDuplicateName,
   onSaveName,
   onShowDataCollectionModal,
@@ -240,19 +239,6 @@ const useBigButtonList = ({
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
 
-  const confirmationReceipt = [
-    {
-      layout: 'defaultBigButton',
-      buttonClass: 'schemaDataset',
-      buttonIcon: 'fileDownload',
-      caption: resources.messages['confirmationReceipt'],
-      handleRedirect: () => onDownloadReceipt(),
-      infoStatus: true,
-      infoStatusIcon: false,
-      visibility: isCustodian
-    }
-  ];
-
   const dashboardModels = [
     {
       layout: 'defaultBigButton',
@@ -337,7 +323,6 @@ const useBigButtonList = ({
     ...buttonList,
     ...designDatasetModels,
     ...groupByRepresentativeModels,
-    ...confirmationReceipt,
     ...createDataCollection,
     ...dataCollectionModels,
     ...dashboardModels
