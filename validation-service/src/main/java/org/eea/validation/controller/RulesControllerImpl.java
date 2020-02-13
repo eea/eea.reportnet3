@@ -8,10 +8,10 @@ import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class RulesControllerImpl implements RulesController {
 
   @Autowired
-  @Qualifier("proxyDatasetService")
   private RulesService rulesService;
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -34,7 +33,8 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
-  public RulesSchemaVO findRuleSchemaByDatasetId(String idDatasetSchema) {
+  public RulesSchemaVO findRuleSchemaByDatasetId(
+      @PathVariable("idDatasetSchema") String idDatasetSchema) {
     if (StringUtils.isBlank(idDatasetSchema)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
