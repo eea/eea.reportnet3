@@ -697,7 +697,7 @@ export const FieldDesigner = ({
         />
         {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
           <Button
-            className={`${styles.codelistButton} p-button-secondary`}
+            className={`${styles.codelistButton} p-button-secondary-transparent`}
             label={
               !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
                 ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`

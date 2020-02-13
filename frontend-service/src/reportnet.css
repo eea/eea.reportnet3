@@ -231,6 +231,9 @@
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);
+  --treeview-property-title-color: var(--black);
+  --treeview-property-value-color: var(--black);
+  --treeview-empty-property-color: var(--black);
 
   /* Documentation */
   --documenticon-color: var(--c-corporate-blue);
