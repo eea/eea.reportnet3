@@ -42,9 +42,17 @@ function boolean isCodeList( String value ,String codeList){
 	return CodeListUtils.codeListValidate(value,codeList);
 }
 
-//EMPTY VALUE VALIDATION
+//////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
 function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
+} 
+
+//////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
+function boolean isBoolean(String value){
+	if(null == value || (!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
+		return false;
+	}
+		return true;
 } 
 
 //////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
