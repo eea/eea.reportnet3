@@ -28,6 +28,7 @@
   /* background-color: var(--gray-5); */
   display: flex;
   border-top: 2px dashed var(--gray-25);
+  color: var(--category-expandable-treeview-color);
 }
 
 .positioning {

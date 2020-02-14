@@ -13,6 +13,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
+
+import './InputSwitch.scss';
+import styles from './InputSwitch.module.scss';
+
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 export class InputSwitch extends Component {
@@ -173,7 +177,13 @@ export class InputSwitch extends Component {
         </div>
         <span
           className={`p-inputswitch-slider ${
-            this.props.checked ? (this.props.sliderCheckedClassName ? this.props.sliderCheckedClassName : null) : null
+            this.props.checked
+              ? this.props.sliderCheckedClassName
+                ? styles.inputswitch_dark_theme_checked
+                : null
+              : this.props.sliderCheckedClassName
+              ? styles.inputswitch_dark_theme_unchecked
+              : null
           }`}></span>
       </div>
     );

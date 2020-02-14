@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './Checkbox.scss';
+
 const Checkbox = ({
   id,
   className,
