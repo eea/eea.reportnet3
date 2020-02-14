@@ -24,11 +24,12 @@ public class RulesServiceImpl implements RulesService {
 
   /** The rules repository. */
   @Autowired
-  RulesRepository rulesRepository;
+  private RulesRepository rulesRepository;
 
   /** The rules schema mapper. */
   @Autowired
-  RulesSchemaMapper rulesSchemaMapper;
+  private RulesSchemaMapper rulesSchemaMapper;
+
   /**
    * The Constant LOG_ERROR.
    */
@@ -62,7 +63,7 @@ public class RulesServiceImpl implements RulesService {
    * @param ruleSchemaId the rule schema id
    */
   @Override
-  public void createEmptyRulesScehma(ObjectId schemaId, ObjectId ruleSchemaId) {
+  public void createEmptyRulesSchema(ObjectId schemaId, ObjectId ruleSchemaId) {
     RulesSchema rSchema = new RulesSchema();
     rSchema.setIdDatasetSchema(schemaId);
     rSchema.setRulesSchemaId(ruleSchemaId);
@@ -72,6 +73,21 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.save(rSchema);
   }
 
+  /**
+   * Delete empty rules scehma.
+   *
+   * @param schemaId the schema id
+   */
+  @Override
+  public void deleteEmptyRulesScehma(ObjectId schemaId) {
+
+    RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(schemaId);
+    System.out.println("este es el: " + ruleSchema);
+    if (null != ruleSchema) {
+      System.out.println("No es null y voy a borarlo:" + ruleSchema.getRulesSchemaId());
+      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+    }
+  }
 
   /**
    * Delete rule by id.
@@ -82,13 +98,20 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException {
-    rulesRepository.deleteRuleById(ruleId);
+    rulesRepository.deleteRuleById(idDatasetSchema, ruleId);
   }
 
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId)
       throws EEAException {
-    rulesRepository.deleteRuleByReferenceId(referenceId);
+    rulesRepository.deleteRuleByReferenceId(idDatasetSchema, referenceId);
 
   }
 }

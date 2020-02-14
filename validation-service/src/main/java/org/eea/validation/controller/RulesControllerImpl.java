@@ -49,7 +49,7 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping(value = "/createEmptyRulesSchema")
   public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema,
       @RequestParam("idRulesSchema") String idRulesSchema) {
-    rulesService.createEmptyRulesScehma(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
+    rulesService.createEmptyRulesSchema(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
   }
 
   /**
@@ -88,6 +88,18 @@ public class RulesControllerImpl implements RulesController {
     } else {
       return rulesService.getActiveRulesSchemaByDatasetId(idDatasetSchema);
     }
+  }
+
+  /**
+   * Creates the empty rules schema.
+   *
+   * @param idDataSetSchema the id data set schema
+   */
+  @Override
+  @DeleteMapping(value = "/deleteRulesSchema")
+  public void deleteRulesSchema(String idDataSetSchema) {
+    rulesService.deleteEmptyRulesScehma(new ObjectId(idDataSetSchema));
+
   }
 
   /**

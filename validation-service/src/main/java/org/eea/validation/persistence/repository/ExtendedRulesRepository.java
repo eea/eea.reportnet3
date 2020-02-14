@@ -8,19 +8,25 @@ import org.bson.types.ObjectId;
  */
 public interface ExtendedRulesRepository {
 
-  /**
-   * Delete rule by reference id.
-   *
-   * @param referenceId the reference id
-   */
-  void deleteRuleByReferenceId(String referenceId);
 
+  void deleteByIdDatasetSchema(ObjectId rulesSchemaId);
   /**
    * Delete rule by id.
    *
-   * @param idRuleSchema the id rule schema
+   * @param idDatasetSchema the id dataset schema
+   * @param ruleId the rule id
    */
-  void deleteRuleById(String idRuleSchema);
+  void deleteRuleById(String idDatasetSchema, String ruleId);
+
+
+
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   */
+  void deleteRuleByReferenceId(String idDatasetSchema, String referenceId);
 
   /**
    * Gets the rules with active criteria.

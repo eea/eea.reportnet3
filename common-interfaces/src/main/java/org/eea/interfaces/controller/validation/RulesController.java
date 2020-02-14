@@ -51,14 +51,19 @@ public interface RulesController {
   RulesSchemaVO findActiveRuleSchemaByDatasetId(
       @PathVariable("idDatasetSchema") String idDatasetSchema);
 
+
+  /**
+   * Creates the empty rules schema.
+   *
+   * @param idDataSetSchema the id data set schema
   /**
    * Delete rule by id.
    *
    * @param idDataSetSchema the id data set schema
    * @param ruleId the rule id
    */
-  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/deleteRulesSchema")
+  void deleteRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema);
   void deleteRuleById(
       @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @PathVariable(name = "ruleId", required = true) String ruleId);

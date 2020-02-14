@@ -3,11 +3,10 @@ package org.eea.validation.persistence.repository;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
@@ -16,7 +15,8 @@ import com.mongodb.client.MongoDatabase;
 /**
  * The Class ExtendedRulesRepositorysitoryImpl.
  */
-public class ExtendedRulesRepositorysitoryImpl implements ExtendedRulesRepository {
+public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
+
 
   /** The mongo operations. */
   @Autowired
@@ -30,35 +30,56 @@ public class ExtendedRulesRepositorysitoryImpl implements ExtendedRulesRepositor
   @Autowired
   private MongoDatabase mongoDatabase;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * Delete rule by reference id.
+   * Delete by id dataset schema.
    *
-   * @param referenceId the reference id
+   * @param rulesSchemaId the rules schema id
    */
   @Override
-  public void deleteRuleByReferenceId(String referenceId) {
-    Update update =
-        new Update().pull("rules", new BasicDBObject("referenceId", new ObjectId(referenceId)));
-    mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
-
+  public void deleteByIdDatasetSchema(ObjectId rulesSchemaId) {
+    mongoTemplate.findAndRemove(new Query(Criteria.where("_id").is(rulesSchemaId)),
+        RulesSchema.class);
   }
 
   /**
    * Delete rule by id.
    *
-   * @param idRuleSchema the id rule schema
+   * @param idDatasetSchema the id dataset schema
+   * @param ruleId the rule id
    */
   @Override
-  public void deleteRuleById(String idRuleSchema) {
-    Update update =
-        new Update().pull("rules", new BasicDBObject("_id", new ObjectId(idRuleSchema)));
-    mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
-
+  public void deleteRuleById(String idDatasetSchema, String ruleId) {
+    Update update = new Update().pull("rules", new BasicDBObject("_id", new ObjectId(ruleId)));
+    Query query = new Query();
+    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
+    mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
 
+
+
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   */
+  @Override
+  public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId) {
+    Update update =
+        new Update().pull("rules", new BasicDBObject("referenceId", new ObjectId(referenceId)));
+    Query query = new Query();
+    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
+    mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
+  }
+
+  /**
+   * Gets the rules with active criteria.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param enable the enable
+   * @return the rules with active criteria
+   */
   @Override
   public Document getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable) {
     Document document;

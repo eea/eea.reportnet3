@@ -9,8 +9,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * The Interface SchemasRepository.
- *
- * @author Mario Severa
  */
 public interface RulesRepository
     extends MongoRepository<RulesSchema, ObjectId>, ExtendedRulesRepository {
