@@ -68,9 +68,11 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
                     !isEmpty(errors.createSnapshotDescription) && touched.createSnapshotDescription ? ' error' : ''
                   }`}>
                   <Field
-                    type="text"
+                    autocomplete="off"
+                    className={styles.formField}
                     name="createSnapshotDescription"
                     placeholder={resources.messages.createSnapshotPlaceholder}
+                    type="text"
                   />
                   <div className={styles.createButtonWrapper}>
                     <Button

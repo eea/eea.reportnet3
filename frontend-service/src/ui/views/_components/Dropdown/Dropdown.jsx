@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import { isNull } from 'lodash';
 
+import './Dropdown.scss';
+
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import classNames from 'classnames';

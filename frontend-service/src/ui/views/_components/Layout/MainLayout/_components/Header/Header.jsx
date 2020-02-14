@@ -18,7 +18,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
-
+import {ConfirmDialog} from 'ui/views/_components/ConfirmDialog'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { Settings } from 'ui/views/Settings/Settings';
 
@@ -90,6 +90,7 @@ const Header = withRouter(({ history }) => {
         <FontAwesomeIcon
           onClick={async e => {
             e.preventDefault();
+            
             userContext.socket.disconnect(() => {});
             try {
               await UserService.logout();
@@ -98,6 +99,8 @@ const Header = withRouter(({ history }) => {
                 type: 'USER_LOGOUT_ERROR'
               });
             } finally {
+              
+              
               userContext.onLogout();
             }
           }}

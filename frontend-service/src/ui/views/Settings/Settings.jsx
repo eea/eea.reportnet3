@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, {Component, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined } from 'lodash';
 import styles from './Settings.module.scss';
@@ -31,8 +31,10 @@ const Settings = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const [ConfigVisible, setConfigVisible]= useState(false)
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+  const [config, setConfig] = useState('isVisible')
+  
 
   const [settingsSectionLoaded, setSettingsSectionLoaded] = useState('');
 
@@ -283,6 +285,7 @@ const Settings = withRouter(({ history, match }) => {
           isCustodian,
           buttons: []
         }}>
+      
         <div className="rep-container">{children}</div>
 
         {/* <UserSettings /> */}

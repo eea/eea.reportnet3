@@ -53,7 +53,6 @@ export const codelistsManagerReducer = (state, { type, payload }) => {
         )
       };
     case 'SET_INITIAL_EXPANDED_STATUS':
-      console.log([...state.categories]);
       return {
         ...state,
         categoriesExpandStatus: [...state.categories].map(category => {
