@@ -29,6 +29,13 @@
   animation: blink 0.2s;
 }
 
+.emptyProperty {
+  color: var(--treeview-empty-property-color);
+  font-style: italic;
+  margin: 1rem 0 0 2rem;
+  display: inline-block;
+}
+
 .slashSpan span::after {
   position: absolute;
   content: '\e90b';

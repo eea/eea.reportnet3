@@ -26,6 +26,16 @@
   color: white;
 }
 
+.propertyTitle {
+  color: var(--treeview-property-title-color);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.propertyValue {
+  color: var(--treeview-property-value-color);
+}
+
 .slider-enter {
   height: 0px;
 }

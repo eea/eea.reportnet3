@@ -2,12 +2,12 @@ import React from 'react';
 
 import { capitalize, isUndefined, isNull } from 'lodash';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styles from './TreeView.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 const TreeView = ({ groupableProperties = [], propertyName, property, rootProperty }) => {
@@ -23,10 +23,10 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
           }}>
           {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
             <React.Fragment>
-              <span style={{ color: 'black', fontSize: '14px', fontWeight: 'bold' }}>
+              <span className={styles.propertyTitle}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
-              {property !== '' ? property.toString() : '-'}
+              {property !== '' ? <span className={styles.propertyValue}>{property.toString()}</span> : '-'}
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem

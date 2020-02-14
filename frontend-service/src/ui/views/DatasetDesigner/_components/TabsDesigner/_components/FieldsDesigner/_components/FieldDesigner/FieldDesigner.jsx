@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'primereact/checkbox';
 import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
@@ -26,6 +27,7 @@ export const FieldDesigner = ({
   fieldId,
   fieldDescription,
   fieldName,
+  fieldRequired,
   fieldType,
   index,
   initialFieldIndexDragged,
@@ -76,12 +78,14 @@ export const FieldDesigner = ({
 
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
+  const [fieldRequiredValue, setFieldRequiredValue] = useState(fieldRequired);
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
   const [fieldValue, setFieldValue] = useState(fieldName);
   const [initialFieldValue, setInitialFieldValue] = useState();
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
   const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
+  const [isQCManagerVisible, setIsQCManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
@@ -141,6 +145,18 @@ export const FieldDesigner = ({
                 }
               }
             }
+          }
+        }
+      }
+    }
+    const requiredCheckboxes = document.getElementsByClassName('requiredCheckbox');
+    if (!isUndefined(requiredCheckboxes)) {
+      for (let i = 0; i < requiredCheckboxes.length; i++) {
+        for (let j = 0; j < requiredCheckboxes[i].childNodes.length; j++) {
+          if (isDragging) {
+            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
+          } else {
+            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
           }
         }
       }
@@ -284,7 +300,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          fieldRequiredValue
         );
       } else {
         fieldUpdate(
@@ -295,7 +312,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          fieldRequiredValue
         );
       }
     }
@@ -317,7 +335,8 @@ export const FieldDesigner = ({
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
@@ -325,7 +344,8 @@ export const FieldDesigner = ({
         name: value,
         type,
         description,
-        codelistId
+        codelistId,
+        required
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -342,7 +362,8 @@ export const FieldDesigner = ({
           codelistId,
           codelistName,
           codelistVersion,
-          codelistItems
+          codelistItems,
+          required
         );
       }
     } catch (error) {
@@ -435,6 +456,45 @@ export const FieldDesigner = ({
     }
   };
 
+  const onRequiredChange = checked => {
+    if (!isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isUndefined(fieldTypeValue) &&
+          !isNull(fieldTypeValue) &&
+          (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+          !isNull(fieldValue) &&
+          fieldValue !== ''
+        ) {
+          onFieldAdd(
+            recordId,
+            parseGeospatialTypes(fieldTypeValue.fieldType),
+            fieldValue,
+            fieldDescriptionValue,
+            selectedCodelist.codelistId,
+            selectedCodelist.codelistName,
+            selectedCodelist.codelistVersion,
+            undefined,
+            checked
+          );
+        }
+      } else {
+        fieldUpdate(
+          fieldId,
+          parseGeospatialTypes(fieldTypeValue.fieldType),
+          fieldValue,
+          fieldDescriptionValue,
+          selectedCodelist.codelistId,
+          selectedCodelist.codelistName,
+          selectedCodelist.codelistVersion,
+          undefined,
+          checked
+        );
+      }
+    }
+    setFieldRequiredValue(checked);
+  };
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -481,26 +541,50 @@ export const FieldDesigner = ({
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
+    console.log({ required, fieldSchemaId });
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
         name: value,
         type: type,
         description,
-        codelistId
+        codelistId,
+        required
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
         setFieldValue(initialFieldValue);
       } else {
-        onFieldUpdate(fieldId, value, type, description, codelistId, codelistName, codelistVersion, codelistItems);
+        onFieldUpdate(
+          fieldId,
+          value,
+          type,
+          description,
+          codelistId,
+          codelistName,
+          codelistVersion,
+          codelistItems,
+          required
+        );
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
     }
   };
+
+  const qcDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        className="p-button-secondary-transparent"
+        icon="cancel"
+        label={resources.messages['close']}
+        onClick={() => setIsQCManagerVisible(false)}
+      />
+    </div>
+  );
 
   return (
     <React.Fragment>
@@ -541,7 +625,30 @@ export const FieldDesigner = ({
           //   animationDuration: '400ms'
           // }}
         ></div>
-        {!addField ? <FontAwesomeIcon icon={AwesomeIcons('move')} /> : <div style={{ width: '32px' }}></div>}
+
+        <div className="requiredCheckbox">
+          {!addField ? (
+            <FontAwesomeIcon icon={AwesomeIcons('move')} />
+          ) : (
+            <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
+          )}
+          <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
+          <Checkbox
+            checked={fieldRequiredValue}
+            inputId={`${fieldId}_check`}
+            label="Default"
+            onChange={e => {
+              onRequiredChange(e.checked);
+            }}
+            style={{
+              marginLeft: '0.4rem',
+              marginRight: '0.4rem'
+              // alignSelf: !isEditing ? 'center' : 'flex-end',
+              // justifySelf: 'flex-end'
+            }}
+          />
+        </div>
+
         <InputText
           autoFocus={false}
           className={styles.inputField}
@@ -563,7 +670,7 @@ export const FieldDesigner = ({
         />
         <InputTextarea
           autoFocus={false}
-          collapsedHeight={30}
+          collapsedHeight={33}
           expandableOnClick={true}
           className={styles.inputFieldDescription}
           key={fieldId}
@@ -597,11 +704,12 @@ export const FieldDesigner = ({
           placeholder={resources.messages['newFieldTypePlaceHolder']}
           // showClear={true}
           scrollHeight="450px"
+          style={{ alignSelf: !isEditing ? 'center' : 'auto' }}
           value={fieldTypeValue !== '' ? fieldTypeValue : getFieldTypeValue(fieldType)}
         />
         {!isUndefined(fieldTypeValue) && fieldTypeValue.fieldType === 'Codelist' ? (
           <Button
-            className={`${styles.codelistButton} p-button-secondary`}
+            className={`${styles.codelistButton} p-button-secondary-transparent`}
             label={
               !isUndefined(selectedCodelist.codelistName) && selectedCodelist.codelistName !== ''
                 ? `${selectedCodelist.codelistName} (${selectedCodelist.codelistVersion})`
@@ -617,12 +725,22 @@ export const FieldDesigner = ({
             tooltipOptions={{ position: 'top' }}
           />
         ) : isCodelistSelected ? (
-          <span style={{ width: '8rem', marginRight: '0.4rem' }}></span>
+          <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
+        ) : null}
+        {!addField ? (
+          <Button
+            className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            icon="horizontalSliders"
+            onClick={() => setIsQCManagerVisible(true)}
+            style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
+            tooltip={resources.messages['editFieldQC']}
+            tooltipOptions={{ position: 'bottom' }}
+          />
         ) : null}
         {!addField ? (
           <a
             draggable={true}
-            className={styles.deleteButton}
+            className={`${styles.button} ${styles.deleteButton}`}
             href="#"
             onClick={e => {
               e.preventDefault();
@@ -649,6 +767,21 @@ export const FieldDesigner = ({
           visible={isCodelistManagerVisible}
           zIndex={3003}>
           {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+        </Dialog>
+      ) : null}
+      {isQCManagerVisible ? (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={qcDialogFooter}
+          header={resources.messages['qcManager']}
+          modal={true}
+          onHide={() => setIsQCManagerVisible(false)}
+          style={{ width: '80%' }}
+          visible={isQCManagerVisible}
+          zIndex={3003}>
+          {}
         </Dialog>
       ) : null}
     </React.Fragment>
