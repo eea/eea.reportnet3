@@ -97,7 +97,7 @@ public class ReportingDatasetServiceTest {
     when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
-    when(snapshotRepository.findByReportingDatasetAndRelease(Mockito.any()))
+    when(snapshotRepository.findByReportingDatasetAndRelease(Mockito.any(), Mockito.any()))
         .thenReturn(Arrays.asList(snap));
     when(designDatasetRepository.findbyDatasetSchemaList(Mockito.any())).thenReturn(designs);
     assertEquals("failed assertion", datasets,

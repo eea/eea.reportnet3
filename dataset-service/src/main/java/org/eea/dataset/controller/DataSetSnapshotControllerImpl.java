@@ -330,7 +330,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       receipt = datasetSnapshotService.getReleasedAndUpdatedStatus(idDataflow, idDataProvider);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error ", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR);
     }

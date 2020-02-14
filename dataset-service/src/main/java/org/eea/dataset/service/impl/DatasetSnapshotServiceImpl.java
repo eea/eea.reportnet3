@@ -606,7 +606,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     receipt.setIdDataflow(idDataflow);
     receipt.setDataflowName(dataflow.getName());
     receipt.setDatasets(dataflow.getReportingDatasets().stream()
-        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId() == idDataProvider)
+        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(idDataProvider))
         .collect(Collectors.toList()));
 
     if (!receipt.getDatasets().isEmpty()) {
@@ -615,7 +615,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-            .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
+            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);

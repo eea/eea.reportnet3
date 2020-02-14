@@ -90,7 +90,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
       List<Long> collection =
           datasetsVO.stream().map(ReportingDatasetVO::getId).collect(Collectors.toList());
       List<Snapshot> resultSnapshots =
-          snapshotRepository.findByReportingDatasetAndRelease(collection);
+          snapshotRepository.findByReportingDatasetAndRelease(collection, true);
       List<Long> result = resultSnapshots.stream().map(Snapshot::getReportingDataset)
           .map(ReportingDataset::getId).collect(Collectors.toList());
       for (ReportingDatasetVO dataset : datasetsVO) {
