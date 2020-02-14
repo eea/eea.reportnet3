@@ -64,22 +64,15 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
-  /**
-   * Delete rule by id.
-   *
-   * @param idDatasetSchema the id dataset schema
-   * @param ruleId the rule id
-   * @throws EEAException the EEA exception
-   */
   @Override
   public void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException {
-    // rulesRepository.deleteRuleById(ruleId);
+    rulesRepository.deleteRuleById(ruleId);
   }
 
   @Override
   public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId)
       throws EEAException {
-    // rulesRepository.deleteRuleByReferenceId(referenceId);
+    rulesRepository.deleteRuleByReferenceId(referenceId);
 
   }
 }
