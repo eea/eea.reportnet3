@@ -14,7 +14,7 @@ public interface RulesService {
    * @param schemaId the schema id
    * @param ruleSchemaId the rule schema id
    */
-  void createEmptyRulesScehma(ObjectId schemaId, ObjectId ruleSchemaId);
+  void createEmptyRulesSchema(ObjectId schemaId, ObjectId ruleSchemaId);
 
   /**
    * Gets the rules schema by dataset id.
@@ -23,5 +23,14 @@ public interface RulesService {
    * @return the rules schema by dataset id
    */
   RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema);
+
+
+
+  /**
+   * Creates the empty rules scehma.
+   *
+   * @param schemaId the schema id
+   */
+  void deleteEmptyRulesScehma(ObjectId schemaId);
 
 }

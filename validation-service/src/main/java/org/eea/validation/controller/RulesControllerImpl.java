@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +48,7 @@ public class RulesControllerImpl implements RulesController {
   public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema,
       @RequestParam("idRulesSchema") String idRulesSchema) {
 
-    rulesService.createEmptyRulesScehma(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
+    rulesService.createEmptyRulesSchema(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
 
   }
 
@@ -67,5 +68,17 @@ public class RulesControllerImpl implements RulesController {
     } else {
       return rulesService.getRulesSchemaByDatasetId(idDatasetSchema);
     }
+  }
+
+  /**
+   * Creates the empty rules schema.
+   *
+   * @param idDataSetSchema the id data set schema
+   */
+  @Override
+  @DeleteMapping(value = "/deleteRulesSchema")
+  public void deleteRulesSchema(String idDataSetSchema) {
+    rulesService.deleteEmptyRulesScehma(new ObjectId(idDataSetSchema));
+
   }
 }

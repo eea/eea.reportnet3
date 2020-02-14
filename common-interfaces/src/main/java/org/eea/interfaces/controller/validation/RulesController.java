@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +40,15 @@ public interface RulesController {
    */
   @GetMapping(value = "/{idDatasetSchema}/rules", produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
+
+
+
+  /**
+   * Creates the empty rules schema.
+   *
+   * @param idDataSetSchema the id data set schema
+   */
+  @DeleteMapping(value = "/deleteRulesSchema")
+  void deleteRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema);
 
 }

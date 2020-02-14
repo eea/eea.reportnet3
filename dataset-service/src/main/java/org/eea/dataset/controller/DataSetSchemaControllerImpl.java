@@ -12,6 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
@@ -90,6 +91,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
 
   /**
    * Creates the empty dataset schema.
@@ -215,10 +220,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
-        // delete the metabase
+        // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+        rulesControllerZuul.deleteRulesSchema(schemaId);
+        // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
-        // delete the schema
+        // delete the schema in BBDD
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
