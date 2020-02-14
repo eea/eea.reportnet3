@@ -228,7 +228,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @PutMapping("/dataset/create/dataCollection/{dataflowId}")
+  @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   public void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
       @PathVariable("dataflowId") Long dataflowId) {
 

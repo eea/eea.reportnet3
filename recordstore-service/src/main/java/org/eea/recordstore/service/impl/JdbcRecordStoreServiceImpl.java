@@ -180,7 +180,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
 
       // Execute queries and commit results
-      int[] aux = statement.executeBatch();
+      statement.executeBatch();
       LOG.info("Schemas created as part of DataCollection creation");
 
       // Release events to initialize databases content
@@ -191,9 +191,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
-      List<Long> datasetIds = new ArrayList<>(datasetIdsAndSchemaIds.keySet());
       // This method will release the lock
-      dataCollectionControllerZuul.undoDataCollectionCreation(datasetIds, dataflowId);
+      dataCollectionControllerZuul
+          .undoDataCollectionCreation(new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId);
     }
   }
 

@@ -17,8 +17,8 @@ public interface DataCollectionController {
 
   }
 
-  @PutMapping("/rollback/dataflow/{dataflowId}")
-  public void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
+  @PutMapping("/private/rollback/dataflow/{dataflowId}")
+  void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
       @PathVariable("dataflowId") Long dataflowId);
 
   @PostMapping("/create/dataflow/{dataflowId}/{dueDate}")

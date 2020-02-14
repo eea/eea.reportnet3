@@ -40,15 +40,24 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private DataCollectionService dataCollectionService;
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * Undo data collection creation.
+   *
+   * @param datasetIds the dataset ids
+   * @param dataflowId the dataflow id
+   */
   @Override
-  @PutMapping("/rollback/dataflow/{dataflowId}")
+  @PutMapping("/private/rollback/dataflow/{dataflowId}")
   public void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
       @PathVariable("dataflowId") Long dataflowId) {
 
@@ -60,6 +69,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId);
   }
 
+  /**
+   * Creates the empty data collection.
+   *
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   */
   @Override
   @HystrixCommand
   @PostMapping("/create/dataflow/{dataflowId}/{dueDate}")
