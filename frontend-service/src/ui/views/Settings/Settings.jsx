@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, {Component, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined } from 'lodash';
 import styles from './Settings.module.scss';
@@ -14,6 +14,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import {Config} from './_components/Configuration'
 
 const Settings = withRouter(({ history, match }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -29,10 +30,15 @@ const Settings = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const [ConfigVisible, setConfigVisible]= useState(false)
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+  const [config, setConfig] = useState('isVisible')
+  
 
   
+
+
+
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([
@@ -51,6 +57,8 @@ const Settings = withRouter(({ history, match }) => {
     ]);
   }, []);
 
+
+
   useEffect ( () => {
     leftSideBarContext.addModels([
       {
@@ -58,7 +66,8 @@ const Settings = withRouter(({ history, match }) => {
         label: 'design',
         onClick: (e) => {
           e.preventDefault();
-          
+
+         setConfig(!'isVisible')
         },
         title: 'design'
       },
@@ -77,49 +86,6 @@ const Settings = withRouter(({ history, match }) => {
 
   )
 
-//   useEffect(() => {
-//     if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
-//       leftSideBarContext.addModels([
-//         {
-//           label: 'edit',
-//           icon: 'edit',
-//           onClick: e => {
-//             onShowEditForm();
-//             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-//           },
-//           title: 'edit'
-//         },
-//         {
-//           label: 'manageRoles',
-//           icon: 'manageRoles',
-//           onClick: () => {
-//             onShowManageRolesDialog();
-//           },
-//           title: 'manageRoles'
-//         },
-//         {
-//           label: 'settings',
-//           icon: 'settings',
-//           onClick: e => {
-//             setIsActivePropertiesDialog(true);
-//           },
-//           show: true,
-//           title: 'settings'
-//         }
-//       ]);
-//     } else {
-//       leftSideBarContext.addModels([
-//         {
-//           label: 'settings',
-//           icon: 'settings',
-//           onClick: e => {
-//             setIsActivePropertiesDialog(true);
-//           },
-//           title: 'settings'
-//         }
-//       ]);
-//     }
-//   }, [isCustodian, dataflowStatus]);
 
   useEffect(() => {
     setLoading(true);
@@ -219,7 +185,9 @@ const Settings = withRouter(({ history, match }) => {
           isCustodian,
           buttons: []
         }}>
+      
         <div className="rep-container">{children}</div>
+        <Config />
       </MainLayout>
     );
   };
