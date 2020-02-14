@@ -161,7 +161,10 @@ export const BigButtonList = ({
           const representatives = datasets.map(dataset => {
             return dataset.datasetSchemaName;
           });
-          if (!isCustodian && uniq(representatives).length === 1) {
+          const isReleased = datasets.map(dataset => {
+            return dataset.isReleased;
+          });
+          if (!isCustodian && uniq(representatives).length === 1 && !isReleased.includes(false)) {
             return (
               <BigButton
                 layout="defaultBigButton"
