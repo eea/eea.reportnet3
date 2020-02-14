@@ -5,6 +5,7 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { TreeView } from 'ui/views/_components/TreeView';
 
 const DatasetSchema = ({ designDataset, codelistsList, index }) => {
+  console.log({ codelistsList });
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
@@ -18,7 +19,7 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
       }
 
       const groupableProperties = ['fields'].concat(codelistTitles);
-
+      console.log({ parsedDesignDataset });
       return (
         <div>
           <TreeView
@@ -63,6 +64,7 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
+  parsedDataset.codelists = [];
   const codelistItemsData = [];
   let codelistsBySchema = [];
   if (!isUndefined(codelistsListWithSchema)) {
@@ -106,7 +108,7 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
                       codelistView.push(codelistItemView);
                     });
                   }
-                  parsedDataset[fieldCodelist] = codelistView;
+                  parsedDataset.codelists.push({ [fieldCodelist]: codelistView });
                 }
               }
             }

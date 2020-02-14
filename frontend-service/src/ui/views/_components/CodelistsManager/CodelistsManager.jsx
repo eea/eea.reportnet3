@@ -32,7 +32,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [codelistsInEdition, setCodelistsInEdition] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
-  const [isEditionModeOn, setIsEditionModeOn] = useState();
+  const [isEditionModeOn, setIsEditionModeOn] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isIncorrect, setIsIncorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

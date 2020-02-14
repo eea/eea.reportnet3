@@ -65,13 +65,9 @@ body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.p-highligh
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a {
-  background-color: var(--yellow-120);
-  border: 1px solid var(--blue-120);
-  /*border: 2px solid var(--blue-120);
-  border-style: solid;
-  border-color: var(--blue-120);
-  border-width: 2px 2px 1px 2px;*/
-  color: #404040;
+  background-color: var(--tabview-highlight-bg-hover);
+  border: var(--tabview-highlight-border-hover);
+  color: var(--tabview-highlight-color-hover);
 }
 body
   .p-tabview.p-tabview-top
@@ -113,9 +109,12 @@ body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hov
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a {
-  background-color: var(--yellow-120);
-  border: 1px solid var(--blue-120);
-  color: #404040;
+  background-color: var(--tabview-highlight-bg-hover);
+  border: var(--tabview-highlight-border-hover);
+  color: var(--tabview-highlight-color-hover);
+  // background-color: var(--yellow-120);
+  // border: 1px solid var(--blue-120);
+  // color: #404040;
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,

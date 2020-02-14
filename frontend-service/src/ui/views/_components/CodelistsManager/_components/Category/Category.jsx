@@ -94,6 +94,7 @@ const Category = ({
   // }, []);
 
   useEffect(() => {
+    console.log({ isEditionModeOn, isInDesign });
     if (!isUndefined(isEditionModeOn)) {
       if (isEditionModeOn) {
         changeFilterValues(
@@ -102,7 +103,15 @@ const Category = ({
           category.codelists
         );
       } else {
-        changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+        if (isInDesign) {
+          changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+        } else {
+          changeFilterValues(
+            'status',
+            [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+            category.codelists
+          );
+        }
       }
     }
   }, [isEditionModeOn]);

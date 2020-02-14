@@ -38,6 +38,7 @@
   --c-corporate-blue-rgb: 0, 102, 153;
   --c-corporate-blue-lighter: #0286c9;
   --c-corporate-aqua-marine: #008675;
+  --c-corporate-yellow: #ffd902;
   /* Blue palette */
   --c-blue-400: #4f758b;
   --c-blue-300: #6ba4b8;
@@ -103,11 +104,21 @@
   --bg: var(--white);
   --main-font-color: var(--gray-110);
 
+  /* Chevron */
   --breadCrumb-font-color: var(--c-corporate-blue);
+  --breadCrumb-icon-color: var(--c-corporate-blue);
+  --breadCrumb-chevron-color: var(--c-corporate-blue);
+
+  /* Leftside bar*/
+
   --leftSideBar-bg: var(--c-corporate-blue);
   --leftSideBar-box-shadow: 0 0 0 rgba(255, 255, 255, 0.1);
+
+  /* Header */
   --header-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
-  --icon-title-color: var(--gray-110);
+
+  /* Title */
+  --title-icon-color: var(--gray-110);
   --title-color: var(--gray-110);
   --subtitle-color: var(--c-corporate-blue);
 
@@ -118,6 +129,9 @@
   --tabview-highlight-bg: var(--c-corporate-blue);
   --tabview-highlight-border: 1px solid var(--c-corporate-blue);
   --tabview-highlight-color: var(--white);
+  --tabview-highlight-bg-hover: var(--c-corporate-yellow);
+  --tabview-highlight-border-hover: 1px solid var(--c-custom-gray);
+  --tabview-highlight-color-hover: var(--gray-110);
 
   /* Inputswitch */
   --inputswitch-checked-bg: var(--c-corporate-blue);
@@ -144,7 +158,7 @@
   --datatable-header-footer-color: var(--gray-110);
   --datatable-header-footer-border: 1px solid var(--gray-25);
   --datatable-column-sortable-icon-color: var(--gray-110);
-  --datatable-column-sortable-hightlight-bg-hover: var(--yellow-120);
+  --datatable-column-sortable-hightlight-bg-hover: var(--c-corporate-yellow);
   --datatable-column-sortable-hightlight-color-hover: var(--gray-110);
   --datatable-column-sortable-icon-hightlight-color-hover: var(--gray-110);
   --datatable-body-row-toggler-infotable-bg: repeating-linear-gradient(
@@ -216,7 +230,7 @@
   --growl-success-bg: var(--success-color);
   --growl-success-color: var(--black);
   --growl-success-icon-color: var(--black);
-  --growl-warning-bg: var(--yellow-120);
+  --growl-warning-bg: var(--c-corporate-yellow);
   --growl-warning-color: var(--black);
   --growl-warning-icon-color: var(--black);
   --growl-error-bg: var(--c-pink);
@@ -2132,6 +2146,14 @@ textarea:focus {
   box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
 }
+.formField input {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
+.formField textarea {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
 
 form .error {
   color: var(--errors);
@@ -2152,13 +2174,13 @@ body .p-dialog.edit-table .p-dialog-content {
     stroke: var(--blue-120);
   }
   25% {
-    stroke: var(--yellow-120);
+    stroke: var(--c-corporate-yellow);
   }
   50% {
     stroke: var(--blue-120);
   }
   100% {
-    stroke: var(--yellow-120);
+    stroke: var(--c-corporate-yellow);
   }
 }
 

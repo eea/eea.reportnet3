@@ -3117,6 +3117,7 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
   -webkit-transition: background-color 0.2s, box-shadow 0.2s;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
+
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-text {
   color: var(--tabview-color);
 }

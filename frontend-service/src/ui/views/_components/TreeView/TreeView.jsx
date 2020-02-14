@@ -18,8 +18,7 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
           style={{
             paddingTop: '6px',
             paddingLeft: '3px',
-            marginLeft: '10px',
-            color: '#666'
+            marginLeft: '10px'
           }}>
           {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
             <React.Fragment>
