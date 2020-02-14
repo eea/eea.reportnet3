@@ -36,6 +36,7 @@
   /* Main corporate colors */
   --c-corporate-blue: #006699;
   --c-corporate-blue-rgb: 0, 102, 153;
+  --c-corporate-blue-lighter: #0286c9;
   --c-corporate-aqua-marine: #008675;
   /* Blue palette */
   --c-blue-400: #4f758b;
@@ -79,6 +80,8 @@
   --c-black-300: #75787b;
   --c-black-200: #b1b3b3;
   --c-black-100: #d0d0ce;
+  /* pink */
+  --c-pink: #f98e97;
   /* individuals */
   --c-darkest-blue: #15171b;
   --c-darker-blue: #1a1c22;
@@ -99,6 +102,7 @@
   /* Theme switcher */
   --bg: var(--white);
   --main-font-color: var(--gray-110);
+
   --breadCrumb-font-color: var(--c-corporate-blue);
   --leftSideBar-bg: var(--c-corporate-blue);
   --leftSideBar-box-shadow: 0 0 0 rgba(255, 255, 255, 0.1);
@@ -108,7 +112,7 @@
   --subtitle-color: var(--c-corporate-blue);
 
   /* Tabview */
-  --tabview-bg: var(--white);
+  --tabview-bg: var(--gray-5);
   --tabview-border: 1px solid var(--c-custom-gray);
   --tabview-color: var(--gray-110);
   --tabview-highlight-bg: var(--c-corporate-blue);
@@ -118,19 +122,19 @@
   /* Inputswitch */
   --inputswitch-checked-bg: var(--c-corporate-blue);
   --inputswitch-checked-before-bg: var(--white);
-  --inputswitch-dark-theme-checked: inset 4px 0px var(--white);
+  --inputswitch-dark-theme-checked: inset 4px -1px var(--white);
   --inputswitch-unchecked-bg: var(--gray-25);
   --inputswitch-slider-bg: var(--white);
 
   /* Datatable */
-  --datatable-header-bg: var(--gray-10);
+  --datatable-header-bg: var(--gray-5);
   --datatable-header-color: var(--gray-110);
   --datatable-header-border: 1px solid var(--c-custom-gray);
   --datatable-body-border: 1px solid var(--c-custom-gray);
   --datatable-body-color: var(--black);
   --datatable-body-bg: var(--white);
-  --datatable-body-even-bg: var(--gray-10);
-  --datatable-body-highlight-bg: var(--gray-25);
+  --datatable-body-even-bg: var(--gray-5);
+  --datatable-body-highlight-bg: var(--gray-10);
 
   --datatable-column-sortable-hightlight-bg: var(--c-corporate-blue);
   --datatable-column-sortable-hightlight-color: var(--white);
@@ -138,7 +142,7 @@
   --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25);
   --datatable-header-footer-bg: var(--gray-10);
   --datatable-header-footer-color: var(--gray-110);
-  --datatable-header-footer-border: 1px solid var(--gray-10);
+  --datatable-header-footer-border: 1px solid var(--gray-25);
   --datatable-column-sortable-icon-color: var(--gray-110);
   --datatable-column-sortable-hightlight-bg-hover: var(--yellow-120);
   --datatable-column-sortable-hightlight-color-hover: var(--gray-110);
@@ -180,24 +184,9 @@
   --paginator-pages-color: var(--white);
 
   /* Dropdown */
-  /* --dropdown-trigger-bg: var(--c-corporate-blue);
-  --dropdown-trigger-color: var(--white);
-  --dropdown-trigger-clear-icon-color: var(--white);
-  --dropdown-panel-border: 1px solid var(--c-corporate-blue);
-  --dropdown-panel-bg: var(--white);
-  --dropdown-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-  --dropdown-panel-filter-border: 1px solid var(--gray-10);
-  --dropdown-panel-filter-color: var(--gray-110);
-  --dropdown-panel-filter-bg: var(--white);
-  --dropdown-panel-filter-icon-color: var(--c-corporate-blue);
-  --dropdown-panel-items-group-color: var(--gray-110);
-  --dropdown-panel-items-group-highlight-color: var(--white);
-  --dropdown-panel-items-group-highlight-bg: var(--c-corporate-blue);
-  --dropdown-panel-items-group-not-highlight-color-hover: var(--gray-110);
-  --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-10); */
-
   --dropdown-bg: var(--bg);
-  --dropdown-border: 1px solid var(--bg);
+  --dropdown-border: 1px solid var(--gray-50);
+  --dropdown-border-color-hover: var(--gray-75);
   --dropdown-bg-hover: var(--white);
   --dropdown-bg-focus: var(--c-corporate-blue);
   --dropdown-trigger-bg: var(--white);
@@ -230,7 +219,7 @@
   --growl-warning-bg: var(--yellow-120);
   --growl-warning-color: var(--black);
   --growl-warning-icon-color: var(--black);
-  --growl-error-bg: var(--c-red-200);
+  --growl-error-bg: var(--c-pink);
   --growl-error-color: var(--black);
   --growl-error-icon-color: var(--black);
 
@@ -244,6 +233,9 @@
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);
+  --treeview-property-title-color: var(--black);
+  --treeview-property-value-color: var(--black);
+  --treeview-empty-property-color: var(--black);
 
   /* Documentation */
   --documenticon-color: var(--c-corporate-blue);
@@ -316,6 +308,70 @@
   /* Chart */
   --chart-bg: var(--bg);
   --chart-color: var(--main-font-color);
+
+  /* Category expandable Treeview*/
+  --category-expandable-treeview-color: var(--main-font-color);
+
+  /* Codelist expandable Treeview*/
+  --codelist-expandable-treeview-color: var(--main-font-color);
+
+  /* Multiselect */
+  --multiselect-bg: var(--white);
+  --multiselect-border: 1px solid var(--gray-15);
+  --multiselect-bg-hover: var(--gray-110);
+  --multiselect-label-color: var(--gray-110);
+  --multiselect-trigger-bg: var(--white);
+  --multiselect-trigger-color: var(--gray-50);
+  --multiselect-panel-border: 1px solid var(--gray-25);
+  --multiselect-panel-bg: var(--white);
+  --multiselect-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --multiselect-panel-header-border-bottom: 1px solid var(--gray-10);
+  --multiselect-panel-header-color: var(--gray-110);
+  --multiselect-panel-header-bg: var(--white);
+  --multiselect-panel-header-filter-icon-color: var(--c-corporate-blue);
+  --multiselect-panel-header-close-color: var(--gray-25);
+  --multiselect-panel-item-color: var(--gray-110);
+  --multiselect-panel-item-color-hover: var(--gray-110);
+  --multiselect-panel-item-bg-hover: var(--gray-5);
+
+  /* Checkbox */
+  --checkbox-box-border: 1px solid var(--gray-50);
+  --checkbox-box-bg: var(--white);
+  --checkbox-box-bg-hover: var(--black);
+  --checkbox-box-box-shadow-focus: 0 0 0 0.2em var(--c-corporate-blue);
+  --checkbox-box-bg-focus: var(--c-corporate-blue);
+  --checkbox-box-highlight-border-color: var(--c-corporate-blue);
+  --checkbox-box-highlight-bg: var(--c-corporate-blue);
+  --checkbox-box-highlight-color: var(--white);
+  --checkbox-box-highlight-border-color-hover: var(--c-corporate-blue-lighter);
+  --checkbox-box-highlight-bg-hover: var(--c-corporate-blue-lighter);
+  --checkbox-box-highlight-color-hover: var(--white);
+
+  /* InputTextArea */
+
+  --inputtextarea-box-shadow: 0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.1);
+
+  /* FieldDesigner */
+  --field-designer-separator-box-shadow: 1px 1px rgba(var(--c-corporate-blue-rgb), 0.2),
+    2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2);
+  --field-designer-separator-bg: rgba(var(--c-corporate-blue-rgb), 0.2);
+
+  /* SideBar */
+  --sidebar-bg: var(--white);
+  --sidebar-color: var(--gray-110);
+  --sidebar-border: 1px solid var(--gray-50);
+  --sidebar-boxshadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
+  --sidebar-scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  --sidebar-scrollbar-bg: var(--c-custom-gray);
+  --sidebar-scrollbar-thumb-bg: var(--gray-50);
+  --sidebar-scrollbar-thumb-bg-hover: var(--gray-75);
+  --sidebar-close-icon-color: var(--gray-50);
+  --sidebar-close-icon-color-hover: var(--gray-110);
+  --sidebar-title-color: var(--c-corporate-blue);
+
+  /* Form field */
+  --form-field-bg: var(--white);
+  --form-field-color: var(--black);
 }
 body {
   margin: 0px;
