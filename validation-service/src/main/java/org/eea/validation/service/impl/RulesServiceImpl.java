@@ -7,7 +7,8 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.schemas.repository.RulesRepository;
+import org.eea.validation.persistence.repository.ExtendedRulesRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
@@ -29,6 +30,10 @@ public class RulesServiceImpl implements RulesService {
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
+
+  @Autowired
+  private ExtendedRulesRepository extendedRulesRepository;
+
   /**
    * The Constant LOG_ERROR.
    */
@@ -75,11 +80,9 @@ public class RulesServiceImpl implements RulesService {
     System.out.println("este es el: " + ruleSchema);
     if (null != ruleSchema) {
       System.out.println("No es null y voy a borarlo");
-      // rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
-      rulesRepository.delete(ruleSchema);
-      // rulesRepository.deleteById(schemaId);
+      extendedRulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
     }
-
+  }
 
   /**
    * Delete rule by id.
