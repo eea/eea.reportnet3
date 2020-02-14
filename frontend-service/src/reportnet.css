@@ -80,6 +80,8 @@
   --c-black-300: #75787b;
   --c-black-200: #b1b3b3;
   --c-black-100: #d0d0ce;
+  /* pink */
+  --c-pink: #f98e97;
   /* individuals */
   --c-darkest-blue: #15171b;
   --c-darker-blue: #1a1c22;
@@ -217,7 +219,7 @@
   --growl-warning-bg: var(--yellow-120);
   --growl-warning-color: var(--black);
   --growl-warning-icon-color: var(--black);
-  --growl-error-bg: var(--c-red-200);
+  --growl-error-bg: var(--c-pink);
   --growl-error-color: var(--black);
   --growl-error-icon-color: var(--black);
 
