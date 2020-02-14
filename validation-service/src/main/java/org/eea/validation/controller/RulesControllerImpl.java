@@ -61,13 +61,23 @@ public class RulesControllerImpl implements RulesController {
   public RulesSchemaVO findRuleSchemaByDatasetId(
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
     if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error find datasetschema with idDatasetSchema {} because idDatasetSchema is incorrect",
+          idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+
     } else {
       return rulesService.getRulesSchemaByDatasetId(idDatasetSchema);
     }
   }
 
+  /**
+   * Delete rule by id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param ruleId the rule id
+   */
   @Override
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,15 +85,27 @@ public class RulesControllerImpl implements RulesController {
       @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @PathVariable(name = "ruleId", required = true) String ruleId) {
     if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error deleting  rule with ruleId {} in schema {} because idDatasetSchema is incorrect",
+          ruleId, idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
     if (StringUtils.isBlank(ruleId)) {
+      LOG_ERROR.error(
+          "Error deleting  rule with ruleId {} in schema {} because ruleId is incorrect", ruleId,
+          idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RULEID_INCORRECT);
     }
 
   }
 
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   */
   @Override
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,13 +113,20 @@ public class RulesControllerImpl implements RulesController {
       @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @PathVariable(name = "referenceId", required = true) String referenceId) {
     if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error deleting all rules with referenceid {} in schema {} because idDatasetSchema is incorrect",
+          referenceId, idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
 
     if (StringUtils.isBlank(referenceId)) {
+      LOG_ERROR.error(
+          "Error deleting all rules with referenceid {} in schema {} because referenceId is incorrect",
+          referenceId, idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REFERENCEID_INCORRECT);
     }
   }
+
 }
