@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,27 +78,17 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/create/dataflow/{dataflowId}/{dueDate}")
+  @PostMapping("/create/")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createEmptyDataCollection(
-      @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId,
-      @PathVariable("dueDate") Long dueDate) {
+  public void createEmptyDataCollection(@RequestBody @LockCriteria(name = "dataflowId",
+      path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
-    // Check if the date is after actual date
-    Date date = new Date(dueDate);
-    if (new Date(System.currentTimeMillis()).compareTo(date) > 0) {
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
-      LOG_ERROR.error("Error creating DataCollection: Invalid date");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATE_AFTER_INCORRECT);
-    }
+    Date date = dataCollectionVO.getDueDate();
+    Long dataflowId = dataCollectionVO.getIdDataflow();
 
     // Continue if the dataflow exists and is DESIGN
-    if (!dataCollectionService.isDesignDataflow(dataflowId)) {
+    if (date == null || dataflowId == null || !dataCollectionService.isDesignDataflow(dataflowId)) {
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
       criteria.add(dataflowId);

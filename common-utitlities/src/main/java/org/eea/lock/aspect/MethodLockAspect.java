@@ -1,6 +1,10 @@
 package org.eea.lock.aspect;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -9,7 +13,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
@@ -58,7 +61,7 @@ public class MethodLockAspect {
 
       return rtn;
 
-    } catch (EEAException e) {
+    } catch (Exception e) {
       if (lockMethod.isController()) {
         throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
       }
@@ -71,10 +74,16 @@ public class MethodLockAspect {
    *
    * @param joinPoint the join point
    * @return the lock criteria
+   * @throws SecurityException
    * @throws NoSuchMethodException the no such method exception
+   * @throws IntrospectionException
+   * @throws InvocationTargetException
+   * @throws IllegalAccessException the illegal access exception
+   * @throws NoSuchFieldException the no such field exception
    */
   private Map<String, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
-      throws NoSuchMethodException {
+      throws NoSuchMethodException, IntrospectionException, IllegalAccessException,
+      InvocationTargetException {
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Class<?>[] parameterTypes = signature.getMethod().getParameterTypes();
@@ -89,12 +98,40 @@ public class MethodLockAspect {
       if (annotations[i].length > 0) {
         for (Annotation annotation : annotations[i]) {
           if (annotation.annotationType().equals(LockCriteria.class)) {
-            criteria.put(((LockCriteria) annotation).name(), arguments[i]);
+            criteria.put(((LockCriteria) annotation).name(),
+                retrieveValue(((LockCriteria) annotation).path(), arguments[i]));
           }
         }
       }
     }
 
     return criteria;
+  }
+
+  /**
+   * Retrieve value.
+   *
+   * @param path the path
+   * @param object the object
+   * @return the object
+   * @throws IllegalAccessException the illegal access exception
+   * @throws NoSuchFieldException the no such field exception
+   * @throws IntrospectionException
+   * @throws InvocationTargetException
+   * @throws IllegalArgumentException
+   */
+  private Object retrieveValue(String path, Object object)
+      throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+    Object rtn = object;
+    for (String variable : path.split("\\.")) {
+      for (PropertyDescriptor pd : Introspector.getBeanInfo(object.getClass())
+          .getPropertyDescriptors()) {
+        if (pd.getName().equals(variable)) {
+          rtn = pd.getReadMethod().invoke(rtn);
+          break;
+        }
+      }
+    }
+    return rtn;
   }
 }
