@@ -85,6 +85,7 @@ export const FieldDesigner = ({
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
   const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
+  const [isQCManagerVisible, setIsQCManagerVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
@@ -574,6 +575,17 @@ export const FieldDesigner = ({
     }
   };
 
+  const qcDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        className="p-button-secondary-transparent"
+        icon="cancel"
+        label={resources.messages['close']}
+        onClick={() => setIsQCManagerVisible(false)}
+      />
+    </div>
+  );
+
   return (
     <React.Fragment>
       {/* <style children={inEffect} /> */}
@@ -719,6 +731,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
+            onClick={() => setIsQCManagerVisible(true)}
             style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['editFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
@@ -754,6 +767,21 @@ export const FieldDesigner = ({
           visible={isCodelistManagerVisible}
           zIndex={3003}>
           {<CodelistsManager isInDesign={true} onCodelistSelected={onCodelistSelected} />}
+        </Dialog>
+      ) : null}
+      {isQCManagerVisible ? (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={qcDialogFooter}
+          header={resources.messages['qcManager']}
+          modal={true}
+          onHide={() => setIsQCManagerVisible(false)}
+          style={{ width: '80%' }}
+          visible={isQCManagerVisible}
+          zIndex={3003}>
+          {}
         </Dialog>
       ) : null}
     </React.Fragment>

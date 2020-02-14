@@ -235,6 +235,7 @@ export const ThemeProvider = ({ children }) => {
         'sidebar-scrollbar-thumb-bg-hover': 'var(--gray-75)',
         'sidebar-close-icon-color': 'var(--gray-50)',
         'sidebar-close-icon-color-hover': 'var(--gray-110)',
+        'sidebar-title-color': 'var(--c-corporate-blue)',
         'form-field-bg': 'var(--white)',
         'form-field-color': 'var(--black)'
       },
@@ -456,6 +457,7 @@ export const ThemeProvider = ({ children }) => {
         'sidebar-scrollbar-thumb-bg-hover': 'var(--gray-75)',
         'sidebar-close-icon-color': 'var(--gray-50)',
         'sidebar-close-icon-color-hover': 'var(--gray-110)',
+        'sidebar-title-color': 'var(--yellow-120)',
         'form-field-bg': 'var(--c-dark-blue)',
         'form-field-color': 'var(--white)'
       }

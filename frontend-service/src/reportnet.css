@@ -367,6 +367,7 @@
   --sidebar-scrollbar-thumb-bg-hover: var(--gray-75);
   --sidebar-close-icon-color: var(--gray-50);
   --sidebar-close-icon-color-hover: var(--gray-110);
+  --sidebar-title-color: var(--c-corporate-blue);
 
   /* Form field */
   --form-field-bg: var(--white);

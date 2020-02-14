@@ -262,6 +262,7 @@
 		"percentage": "Percentage",
 		"preview": "View data",
 		"properties": "Properties",
+		"qcManager": "QC Manager",
 		"recordBlockers": "One or more fields have blockers",
 		"recordErrors": "One or more fields have errors",
 		"recordInfos": "One or more fields have infos",
