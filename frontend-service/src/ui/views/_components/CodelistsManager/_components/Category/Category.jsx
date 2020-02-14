@@ -39,6 +39,7 @@ const Category = ({
   onCodelistError,
   onCodelistSelected,
   onLoadCategories,
+  onRefreshCategory,
   // onLoadCategory,
   onToggleIncorrect,
   toggleExpandAll,
@@ -59,10 +60,7 @@ const Category = ({
       name: '',
       version: '',
       status: !isInDesign
-        ? [
-            { statusType: 'Design', value: 'design' },
-            { statusType: 'Ready', value: 'ready' }
-          ]
+        ? [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }]
         : [{ statusType: 'Ready', value: 'ready' }],
       description: ''
     },
@@ -87,8 +85,27 @@ const Category = ({
   useEffect(() => {
     if (!isIncorrect) {
       onLoadCodelists();
+      // onRefreshCategory(category);
     }
   }, [category.codelists]);
+
+  // useEffect(() => {
+  //   onRefreshCategory(category);
+  // }, []);
+
+  useEffect(() => {
+    if (!isUndefined(isEditionModeOn)) {
+      if (isEditionModeOn) {
+        changeFilterValues(
+          'status',
+          [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+          category.codelists
+        );
+      } else {
+        changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+      }
+    }
+  }, [isEditionModeOn]);
 
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
@@ -160,6 +177,7 @@ const Category = ({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: updatedCodelists }
     });
+    onRefreshCategory(category, updatedCodelists);
     changeFilterValues('status', categoryState.filter.status, updatedCodelists);
   };
 
@@ -210,7 +228,7 @@ const Category = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button disabled={isIncorrect} icon="save" label={resources.messages['save']} onClick={onSaveCodelist} />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary-transparent"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {
@@ -399,7 +417,7 @@ const Category = ({
   const renderFilterOrder = property => {
     return (
       <Button
-        className={`p-button-secondary ${styles.orderIcon}`}
+        className={`p-button-secondary-transparent ${styles.orderIcon}`}
         icon={categoryState.order[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
         onClick={() => onOrderCodelists(categoryState.order[property], property)}
         style={{ fontSize: '12pt' }}

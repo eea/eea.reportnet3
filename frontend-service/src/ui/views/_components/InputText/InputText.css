@@ -1,0 +1,44 @@
+body .p-inputtext {
+  font-size: 14px;
+  color: var(--inputtext-color);
+  background: var(--inputtext-bg);
+  padding: 0.429em;
+  border: var(--inputtext-border);
+  -moz-transition: border-color 0.2s, box-shadow 0.2s;
+  -o-transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  font-family: Roboto, 'Font Awesome\ 5 Pro', sans-serif;
+}
+
+body .p-inputtext::-webkit-input-placeholder {
+  font-style: italic;
+}
+body .p-inputtext::-moz-placeholder {
+  font-style: italic;
+}
+body .p-inputtext:-ms-input-placeholder {
+  font-style: italic;
+}
+body .p-inputtext:-moz-placeholder {
+  font-style: italic;
+}
+
+body .p-inputtext:enabled:hover {
+  border-color: var(--inputtext-border-color-hover);
+}
+body .p-inputtext:enabled:focus {
+  outline: 0 none;
+  outline-offset: 0;
+
+  -webkit-box-shadow: var(--inputtext-box-shadow-focus);
+  -moz-box-shadow: var(--inputtext-box-shadow-focus);
+  box-shadow: var(--inputtext-box-shadow-focus);
+  border-color: var(--inputtext-border-color-focus);
+}

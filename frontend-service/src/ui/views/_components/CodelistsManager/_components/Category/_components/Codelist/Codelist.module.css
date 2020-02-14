@@ -27,6 +27,7 @@
   align-items: center;
   /* background-color: var(--gray-5); */
   display: flex;
+  color: var(--codelist-expandable-treeview-color);
 }
 
 .footerWrap {
