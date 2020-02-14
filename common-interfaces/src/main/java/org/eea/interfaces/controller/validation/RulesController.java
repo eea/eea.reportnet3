@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +40,30 @@ public interface RulesController {
    */
   @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
+
+
+  /**
+   * Delete rule by id.
+   *
+   * @param idDataSetSchema the id data set schema
+   * @param ruleId the rule id
+   */
+  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteRuleById(
+      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @PathVariable(name = "ruleId", required = true) String ruleId);
+
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDataSetSchema the id data set schema
+   * @param referenceId the reference id
+   */
+  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteRuleByReferenceId(
+      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @PathVariable(name = "referenceId", required = true) String referenceId);
 
 }

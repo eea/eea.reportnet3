@@ -12,7 +12,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *
  * @author Mario Severa
  */
-public interface RulesRepository extends MongoRepository<RulesSchema, ObjectId> {
+public interface RulesRepository
+    extends MongoRepository<RulesSchema, ObjectId>, ExtendedRulesRepository {
 
 
   /**

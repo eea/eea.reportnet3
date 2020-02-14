@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,9 +47,7 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping(value = "/createEmptyRulesSchema")
   public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema,
       @RequestParam("idRulesSchema") String idRulesSchema) {
-
     rulesService.createEmptyRulesScehma(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
-
   }
 
   /**
@@ -63,9 +62,42 @@ public class RulesControllerImpl implements RulesController {
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
     if (StringUtils.isBlank(idDatasetSchema)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     } else {
       return rulesService.getRulesSchemaByDatasetId(idDatasetSchema);
+    }
+  }
+
+  @Override
+  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteRuleById(
+      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @PathVariable(name = "ruleId", required = true) String ruleId) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(ruleId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RULEID_INCORRECT);
+    }
+
+  }
+
+  @Override
+  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteRuleByReferenceId(
+      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @PathVariable(name = "referenceId", required = true) String referenceId) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+
+    if (StringUtils.isBlank(referenceId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REFERENCEID_INCORRECT);
     }
   }
 }

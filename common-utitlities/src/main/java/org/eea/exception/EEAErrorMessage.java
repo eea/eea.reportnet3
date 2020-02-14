@@ -38,6 +38,16 @@ public final class EEAErrorMessage {
   /** The Constant IDTABLESCHEMA_INCORRECT. */
   public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
 
+  /** The Constant IDDATASETSCHEMA_INCORRECT. */
+  public static final String IDDATASETSCHEMA_INCORRECT = "DatasetSchemaId incorrect";
+
+
+  /** The Constant RULEID_INCORRECT. */
+  public static final String RULEID_INCORRECT = "ruleId incorrect";
+
+  /** The Constant REFERENCEID_INCORRECT. */
+  public static final String REFERENCEID_INCORRECT = "referenceId incorrect";
+
   /** The Constant EXECUTION_ERROR. */
   public static final String EXECUTION_ERROR = "Runtime error";
 
