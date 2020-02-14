@@ -28,6 +28,7 @@ export const BigButtonList = ({
   dataflowData,
   dataflowId,
   dataflowStatus,
+  dataProviderId = 777,
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
@@ -154,7 +155,7 @@ export const BigButtonList = ({
   const onUpdatedButtonList = () => {
     const receiptButton = (
       <PDFDownloadLink
-        document={<ConfirmationReceipt dataflowData={dataflowData} />}
+        document={<ConfirmationReceipt dataflowId={dataflowId} dataProviderId={dataProviderId} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ blob, url, loading, error }) => {
           const { datasets } = dataflowData;

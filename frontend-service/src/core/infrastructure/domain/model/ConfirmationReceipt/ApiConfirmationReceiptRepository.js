@@ -1,4 +1,4 @@
-import { apiConfirmationReceipt } from 'core/domain/model/ConfirmationReceipt/ApiConfirmationReceipt';
+import { apiConfirmationReceipt } from 'core/infrastructure/api/domain/model/ConfirmationReceipt/ApiConfirmationReceipt';
 import { ConfirmationReceipt } from 'core/domain/model/ConfirmationReceipt/ConfirmationReceipt';
 
 const get = async (dataflowId, dataProviderId) => {
