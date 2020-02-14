@@ -4,12 +4,13 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiConfirmationReceipt = {
-  get: async dataflowId => {
+  get: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.get({
       url: getUrl(ConfirmationReceiptConfig.get, {
-        dataflowId
+        dataflowId,
+        dataProviderId
       }),
       queryString: {},
       headers: {

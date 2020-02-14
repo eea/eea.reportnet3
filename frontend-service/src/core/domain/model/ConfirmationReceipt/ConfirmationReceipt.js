@@ -1,9 +1,8 @@
 export class ConfirmationReceipt {
-  constructor(id, representative, dataflowName, datasets, isLastVersionDownloaded) {
+  constructor(id, representative, dataflowName, datasets) {
     this.id = id;
     this.representative = representative;
     this.dataflowName = dataflowName;
     this.datasets = datasets;
-    this.isLastVersionDownloaded = isLastVersionDownloaded;
   }
 }

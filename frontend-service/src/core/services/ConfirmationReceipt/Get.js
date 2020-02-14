@@ -1,2 +1,2 @@
-export const Get = ({ confirmationReceiptRepository }) => async dataflowId =>
-  confirmationReceiptRepository.get(dataflowId);
+export const Get = ({ confirmationReceiptRepository }) => async (dataflowId, dataProviderId) =>
+  confirmationReceiptRepository.get(dataflowId, dataProviderId);

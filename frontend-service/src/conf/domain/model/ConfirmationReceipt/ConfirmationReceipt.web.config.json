@@ -1,3 +1,4 @@
-{
-    "get": "/confirmationreceipt/dataflow/{:dataflowId}" 
+{   
+    "get": "/snapshot/dataflow/{:dataflowId}/releaseStatus/{:dataProviderId}" 
 }
+
