@@ -35,7 +35,7 @@ end template
 //////////////////////////////////////////DEFAULT VALIDATIONS////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
-function boolean isCodeList( String value ,String codeList){
+function boolean isCodeList( String value ,Long codeList){
 	if(!isBlank(value)){
 		value = "";
 	}
@@ -46,6 +46,7 @@ function boolean isCodeList( String value ,String codeList){
 function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
 } 
+
 
 //////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
 function boolean isBoolean(String value){
@@ -89,7 +90,7 @@ function boolean isCordenateLat( String value ){
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
-   if(isValid(value,'double')){
+   if(isNumber(value)){
     	return Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90;
    }
    return false;
@@ -103,10 +104,11 @@ function boolean isCordenateLong( String value ){
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
-   if(isValid(value,'double')){
+   if(isNumber(value)){
     	return Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180;
    }
    return false;
  }
 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
+
