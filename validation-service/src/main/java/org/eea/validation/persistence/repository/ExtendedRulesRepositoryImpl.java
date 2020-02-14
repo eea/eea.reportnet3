@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
@@ -18,27 +19,35 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Autowired
   private MongoOperations mongoOperations;
 
+
   /**
    * Delete rule by id.
    *
+   * @param idDatasetSchema the id dataset schema
    * @param ruleId the rule id
    */
   @Override
-  public void deleteRuleById(String ruleId) {
+  public void deleteRuleById(String idDatasetSchema, String ruleId) {
     Update update = new Update().pull("rules", new BasicDBObject("_id", new ObjectId(ruleId)));
-    mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
+    Query query = new Query();
+    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
+    mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
+
 
 
   /**
    * Delete rule by reference id.
    *
+   * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id
    */
   @Override
-  public void deleteRuleByReferenceId(String referenceId) {
+  public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId) {
     Update update =
         new Update().pull("rules", new BasicDBObject("referenceId", new ObjectId(referenceId)));
+    Query query = new Query();
+    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
   }
 
