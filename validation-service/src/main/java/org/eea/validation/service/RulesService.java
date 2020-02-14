@@ -1,6 +1,7 @@
 package org.eea.validation.service;
 
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 
 /**
@@ -24,4 +25,23 @@ public interface RulesService {
    */
   RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema);
 
+
+
+  /**
+   * Delete rule by id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param ruleId the rule id
+   * @throws EEAException
+   */
+  void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException;
+
+
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   */
+  void deleteRuleByReferenceId(String idDatasetSchema, String referenceId) throws EEAException;
 }

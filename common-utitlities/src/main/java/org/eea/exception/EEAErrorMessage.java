@@ -41,7 +41,6 @@ public final class EEAErrorMessage {
   /** The Constant IDDATASETSCHEMA_INCORRECT. */
   public static final String IDDATASETSCHEMA_INCORRECT = "DatasetSchemaId incorrect";
 
-
   /** The Constant RULEID_INCORRECT. */
   public static final String RULEID_INCORRECT = "ruleId incorrect";
 
@@ -152,6 +151,9 @@ public final class EEAErrorMessage {
 
   /** The Constant CODELIST_VERSION_DUPLICATED. */
   public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
+
+  /** The Constant CODELIST_VERSION_DUPLICATED. */
+  public static final String ERROR_DELETING_RULE = "Error deleting rules";
 
   /**
    * Instantiates a new EEA error message.

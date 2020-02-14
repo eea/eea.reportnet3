@@ -3,6 +3,7 @@ package org.eea.validation.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.service.RulesService;
@@ -31,6 +32,7 @@ public class RulesControllerImpl implements RulesController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  private static final Logger LOG = LoggerFactory.getLogger(RulesControllerImpl.class);
   /** The rules service. */
   @Autowired
   private RulesService rulesService;
@@ -97,7 +99,16 @@ public class RulesControllerImpl implements RulesController {
           idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RULEID_INCORRECT);
     }
-
+    try {
+      rulesService.deleteRuleById(idDatasetSchema, ruleId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the rule  with id {} in datasetSchema {}", ruleId,
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
+          e);
+    }
+    LOG.info("Delete the rule with id {} in datasetSchema {} successfully", ruleId,
+        idDatasetSchema);
   }
 
   /**
@@ -127,6 +138,17 @@ public class RulesControllerImpl implements RulesController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.REFERENCEID_INCORRECT);
     }
+    try {
+      rulesService.deleteRuleByReferenceId(idDatasetSchema, referenceId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the rules  with referenceId {} in datasetSchema {}",
+          referenceId, idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
+          e);
+    }
+
+    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
+        idDatasetSchema);
   }
 
 }
