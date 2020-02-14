@@ -77,7 +77,7 @@ const Settings = withRouter(({ history, match }) => {
         label: 'configUserSettngs',
         onClick: e => {
           e.preventDefault();
-          history.push(getUrl(routes['CODELISTS']));
+         
         },
         title: 'configUserSettngs'
       }
