@@ -7,7 +7,6 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.repository.ExtendedRulesRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -30,9 +29,6 @@ public class RulesServiceImpl implements RulesService {
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
-
-  @Autowired
-  private ExtendedRulesRepository extendedRulesRepository;
 
   /**
    * The Constant LOG_ERROR.
@@ -79,8 +75,8 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(schemaId);
     System.out.println("este es el: " + ruleSchema);
     if (null != ruleSchema) {
-      System.out.println("No es null y voy a borarlo");
-      extendedRulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+      System.out.println("No es null y voy a borarlo:" + ruleSchema.getRulesSchemaId());
+      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
     }
   }
 
@@ -93,13 +89,20 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException {
-    // rulesRepository.deleteRuleById(ruleId);
+    rulesRepository.deleteRuleById(idDatasetSchema, ruleId);
   }
 
+  /**
+   * Delete rule by reference id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId)
       throws EEAException {
-    // rulesRepository.deleteRuleByReferenceId(referenceId);
+    rulesRepository.deleteRuleByReferenceId(idDatasetSchema, referenceId);
 
   }
 }
