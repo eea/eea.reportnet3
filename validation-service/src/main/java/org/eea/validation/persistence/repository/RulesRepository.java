@@ -15,7 +15,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface RulesRepository
     extends MongoRepository<RulesSchema, ObjectId>, ExtendedRulesRepository {
 
-
   /**
    * Find by id data set schema.
    *

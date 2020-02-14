@@ -42,8 +42,17 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema) {
-    return rulesSchemaMapper
-        .entityToClass(rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema)));
+    return rulesSchemaMapper.entityToClass((RulesSchema) rulesRepository
+        .getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), false).get("rulesSchema "));
+  }
+
+
+  @Override
+  public RulesSchemaVO getActiveRulesSchemaByDatasetId(String idDatasetSchema) {
+    RulesSchema rulesSchema = (RulesSchema) rulesRepository
+        .getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), true).get("rulesSchema ");
+    return rulesSchemaMapper.entityToClass(rulesSchema);
+
   }
 
   /**

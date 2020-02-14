@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.slf4j.Logger;
@@ -56,6 +57,20 @@ public class ExtendedRulesRepositorysitoryImpl implements ExtendedRulesRepositor
         new Update().pull("rules", new BasicDBObject("_id", new ObjectId(idRuleSchema)));
     mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
 
+  }
+
+  @Override
+  public Document getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable) {
+    Document document;
+    if (Boolean.TRUE.equals(enable)) {
+      document = mongoDatabase.getCollection("RulesSchema")
+          .find(new Document("_id", idDatasetSchema).append("rules.enable", true)).first();
+    } else {
+      document = mongoDatabase.getCollection("RulesSchema")
+          .find(new Document("_id", idDatasetSchema)).first();
+    }
+
+    return document;
   }
 
 }
