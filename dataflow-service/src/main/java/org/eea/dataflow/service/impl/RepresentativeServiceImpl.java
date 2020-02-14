@@ -78,6 +78,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     Dataflow dataflow = new Dataflow();
     dataflow.setId(dataflowId);
     dataflowRepresentative.setDataflow(dataflow);
+    dataflowRepresentative.setReceiptDownloaded(false);
+    dataflowRepresentative.setReceiptOutdated(false);
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(representativeVO.getDataProviderId());
     dataflowRepresentative.setDataProvider(dataProvider);
@@ -125,7 +127,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             : representative.getDataProvider().getId(),
         representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
             : representative.getUserMail(),
-        representative.getDataflow().getId())) {
+        representative.getDataflow().getId())
+        && !changesInReceiptStatus(representative, representativeVO)) {
       LOG_ERROR.error("Duplicated representative relationship");
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     } else {
@@ -137,6 +140,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         DataProvider dataProvider = new DataProvider();
         dataProvider.setId(representativeVO.getDataProviderId());
         representative.setDataProvider(dataProvider);
+      }
+      if (representativeVO.getReceiptDownloaded() != null) {
+        representative.setReceiptDownloaded(representativeVO.getReceiptDownloaded());
+      }
+      if (representativeVO.getReceiptOutdated() != null) {
+        representative.setReceiptOutdated(representativeVO.getReceiptOutdated());
       }
       // save changes
       return representativeRepository.save(representative).getId();
@@ -222,6 +231,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     return dataProviderMapper.entityToClass(dataprovider);
 
+  }
+
+
+  private boolean changesInReceiptStatus(Representative representative,
+      RepresentativeVO representativeVO) {
+
+    Boolean changes = true;
+    if (representative.getReceiptDownloaded() == representativeVO.getReceiptDownloaded()
+        && representative.getReceiptOutdated() == representativeVO.getReceiptOutdated()) {
+      changes = false;
+    }
+    return changes;
   }
 
 }

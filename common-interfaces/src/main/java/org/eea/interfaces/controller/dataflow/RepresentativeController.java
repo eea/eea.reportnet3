@@ -67,12 +67,14 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId);
 
+
   /**
    * Update representative.
    *
    * @param dataflowRepresentativeVO the dataflow representative VO
+   * @return the response entity
    */
-  @PutMapping(value = "/update")
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**

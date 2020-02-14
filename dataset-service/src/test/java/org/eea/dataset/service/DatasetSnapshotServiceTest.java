@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -28,11 +29,15 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -129,6 +134,11 @@ public class DatasetSnapshotServiceTest {
   /** The data collection repository. */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
+
+
+  /** The dataflow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Inits the mocks.
@@ -418,6 +428,34 @@ public class DatasetSnapshotServiceTest {
     when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
     datasetSnapshotService.deleteAllSnapshots(1L);
     Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
+  }
+
+
+  /**
+   * Test get released status.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetReleasedStatus() throws EEAException {
+
+    DataFlowVO df = new DataFlowVO();
+    df.setId(1L);
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(1L);
+    reporting.setDataProviderId(1L);
+    reporting.setIsReleased(true);
+    df.setReportingDatasets(Arrays.asList(reporting));
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setId(1L);
+    representative.setDataProviderId(1L);
+
+    when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(df);
+    when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(representative));
+    datasetSnapshotService.getReleasedAndUpdatedStatus(1L, 1L);
+    Mockito.verify(representativeControllerZuul, times(1))
+        .findRepresentativesByIdDataFlow(Mockito.any());
   }
 
 

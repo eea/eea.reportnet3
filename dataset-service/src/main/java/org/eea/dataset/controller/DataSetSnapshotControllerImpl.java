@@ -7,6 +7,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -308,4 +309,32 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
   }
+
+
+  /**
+   * Gets the released and updated status.
+   *
+   * @param idDataflow the id dataflow
+   * @param idDataProvider the id data provider
+   * @return the released and updated status
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataflow/{idDataflow}/releaseStatus/{idDataProvider}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_PROVIDER')")
+  public ReleaseReceiptVO getReleasedAndUpdatedStatus(@PathVariable("idDataflow") Long idDataflow,
+      @PathVariable("idDataProvider") Long idDataProvider) {
+
+    ReleaseReceiptVO receipt = null;
+    try {
+      receipt = datasetSnapshotService.getReleasedAndUpdatedStatus(idDataflow, idDataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR);
+    }
+    return receipt;
+  }
+
 }

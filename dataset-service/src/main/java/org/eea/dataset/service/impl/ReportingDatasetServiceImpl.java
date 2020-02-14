@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
@@ -88,12 +89,23 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     if (datasetsVO != null && !datasetsVO.isEmpty()) {
       List<Long> collection =
           datasetsVO.stream().map(ReportingDatasetVO::getId).collect(Collectors.toList());
-      List<Long> result = snapshotRepository.findByReportingDatasetAndRelease(collection);
+      List<Snapshot> resultSnapshots =
+          snapshotRepository.findByReportingDatasetAndRelease(collection);
+      List<Long> result = resultSnapshots.stream().map(Snapshot::getReportingDataset)
+          .map(ReportingDataset::getId).collect(Collectors.toList());
       for (ReportingDatasetVO dataset : datasetsVO) {
-        if (result != null && dataset != null && dataset.getId() != null) {
+        if (result != null && !result.isEmpty() && dataset != null && dataset.getId() != null) {
+
           Boolean isReleased = result.contains(dataset.getId());
           dataset.setIsReleased(isReleased);
+          // set the date of the release
+          if (!resultSnapshots.stream().filter(s -> s.getRelease()).collect(Collectors.toList())
+              .isEmpty()) {
+            dataset.setDateReleased(resultSnapshots.stream().filter(s -> s.getRelease())
+                .collect(Collectors.toList()).get(0).getDateReleased());
+          }
         }
+
       }
     }
   }

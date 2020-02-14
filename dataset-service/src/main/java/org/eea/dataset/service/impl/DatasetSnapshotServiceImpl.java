@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
@@ -29,14 +30,18 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -150,6 +155,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The dataset snapshot controller. */
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
 
 
   /**
@@ -319,9 +329,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (metabase.getDataProviderId() != null) {
       providerId = metabase.getDataProviderId();
     }
+    final Long idDataProvider = providerId;
 
     // Get the provider
-    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
 
     // Get the dataCollection
     Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
@@ -340,6 +351,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         restoreSnapshot(idDataCollection, idSnapshot, false);
         // Check the snapshot released
         snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+
+        // Mark the receipt button as outdated because a new release has been done, so it would be
+        // necessary to generate a new receipt
+        Long idDataflow = datasetService.getDataFlowIdById(idDataset);
+        List<RepresentativeVO> representatives =
+            representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
+                .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
+        if (!representatives.isEmpty()) {
+          RepresentativeVO representative = representatives.get(0);
+          representative.setReceiptOutdated(true);
+          representativeControllerZuul.updateRepresentative(representative);
+        }
+
+
         LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
@@ -563,5 +588,47 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return partition;
   }
 
+
+  /**
+   * Gets the released and updated status.
+   *
+   * @param idDataflow the id dataflow
+   * @param idDataProvider the id data provider
+   * @return the released and updated status
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ReleaseReceiptVO getReleasedAndUpdatedStatus(Long idDataflow, Long idDataProvider)
+      throws EEAException {
+
+    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    DataFlowVO dataflow = dataflowControllerZuul.findById(idDataflow);
+    receipt.setIdDataflow(idDataflow);
+    receipt.setDataflowName(dataflow.getName());
+    receipt.setDatasets(dataflow.getReportingDatasets().stream()
+        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId() == idDataProvider)
+        .collect(Collectors.toList()));
+
+    if (!receipt.getDatasets().isEmpty()) {
+      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
+    }
+
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
+            .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
+
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+
+      receipt.setProviderEmail(representative.getProviderAccount());
+
+      // update provider. Button downloaded = true && outdated = false
+      representative.setReceiptDownloaded(true);
+      representative.setReceiptOutdated(false);
+      representativeControllerZuul.updateRepresentative(representative);
+    }
+
+    return receipt;
+  }
 
 }
