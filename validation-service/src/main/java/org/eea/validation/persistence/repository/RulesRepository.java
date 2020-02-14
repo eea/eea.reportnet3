@@ -6,12 +6,12 @@ package org.eea.validation.persistence.repository;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * The Interface SchemasRepository.
- *
- * @author Mario Severa
  */
+@Repository
 public interface RulesRepository
     extends MongoRepository<RulesSchema, ObjectId>, ExtendedRulesRepository {
 

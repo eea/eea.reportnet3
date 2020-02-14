@@ -24,11 +24,11 @@ public class RulesServiceImpl implements RulesService {
 
   /** The rules repository. */
   @Autowired
-  RulesRepository rulesRepository;
+  private RulesRepository rulesRepository;
 
   /** The rules schema mapper. */
   @Autowired
-  RulesSchemaMapper rulesSchemaMapper;
+  private RulesSchemaMapper rulesSchemaMapper;
   /**
    * The Constant LOG_ERROR.
    */
@@ -73,13 +73,13 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException {
-    rulesRepository.deleteRuleById(ruleId);
+    // rulesRepository.deleteRuleById(ruleId);
   }
 
   @Override
   public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId)
       throws EEAException {
-    rulesRepository.deleteRuleByReferenceId(referenceId);
+    // rulesRepository.deleteRuleByReferenceId(referenceId);
 
   }
 }
