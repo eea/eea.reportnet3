@@ -1,8 +1,8 @@
 export class ConfirmationReceipt {
-  constructor(id, representative, dataflowName, datasets) {
-    this.id = id;
-    this.representative = representative;
+  constructor({ dataflowId, representative, dataflowName, datasets }) {
+    this.dataflowId = dataflowId;
     this.dataflowName = dataflowName;
     this.datasets = datasets;
+    this.representative = representative;
   }
 }
