@@ -8,6 +8,7 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -46,6 +47,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
     isLoadingSnapshotListData,
@@ -225,6 +227,16 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
+              disabled={false}
+              icon={'validate'}
+              label={resources.messages['QCRules']}
+              onClick={() => setValidationListDialogVisible(true)}
+              ownButtonClasses={null}
+              iconClasses={null}
+            />
+
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
@@ -247,6 +259,25 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
         snapshotListData={snapshotListData}
       />
+      <Dialog
+        className={styles.paginatorValidationViewer}
+        dismissableMask={true}
+        header={resources.messages['titleValidations']}
+        maximizable
+        onHide={() => setValidationListDialogVisible(false)}
+        style={{ width: '80%' }}
+        visible={validationListDialogVisible}>
+        {/* <ValidationViewer
+          datasetId={datasetId}
+          datasetName={datasetName}
+          hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
+          onSelectValidation={onSelectValidation}
+          tableSchemaNames={tableSchemaNames}
+          visible={validationsVisible}
+        /> */}
+        <TabsDesigner editable={true} />
+      </Dialog>
     </SnapshotContext.Provider>
   );
 });
