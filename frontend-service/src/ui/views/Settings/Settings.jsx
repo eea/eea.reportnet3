@@ -77,7 +77,7 @@ const Settings = withRouter(({ history, match }) => {
         // href: getUrl(routes['CODELISTS']),
         icon: 'configs',
         label: 'configUserSettngs',
-        onClick: e => {
+        onClick: () => {
           showDispatch({
             type: 'SHOWUSERCONFIGURATION',
             payload: {

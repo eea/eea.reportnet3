@@ -58,6 +58,7 @@ const LeftSideBar = withRouter(({history}) => {
   const renderSectionButtons = () => {
     return leftSideBarContext.models.map((model, i) => <LeftSideBarButton key={i} {...model} />);
   };
+  
   const renderLogout = () => {
     const logoutProps = {
       href: '#',

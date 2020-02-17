@@ -16,16 +16,7 @@ export const Config = (props)=>{
         <div>
         <h2>Confirmation Logout</h2>
             
-      <InputSwitch 
-      checked={themeContext.currentTheme === 'dark'}
-      onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
-      sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-      style={{ marginRight: '1rem' }}
-      tooltip={
-        themeContext.currentTheme === 'light'
-          ? resources.messages['toggleDarkTheme']
-          : resources.messages['toggleLightTheme']
-      }/>
+     
       </div>
 
       <h2>Number of lines per page</h2>

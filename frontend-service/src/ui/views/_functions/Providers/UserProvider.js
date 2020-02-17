@@ -21,6 +21,11 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         ...payload.user
       };
+    case 'TOGGLE_LOGOUT_CONFIRM': 
+      return {
+        ...state,
+        showLogoutConfirmation: !state.showLogoutConfirmation
+      }
 
     default:
       return state;
@@ -65,6 +70,12 @@ export const UserProvider = ({ children }) => {
               user
             }
           });
+        },
+        onToggleLogoutConfirm: () => {
+          dispatch({
+            type: 'TOGGLE_LOGOUT_CONFIRM',
+            payload:{}
+          })
         }
       }}>
       {children}

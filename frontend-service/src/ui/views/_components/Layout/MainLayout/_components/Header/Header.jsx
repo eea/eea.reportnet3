@@ -1,11 +1,13 @@
-import React, { useContext } from 'react';
-import { withRouter,Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { withRouter, Link } from 'react-router-dom';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
+////////////////////////////////////////////
 
+//////////////////
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
@@ -18,15 +20,16 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
-import {ConfirmDialog} from 'ui/views/_components/ConfirmDialog'
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { Settings } from 'ui/views/Settings/Settings';
-
 const Header = withRouter(({ history }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
+  
+  const [confirmvisible,setConfirmVisible]=useState(false)
 
   const loadTitle = () => (
     <a
@@ -56,10 +59,37 @@ const Header = withRouter(({ history }) => {
         <div className={styles.localhostAlert}>
           <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
         </div>
+        
       );
   };
+  ////////////////////////////////////////////
+
+  const confgDiag = () => {
+    return (
+      <div>
+        
+      </div>
+    );
+  };
+
+  ///////////////////////////////////////////////////
+   const userLogout = async () =>{  userContext.socket.disconnect(() => {});
+   try {
+     await UserService.logout();
+   } catch (error) {
+     notificationContext.add({
+       type: 'USER_LOGOUT_ERROR'
+     });
+   } finally {
+     
+     userContext.onLogout();
+   }}
+  
   const loadUser = () => (
+    
     <>
+    {console.log('confirmvisible:', confirmvisible )
+    }
       <div className={styles.userWrapper}>
         <InputSwitch
           checked={themeContext.currentTheme === 'dark'}
@@ -76,13 +106,14 @@ const Header = withRouter(({ history }) => {
         {localhostEnvironmentAlert()}
 
         <a
-          href={getUrl(routes.SETTINGS)}      
+          href={getUrl(routes.SETTINGS)}
           title="User profile details"
           onClick={async e => {
             e.preventDefault();
             history.push(getUrl(routes.SETTINGS));
           }}>
-            <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
+          <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '}
+          <span>{userContext.preferredUsername}</span>
         </a>
       </div>
 
@@ -90,19 +121,7 @@ const Header = withRouter(({ history }) => {
         <FontAwesomeIcon
           onClick={async e => {
             e.preventDefault();
-            
-            userContext.socket.disconnect(() => {});
-            try {
-              await UserService.logout();
-            } catch (error) {
-              notificationContext.add({
-                type: 'USER_LOGOUT_ERROR'
-              });
-            } finally {
-              
-              
-              userContext.onLogout();
-            }
+            userContext.showLogoutConfirmation?setConfirmVisible(true):userLogout();
           }}
           icon={AwesomeIcons('logout')}
         />
@@ -114,6 +133,15 @@ const Header = withRouter(({ history }) => {
       {loadTitle()}
       <BreadCrumb />
       {loadUser()}
+      {userContext.showLogoutConfirmation && <ConfirmDialog
+          onConfirm={()=>{userLogout()}}
+          onHide={() => setConfirmVisible(false)}
+          visible={confirmvisible}
+          header={resources.messages['deleteRow']}
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
+          {resources.messages['confirmDeleteRow']}
+        </ConfirmDialog>}
     </div>
   );
 });
