@@ -75,7 +75,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of snapshots. ", e.getMessage(), e);
     }
     return snapshots;
 
@@ -125,9 +125,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
 
@@ -159,9 +159,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -216,7 +216,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSchemaSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of schema snapshots. ", e.getMessage(), e);
     }
     return snapshots;
   }
@@ -273,9 +273,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a schema snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -304,9 +304,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a schema snapshot", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
 
@@ -330,9 +330,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       receipt = datasetSnapshotService.getReleasedAndUpdatedStatus(idDataflow, idDataProvider);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error ", e.getMessage());
+      LOG_ERROR.error("Error getting the data to make the receipt of the release. ", e.getMessage(),
+          e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR);
+          EEAErrorMessage.EXECUTION_ERROR, e);
     }
     return receipt;
   }
