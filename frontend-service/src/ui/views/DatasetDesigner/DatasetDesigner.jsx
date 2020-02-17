@@ -8,8 +8,10 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { QCManagement } from './_components/QCManagement';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -46,6 +48,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [qcDialogVisibility, setQcDialogVisibility] = useState(true);
 
   const {
     isLoadingSnapshotListData,
@@ -166,6 +169,9 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     return (
       <MainLayout>
         <div className="rep-container">{children}</div>
+        <Dialog header="QC Creation field" visible={qcDialogVisibility}>
+          <QCManagement />
+        </Dialog>
       </MainLayout>
     );
   };
