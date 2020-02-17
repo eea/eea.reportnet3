@@ -137,8 +137,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Override
   public boolean isDesignDataflow(Long dataflowId) {
-    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    return (dataflowVO != null && TypeStatusEnum.DESIGN.equals(dataflowVO.getStatus()));
+    try {
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      return (dataflowVO != null && TypeStatusEnum.DESIGN.equals(dataflowVO.getStatus()));
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in isDesignDataflow", e);
+      return false;
+    }
   }
 
   /**
@@ -170,12 +175,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // Release the notification
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DATA_COLLECTION_CREATION_FAILED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataflowId).error("Error creating schemas").build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ",
-          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
+      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_FAILED_EVENT, e);
     }
 
     int size = datasetIds.size();
@@ -273,12 +277,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // Release the notification
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DATA_COLLECTION_CREATION_FAILED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataflowId).error("Error creating datasets on the metabase").build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ",
-          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
+      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_FAILED_EVENT, e);
     }
 
     connection.rollback();
@@ -341,6 +344,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds)
       throws EEAException {
+
+    if (datasetIdsEmails.isEmpty() || dataCollectionIds.isEmpty()) {
+      throw new EEAException("No design datasets in the dataflow");
+    }
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> providerAssignments = new ArrayList<>();

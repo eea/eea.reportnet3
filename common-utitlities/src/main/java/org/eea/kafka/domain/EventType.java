@@ -233,13 +233,12 @@ public enum EventType {
   /** The command new design field propagation. */
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION("COMMAND_TOPIC", "new_field_propagation", false),
 
-  /** The data collection creation completed event. */
-  DATA_COLLECTION_CREATION_COMPLETED_EVENT("DATA_COLLECTION_CREATION_COMPLETED_EVENT",
-      "data_collection_creation_completed_event", true),
+  /** The add datacollection completed event. */
+  ADD_DATACOLLECTION_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_completed_event",
+      true),
 
-  /** The data collection creation failed event. */
-  DATA_COLLECTION_CREATION_FAILED_EVENT("DATA_COLLECTION_CREATION_FAILED_EVENT",
-      "data_collection_creation_failed_event", true);
+  /** The add datacollection failed event. */
+  ADD_DATACOLLECTION_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_failed_event", true);
 
   /**
    * The topic.

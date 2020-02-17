@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataCollectionCreationCompletedEvent implements NotificableEventHandler {
+public class AddDatacollectionCompletedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -24,7 +24,7 @@ public class DataCollectionCreationCompletedEvent implements NotificableEventHan
    */
   @Override
   public EventType getEventType() {
-    return EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT;
+    return EventType.ADD_DATACOLLECTION_COMPLETED_EVENT;
   }
 
   /**

@@ -13,10 +13,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class DataCollectionCreationFailedEventTest {
+public class AddDatacollectionCompletedEventTest {
 
   @InjectMocks
-  private DataCollectionCreationFailedEvent dataCollectionCreationFailedEvent;
+  private AddDatacollectionCompletedEvent addDatacollectionCompletedEvent;
 
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
@@ -31,23 +31,22 @@ public class DataCollectionCreationFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.DATA_COLLECTION_CREATION_FAILED_EVENT,
-        dataCollectionCreationFailedEvent.getEventType());
+    Assert.assertEquals(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+        addDatacollectionCompletedEvent.getEventType());
   }
 
   @Test
   public void getMapTest1() throws EEAException {
-    Assert.assertEquals(4, dataCollectionCreationFailedEvent.getMap(NotificationVO.builder()
-        .user("user").dataflowId(1L).dataflowName("dataflowName").error("error").build()).size());
+    Assert.assertEquals(3, addDatacollectionCompletedEvent.getMap(
+        NotificationVO.builder().user("user").dataflowId(1L).dataflowName("dataflowName").build())
+        .size());
   }
 
   @Test
   public void getMapTest2() throws EEAException {
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(4,
-        dataCollectionCreationFailedEvent
-            .getMap(NotificationVO.builder().user("user").dataflowId(1L).error("error").build())
-            .size());
+    Assert.assertEquals(3, addDatacollectionCompletedEvent
+        .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }

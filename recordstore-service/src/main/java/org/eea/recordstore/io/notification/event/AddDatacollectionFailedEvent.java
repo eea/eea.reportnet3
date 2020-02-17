@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * The Class DataCollectionCreationFailedEvent.
  */
 @Component
-public class DataCollectionCreationFailedEvent implements NotificableEventHandler {
+public class AddDatacollectionFailedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -27,7 +27,7 @@ public class DataCollectionCreationFailedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.DATA_COLLECTION_CREATION_FAILED_EVENT;
+    return EventType.ADD_DATACOLLECTION_FAILED_EVENT;
   }
 
   /**

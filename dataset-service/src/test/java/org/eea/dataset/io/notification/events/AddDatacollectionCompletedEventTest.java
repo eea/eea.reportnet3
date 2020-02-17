@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class DataCollectionCreationCompletedEventTest {
+public class AddDatacollectionCompletedEventTest {
 
   @InjectMocks
-  private DataCollectionCreationCompletedEvent dataCollectionCreationCompletedEvent;
+  private AddDatacollectionCompletedEvent addDatacollectionCompletedEvent;
 
   @Mock
   private DatasetService datasetService;
@@ -43,13 +43,13 @@ public class DataCollectionCreationCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT,
-        dataCollectionCreationCompletedEvent.getEventType());
+    Assert.assertEquals(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+        addDatacollectionCompletedEvent.getEventType());
   }
 
   @Test
   public void getMapTest1() throws EEAException {
-    Assert.assertEquals(3, dataCollectionCreationCompletedEvent.getMap(
+    Assert.assertEquals(3, addDatacollectionCompletedEvent.getMap(
         NotificationVO.builder().user("user").dataflowId(1L).dataflowName("dataflowName").build())
         .size());
   }
@@ -57,7 +57,7 @@ public class DataCollectionCreationCompletedEventTest {
   @Test
   public void getMapTest2() throws EEAException {
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
-    Assert.assertEquals(3, dataCollectionCreationCompletedEvent
+    Assert.assertEquals(3, addDatacollectionCompletedEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }

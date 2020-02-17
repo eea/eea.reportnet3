@@ -10,8 +10,11 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class DataCollectionCreationFailedEvent.
+ */
 @Component
-public class DataCollectionCreationCompletedEvent implements NotificableEventHandler {
+public class AddDatacollectionFailedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -24,7 +27,7 @@ public class DataCollectionCreationCompletedEvent implements NotificableEventHan
    */
   @Override
   public EventType getEventType() {
-    return EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT;
+    return EventType.ADD_DATACOLLECTION_FAILED_EVENT;
   }
 
   /**
@@ -45,6 +48,7 @@ public class DataCollectionCreationCompletedEvent implements NotificableEventHan
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", dataflowName);
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }

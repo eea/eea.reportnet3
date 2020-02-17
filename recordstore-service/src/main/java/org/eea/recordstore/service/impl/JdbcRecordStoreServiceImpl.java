@@ -123,13 +123,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     // Release the notification
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataflowId).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ",
-          EventType.DATA_COLLECTION_CREATION_COMPLETED_EVENT, e);
+      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+          e);
     }
   }
 
