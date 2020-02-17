@@ -56,14 +56,20 @@ public interface RulesController {
    * Creates the empty rules schema.
    *
    * @param idDataSetSchema the id data set schema
-  /**
-   * Delete rule by id.
-   *
-   * @param idDataSetSchema the id data set schema
-   * @param ruleId the rule id
    */
   @DeleteMapping(value = "/deleteRulesSchema")
   void deleteRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema);
+
+
+
+  /**
+   * Delete rule by id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param ruleId the rule id
+   */
+  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteRuleById(
       @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @PathVariable(name = "ruleId", required = true) String ruleId);
@@ -71,7 +77,7 @@ public interface RulesController {
   /**
    * Delete rule by reference id.
    *
-   * @param idDataSetSchema the id data set schema
+   * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id
    */
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
