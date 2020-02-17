@@ -234,15 +234,23 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
 
+  /**
+   * Changes in receipt status.
+   *
+   * @param representative the representative
+   * @param representativeVO the representative VO
+   * @return true, if successful
+   */
   private boolean changesInReceiptStatus(Representative representative,
       RepresentativeVO representativeVO) {
 
     Boolean changes = true;
-    if (representative.getReceiptDownloaded() == representativeVO.getReceiptDownloaded()
-        && representative.getReceiptOutdated() == representativeVO.getReceiptOutdated()) {
+    if (representative.getReceiptDownloaded().equals(representativeVO.getReceiptDownloaded())
+        && representative.getReceiptOutdated().equals(representativeVO.getReceiptOutdated())) {
       changes = false;
     }
     return changes;
   }
+
 
 }
