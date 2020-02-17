@@ -511,7 +511,11 @@ public class DatasetServiceImpl implements DatasetService {
           SortField sortField = new SortField();
           sortField.setFieldName(nameField);
           sortField.setAsc((intToBoolean(mapFields.get(nameField))));
-          sortField.setTypefield(typefield.getType());
+          if (null == typefield) {
+            sortField.setTypefield(TypeData.TEXT);
+          } else {
+            sortField.setTypefield(typefield.getType());
+          }
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
