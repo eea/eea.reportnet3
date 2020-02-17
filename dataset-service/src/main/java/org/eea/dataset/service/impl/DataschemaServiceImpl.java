@@ -131,19 +131,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
-
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
-
-
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
-
     schemasRepository.save(dataSetSchema);
 
-    // TO-DO - service to create Rule Schema in mongodb
-
+    // create the schema of its rules
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
         new ObjectId().toString());
 
@@ -320,7 +315,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   @Transactional
-  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+  public void deleteDatasetSchema(String schemaId) {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
