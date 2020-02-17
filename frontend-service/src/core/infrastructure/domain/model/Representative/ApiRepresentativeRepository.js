@@ -6,10 +6,7 @@ const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
 
   const representativesList = !isEmpty(representativesDTO.data)
-    ? representativesDTO.data.map(
-        representativeDTO =>
-          new Representative(representativeDTO.id, representativeDTO.providerAccount, representativeDTO.dataProviderId)
-      )
+    ? representativesDTO.data.map(representativeDTO => new Representative(representativeDTO))
     : [];
 
   const dataToConsume = {

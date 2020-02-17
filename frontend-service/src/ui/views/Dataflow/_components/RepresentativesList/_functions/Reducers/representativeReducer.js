@@ -3,7 +3,7 @@ import { includes, isUndefined, isNull } from 'lodash';
 import { Representative } from 'core/domain/model/Representative/Representative';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyRepresentative = new Representative(null, '', '');
+  const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
 
   let updatedList = [];
 

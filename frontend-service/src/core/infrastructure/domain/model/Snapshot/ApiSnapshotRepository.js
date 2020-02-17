@@ -7,7 +7,12 @@ const allDesigner = async datasetSchemaId => {
   const snapshotsList = snapshotsDTO
     ? snapshotsDTO.map(
         snapshotDTO =>
-          new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
+          new Snapshot({
+            creationDate: snapshotDTO.creationDate,
+            description: snapshotDTO.description,
+            id: snapshotDTO.id,
+            isReleased: snapshotDTO.release
+          })
       )
     : [];
 
@@ -34,7 +39,13 @@ const allReporter = async datasetId => {
   const snapshotsDTO = await apiSnapshot.allReporter(datasetId);
 
   return snapshotsDTO.map(
-    snapshotDTO => new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
+    snapshotDTO =>
+      new Snapshot({
+        creationDate: snapshotDTO.creationDate,
+        description: snapshotDTO.description,
+        id: snapshotDTO.id,
+        isReleased: snapshotDTO.release
+      })
   );
 };
 
@@ -53,11 +64,7 @@ const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
 const releaseByIdReporter = async (dataflowId, datasetId, snapshotId) => {
   const isReleased = await apiSnapshot.releaseByIdReporter(dataflowId, datasetId, snapshotId);
 
-  const snapshotToRelease = new Snapshot();
-  snapshotToRelease.id = snapshotId;
-  snapshotToRelease.isReleased = isReleased;
-
-  return snapshotToRelease;
+  return new Snapshot({ id: snapshotId, isReleased });
 };
 
 export const ApiSnapshotRepository = {

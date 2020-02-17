@@ -101,7 +101,7 @@ const parseDesignDataset = (design, codelistsListWithSchema) => {
                       }
                       let codelistItemView = {};
                       codelistItemView.shortCode = itemDTO.shortCode;
-                      codelistItemView.label = itemDTO.definition;
+                      codelistItemView.label = itemDTO.label;
                       codelistItemView.definition = itemDTO.definition;
                       codelistView.push(codelistItemView);
                     });

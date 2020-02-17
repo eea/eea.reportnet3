@@ -1,7 +1,7 @@
 export class WebLink {
-  constructor(id, description, url) {
-    this.id = id;
+  constructor({ description, id, url } = {}) {
     this.description = description;
+    this.id = id;
     this.url = url;
   }
 }

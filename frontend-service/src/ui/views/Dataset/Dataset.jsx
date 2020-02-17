@@ -401,6 +401,7 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       const datasetSchema = await getDataSchema();
       const codelistsList = await getCodelistsList([datasetSchema]);
+      console.log({ codelistsList });
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -409,6 +410,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
+      console.log({ datasetSchema });
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
