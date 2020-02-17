@@ -41,6 +41,15 @@ public interface RulesController {
   @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
 
+  /**
+   * Find active rule schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the rules schema VO
+   */
+  @GetMapping(value = "/{idDatasetSchema}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findActiveRuleSchemaByDatasetId(
+      @PathVariable("idDatasetSchema") String idDatasetSchema);
 
 
   /**
@@ -67,7 +76,7 @@ public interface RulesController {
    */
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void deleteRuleByReferenceId(
+  void deleteRuleByReferenceId(
       @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @PathVariable(name = "referenceId", required = true) String referenceId);
 

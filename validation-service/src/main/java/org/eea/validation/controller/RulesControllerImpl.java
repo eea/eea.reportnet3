@@ -74,6 +74,22 @@ public class RulesControllerImpl implements RulesController {
     }
   }
 
+  @Override
+  @GetMapping(value = "/{idDatasetSchema}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+  public RulesSchemaVO findActiveRuleSchemaByDatasetId(
+      @PathVariable("idDatasetSchema") String idDatasetSchema) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error find datasetschema with idDatasetSchema {} because idDatasetSchema is incorrect",
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+
+    } else {
+      return rulesService.getActiveRulesSchemaByDatasetId(idDatasetSchema);
+    }
+  }
+
   /**
    * Creates the empty rules schema.
    *

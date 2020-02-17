@@ -25,7 +25,13 @@ public interface RulesService {
    */
   RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema);
 
-
+  /**
+   * Gets the active rules schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the active rules schema by dataset id
+   */
+  RulesSchemaVO getActiveRulesSchemaByDatasetId(String idDatasetSchema);
 
   /**
    * Creates the empty rules scehma.
