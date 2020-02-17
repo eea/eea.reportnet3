@@ -123,6 +123,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
 
+
   /**
    * Find representatives by id data flow.
    *
@@ -147,14 +148,16 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeVOs;
   }
 
+
   /**
    * Update representative.
    *
    * @param representativeVO the representative VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update")
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;

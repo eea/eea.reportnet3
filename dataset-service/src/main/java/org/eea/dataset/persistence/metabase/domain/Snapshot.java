@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.metabase.domain;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,13 +36,13 @@ public class Snapshot extends DataSetMetabase {
   @JoinColumn(name = "REPORTING_DATASET_ID")
   private ReportingDataset reportingDataset;
 
-  /** The datacollection. */
-  @Column(name = "DATACOLLECTION_ID")
-  private Long datacollection;
-
   /** The release. */
   @Column(name = "RELEASE")
   private Boolean release;
+
+  /** The date released. */
+  @Column(name = "DATE_RELEASED")
+  private Date dateReleased;
 
 
   /**
@@ -70,7 +71,7 @@ public class Snapshot extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, datacollection);
+    return Objects.hash(id, description, reportingDataset);
   }
 
 }
