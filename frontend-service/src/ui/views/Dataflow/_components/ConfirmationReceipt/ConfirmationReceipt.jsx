@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { isUndefined } from 'lodash';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 
 import logo from 'assets/images/logo.png';
 
-import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
-
-const ConfirmationReceipt = ({ dataflowId, dataProviderId }) => {
-  const [receiptData, setReceiptData] = useState();
-
-  useEffect(() => {
-    onLoadReceiptData();
-  }, []);
-
-  const onLoadReceiptData = async () => {
-    setReceiptData(await ConfirmationReceiptService.get(dataflowId, dataProviderId));
-  };
-
+const ConfirmationReceipt = ({ receiptData }) => {
   const styles = StyleSheet.create({
     image: { width: '30vmin', height: '30vmin' },
     page: { backgroundColor: 'white' },

@@ -340,6 +340,11 @@
           "key": "DATAFLOW_NAME_EXISTS",
           "lifeTime": 5000,
           "fixed": false
+        },
+        {
+          "key": "LOAD_RECEIPT_DATA_ERROR",
+          "lifeTime": 5000,
+          "fixed": false
         }
       ]
     },

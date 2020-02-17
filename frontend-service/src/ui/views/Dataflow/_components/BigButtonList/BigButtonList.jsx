@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isUndefined, remove, uniq } from 'lodash';
+import { isNull, isUndefined, remove } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
@@ -13,6 +13,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
+import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
 
@@ -54,6 +55,17 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [receiptData, setReceiptData] = useState();
+
+  const receiptBtnRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (!isUndefined(receiptData)) {
+        onDownloadReceipt();
+      }
+    }, 0);
+  }, [receiptData]);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -134,6 +146,12 @@ export const BigButtonList = ({
     }
   };
 
+  const onDownloadReceipt = () => {
+    if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
+      receiptBtnRef.current.click();
+    }
+  };
+
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -143,6 +161,18 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onLoadReceiptData = async () => {
+    try {
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setReceiptData(response);
+    } catch (error) {
+      console.log('error', error);
+      notificationContext.add({
+        type: 'LOAD_RECEIPT_DATA_ERROR'
+      });
+    }
+  };
+
   const onShowNewSchemaDialog = () => {
     setNewDatasetDialog(true);
     setIsFormReset(true);
@@ -150,36 +180,6 @@ export const BigButtonList = ({
 
   const onShowDataCollectionModal = () => {
     setDataCollectionDialog(true);
-  };
-
-  const onUpdatedButtonList = () => {
-    const receiptButton = (
-      <PDFDownloadLink
-        document={<ConfirmationReceipt dataflowId={dataflowId} dataProviderId={dataProviderId} />}
-        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-        {({ blob, url, loading, error }) => {
-          const { datasets } = dataflowData;
-          const representatives = datasets.map(dataset => {
-            return dataset.datasetSchemaName;
-          });
-          const isReleased = datasets.map(dataset => {
-            return dataset.isReleased;
-          });
-          if (!isCustodian && uniq(representatives).length === 1 && !isReleased.includes(false)) {
-            return (
-              <BigButton
-                layout="defaultBigButton"
-                buttonClass="schemaDataset"
-                buttonIcon={loading ? 'spinner' : 'fileDownload'}
-                buttonIconClass={loading ? 'spinner' : ''}
-                caption={resources.messages['confirmationReceipt']}
-              />
-            );
-          }
-        }}
-      </PDFDownloadLink>
-    );
-    return [...bigButtonList, receiptButton];
   };
 
   const bigButtonList = useBigButtonList({
@@ -195,6 +195,7 @@ export const BigButtonList = ({
     isDataSchemaCorrect: isDataSchemaCorrect,
     onDatasetSchemaNameError: onDatasetSchemaNameError,
     onDuplicateName: onDuplicateName,
+    onLoadReceiptData: onLoadReceiptData,
     onSaveName: onSaveName,
     onShowDataCollectionModal: onShowDataCollectionModal,
     onShowNewSchemaDialog: onShowNewSchemaDialog,
@@ -208,7 +209,7 @@ export const BigButtonList = ({
     <>
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
-          <div className={styles.datasetItem}>{onUpdatedButtonList()}</div>
+          <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
 
@@ -278,6 +279,12 @@ export const BigButtonList = ({
           yearRange="2020:2030"
         />
       </ConfirmDialog>
+
+      <PDFDownloadLink
+        document={<ConfirmationReceipt receiptData={receiptData} />}
+        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
+        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      </PDFDownloadLink>
     </>
   );
 };

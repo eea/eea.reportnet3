@@ -21,6 +21,7 @@ const useBigButtonList = ({
   isDataSchemaCorrect,
   onDatasetSchemaNameError,
   onDuplicateName,
+  onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
@@ -319,10 +320,35 @@ const useBigButtonList = ({
     ],
     visibility: !isEmpty(dataflowData.dataCollections)
   }));
+
+  const onBuildReceiptButton = () => {
+    const { datasets } = dataflowData;
+    const representatives = datasets.map(dataset => {
+      return dataset.datasetSchemaName;
+    });
+    const isReleased = datasets.map(dataset => {
+      return dataset.isReleased;
+    });
+    return [
+      {
+        layout: 'defaultBigButton',
+        buttonClass: 'schemaDataset',
+        buttonIcon: false ? 'spinner' : 'fileDownload',
+        buttonIconClass: false ? 'spinner' : '',
+        caption: resources.messages['confirmationReceipt'],
+        handleRedirect: () => onLoadReceiptData(),
+        visibility: !isCustodian && uniq(representatives).length === 1 && !isReleased.includes(false)
+      }
+    ];
+  };
+
+  const receiptBigButton = onBuildReceiptButton();
+
   return [
     ...buttonList,
     ...designDatasetModels,
     ...groupByRepresentativeModels,
+    ...receiptBigButton,
     ...createDataCollection,
     ...dataCollectionModels,
     ...dashboardModels
