@@ -43,6 +43,9 @@ public class Snapshot extends DataSetMetabase {
   /** The date released. */
   @Column(name = "DATE_RELEASED")
   private Date dateReleased;
+  /** The blocked. */
+  @Column(name = "BLOCKED")
+  private Boolean blocked;
 
 
   /**
