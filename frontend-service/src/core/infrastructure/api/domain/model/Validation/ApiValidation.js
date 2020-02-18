@@ -17,5 +17,26 @@ export const apiValidation = {
       }
     });
     return response;
+  },
+  getAll: async datasetSchemaId => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.get({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetId}/fieldSchema`
+          : getUrl(ValidationConfig.getAll, {
+              datasetSchemaId
+            }),
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response;
+    } catch (error) {
+      console.error(`Error loading validations list: ${error}`);
+      return false;
+    }
   }
 };

@@ -5,6 +5,20 @@ const deleteById = async (datasetSchemaId, ruleId) => {
   return await apiValidation.deleteById(datasetSchemaId, ruleId);
 };
 
+const getAll = async datasetSchemaId => {
+  const validationsDTO = await apiValidation.getAll(datasetSchemaId);
+  return (validations = validationsDTO.map(validationsDTO => {
+    return new Validation({
+      id: validationsDTO.id,
+      levelError: validationsDTO.levelError,
+      entityType: validationsDTO.entityType,
+      date: validationsDTO.date,
+      message: validationsDTO.message
+    });
+  }));
+};
+
 export const ApiValidationRepository = {
-  deleteById
+  deleteById,
+  getAll
 };

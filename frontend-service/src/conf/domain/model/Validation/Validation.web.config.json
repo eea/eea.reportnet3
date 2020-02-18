@@ -1,3 +1,4 @@
 {
-    "delete":  "/rules/{:datasetSchemaId}/deleteRuleById/{:ruleId}"
+    "delete":  "/rules/{:datasetSchemaId}/deleteRuleById/{:ruleId}",
+	"getAll": "/rules/{:datasetSchemaId}"
 }
