@@ -389,11 +389,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
+      final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService
-          .updateFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO);
+      String type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
+        // if we changue the type we need to delete all rules
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
+        // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
       }
     } catch (EEAException e) {
