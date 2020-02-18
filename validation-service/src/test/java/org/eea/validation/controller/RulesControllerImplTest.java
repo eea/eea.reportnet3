@@ -74,7 +74,7 @@ public class RulesControllerImplTest {
 
   /**
    * Delete rule by id.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -128,7 +128,7 @@ public class RulesControllerImplTest {
 
   /**
    * Delete rule by reference id.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -137,4 +137,55 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).deleteRuleByReferenceId("ObjectId", "ObjectId");
   }
 
+  @Test
+  public void findRuleSchemaByDatasetIdBlankTest() throws EEAException {
+    try {
+      rulesControllerImpl.findRuleSchemaByDatasetId("");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void findRuleSchemaByDatasetIdNullTest() throws EEAException {
+    try {
+      rulesControllerImpl.findRuleSchemaByDatasetId(null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void findRuleSchemaByDatasetIdSuccessTest() throws EEAException {
+    rulesControllerImpl.findRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).getRulesSchemaByDatasetId(Mockito.any());
+  }
+
+  @Test
+  public void findActiveRuleSchemaByDatasetIdBlankTest() throws EEAException {
+    try {
+      rulesControllerImpl.findActiveRuleSchemaByDatasetId("");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void findActiveRuleSchemaByDatasetIdNullTest() throws EEAException {
+    try {
+      rulesControllerImpl.findActiveRuleSchemaByDatasetId(null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void findActiveRuleSchemaByDatasetIdSuccessTest() throws EEAException {
+    rulesControllerImpl.findActiveRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).getActiveRulesSchemaByDatasetId(Mockito.any());
+  }
 }

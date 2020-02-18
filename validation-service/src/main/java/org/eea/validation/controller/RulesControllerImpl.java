@@ -80,7 +80,7 @@ public class RulesControllerImpl implements RulesController {
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
     if (StringUtils.isBlank(idDatasetSchema)) {
       LOG_ERROR.error(
-          "Error find datasetschema with idDatasetSchema {} because idDatasetSchema is incorrect",
+          "Error find active datasetschema with idDatasetSchema {} because idDatasetSchema is incorrect",
           idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
