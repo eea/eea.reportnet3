@@ -153,8 +153,8 @@ public class RulesControllerImpl implements RulesController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the rule  with id {} in datasetSchema {}", ruleId,
           idDatasetSchema);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
-          e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.ERROR_DELETING_RULE, e);
     }
     LOG.info("Delete the rule with id {} in datasetSchema {} successfully", ruleId,
         idDatasetSchema);
@@ -193,8 +193,8 @@ public class RulesControllerImpl implements RulesController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the rules  with referenceId {} in datasetSchema {}",
           referenceId, idDatasetSchema);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
-          e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.ERROR_DELETING_RULE, e);
     }
 
     LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
