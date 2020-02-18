@@ -2,6 +2,8 @@ package org.eea.validation.persistence.repository;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAException;
+import org.eea.validation.persistence.schemas.rule.Rule;
 
 /**
  * The Interface ExtendedRulesRepository.
@@ -9,7 +11,13 @@ import org.bson.types.ObjectId;
 public interface ExtendedRulesRepository {
 
 
+  /**
+   * Delete by id dataset schema.
+   *
+   * @param rulesSchemaId the rules schema id
+   */
   void deleteByIdDatasetSchema(ObjectId rulesSchemaId);
+
   /**
    * Delete rule by id.
    *
@@ -36,4 +44,18 @@ public interface ExtendedRulesRepository {
    * @return the rules with active criteria
    */
   Document getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable);
+
+
+  /**
+   * Creates the new rule.
+   *
+   * @param idRuleSchema the id rule schema
+   * @param idSchema the id schema
+   * @param rule the rule
+   * @return the update result
+   * @throws EEAException
+   */
+  void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException;
+
+
 }

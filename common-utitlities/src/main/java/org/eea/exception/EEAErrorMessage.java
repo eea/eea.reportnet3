@@ -152,8 +152,11 @@ public final class EEAErrorMessage {
   /** The Constant CODELIST_VERSION_DUPLICATED. */
   public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
-  /** The Constant CODELIST_VERSION_DUPLICATED. */
+  /** The Constant ERROR_DELETING_RULE. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
+
+  /** The Constant ERROR_CREATING_RULE. */
+  public static final String ERROR_CREATING_RULE = "Error creating rules";
 
   /**
    * Instantiates a new EEA error message.

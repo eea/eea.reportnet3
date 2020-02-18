@@ -2,7 +2,11 @@ package org.eea.validation.persistence.repository;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAException;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -29,6 +33,12 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   /** The mongo database. */
   @Autowired
   private MongoDatabase mongoDatabase;
+
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -93,5 +103,30 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
 
     return document;
   }
+
+  @Override
+  public void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException {
+    Update update = new Update().push("rules", rule);
+    Query query = new Query();
+    query.addCriteria(new Criteria("_id").is(new ObjectId(idRuleSchema)));
+    mongoOperations.updateMulti(query, update, RulesSchema.class);
+  }
+
+
+  //
+  // UpdateResult updateTableSchema(String datasetSchemaId, Document tableSchema)
+  // throws EEAException {
+  // try {
+  // return mongoDatabase.getCollection("DataSetSchema").updateOne(
+  // new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+  // tableSchema.get("_id")),
+  // new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
+  // new UpdateOptions().arrayFilters(
+  // Arrays.asList(new Document("tableSchemaId._id", tableSchema.get("_id")))));
+  // } catch (IllegalArgumentException e) {
+  // LOG_ERROR.error("error updating table: ", e);
+  // throw new EEAException(e);
+  // }
+  // }
 
 }

@@ -5,7 +5,9 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,10 +36,17 @@ public class RulesControllerImpl implements RulesController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesControllerImpl.class);
+
   /** The rules service. */
   @Autowired
   private RulesService rulesService;
+
+
+  /** The rule mapper. */
+  @Autowired
+  private RuleMapper ruleMapper;
 
 
   /**
@@ -59,6 +70,7 @@ public class RulesControllerImpl implements RulesController {
    * @return the rules schema VO
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
   public RulesSchemaVO findRuleSchemaByDatasetId(
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
@@ -74,7 +86,14 @@ public class RulesControllerImpl implements RulesController {
     }
   }
 
+  /**
+   * Find active rule schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the rules schema VO
+   */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/{idDatasetSchema}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
   public RulesSchemaVO findActiveRuleSchemaByDatasetId(
       @PathVariable("idDatasetSchema") String idDatasetSchema) {
@@ -96,6 +115,7 @@ public class RulesControllerImpl implements RulesController {
    * @param idDataSetSchema the id data set schema
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "/deleteRulesSchema")
   public void deleteRulesSchema(String idDataSetSchema) {
     rulesService.deleteEmptyRulesScehma(new ObjectId(idDataSetSchema));
@@ -109,6 +129,7 @@ public class RulesControllerImpl implements RulesController {
    * @param ruleId the rule id
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteRuleById(
@@ -146,6 +167,7 @@ public class RulesControllerImpl implements RulesController {
    * @param referenceId the reference id
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteRuleByReferenceId(
@@ -177,6 +199,30 @@ public class RulesControllerImpl implements RulesController {
 
     LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
         idDatasetSchema);
+  }
+
+  /**
+   * Creates the new rule.
+   *
+   * @param idRuleSchema the id rule schema
+   * @param idSchema the id schema
+   * @param ruleVO the rule VO
+   * @throws EEAException
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/createNewRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void createNewRule(@RequestParam(name = "idRuleSchema") String idRuleSchema,
+      @RequestParam(name = "idSchema") String idSchema, @RequestBody RuleVO ruleVO) {
+    try {
+      rulesService.createNewRule(idRuleSchema, idSchema, ruleMapper.classToEntity(ruleVO));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the rules  with idRuleSchema {} in datasetSchema {}",
+          idRuleSchema, idSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
+          e);
+    }
+
   }
 
 }
