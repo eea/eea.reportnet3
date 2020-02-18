@@ -67,7 +67,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       zIndex={3100}>
       <DataTable
         autoLayout={true}
-        className={styles.showNotificationssData}
+        className={styles.showNotificationsData}
         loading={false}
         paginator={true}
         paginatorRight={notifications.length}
