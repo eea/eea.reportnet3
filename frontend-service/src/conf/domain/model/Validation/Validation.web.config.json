@@ -1,0 +1,3 @@
+{
+    "delete":  "/rules/{:datasetSchemaId}/deleteRuleById/{:ruleId}"
+}
