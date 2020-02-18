@@ -221,7 +221,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
         // delete the schema in Mongo
-        dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+        dataschemaService.deleteDatasetSchema(schemaId);
+
+        // delete the schema to dataset
         rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
@@ -302,8 +304,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
-      dataschemaService.deleteTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          tableSchemaId);
+      final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
+
+      // we delete the rules associate to the table
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
+
       datasetService.deleteTableValue(datasetId, tableSchemaId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -383,11 +389,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
+      final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService
-          .updateFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO);
+      String type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
+        // if we changue the type we need to delete all rules
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
+        // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
       }
     } catch (EEAException e) {
@@ -409,11 +418,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
+
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       // Delete the fieldSchema from the datasetSchema
-      if (!dataschemaService.deleteFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          fieldSchemaId)) {
+      if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      // Delete the rules from the fieldSchema
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
       // Delete the fieldSchema from the dataset
       datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {

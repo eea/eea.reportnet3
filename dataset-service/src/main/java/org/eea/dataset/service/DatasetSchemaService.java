@@ -6,7 +6,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 
 /**
@@ -48,7 +47,7 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    * @param schemaId the schema id
    */
-  void deleteDatasetSchema(Long datasetId, String schemaId);
+  void deleteDatasetSchema(String schemaId);
 
   /**
    * Creates the group and add user.

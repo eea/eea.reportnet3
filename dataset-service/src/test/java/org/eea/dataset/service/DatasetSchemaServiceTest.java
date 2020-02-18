@@ -33,6 +33,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -159,12 +160,17 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaVO tableSchemaVO;
 
+  /** The validation commands. */
   @Spy
   private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
 
+  /** The command. */
   @Mock
   private ValidationSchemaIntegrityCommand command;
 
+  /** The rules controller zuul. */
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
 
   /**
    * Inits the mocks.
@@ -314,6 +320,7 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
+    doNothing().when(rulesControllerZuul).createEmptyRulesSchema(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 
@@ -333,7 +340,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void deleteDatasetSchemaTest() {
-    dataSchemaServiceImpl.deleteDatasetSchema(1L, "idTableSchema");
+    dataSchemaServiceImpl.deleteDatasetSchema("idTableSchema");
     Mockito.verify(schemasRepository, times(1)).deleteDatasetSchemaById(Mockito.any());
   }
 
@@ -786,6 +793,11 @@ public class DatasetSchemaServiceTest {
     Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
   }
 
+  /**
+   * Gets the table schema name test 1.
+   *
+   * @return the table schema name test 1
+   */
   @Test
   public void getTableSchemaNameTest1() {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
@@ -795,12 +807,20 @@ public class DatasetSchemaServiceTest {
         dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
 
+  /**
+   * Gets the table schema name test 2.
+   *
+   * @return the table schema name test 2
+   */
   @Test
   public void getTableSchemaNameTest2() {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
 
+  /**
+   * Validate schema test.
+   */
   @Test
   public void validateSchemaTest() {
 

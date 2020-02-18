@@ -22,6 +22,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -95,6 +96,9 @@ public class DataSetSchemaControllerImplTest {
 
   /** The dataset schema VO. */
   private DataSetSchemaVO datasetSchemaVO;
+
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
 
   /**
    * Inits the mocks.
@@ -308,7 +312,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
+    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
     doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
     DataFlowVO df = new DataFlowVO();
@@ -402,6 +406,7 @@ public class DataSetSchemaControllerImplTest {
   public void deleteTableSchemaTest1() throws EEAException {
     Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(datasetService).deleteTableValue(Mockito.any(), Mockito.any());
+    // doNothing().when(rulesControllerZuul).deleteRuleByReferenceId(Mockito.any(), Mockito.any());;
     dataSchemaControllerImpl.deleteTableSchema(1L, "");
   }
 
