@@ -2,6 +2,10 @@ import React, { useReducer, useContext } from 'react';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
+const userSettingsDefaultState = {
+  userProps:{}
+};
+
 const userReducer = (state, { type, payload }) => {
   switch (type) {
     case 'LOGIN':
@@ -10,7 +14,7 @@ const userReducer = (state, { type, payload }) => {
         ...payload.user
       };
     case 'LOGOUT':
-      return {};
+      return userSettingsDefaultState;
     case 'ADD_SOCKET':
       return {
         ...state,
@@ -24,7 +28,11 @@ const userReducer = (state, { type, payload }) => {
     case 'TOGGLE_LOGOUT_CONFIRM': 
       return {
         ...state,
-        showLogoutConfirmation: !state.showLogoutConfirmation
+        userProps:{
+          ...state,
+          showLogoutConfirmation: !state.userProps.showLogoutConfirmation
+        }
+        
       }
 
     default:
@@ -33,9 +41,10 @@ const userReducer = (state, { type, payload }) => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(userReducer, {});
+  const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
   const notificationContext = useContext(NotificationContext);
 
+  console.log('state', state)
   return (
     <UserContext.Provider
       value={{

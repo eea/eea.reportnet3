@@ -1,0 +1,44 @@
+.userconfig {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    width: 100%;
+    height: var(--header-height);
+    padding: 0.5rem;
+    overflow: hidden;
+    background-color: var(--bg);
+    transition: 0.5s;
+    box-shadow: var(--header-box-shadow);
+    z-index: 3002;
+    .title {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      img {
+        height: 3rem;
+        margin-right: 1rem;
+      }
+      h1 {
+        margin: 0px;
+        font-size: 1.5rem;
+        color: var(--main-font-color);
+      }
+    }
+  
+    .logoutWrapper {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      svg {
+        color: var(--main-font-color);
+      }
+    }
+    .themeSwitcherTooltip {
+      z-index: 3004;
+    }
+  
+   
+  }
+  

@@ -28,7 +28,7 @@ import { CodelistUtils } from './_functions/Utils/CodelistUtils';
 
 const Codelist = ({
   categoriesDropdown,
-  categoryId
+  categoryId,
   checkDuplicates,
   codelist,
   isDataCustodian = true,

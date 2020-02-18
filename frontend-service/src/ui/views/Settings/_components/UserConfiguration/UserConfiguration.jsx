@@ -1,12 +1,22 @@
-import React, {useContext} from 'react';
+import React from 'react';
+import styles from './userConfiguration.module.scss';
 
-import {UserContext} from 'ui/views/_functions/Contexts/UserContext';
+import { ToggleUserConfirmation } from './_components/UserConfirmation';
 
 const UserConfiguration = () => {
-  const userContext = useContext(UserContext)
-  return <h1 onClick={(e) => {
-    userContext.onToggleLogoutConfirm();
-  }}>UserConfiguration</h1>;
+  return (
+    <div>
+      <h1
+      // onClick={e => {
+      //   userContext.onToggleLogoutConfirm();
+      // }}
+      >
+        UserConfiguration
+      </h1>
+      <h3>Confirmation user Logout</h3>
+      <ToggleUserConfirmation />
+    </div>
+  );
 };
 
 export { UserConfiguration };
