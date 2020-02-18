@@ -296,6 +296,7 @@ const Codelist = ({
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={isIncorrect}
         icon="save"
         label={resources.messages['save']}
@@ -416,6 +417,7 @@ const Codelist = ({
           <Button label={resources.messages['add']} icon="add" onClick={() => onAddCodelistItemClick()} />
         ) : null}
         <Button
+          className={codelistState.isEditing ? 'p-button-success' : null}
           disabled={codelistState.isEditing && isIncorrect}
           icon={codelistState.isEditing ? 'save' : 'pencil'}
           label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}

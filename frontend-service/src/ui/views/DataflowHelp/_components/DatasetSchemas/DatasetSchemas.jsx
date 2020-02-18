@@ -20,16 +20,18 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const [isLoading, setIsLoading] = useState(false);
   const [codelistsList, setCodelistsList] = useState();
+  const [validationList, setValidationList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
       getCodelistsList(datasetsSchemas);
+      getValidationList(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
   useEffect(() => {
     renderDatasetSchemas();
-  }, [codelistsList]);
+  }, [codelistsList, validationList]);
 
   const getCodelistsList = async datasetsSchemas => {
     try {
@@ -44,10 +46,56 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     }
   };
 
+  const getValidationList = async datasetsSchemas => {
+    try {
+      // setValidationList(await CodelistService.getCodelistsListWithSchemas(datasetsSchemas));
+      setValidationList([
+        {
+          automatic: 'true',
+          datasetSchemaId: '5e450733a268b2000140ad7c',
+          date: '2018-01-01',
+          enabled: 'true',
+          entityType: 'FIELD',
+          id: 0,
+          levelError: 'error',
+          message: 'This is an error message',
+          ruleName: 'Test rule'
+        },
+        {
+          automatic: 'false',
+          datasetSchemaId: '5e450733a268b2000140ad7c',
+          date: '2018-01-01',
+          enabled: 'true',
+          entityType: 'TABLE',
+          id: 0,
+          levelError: 'WARNING',
+          message: 'This is a warning message 2',
+          ruleName: 'Test rule 2'
+        }
+      ]);
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderDatasetSchemas = () => {
+    // console.log({ codelistsList, datasetsSchemas });
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} codelistsList={codelistsList} index={i} key={i} />;
+        return (
+          <DatasetSchema
+            codelistsList={codelistsList}
+            designDataset={designDataset}
+            key={i}
+            index={i}
+            validationList={validationList}
+          />
+        );
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>

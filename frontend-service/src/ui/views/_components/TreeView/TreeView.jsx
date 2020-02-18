@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 
 import { capitalize, isUndefined, isNull } from 'lodash';
 
@@ -8,9 +8,95 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { MultiSelect } from 'primereact/multiselect';
 import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
-const TreeView = ({ groupableProperties = [], propertyName, property, rootProperty }) => {
+import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
+
+const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) => {
+  const dataTableRef = useRef();
+  const initialTreeViewState = {
+    filters: {
+      automatic: [],
+      entityType: [],
+      enabled: [],
+      levelError: []
+    },
+    options: {}
+  };
+  const [treeViewState, dispatchTreeView] = useReducer(treeViewReducer, initialTreeViewState);
+
+  const getMultiselectFilter = field => {
+    if (
+      !isUndefined(columnOptions[propertyName]['filterType']) &&
+      !isUndefined(columnOptions[propertyName]['filterType']['multiselect']) &&
+      !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field])
+    ) {
+      console.log(treeViewState.filters[field], columnOptions[propertyName]['filterType']['multiselect'][field]);
+      return (
+        <MultiSelect
+          style={{ width: '100%' }}
+          value={treeViewState.filters[field]}
+          options={columnOptions[propertyName]['filterType']['multiselect'][field]}
+          onChange={e => onFilterChange(e, field)}
+        />
+      );
+    }
+  };
+
+  const groupFields = fields => {
+    if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
+      return (
+        <DataTable ref={dataTableRef} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }} value={fields}>
+          {renderColumns(fields)}
+        </DataTable>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const onFilterChange = (event, field) => {
+    dataTableRef.current.filter(event.value, field, 'in');
+    dispatchTreeView({ type: 'SET_FILTER', payload: { value: event.value, field } });
+  };
+
+  const renderColumns = fields =>
+    Object.keys(fields[0]).map(field => (
+      <Column
+        body={field === 'type' ? typeTemplate : null}
+        key={field}
+        columnResizeMode="expand"
+        field={field}
+        filter={
+          !isUndefined(columnOptions) && !isUndefined(columnOptions[propertyName])
+            ? columnOptions[propertyName]['filtered']
+            : false
+        }
+        filterElement={getMultiselectFilter(field)}
+        filterMatchMode="contains"
+        header={
+          !isUndefined(
+            columnOptions[propertyName] &&
+              columnOptions[propertyName]['names'] &&
+              columnOptions[propertyName]['names'][field]
+          )
+            ? columnOptions[propertyName]['names'][field]
+            : capitalize(field)
+        }
+        sortable={true}
+        style={{
+          width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%',
+          display:
+            !isUndefined(columnOptions[propertyName]) &&
+            !isUndefined(columnOptions[propertyName]['invisible']) &&
+            columnOptions[propertyName]['invisible'].indexOf(field) === 0
+              ? 'none'
+              : 'auto'
+        }}
+      />
+    ));
+
   return (
     <React.Fragment>
       {!isUndefined(property) && !isNull(property) ? (
@@ -31,16 +117,18 @@ const TreeView = ({ groupableProperties = [], propertyName, property, rootProper
             <TreeViewExpandableItem
               items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}
               expanded={true}>
-              {groupableProperties.indexOf(propertyName) > -1
+              {!isUndefined(columnOptions[propertyName]) &&
+              !isUndefined(columnOptions[propertyName]['groupable']) &&
+              columnOptions[propertyName]['groupable']
                 ? groupFields(property)
                 : !isUndefined(property)
                 ? Object.values(property).map((proper, index, { length }) => (
                     <TreeView
+                      columnOptions={columnOptions}
+                      excludeBottomBorder={index === length - 1}
                       key={index}
                       property={proper}
                       propertyName={Object.getOwnPropertyNames(property)[index]}
-                      excludeBottomBorder={index === length - 1}
-                      groupableProperties={groupableProperties}
                     />
                   ))
                 : null}
@@ -77,38 +165,25 @@ const getFieldTypeValue = value => {
   return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
 };
 
-const groupFields = fields => {
-  if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
-    return (
-      <DataTable value={fields} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }}>
-        {renderColumns(fields)}
-      </DataTable>
-    );
-  } else {
-    return null;
-  }
-};
+const getInitialFilter = (columnOptions, field) =>
+  !isUndefined(columnOptions.validations) &&
+  !isUndefined(columnOptions.validations.filterType) &&
+  !isUndefined(columnOptions.validations.filterType.multiselect)
+    ? columnOptions.validations.filterType.multiselect[field]
+    : [];
 
-const renderColumns = fields =>
-  Object.keys(fields[0]).map(field => (
-    <Column
-      body={field === 'type' ? typeTemplate : null}
-      key={field}
-      columnResizeMode="expand"
-      field={field}
-      filter={false}
-      filterMatchMode="contains"
-      header={capitalize(field)}
-      sortable={true}
-      style={{ width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%' }}
-    />
-  ));
+const getFilterValues = () => {
+  console.log('LLEGO');
+};
 
 const typeTemplate = (rowData, column) => {
   return (
     <div>
       <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
-      <FontAwesomeIcon icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)} style={{ float: 'right' }} />
+      <FontAwesomeIcon
+        icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+        style={{ float: 'right', color: 'var(--treeview-table-icon-color)' }}
+      />
     </div>
   );
 };

@@ -419,20 +419,22 @@ const Dataflow = withRouter(({ history, match }) => {
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
         />
 
-        <Dialog
-          header={resources.messages['manageRolesDialogTitle']}
-          footer={closeBtnManageRolesDialog}
-          visible={isActiveManageRolesDialog}
-          onHide={() => onHideManageRolesDialog()}
-          contentStyle={{ maxHeight: '60vh' }}>
-          <div className={styles.dialog}>
-            <RepresentativesList
-              dataflowId={dataflowData.id}
-              setHasRepresentatives={setHasRepresentatives}
-              isActiveManageRolesDialog={isActiveManageRolesDialog}
-            />
-          </div>
-        </Dialog>
+        {isCustodian && (
+          <Dialog
+            header={resources.messages['manageRolesDialogTitle']}
+            footer={closeBtnManageRolesDialog}
+            visible={isActiveManageRolesDialog}
+            onHide={() => onHideManageRolesDialog()}
+            contentStyle={{ maxHeight: '60vh' }}>
+            <div className={styles.dialog}>
+              <RepresentativesList
+                dataflowId={dataflowData.id}
+                setHasRepresentatives={setHasRepresentatives}
+                isActiveManageRolesDialog={isActiveManageRolesDialog}
+              />
+            </div>
+          </Dialog>
+        )}
 
         {/* <Dialog
           header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}

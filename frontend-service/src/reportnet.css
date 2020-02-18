@@ -250,6 +250,7 @@
   --treeview-property-title-color: var(--black);
   --treeview-property-value-color: var(--black);
   --treeview-empty-property-color: var(--black);
+  --treeview-table-icon-color: var(--black);
 
   /* Documentation */
   --documenticon-color: var(--c-corporate-blue);

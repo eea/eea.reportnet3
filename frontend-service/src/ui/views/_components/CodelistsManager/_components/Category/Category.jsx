@@ -235,7 +235,13 @@ const Category = ({
 
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button disabled={isIncorrect} icon="save" label={resources.messages['save']} onClick={onSaveCodelist} />
+      <Button
+        className="p-button-success"
+        disabled={isIncorrect}
+        icon="save"
+        label={resources.messages['save']}
+        onClick={onSaveCodelist}
+      />
       <Button
         className="p-button-secondary-transparent"
         icon="cancel"
@@ -261,16 +267,18 @@ const Category = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={
           isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
         }
-        label={resources.messages['save']}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => onSaveCategory()}
       />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-danger"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
           dispatchCategory({
