@@ -1,11 +1,14 @@
 package org.eea.validation.persistence.repository;
 
+import java.util.Arrays;
+import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -80,18 +83,32 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @param enable the enable
    * @return the rules with active criteria
    */
+
   @Override
-  public Document getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable) {
-    Document document;
+  public RulesSchema getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable) {
+    List<RulesSchema> result;
     if (Boolean.TRUE.equals(enable)) {
-      document = mongoDatabase.getCollection("RulesSchema")
-          .find(new Document("_id", idDatasetSchema).append("rules.enable", true)).first();
+      Document filterExpression = new Document();
+      filterExpression.append("input", "$rules");
+      filterExpression.append("as", "rule");
+      filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule.enabled", true)));
+      Document filter = new Document("$filter", filterExpression);
+      result =
+          mongoTemplate
+              .aggregate(
+                  Aggregation.newAggregation(
+                      Aggregation.match(Criteria.where("idDatasetSchema").is(idDatasetSchema)),
+                      Aggregation.project("idDatasetSchema")
+                          .and(aggregationOperationContext -> filter).as("rules")),
+                  RulesSchema.class, RulesSchema.class)
+              .getMappedResults();
     } else {
-      document = mongoDatabase.getCollection("RulesSchema")
-          .find(new Document("_id", idDatasetSchema)).first();
+      Query query = new Query();
+      query.addCriteria(new Criteria("idDatasetSchema").is(idDatasetSchema));
+      result = mongoTemplate.find(query, RulesSchema.class);
     }
 
-    return document;
+    return result.isEmpty() ? null : result.get(0);
   }
 
 }

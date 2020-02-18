@@ -1,7 +1,7 @@
 package org.eea.validation.persistence.repository;
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 
 /**
  * The Interface ExtendedRulesRepository.
@@ -10,6 +10,7 @@ public interface ExtendedRulesRepository {
 
 
   void deleteByIdDatasetSchema(ObjectId rulesSchemaId);
+
   /**
    * Delete rule by id.
    *
@@ -35,5 +36,5 @@ public interface ExtendedRulesRepository {
    * @param enable the enable
    * @return the rules with active criteria
    */
-  Document getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable);
+  RulesSchema getRulesWithActiveCriteria(ObjectId idDatasetSchema, Boolean enable);
 }
