@@ -7,18 +7,18 @@ export const apiConfirmationReceipt = {
   get: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
 
-    // const response = await HTTPRequester.get({
-    //   url: getUrl(ConfirmationReceiptConfig.get, {
-    //     dataflowId,
-    //     dataProviderId
-    //   }),
-    //   queryString: {},
-    //   headers: {
-    //     Authorization: `Bearer ${tokens.accessToken}`
-    //   }
-    // });
-    //return response.data;
-    const response = {
+    const response = await HTTPRequester.get({
+      url: getUrl(ConfirmationReceiptConfig.get, {
+        dataflowId,
+        dataProviderId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    /*  const response = {
       idDataflow: 5061,
       dataflowName: 'DF receipt 1',
       datasets: [
@@ -45,7 +45,7 @@ export const apiConfirmationReceipt = {
       ],
       providerEmail: 'vicenteprovider@reportnet.net',
       providerAssignation: 'Denmark'
-    };
-    return response;
+    }; 
+    return response;*/
   }
 };
