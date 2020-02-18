@@ -55,6 +55,12 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
+  /**
+   * Gets the active rules schema by dataset id.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the active rules schema by dataset id
+   */
   @Override
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String idDatasetSchema) {
     RulesSchema rulesSchema =
@@ -137,4 +143,24 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.deleteRuleByReferenceId(idDatasetSchema, referenceId);
 
   }
+
+
+  /**
+   * Creates the new rule.
+   *
+   * @param idRuleSchema the id rule schema
+   * @param idSchema the id schema
+   * @param rule the rule
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException {
+
+    rulesRepository.createNewRule(idRuleSchema, idSchema, rule);
+
+  }
+
+
+
 }
