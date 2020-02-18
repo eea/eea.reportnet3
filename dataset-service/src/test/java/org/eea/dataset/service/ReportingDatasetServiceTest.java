@@ -3,9 +3,12 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
@@ -85,12 +88,17 @@ public class ReportingDatasetServiceTest {
     designs.add(designDataset);
     dataset.setId(1L);
     datasets.add(dataset);
-    List<Long> result = new ArrayList<>();
-    result.add(1L);
+    Snapshot snap = new Snapshot();
+    snap.setId(1L);
+    snap.setRelease(false);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(1L);
+    snap.setReportingDataset(reporting);
     when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
-    when(snapshotRepository.findByReportingDatasetAndRelease(Mockito.any())).thenReturn(result);
+    when(snapshotRepository.findByReportingDatasetAndRelease(Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(snap));
     when(designDatasetRepository.findbyDatasetSchemaList(Mockito.any())).thenReturn(designs);
     assertEquals("failed assertion", datasets,
         reportingDatasetService.getDataSetIdByDataflowId(Mockito.anyLong()));
