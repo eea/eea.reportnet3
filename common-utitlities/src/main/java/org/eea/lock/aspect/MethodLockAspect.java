@@ -13,6 +13,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
@@ -60,10 +61,14 @@ public class MethodLockAspect {
       }
 
       return rtn;
-
-    } catch (Exception e) {
+    } catch (EEAException e) {
       if (lockMethod.isController()) {
         throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
+      }
+      throw e;
+    } catch (Exception e) {
+      if (lockMethod.isController()) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error", e);
       }
       throw e;
     }
@@ -109,7 +114,11 @@ public class MethodLockAspect {
   }
 
   /**
-   * Retrieve value.
+   * Returns the specified value in the object according to the path. The path string is formed by
+   * the desired name of the attributes of each object separated by dots.
+   * <p>
+   * <b>Example:</b> Root object: <i>CodelistVO</i>. Path: <i>"category.description"</i>
+   * </p>
    *
    * @param path the path
    * @param object the object

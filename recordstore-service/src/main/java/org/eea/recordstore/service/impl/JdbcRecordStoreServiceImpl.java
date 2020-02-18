@@ -149,9 +149,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Creates a schema for each entry in the list by executing the queries contained in an external
-   * file. Also releases events to feed the new schemas. Uses the dataflow to release the lock and
-   * send the finish notification.
+   * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
    * <p>
    * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
    * </p>
