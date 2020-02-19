@@ -44,7 +44,6 @@ const Codelist = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  console.log(JSON.parse(JSON.stringify(codelist)).items);
   const initialCodelistState = {
     clonedCodelist: {
       codelistId: codelist.id,

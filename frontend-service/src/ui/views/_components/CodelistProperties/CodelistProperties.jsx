@@ -74,7 +74,7 @@ const CodelistProperties = ({
       ) : null}
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
-          className={isIncorrect ? styles.codelistIncorrectInput : null}
+          className={isIncorrect || state.codelistName.trim() === '' ? styles.codelistIncorrectInput : null}
           disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="nameInput"
           onBlur={() =>
@@ -95,7 +95,7 @@ const CodelistProperties = ({
       </span>
       <span className={`${!isEmbedded ? styles.codelistInput : styles.codelistInputDialog} p-float-label`}>
         <InputText
-          className={isIncorrect ? styles.codelistIncorrectInput : null}
+          className={isIncorrect || state.codelistVersion.trim() === '' ? styles.codelistIncorrectInput : null}
           disabled={initialStatus !== 'design' ? true : !isEmbedded ? !state.isEditing : false}
           id="versionInput"
           onBlur={() =>

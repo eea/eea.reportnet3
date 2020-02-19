@@ -36,8 +36,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isIncorrect, setIsIncorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
-  const [newCategoryVisible, setNewCategoryVisible] = useState(false);
 
   const initialCodelistsManagerState = {
     categories: [],
@@ -83,12 +81,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
 
   const onCalculateExpandedStatus = (categoryId, expanded) => {
     dispatchCodelistsManager({ type: 'SET_EXPANDED_STATUS', payload: { categoryId, expanded } });
-  };
-
-  const onChangeCategoryForm = (property, value) => {
-    const inmNewCategory = { ...newCategory };
-    inmNewCategory[property] = value;
-    setNewCategory(inmNewCategory);
   };
 
   const onCodelistError = (errorTitle, error) => {
@@ -143,28 +135,10 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   // };
 
   const onRefreshCategory = (newCategory, updatedCodelists) => {
-    console.log({ newCategory, updatedCodelists });
     newCategory.codelists = updatedCodelists;
     const inmCategories = cloneDeep(codelistsManagerState.categories);
     const updatedCategories = inmCategories.map(category => (newCategory.id === category.id ? newCategory : category));
-    console.log(updatedCategories);
     dispatchCodelistsManager({ type: 'SET_CATEGORIES', payload: { categories: updatedCategories } });
-  };
-
-  const onSaveCategory = async () => {
-    try {
-      const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
-      if (response.status >= 200 && response.status <= 299) {
-        onLoadCategories();
-      }
-    } catch (error) {
-      console.error(error);
-      notificationContext.add({
-        type: 'CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR'
-      });
-    } finally {
-      setNewCategoryVisible(false);
-    }
   };
 
   const onToggleIncorrect = isIncorrect => {
@@ -331,14 +305,15 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           />
         }
         {
-          <Button
-            className={isEditionModeOn ? styles.newCategoryButton : null}
-            disabled={!checkNoCodelistEditing()}
-            icon="add"
-            label={resources.messages['newCategory']}
-            onClick={() => setNewCategoryVisible(true)}
-            style={{ marginRight: !checkNoCodelistEditing() ? '0.5rem' : '1.5rem' }}
-            visible={!isInDesign || isEditionModeOn}
+          <CategoryForm
+            checkCategoryDuplicates={checkCategoryDuplicates}
+            checkNoCodelistEditing={checkNoCodelistEditing}
+            columns={['shortCode', 'description']}
+            isEditionModeOn={isEditionModeOn}
+            isIncorrect={isIncorrect}
+            isInDesign={isInDesign}
+            onLoadCategories={onLoadCategories}
+            onToggleIncorrect={onToggleIncorrect}
           />
         }
         {
@@ -361,20 +336,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         renderCategories(codelistsManagerState.categories)
       )}
       {/* {isLoading ? <Spinner className={styles.positioning} /> : renderCategories(categories)} */}
-      <CategoryForm
-        checkCategoryDuplicates={checkCategoryDuplicates}
-        columns={['shortCode', 'description']}
-        isIncorrect={isIncorrect}
-        newCategory={newCategory}
-        onChangeCategoryForm={onChangeCategoryForm}
-        onHideDialog={() => {
-          setNewCategory({ shortCode: '', description: '' });
-          setNewCategoryVisible(false);
-        }}
-        onSaveCategory={onSaveCategory}
-        onToggleIncorrect={onToggleIncorrect}
-        visible={newCategoryVisible}
-      />
+
       {renderErrors(errorMessageTitle, errorMessage)}
     </React.Fragment>
   );

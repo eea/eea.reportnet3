@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { capitalize, isNull, isUndefined } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { capitalize, isNull, isUndefined, isEmpty } from 'lodash';
 
 import styles from './CodelistForm.module.css';
 
@@ -21,23 +21,40 @@ const CodelistForm = ({
   visible
 }) => {
   const resources = useContext(ResourcesContext);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   useEffect(() => {
     onFormLoaded();
   }, []);
 
+  useEffect(() => {
+    checkDisabledSave();
+  }, [item]);
+
+  const checkDisabledSave = () => {
+    const inmKeys = [...Object.keys(item)];
+    if (inmKeys.indexOf('codelistId') > -1) {
+      inmKeys.splice(inmKeys.indexOf('codelistId'), 1);
+    }
+    console.log(inmKeys.filter(key => item[key].trim() === ''));
+    setIsSaveDisabled(!isEmpty(inmKeys.filter(key => item[key].trim() === '')));
+  };
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['save']}
+        disabled={isSaveDisabled}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => {
+          setIsSaveDisabled(true);
           onSaveItem(formType);
+          setIsSaveDisabled(false);
         }}
       />
       <Button
-        label={resources.messages['cancel']}
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           onCancelAddEditItem();
           onHideDialog();
