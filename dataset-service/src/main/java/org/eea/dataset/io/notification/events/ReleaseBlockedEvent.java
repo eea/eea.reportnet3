@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+
 /**
- * The Class CopyHasBlockers.
+ * The Class ReleaseBlockedEvent is a notification used when unreleased the release because has
+ * blocker errors.
  */
 @Component
-public class CopyHasBlockers implements NotificableEventHandler {
+public class ReleaseBlockedEvent implements NotificableEventHandler {
 
 
   /** The dataset metabase controller zuul. */
@@ -30,7 +32,7 @@ public class CopyHasBlockers implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.COPY_HAS_BLOCKERS;
+    return EventType.RELEASE_BLOCKED;
   }
 
   /**
