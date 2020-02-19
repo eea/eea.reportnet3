@@ -4,14 +4,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.3.RELEASE</version>
+
+    <groupId>org.eea</groupId>
+    <artifactId>eea-pom</artifactId>
+    <version>3.0.0</version>
+    <relativePath>../parent</relativePath>
   </parent>
   <groupId>org.eea</groupId>
   <artifactId>microservice-pom</artifactId>
   <packaging>pom</packaging>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.0.0</version>
   <properties>
     <java.version>1.8</java.version>
     <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
@@ -20,9 +22,21 @@
     <mapstruct.version>1.3.0.Final</mapstruct.version>
     <projectlombok.version>1.18.0</projectlombok.version>
     <mockito.version>2.27.0</mockito.version>
+
+
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.eea.utils</groupId>
+      <artifactId>common-utitlities</artifactId>
+      <version>${common-utitlities.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>${common-interfaces.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -161,16 +175,6 @@
     </dependency>
 
 
-    <dependency>
-      <groupId>org.eea.utils</groupId>
-      <artifactId>common-utitlities</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eea.interfaces</groupId>
-      <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
