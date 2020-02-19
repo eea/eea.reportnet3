@@ -357,23 +357,28 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
+
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
     try {
       String response;
-
-      if (StringUtils.isBlank(response = dataschemaService
-          .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      if (StringUtils.isBlank(
+          response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
       // propagate the new field to the existing records in the dataset value
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+      // with that we create the rule automatic required
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
-        rulesControllerZuul.createAutomaticRule(dataschemaService.getDatasetSchemaId(datasetId),
-            fieldSchemaVO.getId(), fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
       }
+      // and with it we create the others automatic rules like number etc
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -402,6 +407,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (type != null) {
         // if we changue the type we need to delete all rules
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
+        // if we changue the type we need to upload the new automatic rules
+        rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
         // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
       }
