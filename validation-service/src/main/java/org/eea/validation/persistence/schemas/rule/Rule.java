@@ -38,10 +38,6 @@ public class Rule {
   @Field(value = "enabled")
   private Boolean enabled;
 
-  /** The salience. */
-  @Field(value = "salience")
-  private Integer salience;
-
   /** The activation_group. */
   @Field(value = "activationGroup")
   private String activationGroup;
@@ -68,8 +64,8 @@ public class Rule {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition);
+    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
+        whenCondition, thenCondition);
   }
 
   /**
@@ -89,7 +85,7 @@ public class Rule {
     Rule other = (Rule) obj;
     return Objects.equals(ruleId, other.ruleId) && Objects.equals(referenceId, other.referenceId)
         && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
-        && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
+        && Objects.equals(enabled, other.enabled)
         && Objects.equals(activationGroup, other.activationGroup)
         && Objects.equals(type, other.type) && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(thenCondition, other.thenCondition);

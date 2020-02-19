@@ -118,4 +118,17 @@ public interface RulesController {
       @RequestParam(name = "typeData", required = true) TypeData typeData,
       @RequestParam(name = "typeEntityEnum", required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(name = "requiredRule") Boolean requiredRule);
+
+
+
+  /**
+   * Update rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param ruleVO the rule VO
+   */
+  @PutMapping(value = "/updateRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+      @RequestParam(name = "referenceId") String referenceId, @RequestBody RuleVO ruleVO);
 }

@@ -97,7 +97,6 @@ public class RulesServiceImpl implements RulesService {
     therule.setReferenceId(new ObjectId());
     therule.setRuleId(new ObjectId());
     therule.setRuleName("test");
-    therule.setSalience(1);
     List<String> thenlist = new ArrayList<>();
     thenlist.add("that field must be filled");
     thenlist.add("ERROR");
