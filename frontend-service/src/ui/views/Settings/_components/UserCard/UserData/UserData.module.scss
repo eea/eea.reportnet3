@@ -1,0 +1,24 @@
+.userDataContainer {
+  width: 23rem;
+  border-bottom: 1px solid rgb(212, 212, 212);
+  text-align: center;
+  padding: 1rem;
+}
+
+.userImgBoxContainer {
+  text-align: center;
+}
+
+.userName {
+  color: var(--c-corporate-blue);
+  font-weight: bold;
+  margin-top: 0.5rem;
+  font-size: 1.25em;
+}
+
+.userMail {
+  margin-top: 0.1rem;
+  margin-bottom: 1rem;
+  font-size: 1em;
+  font-weight: bold;
+}

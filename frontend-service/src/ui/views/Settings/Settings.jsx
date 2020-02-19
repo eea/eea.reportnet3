@@ -1,43 +1,50 @@
-import React, { Component, useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+
 import styles from './Settings.module.scss';
+
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from '../_components/Title/Title';
-import { DataflowService } from 'core/services/Dataflow';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { TextUtils } from 'ui/views/_functions/Utils';
-import { UserDesign } from './_components/UserDesign/UserDesign';
-import { UserDefault } from './_components/UserDefault';
-import { UserConfiguration } from './_components/UserConfiguration';
+import { UserDesignOptions } from './_components/UserDesignOptions';
+import { UserCard } from './_components/UserCard';
+import { UserConfigurationOptions } from './_components/UserConfigurationOptions';
 
-const Settings = withRouter(({ history, match }) => {
+const initialState = {
+  isVisibleUserDesignOptions: true,
+  isVisibleUserSettingsOptions: false
+};
+
+const reducer = (state, { type, payload }) => {
+  switch (type) {
+    case 'VISIBLE_USER_DESIGN_OPTIONS':
+      return {
+        ...state,
+        isVisibleUserDesignOptions: payload.isVisibleUserDesignOptions,
+        isVisibleUserSettingsOptions: payload.isVisibleUserSettingsOptions
+      };
+    case 'VISIBLE_USER_SETTINGS_OPTIONS':
+      return {
+        ...state,
+        isVisibleUserSettingsOptions: payload.isVisibleUserSettingsOptions,
+        isVisibleUserDesignOptions: payload.isVisibleUserDesignOptions
+      };
+    default:
+      return state;
+  }
+};
+
+const Settings = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
-  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
 
-  const [dataflowData, setDataflowData] = useState();
-  const [dataflowStatus, setDataflowStatus] = useState();
-  const [isCustodian, setIsCustodian] = useState(false);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [ConfigVisible, setConfigVisible] = useState(false);
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
-  const [config, setConfig] = useState('isVisible');
+  const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
 
-  const [settingsSectionLoaded, setSettingsSectionLoaded] = useState('');
-
-  //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([
       {
@@ -59,268 +66,78 @@ const Settings = withRouter(({ history, match }) => {
     leftSideBarContext.addModels([
       {
         icon: 'palette',
-        label: 'design',
-        onClick: e => {
-          showDispatch({
-            type: 'SHOWUSERDESIGN',
+        label: 'userDesignOptions',
+        onClick: () => {
+          visibleUserSectionDispatch({
+            type: 'VISIBLE_USER_DESIGN_OPTIONS',
             payload: {
-              isOpenUserDesign: true,
-              isOpenUserConfiguration: false,
-              isOpenUserDefault: false
+              isVisibleUserDesignOptions: true,
+              isVisibleUserSettingsOptions: false
             }
           });
         },
-
-        title: 'design'
+        title: 'User Design Options'
       },
       {
-        // href: getUrl(routes['CODELISTS']),
         icon: 'configs',
-        label: 'configUserSettngs',
+        label: 'userConfigurationOptions',
         onClick: () => {
-          showDispatch({
-            type: 'SHOWUSERCONFIGURATION',
+          visibleUserSectionDispatch({
+            type: 'VISIBLE_USER_SETTINGS_OPTIONS',
             payload: {
-              isOpenUserConfiguration: true,
-              isOpenUserDefault: false,
-              isOpenUserDesign: false
+              isVisibleUserDesignOptions: false,
+              isVisibleUserSettingsOptions: true
             }
           });
         },
-        title: 'configUserSettngs'
+        title: 'User Configuration Options'
       }
     ]);
   }, []);
 
-  const initialState = {
-    isOpenUserDefault: true,
-    isOpenUserDesign: false,
-    isOpenUserConfiguration: false
-  };
+  console.log(
+    'UserDesignOptions ',
+    visibleUserSectionState.isVisibleUserDesignOptions,
+    ' UserConfigurationOptions ',
+    visibleUserSectionState.isVisibleUserSettingsOptions
+  );
 
-  const reducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'SHOWUSERDESIGN':
-        return {
-          ...state,
-          isOpenUserDesign: (state.isOpenUserDesign = payload.isOpenUserDesign),
-          isOpenUserConfiguration: (state.isOpenUserConfiguration = payload.isOpenUserConfiguration),
-          isOpenUserDefault: (state.isOpenUserDefault = payload.isOpenUserDefault)
-        };
-      case 'SHOWUSERCONFIGURATION':
-        return {
-          ...state,
-          isOpenUserConfiguration: (state.isOpenUserConfiguration = payload.isOpenUserConfiguration),
-          isOpenUserDesign: (state.isOpenUserDesign = payload.isOpenUserDesign),
-          isOpenUserDefault: (state.isOpenUserDefault = payload.isOpenUserDefault)
-        };
-    }
-  };
-
-  const [showState, showDispatch] = useReducer(reducer, initialState);
-
-  console.log('showState', showState);
-
-  const Show = () => {
+  const toggleUserOptions = () => {
     return (
       <>
-        {/* <h1>{counterState.counter}</h1> */}
+        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
 
-        {showState.isOpenUserDefault && (
-          <div>
-            <UserDefault />
-          </div>
-        )}
+        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfigurationOptions />}
 
-        {showState.isOpenUserDesign && (
-          <div>
-            <UserDesign />
-          </div>
-        )}
-
-        {showState.isOpenUserConfiguration && (
-          <div>
-            <UserConfiguration />
-          </div>
-        )}
+        <UserCard />
       </>
     );
-  };
-
-  //   useEffect(() => {
-  //     if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
-  //       leftSideBarContext.addModels([
-  //         {
-  //           label: 'edit',
-  //           icon: 'edit',
-  //           onClick: e => {
-  //             onShowEditForm();
-  //             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
-  //           },
-  //           title: 'edit'
-  //         },
-  //         {
-  //           label: 'manageRoles',
-  //           icon: 'manageRoles',
-  //           onClick: () => {
-  //             onShowManageRolesDialog();
-  //           },
-  //           title: 'manageRoles'
-  //         },
-  //         {
-  //           label: 'settings',
-  //           icon: 'settings',
-  //           onClick: e => {
-  //             setIsActivePropertiesDialog(true);
-  //           },
-  //           show: true,
-  //           title: 'settings'
-  //         }
-  //       ]);
-  //     } else {
-  //       leftSideBarContext.addModels([
-  //         {
-  //           label: 'settings',
-  //           icon: 'settings',
-  //           onClick: e => {
-  //             setIsActivePropertiesDialog(true);
-  //           },
-  //           title: 'settings'
-  //         }
-  //       ]);
-  //     }
-  //   }, [isCustodian, dataflowStatus]);
-
-  useEffect(() => {
-    setLoading(true);
-    onLoadDataflowsData();
-    //onLoadReportingDataflow();
-    // onLoadSchemasValidations();
-  }, [match.params.dataflowId, isDataUpdated]);
-
-  useEffect(() => {
-    const refresh = notificationContext.toShow.find(
-      notification => notification.key === 'ADD_DATACOLLECTION_COMPLETED_EVENT'
-    );
-    if (refresh) {
-      onUpdateData();
-    }
-  }, [notificationContext]);
-
-  if (isDeleteDialogVisible && document.getElementsByClassName('p-inputtext p-component').length > 0) {
-    document.getElementsByClassName('p-inputtext p-component')[0].focus();
-  }
-
-  const onLoadDataflowsData = async () => {
-    try {
-      const allDataflows = await DataflowService.all();
-      const dataflowInitialValues = {};
-      allDataflows.accepted.forEach(element => {
-        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-      });
-      dataflowDispatch({
-        type: 'ON_INIT_DATA',
-        payload: dataflowInitialValues
-      });
-    } catch (error) {
-      console.error('dataFetch error: ', error);
-    }
-  };
-
-  /*const onLoadReportingDataflow = async () => {
-    try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      setDataflowData(dataflow);
-      setDataflowStatus(dataflow.status);
-      if (!isEmpty(dataflow.designDatasets)) {
-        dataflow.designDatasets.forEach((schema, idx) => {
-          schema.index = idx;
-        });
-        setDesignDatasetSchemas(dataflow.designDatasets);
-        const datasetSchemaInfo = [];
-        dataflow.designDatasets.map(schema => {
-          datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
-        });
-        setUpdatedDatasetSchema(datasetSchemaInfo);
-      }
-    } catch (error) {
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
-      if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(routes.DATAFLOWS));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  //
-  const onLoadSchemasValidations = async () => {
-    setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
-  };
-*/
-
-  /*const onShowEditForm = () => {
-    setIsEditForm(true);
-    setIsDataflowDialogVisible(true);
-    setIsDataflowFormReset(true);
-  };
-
-  const onShowManageRolesDialog = () => {
-    setIsActiveManageRolesDialog(true);
-  };
-*/
-
-  const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
   };
 
   const layout = children => {
     return (
       <MainLayout
         leftSideBarConfig={{
-          isCustodian,
           buttons: []
         }}>
-        <div className="rep-container">{children}</div>
-
-        {/* <UserSettings /> */}
-
-        {/* 
-          <UserDesign /> 
-          {if (settingsSectionLoaded === '<UserDesign />') <UserDesign />
-            else <UserSettings />}
-        */}
+        <div className>
+          <div className="rep-container">{children}</div>
+        </div>
       </MainLayout>
     );
   };
 
   return layout(
-    <div className="rep-row">
-      {/* <LeftSideBar
-        subscribeButtonTitle={resources.messages['subscribeThisButton']}
-        dataflowTitle={dataflowData.name}
-        navTitle={resources.messages['dataflow']}
-        components={[]}
-        entity={`${config.permissions.DATAFLOW}${dataflowData.id}`}
-        style={{ textAlign: 'left' }}
-      /> */}
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        <Title
-          title={
-            !isUndefined(dataflowState[match.params.dataflowId])
-              ? TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
-              : null
-          }
-          subtitle={resources.messages['settingsUser']}
-          icon="user-profile"
-          iconSize="4rem"
-        />
+    <div>
+      <div className="rep-row">
+        <div className={` rep-col-12 rep-col-sm-12`}>
+          <Title title={resources.messages['settingsUser']} icon="user-profile" iconSize="4rem" />
+        </div>
       </div>
 
-      {Show()}
+      <div className="rep-row">
+        <div className={styles.pageMainContent}>{toggleUserOptions()}</div>
+      </div>
     </div>
   );
 });

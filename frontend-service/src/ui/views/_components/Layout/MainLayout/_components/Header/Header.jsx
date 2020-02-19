@@ -28,8 +28,8 @@ const Header = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
-  
-  const [confirmvisible,setConfirmVisible]=useState(false)
+
+  const [confirmvisible, setConfirmVisible] = useState(false);
 
   const loadTitle = () => (
     <a
@@ -59,37 +59,30 @@ const Header = withRouter(({ history }) => {
         <div className={styles.localhostAlert}>
           <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
         </div>
-        
       );
   };
   ////////////////////////////////////////////
 
   const confgDiag = () => {
-    return (
-      <div>
-        
-      </div>
-    );
+    return <div></div>;
   };
 
   ///////////////////////////////////////////////////
-   const userLogout = async () =>{  userContext.socket.disconnect(() => {});
-   try {
-     await UserService.logout();
-   } catch (error) {
-     notificationContext.add({
-       type: 'USER_LOGOUT_ERROR'
-     });
-   } finally {
-     
-     userContext.onLogout();
-   }}
-  
-  const loadUser = () => (
-    
-    <>
-    {console.log('confirmvisible:', confirmvisible )
+  const userLogout = async () => {
+    userContext.socket.disconnect(() => {});
+    try {
+      await UserService.logout();
+    } catch (error) {
+      notificationContext.add({
+        type: 'USER_LOGOUT_ERROR'
+      });
+    } finally {
+      userContext.onLogout();
     }
+  };
+
+  const loadUser = () => (
+    <>
       <div className={styles.userWrapper}>
         <InputSwitch
           checked={themeContext.currentTheme === 'dark'}
@@ -121,7 +114,7 @@ const Header = withRouter(({ history }) => {
         <FontAwesomeIcon
           onClick={async e => {
             e.preventDefault();
-            userContext.showLogoutConfirmation?setConfirmVisible(true):userLogout();
+            userContext.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
           }}
           icon={AwesomeIcons('logout')}
         />
@@ -133,15 +126,19 @@ const Header = withRouter(({ history }) => {
       {loadTitle()}
       <BreadCrumb />
       {loadUser()}
-      {userContext.showLogoutConfirmation && <ConfirmDialog
-          onConfirm={()=>{userLogout()}}
+      {userContext.showLogoutConfirmation && (
+        <ConfirmDialog
+          onConfirm={() => {
+            userLogout();
+          }}
           onHide={() => setConfirmVisible(false)}
           visible={confirmvisible}
           header={resources.messages['deleteRow']}
           labelConfirm={resources.messages['yes']}
           labelCancel={resources.messages['no']}>
           {resources.messages['confirmDeleteRow']}
-        </ConfirmDialog>}
+        </ConfirmDialog>
+      )}
     </div>
   );
 });
