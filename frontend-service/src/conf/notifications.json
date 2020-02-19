@@ -340,6 +340,11 @@
           "key": "DATAFLOW_NAME_EXISTS",
           "lifeTime": 5000,
           "fixed": false
+        },
+        {
+          "key": "COPY_HAS_BLOCKERS",
+          "lifeTime": 5000,
+          "fixed": false
         }
       ]
     },

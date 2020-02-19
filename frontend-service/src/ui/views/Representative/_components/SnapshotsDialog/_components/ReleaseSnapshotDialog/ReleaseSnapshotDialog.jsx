@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import moment from 'moment';
 
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 
@@ -29,10 +31,16 @@ export const ReleaseSnapshotDialog = ({
       await SnapshotService.createByIdReporter(datasetId, snapshotDescription, isReleased);
       onLoadSnapshotList(datasetId);
     } catch (error) {
-      notificationContext.add({
-        type: 'CREATE_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.data == DataflowConf.errorTypes['copyWithErrors']) {
+        notificationContext.add({
+          type: 'COPY_HAS_BLOCKERS'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       hideReleaseDialog();
     }
