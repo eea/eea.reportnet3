@@ -215,10 +215,15 @@ public class RulesServiceImpl implements RulesService {
               UUID.randomUUID().toString(), document.get("idCodeList").toString());
           break;
         default:
+          rule = null;
+          LOG.info("non necessary automatic rule for a type of data {}", typeData.getValue());
           break;
       }
     }
-    rulesRepository.createNewRule(idDatasetSchema, rule);
+    if (null != rule) {
+      rulesRepository.createNewRule(idDatasetSchema, rule);
+    }
+
   }
 
 }
