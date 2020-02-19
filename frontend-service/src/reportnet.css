@@ -26,6 +26,7 @@
   --white: #ffffff;
   --informative-color: #006fb4;
   --warning-color: #f29527;
+  --success-color-lighter: #bcdbbc;
   --success-color: #467a39;
   --success-color-rgb: 70, 122, 57;
   --success-color-dark: #39632f;
@@ -227,7 +228,7 @@
   --growl-info-bg: var(--c-corporate-blue);
   --growl-info-color: var(--black);
   --growl-info-icon-color: var(--black);
-  --growl-success-bg: var(--success-color);
+  --growl-success-bg: var(--success-color-lighter);
   --growl-success-color: var(--black);
   --growl-success-icon-color: var(--black);
   --growl-warning-bg: var(--c-corporate-yellow);
