@@ -42,6 +42,11 @@ public class RulesServiceImpl implements RulesService {
   private RulesSchemaMapper rulesSchemaMapper;
 
   /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
+
+  /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -54,8 +59,9 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema) {
-    return rulesSchemaMapper.entityToClass(
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), false));
+    RulesSchema rulesSchema =
+        rulesRepository.getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), false);
+    return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
   }
 
 
@@ -114,9 +120,9 @@ public class RulesServiceImpl implements RulesService {
   public void deleteEmptyRulesScehma(ObjectId schemaId) {
 
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(schemaId);
-    System.out.println("este es el: " + ruleSchema);
+    LOG.info("este es el: {}", ruleSchema);
     if (null != ruleSchema) {
-      System.out.println("No es null y voy a borarlo:" + ruleSchema.getRulesSchemaId());
+      LOG.info("No es null y voy a borarlo: {}", ruleSchema.getRulesSchemaId());
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
     }
   }
