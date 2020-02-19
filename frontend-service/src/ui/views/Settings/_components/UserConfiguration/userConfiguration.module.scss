@@ -38,7 +38,33 @@
     .themeSwitcherTooltip {
       z-index: 3004;
     }
+
+ }
+    //////////////////////////////////////////
+
+
+  .userConfigurationContainer {
+    width: 65%;
+    height: 100%;
+    border-radius: 5px;
+    border: 1px solid rgb(212, 212, 212);
+    -webkit-box-shadow: 6px 8px 9px 1px rgba(230, 227, 230, 1);
+    -moz-box-shadow: 6px 8px 9px 1px rgba(230, 227, 230, 1);
+    box-shadow: 6px 8px 9px 1px rgba(230, 227, 230, 1);
+    text-align: left;
+  }
+  .userConfirmLogout {
+    color: var(--c-corporate-blue);
+    font-weight: bold;
+    margin-top: 0.5rem;
+    font-size: 1.25em;
+    margin-left:1rem;
+  }
   
-   
+  .userDefaultRows {
+    margin-top: 0.1rem;
+    margin-bottom: 1rem;
+    font-size: 1em;
+    font-weight: bold;
   }
   

@@ -8,6 +8,8 @@ export const ToggleUserConfirmation = () => {
   const userContext = useContext(UserContext);
   const resources = useContext(ResourcesContext);
   return (
+    <div>
+    <h3>Confirmation user Logout</h3>
     <InputSwitch
       checked={userContext.userProps.showLogoutConfirmation}
       style={{ marginRight: '1rem' }}
@@ -18,5 +20,6 @@ export const ToggleUserConfirmation = () => {
           : resources.messages['toogleConfirmationOn']
       }
     />
+    </div>
   );
 };

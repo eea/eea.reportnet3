@@ -6,7 +6,9 @@ export const DefaultRowsPages = () => {
   const resources = useContext(ResourcesContext);
 
   return (
-    <h3>{resources.messages['defaultRowsPage']}</h3>,
+    <>
+    
+        <h3>{resources.messages['defaultRowsPage']}</h3>
     
       <Dropdown
         name="dataProvidersDropdown"
@@ -16,6 +18,8 @@ export const DefaultRowsPages = () => {
         options={[1, 3, 5]}
         onChange={e => {}}
       />
-    
+    </>
   );
 };
+
+

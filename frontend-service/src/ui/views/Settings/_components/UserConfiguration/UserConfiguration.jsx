@@ -5,21 +5,18 @@ import { ToggleUserConfirmation } from './_components/UserConfirmation';
 
 const UserConfiguration = () => {
   return (
-    <div>
-      <h1
-      // onClick={e => {
-      //   userContext.onToggleLogoutConfirm();
-      // }}
-      >
-        UserConfiguration
-      </h1>
-      <h3>Confirmation user Logout</h3>
+    <div className={styles.userConfigurationContainer}>
+     
+      <div className={styles.userConfirmLogout}>
       <ToggleUserConfirmation />
-      <div>
+      </div>
+
+      <div className={styles.userConfirmLogout}>
         <DefaultRowsPages />
       </div>
     </div>
-  );
+   );
+ 
 };
 
 export { UserConfiguration };
