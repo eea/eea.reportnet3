@@ -90,16 +90,16 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedData
         <FontAwesomeIcon icon={AwesomeIcons('clone')} />
       </div>
 
-      <div className={`${styles.deliveryDate}`}>
+      <div className={`${styles.deliveryDate} dataflowList-delivery-date-fourth-step`}>
         <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
       </div>
 
-      <div className={styles.text}>
+      <div className={`${styles.text} dataflowList-name-description-fifth-step`}>
         <h3 className={`${styles.title}`}>{dataflowTitles.name}</h3>
 
         <p>{dataflowTitles.description}</p>
       </div>
-      <div className={styles.status}>
+      <div className={`${styles.status}  dataflowList-status-sixt-step`}>
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
         </p>
