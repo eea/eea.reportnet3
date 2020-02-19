@@ -1,21 +1,8 @@
-.titleBar {
-    display: flex;
-    border-bottom: 1px solid var(--gray-25);
-    margin: 20px 0;
-    justify-content: space-between;
-    .title_wrapper {
-      .title {
-        margin: 0;
-        color: var(--main-font-color);
-      }
-    }
-  }
-  
-  .dialog :global .p-dialog-content {
-    padding-bottom: 0 !important;
-  }
-  
-  .releaseSnapshotsDialog :global .p-dialog-content {
-    max-height: 50vh !important;
-  }
-  
+.pageMainContent {
+  width: 100%;
+  margin: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}

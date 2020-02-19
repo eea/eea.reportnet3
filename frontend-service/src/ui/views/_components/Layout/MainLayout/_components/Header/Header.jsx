@@ -28,8 +28,8 @@ const Header = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
-  
-  const [confirmvisible,setConfirmVisible]=useState(false)
+
+  const [confirmvisible, setConfirmVisible] = useState(false);
 
   const loadTitle = () => (
     <a
@@ -59,7 +59,6 @@ const Header = withRouter(({ history }) => {
         <div className={styles.localhostAlert}>
           <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
         </div>
-        
       );
   };
   ////////////////////////////////////////////
@@ -67,20 +66,20 @@ const Header = withRouter(({ history }) => {
   
 
   ///////////////////////////////////////////////////
-   const userLogout = async () =>{  userContext.socket.disconnect(() => {});
-   try {
-     await UserService.logout();
-   } catch (error) {
-     notificationContext.add({
-       type: 'USER_LOGOUT_ERROR'
-     });
-   } finally {
-     
-     userContext.onLogout();
-   }}
-  
+  const userLogout = async () => {
+    userContext.socket.disconnect(() => {});
+    try {
+      await UserService.logout();
+    } catch (error) {
+      notificationContext.add({
+        type: 'USER_LOGOUT_ERROR'
+      });
+    } finally {
+      userContext.onLogout();
+    }
+  };
+
   const loadUser = () => (
-    
     <>
    
       <div className={styles.userWrapper}>
