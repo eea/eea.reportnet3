@@ -1,5 +1,10 @@
-.userLinksContainer {
-  width: 23rem;
-  text-align: center;
-  padding: 1rem;
+.linksContainer {
+  height: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.link {
+  font-size: 30px;
 }

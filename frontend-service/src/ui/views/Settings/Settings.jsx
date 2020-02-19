@@ -95,13 +95,6 @@ const Settings = withRouter(({ history }) => {
     ]);
   }, []);
 
-  console.log(
-    'UserDesignOptions ',
-    visibleUserSectionState.isVisibleUserDesignOptions,
-    ' UserConfigurationOptions ',
-    visibleUserSectionState.isVisibleUserSettingsOptions
-  );
-
   const toggleUserOptions = () => {
     return (
       <>
@@ -136,7 +129,7 @@ const Settings = withRouter(({ history }) => {
       </div>
 
       <div className="rep-row">
-        <div className={styles.pageMainContent}>{toggleUserOptions()}</div>
+        <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
       </div>
     </div>
   );
