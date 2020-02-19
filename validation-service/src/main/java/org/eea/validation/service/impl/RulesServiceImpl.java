@@ -3,15 +3,20 @@ package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.util.AutomaticRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +31,11 @@ public class RulesServiceImpl implements RulesService {
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
 
   /** The rules schema mapper. */
   @Autowired
@@ -78,7 +88,6 @@ public class RulesServiceImpl implements RulesService {
     therule.setActivationGroup("");
     therule.setAutomatic(true);
     therule.setEnabled(true);
-    therule.setOrder(1);
     therule.setReferenceId(new ObjectId());
     therule.setRuleId(new ObjectId());
     therule.setRuleName("test");
@@ -142,19 +151,67 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Creates the new rule.
    *
-   * @param idRuleSchema the id rule schema
-   * @param idSchema the id schema
+   * @param idDatasetSchema the id dataset schema
    * @param rule the rule
    * @return the update result
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException {
-
-    rulesRepository.createNewRule(idRuleSchema, idSchema, rule);
-
+  public void createNewRule(String idDatasetSchema, Rule rule) throws EEAException {
+    rulesRepository.createNewRule(idDatasetSchema, rule);
   }
 
 
+  /**
+   * Creates the automatic rules.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param typeData the type data
+   * @param required the required
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createAutomaticRules(String idDatasetSchema, String referenceId,
+      TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException {
+    Rule rule = new Rule();
+    if (Boolean.TRUE.equals(required)) {
+      rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
+          UUID.randomUUID().toString());
+    } else {
+      switch (typeData) {
+        case NUMBER:
+          rule = AutomaticRules.createAutomaticNumberRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString());
+          break;
+        case DATE:
+          rule = AutomaticRules.createAutomaticDateRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString());
+          break;
+        case BOOLEAN:
+          rule = AutomaticRules.createAutomaticBooleanRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString());
+          break;
+        case COORDINATE_LAT:
+          rule = AutomaticRules.createAutomaticLatRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString());
+          break;
+        case COORDINATE_LONG:
+          rule = AutomaticRules.createAutomaticLongRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString());
+          break;
+        case CODELIST:
+          Document document = schemasRepository.findFieldSchema(idDatasetSchema, referenceId);
+          rule = AutomaticRules.createAutomaticCodelistRule(referenceId, typeEntityEnum,
+              UUID.randomUUID().toString(), (Long) document.get("idCodeList"));
+          break;
+        default:
+          break;
+      }
+    }
+    rulesRepository.createNewRule(idDatasetSchema, rule);
+
+  }
 
 }

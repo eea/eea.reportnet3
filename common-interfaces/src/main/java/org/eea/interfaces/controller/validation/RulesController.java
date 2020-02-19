@@ -1,5 +1,7 @@
 package org.eea.interfaces.controller.validation;
 
+import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -93,11 +95,27 @@ public interface RulesController {
   /**
    * Createnew rule.
    *
-   * @param idRuleSchema the id rule schema
-   * @param idSchema the id schema
+   * @param idDatasetSchema the id dataset schema
    * @param ruleVO the rule VO
    */
   @PutMapping(value = "/createNewRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createNewRule(@RequestParam(name = "idRuleSchema") String idRuleSchema,
-      @RequestParam(name = "idSchema") String idSchema, @RequestBody RuleVO ruleVO);
+  void createNewRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+      @RequestBody RuleVO ruleVO);
+
+  /**
+   * Creates the automatic rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param typeData the type data
+   * @param typeEntityEnum the type entity enum
+   * @param requiredRule the required rule
+   */
+  @PutMapping(value = "/createAutomaticRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  void createAutomaticRule(
+      @RequestParam(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @RequestParam(name = "referenceId", required = true) String referenceId,
+      @RequestParam(name = "typeData", required = true) TypeData typeData,
+      @RequestParam(name = "typeEntityEnum", required = true) TypeEntityEnum typeEntityEnum,
+      @RequestParam(name = "requiredRule") Boolean requiredRule);
 }

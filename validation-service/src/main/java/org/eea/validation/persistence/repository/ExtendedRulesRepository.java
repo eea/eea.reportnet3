@@ -2,8 +2,8 @@ package org.eea.validation.persistence.repository;
 
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 
 /**
  * The Interface ExtendedRulesRepository.
@@ -55,7 +55,7 @@ public interface ExtendedRulesRepository {
    * @return the update result
    * @throws EEAException
    */
-  void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException;
+  void createNewRule(String idDatasetSchema, Rule rule) throws EEAException;
 
 
 }

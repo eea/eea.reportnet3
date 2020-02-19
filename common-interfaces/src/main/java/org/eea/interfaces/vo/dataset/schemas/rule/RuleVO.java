@@ -42,9 +42,6 @@ public class RuleVO {
   /** The activation group. */
   private String activationGroup;
 
-  /** The order. */
-  private Integer order;
-
   /** The type. */
   private TypeEntityEnum type;
 
@@ -64,7 +61,7 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, order, type, whenCondition, thenCondition);
+        activationGroup, type, whenCondition, thenCondition);
   }
 
   /**
@@ -86,8 +83,7 @@ public class RuleVO {
         && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
         && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
         && Objects.equals(activationGroup, other.activationGroup)
-        && Objects.equals(order, other.order) && Objects.equals(type, other.type)
-        && Objects.equals(thenCondition, other.thenCondition)
+        && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition);
   }
 

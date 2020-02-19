@@ -122,28 +122,12 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   }
 
   @Override
-  public void createNewRule(String idRuleSchema, String idSchema, Rule rule) throws EEAException {
+  public void createNewRule(String idDatasetSchema, Rule rule) throws EEAException {
     Update update = new Update().push("rules", rule);
     Query query = new Query();
-    query.addCriteria(new Criteria("_id").is(new ObjectId(idRuleSchema)));
+    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, RulesSchema.class);
   }
 
-
-  //
-  // UpdateResult updateTableSchema(String datasetSchemaId, Document tableSchema)
-  // throws EEAException {
-  // try {
-  // return mongoDatabase.getCollection("DataSetSchema").updateOne(
-  // new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
-  // tableSchema.get("_id")),
-  // new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
-  // new UpdateOptions().arrayFilters(
-  // Arrays.asList(new Document("tableSchemaId._id", tableSchema.get("_id")))));
-  // } catch (IllegalArgumentException e) {
-  // LOG_ERROR.error("error updating table: ", e);
-  // throw new EEAException(e);
-  // }
-  // }
 
 }

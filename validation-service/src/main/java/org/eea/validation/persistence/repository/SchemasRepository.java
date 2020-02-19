@@ -12,7 +12,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *
  * @author Mario Severa
  */
-public interface SchemasRepository extends MongoRepository<DataSetSchema, ObjectId> {
+public interface SchemasRepository
+    extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
 
 
 

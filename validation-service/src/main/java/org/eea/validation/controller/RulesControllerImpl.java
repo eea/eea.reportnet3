@@ -5,6 +5,8 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
@@ -212,17 +214,60 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/createNewRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void createNewRule(@RequestParam(name = "idRuleSchema") String idRuleSchema,
-      @RequestParam(name = "idSchema") String idSchema, @RequestBody RuleVO ruleVO) {
+  public void createNewRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+      @RequestBody RuleVO ruleVO) {
     try {
-      rulesService.createNewRule(idRuleSchema, idSchema, ruleMapper.classToEntity(ruleVO));
+      rulesService.createNewRule(idDatasetSchema, ruleMapper.classToEntity(ruleVO));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the rules  with idRuleSchema {} in datasetSchema {}",
-          idRuleSchema, idSchema);
+      LOG_ERROR.error("Error deleting the rules  with idDatasetSchema {} ", idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_DELETING_RULE,
           e);
     }
 
   }
+
+
+  /**
+   * Creates the automatic rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param typeData the type data
+   * @param typeEntityEnum the type entity enum
+   * @param requiredRule the required rule
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/createAutomaticRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void createAutomaticRule(
+      @RequestParam(name = "idDatasetSchema", required = true) String idDatasetSchema,
+      @RequestParam(name = "referenceId", required = true) String referenceId,
+      @RequestParam(name = "typeData", required = true) TypeData typeData,
+      @RequestParam(name = "typeEntityEnum", required = true) TypeEntityEnum typeEntityEnum,
+      @RequestParam(name = "requiredRule") Boolean requiredRule) {
+
+    if (Boolean.TRUE.equals(requiredRule)) {
+      try {
+        rulesService.createAutomaticRules(idDatasetSchema, referenceId, typeEntityEnum, null,
+            Boolean.TRUE);
+      } catch (EEAException e) {
+        LOG_ERROR.error(
+            "Error creating the required rule for idDatasetSchema {} and field with id {} ",
+            idDatasetSchema, referenceId);
+      }
+    } else {
+      try {
+        rulesService.createAutomaticRules(idDatasetSchema, referenceId, typeEntityEnum, typeData,
+            Boolean.FALSE);
+      } catch (EEAException e) {
+        LOG_ERROR.error(
+            "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
+            idDatasetSchema, referenceId, typeData);
+      }
+    }
+
+  }
+
+
 
 }

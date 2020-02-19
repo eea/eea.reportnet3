@@ -46,10 +46,6 @@ public class Rule {
   @Field(value = "activationGroup")
   private String activationGroup;
 
-  /** The order. */
-  @Field(value = "order")
-  private Integer order;
-
   /** The type. */
   @Field(value = "type")
   private TypeEntityEnum type;
@@ -72,7 +68,7 @@ public class Rule {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, order, type, whenCondition, thenCondition);
+        activationGroup, type, whenCondition, thenCondition);
   }
 
   /**
@@ -94,8 +90,7 @@ public class Rule {
         && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
         && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
         && Objects.equals(activationGroup, other.activationGroup)
-        && Objects.equals(order, other.order) && Objects.equals(type, other.type)
-        && Objects.equals(whenCondition, other.whenCondition)
+        && Objects.equals(type, other.type) && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(thenCondition, other.thenCondition);
   }
 }

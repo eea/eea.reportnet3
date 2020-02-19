@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -368,6 +369,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       }
       // propagate the new field to the existing records in the dataset value
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+
+        rulesControllerZuul.createAutomaticRule(dataschemaService.getDatasetSchemaId(datasetId),
+            fieldSchemaVO.getId(), fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
+      }
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
