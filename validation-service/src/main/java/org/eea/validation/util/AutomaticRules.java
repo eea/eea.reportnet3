@@ -110,10 +110,11 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createAutomaticCodelistRule(String referenceId, TypeEntityEnum typeEntityEnum,
-      String nameRule, Long codelistId) {
+      String nameRule, String codelistId) {
 
     return composeRule(referenceId, typeEntityEnum, nameRule,
-        "!isCodeList(value," + codelistId + ")", "The field must be filled", "BLOCKER");
+        "!isCodeList(value," + codelistId + ")",
+        "The value must be avaliable value in the codelist", "BLOCKER");
   }
 
   /**

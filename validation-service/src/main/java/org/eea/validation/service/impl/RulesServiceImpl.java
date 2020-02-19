@@ -182,6 +182,7 @@ public class RulesServiceImpl implements RulesService {
   public void createAutomaticRules(String idDatasetSchema, String referenceId,
       TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException {
     Rule rule = new Rule();
+    // we use that if to differenciate beetween a rule required and the rest
     if (Boolean.TRUE.equals(required)) {
       rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           UUID.randomUUID().toString());
@@ -208,16 +209,16 @@ public class RulesServiceImpl implements RulesService {
               UUID.randomUUID().toString());
           break;
         case CODELIST:
+          // we find the idcodelist to create this validate
           Document document = schemasRepository.findFieldSchema(idDatasetSchema, referenceId);
           rule = AutomaticRules.createAutomaticCodelistRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString(), (Long) document.get("idCodeList"));
+              UUID.randomUUID().toString(), document.get("idCodeList").toString());
           break;
         default:
           break;
       }
     }
     rulesRepository.createNewRule(idDatasetSchema, rule);
-
   }
 
 }

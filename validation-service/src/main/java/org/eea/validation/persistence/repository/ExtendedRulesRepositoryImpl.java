@@ -83,7 +83,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         new Update().pull("rules", new BasicDBObject("referenceId", new ObjectId(referenceId)));
     Query query = new Query();
     query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
-    mongoOperations.updateMulti(new Query(), update, RulesSchema.class);
+    mongoOperations.updateMulti(query, update, RulesSchema.class);
   }
 
   /**

@@ -266,6 +266,8 @@ public class RulesControllerImpl implements RulesController {
       }
     }
 
+    LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
+        typeEntityEnum);
   }
 
 
