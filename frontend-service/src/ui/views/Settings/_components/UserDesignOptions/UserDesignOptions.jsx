@@ -7,9 +7,9 @@ const UserDesignOptions = () => {
     <div className={styles.userDesignContainer}>
       <div className={styles.userLogoBoxContainer}></div>
 
-      <div className={styles.userName}>Theme</div>
+      <div className={styles.userName}>UserDesignOptions</div>
 
-      <div className={styles.userMail}>Theme</div>
+      <div className={styles.userMail}>UserDesignOptions</div>
     </div>
   );
 };
