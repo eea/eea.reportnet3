@@ -22,6 +22,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
@@ -66,6 +67,8 @@ export const BigButtonList = ({
       }
     }, 0);
   }, [receiptData]);
+
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
