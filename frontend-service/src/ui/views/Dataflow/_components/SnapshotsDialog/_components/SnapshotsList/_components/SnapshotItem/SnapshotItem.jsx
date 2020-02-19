@@ -17,7 +17,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
         <div className={styles.listItemData}>
           <span className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
             {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
-            {!itemData.isValid && (
+            {itemData.isBlocked && (
               <Button
                 className={`${styles.btn} rp-btn ${styles.hasBlockers}`}
                 icon="warning"
@@ -34,7 +34,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
-              disabled={isLoading || !itemData.isValid}
+              disabled={isLoading || itemData.isBlocked}
               tooltipOptions={{ position: 'right' }}
               icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}

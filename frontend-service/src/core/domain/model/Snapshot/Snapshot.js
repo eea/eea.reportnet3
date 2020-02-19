@@ -1,5 +1,5 @@
 export class Snapshot {
-  constructor(id, creationDate, description, isReleased, isCreated, isDeleted, isRestored, isValid = false) {
+  constructor(id, creationDate, description, isReleased, isCreated, isDeleted, isRestored, isBlocked = false) {
     this.creationDate = creationDate;
     this.description = description;
     this.id = id;
@@ -7,6 +7,6 @@ export class Snapshot {
     this.isDeleted = isDeleted;
     this.isReleased = isReleased;
     this.isRestored = isRestored;
-    this.isValid = isValid;
+    this.isBlocked = isBlocked;
   }
 }

@@ -7,7 +7,16 @@ const allDesigner = async datasetSchemaId => {
   const snapshotsList = snapshotsDTO
     ? snapshotsDTO.map(
         snapshotDTO =>
-          new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
+          new Snapshot(
+            snapshotDTO.id,
+            snapshotDTO.creationDate,
+            snapshotDTO.description,
+            snapshotDTO.release,
+            undefined,
+            undefined,
+            undefined,
+            snapshotDTO.blocked
+          )
       )
     : [];
 
@@ -43,7 +52,7 @@ const allReporter = async datasetId => {
         undefined,
         undefined,
         undefined,
-        snapshotDTO.isValid
+        snapshotDTO.blocked
       )
   );
 };

@@ -20,7 +20,7 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
       <div className={styles.listItemData}>
         <h5>
           {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
-          {!itemData.isValid && (
+          {itemData.isBlocked && (
             <Button
               className={`${styles.btn} rp-btn ${styles.hasBlockers}`}
               icon="warning"
