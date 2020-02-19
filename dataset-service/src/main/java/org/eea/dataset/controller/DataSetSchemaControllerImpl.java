@@ -16,6 +16,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -402,16 +403,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
+      TypeData type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
         // if we changue the type we need to delete all rules
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
-        // if we changue the type we need to upload the new automatic rules
-        rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
+        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+          rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(), type,
+              TypeEntityEnum.FIELD, true);
+        }
         // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+      } else {
+        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+          if (!rulesControllerZuul.existsRuleRequired(datasetSchema, fieldSchemaVO.getId())) {
+            rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
+                fieldSchemaVO.getType(), TypeEntityEnum.FIELD, true);
+          }
+        } else {
+          rulesControllerZuul.deleteRuleRequired(datasetSchema, fieldSchemaVO.getId());
+        }
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

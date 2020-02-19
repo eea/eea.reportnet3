@@ -460,7 +460,8 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
-    Assert.assertEquals("NUMBER", dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+    Assert.assertEquals(TypeData.NUMBER,
+        dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
   }
 
   /**

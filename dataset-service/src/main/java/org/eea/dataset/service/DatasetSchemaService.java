@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -44,7 +45,6 @@ public interface DatasetSchemaService {
   /**
    * Delete dataset schema.
    *
-   * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   void deleteDatasetSchema(String schemaId);
@@ -139,10 +139,11 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return The fieldSchema type if the operation worked, null if not.
+   * @return the type data
    * @throws EEAException the EEA exception
    */
-  String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
+  TypeData updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException;
 
   /**
    * Delete field schema.

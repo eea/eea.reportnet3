@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Class ExtendedRulesRepositorysitoryImpl.
@@ -69,8 +70,6 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
 
-
-
   /**
    * Delete rule by reference id.
    *
@@ -84,6 +83,31 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Query query = new Query();
     query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, RulesSchema.class);
+  }
+
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the update result
+   */
+  @Override
+  public UpdateResult deleteRuleRequired(String datasetSchemaId, String referenceId) {
+    Update update =
+        new Update().pull("rules", new Document().append("referenceId", new ObjectId(referenceId))
+            .append("whenCondition", "!isBlank(value)"));
+    Query query = new Query().addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    return mongoOperations.updateFirst(query, update, RulesSchema.class);
+  }
+
+  @Override
+  public Boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
+
+    Query query = new Query().addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId))
+        .addCriteria(new Criteria("rules.referenceId").is(new ObjectId(referenceId)))
+        .addCriteria(new Criteria("rules.whenCondition").is("!isBlank(value)"));
+    return mongoTemplate.count(query, RulesSchema.class) > 0;
   }
 
   /**
@@ -128,6 +152,4 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, RulesSchema.class);
   }
-
-
 }

@@ -118,4 +118,12 @@ public interface RulesController {
       @RequestParam(name = "typeData", required = true) TypeData typeData,
       @RequestParam(name = "typeEntityEnum", required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(name = "requiredRule") Boolean requiredRule);
+
+  @PutMapping("/private/deleteRuleRequired")
+  void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
+
+  @PutMapping("/private/existsRuleRequired")
+  public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
 }

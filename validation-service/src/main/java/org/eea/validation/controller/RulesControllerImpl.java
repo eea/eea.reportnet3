@@ -265,11 +265,21 @@ public class RulesControllerImpl implements RulesController {
             idDatasetSchema, referenceId, typeData);
       }
     }
-
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
         typeEntityEnum);
   }
 
+  @Override
+  @PutMapping("/private/deleteRuleRequired")
+  public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
 
-
+  @Override
+  @PutMapping("/private/existsRuleRequired")
+  public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    return rulesService.existsRuleRequired(datasetSchemaId, referenceId);
+  }
 }

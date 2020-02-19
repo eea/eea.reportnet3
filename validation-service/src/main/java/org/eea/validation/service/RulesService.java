@@ -64,7 +64,6 @@ public interface RulesService {
    */
   void deleteRuleByReferenceId(String idDatasetSchema, String referenceId) throws EEAException;
 
-
   /**
    * Creates the new rule.
    *
@@ -73,7 +72,6 @@ public interface RulesService {
    * @throws EEAException the EEA exception
    */
   void createNewRule(String idDatasetSchema, Rule rule) throws EEAException;
-
 
   /**
    * Creates the automatic rules.
@@ -87,4 +85,21 @@ public interface RulesService {
    */
   void createAutomaticRules(String idDatasetSchema, String referenceId,
       TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException;
+
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  void deleteRuleRequired(String datasetSchemaId, String referenceId);
+
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
+  Boolean existsRuleRequired(String datasetSchemaId, String referenceId);
 }

@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Interface ExtendedRulesRepository.
@@ -49,13 +50,28 @@ public interface ExtendedRulesRepository {
   /**
    * Creates the new rule.
    *
-   * @param idRuleSchema the id rule schema
-   * @param idSchema the id schema
+   * @param idDatasetSchema the id dataset schema
    * @param rule the rule
    * @return the update result
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void createNewRule(String idDatasetSchema, Rule rule) throws EEAException;
 
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the update result
+   */
+  UpdateResult deleteRuleRequired(String datasetSchemaId, String referenceId);
 
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
+  Boolean existsRuleRequired(String datasetSchemaId, String referenceId);
 }
