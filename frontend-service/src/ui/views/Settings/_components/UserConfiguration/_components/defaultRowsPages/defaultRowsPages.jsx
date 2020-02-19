@@ -7,19 +7,17 @@ export const DefaultRowsPages = () => {
 
   return (
     <>
-    
-        <h3>{resources.messages['defaultRowsPage']}</h3>
-    
+      <h3>{resources.messages['defaultRowsPage']}</h3>
+
       <Dropdown
         name="dataProvidersDropdown"
         optionLabel="label"
         placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-        // value={formState.selectedDataProviderGroup}
+        value={[1, 3, 5]}
         options={[1, 3, 5]}
         onChange={e => {}}
+        placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
       />
     </>
   );
 };
-
-

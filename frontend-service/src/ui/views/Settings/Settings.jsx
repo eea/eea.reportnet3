@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { UserDesignOptions } from './_components/UserDesignOptions';
 import { UserCard } from './_components/UserCard';
-import { UserConfigurationOptions } from './_components/UserConfigurationOptions';
+import { UserConfiguration } from './_components/UserConfiguration';
 
 const initialState = {
   isVisibleUserDesignOptions: true,
@@ -24,14 +24,14 @@ const reducer = (state, { type, payload }) => {
     case 'VISIBLE_USER_DESIGN_OPTIONS':
       return {
         ...state,
-        isVisibleUserDesignOptions: payload.isVisibleUserDesignOptions,
-        isVisibleUserSettingsOptions: payload.isVisibleUserSettingsOptions
+        isVisibleUserDesignOptions: true,
+        isVisibleUserSettingsOptions: false
       };
     case 'VISIBLE_USER_SETTINGS_OPTIONS':
       return {
         ...state,
-        isVisibleUserSettingsOptions: payload.isVisibleUserSettingsOptions,
-        isVisibleUserDesignOptions: payload.isVisibleUserDesignOptions
+        isVisibleUserSettingsOptions: true,
+        isVisibleUserDesignOptions: false
       };
     default:
       return state;
@@ -44,6 +44,21 @@ const Settings = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
 
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
+
+  const initUserSettingsSection = () => {
+    visibleUserSectionDispatch({ type: 'VISIBLE_USER_DESIGN_OPTIONS' });
+  };
+
+  useEffect(() => {
+    document.querySelectorAll('.userSettingsBtn').forEach(btn => {
+      btn.addEventListener('click', initUserSettingsSection);
+    });
+    return () => {
+      document.querySelectorAll('.userSettingsBtn').forEach(btn => {
+        btn.removeEventListener('click', initUserSettingsSection);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -69,11 +84,7 @@ const Settings = withRouter(({ history }) => {
         label: 'userDesignOptions',
         onClick: () => {
           visibleUserSectionDispatch({
-            type: 'VISIBLE_USER_DESIGN_OPTIONS',
-            payload: {
-              isVisibleUserDesignOptions: true,
-              isVisibleUserSettingsOptions: false
-            }
+            type: 'VISIBLE_USER_DESIGN_OPTIONS'
           });
         },
         title: 'User Design Options'
@@ -83,11 +94,7 @@ const Settings = withRouter(({ history }) => {
         label: 'userConfigurationOptions',
         onClick: () => {
           visibleUserSectionDispatch({
-            type: 'VISIBLE_USER_SETTINGS_OPTIONS',
-            payload: {
-              isVisibleUserDesignOptions: false,
-              isVisibleUserSettingsOptions: true
-            }
+            type: 'VISIBLE_USER_SETTINGS_OPTIONS'
           });
         },
         title: 'User Configuration Options'
@@ -100,7 +107,7 @@ const Settings = withRouter(({ history }) => {
       <>
         {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
 
-        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfigurationOptions />}
+        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
 
         <UserCard />
       </>

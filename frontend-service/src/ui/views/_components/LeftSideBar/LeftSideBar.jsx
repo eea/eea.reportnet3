@@ -16,7 +16,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const LeftSideBar = withRouter(({history}) => {
+const LeftSideBar = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -24,22 +24,20 @@ const LeftSideBar = withRouter(({history}) => {
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  const [logoutConfirmvisible,setlogoutConfirmVisible]=useState(undefined)
+  const [logoutConfirmvisible, setlogoutConfirmVisible] = useState(undefined);
   const renderUserProfile = () => {
     const userButtonProps = {
       href: getUrl(routes['SETTINGS']),
       onClick: e => {
-
         e.preventDefault();
         history.push(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings',
       icon: 'user-profile',
-      label: 'userSettings'
+      label: 'userSettings',
+      className: 'userSettingsBtn'
     };
     return <LeftSideBarButton {...userButtonProps} />;
-  
-    
   };
   const renderUserNotifications = () => {
     const userNotificationsProps = {
@@ -59,27 +57,28 @@ const LeftSideBar = withRouter(({history}) => {
   const renderSectionButtons = () => {
     return leftSideBarContext.models.map((model, i) => <LeftSideBarButton key={i} {...model} />);
   };
-  
-const userLogout= async ()=>{
-  {  userContext.socket.disconnect(() => {});
-  try {
-    await UserService.logout();
-  } catch (error) {
-    notificationContext.add({
-      type: 'USER_LOGOUT_ERROR'
-    });
-  } finally {
-    
-    userContext.onLogout();
-  }}
-}
+
+  const userLogout = async () => {
+    {
+      userContext.socket.disconnect(() => {});
+      try {
+        await UserService.logout();
+      } catch (error) {
+        notificationContext.add({
+          type: 'USER_LOGOUT_ERROR'
+        });
+      } finally {
+        userContext.onLogout();
+      }
+    }
+  };
 
   const renderLogout = () => {
     const logoutProps = {
       href: '#',
       onClick: e => {
         e.preventDefault();
-        userContext.userProps.showLogoutConfirmation?setlogoutConfirmVisible(true):userLogout();
+        userContext.userProps.showLogoutConfirmation ? setlogoutConfirmVisible(true) : userLogout();
       },
       title: 'logout',
       icon: 'logout',
@@ -105,7 +104,6 @@ const userLogout= async ()=>{
     <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
       {
         <>
-        
           <div className={styles.barSection}>
             {renderUserProfile()}
             {renderUserNotifications()}
@@ -121,15 +119,19 @@ const userLogout= async ()=>{
             isNotificationVisible={isNotificationVisible}
             setIsNotificationVisible={setIsNotificationVisible}
           />
-          {userContext.userProps.showLogoutConfirmation && <ConfirmDialog
-          onConfirm={()=>{userLogout()}}
-          onHide={() => setlogoutConfirmVisible(false)}
-          visible={logoutConfirmvisible}
-          header={resources.messages['logout']}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['confirmationLogout']}
-        </ConfirmDialog>}
+          {userContext.userProps.showLogoutConfirmation && (
+            <ConfirmDialog
+              onConfirm={() => {
+                userLogout();
+              }}
+              onHide={() => setlogoutConfirmVisible(false)}
+              visible={logoutConfirmvisible}
+              header={resources.messages['logout']}
+              labelConfirm={resources.messages['yes']}
+              labelCancel={resources.messages['no']}>
+              {resources.messages['confirmationLogout']}
+            </ConfirmDialog>
+          )}
         </>
       }
     </div>

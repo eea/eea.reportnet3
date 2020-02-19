@@ -63,8 +63,6 @@ const Header = withRouter(({ history }) => {
   };
   ////////////////////////////////////////////
 
-  
-
   ///////////////////////////////////////////////////
   const userLogout = async () => {
     userContext.socket.disconnect(() => {});
@@ -81,7 +79,6 @@ const Header = withRouter(({ history }) => {
 
   const loadUser = () => (
     <>
-   
       <div className={styles.userWrapper}>
         <InputSwitch
           checked={themeContext.currentTheme === 'dark'}
@@ -98,6 +95,7 @@ const Header = withRouter(({ history }) => {
         {localhostEnvironmentAlert()}
 
         <a
+          className="userSettingsBtn"
           href={getUrl(routes.SETTINGS)}
           title="User profile details"
           onClick={async e => {
@@ -113,8 +111,8 @@ const Header = withRouter(({ history }) => {
         <FontAwesomeIcon
           onClick={async e => {
             e.preventDefault();
-            console.log(useContext.userProps)
-            userContext.userProps.showLogoutConfirmation?setConfirmVisible(true):userLogout();
+            console.log(useContext.userProps);
+            userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
           }}
           icon={AwesomeIcons('logout')}
         />
@@ -126,15 +124,19 @@ const Header = withRouter(({ history }) => {
       {loadTitle()}
       <BreadCrumb />
       {loadUser()}
-      {userContext.userProps.showLogoutConfirmation && <ConfirmDialog
-          onConfirm={()=>{userLogout()}}
+      {userContext.userProps.showLogoutConfirmation && (
+        <ConfirmDialog
+          onConfirm={() => {
+            userLogout();
+          }}
           onHide={() => setConfirmVisible(false)}
           visible={confirmvisible}
           header={resources.messages['logout']}
           labelConfirm={resources.messages['yes']}
           labelCancel={resources.messages['no']}>
           {resources.messages['confirmationLogout']}
-        </ConfirmDialog>}
+        </ConfirmDialog>
+      )}
     </div>
   );
 });
