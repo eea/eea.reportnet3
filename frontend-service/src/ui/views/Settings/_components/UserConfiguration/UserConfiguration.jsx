@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './userConfiguration.module.scss';
-
+import { DefaultRowsPages } from './_components/defaultRowsPages';
 import { ToggleUserConfirmation } from './_components/UserConfirmation';
 
 const UserConfiguration = () => {
@@ -15,9 +15,9 @@ const UserConfiguration = () => {
       </h1>
       <h3>Confirmation user Logout</h3>
       <ToggleUserConfirmation />
-
-      <h3>default amount of pages</h3>
-      
+      <div>
+        <DefaultRowsPages />
+      </div>
     </div>
   );
 };

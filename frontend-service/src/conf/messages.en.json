@@ -94,6 +94,7 @@
 		"datasetSchema": "Dataset Schema",
 		"datasetSchemas":"Dataset schemas",
 		"deadline": "Deadline",
+		"defaultRowsPage":"Default rows per page",
 		"delete": "Delete",
 		"deleteCategory": "Delete category",
 		"deleteContributor":"Delete contributor",
