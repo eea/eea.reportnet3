@@ -32,7 +32,7 @@ public class ReleaseBlockedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_BLOCKED;
+    return EventType.RELEASE_BLOCKED_EVENT;
   }
 
   /**
