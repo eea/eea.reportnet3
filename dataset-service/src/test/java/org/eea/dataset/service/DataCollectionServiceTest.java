@@ -125,7 +125,7 @@ public class DataCollectionServiceTest {
   }
 
   @Test
-  public void undoDataCollectionCreationTest1() throws EEAException {
+  public void undoDataCollectionCreationTest() throws EEAException {
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -141,7 +141,7 @@ public class DataCollectionServiceTest {
   }
 
   @Test
-  public void undoDataCollectionCreationTest2() throws EEAException {
+  public void undoDataCollectionCreationTestEEAExceptionPath() throws EEAException {
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
@@ -154,7 +154,7 @@ public class DataCollectionServiceTest {
   }
 
   @Test
-  public void createEmptyDataCollectionTest1() throws SQLException {
+  public void createEmptyDataCollectionTest() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     DesignDatasetVO design = new DesignDatasetVO();
@@ -185,7 +185,7 @@ public class DataCollectionServiceTest {
   }
 
   @Test
-  public void createEmptyDataCollectionTest2() throws SQLException, EEAException {
+  public void createEmptyDataCollectionTestSQLExceptionPath() throws SQLException, EEAException {
     List<DesignDatasetVO> designs = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     DesignDatasetVO design = new DesignDatasetVO();
@@ -211,7 +211,7 @@ public class DataCollectionServiceTest {
   }
 
   @Test
-  public void createEmptyDataCollectionTest3() throws SQLException {
+  public void createEmptyDataCollectionTestEEAExceptionPath() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     DesignDatasetVO design = new DesignDatasetVO();

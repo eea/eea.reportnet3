@@ -99,7 +99,7 @@ public class DataCollectionControllerImplTest {
   }
 
   @Test
-  public void createEmptyDataCollectionTest1() {
+  public void createEmptyDataCollectionTestException() {
     Mockito.when(dataCollectionService.isDesignDataflow(Mockito.any())).thenReturn(false);
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     try {
@@ -113,7 +113,7 @@ public class DataCollectionControllerImplTest {
   }
 
   @Test
-  public void createEmptyDataCollectionTest2() {
+  public void createEmptyDataCollectionTest() {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(dataCollectionService.isDesignDataflow(Mockito.any())).thenReturn(true);
