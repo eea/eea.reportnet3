@@ -398,8 +398,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     } else {
       LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
-      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
-          "The snapshot contains blocker errors");
+      releaseEvent(EventType.RELEASE_BLOCKED, idSnapshot, "The snapshot contains blocker errors");
       removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }
   }
