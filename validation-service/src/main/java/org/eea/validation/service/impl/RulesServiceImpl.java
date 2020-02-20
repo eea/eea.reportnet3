@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -88,6 +89,7 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema rSchema = new RulesSchema();
     rSchema.setIdDatasetSchema(schemaId);
     rSchema.setRulesSchemaId(ruleSchemaId);
+    rSchema.setRules(new ArrayList());
     rulesRepository.save(rSchema);
   }
 
