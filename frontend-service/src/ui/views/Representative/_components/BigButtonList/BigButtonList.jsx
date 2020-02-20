@@ -1,14 +1,19 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+
+import { isNull, isUndefined } from 'lodash';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
+import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
 
@@ -24,6 +29,7 @@ export const BigButtonList = ({
   dataflowData,
   dataflowId,
   dataflowStatus,
+  dataProviderId,
   designDatasetSchemas,
   handleRedirect,
   hasWritePermissions,
@@ -46,6 +52,17 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [receiptData, setReceiptData] = useState();
+
+  const receiptBtnRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (!isUndefined(receiptData)) {
+        onDownloadReceipt();
+      }
+    }, 100);
+  }, [receiptData]);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -119,6 +136,12 @@ export const BigButtonList = ({
     }
   };
 
+  const onDownloadReceipt = () => {
+    if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
+      receiptBtnRef.current.click();
+    }
+  };
+
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -126,6 +149,18 @@ export const BigButtonList = ({
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
     setIsDuplicated(false);
+  };
+
+  const onLoadReceiptData = async () => {
+    try {
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setReceiptData(response);
+    } catch (error) {
+      console.log('error', error);
+      notificationContext.add({
+        type: 'LOAD_RECEIPT_DATA_ERROR'
+      });
+    }
   };
 
   const onShowNewSchemaDialog = () => {
@@ -152,6 +187,7 @@ export const BigButtonList = ({
               isCustodian: isCustodian,
               onDatasetSchemaNameError: onDatasetSchemaNameError,
               onDuplicateName: onDuplicateName,
+              onLoadReceiptData: onLoadReceiptData,
               onSaveName: onSaveName,
               onShowDataCollectionModal: onShowDataCollectionModal,
               onShowNewSchemaDialog: onShowNewSchemaDialog,
@@ -225,6 +261,12 @@ export const BigButtonList = ({
           />
         </div>
       </ConfirmDialog>
+
+      <PDFDownloadLink
+        document={<ConfirmationReceipt receiptData={receiptData} resources={resources} />}
+        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
+        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      </PDFDownloadLink>
     </>
   );
 };

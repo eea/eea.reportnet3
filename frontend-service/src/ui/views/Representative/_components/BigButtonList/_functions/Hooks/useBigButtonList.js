@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
 import { routes } from 'ui/routes';
 
@@ -13,6 +13,8 @@ const useBigButtonList = ({
   dataflowId,
   handleRedirect,
   hasWritePermissions,
+  isCustodian,
+  onLoadReceiptData,
   showReleaseSnapshotDialog,
   representative
 }) => {
@@ -91,7 +93,30 @@ const useBigButtonList = ({
         visibility: !isEmpty(dataflowData.datasets)
       };
     });
-  return [helpButton, ...groupByRepresentativeModels];
+
+  const onBuildReceiptButton = () => {
+    const { datasets } = dataflowData;
+    const { representatives } = dataflowData;
+    const isReleased = datasets.map(dataset => {
+      return dataset.isReleased;
+    });
+    // const isOutdated = representatives.filter(representative => representative.dataProviderId === datasets)
+    return [
+      {
+        layout: 'defaultBigButton',
+        buttonClass: 'schemaDataset',
+        buttonIcon: false ? 'spinner' : 'fileDownload',
+        buttonIconClass: false ? 'spinner' : '',
+        caption: resources.messages['confirmationReceipt'],
+        handleRedirect: () => onLoadReceiptData(),
+        visibility: !isCustodian /* && !isReleased.includes(false) */
+      }
+    ];
+  };
+
+  const receiptBigButton = onBuildReceiptButton();
+
+  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
 };
 
 export { useBigButtonList };
