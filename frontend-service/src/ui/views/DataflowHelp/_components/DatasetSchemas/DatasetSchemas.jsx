@@ -57,7 +57,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
           enabled: 'true',
           entityType: 'FIELD',
           id: 0,
-          levelError: 'error',
+          levelError: 'ERROR',
           message: 'This is an error message',
           ruleName: 'Test rule'
         },

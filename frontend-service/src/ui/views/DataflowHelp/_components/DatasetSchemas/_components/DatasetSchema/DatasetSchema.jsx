@@ -26,18 +26,18 @@ const DatasetSchema = ({ codelistsList, designDataset, index, validationList }) 
           filterType: {
             multiselect: {
               entityType: [
-                { label: 'Field', value: 'field' },
-                { label: 'Record', value: 'record' },
-                { label: 'Table', value: 'table' },
-                { label: 'Dataset', value: 'dataset' }
+                { label: 'Field', value: 'FIELD' },
+                { label: 'Record', value: 'RECORD' },
+                { label: 'Table', value: 'TABLE' },
+                { label: 'Dataset', value: 'DATASET' }
               ],
               automatic: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
               enabled: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
               levelError: [
-                { label: 'Info', value: 'info' },
-                { label: 'Warning', value: 'warning' },
-                { label: 'Error', value: 'error' },
-                { label: 'Blocker', value: 'blocker' }
+                { label: 'Info', value: 'INFO' },
+                { label: 'Warning', value: 'WARNING' },
+                { label: 'Error', value: 'ERROR' },
+                { label: 'Blocker', value: 'BLOCKER' }
               ]
             }
           },
