@@ -17,7 +17,9 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
+import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -31,6 +33,7 @@ import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -38,6 +41,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -140,6 +144,14 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The validation repository. */
+  @Mock
+  private ValidationRepository validationRepository;
+
+  /** The dataset snapshot controller. */
+  @Mock
+  private DatasetSnapshotController datasetSnapshotController;
+
   /**
    * Inits the mocks.
    */
@@ -173,6 +185,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest1() throws EEAException {
+    List<Validation> validations = new ArrayList<>();
+    validations.add(new Validation());
+    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+        .thenReturn(validations);
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
@@ -189,7 +205,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest2() throws EEAException {
-
+    List<Validation> validations = new ArrayList<>();
+    validations.add(new Validation());
+    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+        .thenReturn(validations);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
@@ -207,6 +226,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest3() throws EEAException {
+    List<Validation> validations = new ArrayList<>();
+    validations.add(new Validation());
+    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+        .thenReturn(validations);
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
