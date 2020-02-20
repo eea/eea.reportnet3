@@ -1353,8 +1353,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateFieldValueType(Long datasetId, String fieldSchemaId, String type) {
-    fieldRepository.updateFieldValueType(fieldSchemaId, type);
+  public void updateFieldValueType(Long datasetId, String fieldSchemaId, TypeData type) {
+    fieldRepository.updateFieldValueType(fieldSchemaId, type.getValue());
   }
 
   /**

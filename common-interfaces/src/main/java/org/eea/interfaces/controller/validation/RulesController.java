@@ -124,6 +124,29 @@ public interface RulesController {
   /**
    * Update rule.
    *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @PutMapping("/private/deleteRuleRequired")
+  void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
+
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
+  @PutMapping("/private/existsRuleRequired")
+  public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
+
+
+
+  /**
+   * Update rule.
+   *
    * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id
    * @param ruleVO the rule VO

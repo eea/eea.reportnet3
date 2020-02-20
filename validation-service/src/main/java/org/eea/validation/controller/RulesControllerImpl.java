@@ -54,7 +54,7 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Creates the empty rules schema.
    *
-   * @param idDataSetSchema the id data set schema
+   * @param idDatasetSchema the id dataset schema
    * @param idRulesSchema the id rules schema
    */
   @Override
@@ -223,10 +223,8 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Creates the new rule.
    *
-   * @param idRuleSchema the id rule schema
-   * @param idSchema the id schema
+   * @param idDatasetSchema the id dataset schema
    * @param ruleVO the rule VO
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
@@ -282,7 +280,6 @@ public class RulesControllerImpl implements RulesController {
             idDatasetSchema, referenceId, typeData);
       }
     }
-
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
         typeEntityEnum);
   }
@@ -293,6 +290,7 @@ public class RulesControllerImpl implements RulesController {
    * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id
    * @param ruleVO the rule VO
+   * 
    */
   @Override
   @HystrixCommand
@@ -303,15 +301,44 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error(
           "Error updating all rules with referenceid {} because idDatasetSchema is incorrect",
           referenceId);
-      if (StringUtils.isBlank(idDatasetSchema)) {
-        LOG_ERROR.error(
-            "Error updating rules in idDatasetSchema: {} because referenceId is incorrect",
-            idDatasetSchema);
-      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
-
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error updating rules in idDatasetSchema: {} because referenceId is incorrect",
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REFERENCEID_INCORRECT);
+    }
+    rulesService.updateRule(idDatasetSchema, referenceId, ruleMapper.classToEntity(ruleVO));
   }
 
+
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
+  @Override
+  @PutMapping("/private/existsRuleRequired")
+  public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    return rulesService.existsRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  @PutMapping("/private/deleteRuleRequired")
+  public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
 }

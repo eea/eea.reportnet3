@@ -517,46 +517,93 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
-  /**
-   * Update field schema test 1.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
-    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any())).thenReturn("");
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(TypeData.TEXT);
+    Mockito.doNothing().when(rulesControllerZuul).deleteRuleByReferenceId(Mockito.any(),
+        Mockito.any());
+    Mockito.doNothing().when(rulesControllerZuul).createAutomaticRule(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
+    Mockito.verify(rulesControllerZuul, times(1)).createAutomaticRule(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Update field schema test 2.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
   public void updateFieldSchemaTest2() throws EEAException {
-    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(null);
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).getDatasetSchemaId(Mockito.any());
+        .thenReturn(TypeData.TEXT);
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
+    Mockito.verify(datasetService, times(1)).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
-  /**
-   * Update field schema test 3.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateFieldSchemaTest3() throws EEAException {
-    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+        .thenReturn(null);
+    Mockito.when(rulesControllerZuul.existsRuleRequired(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    Mockito.doNothing().when(rulesControllerZuul).createAutomaticRule(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
+    Mockito.verify(rulesControllerZuul, times(1)).createAutomaticRule(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldSchemaTest4() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    Mockito.when(rulesControllerZuul.existsRuleRequired(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
+    Mockito.verify(rulesControllerZuul, times(0)).createAutomaticRule(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldSchemaTest5() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    Mockito.doNothing().when(rulesControllerZuul).deleteRuleRequired(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
+    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldSchemaTest6() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
+    try {
+      dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
+    }
   }
 
   /**

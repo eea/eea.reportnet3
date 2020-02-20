@@ -314,7 +314,7 @@ public interface DatasetService {
    * @param fieldSchemaId the field schema id
    * @param type the type
    */
-  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, String type);
+  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, TypeData type);
 
   /**
    * Delete table values.

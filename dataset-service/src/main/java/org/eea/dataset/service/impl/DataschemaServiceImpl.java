@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -310,7 +311,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Delete dataset schema.
    *
-   * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   @Override
@@ -487,11 +487,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return the string
+   * @return the type data
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public TypeData updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     boolean typeModified = false;
     try {
@@ -523,7 +523,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
             .getModifiedCount() == 1) {
           if (typeModified) {
-            return fieldSchemaVO.getType().getValue();
+            return fieldSchemaVO.getType();
           }
           return null;
         }

@@ -1377,7 +1377,7 @@ public class DatasetServiceTest {
   @Test
   public void updateFieldValueTypeTest() {
     Mockito.doNothing().when(fieldRepository).updateFieldValueType(Mockito.any(), Mockito.any());
-    datasetService.updateFieldValueType(1L, "<id>", "TEXT");
+    datasetService.updateFieldValueType(1L, "<id>", TypeData.TEXT);
     Mockito.verify(fieldRepository, times(1)).updateFieldValueType(Mockito.any(), Mockito.any());
   }
 

@@ -225,4 +225,40 @@ public class RulesServiceImpl implements RulesService {
 
   }
 
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  public void deleteRuleRequired(String datasetSchemaId, String referenceId) {
+    rulesRepository.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
+  @Override
+  public Boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
+    return rulesRepository.existsRuleRequired(datasetSchemaId, referenceId);
+  }
+
+
+  /**
+   * Update rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  public void updateRule(String idDatasetSchema, String referenceId, Rule rule) {
+    // TODO Auto-generated method stub
+
+  }
 }
