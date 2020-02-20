@@ -17,6 +17,20 @@ const UserObligations = () => {
 
   const dataflow = 'dataflow';
 
+  const arr = [{ item: 'item 1' }, { item: 'item2' }, { item: 'item4' }];
+  const renderDataFlows = () => {
+    return arr.map((e, i) => (
+      <TreeViewExpandableItem
+        className={styles.obligationsExpandable}
+        expanded={false}
+        key={i}
+        items={[e.item]}
+        children={['dataflow1  ']}>
+        <h1>{e.item}</h1>
+      </TreeViewExpandableItem>
+    ));
+  };
+
   return (
     <div className={styles.userObligationsContainer}>
       <div className={styles.userObligationsTitle}>Obligations</div>
@@ -33,13 +47,7 @@ const UserObligations = () => {
           tooltipOptions={{ position: 'bottom' }}
         />
       </div> */}
-
-      <TreeViewExpandableItem
-        className={styles.obligationsExpandable}
-        expanded={false}
-        items={[{ label: dataflow }, { label: dataflow }]}
-        children={['dataflow1 ', 'dataflow2 ']}
-      />
+      {renderDataFlows()}
     </div>
   );
 };
