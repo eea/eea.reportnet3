@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bson.Document;
@@ -145,6 +146,13 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return result.isEmpty() ? null : result.get(0);
   }
 
+  /**
+   * Creates the new rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void createNewRule(String idDatasetSchema, Rule rule) throws EEAException {
     Update update = new Update().push("rules", rule);
@@ -152,4 +160,38 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, RulesSchema.class);
   }
+
+
+  @Override
+  public UpdateResult insertRuleInPosition(String idDatasetSchema, Rule rule, int position)
+      throws EEAException {
+    try {
+      List<Rule> list = new ArrayList<>();
+      list.add(rule);
+      return mongoDatabase.getCollection("DataSetSchema").updateOne(
+          new Document("_id", new ObjectId(idDatasetSchema)),
+          new Document("$push", new Document("tableSchemas",
+              new Document("$each", list).append("$position", position))));
+    } catch (IllegalArgumentException e) {
+      LOG_ERROR.error("error inserting table: ", e);
+      throw new EEAException(e);
+    }
+  }
+
+  @Override
+  public UpdateResult updateRule(String datasetSchemaId, Rule rule) throws EEAException {
+    // try {
+    // //return mongoTemplate.updateFirst(query, update, Rule.class, RulesSchema.class);
+    //// new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+    //// tableSchema.get("_id")),
+    //// new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
+    //// new UpdateOptions().arrayFilters(
+    //// Arrays.asList(new Document("tableSchemaId._id", tableSchema.get("_id")))));
+    // } catch (IllegalArgumentException e) {
+    // LOG_ERROR.error("error updating table: ", e);
+    // throw new EEAException(e);
+    return null;
+  }
+
+
 }

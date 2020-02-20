@@ -54,15 +54,32 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Creates the empty rules schema.
    *
-   * @param idDataSetSchema the id data set schema
+   * @param idDatasetSchema the id dataset schema
    * @param idRulesSchema the id rules schema
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "/createEmptyRulesSchema")
-  public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema,
+  public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDatasetSchema,
       @RequestParam("idRulesSchema") String idRulesSchema) {
-    rulesService.createEmptyRulesSchema(new ObjectId(idDataSetSchema), new ObjectId(idRulesSchema));
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error creating Rule Schema with idRulesSchema {} because idDatasetSchema is incorrect",
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(idRulesSchema)) {
+      LOG_ERROR.error(
+          "Error creating Rule Schema with idDatasetSchema {} because idRulesSchema is incorrect",
+          idRulesSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    rulesService.createEmptyRulesSchema(new ObjectId(idDatasetSchema), new ObjectId(idRulesSchema));
+    LOG.info("Creating Schema rules with id {} in datasetSchema {} successfully", idRulesSchema,
+        idDatasetSchema);
+
   }
 
   /**
@@ -206,10 +223,8 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Creates the new rule.
    *
-   * @param idRuleSchema the id rule schema
-   * @param idSchema the id schema
+   * @param idDatasetSchema the id dataset schema
    * @param ruleVO the rule VO
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
@@ -273,17 +288,61 @@ public class RulesControllerImpl implements RulesController {
         typeEntityEnum);
   }
 
+  /**
+   * Update rule.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param referenceId the reference id
+   * @param ruleVO the rule VO
+   * 
+   */
   @Override
-  @PutMapping("/private/deleteRuleRequired")
-  public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("referenceId") String referenceId) {
-    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  @HystrixCommand
+  @PutMapping(value = "/updateRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+      @RequestParam(name = "referenceId") String referenceId, @RequestBody RuleVO ruleVO) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error updating all rules with referenceid {} because idDatasetSchema is incorrect",
+          referenceId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error(
+          "Error updating rules in idDatasetSchema: {} because referenceId is incorrect",
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REFERENCEID_INCORRECT);
+    }
+    rulesService.updateRule(idDatasetSchema, referenceId, ruleMapper.classToEntity(ruleVO));
   }
 
+
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
   @Override
   @PutMapping("/private/existsRuleRequired")
   public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     return rulesService.existsRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Delete rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  @PutMapping("/private/deleteRuleRequired")
+  public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
   }
 }

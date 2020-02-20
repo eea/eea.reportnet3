@@ -74,4 +74,27 @@ public interface ExtendedRulesRepository {
    * @return the boolean
    */
   Boolean existsRuleRequired(String datasetSchemaId, String referenceId);
+
+
+  /**
+   * Update rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult updateRule(String datasetSchemaId, Rule rule) throws EEAException;
+
+  /**
+   * Insert rule in position.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param rule the rule
+   * @param position the position
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult insertRuleInPosition(String idDatasetSchema, Rule rule, int position)
+      throws EEAException;
 }
