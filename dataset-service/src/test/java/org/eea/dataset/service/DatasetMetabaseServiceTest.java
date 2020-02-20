@@ -253,8 +253,7 @@ public class DatasetMetabaseServiceTest {
     representative.setDataProviderId(1L);
     Map<Long, String> mapTest = new HashMap<>();
     mapTest.put(1L, "test@reportnet.net");
-    datasetMetabaseService.createGroupProviderAndAddUser(mapTest, Arrays.asList(representative),
-        1L);
+    datasetMetabaseService.createGroupProviderAndAddUser(mapTest, 1L);
 
     Mockito.verify(resourceManagementControllerZuul, times(1)).createResources(Mockito.any());
 

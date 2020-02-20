@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
+import org.eea.dataset.persistence.data.domain.Validation;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -40,6 +42,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -47,6 +50,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +124,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
+
+  /** The validation repository. */
+  @Autowired
+  private ValidationRepository validationRepository;
 
   /**
    * The dataset service.
@@ -209,7 +217,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, String description, Boolean released) {
 
     Long snapshotId = 0L;
+    List<Validation> isBlocked = null;
     try {
+      setTenant(idDataset);
+      isBlocked = validationRepository.findByLevelError(TypeErrorEnum.BLOCKER);
+
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
@@ -219,6 +231,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setReportingDataset(reportingDataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setRelease(false);
+      snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
       snapshotId = snap.getId();
@@ -242,7 +255,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(criteria);
     }
 
-    if (released) {
+    if (released || isBlocked != null && !isBlocked.isEmpty()) {
       datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
 
@@ -323,62 +336,83 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void releaseSnapshot(Long idDataset, Long idSnapshot) {
 
+    // Get if the snapshot contains blocker errors
+    setTenant(idDataset);
+    List<Validation> isBlocked = validationRepository.findByLevelError(TypeErrorEnum.BLOCKER);
 
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
-    final Long idDataProvider = providerId;
-
-    // Get the provider
-    DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
-
-    // Get the dataCollection
-    Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
-    String datasetSchema = designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
-    Optional<DataCollection> dataCollection =
-        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
-    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
-
-
-    // Delete data of the same provider
-    if (provider != null && idDataCollection != null) {
-      datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
-
-      // Restore data from snapshot
-      try {
-        restoreSnapshot(idDataCollection, idSnapshot, false);
-        // Check the snapshot released
-        snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-
-        // Mark the receipt button as outdated because a new release has been done, so it would be
-        // necessary to generate a new receipt
-        Long idDataflow = datasetService.getDataFlowIdById(idDataset);
-        List<RepresentativeVO> representatives =
-            representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-                .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
-        if (!representatives.isEmpty()) {
-          RepresentativeVO representative = representatives.get(0);
-          representative.setReceiptOutdated(true);
-          representativeControllerZuul.updateRepresentative(representative);
-        }
-
-
-        LOG.info("Snapshot {} released", idSnapshot);
-      } catch (EEAException e) {
-        LOG_ERROR.error(e.getMessage());
-        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
-        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+    if (isBlocked == null || isBlocked.isEmpty()) {
+      Long providerId = 0L;
+      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
+      if (metabase.getDataProviderId() != null) {
+        providerId = metabase.getDataProviderId();
       }
 
+      final Long idDataProvider = providerId;
+
+      // Get the provider
+      DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
+
+
+      // Get the dataCollection
+      Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
+      String datasetSchema =
+          designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
+      Optional<DataCollection> dataCollection =
+          dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
+      Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+
+
+
+      // Delete data of the same provider
+      if (provider != null && idDataCollection != null) {
+        datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
+
+        // Restore data from snapshot
+        try {
+          restoreSnapshot(idDataCollection, idSnapshot, false);
+          // Check the snapshot released
+          snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+
+          // Mark the receipt button as outdated because a new release has been done, so it would be
+          // necessary to generate a new receipt
+          Long idDataflow = datasetService.getDataFlowIdById(idDataset);
+          List<RepresentativeVO> representatives = representativeControllerZuul
+              .findRepresentativesByIdDataFlow(idDataflow).stream()
+              .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
+          if (!representatives.isEmpty()) {
+            RepresentativeVO representative = representatives.get(0);
+            representative.setReceiptOutdated(true);
+            representativeControllerZuul.updateRepresentative(representative);
+          }
+          LOG.info("Snapshot {} released", idSnapshot);
+        } catch (EEAException e) {
+          LOG_ERROR.error(e.getMessage());
+          releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
+          removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+        }
+      } else {
+        LOG_ERROR.error("Error in release snapshot");
+        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
+            "Error in release snapshot");
+        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+      }
     } else {
-      LOG_ERROR.error("Error in release snapshot");
-      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
-          "Error in release snapshot");
+      LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
+      releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot, "The snapshot contains blocker errors");
       removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }
   }
+
+  /**
+   * Sets the tenant.
+   *
+   * @param idDataset the new tenant
+   */
+  private void setTenant(Long idDataset) {
+    TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+  }
+
+
 
   /**
    * Removes the lock.

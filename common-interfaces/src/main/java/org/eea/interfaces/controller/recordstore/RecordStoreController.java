@@ -1,12 +1,15 @@
 package org.eea.interfaces.controller.recordstore;
 
 import java.util.List;
+import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -115,6 +118,18 @@ public interface RecordStoreController {
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName);
 
-
-
+  /**
+   * Creates a schema for each entry in the list by executing the queries contained in an external
+   * file. Also releases events to feed the new schemas. Uses the dataflow to release the lock and
+   * send the finish notification.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
+  void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
+      @PathVariable("dataflowId") Long dataflowId);
 }

@@ -48,8 +48,6 @@ public class DesignDatasetServiceTest {
   @Mock
   private FileCommonUtils fileCommon;
 
-
-
   /**
    * Inits the mocks.
    */
@@ -58,7 +56,6 @@ public class DesignDatasetServiceTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
   @Test
   public void testGetDesignDataSetIdByDataflowIdNull() {
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -66,7 +63,6 @@ public class DesignDatasetServiceTest {
     assertEquals("failed assertion", new ArrayList<>(),
         designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()));
   }
-
 
   @Test
   public void testGetDesignDataSetIdByDataflowId() {
@@ -83,9 +79,8 @@ public class DesignDatasetServiceTest {
         designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()));
   }
 
-
   @Test
-  public void testGetFileName() throws EEAException {
+  public void getFileNameDesignTest1() throws EEAException {
     DesignDataset dataset = new DesignDataset();
     when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any()))
@@ -95,4 +90,12 @@ public class DesignDatasetServiceTest {
         designDatasetService.getFileNameDesign("csv", "test", 1L));
   }
 
+  @Test
+  public void getFileNameDesignTest2() throws EEAException {
+    when(designDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new DesignDataset()));
+    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(null);
+    assertEquals("null.csv", designDatasetService.getFileNameDesign("csv", "test", 1L));
+  }
 }
