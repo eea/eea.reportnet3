@@ -92,8 +92,8 @@ public interface RulesService {
    * @param required the required
    * @throws EEAException the EEA exception
    */
-  void createAutomaticRules(String idDatasetSchema, String referenceId,
-      TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException;
+  void createAutomaticRules(String idDatasetSchema, String referenceId, TypeData typeData,
+      TypeEntityEnum typeEntityEnum, Boolean required) throws EEAException;
 
   /**
    * Delete rule required.

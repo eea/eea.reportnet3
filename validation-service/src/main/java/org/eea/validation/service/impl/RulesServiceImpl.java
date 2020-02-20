@@ -2,7 +2,6 @@ package org.eea.validation.service.impl;
 
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -90,8 +89,7 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema rSchema = new RulesSchema();
     rSchema.setIdDatasetSchema(schemaId);
     rSchema.setRulesSchemaId(ruleSchemaId);
-    List<Rule> ruleList = new ArrayList<>();
-    rSchema.setRules(ruleList);
+    rSchema.setRules(new ArrayList());
     rulesRepository.save(rSchema);
   }
 
@@ -163,8 +161,8 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createAutomaticRules(String idDatasetSchema, String referenceId,
-      TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException {
+  public void createAutomaticRules(String idDatasetSchema, String referenceId, TypeData typeData,
+      TypeEntityEnum typeEntityEnum, Boolean required) throws EEAException {
     Rule rule = new Rule();
     // we use that if to differenciate beetween a rule required and the rest
     if (Boolean.TRUE.equals(required)) {
