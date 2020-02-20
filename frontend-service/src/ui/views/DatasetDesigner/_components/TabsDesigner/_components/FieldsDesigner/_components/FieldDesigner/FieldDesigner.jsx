@@ -544,7 +544,6 @@ export const FieldDesigner = ({
     codelistItems,
     required
   ) => {
-    console.log({ required, fieldSchemaId });
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         fieldSchemaId,
