@@ -33,7 +33,7 @@ export const ReleaseSnapshotDialog = ({
     } catch (error) {
       if (error.response.data == DataflowConf.errorTypes['copyWithErrors']) {
         notificationContext.add({
-          type: 'COPY_HAS_BLOCKERS'
+          type: 'RELEASE_BLOCKED_EVENT'
         });
       } else {
         notificationContext.add({

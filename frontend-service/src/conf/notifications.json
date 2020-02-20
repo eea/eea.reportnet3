@@ -342,7 +342,7 @@
           "fixed": false
         },
         {
-          "key": "COPY_HAS_BLOCKERS",
+          "key": "RELEASE_BLOCKED_EVENT",
           "lifeTime": 5000,
           "fixed": false
         }

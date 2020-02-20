@@ -438,6 +438,6 @@
 		"loadDocumentsError": "Error loading documents",
 		"loadWebLinksError": "Error loading web links",
 		"dataflowNameExists": "Dataflow name already exists, please choose another one",
-		"copyHasBlockers": "The data contains blocker errors"
+		"releaseBlockedEvent": "The data contains blocker errors"
 	}
 }
