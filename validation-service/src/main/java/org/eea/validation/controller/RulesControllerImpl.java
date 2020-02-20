@@ -248,21 +248,25 @@ public class RulesControllerImpl implements RulesController {
 
     if (Boolean.TRUE.equals(requiredRule)) {
       try {
-        rulesService.createAutomaticRules(idDatasetSchema, referenceId, typeEntityEnum, null,
+        rulesService.createAutomaticRules(idDatasetSchema, referenceId, null, typeEntityEnum,
             Boolean.TRUE);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the required rule for idDatasetSchema {} and field with id {} ",
             idDatasetSchema, referenceId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.ERROR_CREATING_RULE, e);
       }
     } else {
       try {
-        rulesService.createAutomaticRules(idDatasetSchema, referenceId, typeEntityEnum, typeData,
+        rulesService.createAutomaticRules(idDatasetSchema, referenceId, typeData, typeEntityEnum,
             Boolean.FALSE);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
             idDatasetSchema, referenceId, typeData);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.ERROR_CREATING_RULE, e);
       }
     }
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,

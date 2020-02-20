@@ -4,6 +4,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.validation.service.RulesService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -75,7 +77,7 @@ public class RulesControllerImplTest {
   /**
    * Delete rule by id.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void deleteRuleById() throws EEAException {
@@ -129,7 +131,7 @@ public class RulesControllerImplTest {
   /**
    * Delete rule by reference id.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void deleteRuleByReferenceId() throws EEAException {
@@ -137,6 +139,11 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).deleteRuleByReferenceId("ObjectId", "ObjectId");
   }
 
+  /**
+   * Find rule schema by dataset id blank test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findRuleSchemaByDatasetIdBlankTest() throws EEAException {
     try {
@@ -147,6 +154,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Find rule schema by dataset id null test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findRuleSchemaByDatasetIdNullTest() throws EEAException {
     try {
@@ -157,12 +169,22 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Find rule schema by dataset id success test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findRuleSchemaByDatasetIdSuccessTest() throws EEAException {
     rulesControllerImpl.findRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesService, times(1)).getRulesSchemaByDatasetId(Mockito.any());
   }
 
+  /**
+   * Find active rule schema by dataset id blank test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findActiveRuleSchemaByDatasetIdBlankTest() throws EEAException {
     try {
@@ -173,6 +195,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Find active rule schema by dataset id null test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findActiveRuleSchemaByDatasetIdNullTest() throws EEAException {
     try {
@@ -183,9 +210,78 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Find active rule schema by dataset id success test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void findActiveRuleSchemaByDatasetIdSuccessTest() throws EEAException {
     rulesControllerImpl.findActiveRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesService, times(1)).getActiveRulesSchemaByDatasetId(Mockito.any());
+  }
+
+
+  /**
+   * Creates the automatic rule test false.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRuleTestFalse() throws EEAException {
+    rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+        Boolean.FALSE);
+    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", TypeData.BOOLEAN,
+        TypeEntityEnum.FIELD, Boolean.FALSE);
+  }
+
+  /**
+   * Creates the automatic rule test false throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRuleTestFalseThrow() throws EEAException {
+
+    doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", TypeData.BOOLEAN,
+        TypeEntityEnum.FIELD, Boolean.FALSE);
+    try {
+      rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+          Boolean.FALSE);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getReason());
+    }
+  }
+
+  /**
+   * Creates the automatic rule test true.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRuleTestTrue() throws EEAException {
+    rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+        Boolean.TRUE);
+    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", null, TypeEntityEnum.FIELD,
+        Boolean.TRUE);
+  }
+
+  /**
+   * Creates the automatic rule test true throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRuleTestTrueThrow() throws EEAException {
+    doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", null,
+        TypeEntityEnum.FIELD, Boolean.TRUE);
+    try {
+      rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+          Boolean.TRUE);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getReason());
+    }
   }
 }

@@ -13,6 +13,8 @@ public class AutomaticRules {
 
   // WE DEVIDE THAT CLASS TO BE EASY KNOW WHAT AUTOMATIC VALIDATION SHOULD BE FILLED
 
+  private static final String LV_ERROR = "BLOCKER";
+
 
   /**
    * Creates the required rule.
@@ -25,7 +27,7 @@ public class AutomaticRules {
   public static Rule createRequiredRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBlank(value)",
-        "The field must be filled", "BLOCKER");
+        "The field must be filled", LV_ERROR);
   }
 
   /**
@@ -39,7 +41,7 @@ public class AutomaticRules {
   public static Rule createAutomaticNumberRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isNumber(value)",
-        "The field must be a valid number", "BLOCKER");
+        "The field must be a valid number", LV_ERROR);
   }
 
   /**
@@ -53,7 +55,7 @@ public class AutomaticRules {
   public static Rule createAutomaticDateRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isDateYYYYMMDD(value)",
-        "The field must be a valid date(YYYYMMDD) ", "BLOCKER");
+        "The field must be a valid date(YYYYMMDD) ", LV_ERROR);
   }
 
 
@@ -69,7 +71,7 @@ public class AutomaticRules {
   public static Rule createAutomaticBooleanRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBoolean(value)",
-        "The field must be TRUE OR FALSE", "BLOCKER");
+        "The field must be TRUE OR FALSE", LV_ERROR);
   }
 
   /**
@@ -83,7 +85,7 @@ public class AutomaticRules {
   public static Rule createAutomaticLatRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLat(value)",
-        "The field must be a valid Lat(beetween -90 and 90)", "BLOCKER");
+        "The field must be a valid Lat(beetween -90 and 90)", LV_ERROR);
   }
 
   /**
@@ -97,7 +99,7 @@ public class AutomaticRules {
   public static Rule createAutomaticLongRule(String referenceId, TypeEntityEnum typeEntityEnum,
       String nameRule) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLong(value)",
-        "The field must be a valid Longitude(beetween -180 and 180)", "BLOCKER");
+        "The field must be a valid Longitude(beetween -180 and 180)", LV_ERROR);
   }
 
   /**
@@ -114,7 +116,7 @@ public class AutomaticRules {
 
     return composeRule(referenceId, typeEntityEnum, nameRule,
         "!isCodeList(value," + codelistId + ")",
-        "The value must be avaliable value in the codelist", "BLOCKER");
+        "The value must be avaliable value in the codelist", LV_ERROR);
   }
 
   /**

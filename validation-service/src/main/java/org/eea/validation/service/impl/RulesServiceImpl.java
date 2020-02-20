@@ -179,8 +179,8 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createAutomaticRules(String idDatasetSchema, String referenceId,
-      TypeEntityEnum typeEntityEnum, TypeData typeData, Boolean required) throws EEAException {
+  public void createAutomaticRules(String idDatasetSchema, String referenceId, TypeData typeData,
+      TypeEntityEnum typeEntityEnum, Boolean required) throws EEAException {
     Rule rule = new Rule();
     // we use that if to differenciate beetween a rule required and the rest
     if (Boolean.TRUE.equals(required)) {
