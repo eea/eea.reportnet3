@@ -14,6 +14,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
+import { TabsValidations } from './_components/TabsValidations';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { Title } from 'ui/views/_components/Title';
 
@@ -276,7 +277,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           tableSchemaNames={tableSchemaNames}
           visible={validationsVisible}
         /> */}
-        <TabsDesigner editable={true} />
+        <TabsValidations datasetSchemaId={datasetSchemaId} />
       </Dialog>
     </SnapshotContext.Provider>
   );
