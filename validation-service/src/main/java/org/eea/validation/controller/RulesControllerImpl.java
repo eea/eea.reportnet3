@@ -296,22 +296,31 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PutMapping(value = "/updateRule", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
-      @RequestParam(name = "referenceId") String referenceId, @RequestBody RuleVO ruleVO) {
+      @RequestBody RuleVO ruleVO) {
     if (StringUtils.isBlank(idDatasetSchema)) {
       LOG_ERROR.error(
           "Error updating all rules with referenceid {} because idDatasetSchema is incorrect",
-          referenceId);
+          idDatasetSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
-    if (StringUtils.isBlank(idDatasetSchema)) {
-      LOG_ERROR.error(
-          "Error updating rules in idDatasetSchema: {} because referenceId is incorrect",
-          idDatasetSchema);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.REFERENCEID_INCORRECT);
-    }
-    rulesService.updateRule(idDatasetSchema, referenceId, ruleMapper.classToEntity(ruleVO));
+    rulesService.updateRule(idDatasetSchema, ruleMapper.classToEntity(ruleVO));
+  }
+
+  /**
+   * Insert rule in position.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   * @param position the position
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/updatePositionRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void insertRuleInPosition(@RequestParam(name = "referenceId") String referenceId,
+      @RequestParam(name = "position") int position,
+      @RequestParam(name = "datasetSchemaId") String datasetSchemaId) {
+    rulesService.insertRuleInPosition(datasetSchemaId, referenceId, position);
   }
 
 
@@ -341,4 +350,5 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
   }
+
 }

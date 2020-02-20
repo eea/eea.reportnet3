@@ -1,8 +1,8 @@
 package org.eea.validation.persistence.repository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
@@ -102,6 +102,13 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
 
+  /**
+   * Exists rule required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the boolean
+   */
   @Override
   public Boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
 
@@ -161,36 +168,56 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     mongoOperations.updateMulti(query, update, RulesSchema.class);
   }
 
-
+  /**
+   * Insert rule in position.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @param position the position
+   * @return the update result
+   */
   @Override
-  public UpdateResult insertRuleInPosition(String idDatasetSchema, Rule rule, int position)
-      throws EEAException {
-    try {
-      List<Rule> list = new ArrayList<>();
-      list.add(rule);
-      return mongoDatabase.getCollection("DataSetSchema").updateOne(
-          new Document("_id", new ObjectId(idDatasetSchema)),
-          new Document("$push", new Document("tableSchemas",
-              new Document("$each", list).append("$position", position))));
-    } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("error inserting table: ", e);
-      throw new EEAException(e);
-    }
+  public UpdateResult insertRuleInPosition(String datasetSchemaId, Rule rule, int position) {
+    Query query =
+        new Query().addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    Update update = new Update().push("rules").atPosition(position).each(rule);
+    return mongoTemplate.updateFirst(query, update, Rule.class, "RulesSchema");
   }
+
+
+
+  /**
+   * Find and remove rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the rule
+   */
+  @Override
+  @CheckForNull
+  public Rule findAndRemoveRule(String datasetSchemaId, String referenceId) {
+    ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
+    ObjectId referenceOId = new ObjectId(referenceId);
+    RulesSchema rulesSchema = mongoTemplate.findOne(
+        new Query(new Criteria("idDatasetSchema").is(datasetSchemaOId)).addCriteria(
+            new Criteria("rules").elemMatch(new Criteria("referenceId").is(referenceOId))),
+        RulesSchema.class);
+    if (rulesSchema != null && rulesSchema.getRules() != null) {
+      Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaOId));
+      Update update = new Update().push("rules", new Document("referenceId", referenceOId));
+      mongoTemplate.updateFirst(query, update, Rule.class);
+      return rulesSchema.getRules().get(0);
+    }
+    return null;
+  }
+
 
   @Override
   public UpdateResult updateRule(String datasetSchemaId, Rule rule) throws EEAException {
-    // try {
-    // //return mongoTemplate.updateFirst(query, update, Rule.class, RulesSchema.class);
-    //// new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
-    //// tableSchema.get("_id")),
-    //// new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
-    //// new UpdateOptions().arrayFilters(
-    //// Arrays.asList(new Document("tableSchemaId._id", tableSchema.get("_id")))));
-    // } catch (IllegalArgumentException e) {
-    // LOG_ERROR.error("error updating table: ", e);
-    // throw new EEAException(e);
-    return null;
+    return mongoTemplate.updateFirst(
+        new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)))
+            .addCriteria(new Criteria("rules.referenceId").is(rule.getReferenceId())),
+        new Update().set("rules.$", rule), RulesSchema.class);
   }
 
 

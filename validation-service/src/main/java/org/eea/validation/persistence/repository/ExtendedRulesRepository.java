@@ -97,4 +97,13 @@ public interface ExtendedRulesRepository {
    */
   UpdateResult insertRuleInPosition(String idDatasetSchema, Rule rule, int position)
       throws EEAException;
+
+  /**
+   * Find and remove rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the rule
+   */
+  Rule findAndRemoveRule(String datasetSchemaId, String referenceId);
 }

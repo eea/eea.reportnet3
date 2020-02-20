@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The type Dataschema service.
@@ -519,10 +520,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getIdCodeList() != null) {
           fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
         }
+
         // Guardar el FieldSchema modificado en MongoDB
-        if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
-            .getModifiedCount() == 1) {
-          if (typeModified) {
+        UpdateResult updateResult =
+            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        if (updateResult.getMatchedCount() == 1) {
+          if (updateResult.getModifiedCount() == 1 && typeModified) {
             return fieldSchemaVO.getType();
           }
           return null;

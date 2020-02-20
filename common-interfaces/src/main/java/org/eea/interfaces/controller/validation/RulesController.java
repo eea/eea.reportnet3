@@ -142,8 +142,6 @@ public interface RulesController {
   public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
 
-
-
   /**
    * Update rule.
    *
@@ -153,5 +151,19 @@ public interface RulesController {
    */
   @PutMapping(value = "/updateRule", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
-      @RequestParam(name = "referenceId") String referenceId, @RequestBody RuleVO ruleVO);
+      @RequestBody RuleVO ruleVO);
+
+  /**
+   * Insert rule in position.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   * @param position the position
+   */
+  @PutMapping(value = "/updatePositionRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void insertRuleInPosition(@RequestParam(name = "referenceId") String referenceId,
+      @RequestParam(name = "position") int position,
+      @RequestParam(name = "datasetSchemaId") String datasetSchemaId);
+
+
 }

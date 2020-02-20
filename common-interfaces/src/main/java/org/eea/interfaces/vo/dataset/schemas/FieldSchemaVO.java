@@ -44,7 +44,6 @@ public class FieldSchemaVO {
   /** The id code list. */
   private Long idCodeList;
 
-
   /** The required. */
   private Boolean required;
 

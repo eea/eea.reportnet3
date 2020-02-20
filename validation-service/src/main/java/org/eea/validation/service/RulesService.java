@@ -73,14 +73,14 @@ public interface RulesService {
    */
   void createNewRule(String idDatasetSchema, Rule rule) throws EEAException;
 
+
   /**
    * Update rule.
    *
    * @param idDatasetSchema the id dataset schema
-   * @param referenceId the reference id
-   * @param ruleVO the rule VO
+   * @param rule the rule
    */
-  void updateRule(String idDatasetSchema, String referenceId, Rule rule);
+  void updateRule(String idDatasetSchema, Rule rule);
 
   /**
    * Creates the automatic rules.
@@ -111,4 +111,15 @@ public interface RulesService {
    * @return the boolean
    */
   Boolean existsRuleRequired(String datasetSchemaId, String referenceId);
+
+
+  /**
+   * Insert rule in position.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @param position the position
+   */
+  void insertRuleInPosition(String datasetSchemaId, String referenceId, int position);
+
 }
