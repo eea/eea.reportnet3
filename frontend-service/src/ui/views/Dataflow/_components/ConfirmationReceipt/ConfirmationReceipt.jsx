@@ -14,8 +14,6 @@ export const ConfirmationReceipt = ({ receiptData }) => {
 
   Font.registerHyphenationCallback(hyphenationCallback);
 
-  console.log('receiptData', receiptData);
-
   const Header = styled.View`
     display: flex;
     flex-direction: row;
