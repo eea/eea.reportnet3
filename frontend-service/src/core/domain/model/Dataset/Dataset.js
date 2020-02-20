@@ -13,7 +13,8 @@ export class Dataset {
     isReleased,
     levelErrorTypes,
     datasetSchemaDescription,
-    name
+    name,
+    dataProviderId
   ) {
     this.datasetId = datasetId;
     this.datasetSchemaDescription = datasetSchemaDescription;
@@ -29,5 +30,6 @@ export class Dataset {
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
     this.hasErrors = hasErrors;
+    this.dataProviderId = dataProviderId;
   }
 }

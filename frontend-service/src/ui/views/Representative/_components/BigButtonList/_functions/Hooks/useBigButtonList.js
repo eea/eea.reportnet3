@@ -95,21 +95,28 @@ const useBigButtonList = ({
     });
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowData;
-    const { representatives } = dataflowData;
+    const { datasets, representatives } = dataflowData;
     const isReleased = datasets.map(dataset => {
       return dataset.isReleased;
     });
-    // const isOutdated = representatives.filter(representative => representative.dataProviderId === datasets)
+
+    const representativeId = datasets
+      .filter(dataset => dataset.datasetSchemaName === representative)
+      .map(id => id.dataProviderId);
+
+    const isOutdated = representatives
+      .filter(representative => representative.dataProviderId === uniq(representativeId))
+      .map(representative => representative.isOutdated)[0];
+
     return [
       {
         layout: 'defaultBigButton',
         buttonClass: 'schemaDataset',
-        buttonIcon: false ? 'spinner' : 'fileDownload',
-        buttonIconClass: false ? 'spinner' : '',
+        buttonIcon: 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
+        infoStatus: isOutdated,
         handleRedirect: () => onLoadReceiptData(),
-        visibility: !isCustodian /* && !isReleased.includes(false) */
+        visibility: !isCustodian && !isReleased.includes(false)
       }
     ];
   };
