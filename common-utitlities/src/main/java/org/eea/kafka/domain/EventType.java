@@ -240,8 +240,8 @@ public enum EventType {
   /** The add datacollection failed event. */
   ADD_DATACOLLECTION_FAILED_EVENT("DATA_REPORTING_TOPIC", "add_datacollection_failed_event", true),
 
-  /** The release blocked. */
-  RELEASE_BLOCKED("DATA_REPORTING_TOPIC", "release_blocked", true);
+  /** The release blocked event. */
+  RELEASE_BLOCKED_EVENT("DATA_REPORTING_TOPIC", "release_blocked_event", true);
 
   /**
    * The topic.
