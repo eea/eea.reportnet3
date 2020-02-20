@@ -18,19 +18,21 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -90,11 +92,6 @@ public class DataflowServiceImpl implements DataflowService {
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /**
-   * The dataset controller.
-   */
-  @Autowired
-  private DataSetControllerZuul dataSetControllerZuul;
-  /**
    * The user management controller zull.
    */
   @Autowired
@@ -120,8 +117,14 @@ public class DataflowServiceImpl implements DataflowService {
   private DocumentControllerZuul documentControllerZuul;
 
 
+  /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+
+  /** The representative service. */
+  @Autowired
+  private RepresentativeService representativeService;
 
 
   /**
@@ -170,6 +173,19 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setDataCollections(
         dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the representatives
+    List<RepresentativeVO> representatives =
+        representativeService.getRepresetativesByIdDataFlow(id);
+    List<Long> dataProviderIds = dataflowVO.getReportingDatasets().stream()
+        .map(ReportingDatasetVO::getDataProviderId).collect(Collectors.toList());
+
+    if (representatives != null && !representatives.isEmpty()) {
+      dataflowVO.setRepresentatives(representatives.stream()
+          .filter(representative -> dataProviderIds.contains(representative.getDataProviderId()))
+          .collect(Collectors.toList()));
+    }
+
 
     LOG.info("Get the dataflow information with id {}", id);
 
