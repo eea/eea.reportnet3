@@ -8,7 +8,7 @@ import styles from './BigButtonList.module.css';
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
-import { ConfirmationReceipt } from '../ConfirmationReceipt';
+import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
@@ -30,7 +30,7 @@ export const BigButtonList = ({
   dataflowData,
   dataflowId,
   dataflowStatus,
-  dataProviderId = 777,
+  dataProviderId,
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
@@ -284,7 +284,7 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptData} />}
+        document={<ConfirmationReceipt receiptData={receiptData} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       </PDFDownloadLink>

@@ -323,12 +323,14 @@ const useBigButtonList = ({
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowData;
-    const representatives = datasets.map(dataset => {
+    const { representatives } = dataflowData;
+    const representativeNames = datasets.map(dataset => {
       return dataset.datasetSchemaName;
     });
     const isReleased = datasets.map(dataset => {
       return dataset.isReleased;
     });
+    // const isOutdated = representatives.filter(representative => representative.dataProviderId === datasets)
     return [
       {
         layout: 'defaultBigButton',
@@ -337,7 +339,7 @@ const useBigButtonList = ({
         buttonIconClass: false ? 'spinner' : '',
         caption: resources.messages['confirmationReceipt'],
         handleRedirect: () => onLoadReceiptData(),
-        visibility: !isCustodian && uniq(representatives).length === 1 && !isReleased.includes(false)
+        visibility: !isCustodian && uniq(representativeNames).length === 1 && !isReleased.includes(false)
       }
     ];
   };

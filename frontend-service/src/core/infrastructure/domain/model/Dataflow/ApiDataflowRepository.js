@@ -22,13 +22,33 @@ const parseDataflowDTO = dataflowDTO => {
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
   dataflow.id = dataflowDTO.id;
   dataflow.name = dataflowDTO.name;
-  dataflow.representatives = parseRepresentativeListDTO(dataflowDTO.representatives);
+  // dataflow.representatives = parseRepresentativeListDTO(dataflowDTO.representatives);
+  dataflow.representatives = repreArray;
   dataflow.requestId = dataflowDTO.requestId;
   dataflow.status = dataflowDTO.status;
   dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
   dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
   return dataflow;
 };
+
+const repreArray = [
+  {
+    id: 142,
+    dataProviderId: 7,
+    provideraccount: 'vicenteprovider@reportnet.net',
+    dataProviderGroupId: 1,
+    receiptDownloaded: false,
+    receiptOutdated: false
+  },
+  {
+    id: 143,
+    dataProviderId: 6,
+    provideraccount: 'vicenteprovider@reportnet.net',
+    dataProviderGroupId: 1,
+    receiptDownloaded: false,
+    receiptOutdated: false
+  }
+];
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
   if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
