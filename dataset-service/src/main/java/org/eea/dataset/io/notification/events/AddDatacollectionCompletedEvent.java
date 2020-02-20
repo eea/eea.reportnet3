@@ -10,12 +10,8 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-/**
- * The Class AddDataCollectionCompletedEvent.
- */
 @Component
-public class AddDataCollectionCompletedEvent implements NotificableEventHandler {
+public class AddDatacollectionCompletedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -40,7 +36,6 @@ public class AddDataCollectionCompletedEvent implements NotificableEventHandler 
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-
     Long dataflowId = notificationVO.getDataflowId();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()

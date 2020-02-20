@@ -107,16 +107,6 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
-   * Test create data schema.
-   */
-  @Test
-  public void testCreateDataSchema() {
-    dataSchemaControllerImpl.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
-
-  }
-
-  /**
    * Test find data schema by id.
    */
   @Test

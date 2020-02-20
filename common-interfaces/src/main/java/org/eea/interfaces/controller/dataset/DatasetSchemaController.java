@@ -30,16 +30,6 @@ public interface DatasetSchemaController {
   }
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @PostMapping(value = "/createDataSchema/{id}")
-  void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId);
-
-  /**
    * Creates the empty data schema.
    *
    * @param dataflowId the dataflow id
@@ -152,7 +142,7 @@ public interface DatasetSchemaController {
    * @param fieldSchemaVO the field schema VO
    * @return the string
    */
-  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{datasetId}/fieldSchema")
   String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 

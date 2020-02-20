@@ -14,14 +14,6 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 public interface DatasetSchemaService {
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  void createDataSchema(Long datasetId, Long dataflowId);
-
-  /**
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id

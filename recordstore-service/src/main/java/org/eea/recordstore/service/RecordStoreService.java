@@ -3,6 +3,7 @@ package org.eea.recordstore.service;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -110,6 +111,14 @@ public interface RecordStoreService {
    */
   void deleteDataset(String datasetSchemaName);
 
-
-
+  /**
+   * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId);
 }

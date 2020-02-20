@@ -92,20 +92,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/createDataSchema/{id}")
-  public void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId) {
-    dataschemaService.createDataSchema(datasetId, dataflowId);
-  }
-
-  /**
    * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
@@ -353,7 +339,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{datasetId}/fieldSchema")
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
