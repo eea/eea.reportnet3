@@ -33,6 +33,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
@@ -171,6 +172,9 @@ public class DatasetSchemaServiceTest {
   /** The rules controller zuul. */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
+
+  @Mock
+  private RulesController rulesController;
 
   /**
    * Inits the mocks.
@@ -552,6 +556,19 @@ public class DatasetSchemaServiceTest {
     schema.setTableSchemas(listaTables);
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
+    Document documentRecord = new Document();
+    ObjectId objIdRecord = new ObjectId();
+    documentRecord.put("_id", objIdRecord);
+    List<Document> docFieldSchmea = new ArrayList<>();
+    Document documentField = new Document();
+    documentField.put("_id", objIdRecord);
+    docFieldSchmea.add(documentField);
+    documentRecord.put("fieldSchemas", docFieldSchmea);
+
+    Mockito.when(schemasRepository.findRecordSchema(id.toString(), id.toString()))
+        .thenReturn(documentRecord);
+    doNothing().when(rulesController).deleteRuleByReferenceId(id.toString(),
+        objIdRecord.toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
     Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());

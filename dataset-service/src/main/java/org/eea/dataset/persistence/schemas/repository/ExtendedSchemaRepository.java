@@ -123,4 +123,6 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    */
   UpdateResult updateDatasetSchemaDescription(String datasetSchemaId, String description);
+
+  Document findRecordSchema(String datasetSchemaId, String tableSchemaId);
 }

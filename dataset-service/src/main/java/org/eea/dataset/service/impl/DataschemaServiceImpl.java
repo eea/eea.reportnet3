@@ -29,6 +29,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -69,6 +70,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private RulesController rulesController;
 
   /**
    * The dataschema mapper.
@@ -436,6 +440,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (table == null) {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+    }
+    // when we delete a table we need ,do the records and field to clean the rules
+    Document recordSchemadocument =
+        schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
+    // if the table havent got any record he hasnt any document too
+    if (null != recordSchemadocument) {
+      List<Document> fieldSchemasList = (List<Document>) recordSchemadocument.get("fieldSchemas");
+      fieldSchemasList.stream().forEach(document -> {
+        rulesController.deleteRuleByReferenceId(datasetSchemaId, document.get("_id").toString());
+      });
+      rulesController.deleteRuleByReferenceId(datasetSchemaId,
+          recordSchemadocument.get("_id").toString());
     }
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
