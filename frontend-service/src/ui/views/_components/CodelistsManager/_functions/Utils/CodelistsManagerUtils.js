@@ -21,14 +21,12 @@ const filterByText = (data, filterText) => {
   return filteredData;
 };
 
-const getCategoryById = (categories, categoryId) => {
-  console.log(categories, categoryId);
-  return categories
+const getCategoryById = (categories, categoryId) =>
+  categories
     .map(e => {
       return e.id;
     })
     .indexOf(categoryId);
-};
 
 export const CodelistsManagerUtils = {
   filterByText,

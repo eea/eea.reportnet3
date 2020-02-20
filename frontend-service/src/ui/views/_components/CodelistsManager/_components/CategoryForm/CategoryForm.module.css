@@ -6,3 +6,7 @@
 .categoryIncorrectInput {
   border: 2px solid var(--errors) !important;
 }
+
+.refreshCategoriesButton {
+  margin-left: auto !important;
+}

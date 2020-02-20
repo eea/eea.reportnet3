@@ -3,10 +3,8 @@ import { cloneDeep } from 'lodash';
 import { CodelistsManagerUtils } from '../Utils/CodelistsManagerUtils';
 
 const changeExpanded = (categories, categoriesExpandStatus, categoryId, expanded) => {
-  // console.log({ categories });
   const inmCategoriesExpandStatus = categoriesExpandStatus;
   const id = CodelistsManagerUtils.getCategoryById(categories, categoryId);
-  // console.log(inmCategoriesExpandStatus, id);
   inmCategoriesExpandStatus[id].expanded = expanded;
   return inmCategoriesExpandStatus;
 };
