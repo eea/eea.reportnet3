@@ -90,7 +90,7 @@ const Settings = withRouter(({ history }) => {
         title: 'User Design Options'
       },
       {
-        icon: 'configs',
+        icon: 'userConfig',
         label: 'userConfigurationOptions',
         onClick: () => {
           visibleUserSectionDispatch({

@@ -45,6 +45,7 @@ import {
   faHome,
   faCloudUploadAlt,
   faThList,
+  faUserCog,
   faMinus,
   faEye,
   faAngleDoubleUp,
@@ -303,12 +304,14 @@ export const AwesomeIcons = icon => {
       return faPen;
     case 'manageRoles':
       return faUsersCog;
+    case 'userConfig':
+      return faUserCog;
     case 'localhostAlert':
       return faIgloo;
     case 'palette':
-      return faPalette
+      return faPalette;
     case 'cofings':
-      return faCogs
+      return faCogs;
     default:
       return faFileAlt;
   }

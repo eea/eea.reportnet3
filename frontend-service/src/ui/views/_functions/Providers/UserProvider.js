@@ -31,7 +31,7 @@ const userReducer = (state, { type, payload }) => {
       return {
         ...state,
         userProps: {
-          ...state,
+          ...state.userProps,
           showLogoutConfirmation: !state.userProps.showLogoutConfirmation
         }
       };
@@ -39,7 +39,7 @@ const userReducer = (state, { type, payload }) => {
       return {
         ...state,
         userProps: {
-          ...state,
+          ...state.userProps,
           defaultRowSelected: payload
         }
       };
