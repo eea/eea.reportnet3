@@ -532,8 +532,6 @@ public class DataSetSchemaControllerImplTest {
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
         Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
-    Mockito.verify(rulesControllerZuul, times(1)).createAutomaticRule(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
