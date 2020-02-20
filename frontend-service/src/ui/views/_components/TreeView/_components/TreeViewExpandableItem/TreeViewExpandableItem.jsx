@@ -35,7 +35,6 @@ const TreeViewExpandableItem = ({
       }
     }
   }, [isOpen]);
-
   useEffect(() => {
     setIsOpen(expanded);
   }, [expanded]);
