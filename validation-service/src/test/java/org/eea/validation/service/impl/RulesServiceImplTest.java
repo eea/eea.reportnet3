@@ -226,7 +226,6 @@ public class RulesServiceImplTest {
   public void createAutomaticRulesTextTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         TypeData.TEXT, TypeEntityEnum.FIELD, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 }

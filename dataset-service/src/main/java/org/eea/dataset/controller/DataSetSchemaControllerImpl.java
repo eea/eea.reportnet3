@@ -409,17 +409,21 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (type != null) {
         // if we changue the type we need to delete all rules
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
+
         if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
           rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(), type,
-              TypeEntityEnum.FIELD, true);
+              TypeEntityEnum.FIELD, Boolean.TRUE);
         }
+
+        rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
         // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
       } else {
         if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
           if (!rulesControllerZuul.existsRuleRequired(datasetSchema, fieldSchemaVO.getId())) {
             rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-                fieldSchemaVO.getType(), TypeEntityEnum.FIELD, true);
+                fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
           }
         } else {
           rulesControllerZuul.deleteRuleRequired(datasetSchema, fieldSchemaVO.getId());
