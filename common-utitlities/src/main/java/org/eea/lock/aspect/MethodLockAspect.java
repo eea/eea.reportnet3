@@ -66,9 +66,16 @@ public class MethodLockAspect {
         throw new ResponseStatusException(HttpStatus.LOCKED, e.getMessage(), e);
       }
       throw e;
+    } catch (NoSuchMethodException | IntrospectionException | IllegalAccessException
+        | InvocationTargetException e) {
+      if (lockMethod.isController()) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected exception",
+            e);
+      }
+      throw e;
     } catch (Exception e) {
       if (lockMethod.isController()) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error", e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown exception", e);
       }
       throw e;
     }
