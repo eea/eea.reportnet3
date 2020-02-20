@@ -1,8 +1,6 @@
 package org.eea.validation.service.impl;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -90,23 +88,6 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema rSchema = new RulesSchema();
     rSchema.setIdDatasetSchema(schemaId);
     rSchema.setRulesSchemaId(ruleSchemaId);
-    Rule therule = new Rule();
-    therule.setActivationGroup("");
-    therule.setAutomatic(true);
-    therule.setEnabled(true);
-    therule.setReferenceId(new ObjectId());
-    therule.setRuleId(new ObjectId());
-    therule.setRuleName("test");
-    List<String> thenlist = new ArrayList<>();
-    thenlist.add("that field must be filled");
-    thenlist.add("ERROR");
-    therule.setThenCondition(thenlist);
-    therule.setType(TypeEntityEnum.FIELD);
-    therule.setWhenCondition("null != null");
-    List<Rule> ruleList = new ArrayList<>();
-    ruleList.add(therule);
-    rSchema.setRules(ruleList);
-
     rulesRepository.save(rSchema);
   }
 
