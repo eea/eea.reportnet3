@@ -13,7 +13,7 @@ public class AutomaticRules {
 
   // WE DEVIDE THAT CLASS TO BE EASY KNOW WHAT AUTOMATIC VALIDATION SHOULD BE FILLED
 
-  private static final String LV_ERROR = "BLOCKER";
+  private static final String LV_ERROR = "ERROR";
 
 
   /**
