@@ -241,12 +241,12 @@ const Category = ({
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={
           isIncorrect ||
           categoryState.isSaving ||
           (categoryState.codelistName.trim() === '' || categoryState.codelistVersion.trim() === '')
         }
-        className="p-button-success"
         icon="save"
         label={resources.messages['save']}
         onClick={onSaveCodelist}

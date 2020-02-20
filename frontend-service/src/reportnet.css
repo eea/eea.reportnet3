@@ -98,6 +98,7 @@
   --c-chart-warning: #ffcc00;
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
+  --c-growl-info-blue: #8bc3ed;
 
   --header-height: 4rem;
 
@@ -225,7 +226,7 @@
 
   /* Growl */
   --growl-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
-  --growl-info-bg: var(--c-corporate-blue);
+  --growl-info-bg: var(--c-growl-info-blue);
   --growl-info-color: var(--black);
   --growl-info-icon-color: var(--black);
   --growl-success-bg: var(--success-color-lighter);
