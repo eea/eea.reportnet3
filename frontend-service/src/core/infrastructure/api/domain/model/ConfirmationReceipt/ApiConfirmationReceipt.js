@@ -5,7 +5,7 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiConfirmationReceipt = {
   get: async (dataflowId, dataProviderId) => {
-    /* const tokens = userStorage.get();
+    const tokens = userStorage.get();
 
     const response = await HTTPRequester.get({
       url: getUrl(ConfirmationReceiptConfig.get, {
@@ -17,8 +17,8 @@ export const apiConfirmationReceipt = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    return response.data; */
-    const response = {
+    return response.data;
+    /*  const response = {
       idDataflow: 5061,
       dataflowName: 'DF receipt 1',
       datasets: [
@@ -46,6 +46,6 @@ export const apiConfirmationReceipt = {
       providerEmail: 'vicenteprovider@reportnet.net',
       providerAssignation: 'Denmark'
     };
-    return response;
+    return response; */
   }
 };
