@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isUndefined, isNull } from 'lodash';
+import { isUndefined } from 'lodash';
 
 import styles from './CodelistProperties.module.css';
 

@@ -10,6 +10,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const CodelistForm = ({
+  checkDuplicateItems,
   columns,
   formType,
   onCancelAddEditItem,
@@ -36,8 +37,9 @@ const CodelistForm = ({
     if (inmKeys.indexOf('codelistId') > -1) {
       inmKeys.splice(inmKeys.indexOf('codelistId'), 1);
     }
-    console.log(inmKeys.filter(key => item[key].trim() === ''));
-    setIsSaveDisabled(!isEmpty(inmKeys.filter(key => item[key].trim() === '')));
+    setIsSaveDisabled(
+      !isEmpty(inmKeys.filter(key => item[key].trim() === '')) || !checkDuplicateItems(item['shortCode'], item['id'])
+    );
   };
 
   const codelistDialogFooter = (
@@ -68,7 +70,14 @@ const CodelistForm = ({
       <React.Fragment key={column}>
         <span className={`${styles.codelistInput} p-float-label`}>
           <InputText
+            className={
+              (!isUndefined(item) && !isUndefined(item[column]) && item[column].trim() === '') ||
+              (column === 'shortCode' && !checkDuplicateItems(item['shortCode'], item['id']))
+                ? styles.codelistIncorrectItem
+                : null
+            }
             id={`${column}Input`}
+            // onBlur={column === 'shortCode' ? () => setIsSaveDisabled(checkDuplicateItems(item['shortCode'])) : null}
             onChange={e => onChangeItemForm(column, e.target.value, formType)}
             value={isUndefined(item) || isNull(item[column]) || isUndefined(item[column]) ? '' : item[column]}
           />

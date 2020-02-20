@@ -146,7 +146,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   };
 
   const onToggleExpandCollapseAll = () => {
-    console.log(codelistsManagerState.toggleExpandCollapseAll);
     dispatchCodelistsManager({
       type: codelistsManagerState.toggleExpandCollapseAll === 0 ? 'EXPAND_ALL' : 'COLLAPSE_ALL'
     });

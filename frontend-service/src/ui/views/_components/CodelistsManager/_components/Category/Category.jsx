@@ -231,7 +231,6 @@ const Category = ({
   // };
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      {console.log(categoryState.isSaving)}
       <Button
         disabled={
           isIncorrect ||
@@ -297,8 +296,6 @@ const Category = ({
   };
 
   const checkNoCodelistEditing = () => categoryState.codelistsInEdition === 0;
-
-  console.log('eeeeee');
 
   const editCategoryForm = (
     <React.Fragment>
