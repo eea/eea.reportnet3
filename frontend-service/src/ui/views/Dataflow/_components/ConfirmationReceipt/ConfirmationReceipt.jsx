@@ -117,8 +117,7 @@ export const ConfirmationReceipt = ({ receiptData }) => {
 
             <Header fixed>
               <Date>
-                {'Date: '}
-                {moment().format('YYYY-MM-DD HH:mm:ss')}
+                {resources.messages.date} : {moment().format('YYYY-MM-DD HH:mm:ss')}
               </Date>
               <RepresentativeName>
                 {'Representative: '}
