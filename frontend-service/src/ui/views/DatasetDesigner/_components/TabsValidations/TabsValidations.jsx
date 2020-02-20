@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './TabsValidations.module.css';
 
@@ -27,14 +27,6 @@ const TabsValidations = ({
   const [isLoading, setIsLoading] = useState(true);
   const [validations, setValidations] = useState([]);
 
-  // const layout = children => {
-  //   return (
-  //     // <MainLayout>
-  //     // <div className="rep-container">{children}</div>
-  //     // </MainLayout>
-  //   );
-  // };
-
   const getValidations = async () => {
     try {
       return await ValidationService.getAll(datasetSchemaId);
@@ -48,11 +40,14 @@ const TabsValidations = ({
     }
   };
 
-  const validationsList = () => {
-    const validationsList = getValidations();
-    console.log({ validationsList });
-    return validationsList;
-  };
+  const validationsList = getValidations();
+  console.log(validationsList);
+
+  if (isUndefined(validationsList) || isEmpty(validationsList.rules)) {
+    console.log('Schema has no validations');
+  }
+
+  let tabs = validationsList.entityLevels;
 
   if (isLoading) {
     return <Spinner />;
