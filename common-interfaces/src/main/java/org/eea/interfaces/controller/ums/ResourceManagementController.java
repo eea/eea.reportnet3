@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,4 +87,7 @@ public interface ResourceManagementController {
    */
   @RequestMapping(value = "/createList", method = RequestMethod.POST)
   void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs);
+
+  @DeleteMapping("/delete_by_dataset_id")
+  void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds);
 }
