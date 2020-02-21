@@ -89,7 +89,7 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema rSchema = new RulesSchema();
     rSchema.setIdDatasetSchema(schemaId);
     rSchema.setRulesSchemaId(ruleSchemaId);
-    rSchema.setRules(new ArrayList());
+    rSchema.setRules(new ArrayList<Rule>());
     rulesRepository.save(rSchema);
   }
 
@@ -102,9 +102,7 @@ public class RulesServiceImpl implements RulesService {
   public void deleteEmptyRulesScehma(ObjectId schemaId) {
 
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(schemaId);
-    LOG.info("este es el: {}", ruleSchema);
     if (null != ruleSchema) {
-      LOG.info("No es null y voy a borarlo: {}", ruleSchema.getRulesSchemaId());
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
     }
   }
@@ -240,13 +238,17 @@ public class RulesServiceImpl implements RulesService {
    * @param ruleVO the rule
    */
   @Override
-  public void updateRule(String idDatasetSchema, Rule rule) {
-    try {
-      rulesRepository.updateRule(idDatasetSchema, rule);
-    } catch (EEAException e) {
-      e.printStackTrace();
+  public boolean updateRule(String idDatasetSchema, Rule rule) {
+    if (null != rule) {
+      if (rulesRepository.updateRule(idDatasetSchema, rule)) {
+        LOG.info("Rule {} reordered in datasetSchemaId {}", rule.getRuleId(), idDatasetSchema);
+        return true;
+      }
+      LOG_ERROR.error("Error updating rule for idDatasetSchema {} ", idDatasetSchema);
+      return false;
     }
-
+    LOG_ERROR.error("Error updating rule for idDatasetSchema {} ", idDatasetSchema);
+    return false;
   }
 
   /**
@@ -255,15 +257,26 @@ public class RulesServiceImpl implements RulesService {
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param position the position
+   * @return
    */
   @Override
-  public void insertRuleInPosition(String datasetSchemaId, String referenceId, int position) {
-    try {
-      Rule rule = rulesRepository.findAndRemoveRule(datasetSchemaId, referenceId);
-      rulesRepository.insertRuleInPosition(datasetSchemaId, rule, position);
-    } catch (EEAException e) {
-      e.printStackTrace();
+  public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
+    Rule rule = rulesRepository.findRule(datasetSchemaId, ruleId);
+    if (rule != null) {
+      if (rulesRepository.deleteRule(datasetSchemaId, ruleId)) {
+        if (rulesRepository.insertRuleInPosition(datasetSchemaId, rule, position)) {
+          LOG.info("Rule {} reordered in datasetSchemaId {}", ruleId, datasetSchemaId);
+          return true;
+        }
+        LOG_ERROR.error("Error inserting Rule {} in datasetSchemaId {} in position {}", ruleId,
+            datasetSchemaId, position);
+        return false;
+      }
+      LOG_ERROR.error("Error deleting Rule {} in datasetSchemaId {}", ruleId, datasetSchemaId);
+      return false;
     }
+    LOG_ERROR.error("Rule {} not found", ruleId);
+    return false;
   }
 
 }

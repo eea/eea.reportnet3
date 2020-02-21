@@ -161,7 +161,7 @@ public interface RulesController {
    * @param position the position
    */
   @PutMapping(value = "/updatePositionRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void insertRuleInPosition(@RequestParam(name = "referenceId") String referenceId,
+  public void insertRuleInPosition(@RequestParam(name = "ruleId") String ruleId,
       @RequestParam(name = "position") int position,
       @RequestParam(name = "datasetSchemaId") String datasetSchemaId);
 

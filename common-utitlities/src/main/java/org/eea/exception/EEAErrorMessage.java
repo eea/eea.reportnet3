@@ -158,6 +158,12 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_CREATING_RULE. */
   public static final String ERROR_CREATING_RULE = "Error creating rules";
 
+  /** The Constant ERROR_ORDERING_RULE. */
+  public static final String ERROR_ORDERING_RULE = "Error ordering rule";
+
+  /** The Constant ERROR_UPDATING_RULE. */
+  public static final String ERROR_UPDATING_RULE = "Error updating rule";
+
   /**
    * Instantiates a new EEA error message.
    */

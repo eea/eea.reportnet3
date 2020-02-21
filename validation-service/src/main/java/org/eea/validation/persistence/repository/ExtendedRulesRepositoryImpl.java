@@ -177,47 +177,79 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return the update result
    */
   @Override
-  public UpdateResult insertRuleInPosition(String datasetSchemaId, Rule rule, int position) {
+  public boolean insertRuleInPosition(String datasetSchemaId, Rule rule, int position) {
     Query query =
         new Query().addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
     Update update = new Update().push("rules").atPosition(position).each(rule);
-    return mongoTemplate.updateFirst(query, update, Rule.class, "RulesSchema");
+    return mongoTemplate.updateFirst(query, update, Rule.class, "RulesSchema")
+        .getModifiedCount() == 1;
   }
 
 
 
   /**
-   * Find and remove rule.
+   * Find rule.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param referenceId the reference id
+   * @param ruleId the rule id
    * @return the rule
    */
-  @Override
   @CheckForNull
-  public Rule findAndRemoveRule(String datasetSchemaId, String referenceId) {
+  @Override
+  public Rule findRule(String datasetSchemaId, String ruleId) {
     ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
-    ObjectId referenceOId = new ObjectId(referenceId);
-    RulesSchema rulesSchema = mongoTemplate.findOne(
-        new Query(new Criteria("idDatasetSchema").is(datasetSchemaOId)).addCriteria(
-            new Criteria("rules").elemMatch(new Criteria("referenceId").is(referenceOId))),
-        RulesSchema.class);
-    if (rulesSchema != null && rulesSchema.getRules() != null) {
-      Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaOId));
-      Update update = new Update().push("rules", new Document("referenceId", referenceOId));
-      mongoTemplate.updateFirst(query, update, Rule.class);
-      return rulesSchema.getRules().get(0);
+    ObjectId ruleOId = new ObjectId(ruleId);
+    Document filterExpression = new Document();
+    filterExpression.append("input", "$rules");
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule._id", ruleOId)));
+    Document filter = new Document("$filter", filterExpression);
+    RulesSchema rulesSchema = mongoTemplate.aggregate(
+        Aggregation.newAggregation(
+            Aggregation.match(Criteria.where("idDatasetSchema").is(datasetSchemaOId)),
+            Aggregation.project().and(aggregationOperationContext -> filter).as("rules")),
+        RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
+    if (rulesSchema != null) {
+      List<Rule> rules = rulesSchema.getRules();
+      if (rules != null && !rules.isEmpty()) {
+        return rules.get(0);
+      }
     }
     return null;
   }
 
-
+  /**
+   * Delete rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleId the rule id
+   * @return true, if successful
+   */
   @Override
-  public UpdateResult updateRule(String datasetSchemaId, Rule rule) throws EEAException {
+  public boolean deleteRule(String datasetSchemaId, String ruleId) {
+    ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
+    ObjectId ruleOId = new ObjectId(ruleId);
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaOId));
+    Update update = new Update().pull("rules", new Document("_id", ruleOId));
+    return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
+
+
+  /**
+   * Update rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean updateRule(String datasetSchemaId, Rule rule) {
+    rule.setAutomatic(false);
     return mongoTemplate.updateFirst(
         new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)))
             .addCriteria(new Criteria("rules.referenceId").is(rule.getReferenceId())),
-        new Update().set("rules.$", rule), RulesSchema.class);
+        new Update().set("rules.$", rule), RulesSchema.class).getModifiedCount() == 1;
   }
 
 

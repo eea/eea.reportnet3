@@ -308,7 +308,10 @@ public class RulesControllerImpl implements RulesController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
-    rulesService.updateRule(idDatasetSchema, ruleMapper.classToEntity(ruleVO));
+    if (!rulesService.updateRule(idDatasetSchema, ruleMapper.classToEntity(ruleVO))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_UPDATING_RULE);
+    }
   }
 
   /**
@@ -321,10 +324,24 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/updatePositionRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void insertRuleInPosition(@RequestParam(name = "referenceId") String referenceId,
+  public void insertRuleInPosition(@RequestParam(name = "ruleId") String ruleId,
       @RequestParam(name = "position") int position,
       @RequestParam(name = "datasetSchemaId") String datasetSchemaId) {
-    rulesService.insertRuleInPosition(datasetSchemaId, referenceId, position);
+    if (StringUtils.isBlank(datasetSchemaId)) {
+      LOG_ERROR.error("Error updating position ruleId {} because idDatasetSchema is incorrect",
+          datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(ruleId)) {
+      LOG_ERROR.error("Error updating position in idDatasetSchema because ruleId is incorrect",
+          datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RULEID_INCORRECT);
+    }
+    if (!rulesService.insertRuleInPosition(datasetSchemaId, ruleId, position)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_ORDERING_RULE);
+    }
   }
 
 

@@ -84,7 +84,7 @@ public interface ExtendedRulesRepository {
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult updateRule(String datasetSchemaId, Rule rule) throws EEAException;
+  boolean updateRule(String datasetSchemaId, Rule rule);
 
   /**
    * Insert rule in position.
@@ -92,18 +92,25 @@ public interface ExtendedRulesRepository {
    * @param idDatasetSchema the id dataset schema
    * @param rule the rule
    * @param position the position
-   * @return the update result
-   * @throws EEAException the EEA exception
+   * @return true, if successful
    */
-  UpdateResult insertRuleInPosition(String idDatasetSchema, Rule rule, int position)
-      throws EEAException;
+  boolean insertRuleInPosition(String idDatasetSchema, Rule rule, int position);
 
   /**
-   * Find and remove rule.
+   * Delete rule.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param referenceId the reference id
+   * @param ruleId the rule id
+   * @return true, if successful
+   */
+  boolean deleteRule(String datasetSchemaId, String ruleId);
+
+  /**
+   * Find rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleId the rule id
    * @return the rule
    */
-  Rule findAndRemoveRule(String datasetSchemaId, String referenceId);
+  Rule findRule(String datasetSchemaId, String ruleId);
 }

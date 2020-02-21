@@ -79,8 +79,9 @@ public interface RulesService {
    *
    * @param idDatasetSchema the id dataset schema
    * @param rule the rule
+   * @return
    */
-  void updateRule(String idDatasetSchema, Rule rule);
+  boolean updateRule(String idDatasetSchema, Rule rule);
 
   /**
    * Creates the automatic rules.
@@ -119,7 +120,8 @@ public interface RulesService {
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param position the position
+   * @return
    */
-  void insertRuleInPosition(String datasetSchemaId, String referenceId, int position);
+  boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position);
 
 }
