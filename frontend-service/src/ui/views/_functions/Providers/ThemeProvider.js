@@ -249,7 +249,8 @@ export const ThemeProvider = ({ children }) => {
         'sidebar-close-icon-color-hover': 'var(--gray-110)',
         'sidebar-title-color': 'var(--c-corporate-blue)',
         'form-field-bg': 'var(--white)',
-        'form-field-color': 'var(--black)'
+        'form-field-color': 'var(--black)',
+        'box-shadow': 'var(--gray-15)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -471,7 +472,8 @@ export const ThemeProvider = ({ children }) => {
         'sidebar-close-icon-color-hover': 'var(--gray-110)',
         'sidebar-title-color': 'var(--yellow-120)',
         'form-field-bg': 'var(--c-dark-blue)',
-        'form-field-color': 'var(--white)'
+        'form-field-color': 'var(--white)',
+        'box-shadow': 'var(--gray-75)'
       }
     }
   });
