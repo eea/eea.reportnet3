@@ -80,6 +80,7 @@
 		"dataflowHelp": "Dataflow help",
 		"dataflowList": "Dataflows",	
 		"dataset": "Dataset",
+		"datasets": "Datasets",
 		"datasetDataLoadingInit":"<strong>{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}",
 		"datasetDesigner": "Dataset designer",
 		"datasetDesignerNoFields":  "There are no fields created for the table schema",

@@ -20,11 +20,11 @@ export const apiConfirmationReceipt = {
     return response.data;
     /*  const response = {
       idDataflow: 5061,
-      dataflowName: 'DF receipt 1',
+      dataflowName: 'DF name that is very descriptive and large',
       datasets: [
         {
-          id: 5833,
-          dataSetName: 'Denmark',
+          id: 5833,         
+          dataSetName: 'First dataset',
           creationDate: 1581673921830,
           isReleased: true,
           dateReleased: 1581622608687,
@@ -34,7 +34,7 @@ export const apiConfirmationReceipt = {
         },
         {
           id: 5834,
-          dataSetName: 'Denmark',
+          dataSetName: 'Second dataset',
           creationDate: 1581673921826,
           isReleased: true,
           dateReleased: 1581622608687,

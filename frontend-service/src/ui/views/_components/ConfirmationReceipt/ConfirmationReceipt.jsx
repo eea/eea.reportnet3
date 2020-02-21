@@ -117,19 +117,18 @@ export const ConfirmationReceipt = ({ receiptData, resources }) => {
 
             <Header fixed>
               <Date>
-                {resources.messages.date} : {moment().format('YYYY-MM-DD HH:mm:ss')}
+                {resources.messages['date']} : {moment().format('YYYY-MM-DD HH:mm:ss')}
               </Date>
               <RepresentativeName>
-                {'Representative: '}
-                {receiptData.representative}
+                {resources.messages['representative']}: {receiptData.representative}
               </RepresentativeName>
             </Header>
 
-            <Title hyphenationCallback="1000">{'Confirmation receipt'}</Title>
+            <Title hyphenationCallback="1000">{resources.messages['confirmationReceipt']}</Title>
             <SubTitle>{receiptData.dataflowName}</SubTitle>
             <TableTitles>
-              <DatasetsTitle>{'Datasets'}</DatasetsTitle>
-              <DateTitle>{'Date'}</DateTitle>
+              <DatasetsTitle> {resources.messages['datasets']}</DatasetsTitle>
+              <DateTitle> {resources.messages['date']}</DateTitle>
             </TableTitles>
             <DataTableWrapper>
               {receiptData.datasets.map(dataset => (
