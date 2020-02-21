@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -157,18 +158,26 @@ public class DataCollectionServiceTest {
   public void createEmptyDataCollectionTest() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
+    List<DataProviderVO> dataProviders = new ArrayList<>();
     DesignDatasetVO design = new DesignDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
+    DataProviderVO dataProvider = new DataProviderVO();
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
     representative.setProviderAccount("providerAccount_");
+    representative.setDataProviderId(1L);
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
     designs.add(design);
     representatives.add(representative);
+    dataProviders.add(dataProvider);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProviders);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
