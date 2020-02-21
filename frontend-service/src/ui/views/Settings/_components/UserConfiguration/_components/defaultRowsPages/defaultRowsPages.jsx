@@ -19,12 +19,7 @@ export const DefaultRowsPages = () => {
       <Dropdown
         name="rowPerPage"
         placeholder="select"
-        options={[
-          { label: 5, value: 5 },
-          { label: 10, value: 10 },
-          { label: 20, value: 20 },
-          { label: 100, value: 100 }
-        ]}
+        options={resources.userParameters['defaultRowsPage']}
         onChange={changeRowValue}
         value={userContext.userProps.defaultRowSelected}
       />
