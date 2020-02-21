@@ -226,6 +226,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.getDataProviderById(dataProviderId);
   }
 
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
   @Override
   @GetMapping("/private/dataProvider")
   public List<DataProviderVO> findDataProvidersByIds(
