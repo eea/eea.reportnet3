@@ -7,6 +7,7 @@ import styles from './TabsValidations.module.css';
 import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -57,11 +58,41 @@ const TabsValidations = ({
     }
   };
 
+  const setActionButtons = validations => {
+    validations.rules.forEach(validation => {
+      validation.actionButtons = (
+        <div>
+          <Button
+            type="button"
+            icon="edit"
+            className={`p-button-rounded p-button-secondary`}
+            // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
+            // onClick={e => onEditDocument()}
+          />
+          <Button
+            type="button"
+            icon="trash"
+            // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
+            className={`p-button-rounded p-button-secondary`}
+            // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
+            // onClick={() => {
+            //   setDeleteDialogVisible(true);
+            //   setRowDataState(rowData);
+            // }}
+          />
+        </div>
+      );
+    });
+  };
+
   const validationList = () => {
     console.log({ validations });
     if (isEmpty(validations)) {
       return;
     }
+
+    setActionButtons(validations);
+
     const headers = [
       {
         id: 'name',
@@ -88,7 +119,7 @@ const TabsValidations = ({
         header: 'Automatic'
       },
       {
-        id: 'rulesActionButtons',
+        id: 'actionButtons',
         header: 'Actions'
       }
     ];
