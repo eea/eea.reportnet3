@@ -1,10 +1,13 @@
 import React, { useReducer } from 'react';
+import { isNull } from 'lodash';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
     case 'TOGGLE_THEME':
-      //   document.body.style.setProperty('--bg', '#282c35');
+      if (typeof Storage !== 'undefined') {
+        localStorage.setItem('theme', payload.newTheme);
+      }
       return {
         ...state,
         currentTheme: payload.newTheme
@@ -16,7 +19,9 @@ const themeReducer = (state, { type, payload }) => {
 
 export const ThemeProvider = ({ children }) => {
   const [state, dispatch] = useReducer(themeReducer, {
-    currentTheme: 'light',
+    currentTheme: !isNull(window.localStorage.getItem('theme'))
+      ? window.localStorage.getItem('theme')
+      : window.localStorage.setItem('theme', 'light'),
     themes: {
       light: {
         bg: 'var(--white)',
@@ -487,6 +492,7 @@ export const ThemeProvider = ({ children }) => {
               newTheme
             }
           });
+          console.log({ newTheme });
           const theme = state.themes[newTheme];
           Object.keys(theme).forEach(key => {
             const cssKey = `--${key}`;
