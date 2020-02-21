@@ -1,4 +1,4 @@
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isNull, isUndefined } from 'lodash';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
@@ -17,10 +17,11 @@ const getAll = async datasetSchemaId => {
       {
         ruleId: '1',
         referenceId: '5e4a486519eede2f8821becd',
-        ruleName: 'Date between 2005 and 2010',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
         automatic: true,
         enabled: true,
-        salience: 1,
+        description: 'This value must be filled',
         activationGroup: '',
         order: 1,
         type: 'FIELD',
@@ -28,12 +29,237 @@ const getAll = async datasetSchemaId => {
         thenCondition: ['that field must be filled', 'ERROR']
       },
       {
-        ruleId: '2',
+        ruleId: '25',
         referenceId: '7346519eede2f8821becd',
-        ruleName: 'Date between 2010 and 2020',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
         automatic: false,
         enabled: true,
-        salience: 2,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
+        activationGroup: '',
+        order: 2,
+        type: 'FIELD',
+        whenCondition: 'null != null',
+        thenCondition: ['that field must be filled', 'ERROR']
+      },
+      {
+        ruleId: '25',
+        referenceId: '7346519eede2f8821becd',
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: false,
+        enabled: true,
+        description: 'This value must be filled',
         activationGroup: '',
         order: 2,
         type: 'FIELD',
@@ -43,10 +269,11 @@ const getAll = async datasetSchemaId => {
       {
         ruleId: '2',
         referenceId: '7346519eede2f8821becd',
-        ruleName: 'Date between 2010 and 2020',
-        automatic: false,
-        enabled: true,
-        salience: 2,
+        ruleName: 'FIELD REQUIRED',
+        shortCode: 'FIELD_REQ',
+        automatic: 'false',
+        enabled: 'true',
+        description: 'This value must be filled',
         activationGroup: '',
         order: 2,
         type: 'TABLE',
@@ -63,7 +290,7 @@ const getAll = async datasetSchemaId => {
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   const rulesData = parseDataValidationRulesDTO(validationsListDTO.rules);
-  validationsList.entityLevels = rulesData.entityLevels;
+  validationsList.entityTypes = rulesData.entityTypes;
   validationsList.rules = rulesData.rules;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
   return validationsList;
@@ -71,20 +298,31 @@ const getAll = async datasetSchemaId => {
 
 const parseDataValidationRulesDTO = rulesDTO => {
   const rulesData = {};
-  const entityLevels = [];
+  const entityTypes = [];
 
   rulesData.rules = rulesDTO.map(ruleDTO => {
-    entityLevels.push(ruleDTO.type);
-    return new Validation({
-      id: ruleDTO.ruleId,
-      levelError: ruleDTO.salience,
-      entityType: ruleDTO.type,
-      message: ruleDTO.thenCondition[0]
-    });
+    entityTypes.push(ruleDTO.type);
+    const rule = {};
+    rule.shortCode = ruleDTO.shortCode;
+    rule.name = ruleDTO.ruleName;
+    rule.ruleDescription = ruleDTO.description;
+    rule.levelError = ruleDTO.thenCondition[1];
+    rule.enabled = capitalize(ruleDTO.enabled.toString());
+    rule.automatic = capitalize(ruleDTO.automatic.toString());
+    rule.order = ruleDTO.order;
+    rule.entityType = ruleDTO.type;
+    rule.message = ruleDTO.thenCondition[0];
+    return rule;
+    // return new Validation({
+    //   entityType: ruleDTO.type,
+    //   id: ruleDTO.ruleId,
+    //   levelError: ruleDTO.thenCondition[1],
+    //   message: ruleDTO.thenCondition[0]
+    // });
   });
 
-  rulesData.entityLevels = [...new Set(entityLevels)];
-
+  rulesData.entityTypes = [...new Set(entityTypes)];
+  console.log({ rulesData });
   return rulesData;
 };
 export const ApiValidationRepository = {

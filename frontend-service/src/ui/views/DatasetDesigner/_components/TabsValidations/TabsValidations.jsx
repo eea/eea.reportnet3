@@ -6,6 +6,7 @@ import styles from './TabsValidations.module.css';
 
 import { config } from 'conf';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -32,19 +33,34 @@ const TabsValidations = ({
   const [isLoading, setIsLoading] = useState(true);
   const [validations, setValidations] = useState([]);
   const [validationColumns, setValidationColumns] = useState([]);
+  const [rules, setRules] = useState([]);
 
   useEffect(() => {
     onLoadValidationsList();
   }, []);
   // }, [isValidationDeleted]);
 
-  const getValidationColumns = validationsList => {};
+  // const parseValidationsToDataTable = validations => {
+  //   const validationsArray = validations.rules.map(rule => {
+  //     console.log({ rule });
+  //     return {
+  //       ruleName: 'rule.name',
+  //       description: 'rule.description',
+  //       levelError: ' rule.levelError',
+  //       isEnabled: 'rule.isEnabled',
+  //       isAutomatic: 'rule.isAutomatic',
+  //       actionButtons: ''
+  //     };
+  //   });
+  //   console.log({ validationsArray });
+  //   return validationsArray;
+  // };
 
   const onLoadValidationsList = async () => {
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidations(validationsList);
-      setValidationColumns(getValidationColumns(validationsList));
+      setValidationColumns(validationsList);
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_VALIDATIONS',
@@ -57,72 +73,66 @@ const TabsValidations = ({
     }
   };
 
-  const validationLevelTabs = () => {
+  const validationList = () => {
     console.log({ validations });
     if (isEmpty(validations)) {
       return;
     }
-    console.log(validations);
-
     const headers = [
       {
-        id: 'ruleName',
+        id: 'name',
         header: 'Name'
+      },
+      {
+        id: 'shortCode',
+        header: 'Short code'
       },
       {
         id: 'ruleDescription',
         header: 'Description'
       },
       {
-        id: 'isRuleAutomatic',
-        header: 'Type error'
+        id: 'levelError',
+        header: 'Level error'
       },
       {
-        id: 'isRuleEnabled',
+        id: 'enabled',
         header: 'Enabled'
       },
       {
-        id: 'isRuleAutomatic',
-        header: 'Automatic QC'
+        id: 'automatic',
+        header: 'Automatic'
       },
       {
-        id: 'actionButtons',
-        header: 'Edit/delete'
-      },
-      {
-        //Buttons to add, edit, delelet QCs
-        id: 'actionButtons',
-        header: 'Add'
+        id: 'rulesActionButtons',
+        header: 'Actions'
       }
     ];
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;
 
-    const tabs = [];
-    console.log({ validations });
-    validations.entityLevels.forEach(entityLevel => {
-      const validationsFilteredByEntityLevel = validations.rules.filter(rule => rule.entityType === entityLevel);
-      console.log({ validationsFilteredByEntityLevel });
-      tabs.push(
-        <TabPanel header={entityLevel} key={entityLevel} rightIcon={null}>
+    return validations.entityTypes.map(entityType => {
+      const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
+      const totalRecordsBy = 'Total validations';
+      return (
+        <TabPanel header={entityType} key={entityType} rightIcon={null}>
           <div className={null}>
             <DataTable
               autoLayout={true}
               className={null}
               loading={false}
               paginator={true}
-              paginatorRight={validationsFilteredByEntityLevel.length}
+              paginatorRight={validationsFilteredByEntityType.length}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
-              totalRecords={validationsFilteredByEntityLevel.length}
-              value={validationsFilteredByEntityLevel}>
+              totalRecords={validationsFilteredByEntityType.length}
+              value={validationsFilteredByEntityType}>
               {columns}
             </DataTable>
           </div>
         </TabPanel>
       );
     });
-    return tabs;
   };
 
   if (isLoading) {
@@ -131,7 +141,7 @@ const TabsValidations = ({
 
   return (
     <TabView activeIndex={activeIndex} onTabChange={onTabChange} renderActiveOnly={false}>
-      {validationLevelTabs()}
+      {validationList()}
     </TabView>
   );
 };
