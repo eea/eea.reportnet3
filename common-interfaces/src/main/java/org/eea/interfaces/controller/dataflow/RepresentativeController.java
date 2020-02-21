@@ -100,9 +100,9 @@ public interface RepresentativeController {
   /**
    * Find data providers by ids.
    *
-   * @param dataProviderIds the data provider ids
+   * @param dataProviderIds the data provider id
    * @return the list
    */
-  @GetMapping("/private/dataProvider/ids")
-  List<DataProviderVO> findDataProvidersByIds(@RequestParam("ids") List<Long> dataProviderIds);
+  @GetMapping("/private/dataProvider")
+  List<DataProviderVO> findDataProvidersByIds(@RequestParam("id") List<Long> dataProviderIds);
 }
