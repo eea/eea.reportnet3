@@ -11,7 +11,7 @@ export const codelistReducer = (state, { type, payload }) => {
     case 'RESET_INITIAL_NEW_ITEM':
       return {
         ...state,
-        newItem: { id: `-${state.items.length}`, shortCode: '', label: '', definition: '', codelistId: '' }
+        newItem: { id: `-${state.items.length}`, code: '', label: '', definition: '', codelistId: '' }
       };
     case 'RESET_INITIAL_CLONED_CODELIST':
       return {

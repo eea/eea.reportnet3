@@ -148,7 +148,7 @@ const useBigButtonList = ({
         disabled: true
       }
     ],
-    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
+    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections)
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {

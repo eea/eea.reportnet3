@@ -14,6 +14,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -67,6 +68,8 @@ const DataViewer = withRouter(
     match: { params },
     history
   }) => {
+    const userContext = useContext(UserContext);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [codelistInfo, setCodelistInfo] = useState({});
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -85,12 +88,14 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
-
+    //
+    const DefaultRowsPage = userContext.userProps.defaultRowSelected;
+    //
     const [records, dispatchRecords] = useReducer(recordReducer, {
       totalRecords: 0,
       totalFilteredRecords: 0,
       firstPageRecord: 0,
-      recordsPerPage: 10,
+      recordsPerPage: DefaultRowsPage,
       initialRecordValue: undefined,
       isRecordDeleted: false,
       editedRecord: {},
@@ -801,7 +806,9 @@ const DataViewer = withRouter(
             resizableColumns={true}
             rowClassName={rowClassName}
             rows={records.recordsPerPage}
+            //////////////////////////////////////////////////
             rowsPerPageOptions={[5, 10, 20, 100]}
+            /////////////////////////////////////////
             scrollable={true}
             scrollHeight="70vh"
             selectionMode="single"

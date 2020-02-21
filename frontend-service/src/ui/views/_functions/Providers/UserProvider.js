@@ -3,7 +3,9 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const userSettingsDefaultState = {
-  userProps:{}
+  userProps: {
+    defaultRowSelected: 10
+  }
 };
 
 const userReducer = (state, { type, payload }) => {
@@ -25,15 +27,22 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         ...payload.user
       };
-    case 'TOGGLE_LOGOUT_CONFIRM': 
+    case 'TOGGLE_LOGOUT_CONFIRM':
       return {
         ...state,
-        userProps:{
-          ...state,
+        userProps: {
+          ...state.userProps,
           showLogoutConfirmation: !state.userProps.showLogoutConfirmation
         }
-        
-      }
+      };
+    case 'DEFAULT_ROW_SELECTED':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          defaultRowSelected: payload
+        }
+      };
 
     default:
       return state;
@@ -44,7 +53,7 @@ export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
   const notificationContext = useContext(NotificationContext);
 
-  console.log('state', state)
+  console.log('state', state);
   return (
     <UserContext.Provider
       value={{
@@ -72,6 +81,12 @@ export const UserProvider = ({ children }) => {
             }
           });
         },
+        defaultRowSelected: rowNumber => {
+          dispatch({
+            type: 'DEFAULT_ROW_SELECTED',
+            payload: rowNumber
+          });
+        },
         onTokenRefresh: user => {
           dispatch({
             type: 'REFRESH_TOKEN',
@@ -83,8 +98,8 @@ export const UserProvider = ({ children }) => {
         onToggleLogoutConfirm: () => {
           dispatch({
             type: 'TOGGLE_LOGOUT_CONFIRM',
-            payload:{}
-          })
+            payload: {}
+          });
         }
       }}>
       {children}

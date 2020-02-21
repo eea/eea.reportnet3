@@ -1,1 +1,1 @@
-export  {DefaultRowsPages} from './defaultRowsPages'
+export { DefaultRowsPages } from './defaultRowsPages';

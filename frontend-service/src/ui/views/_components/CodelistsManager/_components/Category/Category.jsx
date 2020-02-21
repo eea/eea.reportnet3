@@ -45,9 +45,6 @@ const Category = ({
   toggleExpandAll,
   updateEditingCodelists
 }) => {
-  const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
-
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
@@ -73,10 +70,11 @@ const Category = ({
     isEditingDialogVisible: false,
     isFiltered: true,
     isKeyFiltered: false,
-    isSaving: false,
     order: { name: 1, version: 1, status: 1, description: 1 }
   };
   const [categoryState, dispatchCategory] = useReducer(categoryReducer, initialCategoryState);
+  const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
 
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
@@ -184,7 +182,6 @@ const Category = ({
   };
 
   const onSaveCategory = async () => {
-    onToggleIncorrect(true);
     try {
       const response = await CodelistCategoryService.updateById(
         categoryState.categoryId,
@@ -197,13 +194,11 @@ const Category = ({
         type: 'CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR'
       });
     } finally {
-      onToggleIncorrect(false);
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
   };
 
   const onSaveCodelist = async () => {
-    dispatchCategory({ type: 'TOGGLE_IS_SAVING', payload: true });
     try {
       const response = await CodelistService.addById(
         categoryState.codelistDescription,
@@ -221,7 +216,6 @@ const Category = ({
         type: 'CODELIST_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
-      dispatchCategory({ type: 'TOGGLE_IS_SAVING', payload: false });
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
   };
@@ -229,18 +223,10 @@ const Category = ({
   // const onShowDeprecatedCodelists = () => {
   //   dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
   // };
+
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        disabled={
-          isIncorrect ||
-          categoryState.isSaving ||
-          (categoryState.codelistName.trim() === '' || categoryState.codelistVersion.trim() === '')
-        }
-        icon="save"
-        label={resources.messages['save']}
-        onClick={onSaveCodelist}
-      />
+      <Button disabled={isIncorrect} icon="save" label={resources.messages['save']} onClick={onSaveCodelist} />
       <Button
         className="p-button-secondary-transparent"
         icon="cancel"
@@ -301,9 +287,7 @@ const Category = ({
     <React.Fragment>
       <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
-          className={
-            isIncorrect || categoryState.categoryShortCode.trim() === '' ? styles.categoryIncorrectInput : null
-          }
+          className={isIncorrect ? styles.categoryIncorrectInput : null}
           id={'shortCodeInput'}
           onBlur={() =>
             onToggleIncorrect(checkCategoryDuplicates(categoryState.categoryShortCode, categoryState.categoryId))
@@ -315,9 +299,6 @@ const Category = ({
       </span>
       <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
-          className={
-            isIncorrect || categoryState.categoryDescription.trim() === '' ? styles.categoryIncorrectInput : null
-          }
           id={'descriptionInput'}
           onChange={e => setCategoryInputs(e.target.value)}
           // required={true}

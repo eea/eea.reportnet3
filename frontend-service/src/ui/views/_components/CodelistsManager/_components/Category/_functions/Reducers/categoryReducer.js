@@ -90,18 +90,16 @@ export const categoryReducer = (state, { type, payload }) => {
       };
     case 'SET_ISLOADING':
       return { ...state, isLoading: payload.loading };
+    case 'TOGGLE_EDIT_DIALOG_VISIBLE':
+      return { ...state, isEditingDialogVisible: payload };
     case 'TOGGLE_ADD_CODELIST_DIALOG_VISIBLE':
       return { ...state, isAddCodelistDialogVisible: payload };
     case 'TOGGLE_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteConfirmDialogVisible: payload };
-    case 'TOGGLE_EDIT_DIALOG_VISIBLE':
-      return { ...state, isEditingDialogVisible: payload };
     case 'TOGGLE_EXPANDED':
       return { ...state, expanded: payload.expanded };
     case 'TOGGLE_FILTER_DEPRECATED_CODELISTS':
       return { ...state, isFiltered: !state.isFiltered };
-    case 'TOGGLE_IS_SAVING':
-      return { ...state, isSaving: payload };
     case 'EDIT_NEW_CODELIST':
       return { ...state, [payload.property]: payload.value };
     default:

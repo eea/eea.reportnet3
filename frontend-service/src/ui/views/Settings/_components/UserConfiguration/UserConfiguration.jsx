@@ -6,17 +6,15 @@ import { ToggleUserConfirmation } from './_components/UserConfirmation';
 const UserConfiguration = () => {
   return (
     <div className={styles.userConfigurationContainer}>
-     
       <div className={styles.userConfirmLogout}>
-      <ToggleUserConfirmation />
+        <ToggleUserConfirmation />
       </div>
 
       <div className={styles.userConfirmLogout}>
         <DefaultRowsPages />
       </div>
     </div>
-   );
- 
+  );
 };
 
 export { UserConfiguration };

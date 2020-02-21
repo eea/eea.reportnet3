@@ -250,12 +250,13 @@ const ActionsToolbar = ({
           /> */}
       </div>
       <div className="p-toolbar-group-right">
-        <Button
+        {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}
+          disabled={true}
           icon={'refresh'}
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
-        />
+        /> */}
       </div>
     </Toolbar>
   );
