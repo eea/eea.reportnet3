@@ -4,14 +4,10 @@ import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './TabsValidations.module.css';
 
-import { config } from 'conf';
-
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { DataViewer } from 'ui/views/_components/DataViewer';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
@@ -29,12 +25,10 @@ const TabsValidations = ({
   onTabChange
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [isLoading, setIsLoading] = useState(true);
   const [validations, setValidations] = useState([]);
-  const [validationColumns, setValidationColumns] = useState([]);
-  const [rules, setRules] = useState([]);
 
   useEffect(() => {
     onLoadValidationsList();
@@ -45,7 +39,6 @@ const TabsValidations = ({
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidations(validationsList);
-      setValidationColumns(validationsList);
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_VALIDATIONS',
@@ -96,31 +89,31 @@ const TabsValidations = ({
     const headers = [
       {
         id: 'name',
-        header: 'Name'
+        header: resources.messages['ruleName']
       },
       {
         id: 'shortCode',
-        header: 'Short code'
+        header: resources.messages['ruleShortCode']
       },
       {
         id: 'ruleDescription',
-        header: 'Description'
+        header: resources.messages['ruleDescription']
       },
       {
         id: 'levelError',
-        header: 'Level error'
+        header: resources.messages['ruleLevelError']
       },
       {
         id: 'enabled',
-        header: 'Enabled'
+        header: resources.messages['ruleEnabled']
       },
       {
         id: 'automatic',
-        header: 'Automatic'
+        header: resources.messages['ruleAutomatic']
       },
       {
         id: 'actionButtons',
-        header: 'Actions'
+        header: resources.messages['ruleActions']
       }
     ];
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);

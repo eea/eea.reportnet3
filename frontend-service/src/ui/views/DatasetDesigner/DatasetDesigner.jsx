@@ -230,7 +230,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={false}
               icon={'validate'}
-              label={resources.messages['QCRules']}
+              label={resources.messages['qcRules']}
               onClick={() => setValidationListDialogVisible(true)}
               ownButtonClasses={null}
               iconClasses={null}
