@@ -94,6 +94,7 @@
 		"datasetSchemas":"Dataset schemas",
 		"deadline": "Deadline",
 		"defaultRowsPage":"Default rows per page",
+		"defaultVisualTheme": "Default Visual Theme",
 		"delete": "Delete",
 		"deleteCategory": "Delete category",
 		"deleteContributor":"Delete contributor",
