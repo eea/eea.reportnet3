@@ -6,7 +6,9 @@ import styles from './TabsValidations.module.css';
 
 import { config } from 'conf';
 
+import { Column } from 'primereact/column';
 import { DataViewer } from 'ui/views/_components/DataViewer';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
@@ -15,6 +17,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { ValidationService } from 'core/services/Validation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const TabsValidations = ({
   activeIndex = 0,
@@ -24,12 +27,24 @@ const TabsValidations = ({
   onTabChange
 }) => {
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
+
   const [isLoading, setIsLoading] = useState(true);
   const [validations, setValidations] = useState([]);
+  const [validationColumns, setValidationColumns] = useState([]);
 
-  const getValidations = async () => {
+  useEffect(() => {
+    onLoadValidationsList();
+  }, []);
+  // }, [isValidationDeleted]);
+
+  const getValidationColumns = validationsList => {};
+
+  const onLoadValidationsList = async () => {
     try {
-      return await ValidationService.getAll(datasetSchemaId);
+      const validationsList = await ValidationService.getAll(datasetSchemaId);
+      setValidations(validationsList);
+      setValidationColumns(getValidationColumns(validationsList));
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_VALIDATIONS',
@@ -37,67 +52,88 @@ const TabsValidations = ({
           datasetSchemaId
         }
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const validationsList = getValidations();
-  console.log(validationsList);
+  const validationLevelTabs = () => {
+    console.log({ validations });
+    if (isEmpty(validations)) {
+      return;
+    }
+    console.log(validations);
 
-  if (isUndefined(validationsList) || isEmpty(validationsList.rules)) {
-    console.log('Schema has no validations');
-  }
+    const headers = [
+      {
+        id: 'ruleName',
+        header: 'Name'
+      },
+      {
+        id: 'ruleDescription',
+        header: 'Description'
+      },
+      {
+        id: 'isRuleAutomatic',
+        header: 'Type error'
+      },
+      {
+        id: 'isRuleEnabled',
+        header: 'Enabled'
+      },
+      {
+        id: 'isRuleAutomatic',
+        header: 'Automatic QC'
+      },
+      {
+        id: 'actionButtons',
+        header: 'Edit/delete'
+      },
+      {
+        //Buttons to add, edit, delelet QCs
+        id: 'actionButtons',
+        header: 'Add'
+      }
+    ];
+    let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
+    let columns = columnsArray;
 
-  let tabs = validationsList.entityLevels;
+    const tabs = [];
+    console.log({ validations });
+    validations.entityLevels.forEach(entityLevel => {
+      const validationsFilteredByEntityLevel = validations.rules.filter(rule => rule.entityType === entityLevel);
+      console.log({ validationsFilteredByEntityLevel });
+      tabs.push(
+        <TabPanel header={entityLevel} key={entityLevel} rightIcon={null}>
+          <div className={null}>
+            <DataTable
+              autoLayout={true}
+              className={null}
+              loading={false}
+              paginator={true}
+              paginatorRight={validationsFilteredByEntityLevel.length}
+              rows={10}
+              rowsPerPageOptions={[5, 10, 15]}
+              totalRecords={validationsFilteredByEntityLevel.length}
+              value={validationsFilteredByEntityLevel}>
+              {columns}
+            </DataTable>
+          </div>
+        </TabPanel>
+      );
+    });
+    return tabs;
+  };
 
   if (isLoading) {
     return <Spinner />;
   }
-  if (validations) {
-    return <></>;
-    // let tableHasErrors = true;
-    // if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
-    //   tableHasErrors = tables[activeIndex].hasErrors;
-    // }
-    // let tabs = validationLevels
-    //   ? tables.map(table => {
-    //       return (
-    //         <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
-    //           <div className={styles.tabsSchema}>
-    //             <DataViewer
-    //               buttonsList={buttonsList}
-    //               levelErrorTypes={levelErrorTypes}
-    //               hasWritePermissions={hasWritePermissions}
-    //               isDataCollection={isDataCollection}
-    //               isWebFormMMR={isWebFormMMR}
-    //               key={table.id}
-    //               isValidationSelected={isValidationSelected}
-    //               onLoadTableData={onLoadTableData}
-    //               tableHasErrors={tableHasErrors}
-    //               tableId={table.id}
-    //               tableName={table.name}
-    //             />
-    //           </div>
-    //         </TabPanel>
-    //       );
-    //     })
-    //   : null;
-    // const filterActiveIndex = tableSchemaId => {
-    //   //TODO: Refactorizar este apaño y CUIDADO con activeIndex (integer cuando es manual, idTable cuando es por validación).
-    //   if (Number.isInteger(tableSchemaId)) {
-    //     return tabs ? activeIndex : 0;
-    //   } else {
-    //     return tabs ? tabs.findIndex(t => t.key === tableSchemaId) : 0;
-    //   }
-    // };
 
-    // return (
-    //   <TabView
-    //     activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
-    //     onTabChange={onTabChange}
-    //     renderActiveOnly={false}>
-    //     {tabs}
-    //   </TabView>
-    // );
-  }
+  return (
+    <TabView activeIndex={activeIndex} onTabChange={onTabChange} renderActiveOnly={false}>
+      {validationLevelTabs()}
+    </TabView>
+  );
 };
+
 export { TabsValidations };

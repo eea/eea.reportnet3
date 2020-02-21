@@ -61,10 +61,11 @@ const getAll = async datasetSchemaId => {
   }
 
   const validationsList = {};
-  validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
-  validationsList.rules = parseDataValidationRulesDTO(validationsListDTO.rules);
-  console.log({ validationsList });
+  const rulesData = parseDataValidationRulesDTO(validationsListDTO.rules);
+  validationsList.entityLevels = rulesData.entityLevels;
+  validationsList.rules = rulesData.rules;
+  validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
   return validationsList;
 };
 
