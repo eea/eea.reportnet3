@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './TabsValidations.module.css';
 
@@ -97,7 +97,7 @@ const TabsValidations = ({
 
     return validations.entityTypes.map(entityType => {
       const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
-      const totalRecordsBy = 'Total validations';
+      const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
       return (
         <TabPanel header={entityType} key={entityType} rightIcon={null}>
           <div className={null}>
@@ -106,7 +106,7 @@ const TabsValidations = ({
               className={null}
               loading={false}
               paginator={true}
-              paginatorRight={validationsFilteredByEntityType.length}
+              paginatorRight={paginatorRightText}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={validationsFilteredByEntityType.length}
