@@ -40,22 +40,6 @@ const TabsValidations = ({
   }, []);
   // }, [isValidationDeleted]);
 
-  // const parseValidationsToDataTable = validations => {
-  //   const validationsArray = validations.rules.map(rule => {
-  //     console.log({ rule });
-  //     return {
-  //       ruleName: 'rule.name',
-  //       description: 'rule.description',
-  //       levelError: ' rule.levelError',
-  //       isEnabled: 'rule.isEnabled',
-  //       isAutomatic: 'rule.isAutomatic',
-  //       actionButtons: ''
-  //     };
-  //   });
-  //   console.log({ validationsArray });
-  //   return validationsArray;
-  // };
-
   const onLoadValidationsList = async () => {
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
