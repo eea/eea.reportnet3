@@ -131,7 +131,12 @@ const Settings = withRouter(({ history }) => {
     <div>
       <div className="rep-row">
         <div className={` rep-col-12 rep-col-sm-12`}>
-          <Title title={resources.messages['settingsUser']} icon="user-profile" iconSize="4rem" />
+          <Title
+            title={resources.messages['settingsUser']}
+            icon="user-profile"
+            iconSize="4rem"
+            subtitle={resources.messages['manageUserSettings']}
+          />
         </div>
       </div>
 

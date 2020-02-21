@@ -10,7 +10,7 @@
 }
 
 .userName {
-  color: var(--c-corporate-blue);
+  color: var(--subtitle-color);
   font-weight: bold;
   margin-top: 0.5rem;
   font-size: 1.25em;
@@ -21,4 +21,5 @@
   margin-bottom: 1rem;
   font-size: 1em;
   font-weight: bold;
+  color: var(--main-font-color);
 }

@@ -488,7 +488,6 @@ export const ThemeProvider = ({ children }) => {
               newTheme
             }
           });
-          console.log({ newTheme });
           const theme = state.themes[newTheme];
           console.log({ theme });
           Object.keys(theme).forEach(key => {
