@@ -7,16 +7,12 @@ import logo from 'assets/images/logo.png';
 import { Page, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import styled from '@react-pdf/styled-components';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 export const ConfirmationReceipt = ({ receiptData, resources }) => {
   const hyphenationCallback = word => {
     return [word];
   };
 
   Font.registerHyphenationCallback(hyphenationCallback);
-  // const resources = useContext(ResourcesContext);
-  console.log('resources', resources);
 
   const Header = styled.View`
     display: flex;

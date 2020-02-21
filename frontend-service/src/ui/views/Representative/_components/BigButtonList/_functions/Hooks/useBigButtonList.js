@@ -15,8 +15,8 @@ const useBigButtonList = ({
   hasWritePermissions,
   isCustodian,
   onLoadReceiptData,
-  showReleaseSnapshotDialog,
-  representative
+  representative,
+  showReleaseSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
@@ -106,16 +106,16 @@ const useBigButtonList = ({
 
     const isOutdated = representatives
       .filter(representative => representative.dataProviderId === uniq(representativeId))
-      .map(representative => representative.isOutdated)[0];
+      .map(representative => representative.isReceiptOutdated);
 
     return [
       {
-        layout: 'defaultBigButton',
         buttonClass: 'schemaDataset',
         buttonIcon: 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        infoStatus: isOutdated,
         handleRedirect: () => onLoadReceiptData(),
+        infoStatus: isOutdated,
+        layout: 'defaultBigButton',
         visibility: !isCustodian && !isReleased.includes(false)
       }
     ];
