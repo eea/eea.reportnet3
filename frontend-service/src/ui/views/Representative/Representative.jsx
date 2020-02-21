@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, uniq } from 'lodash';
 
 import styles from './Representative.module.scss';
 
@@ -39,14 +39,16 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Representative = withRouter(({ history, match }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const { showLoading, hideLoading } = useContext(LoadingContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
+  const [dataProviderId, setDataProviderId] = useState([]);
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
@@ -236,6 +238,16 @@ const Representative = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
+
+      if (!isEmpty(dataflow.datasets)) {
+        const representativeId = dataflow.datasets
+          .filter(dataset => dataset.datasetSchemaName === match.params.representative)
+          .map(id => id.dataProviderId);
+        if (representativeId.length === 1) {
+          setDataProviderId(uniq(representativeId)[0]);
+        }
+      }
+
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -306,22 +318,23 @@ const Representative = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowData={dataflowData}
-          handleRedirect={handleRedirect}
-          dataflowStatus={dataflowStatus}
           dataflowId={match.params.dataflowId}
+          dataflowStatus={dataflowStatus}
+          dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
-          isCustodian={isCustodian}
+          handleRedirect={handleRedirect}
           hasWritePermissions={hasWritePermissions}
-          onUpdateData={onUpdateData}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          isCustodian={isCustodian}
           onSaveName={onSaveName}
-          updatedDatasetSchema={updatedDatasetSchema}
+          onUpdateData={onUpdateData}
           representative={match.params.representative}
+          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          updatedDatasetSchema={updatedDatasetSchema}
         />
 
         <SnapshotsDialog
-          dataflowId={match.params.dataflowId}
           dataflowData={dataflowData}
+          dataflowId={match.params.dataflowId}
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, uniq } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -53,8 +53,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
+  const [dataProviderId, setDataProviderId] = useState([]);
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
+  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
@@ -67,7 +69,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
-  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
@@ -253,6 +254,14 @@ const Dataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
+
+      if (!isEmpty(dataflow.datasets)) {
+        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
+        if (uniq(dataProviderIds).length === 1) {
+          setDataProviderId(dataProviderIds[0]);
+        }
+      }
+
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -356,19 +365,20 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowData={dataflowData}
-          dataflowStatus={dataflowStatus}
           dataflowId={match.params.dataflowId}
+          dataflowStatus={dataflowStatus}
+          dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
-          isCustodian={isCustodian}
-          isDataSchemaCorrect={isDataSchemaCorrect}
           handleRedirect={handleRedirect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
-          onUpdateData={onUpdateData}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          isCustodian={isCustodian}
+          isDataSchemaCorrect={isDataSchemaCorrect}
           onSaveName={onSaveName}
-          updatedDatasetSchema={updatedDatasetSchema}
+          onUpdateData={onUpdateData}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          updatedDatasetSchema={updatedDatasetSchema}
         />
 
         <SnapshotsDialog
