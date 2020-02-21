@@ -73,8 +73,7 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error(
           "Error creating Rule Schema with idDatasetSchema {} because idRulesSchema is incorrect",
           idRulesSchema);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RULEID_INCORRECT);
     }
     rulesService.createEmptyRulesSchema(new ObjectId(idDatasetSchema), new ObjectId(idRulesSchema));
     LOG.info("Creating Schema rules with id {} in datasetSchema {} successfully", idRulesSchema,
@@ -137,8 +136,16 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @DeleteMapping(value = "/deleteRulesSchema")
   public void deleteRulesSchema(String idDataSetSchema) {
-    rulesService.deleteEmptyRulesScehma(new ObjectId(idDataSetSchema));
+    if (StringUtils.isBlank(idDataSetSchema)) {
+      LOG_ERROR.error(
+          "Error find active datasetschema with idDatasetSchema {} because idDatasetSchema is incorrect",
+          idDataSetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
 
+    } else {
+      rulesService.deleteEmptyRulesScehma(new ObjectId(idDataSetSchema));
+    }
   }
 
   /**
@@ -231,6 +238,12 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping(value = "/createNewRule", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createNewRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
       @RequestBody RuleVO ruleVO) {
+    if (StringUtils.isBlank(idDatasetSchema)) {
+      LOG_ERROR.error("Error creating rule in schema {} because idDatasetSchema is incorrect",
+          idDatasetSchema);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
     try {
       rulesService.createNewRule(idDatasetSchema, ruleMapper.classToEntity(ruleVO));
     } catch (EEAException e) {
@@ -356,6 +369,17 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping("/private/existsRuleRequired")
   public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
+    if (StringUtils.isBlank(datasetSchemaId)) {
+      LOG_ERROR.error("Error in entity {} because idDatasetSchema is incorrect", datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(referenceId)) {
+      LOG_ERROR.error("Error in idDatasetSchema {} because referenceId is incorrect",
+          datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REFERENCEID_INCORRECT);
+    }
     return rulesService.existsRuleRequired(datasetSchemaId, referenceId);
   }
 
@@ -369,6 +393,17 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping("/private/deleteRuleRequired")
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
+    if (StringUtils.isBlank(datasetSchemaId)) {
+      LOG_ERROR.error("Error in entity {} because idDatasetSchema is incorrect", datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (StringUtils.isBlank(referenceId)) {
+      LOG_ERROR.error("Error in idDatasetSchema {} because referenceId is incorrect",
+          datasetSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.REFERENCEID_INCORRECT);
+    }
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
   }
 

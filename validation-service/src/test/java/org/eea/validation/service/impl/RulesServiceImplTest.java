@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -12,6 +13,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -227,5 +229,103 @@ public class RulesServiceImplTest {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         TypeData.TEXT, TypeEntityEnum.FIELD, Boolean.FALSE);
 
+  }
+
+  @Test
+  public void createEmptyRulesSchemaTest() throws EEAException {
+    rulesServiceImpl.createEmptyRulesSchema(new ObjectId("5e44110d6a9e3a270ce13fac"),
+        new ObjectId("5e44110d6a9e3a270ce13fac"));
+    Mockito.verify(rulesRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void deleteEmptyRulesScehmaTest() throws EEAException {
+    when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(new RulesSchema());
+    rulesServiceImpl.deleteEmptyRulesScehma(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    Mockito.verify(rulesRepository, times(1)).deleteByIdDatasetSchema(Mockito.any());
+  }
+
+  @Test
+  public void deleteEmptyRulesScehmaNoSchemaTest() throws EEAException {
+    when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
+    rulesServiceImpl.deleteEmptyRulesScehma(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void createNewRuleTest() throws EEAException {
+    Rule rule = new Rule();
+    rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", rule);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void deleteRuleRequiredTest() throws EEAException {
+    rulesServiceImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void existsRuleRequiredTest() throws EEAException {
+    rulesServiceImpl.existsRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).existsRuleRequired(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateRuleTest() throws EEAException {
+    Rule rule = new Rule();
+    when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", rule);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateRuleNoIdSchemaTest() throws EEAException {
+    Rule rule = new Rule();
+    rulesServiceImpl.updateRule(null, rule);
+  }
+
+  @Test
+  public void updateRuleNoRuleTest() throws EEAException {
+    rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", null);
+  }
+
+  @Test
+  public void insertRuleInPositionTest() throws EEAException {
+    Rule rule = new Rule();
+    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    when(rulesRepository.deleteRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    when(rulesRepository.insertRuleInPosition("5e44110d6a9e3a270ce13fac", rule, 0))
+        .thenReturn(true);
+    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        0);
+    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition("5e44110d6a9e3a270ce13fac", rule,
+        0);
+  }
+
+  @Test
+  public void insertRuleInPositionNoRuleTest() throws EEAException {
+    Rule rule = null;
+    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", null, 0);
+  }
+
+  @Test
+  public void insertRuleInPositionNoDeleteTest() throws EEAException {
+    Rule rule = new Rule();
+    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    when(rulesRepository.deleteRule(Mockito.any(), Mockito.any())).thenReturn(false);
+    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        0);
+  }
+
+  @Test
+  public void insertRuleInPositionNoInsertTest() throws EEAException {
+    Rule rule = new Rule();
+    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    when(rulesRepository.deleteRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    when(rulesRepository.insertRuleInPosition("5e44110d6a9e3a270ce13fac", rule, 0))
+        .thenReturn(false);
+    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        0);
   }
 }

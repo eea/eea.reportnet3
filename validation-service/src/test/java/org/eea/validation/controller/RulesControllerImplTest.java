@@ -2,10 +2,15 @@ package org.eea.validation.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.validation.mapper.RuleMapper;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,6 +35,9 @@ public class RulesControllerImplTest {
   /** The rules service. */
   @Mock
   private RulesService rulesService;
+
+  @Mock
+  private RuleMapper ruleMapper;
 
   /**
    * Delete rule by id throw id dataset schema.
@@ -284,4 +292,220 @@ public class RulesControllerImplTest {
       Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getReason());
     }
   }
+
+  @Test
+  public void createEmptyRulesSchemaTest() throws EEAException {
+    rulesControllerImpl.createEmptyRulesSchema("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).createEmptyRulesSchema(
+        new ObjectId("5e44110d6a9e3a270ce13fac"), new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void createEmptyRulesSchemaNoIdDataSchemaTest() throws EEAException {
+    try {
+      rulesControllerImpl.createEmptyRulesSchema(null, "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void createEmptyRulesSchemaNoIdRulesTest() throws EEAException {
+    try {
+      rulesControllerImpl.createEmptyRulesSchema("5e44110d6a9e3a270ce13fac", null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getReason());
+    }
+
+  }
+
+  @Test
+  public void deleteRulesSchemaTest() throws EEAException {
+    rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1))
+        .deleteEmptyRulesScehma(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void deleteRulesSchemaNoschemaIDTest() throws EEAException {
+    try {
+      rulesControllerImpl.deleteRulesSchema(null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void createNewRuleTest() throws EEAException {
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    when(ruleMapper.classToEntity(ruleVO)).thenReturn(rule);
+    rulesControllerImpl.createNewRule("5e44110d6a9e3a270ce13fac", ruleVO);
+    Mockito.verify(rulesService, times(1)).createNewRule("5e44110d6a9e3a270ce13fac", rule);
+  }
+
+  @Test
+  public void createNewRuleNoDataSchemaIsTest() throws EEAException {
+    try {
+      rulesControllerImpl.createNewRule(null, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void createNewRuleNotWorkTest() throws EEAException {
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    doThrow(EEAException.class).when(rulesService).createNewRule("5e44110d6a9e3a270ce13fac", rule);
+    when(ruleMapper.classToEntity(ruleVO)).thenReturn(rule);
+    try {
+      rulesControllerImpl.createNewRule("5e44110d6a9e3a270ce13fac", ruleVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.ERROR_DELETING_RULE, e.getReason());
+    }
+  }
+
+  @Test
+  public void updateRuleTest() throws EEAException {
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    when(ruleMapper.classToEntity(ruleVO)).thenReturn(rule);
+    when(rulesService.updateRule("5e44110d6a9e3a270ce13fac", rule)).thenReturn(true);
+    rulesControllerImpl.updateRule("5e44110d6a9e3a270ce13fac", ruleVO);
+    Mockito.verify(rulesService, times(1)).updateRule("5e44110d6a9e3a270ce13fac", rule);
+  }
+
+  @Test
+  public void updateRuleNotWorkTest() throws EEAException {
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    when(ruleMapper.classToEntity(ruleVO)).thenReturn(rule);
+    when(rulesService.updateRule("5e44110d6a9e3a270ce13fac", rule)).thenReturn(false);
+    try {
+      rulesControllerImpl.updateRule("5e44110d6a9e3a270ce13fac", ruleVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.ERROR_UPDATING_RULE, e.getReason());
+    }
+  }
+
+
+  @Test
+  public void updateRuleNoDataSchemaIsTest() throws EEAException {
+    try {
+      rulesControllerImpl.updateRule(null, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+
+  @Test
+  public void insertRuleInPositionTest() throws EEAException {
+    when(rulesService.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        0)).thenReturn(true);
+    rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0,
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).insertRuleInPosition("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac", 0);
+  }
+
+  @Test
+  public void insertRuleInPositionNoDataSchemaIdTest() throws EEAException {
+    try {
+      rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void insertRuleInPositionNoIdRuleIsTest() throws EEAException {
+    try {
+      rulesControllerImpl.insertRuleInPosition(null, 0, "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void insertRuleInPositionNotWorkTest() throws EEAException {
+    when(rulesService.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        0)).thenReturn(false);
+    try {
+      rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0,
+          "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.ERROR_ORDERING_RULE, e.getReason());
+    }
+  }
+
+  @Test
+  public void existsRuleRequiredTest() throws EEAException {
+    rulesControllerImpl.existsRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).existsRuleRequired("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+  }
+
+  @Test
+  public void existsRuleRequiredNoIdReferenceIsTest() throws EEAException {
+    try {
+
+      rulesControllerImpl.existsRuleRequired("5e44110d6a9e3a270ce13fac", null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.REFERENCEID_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void existsRuleRequiredNoDataSchemaIdTest() throws EEAException {
+    try {
+      rulesControllerImpl.existsRuleRequired(null, "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void deleteRuleRequireddNoIdReferenceIsTest() throws EEAException {
+    try {
+
+      rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.REFERENCEID_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void deleteRuleRequiredNoDataSchemaIdTest() throws EEAException {
+    try {
+      rulesControllerImpl.deleteRuleRequired(null, "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+    }
+  }
+
+  @Test
+  public void deleteRuleRequiredTest() throws EEAException {
+    rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteRuleRequired("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+  }
+
+
 }

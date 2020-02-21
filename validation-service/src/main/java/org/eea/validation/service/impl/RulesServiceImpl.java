@@ -262,7 +262,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
     Rule rule = rulesRepository.findRule(datasetSchemaId, ruleId);
-    if (rule != null) {
+    if (null != rule) {
       if (rulesRepository.deleteRule(datasetSchemaId, ruleId)) {
         if (rulesRepository.insertRuleInPosition(datasetSchemaId, rule, position)) {
           LOG.info("Rule {} reordered in datasetSchemaId {}", ruleId, datasetSchemaId);
