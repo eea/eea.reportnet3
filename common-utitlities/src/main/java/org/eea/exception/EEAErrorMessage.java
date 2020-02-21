@@ -5,34 +5,28 @@ package org.eea.exception;
  */
 public final class EEAErrorMessage {
 
-  /**
-   * The Constant DB_FILEFORMAT.
-   */
+  /** The Constant FILE_FORMAT. */
   public static final String FILE_FORMAT = "Invalid file format";
 
-  /**
-   * The Constant FILE_EXTENSION.
-   */
+  /** The Constant NULL_DATE. */
+  public static final String INVALID_DATE = "Not a valid date";
+
+  /** The Constant NOT_DESIGN_DATAFLOW. */
+  public static final String NOT_DESIGN_DATAFLOW = "Not a DESIGN dataflow";
+
+  /** The Constant FILE_EXTENSION. */
   public static final String FILE_EXTENSION = "File without extension";
 
-  /**
-   * The Constant FILE_EXTENSION.
-   */
+  /** The Constant FILE_NAME. */
   public static final String FILE_NAME = "Error getting the file name";
 
-  /**
-   * The Constant DATASET_NOTFOUND.
-   */
+  /** The Constant DATASET_NOTFOUND. */
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
-  /**
-   * The Constant DATASET_UNKNOW_TYPE.
-   */
+  /** The Constant DATASET_UNKNOW_TYPE. */
   public static final String DATASET_UNKNOW_TYPE = "Unknown Dataset type";
 
-  /**
-   * The constant DATASET_INCORRECT_ID.
-   */
+  /** The Constant DATASET_INCORRECT_ID. */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
   /** The Constant IDTABLESCHEMA_INCORRECT. */
@@ -154,6 +148,8 @@ public final class EEAErrorMessage {
 
   /** The Constant ERROR_DELETING_RULE. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
+  /** The Constant PERMISSION_NOT_CREATED. */
+  public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
   /** The Constant ERROR_CREATING_RULE. */
   public static final String ERROR_CREATING_RULE = "Error creating rules";

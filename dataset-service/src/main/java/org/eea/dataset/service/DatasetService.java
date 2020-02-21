@@ -16,7 +16,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -72,19 +71,6 @@ public interface DatasetService {
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
       String fields, TypeErrorEnum[] levelError) throws EEAException;
-
-  /**
-   * Sets the dataschema tables.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollections the table collections
-   *
-   * @throws EEAException the EEA exception
-   */
-  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollections) throws EEAException;
-
 
   /**
    * Gets the position from any object id.
@@ -353,7 +339,6 @@ public interface DatasetService {
    */
   void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
       String idFieldSchema, TypeData typeField);
-
 
   /**
    * Delete record values.

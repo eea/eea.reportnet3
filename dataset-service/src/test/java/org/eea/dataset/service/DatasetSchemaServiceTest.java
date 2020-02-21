@@ -17,7 +17,6 @@ import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -64,12 +63,6 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
-
-  /**
-   * The data set metabase table collection.
-   */
-  @Mock
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /**
    * The data flow controller zuul.
@@ -185,8 +178,6 @@ public class DatasetSchemaServiceTest {
     MockitoAnnotations.initMocks(this);
     validationCommands.add(command);
   }
-
-
 
   /**
    * Test find data schema by id.

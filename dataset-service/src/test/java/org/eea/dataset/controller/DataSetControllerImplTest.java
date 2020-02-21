@@ -26,7 +26,6 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,21 +138,6 @@ public class DataSetControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.loadTableData(1L, null, null);
   }
-
-  /**
-   * Test load dataset data success.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDatasetDataSuccess() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    final EEAMockMultipartFile file =
-        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadTableData(1L, file, "example");
-  }
-
 
   /**
    * Test load dataset data success 2.
@@ -285,68 +269,6 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
-  }
-
-
-
-  /**
-   * Load schema mongo exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(null, 1L, new TableCollectionVO());
-  }
-
-  /**
-   * Load schema mongo exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException2() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(1L, null, new TableCollectionVO());
-  }
-
-  /**
-   * Load schema mongo exception 3.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException3() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, null);
-  }
-
-  /**
-   * Load schema mongo EEA exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
-
-    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Load schema mongo success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
-
-    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
   }
 
   /**

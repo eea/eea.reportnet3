@@ -13,11 +13,9 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -72,6 +70,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
+  /** The rules controller. */
   @Autowired
   private RulesController rulesController;
 
@@ -205,28 +204,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return resourceInfoVO;
   }
 
-
   /**
-   * Creates the rule fields.
+   * Gets the data schema by id.
    *
-   * @param i the i
-   * @param table the table
-   * @param recordSchema the record schema
-   * @param fieldSchemas the field schemas
-   * @param headersSize the headers size
-   * @param dataflowId the dataflow id
-   */
-  private void createRuleFields(int i, TableCollection table, RecordSchema recordSchema,
-      List<FieldSchema> fieldSchemas, int headersSize, Long dataflowId) {
-
-
-  }
-
-  /**
-   * Find the dataschema per id.
-   *
-   * @param dataschemaId the idDataschema
-   *
+   * @param dataschemaId the dataschema id
    * @return the data schema by id
    */
   @Override
@@ -281,7 +262,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       dataschemaVO.setNameDatasetSchema(designDataset.get().getDataSetName());
     }
   }
-
 
   /**
    * Gets the dataset schema id.

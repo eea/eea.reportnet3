@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -223,30 +222,6 @@ public class DataSetControllerImpl implements DatasetController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     datasetService.deleteImportData(dataSetId);
-  }
-
-  /**
-   * Load dataset schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollection the table collection
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping("{id}/loadDatasetSchema")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
-  public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollection) {
-    if (datasetId == null || dataFlowId == null || tableCollection == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      datasetService.setDataschemaTables(datasetId, dataFlowId, tableCollection);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
   }
 
   /**

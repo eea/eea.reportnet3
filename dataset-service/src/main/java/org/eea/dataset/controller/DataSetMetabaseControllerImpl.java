@@ -1,17 +1,13 @@
 package org.eea.dataset.controller;
 
-
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -35,23 +31,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/**
- * The Class DataSetMetabaseControllerImpl.
- */
+/** The Class DataSetMetabaseControllerImpl. */
 @RestController
 @RequestMapping("/datasetmetabase")
 public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The reporting dataset service.
-   */
+  /** The reporting dataset service. */
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
@@ -59,29 +48,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The data collection service. */
-  @Autowired
-  private DataCollectionService dataCollectionService;
-
-  /** The representative controller zuul. */
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
 
   /**
    * Find data set id by dataflow id.

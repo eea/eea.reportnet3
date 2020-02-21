@@ -33,7 +33,7 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Modifying
   @Query(nativeQuery = true,
       value = "UPDATE snapshot SET release=false WHERE reporting_dataset_id=:idDataset ; "
-          + "UPDATE snapshot SET release=true WHERE id=:idSnapshot")
+          + "UPDATE snapshot SET release=true, date_released=CURRENT_TIMESTAMP WHERE id=:idSnapshot")
   void releaseSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
 
 
@@ -42,9 +42,12 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * Find by reporting dataset and release.
    *
    * @param datasetIds the dataset ids
+   * @param released the released
    * @return the list
    */
   @Query(
-      value = "select s.reportingDataset.id from Snapshot s where s.release=true AND  s.reportingDataset.id IN :datasetIds")
-  List<Long> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds);
+      value = "select s from Snapshot s where s.release=:released AND s.reportingDataset.id IN :datasetIds")
+  List<Snapshot> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds,
+      @Param("released") Boolean released);
+
 }

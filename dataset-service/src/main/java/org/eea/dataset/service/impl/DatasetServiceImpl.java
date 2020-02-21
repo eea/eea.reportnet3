@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -40,9 +39,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -75,7 +72,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
@@ -113,12 +109,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataSetMapper dataSetMapper;
-
-  /**
-   * The data set tables mapper.
-   */
-  @Autowired
-  private DataSetTablesMapper dataSetTablesMapper;
 
   /**
    * The record mapper.
@@ -167,12 +157,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DatasetRepository datasetRepository;
-
-  /**
-   * The data set metabase table collection.
-   */
-  @Autowired
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /**
    * The schemas repository.
@@ -633,26 +617,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return sanitizedRecords;
 
-  }
-
-  /**
-   * Sets the dataschema tables.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollectionVO the table collection VO
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void setDataschemaTables(final Long datasetId, final Long dataFlowId,
-      final TableCollectionVO tableCollectionVO) throws EEAException {
-    final TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
-    tableCollection.setDataSetId(datasetId);
-    tableCollection.setDataFlowId(dataFlowId);
-
-    dataSetMetabaseTableCollection.save(tableCollection);
   }
 
 
@@ -1484,7 +1448,4 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     recordRepository.deleteByDataProviderCode(providerCode);
   }
-
-
-
 }
