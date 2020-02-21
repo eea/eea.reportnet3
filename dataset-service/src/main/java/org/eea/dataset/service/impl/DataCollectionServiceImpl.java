@@ -239,7 +239,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         statement.executeBatch();
         // 7. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds);
+        createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
         connection.commit();
         LOG.info("Metabase changes completed on DataCollection creation");
 
@@ -323,9 +323,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
       RepresentativeVO representative, String time, Long dataflowId) throws SQLException {
-    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time,
-        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema(),
-        representative.getId()))) {
+    try (ResultSet rs = metabaseStatement.executeQuery(
+        String.format(INSERT_RD_INTO_DATASET, time, dataflowId, representative.getProviderAccount(),
+            design.getDatasetSchema(), representative.getId()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
@@ -339,11 +339,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
-   * @return true, if successful
+   * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds)
-      throws EEAException {
+  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
+      Long dataflowId) throws EEAException {
 
     if (datasetIdsEmails.isEmpty() || dataCollectionIds.isEmpty()) {
       throw new EEAException("No design datasets in the dataflow");
@@ -361,12 +361,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
     }
 
-    // Create Dataset groups and assign provider to representatives and custodian to self user
+    // Create DATASET_PROVIDER and DATA_CUSTODIAN groups
+    // Assign DATAFLOW_PROVIDER and DATA_PROVIDER to representatives and DATA_CUSTODIAN to self user
     for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
       providerAssignments.add(
           createAssignments(entry.getKey(), entry.getValue(), ResourceGroupEnum.DATASET_PROVIDER));
+      providerAssignments.add(
+          createAssignments(dataflowId, entry.getValue(), ResourceGroupEnum.DATAFLOW_PROVIDER));
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments
