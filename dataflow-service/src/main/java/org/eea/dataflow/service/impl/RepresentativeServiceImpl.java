@@ -252,5 +252,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return changes;
   }
 
-
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @Override
+  public List<DataProviderVO> findDataProvidersByIds(List<Long> dataProviderIds) {
+    List<DataProviderVO> list = new ArrayList<>();
+    Iterable<DataProvider> dataProviders = dataProviderRepository.findAllById(dataProviderIds);
+    dataProviders.forEach(dataProvider -> list.add(dataProviderMapper.entityToClass(dataProvider)));
+    return list;
+  }
 }

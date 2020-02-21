@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface RepresentativeController.
@@ -95,4 +96,13 @@ public interface RepresentativeController {
    */
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId);
+
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @GetMapping("/private/dataProvider/ids")
+  List<DataProviderVO> findDataProvidersByIds(@RequestParam("ids") List<Long> dataProviderIds);
 }

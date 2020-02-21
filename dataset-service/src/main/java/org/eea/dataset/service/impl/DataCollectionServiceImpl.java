@@ -25,6 +25,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -206,9 +207,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
-    // 2. Get the providers who are going to provide data
+    // 2. Get the representatives who are going to provide data
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // 3. Get the providers associated with representatives
+    List<DataProviderVO> dataProviders =
+        representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+
+    // 4. Map representatives to providers
+    Map<Long, String> map = new HashMap<>();
+    for (RepresentativeVO representative : representatives) {
+      for (DataProviderVO dataProvider : dataProviders) {
+        if (dataProvider.getId().equals(representative.getDataProviderId())) {
+          map.put(representative.getDataProviderId(), dataProvider.getLabel());
+          dataProviders.remove(dataProvider);
+          break;
+        }
+      }
+    }
 
     List<Long> dataCollectionIds = new ArrayList<>();
     Map<Long, String> datasetIdsEmails = new HashMap<>();
@@ -220,30 +238,31 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       try {
         connection.setAutoCommit(false);
 
-        // 3. Set dataflow to DRAFT
+        // 5. Set dataflow to DRAFT
         statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dataflowId));
 
         for (DesignDatasetVO design : designs) {
-          // 4. Create DataCollection in metabase
+          // 6. Create DataCollection in metabase
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
 
-          // 5. Create Reporting Dataset in metabase
+          // 7. Create Reporting Dataset in metabase
           for (RepresentativeVO representative : representatives) {
-            Long datasetId = persistRD(statement, design, representative, time, dataflowId);
+            Long datasetId = persistRD(statement, design, representative, time, dataflowId,
+                map.get(representative.getDataProviderId()));
             datasetIdsEmails.put(datasetId, representative.getProviderAccount());
             datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
           }
         }
 
         statement.executeBatch();
-        // 7. Create permissions
+        // 8. Create permissions
         createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
         connection.commit();
         LOG.info("Metabase changes completed on DataCollection creation");
 
-        // 6. Create schemas for each dataset
+        // 9. Create schemas for each dataset
         // This method will release the lock
         recordStoreControllerZull.createSchemas(datasetIdsAndSchemaIds, dataflowId);
       } catch (SQLException e) {
@@ -314,18 +333,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Persist RD.
    *
    * @param metabaseStatement the metabase statement
-   * @param design the design
    * @param representative the representative
    * @param time the time
    * @param dataflowId the dataflow id
+   * @param dataprovider the dataprovider
    * @return the long
    * @throws SQLException the SQL exception
    */
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
-      RepresentativeVO representative, String time, Long dataflowId) throws SQLException {
-    try (ResultSet rs = metabaseStatement.executeQuery(
-        String.format(INSERT_RD_INTO_DATASET, time, dataflowId, representative.getProviderAccount(),
-            design.getDatasetSchema(), representative.getId()))) {
+      RepresentativeVO representative, String time, Long dataflowId, String dataProviderLabel)
+      throws SQLException {
+    try (ResultSet rs =
+        metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time, dataflowId,
+            dataProviderLabel, design.getDatasetSchema(), representative.getDataProviderId()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
