@@ -12,7 +12,8 @@ const get = async (dataflowId, dataProviderId) => {
     dataflowId: confirmationReceiptDTO.idDataflow,
     dataflowName: confirmationReceiptDTO.dataflowName,
     datasets,
-    representative: confirmationReceiptDTO.providerAssignation
+    representative: confirmationReceiptDTO.providerAssignation,
+    representativeEmail: confirmationReceiptDTO.providerEmail
   });
 
   return confirmationReceipt;
