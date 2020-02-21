@@ -1,10 +1,13 @@
 import React, { useReducer, useContext } from 'react';
+
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const userSettingsDefaultState = {
   userProps: {
-    defaultRowSelected: 10
+    defaultRowSelected: 10,
+    defaultVisualTheme: 'light'
   }
 };
 
@@ -43,6 +46,14 @@ const userReducer = (state, { type, payload }) => {
           defaultRowSelected: payload
         }
       };
+    case 'DEFAULT_VISUAL_THEME':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          defaultVisualTheme: payload
+        }
+      };
 
     default:
       return state;
@@ -51,6 +62,7 @@ const userReducer = (state, { type, payload }) => {
 
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
+  const themeContext = useContext(ThemeContext);
   const notificationContext = useContext(NotificationContext);
 
   console.log('state', state);
@@ -99,6 +111,12 @@ export const UserProvider = ({ children }) => {
           dispatch({
             type: 'TOGGLE_LOGOUT_CONFIRM',
             payload: {}
+          });
+        },
+        defaultVisualTheme: visualTheme => {
+          dispatch({
+            type: 'DEFAULT_VISUAL_THEME',
+            payload: visualTheme
           });
         }
       }}>

@@ -82,7 +82,10 @@ const Header = withRouter(({ history }) => {
       <div className={styles.userWrapper}>
         <InputSwitch
           checked={themeContext.currentTheme === 'dark'}
-          onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
+          onChange={e => {
+            themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+            userContext.defaultVisualTheme(e.value ? 'dark' : 'light');
+          }}
           sliderCheckedClassName={styles.themeSwitcherInputSwitch}
           style={{ marginRight: '1rem' }}
           tooltip={

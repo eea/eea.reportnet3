@@ -10,6 +10,8 @@ export const DefaultRowsPages = () => {
 
   const changeRowValue = e => userContext.defaultRowSelected(e.target.value);
 
+  console.log(`///// valor de filas ${changeRowValue}`);
+
   return (
     <React.Fragment>
       {' '}

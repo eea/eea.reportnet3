@@ -9,6 +9,13 @@ const themeReducer = (state, { type, payload }) => {
         ...state,
         currentTheme: payload.newTheme
       };
+    case 'DEFAULT_VISUAL_THEME':
+      //   document.body.style.setProperty('--bg', '#282c35');
+      return {
+        ...state,
+        currentTheme: payload.newTheme
+      };
+
     default:
       return state;
   }
@@ -478,6 +485,21 @@ export const ThemeProvider = ({ children }) => {
           });
           const theme = state.themes[newTheme];
           console.log({ theme });
+          Object.keys(theme).forEach(key => {
+            const cssKey = `--${key}`;
+            const cssValue = theme[key];
+            document.body.style.setProperty(cssKey, cssValue);
+          });
+        },
+        defaultVisualTheme: newTheme => {
+          dispatch({
+            type: 'DEFAULT_VISUAL_THEME',
+            payload: {
+              newTheme
+            }
+          });
+          console.log(`// state.currentTheme ${state.currentTheme}`);
+          const theme = state.themes[newTheme];
           Object.keys(theme).forEach(key => {
             const cssKey = `--${key}`;
             const cssValue = theme[key];
