@@ -19,7 +19,9 @@ const themeReducer = (state, { type, payload }) => {
 
 export const ThemeProvider = ({ children }) => {
   const [state, dispatch] = useReducer(themeReducer, {
-    currentTheme: !isNull(window.localStorage.getItem('theme')) ? window.localStorage.getItem('theme') : 'light',
+    currentTheme: !isNull(window.localStorage.getItem('theme'))
+      ? window.localStorage.getItem('theme')
+      : window.localStorage.setItem('theme', 'light'),
     themes: {
       light: {
         bg: 'var(--white)',
