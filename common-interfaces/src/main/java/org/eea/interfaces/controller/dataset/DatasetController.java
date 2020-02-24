@@ -10,8 +10,8 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +56,7 @@ public interface DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) TypeErrorEnum[] levelError);
+      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError);
 
 
   /**
@@ -99,7 +99,7 @@ public interface DatasetController {
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "type", required = true) TypeEntityEnum type);
+      @RequestParam(value = "type", required = true) EntityTypeEnum type);
 
   /**
    * Gets the by id.

@@ -1,10 +1,8 @@
 package org.eea.dataset.persistence.schemas.domain;
 
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,19 +11,15 @@ import lombok.ToString;
 /**
  * The Class TableSchema.
  */
+
 @Getter
 @Setter
 @ToString
 public class TableSchema {
-
   /** The id table schema. */
   @Id
   @Field(value = "_id")
   private ObjectId idTableSchema;
-
-  /** The description. */
-  @Field(value = "description")
-  private String description;
 
   /** The name table schema. */
   @Field(value = "nameTableSchema")
@@ -35,13 +29,10 @@ public class TableSchema {
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
 
+
   /** The record schema. */
   @Field(value = "recordSchema")
   private RecordSchema recordSchema;
-
-  /** The rule table. */
-  @Field(value = "rules")
-  private List<RuleTable> ruleTable;
 
   /**
    * Hash code.
@@ -50,8 +41,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, description, idTableSchema, nameTableSchema, recordSchema,
-        ruleTable);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -70,10 +60,10 @@ public class TableSchema {
     }
     TableSchema other = (TableSchema) obj;
     return Objects.equals(idDataSet, other.idDataSet)
-        && Objects.equals(description, other.description)
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
-        && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(ruleTable, other.ruleTable);
+        && Objects.equals(recordSchema, other.recordSchema);
   }
+
+
 }

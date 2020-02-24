@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -342,7 +342,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }

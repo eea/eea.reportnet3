@@ -41,8 +41,8 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -220,7 +220,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Validation> isBlocked = null;
     try {
       setTenant(idDataset);
-      isBlocked = validationRepository.findByLevelError(TypeErrorEnum.BLOCKER);
+      isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
@@ -318,7 +318,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        TypeDatasetEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
+        DatasetTypeEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
         deleteData);
   }
 
@@ -338,7 +338,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Get if the snapshot contains blocker errors
     setTenant(idDataset);
-    List<Validation> isBlocked = validationRepository.findByLevelError(TypeErrorEnum.BLOCKER);
+    List<Validation> isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
 
     if (isBlocked == null || isBlocked.isEmpty()) {
       Long providerId = 0L;

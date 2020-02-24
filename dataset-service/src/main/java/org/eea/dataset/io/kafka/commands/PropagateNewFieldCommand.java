@@ -2,7 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.util.UUID;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -51,7 +51,7 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
-    TypeData typeField = (TypeData) eeaEventVO.getData().get("typeField");
+    DataType typeField = (DataType) eeaEventVO.getData().get("typeField");
 
     updateRecordHelper.propagateNewFieldDesign(datasetId, idTableSchema, sizeRecords, numPag,
         UUID.randomUUID().toString(), idFieldSchema, typeField);

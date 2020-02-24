@@ -3,7 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -72,7 +72,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
-    TypeData typeField = (TypeData) eeaEventVO.getData().get("typeField");
+    DataType typeField = (DataType) eeaEventVO.getData().get("typeField");
     final String uuid = (String) eeaEventVO.getData().get("uuId");
 
     try {

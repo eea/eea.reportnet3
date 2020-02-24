@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
@@ -12,10 +13,13 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -91,6 +95,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
   /**
    * Creates the empty dataset schema.
    *
@@ -105,7 +113,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
+      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
           datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
           dataflowId, null, null, 0);
       datasetId.get();
@@ -215,10 +223,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
+        // delete the schema in Mongo
+        dataschemaService.deleteDatasetSchema(schemaId);
+
+        // delete the schema to dataset
+        rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
-        dataschemaService.deleteDatasetSchema(datasetId, schemaId);
         datasetMetabaseService.deleteDesignDataset(datasetId);
-        // delete the schema
+        // delete the schema in database
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
@@ -295,8 +307,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
-      dataschemaService.deleteTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          tableSchemaId);
+      final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
+
+      // we delete the rules associate to the table
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
+
       datasetService.deleteTableValue(datasetId, tableSchemaId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -343,18 +359,28 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
+
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
     try {
       String response;
-
-      if (StringUtils.isBlank(response = dataschemaService
-          .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      if (StringUtils.isBlank(
+          response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
       // propagate the new field to the existing records in the dataset value
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+      // with that we create the rule automatic required
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+      }
+      // and with it we create the others automatic rules like number etc
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -376,12 +402,32 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
+      final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService
-          .updateFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO);
+      DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
+        // if we change the type we need to delete all rules
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
+
+        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+          rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(), type,
+              EntityTypeEnum.FIELD, Boolean.TRUE);
+        }
+
+        rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+        // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+      } else {
+        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+          if (!rulesControllerZuul.existsRuleRequired(datasetSchema, fieldSchemaVO.getId())) {
+            rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
+                fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+          }
+        } else {
+          rulesControllerZuul.deleteRuleRequired(datasetSchema, fieldSchemaVO.getId());
+        }
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -402,11 +448,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
+
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       // Delete the fieldSchema from the datasetSchema
-      if (!dataschemaService.deleteFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          fieldSchemaId)) {
+      if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      // Delete the rules from the fieldSchema
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
       // Delete the fieldSchema from the dataset
       datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {
@@ -493,8 +542,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      isValid = !dataflow.getDesignDatasets().parallelStream()
-          .anyMatch(ds -> dataschemaService.validateSchema(ds.getDatasetSchema()) == false);
+      isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(
+          ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
   }
