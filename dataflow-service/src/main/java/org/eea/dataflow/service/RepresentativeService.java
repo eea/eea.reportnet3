@@ -72,4 +72,11 @@ public interface RepresentativeService {
    */
   DataProviderVO getDataProviderById(Long dataProviderId);
 
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  List<DataProviderVO> findDataProvidersByIds(List<Long> dataProviderIds);
 }
