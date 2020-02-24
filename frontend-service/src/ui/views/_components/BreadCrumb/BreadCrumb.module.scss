@@ -20,6 +20,9 @@
       }
       color: var(--breadCrumb-chevron-color);
     }
+    li:last-child {
+      font-weight: bold;
+    }
   }
 }
 // .p-breadcrumb {
