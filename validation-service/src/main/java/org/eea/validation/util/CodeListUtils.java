@@ -1,52 +1,44 @@
 package org.eea.validation.util;
-import java.util.Arrays;
+
+
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
 /**
  * The Class ValidationRuleDrools.
  */
-
+@Component("codeListUtils")
 public class CodeListUtils {
 
-  /** The Constant listBWDStatus. */
-  final static List<String> listBWDStatus = Arrays.asList("0", "1", "2", "3", "4");
 
-  /** The Constant listBWDPeriodType. */
-  final static List<String> listBWDPeriodType =
-      Arrays.asList("bathingSeason", "shortTermPollution", "abnormalSituation", "qualityChanges",
-          "bathingProhibition", "inaccessible", "cyanobacteriaBloom", "other");
+  /** The validation helper. */
+  private static ValidationHelper validationHelper;
 
-  /** The Constant listBWDSampleStatus. */
-  final static List<String> listBWDSampleStatus = Arrays.asList("missingSample", "preSeasonSample",
-      "shortTermPollutionSample", "replacementSample");
-
-  /** The Constant listBWDObservationStatus. */
-  final static List<String> listBWDObservationStatus =
-      Arrays.asList("missingValue", "confirmedValue", "limitOfDetectionValue");
-
+  @Autowired
+  private void setValidationHelperRepository(ValidationHelper validationHelper) {
+    CodeListUtils.validationHelper = validationHelper;
+  }
 
   /**
    * Code list validate.
    *
    * @param value the value
-   * @param codeList the code list
+   * @param idCodelist the id codelist
    * @return the boolean
    */
-  public static Boolean codeListValidate(final String value, final String codeList) {
-    switch (codeList) {
-      case "BWDStatus":
-        return listBWDStatus.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value));
-      case "BWDPeriodType":
-        return listBWDPeriodType.stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
-      case "BWDSampleStatus":
-        return listBWDSampleStatus.stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
-      case "BWDObservationStatus":
-        return listBWDObservationStatus.stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
-      default:
-        return false;
+  public static Boolean codeListValidate(final String value, final Long idCodelist) {
+    Boolean codeList = Boolean.FALSE;
+    // we can validation helper and put in memory the codeList
+    List<String> itemsCodelist = validationHelper.listItemsCodelist(idCodelist);
+    // we find all the values avaliables of codelist and we find if the codelist is correct
+    for (String item : itemsCodelist) {
+      if (item.equalsIgnoreCase(value)) {
+        codeList = Boolean.TRUE;
+      }
     }
+    return codeList;
   }
 
 }

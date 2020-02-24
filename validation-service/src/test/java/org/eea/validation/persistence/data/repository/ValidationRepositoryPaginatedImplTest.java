@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +33,9 @@ public class ValidationRepositoryPaginatedImplTest {
 
   private Pageable pageable;
 
-  private List<TypeEntityEnum> typeEntityEnum;
+  private List<EntityTypeEnum> typeEntityEnum;
 
-  private List<TypeErrorEnum> levelErrorsFilter;
+  private List<ErrorTypeEnum> levelErrorsFilter;
 
 
   @Before
@@ -43,8 +43,8 @@ public class ValidationRepositoryPaginatedImplTest {
     pageable = PageRequest.of(1, 1);
     typeEntityEnum = new ArrayList<>();
     levelErrorsFilter = new ArrayList<>();
-    typeEntityEnum.add(TypeEntityEnum.DATASET);
-    levelErrorsFilter.add(TypeErrorEnum.ERROR);
+    typeEntityEnum.add(EntityTypeEnum.DATASET);
+    levelErrorsFilter.add(ErrorTypeEnum.ERROR);
     MockitoAnnotations.initMocks(this);
   }
 

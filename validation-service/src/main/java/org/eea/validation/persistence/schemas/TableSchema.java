@@ -1,10 +1,8 @@
 package org.eea.validation.persistence.schemas;
 
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.validation.persistence.schemas.rule.RuleTable;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,10 +34,6 @@ public class TableSchema {
   @Field(value = "recordSchema")
   private RecordSchema recordSchema;
 
-  /** The rule table. */
-  @Field(value = "rules")
-  private List<RuleTable> ruleTable;
-
   /**
    * Hash code.
    *
@@ -47,7 +41,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, ruleTable);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -68,8 +62,7 @@ public class TableSchema {
     return Objects.equals(idDataSet, other.idDataSet)
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
-        && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(ruleTable, other.ruleTable);
+        && Objects.equals(recordSchema, other.recordSchema);
   }
 
 

@@ -18,7 +18,6 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleDataSet;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -28,7 +27,10 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -42,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The type Dataschema service.
@@ -67,6 +70,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
+  /** The rules controller. */
+  @Autowired
+  private RulesController rulesController;
+
   /**
    * The dataschema mapper.
    */
@@ -89,6 +96,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
@@ -104,51 +116,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-
-  /**
-   * The Constant GENERAL_WARNING.
-   */
-  private static final String GENERAL_WARNING = "WARNING";
-
-  /**
-   * The Constant VALIDATION_WARNING.
-   */
-  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-
-  /**
-   * The Constant GENERAL_ERROR.
-   */
-  private static final String GENERAL_ERROR = "ERROR";
-
-  /**
-   * The Constant INTEGER_ERROR.
-   */
-  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-
-  /**
-   * The Constant BOOLEAN_ERROR.
-   */
-  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-
-  /**
-   * The Constant COORDINATE_LAT_ERROR.
-   */
-  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-
-  /**
-   * The Constant COORDINATE_LONG_ERROR.
-   */
-  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-
-  /**
-   * The Constant DATE_ERROR.
-   */
-  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
-
-  /**
-   * The Constant NULL.
-   */
-  private static final String NULL = "id == null";
 
   /**
    * The data set metabase repository.
@@ -169,16 +136,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
-
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
-
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
     dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
-
     schemasRepository.save(dataSetSchema);
+
+    // create the schema of its rules
+    rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
+        new ObjectId().toString());
 
     return idDataSetSchema;
   }
@@ -238,10 +205,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Find the dataschema per id.
+   * Gets the data schema by id.
    *
-   * @param dataschemaId the idDataschema
-   *
+   * @param dataschemaId the dataschema id
    * @return the data schema by id
    */
   @Override
@@ -330,12 +296,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Delete dataset schema.
    *
-   * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   @Override
   @Transactional
-  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+  public void deleteDatasetSchema(String schemaId) {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
@@ -371,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -457,6 +422,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
+    // when we delete a table we need to delete all rules of this table, we mean, rules of the
+    // records fields, etc
+    Document recordSchemadocument =
+        schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
+    // if the table havent got any record he hasnt any document too
+    if (null != recordSchemadocument) {
+      List<Document> fieldSchemasList = (List<Document>) recordSchemadocument.get("fieldSchemas");
+      fieldSchemasList.stream().forEach(document -> {
+        rulesController.deleteRuleByReferenceId(datasetSchemaId, document.get("_id").toString());
+      });
+      rulesController.deleteRuleByReferenceId(datasetSchemaId,
+          recordSchemadocument.get("_id").toString());
+    }
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
 
@@ -507,11 +485,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return the string
+   * @return the type data
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     boolean typeModified = false;
     try {
@@ -539,11 +517,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getIdCodeList() != null) {
           fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
         }
+
         // Guardar el FieldSchema modificado en MongoDB
-        if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
-            .getModifiedCount() == 1) {
-          if (typeModified) {
-            return fieldSchemaVO.getType().getValue();
+        UpdateResult updateResult =
+            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        if (updateResult.getMatchedCount() == 1) {
+          if (updateResult.getModifiedCount() == 1 && typeModified) {
+            return fieldSchemaVO.getType();
           }
           return null;
         }
@@ -640,4 +620,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return isValid;
   }
+
 }

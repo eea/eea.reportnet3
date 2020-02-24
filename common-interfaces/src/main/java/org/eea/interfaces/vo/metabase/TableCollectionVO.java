@@ -8,15 +8,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class TableStructure.
- *
- * @author Mario Severa
+ * The Class TableCollectionVO.
  */
 @Getter
 @Setter
 @ToString
 public class TableCollectionVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 4367786920962720894L;
 
 

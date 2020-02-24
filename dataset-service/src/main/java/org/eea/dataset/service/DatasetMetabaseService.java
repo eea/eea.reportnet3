@@ -8,7 +8,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 /**
  * The Interface DatasetMetabaseService.
@@ -103,7 +103,7 @@ public interface DatasetMetabaseService {
    * @return the future
    * @throws EEAException the EEA exception
    */
-  Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+  Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException;
 

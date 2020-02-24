@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -292,7 +293,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<CodelistVO> getAllById(String codelistIds) {
+  public List<CodelistVO> getAllById(@RequestParam(value = "codelistId") String codelistIds) {
     if (StringUtils.isBlank(codelistIds)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
     }
