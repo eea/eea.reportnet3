@@ -40,14 +40,16 @@ const TabsValidations = ({
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidations(validationsList);
     } catch (error) {
+      console.log({ error });
       notificationContext.add({
-        type: 'VALIDATION_SERVICE_GET_ALL_VALIDATIONS',
+        type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
         content: {
           datasetSchemaId
         }
       });
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
+      return;
     }
   };
 
@@ -91,10 +93,10 @@ const TabsValidations = ({
         id: 'name',
         header: resources.messages['ruleName']
       },
-      {
-        id: 'shortCode',
-        header: resources.messages['ruleShortCode']
-      },
+      // {
+      //   id: 'shortCode',
+      //   header: resources.messages['ruleShortCode']
+      // },
       {
         id: 'ruleDescription',
         header: resources.messages['ruleDescription']
@@ -123,22 +125,36 @@ const TabsValidations = ({
       const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
       const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
       return (
-        <TabPanel header={entityType} key={entityType} rightIcon={null}>
-          <div className={null}>
-            <DataTable
-              autoLayout={true}
-              className={null}
-              loading={false}
-              paginator={true}
-              paginatorRight={paginatorRightText}
-              rows={10}
-              rowsPerPageOptions={[5, 10, 15]}
-              totalRecords={validationsFilteredByEntityType.length}
-              value={validationsFilteredByEntityType}>
-              {columns}
-            </DataTable>
-          </div>
-        </TabPanel>
+        <div className={null}>
+          <DataTable
+            autoLayout={true}
+            className={null}
+            loading={false}
+            paginator={true}
+            paginatorRight={paginatorRightText}
+            rows={10}
+            rowsPerPageOptions={[5, 10, 15]}
+            totalRecords={validationsFilteredByEntityType.length}
+            value={validationsFilteredByEntityType}>
+            {columns}
+          </DataTable>
+        </div>
+        // <TabPanel header={entityType} key={entityType} rightIcon={null}>
+        //   <div className={null}>
+        //     <DataTable
+        //       autoLayout={true}
+        //       className={null}
+        //       loading={false}
+        //       paginator={true}
+        //       paginatorRight={paginatorRightText}
+        //       rows={10}
+        //       rowsPerPageOptions={[5, 10, 15]}
+        //       totalRecords={validationsFilteredByEntityType.length}
+        //       value={validationsFilteredByEntityType}>
+        //       {columns}
+        //     </DataTable>
+        //   </div>
+        // </TabPanel>
       );
     });
   };
@@ -148,9 +164,9 @@ const TabsValidations = ({
   }
 
   return (
-    <TabView activeIndex={activeIndex} onTabChange={onTabChange} renderActiveOnly={false}>
-      {validationList()}
-    </TabView>
+    // <TabView activeIndex={activeIndex} onTabChange={onTabChange} renderActiveOnly={false}>
+    validationList()
+    // </TabView>
   );
 };
 

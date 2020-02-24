@@ -348,6 +348,7 @@
 		"validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
 		"validationDashboards": "Validation dashboards",
 		"validationFilter":"Validation filter",
+		"validationServiceGetAllError": "Error loading validations",		
 		"viewData": "View data",
 		"visibility": "Visibility",
 		"warning": "Warning",
