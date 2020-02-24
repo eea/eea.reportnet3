@@ -202,7 +202,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         </Dialog>
       );
     }
-    return <p>No validation</p>;
+    return <></>;
   };
 
   const layout = children => {
