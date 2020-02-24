@@ -20,6 +20,7 @@ const useBigButtonList = ({
   isCreateButtonActive,
   isCustodian,
   isDataSchemaCorrect,
+  isLoadingReceipt,
   onDatasetSchemaNameError,
   onDuplicateName,
   onLoadReceiptData,
@@ -335,10 +336,10 @@ const useBigButtonList = ({
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: false ? 'spinner' : 'fileDownload',
-        buttonIconClass: false ? 'spinner' : '',
+        buttonIcon: isLoadingReceipt ? 'spinner' : 'fileDownload',
+        buttonIconClass: isLoadingReceipt ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: () => onLoadReceiptData(),
+        handleRedirect: isLoadingReceipt ? () => {} : () => onLoadReceiptData(),
         infoStatus: isOutdated,
         layout: 'defaultBigButton',
         visibility:

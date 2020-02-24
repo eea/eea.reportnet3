@@ -14,6 +14,7 @@ const useBigButtonList = ({
   handleRedirect,
   hasWritePermissions,
   isCustodian,
+  isLoadingReceipt,
   onLoadReceiptData,
   representative,
   showReleaseSnapshotDialog
@@ -111,9 +112,10 @@ const useBigButtonList = ({
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: 'fileDownload',
+        buttonIcon: isLoadingReceipt ? 'spinner' : 'fileDownload',
+        buttonIconClass: isLoadingReceipt ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: () => onLoadReceiptData(),
+        handleRedirect: isLoadingReceipt ? () => {} : () => onLoadReceiptData(),
         infoStatus: isOutdated,
         layout: 'defaultBigButton',
         visibility: !isCustodian && !releasedStates.includes(false) && !releasedStates.includes(null)

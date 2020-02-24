@@ -55,6 +55,7 @@ export const BigButtonList = ({
   const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [receiptData, setReceiptData] = useState();
 
@@ -69,6 +70,7 @@ export const BigButtonList = ({
   }, [receiptData]);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
+  useCheckNotifications(['LOAD_RECEIPT_DATA_ERROR'], setIsLoadingReceipt, false);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -152,6 +154,7 @@ export const BigButtonList = ({
   const onDownloadReceipt = () => {
     if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
       receiptBtnRef.current.click();
+      setIsLoadingReceipt(false);
     }
   };
 
@@ -165,6 +168,7 @@ export const BigButtonList = ({
   };
 
   const onLoadReceiptData = async () => {
+    setIsLoadingReceipt(true);
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
       setReceiptData(response);
@@ -173,6 +177,7 @@ export const BigButtonList = ({
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
+      setIsLoadingReceipt(false);
     }
   };
 
@@ -196,6 +201,7 @@ export const BigButtonList = ({
     isCreateButtonActive: isCreateButtonActive,
     isCustodian: isCustodian,
     isDataSchemaCorrect: isDataSchemaCorrect,
+    isLoadingReceipt: isLoadingReceipt,
     onDatasetSchemaNameError: onDatasetSchemaNameError,
     onDuplicateName: onDuplicateName,
     onLoadReceiptData: onLoadReceiptData,

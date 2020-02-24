@@ -22,6 +22,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
@@ -51,10 +52,13 @@ export const BigButtonList = ({
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [receiptData, setReceiptData] = useState();
 
   const receiptBtnRef = useRef(null);
+
+  useCheckNotifications(['LOAD_RECEIPT_DATA_ERROR'], setIsLoadingReceipt, false);
 
   useLayoutEffect(() => {
     setTimeout(() => {
@@ -139,6 +143,7 @@ export const BigButtonList = ({
   const onDownloadReceipt = () => {
     if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
       receiptBtnRef.current.click();
+      setIsLoadingReceipt(false);
     }
   };
 
@@ -152,6 +157,7 @@ export const BigButtonList = ({
   };
 
   const onLoadReceiptData = async () => {
+    setIsLoadingReceipt(true);
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
       setReceiptData(response);
@@ -160,6 +166,7 @@ export const BigButtonList = ({
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
+      setIsLoadingReceipt(false);
     }
   };
 
@@ -185,15 +192,16 @@ export const BigButtonList = ({
               handleRedirect: handleRedirect,
               hasWritePermissions: hasWritePermissions,
               isCustodian: isCustodian,
+              isLoadingReceipt: isLoadingReceipt,
               onDatasetSchemaNameError: onDatasetSchemaNameError,
               onDuplicateName: onDuplicateName,
               onLoadReceiptData: onLoadReceiptData,
               onSaveName: onSaveName,
               onShowDataCollectionModal: onShowDataCollectionModal,
               onShowNewSchemaDialog: onShowNewSchemaDialog,
+              representative,
               showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema,
-              representative
+              updatedDatasetSchema: updatedDatasetSchema
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>
