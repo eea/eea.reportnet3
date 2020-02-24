@@ -327,7 +327,7 @@ const useBigButtonList = ({
     const representativeNames = datasets.map(dataset => {
       return dataset.datasetSchemaName;
     });
-    const isReleased = datasets.map(dataset => {
+    const releasedStates = datasets.map(dataset => {
       return dataset.isReleased;
     });
     const isOutdated = representatives.filter(representative => representative.isReceiptOutdated);
@@ -341,7 +341,11 @@ const useBigButtonList = ({
         handleRedirect: () => onLoadReceiptData(),
         infoStatus: isOutdated,
         layout: 'defaultBigButton',
-        visibility: !isCustodian && uniq(representativeNames).length === 1 && isReleased
+        visibility:
+          !isCustodian &&
+          uniq(representativeNames).length === 1 &&
+          !releasedStates.includes(false) &&
+          !releasedStates.includes(null)
       }
     ];
   };

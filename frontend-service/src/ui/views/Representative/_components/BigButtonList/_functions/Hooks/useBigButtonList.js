@@ -96,7 +96,7 @@ const useBigButtonList = ({
 
   const onBuildReceiptButton = () => {
     const { datasets, representatives } = dataflowData;
-    const isReleased = datasets.map(dataset => {
+    const releasedStates = datasets.map(dataset => {
       return dataset.isReleased;
     });
 
@@ -116,7 +116,7 @@ const useBigButtonList = ({
         handleRedirect: () => onLoadReceiptData(),
         infoStatus: isOutdated,
         layout: 'defaultBigButton',
-        visibility: !isCustodian && isReleased
+        visibility: !isCustodian && !releasedStates.includes(false) && !releasedStates.includes(null)
       }
     ];
   };
