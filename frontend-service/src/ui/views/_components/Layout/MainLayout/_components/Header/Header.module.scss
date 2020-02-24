@@ -29,13 +29,13 @@
   .localhostAlert {
     display: flex;
     align-items: center;
-    color: var(--gray-110);
+    color: var(--main-font-color);
   }
   .userWrapper {
     display: flex;
     align-items: center;
     margin-right: 1rem;
-    a{
+    a {
       display: flex;
       align-items: center;
       margin-right: 1rem;
@@ -48,7 +48,6 @@
         color: var(--main-font-color);
       }
     }
-    
   }
   .logoutWrapper {
     display: flex;

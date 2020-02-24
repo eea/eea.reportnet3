@@ -16,6 +16,14 @@
                 "label": "100",
                 "value": 100
             }
-        ]
+        ],
+        "visualTheme": [{
+                "label": "Light", 
+                "value": "light" 
+            },
+            { 
+                "label": "Dark", 
+                "value": "dark" 
+        }]
     }
 }

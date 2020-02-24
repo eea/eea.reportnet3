@@ -23,10 +23,7 @@ const UserDesignOptions = () => {
       <Dropdown
         name="visualTheme"
         className={styles.dropdownFieldType}
-        options={[
-          { label: 'light', value: 'light' },
-          { label: 'dark', value: 'dark' }
-        ]}
+        options={resources.userParameters['visualTheme']}
         onChange={changeVisualTheme}
         placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
         value={userContext.userProps.defaultVisualTheme}
