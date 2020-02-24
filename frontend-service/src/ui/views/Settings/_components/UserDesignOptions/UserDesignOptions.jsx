@@ -10,12 +10,6 @@ import styles from './UserDesignOptions.module.scss';
 const UserDesignOptions = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
-  const userContext = useContext(UserContext);
-
-  const changeVisualTheme = e => {
-    userContext.defaultVisualTheme(e.target.value);
-    themeContext.defaultVisualTheme(e.target.value);
-  };
 
   return (
     <div className={styles.userDesignContainer}>
@@ -27,9 +21,11 @@ const UserDesignOptions = () => {
           { label: 'light', value: 'light' },
           { label: 'dark', value: 'dark' }
         ]}
-        onChange={changeVisualTheme}
+        onChange={e => {
+          themeContext.onToggleTheme(e.value);
+        }}
         placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-        value={userContext.userProps.defaultVisualTheme}
+        value={themeContext.currentTheme}
       />
     </div>
   );
