@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import { capitalize, isUndefined, cloneDeep } from 'lodash';
+import { capitalize, cloneDeep, isEmpty, isUndefined } from 'lodash';
 
 import styles from './Codelist.module.css';
 
@@ -44,7 +44,6 @@ const Codelist = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  console.log(JSON.parse(JSON.stringify(codelist)).items);
   const initialCodelistState = {
     clonedCodelist: {
       codelistId: codelist.id,
@@ -65,7 +64,6 @@ const Codelist = ({
     formType: undefined,
     items: JSON.parse(JSON.stringify(codelist)).items,
     initialCellValue: undefined,
-    initialItem: { id: '', shortCode: '', label: '', definition: '', codelistId: '' },
     isAddEditCodelistVisible: false,
     isDeleteCodelistItemVisible: false,
     isCategoryChanged: false,
@@ -152,7 +150,6 @@ const Codelist = ({
           payload: { property, value: initialCodelistState[property] }
         });
       }
-    } else if (event.key == 'Enter') {
     }
   };
 
@@ -277,14 +274,18 @@ const Codelist = ({
   const cellItemDataEditor = (cells, field) => {
     return (
       <InputText
-        // onBlur={e => onEditorSubmitValue(cells, e.target.value, field)}
-        // onFocus={e => {
-        //   e.preventDefault();
-        //   dispatchCodelist({
-        //     type: 'SAVE_INITIAL_CELL_VALUE',
-        //     payload: e.target.value
-        //   });
-        // }}
+        onBlur={e => {
+          if (!checkDuplicateItems(e.target.value, cells.rowData['id'])) {
+            onEditorItemsValueChange(cells, codelistState.initialCellValue);
+          }
+        }}
+        onFocus={e => {
+          e.preventDefault();
+          dispatchCodelist({
+            type: 'SAVE_INITIAL_CELL_VALUE',
+            payload: e.target.value
+          });
+        }}
         onKeyDown={e => onKeyChange(e, field)}
         onChange={e => onEditorItemsValueChange(cells, e.target.value)}
         type="text"
@@ -293,10 +294,18 @@ const Codelist = ({
     );
   };
 
+  const checkDuplicateItems = (shortCode, itemId) => {
+    return isEmpty(codelistState.items.filter(item => item.shortCode === shortCode && item.id !== itemId));
+  };
+
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        disabled={isIncorrect}
+        disabled={
+          isIncorrect ||
+          codelistState.clonedCodelist.codelistName.trim() === '' ||
+          codelistState.clonedCodelist.codelistVersion.trim() === ''
+        }
         icon="save"
         label={resources.messages['save']}
         onClick={() => onSaveCloneCodelist()}
@@ -390,6 +399,7 @@ const Codelist = ({
   const renderEditItemsDialog = () => {
     return codelistState.isAddEditCodelistVisible ? (
       <CodelistForm
+        checkDuplicateItems={checkDuplicateItems}
         columns={['shortCode', 'label', 'definition']}
         formType={codelistState.formType}
         item={
@@ -416,7 +426,10 @@ const Codelist = ({
           <Button label={resources.messages['add']} icon="add" onClick={() => onAddCodelistItemClick()} />
         ) : null}
         <Button
-          disabled={codelistState.isEditing && isIncorrect}
+          disabled={
+            codelistState.isEditing &&
+            (isIncorrect || codelistState.codelistName.trim() === '' || codelistState.codelistVersion.trim() === '')
+          }
           icon={codelistState.isEditing ? 'save' : 'pencil'}
           label={codelistState.isEditing ? resources.messages['save'] : resources.messages['edit']}
           onClick={
