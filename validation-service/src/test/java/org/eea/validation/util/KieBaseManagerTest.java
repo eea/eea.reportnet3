@@ -7,7 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -50,7 +50,7 @@ public class KieBaseManagerTest {
     ruleDataset.setRuleId(new ObjectId());
     ruleDataset.setRuleName("regla dataset");
     ruleDataset.setEnabled(Boolean.TRUE);
-    ruleDataset.setType(TypeEntityEnum.DATASET);
+    ruleDataset.setType(EntityTypeEnum.DATASET);
     ruleDataset.setWhenCondition("id == null");
     ruleDataset.setThenCondition(listString);
     ruleKiebase.add(ruleDataset);
@@ -61,7 +61,7 @@ public class KieBaseManagerTest {
     ruleTable.setRuleId(new ObjectId());
     ruleTable.setRuleName("regla tadasñe");
     ruleTable.setEnabled(Boolean.TRUE);
-    ruleTable.setType(TypeEntityEnum.TABLE);
+    ruleTable.setType(EntityTypeEnum.TABLE);
     ruleTable.setWhenCondition("id == null");
     ruleTable.setThenCondition(listString);
     ruleKiebase.add(ruleTable);
@@ -72,7 +72,7 @@ public class KieBaseManagerTest {
     ruleRecord.setRuleId(new ObjectId());
     ruleRecord.setRuleName("regla recordasda");
     ruleRecord.setEnabled(Boolean.TRUE);
-    ruleRecord.setType(TypeEntityEnum.RECORD);
+    ruleRecord.setType(EntityTypeEnum.RECORD);
     ruleRecord.setWhenCondition("id == null");
     ruleRecord.setThenCondition(listString);
     ruleKiebase.add(ruleRecord);
@@ -84,7 +84,7 @@ public class KieBaseManagerTest {
     ruleField.setRuleId(new ObjectId());
     ruleField.setRuleName("regla field");
     ruleField.setEnabled(Boolean.TRUE);
-    ruleField.setType(TypeEntityEnum.FIELD);
+    ruleField.setType(EntityTypeEnum.FIELD);
     ruleField.setWhenCondition("id == null");
     ruleField.setThenCondition(listString);
     ruleKiebase.add(ruleField);

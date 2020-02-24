@@ -3,7 +3,7 @@ package org.eea.interfaces.vo.dataset.enums;
 /**
  * The Enum TypeData.
  */
-public enum TypeData {
+public enum DataType {
 
   /**
    * The Text.
@@ -96,7 +96,7 @@ public enum TypeData {
    *
    * @param value the value
    */
-  TypeData(String value) {
+  DataType(String value) {
     this.value = value;
   }
 

@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -419,7 +419,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
 
 

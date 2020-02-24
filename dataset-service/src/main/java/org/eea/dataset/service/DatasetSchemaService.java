@@ -3,7 +3,7 @@ package org.eea.dataset.service;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -142,7 +142,7 @@ public interface DatasetSchemaService {
    * @return the type data
    * @throws EEAException the EEA exception
    */
-  TypeData updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException;
 
   /**

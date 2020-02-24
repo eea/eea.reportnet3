@@ -27,7 +27,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -206,11 +206,11 @@ public class DataSetSchemaControllerImplTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType(TypeData.TEXT);
+    field.setType(DataType.TEXT);
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType(TypeData.TEXT);
+    field2.setType(DataType.TEXT);
 
     assertEquals("error, not equals", field, field2);
 
@@ -524,7 +524,7 @@ public class DataSetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT);
+        .thenReturn(DataType.TEXT);
     Mockito.doNothing().when(rulesControllerZuul).deleteRuleByReferenceId(Mockito.any(),
         Mockito.any());
     Mockito.doNothing().when(rulesControllerZuul).createAutomaticRule(Mockito.any(), Mockito.any(),
@@ -541,7 +541,7 @@ public class DataSetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT);
+        .thenReturn(DataType.TEXT);
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
         Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);

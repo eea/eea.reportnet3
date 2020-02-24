@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,7 +44,7 @@ public class Rule {
 
   /** The type. */
   @Field(value = "type")
-  private TypeEntityEnum type;
+  private EntityTypeEnum type;
 
   /** The when condition. */
   @Field(value = "whenCondition")

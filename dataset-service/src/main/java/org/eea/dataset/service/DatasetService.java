@@ -11,9 +11,9 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
@@ -70,7 +70,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String fields, TypeErrorEnum[] levelError) throws EEAException;
+      String fields, ErrorTypeEnum[] levelError) throws EEAException;
 
   /**
    * Gets the position from any object id.
@@ -84,7 +84,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
-      TypeEntityEnum type) throws EEAException;
+      EntityTypeEnum type) throws EEAException;
 
 
   /**
@@ -300,7 +300,7 @@ public interface DatasetService {
    * @param fieldSchemaId the field schema id
    * @param type the type
    */
-  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, TypeData type);
+  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, DataType type);
 
   /**
    * Delete table values.
@@ -338,7 +338,7 @@ public interface DatasetService {
    * @param typeField the type field
    */
   void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
-      String idFieldSchema, TypeData typeField);
+      String idFieldSchema, DataType typeField);
 
   /**
    * Delete record values.

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Before;
@@ -65,7 +65,7 @@ public class PropagateNewFieldCommandTest {
     data.put("sizeRecords", 1);
     data.put("idTableSchema", "5cf0e9b3b793310e9ceca190");
     data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
-    data.put("typeField", TypeData.TEXT);
+    data.put("typeField", DataType.TEXT);
     eeaEventVO.setData(data);
 
     doNothing().when(updateRecordHelper).propagateNewFieldDesign(Mockito.any(), Mockito.any(),

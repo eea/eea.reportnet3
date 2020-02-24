@@ -3,8 +3,6 @@ package org.eea.validation.persistence.repository;
 import java.util.ArrayList;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.mongodb.client.MongoDatabase;
 
@@ -17,8 +15,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Autowired
   private MongoDatabase mongoDatabase;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /**
    * Find field schema.

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -132,7 +132,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesRequiredTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        null, TypeEntityEnum.FIELD, Boolean.TRUE);
+        null, EntityTypeEnum.FIELD, Boolean.TRUE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -145,7 +145,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesBooleanTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.BOOLEAN, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.BOOLEAN, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -162,7 +162,7 @@ public class RulesServiceImplTest {
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.CODELIST, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.CODELIST, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -175,7 +175,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesLongTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.COORDINATE_LAT, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.COORDINATE_LAT, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -188,7 +188,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesLatTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.COORDINATE_LONG, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.COORDINATE_LONG, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -201,7 +201,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesDateTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.DATE, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.DATE, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -214,7 +214,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesNumberTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.NUMBER, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.NUMBER, EntityTypeEnum.FIELD, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -227,7 +227,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesTextTest() throws EEAException {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        TypeData.TEXT, TypeEntityEnum.FIELD, Boolean.FALSE);
+        DataType.TEXT, EntityTypeEnum.FIELD, Boolean.FALSE);
 
   }
 

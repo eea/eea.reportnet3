@@ -29,8 +29,8 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -336,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -422,7 +422,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
-    // when we delete a table we need ,do the records and field to clean the rules
+    // when we delete a table we need to delete all rules of this table, we mean, rules of the
+    // records fields, etc
     Document recordSchemadocument =
         schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
     // if the table havent got any record he hasnt any document too
@@ -488,7 +489,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public TypeData updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     boolean typeModified = false;
     try {

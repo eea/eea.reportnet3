@@ -2,8 +2,8 @@ package org.eea.validation.service;
 
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
@@ -93,8 +93,8 @@ public interface RulesService {
    * @param required the required
    * @throws EEAException the EEA exception
    */
-  void createAutomaticRules(String idDatasetSchema, String referenceId, TypeData typeData,
-      TypeEntityEnum typeEntityEnum, Boolean required) throws EEAException;
+  void createAutomaticRules(String idDatasetSchema, String referenceId, DataType typeData,
+      EntityTypeEnum typeEntityEnum, Boolean required) throws EEAException;
 
   /**
    * Delete rule required.

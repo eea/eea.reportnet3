@@ -35,7 +35,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -200,14 +200,12 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDatasetId() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
-    // dataSetSchema.setRuleDataSet(new ArrayList<>());
     DataSetMetabase metabase = new DataSetMetabase();
     metabase.setDatasetSchema(new ObjectId().toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(metabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     DataSetSchemaVO value = new DataSetSchemaVO();
-    // value.setRuleDataSet(new ArrayList<>());
     Mockito.doReturn(value).when(dataSchemaMapper).entityToClass(Mockito.any(DataSetSchema.class));
     assertEquals(value, dataSchemaServiceImpl.getDataSchemaByDatasetId(true, 1L));
 
@@ -263,11 +261,11 @@ public class DatasetSchemaServiceTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType(TypeData.TEXT);
+    field.setType(DataType.TEXT);
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType(TypeData.TEXT);
+    field2.setType(DataType.TEXT);
 
     assertEquals("Not equals", field, field2);
 
@@ -447,15 +445,15 @@ public class DatasetSchemaServiceTest {
   public void updateFieldSchemaTest1() throws EEAException {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.NUMBER);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER);
     Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT.getValue());
+        .thenReturn(DataType.TEXT.getValue());
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn("description");
     Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
-    Assert.assertEquals(TypeData.NUMBER,
+    Assert.assertEquals(DataType.NUMBER,
         dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
   }
 
@@ -468,9 +466,9 @@ public class DatasetSchemaServiceTest {
   public void updateFieldSchemaTest2() throws EEAException {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.TEXT);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.TEXT);
     Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT.getValue());
+        .thenReturn(DataType.TEXT.getValue());
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn(null);
     Mockito.when(fieldSchemaVO.getName()).thenReturn(null);
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))

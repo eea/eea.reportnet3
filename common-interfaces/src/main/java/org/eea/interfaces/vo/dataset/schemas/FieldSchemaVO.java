@@ -1,7 +1,7 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,18 +11,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchemaVO {
 
@@ -39,7 +27,7 @@ public class FieldSchemaVO {
   private String name;
 
   /** The type. */
-  private TypeData type;
+  private DataType type;
 
   /** The id code list. */
   private Long idCodeList;

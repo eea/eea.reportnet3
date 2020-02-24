@@ -4,7 +4,7 @@ package org.eea.interfaces.vo.dataset.enums;
 /**
  * The Enum TypeEntityEnum.
  */
-public enum TypeEntityEnum {
+public enum EntityTypeEnum {
 
 
   /** The table. */
@@ -27,7 +27,7 @@ public enum TypeEntityEnum {
    *
    * @param value the value
    */
-  TypeEntityEnum(String value) {
+  EntityTypeEnum(String value) {
     this.value = value;
   }
 

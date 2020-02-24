@@ -2,7 +2,7 @@ package org.eea.interfaces.vo.dataset.schemas.rule;
 
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -43,7 +43,7 @@ public class RuleVO {
   private String activationGroup;
 
   /** The type. */
-  private TypeEntityEnum type;
+  private EntityTypeEnum type;
 
   /** The when condition. */
   private String whenCondition;

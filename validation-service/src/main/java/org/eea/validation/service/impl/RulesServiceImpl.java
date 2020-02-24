@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -159,44 +159,45 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createAutomaticRules(String idDatasetSchema, String referenceId, TypeData typeData,
-      TypeEntityEnum typeEntityEnum, Boolean required) throws EEAException {
+  public void createAutomaticRules(String idDatasetSchema, String referenceId, DataType typeData,
+      EntityTypeEnum typeEntityEnum, Boolean required) throws EEAException {
     Rule rule = new Rule();
-    // we use that if to differenciate beetween a rule required and the rest
+    // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
+    // number etc)
     if (Boolean.TRUE.equals(required)) {
       rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           UUID.randomUUID().toString());
     } else {
       switch (typeData) {
         case NUMBER:
-          rule = AutomaticRules.createAutomaticNumberRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString());
           break;
         case DATE:
-          rule = AutomaticRules.createAutomaticDateRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString());
           break;
         case BOOLEAN:
-          rule = AutomaticRules.createAutomaticBooleanRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString());
           break;
         case COORDINATE_LAT:
-          rule = AutomaticRules.createAutomaticLatRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString());
           break;
         case COORDINATE_LONG:
-          rule = AutomaticRules.createAutomaticLongRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString());
           break;
         case CODELIST:
           // we find the idcodelist to create this validate
           Document document = schemasRepository.findFieldSchema(idDatasetSchema, referenceId);
-          rule = AutomaticRules.createAutomaticCodelistRule(referenceId, typeEntityEnum,
+          rule = AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString(), document.get("idCodeList").toString());
           break;
         default:
           rule = null;
-          LOG.info("non necessary automatic rule for a type of data {}", typeData.getValue());
+          LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
           break;
       }
     }

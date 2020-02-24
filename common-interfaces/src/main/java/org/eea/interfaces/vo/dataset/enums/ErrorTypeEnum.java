@@ -5,7 +5,7 @@ package org.eea.interfaces.vo.dataset.enums;
 /**
  * The Enum TypeErrorEnum.
  */
-public enum TypeErrorEnum {
+public enum ErrorTypeEnum {
 
   /** The correct. */
   CORRECT("CORRECT"),
@@ -30,7 +30,7 @@ public enum TypeErrorEnum {
    *
    * @param value the value
    */
-  TypeErrorEnum(String value) {
+  ErrorTypeEnum(String value) {
     this.value = value;
   }
 

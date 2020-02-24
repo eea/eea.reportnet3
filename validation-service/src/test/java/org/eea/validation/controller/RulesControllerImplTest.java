@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -237,10 +237,10 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createAutomaticRuleTestFalse() throws EEAException {
-    rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
         Boolean.FALSE);
-    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", TypeData.BOOLEAN,
-        TypeEntityEnum.FIELD, Boolean.FALSE);
+    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", DataType.BOOLEAN,
+        EntityTypeEnum.FIELD, Boolean.FALSE);
   }
 
   /**
@@ -251,10 +251,10 @@ public class RulesControllerImplTest {
   @Test
   public void createAutomaticRuleTestFalseThrow() throws EEAException {
 
-    doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", TypeData.BOOLEAN,
-        TypeEntityEnum.FIELD, Boolean.FALSE);
+    doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", DataType.BOOLEAN,
+        EntityTypeEnum.FIELD, Boolean.FALSE);
     try {
-      rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
           Boolean.FALSE);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -269,9 +269,9 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createAutomaticRuleTestTrue() throws EEAException {
-    rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
         Boolean.TRUE);
-    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", null, TypeEntityEnum.FIELD,
+    Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", null, EntityTypeEnum.FIELD,
         Boolean.TRUE);
   }
 
@@ -283,9 +283,9 @@ public class RulesControllerImplTest {
   @Test
   public void createAutomaticRuleTestTrueThrow() throws EEAException {
     doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", null,
-        TypeEntityEnum.FIELD, Boolean.TRUE);
+        EntityTypeEnum.FIELD, Boolean.TRUE);
     try {
-      rulesControllerImpl.createAutomaticRule("", "", TypeData.BOOLEAN, TypeEntityEnum.FIELD,
+      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
           Boolean.TRUE);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());

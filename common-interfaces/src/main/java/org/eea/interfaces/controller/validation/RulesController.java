@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.validation;
 
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -115,8 +115,8 @@ public interface RulesController {
   void createAutomaticRule(
       @RequestParam(name = "idDatasetSchema", required = true) String idDatasetSchema,
       @RequestParam(name = "referenceId", required = true) String referenceId,
-      @RequestParam(name = "typeData", required = true) TypeData typeData,
-      @RequestParam(name = "typeEntityEnum", required = true) TypeEntityEnum typeEntityEnum,
+      @RequestParam(name = "typeData", required = true) DataType typeData,
+      @RequestParam(name = "typeEntityEnum", required = true) EntityTypeEnum typeEntityEnum,
       @RequestParam(name = "requiredRule") Boolean requiredRule);
 
 

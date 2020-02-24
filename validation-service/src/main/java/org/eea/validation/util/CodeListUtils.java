@@ -29,15 +29,16 @@ public class CodeListUtils {
    * @return the boolean
    */
   public static Boolean codeListValidate(final String value, final Long idCodelist) {
+    Boolean codeList = Boolean.FALSE;
     // we can validation helper and put in memory the codeList
     List<String> itemsCodelist = validationHelper.listItemsCodelist(idCodelist);
     // we find all the values avaliables of codelist and we find if the codelist is correct
     for (String item : itemsCodelist) {
       if (item.equalsIgnoreCase(value)) {
-        return true;
+        codeList = Boolean.TRUE;
       }
     }
-    return false;
+    return codeList;
   }
 
 }

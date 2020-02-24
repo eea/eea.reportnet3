@@ -7,7 +7,7 @@ import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -20,20 +20,9 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchema {
+
 
   /** The id field schema. */
   @Id
@@ -48,7 +37,7 @@ public class FieldSchema {
   /** The type. */
   @Field(value = "typeData")
   @Enumerated(EnumType.STRING)
-  private TypeData type;
+  private DataType type;
 
   /** The type. */
   @Field(value = "headerName")

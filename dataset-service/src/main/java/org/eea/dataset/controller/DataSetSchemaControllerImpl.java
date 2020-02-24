@@ -17,9 +17,9 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.OrderVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -113,7 +113,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
+      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
           datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
           dataflowId, null, null, 0);
       datasetId.get();
@@ -230,7 +230,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
-        // delete the schema in BBDD
+        // delete the schema in BD
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
@@ -376,11 +376,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
       }
       // and with it we create the others automatic rules like number etc
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-          fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -404,26 +404,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      TypeData type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
+      DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
-        // if we changue the type we need to delete all rules
+        // if we change the type we need to delete all rules
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
 
         if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
           rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(), type,
-              TypeEntityEnum.FIELD, Boolean.TRUE);
+              EntityTypeEnum.FIELD, Boolean.TRUE);
         }
 
         rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.FALSE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
         // update metabase value
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
       } else {
         if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
           if (!rulesControllerZuul.existsRuleRequired(datasetSchema, fieldSchemaVO.getId())) {
             rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-                fieldSchemaVO.getType(), TypeEntityEnum.FIELD, Boolean.TRUE);
+                fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
           }
         } else {
           rulesControllerZuul.deleteRuleRequired(datasetSchema, fieldSchemaVO.getId());

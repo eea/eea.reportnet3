@@ -5,7 +5,7 @@ package org.eea.interfaces.vo.dataset.enums;
 /**
  * The Enum TypeDatasetEnum.
  */
-public enum TypeDatasetEnum {
+public enum DatasetTypeEnum {
 
 
 
@@ -29,7 +29,7 @@ public enum TypeDatasetEnum {
    *
    * @param value the value
    */
-  TypeDatasetEnum(String value) {
+  DatasetTypeEnum(String value) {
     this.value = value;
   }
 

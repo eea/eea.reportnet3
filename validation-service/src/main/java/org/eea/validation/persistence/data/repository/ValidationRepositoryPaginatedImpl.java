@@ -6,8 +6,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.apache.commons.lang.StringUtils;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.springframework.data.domain.Page;
@@ -41,7 +41,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    */
   @Override
   public Page<Validation> findAllRecordsByFilter(Long datasetId,
-      List<TypeErrorEnum> levelErrorsFilter, List<TypeEntityEnum> typeEntitiesFilter,
+      List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
       String originsFilter, Pageable pageable, String headerField, Boolean asc) {
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
@@ -80,8 +80,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @return the long
    */
   @Override
-  public Long countRecordsByFilter(Long datasetId, List<TypeErrorEnum> levelErrorsFilter,
-      List<TypeEntityEnum> typeEntitiesFilter, String originsFilter) {
+  public Long countRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter) {
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select count(v)  from Validation v  where v.idRule is not null ";
@@ -120,7 +120,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @return the string
    */
-  private String typeEntities(List<TypeEntityEnum> typeEntitiesFilter) {
+  private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
       for (int i = 0; i < typeEntitiesFilter.size(); i++) {
@@ -138,7 +138,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @return the string
    */
-  private String levelErrorFilter(List<TypeErrorEnum> levelErrorsFilter) {
+  private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
       for (int i = 0; i < levelErrorsFilter.size(); i++) {
