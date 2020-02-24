@@ -18,13 +18,13 @@ export const apiValidation = {
     });
     return response;
   },
-  getAll: async datasetSchemaId => {
+  getAll: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
-        ? `/dataschema/${datasetSchemaId}/fieldSchema`
+        ? `/dataschema/${datasetId}/fieldSchema`
         : getUrl(ValidationConfig.getAll, {
-            datasetSchemaId
+            datasetId
           }),
       queryString: {},
       headers: {

@@ -229,7 +229,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={false}
-              icon={'validate'}
+              icon={'list'}
               label={resources.messages['qcRules']}
               onClick={() => setValidationListDialogVisible(true)}
               ownButtonClasses={null}
@@ -277,7 +277,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           tableSchemaNames={tableSchemaNames}
           visible={validationsVisible}
         /> */}
-        <TabsValidations datasetSchemaId={datasetSchemaId} />
+        <TabsValidations datasetId={datasetId} />
       </Dialog>
     </SnapshotContext.Provider>
   );

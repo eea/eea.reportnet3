@@ -17,13 +17,7 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = ({
-  activeIndex = 0,
-  buttonsList = undefined,
-  datasetSchemaId,
-  hasWritePermissions,
-  onTabChange
-}) => {
+const TabsValidations = ({ activeIndex = 0, buttonsList = undefined, datasetId, hasWritePermissions, onTabChange }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -32,19 +26,20 @@ const TabsValidations = ({
 
   useEffect(() => {
     onLoadValidationsList();
+    // setIsLoading(false);
   }, []);
   // }, [isValidationDeleted]);
 
   const onLoadValidationsList = async () => {
     try {
-      const validationsList = await ValidationService.getAll(datasetSchemaId);
+      const validationsList = await ValidationService.getAll(datasetId);
       setValidations(validationsList);
     } catch (error) {
       console.log({ error });
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
         content: {
-          datasetSchemaId
+          datasetId
         }
       });
     } finally {
@@ -80,15 +75,8 @@ const TabsValidations = ({
     });
   };
 
-  const validationList = () => {
-    console.log({ validations });
-    if (isEmpty(validations)) {
-      return;
-    }
-
-    setActionButtons(validations);
-
-    const headers = [
+  const getValidationHeaders = () => {
+    return [
       {
         id: 'name',
         header: resources.messages['ruleName']
@@ -118,8 +106,20 @@ const TabsValidations = ({
         header: resources.messages['ruleActions']
       }
     ];
+  };
+
+  const validationList = () => {
+    if (isEmpty(validations)) {
+      return;
+    }
+
+    setActionButtons(validations);
+
+    const headers = getValidationHeaders();
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;
+
+    console.log({ validations });
 
     return validations.entityTypes.map(entityType => {
       const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
@@ -158,6 +158,14 @@ const TabsValidations = ({
       );
     });
   };
+
+  if (isUndefined(validations) || isEmpty(validations)) {
+    return (
+      <div>
+        <h3>There are no validations</h3>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <Spinner />;
