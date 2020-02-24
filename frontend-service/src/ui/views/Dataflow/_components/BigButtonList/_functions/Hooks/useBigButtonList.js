@@ -341,7 +341,7 @@ const useBigButtonList = ({
         handleRedirect: () => onLoadReceiptData(),
         infoStatus: isOutdated,
         layout: 'defaultBigButton',
-        visibility: !isCustodian && uniq(representativeNames).length === 1 && !isReleased.includes(false)
+        visibility: !isCustodian && uniq(representativeNames).length === 1 && isReleased
       }
     ];
   };
