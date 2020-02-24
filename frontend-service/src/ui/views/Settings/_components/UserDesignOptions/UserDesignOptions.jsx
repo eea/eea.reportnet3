@@ -10,6 +10,7 @@ import styles from './UserDesignOptions.module.scss';
 const UserDesignOptions = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
+  const userContext = useContext(UserContext);
 
   return (
     <div className={styles.userDesignContainer}>
@@ -17,12 +18,10 @@ const UserDesignOptions = () => {
       <Dropdown
         name="visualTheme"
         className={styles.dropdownFieldType}
-        options={[
-          { label: 'light', value: 'light' },
-          { label: 'dark', value: 'dark' }
-        ]}
+        options={resources.userParameters['visualTheme']}
         onChange={e => {
           themeContext.onToggleTheme(e.value);
+          userContext.defaultVisualTheme(e.value);
         }}
         placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
         value={themeContext.currentTheme}

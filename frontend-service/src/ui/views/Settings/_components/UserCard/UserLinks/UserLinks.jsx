@@ -1,14 +1,11 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import styles from './UserLinks.module.scss';
 
 import { routes } from 'ui/routes';
-
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const UserLinks = withRouter(({ history }) => {
@@ -26,7 +23,7 @@ const UserLinks = withRouter(({ history }) => {
           e.preventDefault();
           history.push(getUrl(routes.DATAFLOWS));
         }}>
-        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} /> <span></span>
+        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} />
       </a>
 
       <a
@@ -36,7 +33,7 @@ const UserLinks = withRouter(({ history }) => {
           e.preventDefault();
           history.push(getUrl(routes.DATAFLOWS));
         }}>
-        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} /> <span></span>
+        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} />
       </a>
 
       <a
@@ -46,7 +43,7 @@ const UserLinks = withRouter(({ history }) => {
           e.preventDefault();
           history.push(getUrl(routes.DATAFLOWS));
         }}>
-        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} /> <span></span>
+        <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} />
       </a>
 
       <div></div>

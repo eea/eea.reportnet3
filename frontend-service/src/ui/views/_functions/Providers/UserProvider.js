@@ -1,6 +1,5 @@
 import React, { useReducer, useContext } from 'react';
 
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
@@ -62,10 +61,10 @@ const userReducer = (state, { type, payload }) => {
 
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
-  const themeContext = useContext(ThemeContext);
   const notificationContext = useContext(NotificationContext);
 
   console.log('state', state);
+
   return (
     <UserContext.Provider
       value={{
@@ -113,10 +112,10 @@ export const UserProvider = ({ children }) => {
             payload: {}
           });
         },
-        defaultVisualTheme: visualTheme => {
+        defaultVisualTheme: currentTheme => {
           dispatch({
             type: 'DEFAULT_VISUAL_THEME',
-            payload: visualTheme
+            payload: currentTheme
           });
         }
       }}>

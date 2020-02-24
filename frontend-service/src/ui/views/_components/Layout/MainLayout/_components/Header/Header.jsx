@@ -84,7 +84,6 @@ const Header = withRouter(({ history }) => {
           checked={themeContext.currentTheme === 'dark'}
           onChange={e => {
             themeContext.onToggleTheme(e.value ? 'dark' : 'light');
-            userContext.defaultVisualTheme(e.value ? 'dark' : 'light');
           }}
           sliderCheckedClassName={styles.themeSwitcherInputSwitch}
           style={{ marginRight: '1rem' }}

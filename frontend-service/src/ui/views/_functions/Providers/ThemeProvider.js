@@ -1,6 +1,7 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 import { isNull } from 'lodash';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
@@ -25,6 +26,8 @@ const themeReducer = (state, { type, payload }) => {
 };
 
 export const ThemeProvider = ({ children }) => {
+  const userContext = useContext(UserContext);
+
   const [state, dispatch] = useReducer(themeReducer, {
     currentTheme: !isNull(window.localStorage.getItem('theme'))
       ? window.localStorage.getItem('theme')
@@ -497,21 +500,7 @@ export const ThemeProvider = ({ children }) => {
             const cssValue = theme[key];
             document.body.style.setProperty(cssKey, cssValue);
           });
-        },
-        defaultVisualTheme: newTheme => {
-          dispatch({
-            type: 'DEFAULT_VISUAL_THEME',
-            payload: {
-              newTheme
-            }
-          });
-          console.log(`// state.currentTheme ${state.currentTheme}`);
-          const theme = state.themes[newTheme];
-          Object.keys(theme).forEach(key => {
-            const cssKey = `--${key}`;
-            const cssValue = theme[key];
-            document.body.style.setProperty(cssKey, cssValue);
-          });
+          userContext.defaultVisualTheme(newTheme);
         }
       }}>
       {children}

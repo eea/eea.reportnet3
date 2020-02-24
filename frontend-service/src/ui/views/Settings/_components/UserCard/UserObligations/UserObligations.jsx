@@ -26,15 +26,18 @@ const UserObligations = () => {
   };
 
   const renderChildrenArray = () => {
-    return dataflowData.map(item => (
+    return dataflowData.map((item, index) => (
       <TreeViewExpandableItem
         className={styles.obligationsExpandable}
         expanded={false}
         items={[{ label: item.dataflow }]}
+        key={index}
         children={['dataflow1  ']}>
-        {item.dataset.map(dataset => (
+        {item.dataset.map((dataset, i) => (
           <ul>
-            <li className={styles.children}>{dataset}</li>
+            <li className={styles.children} key={i}>
+              {dataset}
+            </li>
           </ul>
         ))}
       </TreeViewExpandableItem>
