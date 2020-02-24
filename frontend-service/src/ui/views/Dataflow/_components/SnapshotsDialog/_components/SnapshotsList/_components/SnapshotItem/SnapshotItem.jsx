@@ -29,19 +29,19 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
           </span>
           <div className={styles.listActions}>
             <Button
+              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
+              disabled={isLoading || itemData.isBlocked}
+              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
+              onClick={() => {
+                showReleaseDialog({ isReleased: false });
+                getSnapshotData(itemData);
+              }}
               tooltip={
                 itemData.isReleased
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
-              disabled={isLoading || itemData.isBlocked}
               tooltipOptions={{ position: 'right' }}
-              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
-              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
-              onClick={() => {
-                showReleaseDialog({ isReleased: false });
-                getSnapshotData(itemData);
-              }}
             />
           </div>
         </div>

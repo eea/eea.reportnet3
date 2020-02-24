@@ -17,22 +17,31 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
         <div className={styles.listItemData}>
           <span className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
             {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+            {itemData.isBlocked && (
+              <Button
+                className={`${styles.btn} rp-btn ${styles.hasBlockers}`}
+                icon="warning"
+                onClick={() => {}}
+                tooltip={resources.messages['recordBlockers']}
+                tooltipOptions={{ position: 'right' }}
+              />
+            )}
           </span>
           <div className={styles.listActions}>
             <Button
+              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
+              disabled={isLoading || itemData.isBlocked}
+              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
+              onClick={() => {
+                showReleaseDialog({ isReleased: false });
+                getSnapshotData(itemData);
+              }}
               tooltip={
                 itemData.isReleased
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
-              disabled={isLoading}
               tooltipOptions={{ position: 'right' }}
-              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
-              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
-              onClick={() => {
-                showReleaseDialog({ isReleased: false });
-                getSnapshotData(itemData);
-              }}
             />
           </div>
         </div>
