@@ -181,7 +181,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['close']}
-        // onClick={() => onHideManageRolesDialog()}
+        onClick={() => onHideValidationsDialog()}
       />
     </>
   );
@@ -195,7 +195,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           footer={actionButtonsValidationDialog}
           header={resources.messages['titleValidations']}
           maximizable
-          onHide={() => setValidationListDialogVisible(false)}
+          onHide={() => onHideValidationsDialog()}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
           <TabsValidations datasetSchemaId={datasetSchemaId} />
