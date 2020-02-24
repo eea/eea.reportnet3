@@ -149,7 +149,9 @@ public class RulesServiceImpl implements RulesService {
 
 
   /**
-   * Creates the automatic rules.
+   * Creates the automatic rules. When Input argument "required" is true it is created an automatic
+   * rule to validate if the field has been informed or not. Otherwise, a Rule based on the field's
+   * DataType (number, boolean, codelist...) is created
    *
    * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id

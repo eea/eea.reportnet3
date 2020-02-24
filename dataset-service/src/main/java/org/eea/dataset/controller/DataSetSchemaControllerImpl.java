@@ -230,7 +230,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
-        // delete the schema in BD
+        // delete the schema in database
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
