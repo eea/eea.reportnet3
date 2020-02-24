@@ -83,7 +83,6 @@ const getCodelistsList = async datasetSchemas => {
 
 const getCodelistsIdsBySchemas = datasetSchemas => {
   if (isEmpty(datasetSchemas)) {
-    console.log(datasetSchemas);
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
   try {
@@ -103,7 +102,7 @@ const getCodelistsIdsBySchemas = datasetSchemas => {
     });
     return codelistIds;
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
 };
@@ -173,14 +172,13 @@ const getCodelistsIdsBySchema = async datasetSchema => {
     // }
     return codelistIds;
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
 };
 
 const getCodelistsIdsBySchemasWithSchemas = async datasetSchemas => {
   if (isEmpty(datasetSchemas)) {
-    console.log(datasetSchemas);
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
   try {
@@ -193,7 +191,7 @@ const getCodelistsIdsBySchemasWithSchemas = async datasetSchemas => {
     });
     return Promise.all(codelistList).then(codelistsListWithSchemas => codelistsListWithSchemas);
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS');
   }
 };
@@ -231,7 +229,7 @@ const getCodelistsByCodelistsIds = async codelistIds => {
     });
     return codelists;
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
   }
 };
