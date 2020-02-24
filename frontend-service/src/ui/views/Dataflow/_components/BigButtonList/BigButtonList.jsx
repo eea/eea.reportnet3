@@ -1,6 +1,6 @@
-import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { isNull, isUndefined, remove } from 'lodash';
+import { isEmpty, isNull, isUndefined, remove } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
@@ -56,10 +56,18 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
+  const [isOutdatedReceipt, setIsOutdatedReceipt] = useState(null);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [receiptData, setReceiptData] = useState();
 
   const receiptBtnRef = useRef(null);
+
+  useEffect(() => {
+    if (!isEmpty(dataflowData.representatives)) {
+      const isOutdated = dataflowData.representatives.map(representative => representative.isReceiptOutdated);
+      setIsOutdatedReceipt(isOutdated);
+    }
+  }, []);
 
   useLayoutEffect(() => {
     setTimeout(() => {
@@ -172,6 +180,7 @@ export const BigButtonList = ({
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
       setReceiptData(response);
+      setIsOutdatedReceipt(false);
     } catch (error) {
       console.log('error', error);
       notificationContext.add({
@@ -202,6 +211,7 @@ export const BigButtonList = ({
     isCustodian: isCustodian,
     isDataSchemaCorrect: isDataSchemaCorrect,
     isLoadingReceipt: isLoadingReceipt,
+    isOutdatedReceipt: isOutdatedReceipt,
     onDatasetSchemaNameError: onDatasetSchemaNameError,
     onDuplicateName: onDuplicateName,
     onLoadReceiptData: onLoadReceiptData,

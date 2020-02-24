@@ -15,6 +15,7 @@ const useBigButtonList = ({
   hasWritePermissions,
   isCustodian,
   isLoadingReceipt,
+  isOutdatedReceipt,
   onLoadReceiptData,
   representative,
   showReleaseSnapshotDialog
@@ -96,18 +97,10 @@ const useBigButtonList = ({
     });
 
   const onBuildReceiptButton = () => {
-    const { datasets, representatives } = dataflowData;
+    const { datasets } = dataflowData;
     const releasedStates = datasets.map(dataset => {
       return dataset.isReleased;
     });
-
-    const representativeId = datasets
-      .filter(dataset => dataset.datasetSchemaName === representative)
-      .map(id => id.dataProviderId);
-
-    const isOutdated = representatives
-      .filter(representative => representative.dataProviderId === uniq(representativeId))
-      .map(representative => representative.isReceiptOutdated);
 
     return [
       {
@@ -116,7 +109,7 @@ const useBigButtonList = ({
         buttonIconClass: isLoadingReceipt ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
         handleRedirect: isLoadingReceipt ? () => {} : () => onLoadReceiptData(),
-        infoStatus: isOutdated,
+        infoStatus: isOutdatedReceipt,
         layout: 'defaultBigButton',
         visibility: !isCustodian && !releasedStates.includes(false) && !releasedStates.includes(null)
       }
