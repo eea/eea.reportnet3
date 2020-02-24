@@ -65,7 +65,7 @@ export const BigButtonList = ({
       if (!isUndefined(receiptData)) {
         onDownloadReceipt();
       }
-    }, 100);
+    }, 1000);
   }, [receiptData]);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);

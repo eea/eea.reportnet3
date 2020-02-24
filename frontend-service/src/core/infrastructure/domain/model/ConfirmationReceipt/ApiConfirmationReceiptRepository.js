@@ -5,7 +5,10 @@ const get = async (dataflowId, dataProviderId) => {
   const confirmationReceiptDTO = await apiConfirmationReceipt.get(dataflowId, dataProviderId);
 
   const datasets = confirmationReceiptDTO
-    ? confirmationReceiptDTO.datasets.map(dataset => ({ name: dataset.dataSetName, releaseDate: dataset.dateReleased }))
+    ? confirmationReceiptDTO.datasets.map(dataset => ({
+        name: dataset.nameDatasetSchema,
+        releaseDate: dataset.dateReleased
+      }))
     : [];
 
   const confirmationReceipt = new ConfirmationReceipt({

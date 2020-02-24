@@ -61,7 +61,7 @@ export const BigButtonList = ({
       if (!isUndefined(receiptData)) {
         onDownloadReceipt();
       }
-    }, 100);
+    }, 1000);
   }, [receiptData]);
 
   const errorDialogFooter = (
