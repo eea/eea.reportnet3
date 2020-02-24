@@ -33,7 +33,7 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Modifying
   @Query(nativeQuery = true,
       value = "UPDATE snapshot SET release=false WHERE reporting_dataset_id=:idDataset ; "
-          + "UPDATE snapshot SET release=true, date_released=CURRENT_TIMESTAMP WHERE id=:idSnapshot")
+          + "UPDATE snapshot SET release=true WHERE id=:idSnapshot")
   void releaseSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
 
 

@@ -372,6 +372,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           restoreSnapshot(idDataCollection, idSnapshot, false);
           // Check the snapshot released
           snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+          // Add the date of the release
+          Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
+          if (snap.isPresent()) {
+            snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            snapshotRepository.save(snap.get());
+          }
+
 
           // Mark the receipt button as outdated because a new release has been done, so it would be
           // necessary to generate a new receipt
