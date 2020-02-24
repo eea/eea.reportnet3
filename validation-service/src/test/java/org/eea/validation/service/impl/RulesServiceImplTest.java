@@ -231,6 +231,11 @@ public class RulesServiceImplTest {
 
   }
 
+  /**
+   * Creates the empty rules schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createEmptyRulesSchemaTest() throws EEAException {
     rulesServiceImpl.createEmptyRulesSchema(new ObjectId("5e44110d6a9e3a270ce13fac"),
@@ -238,6 +243,11 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Delete empty rules scehma test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteEmptyRulesScehmaTest() throws EEAException {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(new RulesSchema());
@@ -245,12 +255,22 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).deleteByIdDatasetSchema(Mockito.any());
   }
 
+  /**
+   * Delete empty rules scehma no schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteEmptyRulesScehmaNoSchemaTest() throws EEAException {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
     rulesServiceImpl.deleteEmptyRulesScehma(new ObjectId("5e44110d6a9e3a270ce13fac"));
   }
 
+  /**
+   * Creates the new rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createNewRuleTest() throws EEAException {
     Rule rule = new Rule();
@@ -258,18 +278,33 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Delete rule required test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRuleRequiredTest() throws EEAException {
     rulesServiceImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Exists rule required test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void existsRuleRequiredTest() throws EEAException {
     rulesServiceImpl.existsRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).existsRuleRequired(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRuleTest() throws EEAException {
     Rule rule = new Rule();
@@ -278,17 +313,32 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update rule no id schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRuleNoIdSchemaTest() throws EEAException {
     Rule rule = new Rule();
     rulesServiceImpl.updateRule(null, rule);
   }
 
+  /**
+   * Update rule no rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRuleNoRuleTest() throws EEAException {
     rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", null);
   }
 
+  /**
+   * Insert rule in position test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionTest() throws EEAException {
     Rule rule = new Rule();
@@ -302,6 +352,11 @@ public class RulesServiceImplTest {
         0);
   }
 
+  /**
+   * Insert rule in position no rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionNoRuleTest() throws EEAException {
     Rule rule = null;
@@ -309,6 +364,11 @@ public class RulesServiceImplTest {
     rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", null, 0);
   }
 
+  /**
+   * Insert rule in position no delete test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionNoDeleteTest() throws EEAException {
     Rule rule = new Rule();
@@ -318,6 +378,13 @@ public class RulesServiceImplTest {
         0);
   }
 
+
+
+  /**
+   * Insert rule in position no insert test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionNoInsertTest() throws EEAException {
     Rule rule = new Rule();

@@ -15,7 +15,7 @@ import lombok.ToString;
 /**
  * The Class RecordSchema.
  *
- * @author Mario Severa
+ *
  */
 @Getter
 @Setter

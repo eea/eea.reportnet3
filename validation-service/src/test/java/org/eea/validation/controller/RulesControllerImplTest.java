@@ -36,6 +36,7 @@ public class RulesControllerImplTest {
   @Mock
   private RulesService rulesService;
 
+  /** The rule mapper. */
   @Mock
   private RuleMapper ruleMapper;
 
@@ -293,6 +294,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Creates the empty rules schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createEmptyRulesSchemaTest() throws EEAException {
     rulesControllerImpl.createEmptyRulesSchema("5e44110d6a9e3a270ce13fac",
@@ -301,27 +307,13 @@ public class RulesControllerImplTest {
         new ObjectId("5e44110d6a9e3a270ce13fac"), new ObjectId("5e44110d6a9e3a270ce13fac"));
   }
 
-  @Test
-  public void createEmptyRulesSchemaNoIdDataSchemaTest() throws EEAException {
-    try {
-      rulesControllerImpl.createEmptyRulesSchema(null, "5e44110d6a9e3a270ce13fac");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-  }
 
-  @Test
-  public void createEmptyRulesSchemaNoIdRulesTest() throws EEAException {
-    try {
-      rulesControllerImpl.createEmptyRulesSchema("5e44110d6a9e3a270ce13fac", null);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getReason());
-    }
 
-  }
-
+  /**
+   * Delete rules schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRulesSchemaTest() throws EEAException {
     rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac");
@@ -329,6 +321,11 @@ public class RulesControllerImplTest {
         .deleteEmptyRulesScehma(new ObjectId("5e44110d6a9e3a270ce13fac"));
   }
 
+  /**
+   * Delete rules schema noschema ID test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRulesSchemaNoschemaIDTest() throws EEAException {
     try {
@@ -339,6 +336,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Creates the new rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createNewRuleTest() throws EEAException {
     Rule rule = new Rule();
@@ -348,6 +350,11 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).createNewRule("5e44110d6a9e3a270ce13fac", rule);
   }
 
+  /**
+   * Creates the new rule no data schema is test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createNewRuleNoDataSchemaIsTest() throws EEAException {
     try {
@@ -358,6 +365,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Creates the new rule not work test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createNewRuleNotWorkTest() throws EEAException {
     Rule rule = new Rule();
@@ -372,6 +384,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Update rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRuleTest() throws EEAException {
     Rule rule = new Rule();
@@ -382,6 +399,12 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).updateRule("5e44110d6a9e3a270ce13fac", rule);
   }
 
+
+  /**
+   * Update rule not work test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRuleNotWorkTest() throws EEAException {
     Rule rule = new Rule();
@@ -397,17 +420,11 @@ public class RulesControllerImplTest {
   }
 
 
-  @Test
-  public void updateRuleNoDataSchemaIsTest() throws EEAException {
-    try {
-      rulesControllerImpl.updateRule(null, null);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-  }
-
-
+  /**
+   * Insert rule in position test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionTest() throws EEAException {
     when(rulesService.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -418,26 +435,13 @@ public class RulesControllerImplTest {
         "5e44110d6a9e3a270ce13fac", 0);
   }
 
-  @Test
-  public void insertRuleInPositionNoDataSchemaIdTest() throws EEAException {
-    try {
-      rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0, null);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-  }
 
-  @Test
-  public void insertRuleInPositionNoIdRuleIsTest() throws EEAException {
-    try {
-      rulesControllerImpl.insertRuleInPosition(null, 0, "5e44110d6a9e3a270ce13fac");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getReason());
-    }
-  }
 
+  /**
+   * Insert rule in position not work test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRuleInPositionNotWorkTest() throws EEAException {
     when(rulesService.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -451,6 +455,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Exists rule required test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void existsRuleRequiredTest() throws EEAException {
     rulesControllerImpl.existsRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
@@ -458,6 +467,11 @@ public class RulesControllerImplTest {
         "5e44110d6a9e3a270ce13fac");
   }
 
+  /**
+   * Exists rule required no id reference is test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void existsRuleRequiredNoIdReferenceIsTest() throws EEAException {
     try {
@@ -469,6 +483,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Exists rule required no data schema id test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void existsRuleRequiredNoDataSchemaIdTest() throws EEAException {
     try {
@@ -479,6 +498,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Delete rule requiredd no id reference is test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRuleRequireddNoIdReferenceIsTest() throws EEAException {
     try {
@@ -490,6 +514,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Delete rule required no data schema id test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRuleRequiredNoDataSchemaIdTest() throws EEAException {
     try {
@@ -500,6 +529,11 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Delete rule required test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteRuleRequiredTest() throws EEAException {
     rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");

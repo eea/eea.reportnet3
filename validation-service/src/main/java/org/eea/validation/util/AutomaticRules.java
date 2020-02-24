@@ -11,7 +11,7 @@ import org.eea.validation.persistence.schemas.rule.Rule;
  */
 public class AutomaticRules {
 
-  // WE DEVIDE THAT CLASS TO BE EASY KNOW WHAT AUTOMATIC VALIDATION SHOULD BE FILLED
+  // we use that class to create a specifies rule for any of diferent automatic validation
 
   private static final String LV_ERROR = "ERROR";
 

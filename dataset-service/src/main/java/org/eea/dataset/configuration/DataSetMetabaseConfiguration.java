@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * The Class DataSetMetabaseConfiguration.
  *
- * @author Mario Severa
+ * 
  */
 @Configuration
 @EnableTransactionManagement
