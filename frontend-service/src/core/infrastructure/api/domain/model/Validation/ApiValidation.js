@@ -20,17 +20,25 @@ export const apiValidation = {
   },
   getAll: async datasetSchemaId => {
     const tokens = userStorage.get();
+    console.log('DatasetSchemaId: ', datasetSchemaId);
+    console.log(
+      'url: ',
+      getUrl(ValidationConfig.getAll, {
+        datasetSchemaId
+      })
+    );
+
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? `/dataschema/${datasetSchemaId}/fieldSchema`
         : getUrl(ValidationConfig.getAll, {
             datasetSchemaId
           }),
-      queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('ValidationsDTO:', response);
     return response;
   }
 };
