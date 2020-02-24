@@ -37,12 +37,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       setValidations(validationsList);
     } catch (error) {
       console.log(validations);
-      notificationContext.add({
-        type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
-        content: {
-          datasetSchemaId
-        }
-      });
+      // notificationContext.add({
+      //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
+      //   content: {
+      //     datasetSchemaId
+      //   }
+      // });
     } finally {
       setIsLoading(false);
     }
