@@ -372,17 +372,29 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           restoreSnapshot(idDataCollection, idSnapshot, false);
           // Check the snapshot released
           snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+          // Add the date of the release
+          Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
+          if (snap.isPresent()) {
+            snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            snapshotRepository.save(snap.get());
+          }
+
 
           // Mark the receipt button as outdated because a new release has been done, so it would be
           // necessary to generate a new receipt
           Long idDataflow = datasetService.getDataFlowIdById(idDataset);
-          List<RepresentativeVO> representatives = representativeControllerZuul
-              .findRepresentativesByIdDataFlow(idDataflow).stream()
-              .filter(r -> r.getDataProviderId() == idDataProvider).collect(Collectors.toList());
+          List<RepresentativeVO> representatives =
+              representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
+                  .filter(r -> r.getId().equals(idDataProvider)).collect(Collectors.toList());
           if (!representatives.isEmpty()) {
             RepresentativeVO representative = representatives.get(0);
-            representative.setReceiptOutdated(true);
-            representativeControllerZuul.updateRepresentative(representative);
+            // We only update the representative if the receipt is not outdated
+            if (false == representative.getReceiptOutdated()) {
+              representative.setReceiptOutdated(true);
+              representativeControllerZuul.updateRepresentative(representative);
+              LOG.info("Receipt from the representative {} marked as outdated",
+                  representative.getId());
+            }
           }
           LOG.info("Snapshot {} released", idSnapshot);
         } catch (EEAException e) {
@@ -398,7 +410,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     } else {
       LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
-      releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot, "The snapshot contains blocker errors");
+      releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot,
+          "The snapshot contains blocker errors");
       removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }
   }
@@ -649,17 +662,23 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
+            .filter(r -> r.getId().equals(idDataProvider)).collect(Collectors.toList());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
 
       receipt.setProviderEmail(representative.getProviderAccount());
 
-      // update provider. Button downloaded = true && outdated = false
-      representative.setReceiptDownloaded(true);
-      representative.setReceiptOutdated(false);
-      representativeControllerZuul.updateRepresentative(representative);
+      // Check if it's needed to update the status of the button (i.e I only want to download the
+      // receipt twice, but no state is changed)
+      if (!(true == representative.getReceiptDownloaded()
+          && false == representative.getReceiptOutdated())) {
+        // update provider. Button downloaded = true && outdated = false
+        representative.setReceiptDownloaded(true);
+        representative.setReceiptOutdated(false);
+        representativeControllerZuul.updateRepresentative(representative);
+        LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
+      }
     }
 
     return receipt;

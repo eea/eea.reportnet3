@@ -35,6 +35,7 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -145,6 +146,10 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private RepresentativeRepository representativeRepository;
+
+  @Mock
+  private RepresentativeService representativeService;
+
   /**
    * The dataflows.
    */
@@ -207,6 +212,10 @@ public class DataFlowServiceImplTest {
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(representative));
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
