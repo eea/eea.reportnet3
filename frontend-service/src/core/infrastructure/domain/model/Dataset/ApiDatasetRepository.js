@@ -17,6 +17,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idCodeList = datasetTableRecordField.codelistId;
+  datasetTableFieldDesign.required = datasetTableRecordField.required;
 
   const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordsAdded;
@@ -293,7 +294,8 @@ const schemaById = async datasetId => {
                   null,
                   null,
                   DataTableFieldDTO.description,
-                  DataTableFieldDTO.idCodeList
+                  DataTableFieldDTO.idCodeList,
+                  DataTableFieldDTO.required
                 );
               })
             : null;
