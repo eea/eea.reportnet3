@@ -472,6 +472,8 @@ public class DatasetSnapshotServiceTest {
     RepresentativeVO representative = new RepresentativeVO();
     representative.setId(1L);
     representative.setDataProviderId(1L);
+    representative.setReceiptDownloaded(false);
+    representative.setReceiptOutdated(false);
 
     when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(df);
     when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
