@@ -7,8 +7,9 @@ const deleteById = async (datasetSchemaId, ruleId) => {
   return await apiValidation.deleteById(datasetSchemaId, ruleId);
 };
 
-const getAll = async datasetId => {
-  const validationsListDTO = await apiValidation.getAll(datasetId);
+const getAll = async datasetSchemaId => {
+  console.log('Dataset schema Id: ', datasetSchemaId);
+  const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
 
   // const validationsListDTO = {
   //   rulesSchemaId: '5e4a4853a74d0f413db5979e',

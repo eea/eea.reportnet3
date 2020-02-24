@@ -165,6 +165,46 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     }
   };
 
+  const onHideValidationsDialog = () => {
+    setValidationListDialogVisible(false);
+  };
+
+  const actionButtonsValidationDialog = (
+    <>
+      <Button
+        className="p-button-primary"
+        icon={'plus'}
+        label={resources.messages['create']}
+        onClick={() => onHideValidationsDialog()}
+      />
+      <Button
+        className="p-button-secondary"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        // onClick={() => onHideManageRolesDialog()}
+      />
+    </>
+  );
+
+  const ValidationsListDialog = () => {
+    if (validationListDialogVisible) {
+      return (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          footer={actionButtonsValidationDialog}
+          header={resources.messages['titleValidations']}
+          maximizable
+          onHide={() => setValidationListDialogVisible(false)}
+          style={{ width: '80%' }}
+          visible={validationListDialogVisible}>
+          <TabsValidations datasetSchemaId={datasetSchemaId} />
+        </Dialog>
+      );
+    }
+    return <p>No validation</p>;
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -260,7 +300,8 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
         snapshotListData={snapshotListData}
       />
-      <Dialog
+      <ValidationsListDialog />
+      {/* <Dialog
         className={styles.paginatorValidationViewer}
         dismissableMask={true}
         header={resources.messages['titleValidations']}
@@ -277,8 +318,8 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           tableSchemaNames={tableSchemaNames}
           visible={validationsVisible}
         /> */}
-        <TabsValidations datasetId={datasetId} />
-      </Dialog>
+      {/* <TabsValidations datasetSchemaId={datasetSchemaId} />
+      </Dialog>       */}
     </SnapshotContext.Provider>
   );
 });

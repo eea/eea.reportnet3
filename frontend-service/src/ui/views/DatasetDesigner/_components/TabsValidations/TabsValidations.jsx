@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import { capitalize, isEmpty, isUndefined } from 'lodash';
 
@@ -17,34 +18,33 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = ({ activeIndex = 0, buttonsList = undefined, datasetId, hasWritePermissions, onTabChange }) => {
+const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [validations, setValidations] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [validations, setValidations] = useState();
 
   useEffect(() => {
-    onLoadValidationsList();
-    // setIsLoading(false);
+    onLoadValidationsList(datasetSchemaId);
   }, []);
   // }, [isValidationDeleted]);
 
-  const onLoadValidationsList = async () => {
+  const onLoadValidationsList = async datasetSchemaId => {
+    setIsLoading(true);
     try {
-      const validationsList = await ValidationService.getAll(datasetId);
+      const validationsList = await ValidationService.getAll(datasetSchemaId);
+      console.log({ validationsList });
       setValidations(validationsList);
     } catch (error) {
-      console.log({ error });
+      console.log(validations);
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
         content: {
-          datasetId
+          datasetSchemaId
         }
       });
     } finally {
-      // setIsLoading(false);
-      return;
+      setIsLoading(false);
     }
   };
 
@@ -119,8 +119,6 @@ const TabsValidations = ({ activeIndex = 0, buttonsList = undefined, datasetId, 
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;
 
-    console.log({ validations });
-
     return validations.entityTypes.map(entityType => {
       const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
       const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
@@ -162,7 +160,7 @@ const TabsValidations = ({ activeIndex = 0, buttonsList = undefined, datasetId, 
   if (isUndefined(validations) || isEmpty(validations)) {
     return (
       <div>
-        <h3>There are no validations</h3>
+        <h3>There are no validations defined yet.</h3>
       </div>
     );
   }
@@ -176,6 +174,6 @@ const TabsValidations = ({ activeIndex = 0, buttonsList = undefined, datasetId, 
     validationList()
     // </TabView>
   );
-};
+});
 
 export { TabsValidations };
