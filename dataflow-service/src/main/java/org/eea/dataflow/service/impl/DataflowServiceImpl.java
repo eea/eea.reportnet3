@@ -182,7 +182,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     if (representatives != null && !representatives.isEmpty()) {
       dataflowVO.setRepresentatives(representatives.stream()
-          .filter(representative -> dataProviderIds.contains(representative.getDataProviderId()))
+          .filter(representative -> dataProviderIds.contains(representative.getId()))
           .collect(Collectors.toList()));
     }
 
