@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import { isNull, isUndefined, remove } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -60,7 +60,7 @@ export const BigButtonList = ({
 
   const receiptBtnRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTimeout(() => {
       if (!isUndefined(receiptData)) {
         onDownloadReceipt();
