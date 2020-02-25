@@ -2,9 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './UserObligations.module.scss';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 const UserObligations = () => {
+  const resources = useContext(ResourcesContext);
+
   const [dataflowData, setDataflowData] = useState([]);
 
   useEffect(() => {
@@ -46,7 +49,7 @@ const UserObligations = () => {
 
   return (
     <div className={styles.userObligationsContainer}>
-      <div className={styles.userObligationsTitle}>Obligations</div>
+      <div className={styles.userObligationsTitle}>{resources.messages['obligations']}</div>
       {renderChildrenArray()}
     </div>
   );

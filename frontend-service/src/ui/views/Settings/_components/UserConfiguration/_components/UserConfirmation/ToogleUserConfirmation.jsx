@@ -7,19 +7,20 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const ToggleUserConfirmation = () => {
   const userContext = useContext(UserContext);
   const resources = useContext(ResourcesContext);
+
   return (
     <div>
-    <h3>Confirmation user Logout</h3>
-    <InputSwitch
-      checked={userContext.userProps.showLogoutConfirmation}
-      style={{ marginRight: '1rem' }}
-      onChange={e => userContext.onToggleLogoutConfirm()}
-      tooltip={
-        userContext.userProps.showLogoutConfirmation === true
-          ? resources.messages['toogleConfirmationOff']
-          : resources.messages['toogleConfirmationOn']
-      }
-    />
+      <h3>{resources.messages['confirmationUserLogout']}</h3>
+      <InputSwitch
+        checked={userContext.userProps.showLogoutConfirmation}
+        style={{ marginRight: '1rem' }}
+        onChange={e => userContext.onToggleLogoutConfirm()}
+        tooltip={
+          userContext.userProps.showLogoutConfirmation === true
+            ? resources.messages['toogleConfirmationOff']
+            : resources.messages['toogleConfirmationOn']
+        }
+      />
     </div>
   );
 };

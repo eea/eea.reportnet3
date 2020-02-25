@@ -6,7 +6,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 const userSettingsDefaultState = {
   userProps: {
     defaultRowSelected: 10,
-    defaultVisualTheme: 'light'
+    defaultVisualTheme: 'light',
+    showLogoutConfirmation: null
   }
 };
 
