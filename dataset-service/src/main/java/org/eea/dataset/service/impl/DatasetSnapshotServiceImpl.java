@@ -385,7 +385,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           Long idDataflow = datasetService.getDataFlowIdById(idDataset);
           List<RepresentativeVO> representatives =
               representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-                  .filter(r -> r.getId().equals(idDataProvider)).collect(Collectors.toList());
+                  .filter(r -> r.getDataProviderId().equals(idDataProvider))
+                  .collect(Collectors.toList());
           if (!representatives.isEmpty()) {
             RepresentativeVO representative = representatives.get(0);
             // We only update the representative if the receipt is not outdated
@@ -662,7 +663,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-            .filter(r -> r.getId().equals(idDataProvider)).collect(Collectors.toList());
+            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
