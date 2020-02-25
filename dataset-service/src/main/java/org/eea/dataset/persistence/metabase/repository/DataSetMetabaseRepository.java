@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface DataSetMetabaseRepository.
  *
- * @author Mario Severa
+ * 
  */
 public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
 

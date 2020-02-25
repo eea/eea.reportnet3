@@ -41,7 +41,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -187,7 +187,7 @@ public class DatasetSnapshotServiceTest {
   public void addSnapshotTest1() throws EEAException {
     List<Validation> validations = new ArrayList<>();
     validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
         .thenReturn(validations);
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
@@ -207,7 +207,7 @@ public class DatasetSnapshotServiceTest {
   public void addSnapshotTest2() throws EEAException {
     List<Validation> validations = new ArrayList<>();
     validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
         .thenReturn(validations);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
@@ -228,7 +228,7 @@ public class DatasetSnapshotServiceTest {
   public void addSnapshotTest3() throws EEAException {
     List<Validation> validations = new ArrayList<>();
     validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(TypeErrorEnum.BLOCKER))
+    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
         .thenReturn(validations);
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
@@ -472,6 +472,8 @@ public class DatasetSnapshotServiceTest {
     RepresentativeVO representative = new RepresentativeVO();
     representative.setId(1L);
     representative.setDataProviderId(1L);
+    representative.setReceiptDownloaded(false);
+    representative.setReceiptOutdated(false);
 
     when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(df);
     when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))

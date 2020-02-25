@@ -3,13 +3,11 @@
  */
 package org.eea.validation.persistence.schemas;
 
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.validation.persistence.schemas.rule.RuleField;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -22,14 +20,9 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchema {
+
 
   /** The id field schema. */
   @Id
@@ -44,19 +37,19 @@ public class FieldSchema {
   /** The type. */
   @Field(value = "typeData")
   @Enumerated(EnumType.STRING)
-  private TypeData type;
+  private DataType type;
 
   /** The type. */
   @Field(value = "headerName")
   private String headerName;
 
-
-  /** The rule field. */
-  @Field(value = "rules")
-  private List<RuleField> ruleField;
   /** The id code list. */
   @Field(value = "idCodeList")
   private Long idCodeList;
+
+  /** The required. */
+  @Field(value = "required")
+  private Boolean required;
 
   /**
    * Hash code.
@@ -65,7 +58,7 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, ruleField, type, idCodeList);
+    return Objects.hash(headerName, idFieldSchema, idRecord, type, idCodeList, required);
   }
 
 
@@ -86,8 +79,8 @@ public class FieldSchema {
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
-        && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
-        && Objects.equals(idCodeList, other.idCodeList);
+        && Objects.equals(idRecord, other.idRecord) && Objects.equals(idCodeList, other.idCodeList)
+        && Objects.equals(required, other.required);
   }
 
 

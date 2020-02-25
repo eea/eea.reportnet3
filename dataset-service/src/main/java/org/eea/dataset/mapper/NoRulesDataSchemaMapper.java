@@ -28,7 +28,6 @@ public interface NoRulesDataSchemaMapper extends IMapper<DataSetSchema, DataSetS
    * @return the data set schema VO
    */
   @Override
-  @Mapping(source = "ruleDataSet", target = "ruleDataSet", ignore = true)
   DataSetSchemaVO entityToClass(DataSetSchema entity);
 
 
@@ -63,7 +62,6 @@ public interface NoRulesDataSchemaMapper extends IMapper<DataSetSchema, DataSetS
    */
   @Mapping(source = "headerName", target = "name")
   @Mapping(source = "idFieldSchema", target = "id")
-  @Mapping(source = "ruleField", target = "ruleField", ignore = true)
   FieldSchemaVO entityToClass(FieldSchema model);
 
   /**
@@ -73,7 +71,6 @@ public interface NoRulesDataSchemaMapper extends IMapper<DataSetSchema, DataSetS
    *
    * @return the record schema vo
    */
-  @Mapping(source = "ruleRecord", target = "ruleRecord", ignore = true)
   RecordSchemaVO entityToClass(RecordSchema model);
 
   /**
@@ -83,7 +80,6 @@ public interface NoRulesDataSchemaMapper extends IMapper<DataSetSchema, DataSetS
    *
    * @return the table schema vo
    */
-  @Mapping(source = "ruleTable", target = "ruleTable", ignore = true)
   TableSchemaVO entityToClass(TableSchema model);
 
 }

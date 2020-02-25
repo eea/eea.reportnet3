@@ -2,8 +2,8 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,8 +55,8 @@ public interface ValidationController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc,
       @RequestParam(value = "levelErrorsFilter",
-          required = false) List<TypeErrorEnum> levelErrorsFilter,
+          required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
-          required = false) List<TypeEntityEnum> typeEntitiesFilter,
+          required = false) List<EntityTypeEnum> typeEntitiesFilter,
       @RequestParam(value = "originsFilter", required = false) String originsFilter);
 }

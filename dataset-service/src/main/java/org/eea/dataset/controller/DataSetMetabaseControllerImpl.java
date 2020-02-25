@@ -14,7 +14,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @PostMapping(value = "/create")
   public void createEmptyDataSet(
-      @RequestParam(value = "datasetType", required = true) final TypeDatasetEnum datasetType,
+      @RequestParam(value = "datasetType", required = true) final DatasetTypeEnum datasetType,
       @RequestParam(value = "datasetName", required = true) final String datasetname,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow) {

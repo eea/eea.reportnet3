@@ -3,7 +3,7 @@ package org.eea.validation.persistence.data.repository;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -65,7 +65,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " WHERE rv.recordValue.tableValue.datasetId.id=?1 AND rv.recordValue.tableValue.idTableSchema=?2 "
       + " AND rv.validation.levelError=?3")
   Long countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(Long datasetId,
-      String idTableSchema, TypeErrorEnum typeError);
+      String idTableSchema, ErrorTypeEnum typeError);
 
 
   /**
@@ -104,7 +104,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema "
       + " AND rv.validation.levelError=:typeError")
   Set<Long> findRecordIdFromRecordWithValidationsByLevelError(@Param("datasetId") Long datasetId,
-      @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
+      @Param("idTableSchema") String idTableSchema, @Param("typeError") ErrorTypeEnum typeError);
 
 
   /**
@@ -120,7 +120,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema "
       + " AND fv.validation.levelError=:typeError")
   Set<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
-      @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
+      @Param("idTableSchema") String idTableSchema, @Param("typeError") ErrorTypeEnum typeError);
 
 
   /**

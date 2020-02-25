@@ -99,9 +99,11 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
           Boolean isReleased = result.contains(dataset.getId());
           dataset.setIsReleased(isReleased);
           // set the date of the release
-          if (!resultSnapshots.stream().filter(s -> s.getRelease()).collect(Collectors.toList())
-              .isEmpty()) {
-            dataset.setDateReleased(resultSnapshots.stream().filter(s -> s.getRelease())
+          if (dataset.getIsReleased() && !resultSnapshots.stream()
+              .filter(s -> s.getReportingDataset().getId().equals(dataset.getId()))
+              .collect(Collectors.toList()).isEmpty()) {
+            dataset.setDateReleased(resultSnapshots.stream()
+                .filter(s -> s.getReportingDataset().getId().equals(dataset.getId()))
                 .collect(Collectors.toList()).get(0).getDateReleased());
           }
         }

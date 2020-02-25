@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -39,7 +39,7 @@ public class TableVO implements Serializable {
 
 
   /** The level error. */
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * The total records.

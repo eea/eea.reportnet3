@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.validation.persistence.schemas.rule.RuleDataSet;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -38,10 +37,6 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
-  /** The rule data set. */
-  @Field(value = "rules")
-  private List<RuleDataSet> ruleDataSet;
-
   /**
    * Hash code.
    *
@@ -49,7 +44,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, ruleDataSet, tableSchemas);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas);
   }
 
   /**
@@ -69,7 +64,6 @@ public class DataSetSchema {
     DataSetSchema other = (DataSetSchema) obj;
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(ruleDataSet, other.ruleDataSet)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }
 

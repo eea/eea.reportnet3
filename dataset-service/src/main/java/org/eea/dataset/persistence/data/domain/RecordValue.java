@@ -13,7 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -83,7 +83,7 @@ public class RecordValue {
   private String sortCriteria;
 
   @Transient
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * Hash code.

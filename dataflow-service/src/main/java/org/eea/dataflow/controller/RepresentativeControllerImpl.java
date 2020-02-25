@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -223,5 +224,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     return representativeService.getDataProviderById(dataProviderId);
+  }
+
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @Override
+  @GetMapping("/private/dataProvider")
+  public List<DataProviderVO> findDataProvidersByIds(
+      @RequestParam("id") List<Long> dataProviderIds) {
+    return representativeService.findDataProvidersByIds(dataProviderIds);
   }
 }

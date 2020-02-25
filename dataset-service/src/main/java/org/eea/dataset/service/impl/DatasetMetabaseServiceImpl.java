@@ -37,7 +37,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -447,7 +447,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Async
   @org.springframework.transaction.annotation.Transactional(
       value = "metabaseDataSetsTransactionManager")
-  public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+  public Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
 

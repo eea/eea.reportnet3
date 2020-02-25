@@ -66,9 +66,9 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -453,7 +453,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      Pageable pageable, final String fields, TypeErrorEnum[] levelError) throws EEAException {
+      Pageable pageable, final String fields, ErrorTypeEnum[] levelError) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
@@ -496,7 +496,7 @@ public class DatasetServiceImpl implements DatasetService {
           sortField.setFieldName(nameField);
           sortField.setAsc((intToBoolean(mapFields.get(nameField))));
           if (null == typefield) {
-            sortField.setTypefield(TypeData.TEXT);
+            sortField.setTypefield(DataType.TEXT);
           } else {
             sortField.setTypefield(typefield.getType());
           }
@@ -538,8 +538,8 @@ public class DatasetServiceImpl implements DatasetService {
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
                 validations.stream().map(validation -> validation.getValidation().getLevelError())
-                    .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
-                    .orElse(TypeErrorEnum.WARNING));
+                    .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                    .orElse(ErrorTypeEnum.WARNING));
           }
         });
 
@@ -549,8 +549,8 @@ public class DatasetServiceImpl implements DatasetService {
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
               validations.stream().map(validation -> validation.getValidation().getLevelError())
-                  .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
-                  .orElse(TypeErrorEnum.WARNING));
+                  .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                  .orElse(ErrorTypeEnum.WARNING));
         }
       });
 
@@ -697,14 +697,14 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
-      final TypeEntityEnum type) throws EEAException {
+      final EntityTypeEnum type) throws EEAException {
 
     ValidationLinkVO validationLink = new ValidationLinkVO();
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
-    if (TypeEntityEnum.TABLE == type) {
+    if (EntityTypeEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
       records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
       if (records != null && !records.isEmpty()) {
@@ -713,14 +713,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // RECORD
-    if (TypeEntityEnum.RECORD == type) {
+    if (EntityTypeEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       records =
           recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
     }
 
     // FIELD
-    if (TypeEntityEnum.FIELD == type) {
+    if (EntityTypeEnum.FIELD == type) {
 
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
@@ -762,36 +762,36 @@ public class DatasetServiceImpl implements DatasetService {
 
     Set<Long> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.BLOCKER);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
 
     Set<Long> recordIdsFromFieldWithValidationBlocker =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.BLOCKER);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
 
     Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
 
     Set<Long> recordIdsFromFieldWithValidationError =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
 
     Set<Long> recordIdsFromRecordWithValidationWarning =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
 
     Set<Long> recordIdsFromFieldWithValidationWarning =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
 
     Set<Long> recordIdsFromRecordWithValidationInfo =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.INFO);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
 
 
     Set<Long> recordIdsFromFieldWithValidationInfo =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.INFO);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
 
 
 
@@ -1317,8 +1317,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateFieldValueType(Long datasetId, String fieldSchemaId, String type) {
-    fieldRepository.updateFieldValueType(fieldSchemaId, type);
+  public void updateFieldValueType(Long datasetId, String fieldSchemaId, DataType type) {
+    fieldRepository.updateFieldValueType(fieldSchemaId, type.getValue());
   }
 
   /**
@@ -1410,7 +1410,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveNewFieldPropagation(Long datasetId, String idTableSchema, Pageable pageable,
-      String idFieldSchema, TypeData typeField) {
+      String idFieldSchema, DataType typeField) {
 
     List<RecordValue> recordsPaginated =
         recordRepository.findByTableValue_IdTableSchema(idTableSchema, pageable);
