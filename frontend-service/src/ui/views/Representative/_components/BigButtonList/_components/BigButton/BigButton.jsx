@@ -21,6 +21,7 @@ export const BigButton = ({
   dataflowStatus,
   datasetSchemaInfo,
   handleRedirect,
+  helpClassName,
   index,
   isReleased,
   layout,
@@ -125,7 +126,7 @@ export const BigButton = ({
 
   const defaultBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]}`}>
+      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <a
           onClick={e => {
             e.preventDefault();
@@ -179,7 +180,7 @@ export const BigButton = ({
 
   const menuBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]}`}>
+      <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <a
           onClick={e => {
             e.preventDefault();

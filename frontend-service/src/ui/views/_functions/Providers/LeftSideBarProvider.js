@@ -9,6 +9,12 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 
 const leftSideBarReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ADD_HELP_STEPS':
+      return {
+        ...state,
+        helpTitle: payload.helpTitle,
+        steps: payload.steps
+      };
     case 'ADD_MODEL':
       return {
         ...state,
@@ -30,7 +36,7 @@ const leftSideBarReducer = (state, { type, payload }) => {
 };
 
 const LeftSideBarProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [] });
+  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
 
   return (
     <LeftSideBarContext.Provider
@@ -40,6 +46,12 @@ const LeftSideBarProvider = ({ children }) => {
           dispatch({
             type: 'ADD_MODEL',
             payload: models
+          });
+        },
+        addHelpSteps: (helpTitle, steps) => {
+          dispatch({
+            type: 'ADD_HELP_STEPS',
+            payload: { helpTitle, steps }
           });
         },
         removeModels: () => {

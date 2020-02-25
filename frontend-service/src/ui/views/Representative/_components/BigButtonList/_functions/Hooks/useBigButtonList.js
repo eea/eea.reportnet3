@@ -32,6 +32,7 @@ const useBigButtonList = ({
           true
         )
       ),
+    helpClassName: 'dataflow-documents-weblinks-help-step',
     onWheel: getUrl(
       routes.DOCUMENTS,
       {
@@ -64,6 +65,7 @@ const useBigButtonList = ({
             )
           );
         },
+        helpClassName: 'dataflow-dataset-container-help-step',
         onWheel: getUrl(
           routes.DATASET,
           {

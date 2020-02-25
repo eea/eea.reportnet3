@@ -37,6 +37,7 @@ const useBigButtonList = ({
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
       caption: resources.messages['newItem'],
+      helpClassName: 'dataflow-new-item-help-step',
       model: [
         {
           label: resources.messages['createNewEmptyDatasetSchema'],
@@ -66,6 +67,7 @@ const useBigButtonList = ({
             true
           )
         ),
+      helpClassName: 'dataflow-documents-weblinks-help-step',
       onWheel: getUrl(
         routes.DOCUMENTS,
         {
@@ -96,6 +98,7 @@ const useBigButtonList = ({
         )
       );
     },
+    helpClassName: 'dataflow-schema-help-step',
     index: newDatasetSchema.index,
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,
@@ -166,6 +169,7 @@ const useBigButtonList = ({
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
           caption: datasetName,
+          helpClassName: 'dataflow-dataset-help-step',
           isReleased: dataset.isReleased,
           handleRedirect: () => {
             handleRedirect(
@@ -224,6 +228,7 @@ const useBigButtonList = ({
           )
         );
       },
+      helpClassName: 'dataflow-dataset-container-help-step',
       onWheel: getUrl(
         routes.REPRESENTATIVE,
         {
@@ -254,6 +259,7 @@ const useBigButtonList = ({
             true
           )
         ),
+      helpClassName: 'dataflow-dashboards-help-step',
       onWheel: getUrl(
         routes.DASHBOARDS,
         {
@@ -272,6 +278,7 @@ const useBigButtonList = ({
       buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
       buttonIconClass: isCreateButtonActive ? 'siteMap' : 'spinner',
       caption: resources.messages['createDataCollection'],
+      helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
       visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
     }
@@ -294,6 +301,7 @@ const useBigButtonList = ({
         )
       );
     },
+    helpClassName: 'dataflow-datacollection-help-step',
     model: [
       {
         label: resources.messages['rename'],
