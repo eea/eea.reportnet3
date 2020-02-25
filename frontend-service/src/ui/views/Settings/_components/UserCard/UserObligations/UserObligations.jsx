@@ -17,10 +17,12 @@ const UserObligations = () => {
   const onLoadDataflowData = () => {
     const arrayDataflow = [
       {
+        id: '1',
         dataflow: 'dataflow1',
         dataset: ['dataset1 (Reporting)', 'dataset1 (Schema)']
       },
       {
+        id: '2',
         dataflow: 'dataflow2',
         dataset: ['dataset2 (Reporting)', 'dataset2 (Schema)']
       }
@@ -29,16 +31,16 @@ const UserObligations = () => {
   };
 
   const renderChildrenArray = () => {
-    return dataflowData.map((item, index) => (
+    return dataflowData.map(item => (
       <TreeViewExpandableItem
         className={styles.obligationsExpandable}
         expanded={false}
         items={[{ label: item.dataflow }]}
-        key={index}
-        children={['dataflow1  ']}>
-        {item.dataset.map((dataset, i) => (
+        key={item.id}
+        children={['']}>
+        {item.dataset.map((dataset, index) => (
           <ul>
-            <li className={styles.children} key={i}>
+            <li className={styles.children} key={index}>
               {dataset}
             </li>
           </ul>

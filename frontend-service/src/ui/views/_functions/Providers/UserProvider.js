@@ -7,7 +7,7 @@ const userSettingsDefaultState = {
   userProps: {
     defaultRowSelected: 10,
     defaultVisualTheme: 'light',
-    showLogoutConfirmation: null
+    showLogoutConfirmation: false
   }
 };
 
