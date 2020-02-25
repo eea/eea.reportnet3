@@ -5,6 +5,10 @@ import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './TabsValidations.module.css';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
@@ -37,12 +41,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       setValidations(validationsList);
     } catch (error) {
       console.log(validations);
-      // notificationContext.add({
-      //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
-      //   content: {
-      //     datasetSchemaId
-      //   }
-      // });
+      notificationContext.add({
+        type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
+        content: {
+          datasetSchemaId
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -50,28 +54,65 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   const setActionButtons = validations => {
     validations.rules.forEach(validation => {
-      validation.actionButtons = (
-        <div>
-          <Button
-            type="button"
-            icon="edit"
-            className={`p-button-rounded p-button-secondary`}
-            // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-            // onClick={e => onEditDocument()}
-          />
-          <Button
-            type="button"
-            icon="trash"
-            // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-            className={`p-button-rounded p-button-secondary`}
-            // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-            // onClick={() => {
-            //   setDeleteDialogVisible(true);
-            //   setRowDataState(rowData);
-            // }}
-          />
-        </div>
-      );
+      console.log({ validation });
+      if (validation.automatic) {
+        validation.actionButtons = (
+          <div>
+            <Button
+              type="button"
+              icon="trash"
+              // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
+              className={`p-button-rounded p-button-secondary`}
+              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
+              // onClick={() => {
+              //   setDeleteDialogVisible(true);
+              //   setRowDataState(rowData);
+              // }}
+            />
+          </div>
+        );
+      } else {
+        validation.actionButtons = (
+          <div>
+            <Button
+              type="button"
+              icon="edit"
+              className={`p-button-rounded p-button-secondary`}
+              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
+              // onClick={e => onEditDocument()}
+            />
+            <Button
+              type="button"
+              icon="trash"
+              // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
+              className={`p-button-rounded p-button-secondary`}
+              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
+              // onClick={() => {
+              //   setDeleteDialogVisible(true);
+              //   setRowDataState(rowData);
+              // }}
+            />
+          </div>
+        );
+      }
+      if (validation.enabled) {
+        validation.enabled = (
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      } else {
+        validation.enabled = (
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      }
+      if (validation.automatic) {
+        validation.automatic = (
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      } else {
+        validation.automatic = (
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      }
     });
   };
 
