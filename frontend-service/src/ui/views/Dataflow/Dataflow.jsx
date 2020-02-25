@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isEmpty, isUndefined, uniq } from 'lodash';
 
@@ -37,6 +36,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+import { receiptReducer } from './_functions/Reducers/receiptReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -74,6 +74,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -261,7 +262,6 @@ const Dataflow = withRouter(({ history, match }) => {
           setDataProviderId(dataProviderIds[0]);
         }
       }
-
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -272,6 +272,15 @@ const Dataflow = withRouter(({ history, match }) => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
         setUpdatedDatasetSchema(datasetSchemaInfo);
+      }
+      if (!isEmpty(dataflow.representatives)) {
+        const isOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+        if (isOutdated.length === 1) {
+          receiptDispatch({
+            type: 'INIT_DATA',
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {} }
+          });
+        }
       }
     } catch (error) {
       notificationContext.add({
@@ -376,17 +385,20 @@ const Dataflow = withRouter(({ history, match }) => {
           isDataSchemaCorrect={isDataSchemaCorrect}
           onSaveName={onSaveName}
           onUpdateData={onUpdateData}
+          receiptDispatch={receiptDispatch}
+          receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           updatedDatasetSchema={updatedDatasetSchema}
         />
 
         <SnapshotsDialog
-          dataflowId={match.params.dataflowId}
           dataflowData={dataflowData}
+          dataflowId={match.params.dataflowId}
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+          receiptDispatch={receiptDispatch}
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
         />
         {isCustodian && (

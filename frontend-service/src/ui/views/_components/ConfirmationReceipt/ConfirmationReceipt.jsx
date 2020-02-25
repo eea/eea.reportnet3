@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { isUndefined } from 'lodash';
+import React from 'react';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 
 import logo from 'assets/images/logo.png';
@@ -111,7 +111,7 @@ export const ConfirmationReceipt = ({ receiptData, resources }) => {
   return (
     <Document style={styles.document}>
       <Page size="A5" ruler={false} rulerSteps={16} orientation="landscape" wrap>
-        {!isUndefined(receiptData) && (
+        {!isEmpty(receiptData) && (
           <View style={styles.mainContent} height="100%">
             <Image src={logo} style={styles.pageBackground} fixed={true} />
 

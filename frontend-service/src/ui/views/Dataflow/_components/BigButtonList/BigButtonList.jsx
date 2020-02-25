@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { isEmpty, isNull, isUndefined, remove } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -37,11 +37,13 @@ export const BigButtonList = ({
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
-  onUpdateData,
   onSaveName,
+  onUpdateData,
+  receiptDispatch,
+  receiptState,
+  setUpdatedDatasetSchema,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema,
-  setUpdatedDatasetSchema
+  updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -55,30 +57,29 @@ export const BigButtonList = ({
   const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
-  const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
-  const [isOutdatedReceipt, setIsOutdatedReceipt] = useState(null);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const [receiptData, setReceiptData] = useState();
 
   const receiptBtnRef = useRef(null);
 
-  useEffect(() => {
-    if (!isEmpty(dataflowData.representatives)) {
-      const isOutdated = dataflowData.representatives.map(representative => representative.isReceiptOutdated);
-      setIsOutdatedReceipt(isOutdated);
-    }
-  }, []);
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
+    if (response) {
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
+    }
+  }, [notificationContext]);
+
+  useEffect(() => {
     setTimeout(() => {
-      if (!isUndefined(receiptData)) {
+      if (!isEmpty(receiptState.receiptData)) {
         onDownloadReceipt();
       }
     }, 1000);
-  }, [receiptData]);
-
-  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
-  useCheckNotifications(['LOAD_RECEIPT_DATA_ERROR'], setIsLoadingReceipt, false);
+  }, [receiptState.receiptData]);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -160,9 +161,12 @@ export const BigButtonList = ({
   };
 
   const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
+    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
       receiptBtnRef.current.click();
-      setIsLoadingReceipt(false);
+      receiptDispatch({
+        type: 'ON_CLEAN_UP',
+        payload: { isLoading: false, isOutdated: false }
+      });
     }
   };
 
@@ -176,17 +180,21 @@ export const BigButtonList = ({
   };
 
   const onLoadReceiptData = async () => {
-    setIsLoadingReceipt(true);
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-      setReceiptData(response);
-      setIsOutdatedReceipt(false);
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: true, receiptData: response }
+      });
     } catch (error) {
       console.log('error', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
-      setIsLoadingReceipt(false);
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
     }
   };
 
@@ -210,14 +218,13 @@ export const BigButtonList = ({
     isCreateButtonActive: isCreateButtonActive,
     isCustodian: isCustodian,
     isDataSchemaCorrect: isDataSchemaCorrect,
-    isLoadingReceipt: isLoadingReceipt,
-    isOutdatedReceipt: isOutdatedReceipt,
     onDatasetSchemaNameError: onDatasetSchemaNameError,
     onDuplicateName: onDuplicateName,
     onLoadReceiptData: onLoadReceiptData,
     onSaveName: onSaveName,
     onShowDataCollectionModal: onShowDataCollectionModal,
     onShowNewSchemaDialog: onShowNewSchemaDialog,
+    receiptState: receiptState,
     showReleaseSnapshotDialog: showReleaseSnapshotDialog,
     updatedDatasetSchema: updatedDatasetSchema
   })
@@ -300,7 +307,7 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptData} resources={resources} />}
+        document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       </PDFDownloadLink>
