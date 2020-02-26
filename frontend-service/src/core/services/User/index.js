@@ -6,6 +6,7 @@ import { OldLogin } from './OldLogin';
 import { RefreshToken } from './RefreshToken';
 import { userRepository } from 'core/domain/model/User/UserRepository';
 import { UserRole } from './UserRole';
+import { UploadImg } from './UploadImg';
 
 export const UserService = {
   login: Login({ userRepository }),
@@ -14,5 +15,6 @@ export const UserService = {
   refreshToken: RefreshToken({ userRepository }),
   hasPermission: HasPermission({ userRepository }),
   getToken: GetToken({ userRepository }),
-  userRole: UserRole({ userRepository })
+  userRole: UserRole({ userRepository }),
+  uploadImg: UploadImg({ userRepository })
 };

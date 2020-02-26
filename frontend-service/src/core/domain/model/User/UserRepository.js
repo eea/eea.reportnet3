@@ -6,7 +6,8 @@ export const UserRepository = {
   oldLogin: () => Promise.reject('[UserRepository#logout] must be implemented'),
   refreshToken: () => Promise.reject('[UserRepository#refreshToken] must be implemented'),
   hasPermission: () => '[UserRepository#hasPermission] must be implemented',
-  userRole: () => '[UserRepository#userRole] must be implemented'
+  userRole: () => '[UserRepository#userRole] must be implemented',
+  uploadImg: () => '[UserRepository#uploadImg] must be implemented'
 };
 
 export const userRepository = Object.assign({}, UserRepository, ApiUserRepository);

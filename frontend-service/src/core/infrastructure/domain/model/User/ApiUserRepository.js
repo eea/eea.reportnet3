@@ -37,6 +37,12 @@ const logout = async () => {
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
+
+const uploadImg = async (userId, imgData) => {
+  const response = await apiUser.uploadImg(userId, imgData);
+  return response;
+};
+
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -59,6 +65,7 @@ const refreshToken = async refreshToken => {
     const currentTokens = userStorage.get();
     const userDTO = await apiUser.refreshToken(currentTokens.refreshToken);
     const { accessToken, refreshToken } = userDTO;
+
     const user = new User(
       userDTO.userId,
       userDTO.preferredUsername,
@@ -66,7 +73,9 @@ const refreshToken = async refreshToken => {
       userDTO.groups,
       userDTO.preferredUsername,
       userDTO.accessTokenExpiration
+      //    userDto.img
     );
+
     userStorage.set({ accessToken, refreshToken });
     //calculate difference between now and expiration
     const remain = userDTO.accessTokenExpiration - moment().unix();
@@ -110,5 +119,6 @@ export const ApiUserRepository = {
   refreshToken,
   hasPermission,
   getToken,
-  userRole
+  userRole,
+  uploadImg
 };

@@ -486,7 +486,6 @@ export const ThemeProvider = ({ children }) => {
       value={{
         ...state,
         onToggleTheme: newTheme => {
-          console.log({ newTheme });
           dispatch({
             type: 'TOGGLE_THEME',
             payload: {
@@ -494,7 +493,7 @@ export const ThemeProvider = ({ children }) => {
             }
           });
           const theme = state.themes[newTheme];
-          console.log({ theme });
+
           Object.keys(theme).forEach(key => {
             const cssKey = `--${key}`;
             const cssValue = theme[key];

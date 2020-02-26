@@ -113,7 +113,6 @@ const Header = withRouter(({ history }) => {
         <FontAwesomeIcon
           onClick={async e => {
             e.preventDefault();
-            console.log(useContext.userProps);
             userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
           }}
           icon={AwesomeIcons('logout')}
