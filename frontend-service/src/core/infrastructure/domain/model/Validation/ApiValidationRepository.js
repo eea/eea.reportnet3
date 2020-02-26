@@ -8,7 +8,7 @@ const deleteById = async (datasetSchemaId, ruleId) => {
 };
 
 const getAll = async datasetSchemaId => {
-  const validationsListDTO = validationsDTO();
+  const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
