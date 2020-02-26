@@ -65,7 +65,9 @@ import {
   faIgloo,
   faDraftingCompass,
   faClipboardList,
-  faClipboard
+  faClipboard,
+  faCheck,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -187,6 +189,8 @@ export const AwesomeIcons = icon => {
       return faArrowUp;
     case 'boolean':
       return faToggleOff;
+    case 'check':
+      return faCheck;
     case 'delete':
       return faTrashAlt;
     case 'disk':
@@ -303,6 +307,8 @@ export const AwesomeIcons = icon => {
       return faUsersCog;
     case 'localhostAlert':
       return faIgloo;
+    case 'cross':
+      return faTimes;
     default:
       return faFileAlt;
   }

@@ -167,6 +167,7 @@
 		"emptyTabHeader": "Empty table name",
 		"emptyTabHeaderError": "Table should have a name, please enter one",
 		"emptyTitleValidationError": "Please enter a title",
+		"emptyValidations": "There are no validations defined yet.",
 		"error": "Error",
 		"errorMessage": "Message",
 		"entityType": "Entity",
@@ -263,6 +264,7 @@
 		"preview": "View data",
 		"properties": "Properties",
 		"qcManager": "QC Manager",
+		"qcRules": "QC Rules",
 		"recordBlockers": "One or more fields have blockers",
 		"recordErrors": "One or more fields have errors",
 		"recordInfos": "One or more fields have infos",
@@ -284,6 +286,13 @@
 		"restore": "Restore",
 		"required": "Required",
 		"rows": "rows",
+		"ruleActions": "Actions",
+		"ruleAutomatic": "Automatic",
+		"ruleEnabled":"Enabled",
+		"ruleDescription":"Description",
+		"ruleLevelError":"Level error",
+		"ruleName": "Name",
+		"ruleShortCode": "Short code",
 		"save": "Save",
 		"search": "Search",		
 		"searchDataflow": "Search dataflows",
@@ -340,6 +349,7 @@
 		"validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
 		"validationDashboards": "Validation dashboards",
 		"validationFilter":"Validation filter",
+		"validationServiceGetAllError": "Error loading validations",		
 		"viewData": "View data",
 		"visibility": "Visibility",
 		"warning": "Warning",
@@ -437,6 +447,9 @@
 		"loadDatasetsError": "Error loading datasets",
 		"loadDocumentsError": "Error loading documents",
 		"loadWebLinksError": "Error loading web links",
-		"dataflowNameExists": "Dataflow name already exists, please choose another one"
+		"dataflowNameExists": "Dataflow name already exists, please choose another one",
+		"deleteRuleError": "Error deleting rule",
+		"deleteValidationConfirm": "Are you sure you want to delete the validation?",
+		"deleteValidationHeader": "Delete validation"
 	}
 }

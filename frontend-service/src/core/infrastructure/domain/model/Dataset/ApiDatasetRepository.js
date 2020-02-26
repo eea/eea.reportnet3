@@ -54,7 +54,20 @@ const addTableDesign = async (datasetId, tableSchemaName) => {
 };
 
 const createValidation = (entityType, id, levelError, message) => {
-  const validation = new Validation(id, levelError, entityType, new Date(Date.now()).toString(), message);
+  const validation = new Validation(
+    null,
+    null,
+    null,
+    new Date(Date.now()).toString(),
+    null,
+    null,
+    entityType,
+    id,
+    levelError,
+    message,
+    null,
+    null
+  );
   return validation;
 };
 
@@ -342,11 +355,18 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
           field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
             return new Validation(
+              null,
+              null,
+              null,
+              fieldValidation.validation.validationDate,
+              null,
+              null,
+              fieldValidation.validation.typeEntity,
               fieldValidation.id,
               fieldValidation.validation.levelError,
-              fieldValidation.validation.typeEntity,
-              fieldValidation.validation.validationDate,
-              fieldValidation.validation.message
+              fieldValidation.validation.message,
+              null,
+              null
             );
           });
         }
@@ -362,11 +382,18 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
       if (!isNull(dataTableRecordDTO.recordValidations)) {
         record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
           return new Validation(
+            null,
+            null,
+            null,
+            recordValidation.validation.validationDate,
+            null,
+            null,
+            recordValidation.validation.typeEntity,
             recordValidation.id,
             recordValidation.validation.levelError,
-            recordValidation.validation.typeEntity,
-            recordValidation.validation.validationDate,
-            recordValidation.validation.message
+            recordValidation.validation.message,
+            null,
+            null
           );
         });
       }

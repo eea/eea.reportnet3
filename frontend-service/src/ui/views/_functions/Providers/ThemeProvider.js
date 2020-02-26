@@ -314,6 +314,7 @@ export const ThemeProvider = ({ children }) => {
         'paginator-pages-highlight-bg': 'var(--c-darkest-blue)',
         'paginator-pages-highlight-color': 'var(--white)',
         'paginator-pages-color': 'var(--white)',
+        'paginator-right-content': 'var(--white)',
         'dropdown-bg': 'var(--bg)',
         'dropdown-border': '1px solid var(--gray-50)',
         'dropdown-border-color-hover': 'var(--white)',
