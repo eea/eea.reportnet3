@@ -33,7 +33,8 @@ const parseDataValidationRulesDTO = rulesDTO => {
     const rule = {};
     rule.shortCode = ruleDTO.shortCode;
     rule.name = ruleDTO.ruleName;
-    rule.ruleDescription = ruleDTO.description;
+    rule.description =
+      !isUndefined(ruleDTO.thenCondition) && !isNull(ruleDTO.thenCondition[0]) ? ruleDTO.thenCondition[0] : null;
     rule.enabled = ruleDTO.enabled;
     rule.automatic = ruleDTO.automatic;
     rule.order = ruleDTO.order;
