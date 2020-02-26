@@ -1426,7 +1426,7 @@ body .p-accordion .p-accordion-content {
 }
 
 body .p-paginator-right-content {
-  color: var(--bg);
+  color: var(--paginator-right-content);
   height: 2.286em;
   line-height: 2.286em;
   padding-right: 2em;
