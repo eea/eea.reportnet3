@@ -219,13 +219,13 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const renderDeleteConfirmDialog = () => {
     return (
       <ConfirmDialog
-        header={resources.messages['deleteTabHeader']}
+        header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
         visible={isDeleteDialogVisible}>
-        {resources.messages['deleteTabConfirm']}
+        {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
   };
