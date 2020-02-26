@@ -518,7 +518,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
         }
         if (fieldSchemaVO.getRequired() != null) {
-          fieldSchema.put("required", fieldSchemaVO.getIdCodeList());
+          fieldSchema.put("required", fieldSchemaVO.getRequired());
         }
 
         // Guardar el FieldSchema modificado en MongoDB
