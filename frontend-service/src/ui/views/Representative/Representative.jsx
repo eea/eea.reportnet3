@@ -33,6 +33,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -65,6 +66,7 @@ const Representative = withRouter(({ history, match }) => {
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -108,6 +110,7 @@ const Representative = withRouter(({ history, match }) => {
       }
     ]);
   }, []);
+
   useEffect(() => {
     if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
@@ -259,6 +262,23 @@ const Representative = withRouter(({ history, match }) => {
         });
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
+
+      if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
+        const representativeId = dataflow.datasets
+          .filter(dataset => dataset.datasetSchemaName === match.params.representative)
+          .map(id => id.dataProviderId);
+
+        const isOutdated = dataflow.representatives
+          .filter(representative => representative.dataProviderId === uniq(representativeId))
+          .map(representative => representative.isReceiptOutdated);
+
+        if (isOutdated.length === 1) {
+          receiptDispatch({
+            type: 'INIT_DATA',
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {} }
+          });
+        }
+      }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -319,14 +339,14 @@ const Representative = withRouter(({ history, match }) => {
         <BigButtonList
           dataflowData={dataflowData}
           dataflowId={match.params.dataflowId}
-          dataflowStatus={dataflowStatus}
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
-          onSaveName={onSaveName}
           onUpdateData={onUpdateData}
+          receiptDispatch={receiptDispatch}
+          receiptState={receiptState}
           representative={match.params.representative}
           showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
           updatedDatasetSchema={updatedDatasetSchema}
@@ -338,6 +358,7 @@ const Representative = withRouter(({ history, match }) => {
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+          receiptDispatch={receiptDispatch}
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
         />
 

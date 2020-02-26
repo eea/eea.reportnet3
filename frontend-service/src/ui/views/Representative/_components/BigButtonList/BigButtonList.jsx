@@ -29,17 +29,17 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 export const BigButtonList = ({
   dataflowData,
   dataflowId,
-  dataflowStatus,
   dataProviderId,
   designDatasetSchemas,
   handleRedirect,
   hasWritePermissions,
   isCustodian,
   onUpdateData,
-  onSaveName,
+  receiptDispatch,
+  receiptState,
+  representative,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema,
-  representative
+  updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -52,36 +52,27 @@ export const BigButtonList = ({
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
-  const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
-  const [isOutdatedReceipt, setIsOutdatedReceipt] = useState(null);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const [receiptData, setReceiptData] = useState();
 
   const receiptBtnRef = useRef(null);
 
-  useCheckNotifications(['LOAD_RECEIPT_DATA_ERROR'], setIsLoadingReceipt, false);
+  useEffect(() => {
+    const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
+    if (response) {
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
+    }
+  }, [notificationContext]);
 
   useEffect(() => {
-    if (!isEmpty(dataflowData.representatives && !isEmpty(dataflowData.datasets))) {
-      const representativeId = dataflowData.datasets
-        .filter(dataset => dataset.datasetSchemaName === representative)
-        .map(id => id.dataProviderId);
-
-      const isOutdated = dataflowData.representatives
-        .filter(representative => representative.dataProviderId === uniq(representativeId))
-        .map(representative => representative.isReceiptOutdated);
-
-      setIsOutdatedReceipt(isOutdated);
-    }
-  }, []);
-
-  useLayoutEffect(() => {
     setTimeout(() => {
-      if (!isUndefined(receiptData)) {
+      if (!isEmpty(receiptState.receiptData)) {
         onDownloadReceipt();
       }
     }, 1000);
-  }, [receiptData]);
+  }, [receiptState.receiptData]);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -95,11 +86,6 @@ export const BigButtonList = ({
       />
     </div>
   );
-
-  const getDeleteSchemaIndex = index => {
-    setDeleteSchemaIndex(index);
-    setDeleteDialogVisible(true);
-  };
 
   const getMetadata = async ids => {
     try {
@@ -136,10 +122,6 @@ export const BigButtonList = ({
     }
   };
 
-  const onDatasetSchemaNameError = () => {
-    setErrorDialogVisible(true);
-  };
-
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
     showLoading();
@@ -156,14 +138,13 @@ export const BigButtonList = ({
   };
 
   const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isUndefined(receiptData)) {
+    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
       receiptBtnRef.current.click();
-      setIsLoadingReceipt(false);
+      receiptDispatch({
+        type: 'ON_CLEAN_UP',
+        payload: { isLoading: false, isOutdated: false }
+      });
     }
-  };
-
-  const onDuplicateName = () => {
-    setIsDuplicated(true);
   };
 
   const onHideErrorDialog = () => {
@@ -172,27 +153,22 @@ export const BigButtonList = ({
   };
 
   const onLoadReceiptData = async () => {
-    setIsLoadingReceipt(true);
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-      setReceiptData(response);
-      setIsOutdatedReceipt(false);
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: true, receiptData: response }
+      });
     } catch (error) {
       console.log('error', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
-      setIsLoadingReceipt(false);
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
     }
-  };
-
-  const onShowNewSchemaDialog = () => {
-    setNewDatasetDialog(true);
-    setIsFormReset(true);
-  };
-
-  const onShowDataCollectionModal = () => {
-    setDataCollectionDialog(true);
   };
 
   return (
@@ -203,22 +179,13 @@ export const BigButtonList = ({
             {useBigButtonList({
               dataflowData: dataflowData,
               dataflowId: dataflowId,
-              dataflowStatus: dataflowStatus,
-              getDeleteSchemaIndex: getDeleteSchemaIndex,
               handleRedirect: handleRedirect,
               hasWritePermissions: hasWritePermissions,
               isCustodian: isCustodian,
-              isLoadingReceipt: isLoadingReceipt,
-              isOutdatedReceipt: isOutdatedReceipt,
-              onDatasetSchemaNameError: onDatasetSchemaNameError,
-              onDuplicateName: onDuplicateName,
               onLoadReceiptData: onLoadReceiptData,
-              onSaveName: onSaveName,
-              onShowDataCollectionModal: onShowDataCollectionModal,
-              onShowNewSchemaDialog: onShowNewSchemaDialog,
+              receiptState: receiptState,
               representative,
-              showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema
+              showReleaseSnapshotDialog: showReleaseSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>
@@ -288,7 +255,7 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptData} resources={resources} />}
+        document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       </PDFDownloadLink>
