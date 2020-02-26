@@ -82,10 +82,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     ];
   };
 
-  const parseToValidationsView = validations => {
-    let validationsView = validations;
-    validationsView.rules.forEach(validationView => {
-      validationView.actionButtons = (
+  const parseToValidationsView = rules => {
+    console.log({ validations });
+    let validationsView = rules;
+    console.log({ validationsView });
+    validationsView.forEach(ruleDTO => {
+      ruleDTO.actionButtons = (
         <div>
           <Button
             type="button"
@@ -98,27 +100,27 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         </div>
       );
 
-      if (validationView.automatic) {
-        validationView.automatic = (
+      if (ruleDTO.automatic) {
+        ruleDTO.automatic = (
           <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       } else {
-        validationView.actionButtons = (
+        ruleDTO.actionButtons = (
           <div>
             <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
             <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
           </div>
         );
-        validationView.automatic = (
+        ruleDTO.automatic = (
           <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       }
-      if (validationView.enabled) {
-        validationView.enabled = (
+      if (ruleDTO.enabled) {
+        ruleDTO.enabled = (
           <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       } else {
-        validationView.enabled = (
+        ruleDTO.enabled = (
           <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       }
@@ -140,10 +142,10 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     let columns = columnsArray;
 
     return validations.entityTypes.map(entityType => {
-      const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
-
       const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
       const validationsView = parseToValidationsView(validationsFilteredByEntityType);
+
+      const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
       console.log({ validationsView });
       return (
         <div className={null}>
