@@ -317,6 +317,7 @@ public class DatasetSnapshotServiceTest {
     List<RepresentativeVO> representatives = new ArrayList<>();
     RepresentativeVO rep = new RepresentativeVO();
     rep.setId(1L);
+    rep.setDataProviderId(1L);
     rep.setReceiptOutdated(false);
     representatives.add(rep);
     dataCollection.setId(1L);
