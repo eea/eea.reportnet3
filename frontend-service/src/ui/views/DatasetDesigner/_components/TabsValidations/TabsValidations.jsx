@@ -82,12 +82,10 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     ];
   };
 
-  const parseToValidationsView = rules => {
-    console.log({ validations });
-    let validationsView = rules;
-    console.log({ validationsView });
-    validationsView.forEach(ruleDTO => {
-      ruleDTO.actionButtons = (
+  const parseToValidationsView = validations => {
+    let validationsView = validations;
+    validationsView.forEach(validationDTO => {
+      validationDTO.actionButtons = (
         <div>
           <Button
             type="button"
@@ -100,27 +98,27 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         </div>
       );
 
-      if (ruleDTO.automatic) {
-        ruleDTO.automatic = (
+      if (validationDTO.automatic) {
+        validationDTO.automatic = (
           <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       } else {
-        // ruleDTO.actionButtons = (
+        // validationDTO.actionButtons = (
         //   <div>
         //     <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
         //     <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
         //   </div>
         // );
-        ruleDTO.automatic = (
+        validationDTO.automatic = (
           <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       }
-      if (ruleDTO.enabled) {
-        ruleDTO.enabled = (
+      if (validationDTO.enabled) {
+        validationDTO.enabled = (
           <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       } else {
-        ruleDTO.enabled = (
+        validationDTO.enabled = (
           <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       }
