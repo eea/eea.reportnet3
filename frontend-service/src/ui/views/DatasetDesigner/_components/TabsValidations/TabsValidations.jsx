@@ -26,10 +26,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
   const resources = useContext(ResourcesContext);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [validations, setValidations] = useState();
+  const [validationsList, setValidationsList] = useState();
 
   useEffect(() => {
-    if (isUndefined(validations)) {
+    if (isUndefined(validationsList)) {
       onLoadValidationsList(datasetSchemaId);
     }
   }, []);
@@ -38,7 +38,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
     setIsLoading(true);
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
-      setValidations(validationsList);
+      setValidationsList(validationsList);
     } catch (error) {
       console.log(error);
       // notificationContext.add({
@@ -125,20 +125,22 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
   };
 
   const ValidationList = () => {
-    if (isUndefined(validations) || isEmpty(validations)) {
+    if (isUndefined(validationsList) || isEmpty(validationsList)) {
       return (
         <div>
           <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }
-
+    console.log({ validationsList });
     const headers = getValidationHeaders();
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;
 
-    return validations.entityTypes.map(entityType => {
-      const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
+    return validationsList.entityTypes.map(entityType => {
+      const validationsFilteredByEntityType = validationsList.validations.filter(
+        validation => validation.entityType === entityType
+      );
       const validationsView = parseToValidationsView(validationsFilteredByEntityType);
 
       const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
