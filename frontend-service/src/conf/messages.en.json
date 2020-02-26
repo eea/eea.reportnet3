@@ -167,6 +167,7 @@
 		"emptyTabHeader": "Empty table name",
 		"emptyTabHeaderError": "Table should have a name, please enter one",
 		"emptyTitleValidationError": "Please enter a title",
+		"emptyValidations": "There are no validations defined yet.",
 		"error": "Error",
 		"errorMessage": "Message",
 		"entityType": "Entity",

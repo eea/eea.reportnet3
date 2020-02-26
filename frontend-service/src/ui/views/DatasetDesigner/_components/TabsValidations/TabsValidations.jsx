@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -29,91 +28,25 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const [validations, setValidations] = useState();
 
   useEffect(() => {
-    onLoadValidationsList(datasetSchemaId);
+    if (isUndefined(validations)) {
+      onLoadValidationsList(datasetSchemaId);
+    }
   }, []);
-  // }, [isValidationDeleted]);
 
   const onLoadValidationsList = async datasetSchemaId => {
     setIsLoading(true);
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
-      console.log({ validationsList });
+      console.log('View', validationsList);
       setValidations(validationsList);
     } catch (error) {
       console.log(validations);
-      notificationContext.add({
-        type: 'VALIDATION_SERVICE_GET_ALL_ERROR',
-        content: {
-          datasetSchemaId
-        }
-      });
+      // notificationContext.add({
+      //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
+      // });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const setActionButtons = validations => {
-    validations.rules.forEach(validation => {
-      console.log({ validation });
-      if (validation.automatic) {
-        validation.actionButtons = (
-          <div>
-            <Button
-              type="button"
-              icon="trash"
-              // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-              className={`p-button-rounded p-button-secondary`}
-              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-              // onClick={() => {
-              //   setDeleteDialogVisible(true);
-              //   setRowDataState(rowData);
-              // }}
-            />
-          </div>
-        );
-      } else {
-        validation.actionButtons = (
-          <div>
-            <Button
-              type="button"
-              icon="edit"
-              className={`p-button-rounded p-button-secondary`}
-              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-              // onClick={e => onEditDocument()}
-            />
-            <Button
-              type="button"
-              icon="trash"
-              // icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-              className={`p-button-rounded p-button-secondary`}
-              // disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-              // onClick={() => {
-              //   setDeleteDialogVisible(true);
-              //   setRowDataState(rowData);
-              // }}
-            />
-          </div>
-        );
-      }
-      if (validation.enabled) {
-        validation.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
-      } else {
-        validation.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
-      }
-      if (validation.automatic) {
-        validation.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
-      } else {
-        validation.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
-      }
-    });
   };
 
   const getValidationHeaders = () => {
@@ -122,10 +55,10 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         id: 'name',
         header: resources.messages['ruleName']
       },
-      // {
-      //   id: 'shortCode',
-      //   header: resources.messages['ruleShortCode']
-      // },
+      {
+        id: 'shortCode',
+        header: resources.messages['ruleShortCode']
+      },
       {
         id: 'ruleDescription',
         header: resources.messages['ruleDescription']
@@ -149,20 +82,69 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     ];
   };
 
-  const validationList = () => {
-    if (isEmpty(validations)) {
-      return;
-    }
+  const parseToValidationsView = validations => {
+    let validationsView = validations;
+    validationsView.rules.forEach(validationView => {
+      validationView.actionButtons = (
+        <div>
+          <Button
+            type="button"
+            icon="trash"
+            className={`p-button-secondary`}
+            onClick={() => {
+              //Parrastia's time
+            }}
+          />
+        </div>
+      );
 
-    setActionButtons(validations);
+      if (validationView.automatic) {
+        validationView.automatic = (
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      } else {
+        validationView.actionButtons = (
+          <div>
+            <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
+            <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
+          </div>
+        );
+        validationView.automatic = (
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      }
+      if (validationView.enabled) {
+        validationView.enabled = (
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      } else {
+        validationView.enabled = (
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+        );
+      }
+    });
+    return validationsView;
+  };
+
+  const ValidationList = () => {
+    if (isUndefined(validations) || isEmpty(validations)) {
+      return (
+        <div>
+          <h3>{resources.messages['emptyValidations']}</h3>
+        </div>
+      );
+    }
 
     const headers = getValidationHeaders();
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;
 
     return validations.entityTypes.map(entityType => {
-      const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
       const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
+
+      const validationsFilteredByEntityType = validations.rules.filter(rule => rule.entityType === entityType);
+      const validationsView = parseToValidationsView(validationsFilteredByEntityType);
+      console.log({ validationsView });
       return (
         <div className={null}>
           <DataTable
@@ -173,8 +155,8 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={validationsFilteredByEntityType.length}
-            value={validationsFilteredByEntityType}>
+            totalRecords={validationsView.length}
+            value={validationsView}>
             {columns}
           </DataTable>
         </div>
@@ -198,23 +180,11 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     });
   };
 
-  if (isUndefined(validations) || isEmpty(validations)) {
-    return (
-      <div>
-        <h3>There are no validations defined yet.</h3>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return <Spinner />;
   }
 
-  return (
-    // <TabView activeIndex={activeIndex} onTabChange={onTabChange} renderActiveOnly={false}>
-    validationList()
-    // </TabView>
-  );
+  return <ValidationList />;
 });
 
 export { TabsValidations };
