@@ -1,6 +1,7 @@
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
+import { Validation } from 'core/domain/model/Validation/Validation';
 
 const deleteById = async (datasetSchemaId, ruleId) => {
   return await apiValidation.deleteById(datasetSchemaId, ruleId);
@@ -8,6 +9,7 @@ const deleteById = async (datasetSchemaId, ruleId) => {
 
 const getAll = async datasetSchemaId => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
+  console.log({ validationsListDTO });
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
@@ -16,38 +18,47 @@ const getAll = async datasetSchemaId => {
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
 
-  const rulesData = parseDataValidationRulesDTO(validationsListDTO.rules);
-  validationsList.entityTypes = rulesData.entityTypes;
-  validationsList.rules = rulesData.rules;
+  const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
+  validationsList.entityTypes = validationsData.entityTypes;
+  validationsList.validations = validationsData.validations;
+  console.log({ validationsList });
   return validationsList;
 };
 
-const parseDataValidationRulesDTO = rulesDTO => {
-  const rulesData = {};
+const parseDataValidationRulesDTO = validations => {
+  const validationsData = {};
   const entityTypes = [];
 
-  rulesData.rules = rulesDTO.map(ruleDTO => {
-    entityTypes.push(ruleDTO.type);
-
-    const rule = {};
-    rule.shortCode = ruleDTO.shortCode;
-    rule.ruleId = ruleDTO.ruleId;
-    rule.name = ruleDTO.ruleName;
-    rule.description =
-      !isUndefined(ruleDTO.thenCondition) && !isNull(ruleDTO.thenCondition[0]) ? ruleDTO.thenCondition[0] : null;
-    rule.enabled = ruleDTO.enabled;
-    rule.automatic = ruleDTO.automatic;
-    rule.order = ruleDTO.order;
-    rule.entityType = ruleDTO.type;
-    rule.message =
-      !isUndefined(ruleDTO.thenCondition) && !isNull(ruleDTO.thenCondition[0]) ? ruleDTO.thenCondition[0] : null;
-    rule.levelError =
-      !isUndefined(ruleDTO.thenCondition) && !isNull(ruleDTO.thenCondition[1]) ? ruleDTO.thenCondition[1] : null;
-    return rule;
+  validationsData.validations = validations.map(validationDTO => {
+    entityTypes.push(validationDTO.type);
+    return new Validation({
+      activationGroup: validationDTO.activationGroup,
+      automatic: validationDTO.automatic,
+      condition: validationDTO.whenCondition,
+      date: validationDTO.activationGroup,
+      description:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
+          ? validationDTO.thenCondition[0]
+          : null,
+      enabled: validationDTO.enabled,
+      enabled: validationDTO.enabled,
+      entityType: validationDTO.type,
+      id: validationDTO.ruleId,
+      levelError:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[1])
+          ? validationDTO.thenCondition[1]
+          : null,
+      message:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
+          ? validationDTO.thenCondition[0]
+          : null,
+      name: validationDTO.ruleName,
+      referenceId: validationDTO.referenceId
+    });
   });
 
-  rulesData.entityTypes = [...new Set(entityTypes)];
-  return rulesData;
+  validationsData.entityTypes = [...new Set(entityTypes)];
+  return validationsData;
 };
 export const ApiValidationRepository = {
   deleteById,
