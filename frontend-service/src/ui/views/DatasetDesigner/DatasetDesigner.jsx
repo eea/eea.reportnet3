@@ -141,7 +141,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const onDeleteValidation = async () => {
     try {
-      await ValidationService.deleteById(datasetSchemaId, ruleData.ruleId);
+      await ValidationService.deleteById(datasetSchemaId, ruleData.id);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_RULE_ERROR'
