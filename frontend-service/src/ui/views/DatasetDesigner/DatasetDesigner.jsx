@@ -8,6 +8,7 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -15,16 +16,18 @@ import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabsValidations } from './_components/TabsValidations';
-import { Toolbar } from 'ui/views/_components/Toolbar';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+import { ValidationService } from 'core/services/Validation';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
@@ -36,18 +39,22 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
     params: { datasetId }
   } = match;
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
-  const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
+  const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [ruleData, setRuleData] = useState({});
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
@@ -132,6 +139,18 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     }
   };
 
+  const onDeleteValidation = async () => {
+    try {
+      await ValidationService.deleteById(datasetSchemaId, ruleData.ruleId);
+    } catch (error) {
+      notificationContext.add({
+        type: 'DELETE_RULE_ERROR'
+      });
+    } finally {
+      onHideDeleteDialog();
+    }
+  };
+
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setDatasetDescription(initialDatasetDescription);
@@ -165,7 +184,18 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     }
   };
 
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setValidationListDialogVisible(true);
+    setRuleData({});
+  };
+
   const onHideValidationsDialog = () => {
+    setValidationListDialogVisible(false);
+  };
+
+  const onShowDeleteDialog = () => {
+    setIsDeleteDialogVisible(true);
     setValidationListDialogVisible(false);
   };
 
@@ -186,6 +216,20 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     </>
   );
 
+  const renderDeleteConfirmDialog = () => {
+    return (
+      <ConfirmDialog
+        header={resources.messages['deleteTabHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onDeleteValidation()}
+        onHide={() => onHideDeleteDialog()}
+        visible={isDeleteDialogVisible}>
+        {resources.messages['deleteTabConfirm']}
+      </ConfirmDialog>
+    );
+  };
+
   const ValidationsListDialog = () => {
     if (validationListDialogVisible) {
       return (
@@ -198,7 +242,11 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           onHide={() => onHideValidationsDialog()}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
-          <TabsValidations datasetSchemaId={datasetSchemaId} />
+          <TabsValidations
+            datasetSchemaId={datasetSchemaId}
+            onShowDeleteDialog={onShowDeleteDialog}
+            setRuleData={setRuleData}
+          />
         </Dialog>
       );
     }
@@ -301,6 +349,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         snapshotListData={snapshotListData}
       />
       <ValidationsListDialog />
+      {renderDeleteConfirmDialog()}
       {/* <Dialog
         className={styles.paginatorValidationViewer}
         dismissableMask={true}

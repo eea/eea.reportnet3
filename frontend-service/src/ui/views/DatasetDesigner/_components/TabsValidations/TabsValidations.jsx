@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import { capitalize, isEmpty, isUndefined } from 'lodash';
 
-import styles from './TabsValidations.module.css';
+import styles from './TabsValidations.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -21,9 +21,10 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRuleData }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const [isLoading, setIsLoading] = useState(false);
   const [validations, setValidations] = useState();
 
@@ -85,14 +86,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     let validationsView = validations;
     validationsView.forEach(validationDTO => {
       validationDTO.actionButtons = (
-        <div>
+        <div className={styles.actionButtons}>
           <Button
-            type="button"
+            className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
-            className={`p-button-secondary`}
-            onClick={() => {
-              //Parrastia's time
-            }}
+            onClick={() => onShowDeleteDialog()}
+            type="button"
           />
         </div>
       );
@@ -149,10 +148,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
             autoLayout={true}
             className={null}
             loading={false}
+            onRowSelect={event => setRuleData(Object.assign({}, event.data))}
             paginator={true}
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
+            selectionMode="single"
             totalRecords={validationsView.length}
             value={validationsView}>
             {columns}
