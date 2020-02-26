@@ -29,7 +29,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
+              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : ``}`}
               disabled={isLoading || itemData.isBlocked}
               icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
               onClick={() => {
