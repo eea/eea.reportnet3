@@ -52,15 +52,15 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const getValidationHeaders = () => {
     return [
       {
-        id: 'name',
-        header: resources.messages['ruleName']
-      },
-      {
         id: 'shortCode',
         header: resources.messages['ruleShortCode']
       },
       {
-        id: 'ruleDescription',
+        id: 'name',
+        header: resources.messages['ruleName']
+      },
+      {
+        id: 'description',
         header: resources.messages['ruleDescription']
       },
       {
@@ -105,12 +105,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
           <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
         );
       } else {
-        ruleDTO.actionButtons = (
-          <div>
-            <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
-            <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
-          </div>
-        );
+        // ruleDTO.actionButtons = (
+        //   <div>
+        //     <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
+        //     <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
+        //   </div>
+        // );
         ruleDTO.automatic = (
           <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
         );
