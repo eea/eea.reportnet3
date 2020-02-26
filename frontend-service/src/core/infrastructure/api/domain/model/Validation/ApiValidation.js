@@ -38,7 +38,6 @@ export const apiValidation = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    console.log('ValidationsDTO:', response);
-    return response;
+    return response.data;
   }
 };
