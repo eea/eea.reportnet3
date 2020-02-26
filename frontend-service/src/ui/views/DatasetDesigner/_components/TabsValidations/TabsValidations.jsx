@@ -37,10 +37,9 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     setIsLoading(true);
     try {
       const validationsList = await ValidationService.getAll(datasetSchemaId);
-      console.log('View', validationsList);
       setValidations(validationsList);
     } catch (error) {
-      console.log(validations);
+      console.log(error);
       // notificationContext.add({
       //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       // });
@@ -144,7 +143,6 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       const validationsView = parseToValidationsView(validationsFilteredByEntityType);
 
       const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
-      console.log({ validationsView });
       return (
         <div className={null}>
           <DataTable
