@@ -9,8 +9,8 @@
 
 window.env = {
   // This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
-  REACT_APP_BACKEND: 'http://reportnet3-backend.altia.es',
-  // REACT_APP_BACKEND: 'http://rn3beta-backend.altia.es',
+  // REACT_APP_BACKEND: 'http://reportnet3-backend.altia.es',
+  REACT_APP_BACKEND: 'http://rn3beta-backend.altia.es',
   //REACT_APP_BACKEND: 'http://localhost:3000',
   REACT_APP_JSON: false,
   REACT_APP_EULOGIN: true,
