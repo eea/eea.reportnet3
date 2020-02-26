@@ -28,6 +28,9 @@ public class FieldSchema {
   @Field(value = "_id")
   private ObjectId idFieldSchema;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The idRecord. */
   @Field(value = "idRecord")
@@ -57,7 +60,8 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, type, idCodeList, required);
+    return Objects.hash(headerName, idFieldSchema, idRecord, type, idCodeList, required,
+        description);
   }
 
 
@@ -79,7 +83,8 @@ public class FieldSchema {
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(idCodeList, other.idCodeList)
-        && Objects.equals(required, other.required);
+        && Objects.equals(required, other.required)
+        && Objects.equals(description, other.description);
   }
 
 
