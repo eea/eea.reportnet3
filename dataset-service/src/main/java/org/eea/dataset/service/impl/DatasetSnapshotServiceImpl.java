@@ -254,8 +254,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       criteria.add(idDataset);
       lockService.removeLockByCriteria(criteria);
     }
-
-    if (released || isBlocked != null && !isBlocked.isEmpty()) {
+    // release snapshot when the dataset not have blocked errors and the user press create+release
+    if (released && isBlocked != null && !isBlocked.isEmpty()) {
       datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
 
