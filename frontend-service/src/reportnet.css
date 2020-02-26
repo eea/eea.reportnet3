@@ -197,7 +197,9 @@
   --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-10); */
 
   --dropdown-bg: var(--bg);
-  --dropdown-border: 1px solid var(--bg);
+  --dropdown-border: 1px solid var(--gray-50);
+  --dropdown-border-color-hover: var(--gray-75);
+  /* --dropdown-border: 1px solid var(--bg); */
   --dropdown-bg-hover: var(--white);
   --dropdown-bg-focus: var(--c-corporate-blue);
   --dropdown-trigger-bg: var(--white);

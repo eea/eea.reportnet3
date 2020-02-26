@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { isUndefined, isNull } from 'lodash';
 
 import { Button } from 'ui/views/_components/Button';
+import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -385,6 +386,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     <React.Fragment>
       {renderTabViews()}
       {renderErrors(errorMessageTitle, errorMessage)}
+      {datasetSchema && <CreateValidation isVisible={true} datasetSchema={datasetSchema} />}
     </React.Fragment>
   );
 });

@@ -1,1 +1,0 @@
-export { QCManagement } from './QCManagement';

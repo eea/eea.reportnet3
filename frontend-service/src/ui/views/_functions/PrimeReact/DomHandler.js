@@ -91,7 +91,7 @@ export default class DomHandler {
   }
 
   static generateZIndex() {
-    this.zindex = this.zindex || 3004;
+    this.zindex = this.zindex || 5000;
     return ++this.zindex;
   }
 
