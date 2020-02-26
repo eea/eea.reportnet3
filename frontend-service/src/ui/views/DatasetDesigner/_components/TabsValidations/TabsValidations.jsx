@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import { capitalize, isEmpty, isUndefined } from 'lodash';
 
-import styles from './TabsValidations.module.css';
+import styles from './TabsValidations.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -88,14 +88,14 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     console.log({ validationsView });
     validationsView.forEach(ruleDTO => {
       ruleDTO.actionButtons = (
-        <div>
+        <div className={styles.actionButtons}>
           <Button
-            type="button"
+            className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
-            className={`p-button-secondary`}
             onClick={() => {
               //Parrastia's time
             }}
+            type="button"
           />
         </div>
       );
