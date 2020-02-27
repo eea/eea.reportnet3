@@ -347,7 +347,9 @@
           "fixed": false
         },
         {
-          "key": "RELEASE_BLOCKED_EVENT"
+          "key": "RELEASE_BLOCKED_EVENT",
+          "lifeTime": 5000,
+          "fixed": false
         },
         {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
