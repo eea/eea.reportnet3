@@ -56,14 +56,17 @@ body .p-component {
   text-decoration: none;
 }
 body a {
-  color: #004494;
+  color: var(--hyperlink-color);
   text-decoration: none;
 }
 body a:hover {
-  color: #116fbf;
+  color: var(--hyperlink-color-hover);
 }
 body a:active {
-  color: #005b9f;
+  color: var(--hyperlink-color-active);
+}
+body a:visited {
+  color: var(--hyperlink-color-visited);
 }
 body .p-disabled,
 body .p-component:disabled {
