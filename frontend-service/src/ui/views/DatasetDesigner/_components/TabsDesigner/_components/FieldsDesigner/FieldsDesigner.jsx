@@ -18,7 +18,13 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
+export const FieldsDesigner = ({
+  datasetId,
+  onChangeFields,
+  onChangeTableDescription,
+  setIsValidationDisabled,
+  table
+}) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -96,8 +102,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     setFields(inmFields);
   };
 
-  const onFieldDelete = deletedFieldIndx => {
-    setIndexToDelete(deletedFieldIndx);
+  const onFieldDelete = deletedFieldIndex => {
+    setIndexToDelete(deletedFieldIndex);
     setIsDeleteDialogVisible(true);
   };
 
@@ -154,12 +160,12 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     setIsErrorDialogVisible(true);
   };
 
-  const deleteField = async deletedFieldIndx => {
+  const deleteField = async deletedFieldIndex => {
     try {
-      const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndx].fieldId);
+      const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       if (fieldDeleted) {
         const inmFields = [...fields];
-        inmFields.splice(deletedFieldIndx, 1);
+        inmFields.splice(deletedFieldIndex, 1);
         onChangeFields(inmFields, table.tableSchemaId);
         setFields(inmFields);
       } else {
@@ -236,6 +242,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       <DataViewer
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
+        setIsValidationDisabled={setIsValidationDisabled}
         isWebFormMMR={false}
         key={table.id}
         levelErrorTypes={levelErrorTypes}
@@ -273,10 +280,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       return <Spinner className={styles.positioning} />;
     } else {
       return (
-        <React.Fragment>
+        <>
           {isPreviewModeOn ? previewData() : renderFields()}
           {!isPreviewModeOn ? renderNewField() : null}
-        </React.Fragment>
+        </>
       );
     }
   };

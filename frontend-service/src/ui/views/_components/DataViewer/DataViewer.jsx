@@ -47,25 +47,24 @@ const DataViewer = withRouter(
   ({
     correctLevelError = ['CORRECT'],
     hasWritePermissions,
-    isPreviewModeOn = false,
     isDataCollection,
+    isPreviewModeOn = false,
     isValidationSelected,
     isWebFormMMR,
     levelErrorTypes = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
     levelErrorTypesWithCorrects = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
+    match: {
+      params: { datasetId, dataflowId }
+    },
     onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
+    setIsValidationDisabled,
     setIsValidationSelected,
     tableHasErrors,
     tableId,
     tableName,
-    tableSchemaColumns,
-    match: {
-      params: { datasetId, dataflowId }
-    },
-    match: { params },
-    history
+    tableSchemaColumns
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [codelistInfo, setCodelistInfo] = useState({});
@@ -79,26 +78,26 @@ const DataViewer = withRouter(
     const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
-    const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
-      totalRecords: 0,
-      totalFilteredRecords: 0,
+      editedRecord: {},
+      fetchedDataFirstRecord: [],
       firstPageRecord: 0,
-      recordsPerPage: 10,
       initialRecordValue: undefined,
       isRecordDeleted: false,
-      editedRecord: {},
-      selectedRecord: {},
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
-      fetchedDataFirstRecord: []
+      recordsPerPage: 10,
+      selectedRecord: {},
+      totalFilteredRecords: 0,
+      totalRecords: 0
     });
     const [sort, dispatchSort] = useReducer(sortReducer, {
       sortField: undefined,
@@ -121,11 +120,11 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
-          record={record}
+          onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
-          onEditorKeyChange={onEditorKeyChange}
+          record={record}
         />
       );
     };
@@ -224,9 +223,13 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
+
+        setIsValidationDisabled(isEmpty(tableData.records));
+
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           onLoadTableData(true);
         }
+
         if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
             if (tableData.records.length > 0) {

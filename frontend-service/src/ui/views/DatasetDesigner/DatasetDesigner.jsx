@@ -53,6 +53,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isValidationDisabled, setIsValidationDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [validationId, setValidationId] = useState('');
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -307,8 +308,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              disabled={false}
+              disabled={isValidationDisabled}
               icon={'validate'}
               iconClasses={null}
               label={resources.messages['validate']}
@@ -342,7 +342,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} />
+      <TabsDesigner editable={true} setIsValidationDisabled={setIsValidationDisabled} />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
