@@ -25,6 +25,10 @@ public class TableSchema {
   @Field(value = "nameTableSchema")
   private String nameTableSchema;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
+
   /** The Id data set. */
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
@@ -41,7 +45,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description);
   }
 
   /**
@@ -62,7 +66,8 @@ public class TableSchema {
     return Objects.equals(idDataSet, other.idDataSet)
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
-        && Objects.equals(recordSchema, other.recordSchema);
+        && Objects.equals(recordSchema, other.recordSchema)
+        && Objects.equals(description, other.description);
   }
 
 
