@@ -194,4 +194,16 @@ public interface DatasetSchemaService {
    */
   Boolean validateSchema(String datasetSchemaId);
 
+
+  /**
+   * Propagate rules after update schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param type the type
+   * @param datasetId the dataset id
+   */
+  void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      DataType type, Long datasetId);
+
 }

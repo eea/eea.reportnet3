@@ -405,30 +405,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
       DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
-      // If the update operation succeded, scale to the dataset
-      if (type != null) {
-        // if we change the type we need to delete all rules
-        rulesControllerZuul.deleteRuleByReferenceId(datasetSchema, fieldSchemaVO.getId());
 
-        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
-          rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(), type,
-              EntityTypeEnum.FIELD, Boolean.TRUE);
-        }
-
-        rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
-        // update metabase value
-        datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
-      } else {
-        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
-          if (!rulesControllerZuul.existsRuleRequired(datasetSchema, fieldSchemaVO.getId())) {
-            rulesControllerZuul.createAutomaticRule(datasetSchema, fieldSchemaVO.getId(),
-                fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
-          }
-        } else {
-          rulesControllerZuul.deleteRuleRequired(datasetSchema, fieldSchemaVO.getId());
-        }
-      }
+      // After the update, we create the rules needed and change the type of the field if neccessary
+      dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+          datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);

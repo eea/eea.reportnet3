@@ -98,7 +98,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Update update =
         new Update().pull("rules", new Document().append("referenceId", new ObjectId(referenceId))
             .append("whenCondition", "!isBlank(value)"));
-    Query query = new Query().addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    Query query =
+        new Query().addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
     return mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
 
