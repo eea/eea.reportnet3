@@ -13,8 +13,26 @@ import lombok.ToString;
 /**
  * The Class Rule.
  */
+
+/**
+ * Gets the short code.
+ *
+ * @return the short code
+ */
 @Getter
+
+/**
+ * Sets the short code.
+ *
+ * @param shortCode the new short code
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class Rule {
   /** The rule id. */
@@ -42,7 +60,6 @@ public class Rule {
   @Field(value = "activationGroup")
   private String activationGroup;
 
-
   /** The type. */
   @Field(value = "type")
   private EntityTypeEnum type;
@@ -51,11 +68,19 @@ public class Rule {
   @Field(value = "whenCondition")
   private String whenCondition;
 
-  /** The then condition. */
+  /**
+   * The then condition. is a list with 2 redords first is a ERROR message second is a Level ERROR
+   */
   @Field(value = "thenCondition")
   private List<String> thenCondition;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
+  /** The short code. */
+  @Field(value = "shortCode")
+  private String shortCode;
 
   /**
    * Hash code.
@@ -65,7 +90,7 @@ public class Rule {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
-        whenCondition, thenCondition);
+        whenCondition, thenCondition, description, shortCode);
   }
 
   /**
@@ -88,6 +113,8 @@ public class Rule {
         && Objects.equals(enabled, other.enabled)
         && Objects.equals(activationGroup, other.activationGroup)
         && Objects.equals(type, other.type) && Objects.equals(whenCondition, other.whenCondition)
-        && Objects.equals(thenCondition, other.thenCondition);
+        && Objects.equals(thenCondition, other.thenCondition)
+        && Objects.equals(description, other.description)
+        && Objects.equals(shortCode, other.shortCode);
   }
 }

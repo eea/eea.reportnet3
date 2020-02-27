@@ -21,4 +21,14 @@ public interface RulesRepository
    * @return the rules schema
    */
   RulesSchema findByIdDatasetSchema(ObjectId idDatasetSchema);
+
+
+
+  /**
+   * Count rules by id dataset schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the integer
+   */
+  Integer countRulesByIdDatasetSchema(ObjectId idDatasetSchema);
 }
