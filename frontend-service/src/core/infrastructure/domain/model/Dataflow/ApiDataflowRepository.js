@@ -6,6 +6,7 @@ import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
@@ -15,16 +16,17 @@ const parseDataflowDTO = dataflowDTO => {
   dataflow.creationDate = dataflowDTO.creationDate;
   dataflow.dataCollections = parseDataCollectionListDTO(dataflowDTO.dataCollections);
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
-  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
   dataflow.description = dataflowDTO.description;
+  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
   dataflow.id = dataflowDTO.id;
   dataflow.name = dataflowDTO.name;
+  dataflow.representatives = parseRepresentativeListDTO(dataflowDTO.representatives);
+  dataflow.requestId = dataflowDTO.requestId;
   dataflow.status = dataflowDTO.status;
   dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
   dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
-  dataflow.requestId = dataflowDTO.requestId;
   return dataflow;
 };
 
@@ -77,7 +79,8 @@ const parseDatasetDTO = datasetDTO => {
     datasetDTO.isReleased,
     null,
     null,
-    datasetDTO.nameDatasetSchema
+    datasetDTO.nameDatasetSchema,
+    datasetDTO.dataProviderId
   );
 };
 
@@ -100,6 +103,28 @@ const parseDocumentDTO = documentDTO => {
     documentDTO.id,
     documentDTO.language,
     documentDTO.name
+  );
+};
+
+const parseRepresentativeListDTO = representativesDTO => {
+  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
+    const representatives = [];
+    representativesDTO.forEach(representativeDTO => {
+      representatives.push(parseRepresentativeDTO(representativeDTO));
+    });
+    return representatives;
+  }
+  return;
+};
+
+const parseRepresentativeDTO = representativeDTO => {
+  return new Representative(
+    representativeDTO.id,
+    representativeDTO.provideraccount,
+    representativeDTO.dataProviderId,
+    representativeDTO.dataProviderGroupId,
+    representativeDTO.receiptDownloaded,
+    representativeDTO.receiptOutdated
   );
 };
 

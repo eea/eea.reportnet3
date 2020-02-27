@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import moment from 'moment';
 
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 
@@ -31,10 +33,16 @@ export const ReleaseSnapshotDialog = ({
       onLoadSnapshotList(datasetId);
     } catch (error) {
       setIsLoading(false);
-      notificationContext.add({
-        type: 'CREATE_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.data == DataflowConf.errorTypes['copyWithErrors']) {
+        notificationContext.add({
+          type: 'RELEASE_BLOCKED_EVENT'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       hideReleaseDialog();
     }
