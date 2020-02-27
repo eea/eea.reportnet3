@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
@@ -27,13 +30,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class KieBaseManager {
-
   /**
    * The Constant REGULATION_TEMPLATE_FILE.
    */
   private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
-
-
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
@@ -42,7 +42,9 @@ public class KieBaseManager {
    */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
-
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   /**
    * Reload rules.
@@ -55,49 +57,72 @@ public class KieBaseManager {
   public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    RulesSchema schemaRules = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchema));
-
+    // we take all actives kiebase
+    RulesSchema schemaRules =
+        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchema), true);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
-        if (Boolean.TRUE.equals(rule.getEnabled())) {
-          String schemasDrools = "";
-          TypeValidation typeValidation = null;
-          switch (rule.getType()) {
-            case DATASET:
-              schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
-              typeValidation = TypeValidation.DATASET;
-              break;
-            case TABLE:
-              schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-              typeValidation = TypeValidation.TABLE;
-              break;
-            case RECORD:
-              schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
-              typeValidation = TypeValidation.RECORD;
-              break;
-            case FIELD:
-              schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
-              typeValidation = TypeValidation.FIELD;
-              break;
-          }
-          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
-              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
+        String schemasDrools = "";
+        StringBuilder expression = new StringBuilder("");
+        TypeValidation typeValidation = null;
+        switch (rule.getType()) {
+          case DATASET:
+            schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
+            typeValidation = TypeValidation.DATASET;
+            break;
+          case TABLE:
+            schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
+            typeValidation = TypeValidation.TABLE;
+            break;
+          case RECORD:
+            schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
+            typeValidation = TypeValidation.RECORD;
+            break;
+          case FIELD:
+            schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
+            typeValidation = TypeValidation.FIELD;
+            // if the type is field and isnt automatic we create the rules to validate check if the
+            // data are correct
+            Document documentField =
+                schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
+            DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+            if (null != datatype && null != rule.getAutomatic()
+                && rule.getAutomatic().equals(false)) {
+              switch (datatype) {
+                case NUMBER:
+                  expression.append("!isNumber(value) || ");
+                  break;
+                case DATE:
+                  expression.append("!isDateYYYYMMDD(value) || ");
+                  break;
+                case BOOLEAN:
+                  expression.append("!isBoolean(value) || ");
+                  break;
+                case COORDINATE_LAT:
+                  expression.append("!isCordenateLat(value) || ");
+                  break;
+                case COORDINATE_LONG:
+                  expression.append("!isCordenateLong(value) || ");
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
         }
+        ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+            rule.getRuleId().toString(), typeValidation, schemasDrools,
+            expression.append(rule.getWhenCondition()).toString(), rule.getThenCondition().get(0),
+            rule.getThenCondition().get(1),
+            null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
       });
     }
-
     ObjectDataCompiler compiler = new ObjectDataCompiler();
-
     String generatedDRL =
         compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
-
     KieServices kieServices = KieServices.Factory.get();
-
     KieHelper kieHelper = new KieHelper();
-
     // multiple such resoures/rules can be added
     byte[] b1 = generatedDRL.getBytes();
     Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
@@ -135,5 +160,4 @@ public class KieBaseManager {
         tableSchemaName != null ? tableSchemaName : "");
     return ruleAdd;
   }
-
 }

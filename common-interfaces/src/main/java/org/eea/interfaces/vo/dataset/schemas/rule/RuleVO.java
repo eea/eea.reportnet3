@@ -40,7 +40,7 @@ public class RuleVO {
   private EntityTypeEnum type;
 
   /** The when condition. */
-  private String whenCondition;
+  private RuleExpressionVO whenCondition;
 
   /** The then condition. */
   private List<String> thenCondition;
@@ -86,6 +86,4 @@ public class RuleVO {
         && Objects.equals(description, other.description)
         && Objects.equals(shortCode, other.shortCode);
   }
-
-
 }

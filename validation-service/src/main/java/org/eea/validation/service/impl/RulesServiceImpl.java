@@ -154,6 +154,9 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void createNewRule(String idDatasetSchema, Rule rule) throws EEAException {
+    if (rule.getRuleId() == null) {
+      rule.setRuleId(new ObjectId());
+    }
     rulesRepository.createNewRule(idDatasetSchema, rule);
   }
 
