@@ -33,12 +33,14 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon {
   margin-right: 0.5em;
+  color: var(--tabview-highlight-icon-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon {
   margin-left: 0.5em;
+  color: var(--tabview-highlight-icon-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
@@ -96,7 +98,10 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight 
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight a,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a {
   background-color: var(--tabview-highlight-bg);
-  border: var(--tabview-highlight-border);
+  border-top: var(--tabview-highlight-border);
+  border-right: var(--tabview-highlight-border);
+  border-left: var(--tabview-highlight-border);
+  border-bottom: var(--tabview-highlight-border-bottom);
   color: var(--tabview-highlight-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
@@ -105,13 +110,25 @@ body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight .p
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close {
   color: #ffffff;
 }
+
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover {
+  cursor: default;
+}
+
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a {
-  background-color: var(--tabview-highlight-bg-hover);
-  border: var(--tabview-highlight-border-hover);
-  color: var(--tabview-highlight-color-hover);
+  cursor: default;
+  // background-color: var(--bg);
+  // border-top: var(--tabview-highlight-border);
+  // border-right: var(--tabview-highlight-border);
+  // border-left: var(--tabview-highlight-border);
+  // border-bottom: var(--tabview-highlight-border-bottom);
+  // color: var(--tabview-highlight-color-hover);
   // background-color: var(--yellow-120);
   // border: 1px solid var(--blue-120);
   // color: #404040;
@@ -124,14 +141,18 @@ body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:ho
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon {
-  color: #404040;
+  color: var(--tabview-highlight-icon-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a {
-  cursor: pointer;
+  // cursor: pointer;
 }
+body .p-tabview .p-tabview-nav li.p-state-processing a {
+  // cursor: text;
+}
+
 body .p-tabview.p-tabview-top .p-tabview-nav {
   margin-bottom: -1px;
 }

@@ -3142,7 +3142,7 @@ body
   .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover
   .p-menuitem-link
   .p-menuitem-text {
-  color: var(--tabview-color);;
+  color: var(--tabview-color);
 }
 body
   .p-tabmenu
@@ -3153,8 +3153,12 @@ body
   color: #404040;
 }
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
-  background-color: var(--tabview-highlight-bg);
-  border: var(--tabview-highlight-border);
+  background-color: var(--tabmenu-highlight-bg);
+  border-top: var(--tabmenu-highlight-border);
+  border-right: var(--tabmenu-highlight-border);
+  border-left: var(--tabmenu-highlight-border);
+  border-bottom: var(--tabmenu-highlight-border-bottom);
+  color: var(--tabmenu-highlight-color);
 }
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link .p-menuitem-text {
   color:var(--tabview-highlight-color);

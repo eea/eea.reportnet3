@@ -126,14 +126,23 @@
 
   /* Tabview */
   --tabview-bg: var(--gray-5);
-  --tabview-border: 1px solid var(--c-custom-gray);
+  --tabview-border: 1px solid var(--gray-25);
+  /* --'tabview-border-bottom': '1px solid var(--bg)', */
   --tabview-color: var(--gray-110);
-  --tabview-highlight-bg: var(--c-corporate-blue);
-  --tabview-highlight-border: 1px solid var(--c-corporate-blue);
-  --tabview-highlight-color: var(--white);
+  --tabview-highlight-bg: var(--bg);
+  --tabview-highlight-border: 1px solid var(--gray-25);
+  --tabview-highlight-border-bottom: 1px solid var(--bg);
+  --tabview-highlight-color: var(--c-corporate-blue);
+  --tabview-highlight-icon-color: var(--errors);
   --tabview-highlight-bg-hover: var(--c-corporate-yellow);
-  --tabview-highlight-border-hover: 1px solid var(--c-custom-gray);
+  --tabview-highlight-border-hover: 1px solid var(--gray-25);
   --tabview-highlight-color-hover: var(--gray-110);
+
+  /* TabMenu */
+  --tabmenu-highlight-bg: var(--bg);
+  --tabmenu-highlight-border: 1px solid var(--gray-25);
+  --tabmenu-highlight-border-bottom: 1px solid var(--bg);
+  --tabmenu-highlight-color: var(--c-corporate-blue);
 
   /* Inputswitch */
   --inputswitch-checked-bg: var(--c-corporate-blue);

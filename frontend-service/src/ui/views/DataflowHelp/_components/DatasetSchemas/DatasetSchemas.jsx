@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, pick } from 'lodash';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -13,6 +13,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { CodelistService } from 'core/services/Codelist';
+import { ValidationService } from 'core/services/Validation';
 
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
@@ -30,6 +31,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   }, [datasetsSchemas]);
 
   useEffect(() => {
+    console.log({ validationList });
     renderDatasetSchemas();
   }, [codelistsList, validationList]);
 
@@ -48,31 +50,42 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const getValidationList = async datasetsSchemas => {
     try {
-      // setValidationList(await CodelistService.getCodelistsListWithSchemas(datasetsSchemas));
-      setValidationList([
-        {
-          automatic: 'true',
-          datasetSchemaId: '5e450733a268b2000140ad7c',
-          date: '2018-01-01',
-          enabled: 'true',
-          entityType: 'FIELD',
-          id: 0,
-          levelError: 'ERROR',
-          message: 'This is an error message',
-          ruleName: 'Test rule'
-        },
-        {
-          automatic: 'false',
-          datasetSchemaId: '5e450733a268b2000140ad7c',
-          date: '2018-01-01',
-          enabled: 'true',
-          entityType: 'TABLE',
-          id: 0,
-          levelError: 'WARNING',
-          message: 'This is a warning message 2',
-          ruleName: 'Test rule 2'
-        }
-      ]);
+      const datasetValidations = datasetsSchemas.map(async datasetSchema => {
+        console.log({ datasetSchema });
+        return await ValidationService.getAll(datasetSchema.datasetSchemaId);
+      });
+      Promise.all(datasetValidations).then(allValidations => {
+        setValidationList(
+          allValidations[0].validations.map(validation =>
+            pick(validation, 'name', 'entityType', 'levelError', 'message', 'automatic', 'enabled')
+          )
+        );
+      });
+
+      // setValidationList([
+      //   {
+      //     automatic: 'true',
+      //     datasetSchemaId: '5e450733a268b2000140ad7c',
+      //     date: '2018-01-01',
+      //     enabled: 'true',
+      //     entityType: 'FIELD',
+      //     id: 0,
+      //     levelError: 'ERROR',
+      //     message: 'This is an error message',
+      //     ruleName: 'Test rule'
+      //   },
+      //   {
+      //     automatic: 'false',
+      //     datasetSchemaId: '5e450733a268b2000140ad7c',
+      //     date: '2018-01-01',
+      //     enabled: 'true',
+      //     entityType: 'TABLE',
+      //     id: 0,
+      //     levelError: 'WARNING',
+      //     message: 'This is a warning message 2',
+      //     ruleName: 'Test rule 2'
+      //   }
+      // ]);
     } catch (error) {
       const schemaError = {
         type: error.message

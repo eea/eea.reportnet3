@@ -26,6 +26,11 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
   };
   const [treeViewState, dispatchTreeView] = useReducer(treeViewReducer, initialTreeViewState);
 
+  const onFilterChange = (event, field) => {
+    dataTableRef.current.filter(event.value, field, 'in');
+    dispatchTreeView({ type: 'SET_FILTER', payload: { value: event.value, field } });
+  };
+
   const getMultiselectFilter = field => {
     if (
       !isUndefined(columnOptions[propertyName]['filterType']) &&
@@ -45,6 +50,7 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
   };
 
   const groupFields = fields => {
+    parseData(fields);
     if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
       return (
         <DataTable ref={dataTableRef} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }} value={fields}>
@@ -56,15 +62,20 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
     }
   };
 
-  const onFilterChange = (event, field) => {
-    dataTableRef.current.filter(event.value, field, 'in');
-    dispatchTreeView({ type: 'SET_FILTER', payload: { value: event.value, field } });
+  const parseData = fieldsDTO => {
+    fieldsDTO.forEach(fieldDTO => {
+      for (let [key, value] of Object.entries(fieldDTO)) {
+        if (typeof value !== 'string') {
+          fieldDTO[key] = value.toString();
+        }
+      }
+    });
   };
 
   const renderColumns = fields =>
     Object.keys(fields[0]).map(field => (
       <Column
-        body={field === 'type' ? typeTemplate : null}
+        body={field === 'type' ? typeTemplate : field === 'automatic' || field === 'enabled' ? automaticTemplate : null}
         key={field}
         columnResizeMode="expand"
         field={field}
@@ -140,6 +151,14 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
   );
 };
 
+const automaticTemplate = rowData => (
+  <div>
+    {rowData.automatic || rowData.enabled ? (
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+    ) : null}
+  </div>
+);
+
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
 const getFieldTypeValue = value => {
@@ -171,10 +190,6 @@ const getInitialFilter = (columnOptions, field) =>
   !isUndefined(columnOptions.validations.filterType.multiselect)
     ? columnOptions.validations.filterType.multiselect[field]
     : [];
-
-const getFilterValues = () => {
-  console.log('LLEGO');
-};
 
 const typeTemplate = (rowData, column) => {
   return (
