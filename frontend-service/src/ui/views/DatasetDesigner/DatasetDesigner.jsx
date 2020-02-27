@@ -35,9 +35,9 @@ import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDat
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const DatasetDesigner = withRouter(({ match, history }) => {
+export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
-    params: { datasetId }
+    params: { dataflowId, datasetId }
   } = match;
 
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -53,9 +53,10 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isValidationDisabled, setIsValidationDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidationDisabled, setIsValidationDisabled] = useState(true);
   const [validationId, setValidationId] = useState('');
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
@@ -67,7 +68,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId);
+  } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
     try {
@@ -107,7 +108,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         href: getUrl(
           routes.DATAFLOW,
           {
-            dataflowId: match.params.dataflowId
+            dataflowId
           },
           true
         ),
@@ -116,7 +117,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             getUrl(
               routes.DATAFLOW,
               {
-                dataflowId: match.params.dataflowId
+                dataflowId
               },
               true
             )
@@ -130,13 +131,39 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }, []);
 
   const getDataflowName = async () => {
-    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    const dataflowData = await DataflowService.dataflowDetails(dataflowId);
     setDataflowName(dataflowData.name);
   };
 
   const onBlurDescription = description => {
     if (description !== initialDatasetDescription) {
       onUpdateDescription(description);
+    }
+  };
+
+  const onConfirmValidate = async () => {
+    try {
+      setValidateDialogVisible(false);
+      await DatasetService.validateDataById(datasetId);
+      notificationContext.add({
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName: datasetSchemaName
+        }
+      });
+    } catch (error) {
+      notificationContext.add({
+        type: 'VALIDATE_DATA_BY_ID_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName: datasetSchemaName
+        }
+      });
     }
   };
 
@@ -312,6 +339,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
               icon={'validate'}
               iconClasses={null}
               label={resources.messages['validate']}
+              onClick={() => setValidateDialogVisible(true)}
               ownButtonClasses={null}
             />
 
@@ -350,6 +378,18 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         snapshotListData={snapshotListData}
       />
       <ValidationsListDialog />
+
+      <ConfirmDialog
+        header={resources.messages['validateDataset']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmValidate}
+        onHide={() => setValidateDialogVisible(false)}
+        visible={validateDialogVisible}>
+        {resources.messages['validateDatasetConfirm']}
+      </ConfirmDialog>
+
       {renderDeleteConfirmDialog()}
       {/* <Dialog
         className={styles.paginatorValidationViewer}

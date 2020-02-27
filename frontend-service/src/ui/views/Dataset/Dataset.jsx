@@ -284,10 +284,12 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
-    const {
+    //  QUE ES ESO??
+    /*     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId });
+    } = await getMetadata({ dataflowId, datasetId }); */
+
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
