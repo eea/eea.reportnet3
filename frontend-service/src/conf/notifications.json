@@ -342,6 +342,14 @@
           "fixed": false
         },
         {
+          "key": "LOAD_RECEIPT_DATA_ERROR",
+          "lifeTime": 5000,
+          "fixed": false
+        },
+        {
+          "key": "RELEASE_BLOCKED_EVENT"
+        },
+        {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
         },
         {

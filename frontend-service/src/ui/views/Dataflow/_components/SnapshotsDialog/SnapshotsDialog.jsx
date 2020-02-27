@@ -23,6 +23,7 @@ export const SnapshotsDialog = ({
   datasetId,
   hideSnapshotDialog,
   isSnapshotDialogVisible,
+  receiptDispatch,
   setSnapshotDialog
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -33,18 +34,30 @@ export const SnapshotsDialog = ({
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDescription, setSnapshotDescription] = useState();
+  const [snapshotsListData, setSnapshotsListData] = useState([]);
 
   useCheckNotifications(
     [
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT',
       'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT',
-      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT',
-      'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT'
     ],
     setIsLoading,
     false
   );
+
+  useEffect(() => {
+    const response = notificationContext.toShow.find(
+      notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
+    );
+    if (response) {
+      receiptDispatch({
+        type: 'ON_RELEASE_NEW_DATA',
+        payload: { isOutdated: true }
+      });
+    }
+  }, [notificationContext]);
 
   useEffect(() => {
     if (isSnapshotDialogVisible) {
@@ -174,9 +187,9 @@ export const SnapshotsDialog = ({
       <ReleaseSnapshotDialog
         dataflowId={dataflowId}
         datasetId={datasetId}
-        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
-        isReleased={isReleased}
         hideReleaseDialog={onHideReleaseDialog}
+        isReleased={isReleased}
+        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
         onLoadSnapshotList={onLoadSnapshotList}
         setIsLoading={setIsLoading}
         snapshotDataToRelease={snapshotDataToRelease}

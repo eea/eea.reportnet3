@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 
-import moment from 'moment';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, uniq } from 'lodash';
 
 import styles from './Dataflow.module.scss';
 
@@ -37,6 +36,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -53,14 +53,14 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
-  const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [dataProviderId, setDataProviderId] = useState([]);
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
+  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveManageRolesDialog, setIsActiveManageRolesDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
   const [isDataflowFormReset, setIsDataflowFormReset] = useState(false);
@@ -69,14 +69,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditForm, setIsEditForm] = useState(false);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
-  const [hasRepresentatives, setHasRepresentatives] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
-  const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
+  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -257,6 +255,13 @@ const Dataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
+
+      if (!isEmpty(dataflow.datasets)) {
+        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
+        if (uniq(dataProviderIds).length === 1) {
+          setDataProviderId(dataProviderIds[0]);
+        }
+      }
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -267,6 +272,15 @@ const Dataflow = withRouter(({ history, match }) => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
         setUpdatedDatasetSchema(datasetSchemaInfo);
+      }
+      if (!isEmpty(dataflow.representatives)) {
+        const isOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+        if (isOutdated.length === 1) {
+          receiptDispatch({
+            type: 'INIT_DATA',
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {} }
+          });
+        }
       }
     } catch (error) {
       notificationContext.add({
@@ -283,25 +297,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadSchemasValidations = async () => {
     setIsDataSchemaCorrect(await DataflowService.schemasValidation(match.params.dataflowId));
-  };
-
-  const onLoadSnapshotList = async datasetId => {
-    setSnapshotsListData(await SnapshotService.allReporter(datasetId));
-  };
-
-  const onReleaseSnapshot = async snapshotId => {
-    try {
-      await SnapshotService.releaseByIdReporter(match.params.dataflowId, datasetIdToProps, snapshotId);
-      onLoadSnapshotList(datasetIdToProps);
-    } catch (error) {
-      console.log('ERROR ON RELEASE', error);
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
-    } finally {
-      setIsActiveReleaseSnapshotConfirmDialog(false);
-    }
   };
 
   const onSaveName = async (value, index) => {
@@ -348,22 +343,6 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated(!isDataUpdated);
   };
 
-  const releaseModalFooter = (
-    <>
-      <Button
-        icon="cloudUpload"
-        label={resources.messages['yes']}
-        onClick={() => onReleaseSnapshot(snapshotDataToRelease.id)}
-      />
-      <Button
-        icon="cancel"
-        className="p-button-secondary"
-        label={resources.messages['no']}
-        onClick={() => setIsActiveReleaseSnapshotConfirmDialog(false)}
-      />
-    </>
-  );
-
   const layout = children => {
     return (
       <MainLayout
@@ -385,89 +364,73 @@ const Dataflow = withRouter(({ history, match }) => {
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
           title={
-            !isUndefined(dataflowState[match.params.dataflowId])
-              ? TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
-              : null
+            !isUndefined(dataflowState[match.params.dataflowId]) &&
+            TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)
           }
           subtitle={resources.messages['dataflow']}
           icon="archive"
           iconSize="4rem"
         />
+
         <BigButtonList
           dataflowData={dataflowData}
-          handleRedirect={handleRedirect}
-          dataflowStatus={dataflowStatus}
           dataflowId={match.params.dataflowId}
+          dataflowStatus={dataflowStatus}
+          dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
-          isCustodian={isCustodian}
-          isDataSchemaCorrect={isDataSchemaCorrect}
+          handleRedirect={handleRedirect}
           hasRepresentatives={hasRepresentatives}
           hasWritePermissions={hasWritePermissions}
-          onUpdateData={onUpdateData}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          isCustodian={isCustodian}
+          isDataSchemaCorrect={isDataSchemaCorrect}
           onSaveName={onSaveName}
-          updatedDatasetSchema={updatedDatasetSchema}
+          onUpdateData={onUpdateData}
+          receiptDispatch={receiptDispatch}
+          receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          updatedDatasetSchema={updatedDatasetSchema}
         />
 
         <SnapshotsDialog
-          dataflowId={match.params.dataflowId}
           dataflowData={dataflowData}
+          dataflowId={match.params.dataflowId}
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+          receiptDispatch={receiptDispatch}
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
         />
-
-        <Dialog
-          header={resources.messages['manageRolesDialogTitle']}
-          footer={closeBtnManageRolesDialog}
-          visible={isActiveManageRolesDialog}
-          onHide={() => onHideManageRolesDialog()}
-          contentStyle={{ maxHeight: '60vh' }}>
-          <div className={styles.dialog}>
-            <RepresentativesList
-              dataflowId={dataflowData.id}
-              setHasRepresentatives={setHasRepresentatives}
-              isActiveManageRolesDialog={isActiveManageRolesDialog}
-            />
-          </div>
-        </Dialog>
-
-        {/* <Dialog
-          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
-          className={styles.releaseSnapshotsDialog}
-          visible={isActiveReleaseSnapshotDialog}
-          onHide={() => setIsActiveReleaseSnapshotDialog(false)}
-          style={{ width: '30vw' }}>
-           <ScrollPanel style={{ width: '100%', height: '50vh' }}> 
-          {!isEmpty(snapshotsListData) ? (
-            <SnapshotsList
-              className={styles.releaseList}
-              snapshotsListData={snapshotsListData}
-              onLoadSnapshotList={onLoadSnapshotList}
-              setSnapshotDataToRelease={setSnapshotDataToRelease}
-              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
-            />
-          ) : (
-            <h3>{resources.messages['emptySnapshotList']}</h3>
-          )}
-           </ScrollPanel> 
-        </Dialog> */}
+        {isCustodian && (
+          <Dialog
+            header={resources.messages['manageRolesDialogTitle']}
+            footer={closeBtnManageRolesDialog}
+            visible={isActiveManageRolesDialog}
+            onHide={() => onHideManageRolesDialog()}
+            contentStyle={{ maxHeight: '60vh' }}>
+            <div className={styles.dialog}>
+              <RepresentativesList
+                dataflowId={dataflowData.id}
+                setHasRepresentatives={setHasRepresentatives}
+                isActiveManageRolesDialog={isActiveManageRolesDialog}
+              />
+            </div>
+          </Dialog>
+        )}
 
         <Dialog
           header={resources.messages['properties']}
           footer={
             <>
               <div className="p-toolbar-group-left">
-                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? (
+                {isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && (
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
                     style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
                     onClick={() => onShowDeleteDataflowDialog()}
                   />
-                ) : null}
+                )}
               </div>
               <Button className="p-button-text-only" label="Generate new API-key" disabled />
               <Button className="p-button-text-only" label="Open Metadata" disabled />
@@ -483,9 +446,7 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
           <div className="description">
-            {!isUndefined(dataflowState[match.params.dataflowId])
-              ? dataflowState[match.params.dataflowId].description
-              : null}
+            {!isUndefined(dataflowState[match.params.dataflowId]) && dataflowState[match.params.dataflowId].description}
           </div>
           <div className="features">
             <ul>
@@ -510,23 +471,6 @@ const Dataflow = withRouter(({ history, match }) => {
         </Dialog>
 
         <Dialog
-          header={`${resources.messages['releaseSnapshotMessage']}`}
-          footer={releaseModalFooter}
-          visible={isActiveReleaseSnapshotConfirmDialog}
-          onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
-          <ul>
-            <li>
-              <strong>{resources.messages['creationDate']}: </strong>
-              {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
-            </li>
-            <li>
-              <strong>{resources.messages['description']}: </strong>
-              {snapshotDataToRelease.description}
-            </li>
-          </ul>
-        </Dialog>
-
-        <Dialog
           className={styles.dialog}
           dismissableMask={false}
           header={isEditForm ? resources.messages['updateDataflow'] : resources.messages['createNewDataflow']}
@@ -548,7 +492,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState[match.params.dataflowId]) ? (
+        {!isUndefined(dataflowState[match.params.dataflowId]) && (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
@@ -574,8 +518,6 @@ const Dataflow = withRouter(({ history, match }) => {
               />
             </p>
           </ConfirmDialog>
-        ) : (
-          <></>
         )}
       </div>
     </div>

@@ -1,0 +1,4 @@
+{   
+    "get": "/snapshot/dataflow/{:dataflowId}/releaseStatus/{:dataProviderId}" 
+}
+
