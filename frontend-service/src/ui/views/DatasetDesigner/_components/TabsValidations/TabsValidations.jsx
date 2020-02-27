@@ -82,6 +82,18 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
     ];
   };
 
+  const checkedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
+  const crossedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
   const parseToValidationsView = validations => {
     let validationsView = validations;
     validationsView.forEach(validationDTO => {
@@ -98,28 +110,14 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
       );
 
       if (validationDTO.automatic) {
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-        );
+        validationDTO.automatic = checkedField();
       } else {
-        // validationDTO.actionButtons = (
-        //   <div>
-        //     <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
-        //     <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
-        //   </div>
-        // );
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-        );
+        validationDTO.automatic = crossedField();
       }
       if (validationDTO.enabled) {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-        );
+        validationDTO.enabled = checkedField();
       } else {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-        );
+        validationDTO.enabled = crossedField();
       }
     });
     return validationsView;
