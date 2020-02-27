@@ -61,3 +61,19 @@ h5.is_released_snapshot {
 .listItemData .listActions button:nth-last-of-type(1) {
   margin-right: 0;
 }
+
+.hasBlockers {
+  background-color: transparent !important;
+  color: black !important;
+  font-size: 2rem;
+  border: none !important;
+  padding: 0 !important;
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--white) !important;
+  }
+  &:enabled:active,
+  :enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}

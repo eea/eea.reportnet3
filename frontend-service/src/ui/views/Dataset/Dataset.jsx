@@ -99,7 +99,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
       console.info('dataset.Metadata: %o', metaData);
-      const breadCrums = [
+      const breadCrumbs = [
         {
           label: resources.messages['dataflowList'],
           icon: 'home',
@@ -129,7 +129,7 @@ export const Dataset = withRouter(({ match, history }) => {
         }
       ];
       if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
-        breadCrums.push({
+        breadCrumbs.push({
           label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
           icon: 'representative',
           href: getUrl(
@@ -153,8 +153,8 @@ export const Dataset = withRouter(({ match, history }) => {
             )
         });
       }
-      breadCrums.push({ label: resources.messages['dataset'], icon: 'dataset' });
-      breadCrumbContext.add(breadCrums);
+      breadCrumbs.push({ label: resources.messages['dataset'], icon: 'dataset' });
+      breadCrumbContext.add(breadCrumbs);
       leftSideBarContext.removeModels();
     }
   }, [metaData]);

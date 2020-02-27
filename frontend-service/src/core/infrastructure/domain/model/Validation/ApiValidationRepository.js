@@ -1,3 +1,5 @@
+import { isEmpty, isNull, isUndefined } from 'lodash';
+
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
@@ -6,18 +8,58 @@ const deleteById = async (datasetSchemaId, ruleId) => {
 };
 
 const getAll = async datasetSchemaId => {
-  const validationsDTO = await apiValidation.getAll(datasetSchemaId);
-  return (validations = validationsDTO.map(validationsDTO => {
-    return new Validation({
-      id: validationsDTO.id,
-      levelError: validationsDTO.levelError,
-      entityType: validationsDTO.entityType,
-      date: validationsDTO.date,
-      message: validationsDTO.message
-    });
-  }));
+  const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
+  console.log({ validationsListDTO });
+  if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
+    return;
+  }
+
+  const validationsList = {};
+  validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
+  validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
+
+  const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
+  validationsList.entityTypes = validationsData.entityTypes;
+  validationsList.validations = validationsData.validations;
+  console.log({ validationsList });
+  return validationsList;
 };
 
+const parseDataValidationRulesDTO = validations => {
+  const validationsData = {};
+  const entityTypes = [];
+
+  validationsData.validations = validations.map(validationDTO => {
+    entityTypes.push(validationDTO.type);
+    return new Validation({
+      activationGroup: validationDTO.activationGroup,
+      automatic: validationDTO.automatic,
+      condition: validationDTO.whenCondition,
+      date: validationDTO.activationGroup,
+      description:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
+          ? validationDTO.thenCondition[0]
+          : null,
+      enabled: validationDTO.enabled,
+      enabled: validationDTO.enabled,
+      entityType: validationDTO.type,
+      id: validationDTO.ruleId,
+      levelError:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[1])
+          ? validationDTO.thenCondition[1]
+          : null,
+      message:
+        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
+          ? validationDTO.thenCondition[0]
+          : null,
+      name: validationDTO.ruleName,
+      referenceId: validationDTO.referenceId
+    });
+  });
+
+  validationsData.entityTypes = [...new Set(entityTypes)];
+  return validationsData;
+};
 export const ApiValidationRepository = {
   deleteById,
   getAll

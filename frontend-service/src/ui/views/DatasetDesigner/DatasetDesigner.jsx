@@ -8,21 +8,26 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { Toolbar } from 'ui/views/_components/Toolbar';
+import { TabsValidations } from './_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+import { ValidationService } from 'core/services/Validation';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
@@ -34,19 +39,23 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const {
     params: { datasetId }
   } = match;
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
-  const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
+  const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [qcDialogVisibility, setQcDialogVisibility] = useState(true);
+  const [validationId, setValidationId] = useState('');
+  const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
     isLoadingSnapshotListData,
@@ -130,6 +139,18 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     }
   };
 
+  const onDeleteValidation = async () => {
+    try {
+      await ValidationService.deleteById(datasetSchemaId, validationId);
+    } catch (error) {
+      notificationContext.add({
+        type: 'DELETE_RULE_ERROR'
+      });
+    } finally {
+      onHideDeleteDialog();
+    }
+  };
+
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setDatasetDescription(initialDatasetDescription);
@@ -161,6 +182,75 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       console.error('Error during datasetSchema Description update: ', error);
     } finally {
     }
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setValidationListDialogVisible(true);
+    setValidationId('');
+  };
+
+  const onHideValidationsDialog = () => {
+    setValidationListDialogVisible(false);
+  };
+
+  const onShowDeleteDialog = () => {
+    setIsDeleteDialogVisible(true);
+    setValidationListDialogVisible(false);
+  };
+
+  const actionButtonsValidationDialog = (
+    <>
+      <Button
+        className="p-button-primary"
+        icon={'plus'}
+        label={resources.messages['create']}
+        onClick={() => onHideValidationsDialog()}
+      />
+      <Button
+        className="p-button-secondary"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => onHideValidationsDialog()}
+      />
+    </>
+  );
+
+  const renderDeleteConfirmDialog = () => {
+    return (
+      <ConfirmDialog
+        header={resources.messages['deleteValidationHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onDeleteValidation()}
+        onHide={() => onHideDeleteDialog()}
+        visible={isDeleteDialogVisible}>
+        {resources.messages['deleteValidationConfirm']}
+      </ConfirmDialog>
+    );
+  };
+
+  const ValidationsListDialog = () => {
+    if (validationListDialogVisible) {
+      return (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          footer={actionButtonsValidationDialog}
+          header={resources.messages['titleValidations']}
+          maximizable
+          onHide={() => onHideValidationsDialog()}
+          style={{ width: '80%' }}
+          visible={validationListDialogVisible}>
+          <TabsValidations
+            datasetSchemaId={datasetSchemaId}
+            onShowDeleteDialog={onShowDeleteDialog}
+            setValidationId={setValidationId}
+          />
+        </Dialog>
+      );
+    }
+    return <></>;
   };
 
   const layout = children => {
@@ -226,6 +316,16 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
+              disabled={false}
+              icon={'list'}
+              label={resources.messages['qcRules']}
+              onClick={() => setValidationListDialogVisible(true)}
+              ownButtonClasses={null}
+              iconClasses={null}
+            />
+
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
@@ -248,6 +348,27 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
         snapshotListData={snapshotListData}
       />
+      <ValidationsListDialog />
+      {renderDeleteConfirmDialog()}
+      {/* <Dialog
+        className={styles.paginatorValidationViewer}
+        dismissableMask={true}
+        header={resources.messages['titleValidations']}
+        maximizable
+        onHide={() => setValidationListDialogVisible(false)}
+        style={{ width: '80%' }}
+        visible={validationListDialogVisible}>
+        {/* <ValidationViewer
+          datasetId={datasetId}
+          datasetName={datasetName}
+          hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
+          onSelectValidation={onSelectValidation}
+          tableSchemaNames={tableSchemaNames}
+          visible={validationsVisible}
+        /> */}
+      {/* <TabsValidations datasetSchemaId={datasetSchemaId} />
+      </Dialog>       */}
     </SnapshotContext.Provider>
   );
 });

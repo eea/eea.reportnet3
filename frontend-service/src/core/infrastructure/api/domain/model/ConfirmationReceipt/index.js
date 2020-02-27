@@ -1,0 +1,1 @@
+export { apiConfirmationReceipt } from './ApiConfirmationReceipt';
