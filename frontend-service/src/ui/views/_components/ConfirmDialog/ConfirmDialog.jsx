@@ -14,6 +14,7 @@ const ConfirmDialog = forwardRef((props, _) => {
     header,
     iconCancel,
     iconConfirm,
+    isPasting,
     disabledConfirm,
     labelCancel,
     labelConfirm,
@@ -58,8 +59,8 @@ const ConfirmDialog = forwardRef((props, _) => {
     <div>
       {hasPasteOption && isHTTPS() ? (
         <Button
-          disabled={!isChrome()}
-          icon="clipboard"
+          disabled={!isChrome() || isPasting}
+          icon={!isPasting ? 'clipboard' : 'spinnerAnimate'}
           label={resources.messages['paste']}
           onClick={async () => {
             onPasteAsync();
@@ -68,15 +69,27 @@ const ConfirmDialog = forwardRef((props, _) => {
           tooltip={!isChrome() ? resources.messages['pasteDisableButtonMessage'] : null}
         />
       ) : null}
+      {hasPasteOption ? (
+        <Button
+          className={`p-button-success`}
+          disabled={disabledConfirm || isPasting}
+          icon={!isPasting ? (iconConfirm ? iconConfirm : 'check') : 'spinnerAnimate'}
+          label={labelConfirm}
+          onClick={onConfirm}
+          style={styleConfirm}
+        />
+      ) : (
+        <Button
+          className={`p-button-success`}
+          disabled={disabledConfirm}
+          icon={iconConfirm ? iconConfirm : 'check'}
+          label={labelConfirm}
+          onClick={onConfirm}
+          style={styleConfirm}
+        />
+      )}
       <Button
-        label={labelConfirm}
-        icon={iconConfirm ? iconConfirm : 'check'}
-        onClick={onConfirm}
-        disabled={disabledConfirm}
-        style={styleConfirm}
-      />
-      <Button
-        className="p-button-secondary"
+        className="p-button-danger"
         icon={iconCancel ? iconCancel : 'cancel'}
         label={labelCancel}
         onClick={onHide}

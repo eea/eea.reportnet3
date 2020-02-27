@@ -124,6 +124,7 @@
   word-wrap: break-word;
   max-width: 100px;
   box-sizing: content-box;
+  color: var(--main-font-color);
 }
 
 .inputText {

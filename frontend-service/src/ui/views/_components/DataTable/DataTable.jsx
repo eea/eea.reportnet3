@@ -3,6 +3,8 @@ import { isUndefined } from 'lodash';
 
 import colors from 'conf/colors.json';
 
+import './DataTable.css';
+
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Paginator } from 'primereact/paginator';
 import { ScrollableView } from './_components/ScrollableView';

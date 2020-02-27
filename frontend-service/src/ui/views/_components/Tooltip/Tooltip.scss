@@ -1,0 +1,61 @@
+.tooltip {
+  $transTime: 300ms;
+  position: relative;
+  .tooltip-label {
+    position: absolute;
+    padding: 0.5em;
+    margin-bottom: 1em;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 12em;
+    border-radius: 2px;
+    background-color: #313131;
+    box-shadow: 0 3px 16px rgba(black, 0.15);
+    &:after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border: 0.4em solid transparent;
+      border-top-color: #313131;
+      left: 50%;
+      z-index: -1;
+      transform: translateX(-50%);
+      transition: top $transTime ease;
+    }
+  }
+  &.is-visible {
+    .tooltip-label {
+      transform: translateY(0) translateX(-50%);
+      opacity: 1;
+      visibility: visible;
+      transition: transform $transTime ease, opacity $transTime, visibility $transTime 0s;
+      &:after {
+        top: 100%;
+      }
+    }
+  }
+  &.is-hidden {
+    .tooltip-label {
+      transform: translateY(100%) translateX(-50%);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform $transTime ease, opacity $transTime, visibility $transTime $transTime;
+      &:after {
+        top: 0;
+      }
+    }
+  }
+}
+
+@keyframes fade {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  100% {
+    top: -1em;
+    opacity: 0;
+  }
+}

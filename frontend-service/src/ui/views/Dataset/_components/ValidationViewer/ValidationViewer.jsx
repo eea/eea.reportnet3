@@ -366,7 +366,7 @@ const ValidationViewer = React.memo(
           <Toolbar className={styles.validationToolbar}>
             <div className="p-toolbar-group-left">
               <Button
-                className={`${styles.origin} p-button-rounded p-button-secondary`}
+                className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
                 label={resources.messages['origin']}
                 onClick={event => {
@@ -388,7 +388,7 @@ const ValidationViewer = React.memo(
               />
 
               <Button
-                className={`${styles.level} p-button-rounded p-button-secondary`}
+                className={`${styles.level} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
                 label={resources.messages['levelError']}
                 onClick={event => {
@@ -410,7 +410,7 @@ const ValidationViewer = React.memo(
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary`}
+                className={`p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
                 label={resources.messages['entityType']}
                 onClick={event => {
@@ -432,7 +432,7 @@ const ValidationViewer = React.memo(
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary`}
+                className={`p-button-rounded p-button-secondary-transparent`}
                 disabled={!areActiveFilters}
                 icon={'cross'}
                 label={resources.messages['cleanFilters']}
@@ -447,7 +447,7 @@ const ValidationViewer = React.memo(
 
             <div className="p-toolbar-group-right">
               <Button
-                className={`p-button-rounded p-button-secondary`}
+                className={`p-button-rounded p-button-secondary-transparent`}
                 disabled={false}
                 icon={'refresh'}
                 label={resources.messages['refresh']}

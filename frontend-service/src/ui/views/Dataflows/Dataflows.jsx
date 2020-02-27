@@ -107,7 +107,7 @@ const Dataflows = withRouter(({ match, history }) => {
         },
         {
           href: getUrl(routes['CODELISTS']),
-          icon: 'settings',
+          icon: 'clipboard',
           label: 'manageCodelists',
           onClick: e => {
             e.preventDefault();
