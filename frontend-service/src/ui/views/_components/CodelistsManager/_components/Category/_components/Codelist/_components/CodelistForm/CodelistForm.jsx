@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { capitalize, isNull, isUndefined } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { capitalize, isNull, isUndefined, isEmpty } from 'lodash';
 
 import styles from './CodelistForm.module.css';
 
@@ -10,6 +10,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const CodelistForm = ({
+  checkDuplicateItems,
   columns,
   formType,
   onCancelAddEditItem,
@@ -21,23 +22,41 @@ const CodelistForm = ({
   visible
 }) => {
   const resources = useContext(ResourcesContext);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   useEffect(() => {
     onFormLoaded();
   }, []);
 
+  useEffect(() => {
+    checkDisabledSave();
+  }, [item]);
+
+  const checkDisabledSave = () => {
+    const inmKeys = [...Object.keys(item)];
+    if (inmKeys.indexOf('codelistId') > -1) {
+      inmKeys.splice(inmKeys.indexOf('codelistId'), 1);
+    }
+    setIsSaveDisabled(
+      !isEmpty(inmKeys.filter(key => item[key].trim() === '')) || !checkDuplicateItems(item['shortCode'], item['id'])
+    );
+  };
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['save']}
+        disabled={isSaveDisabled}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => {
+          setIsSaveDisabled(true);
           onSaveItem(formType);
+          setIsSaveDisabled(false);
         }}
       />
       <Button
-        label={resources.messages['cancel']}
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           onCancelAddEditItem();
           onHideDialog();
@@ -51,7 +70,14 @@ const CodelistForm = ({
       <React.Fragment key={column}>
         <span className={`${styles.codelistInput} p-float-label`}>
           <InputText
+            className={
+              (!isUndefined(item) && !isUndefined(item[column]) && item[column].trim() === '') ||
+              (column === 'shortCode' && !checkDuplicateItems(item['shortCode'], item['id']))
+                ? styles.codelistIncorrectItem
+                : null
+            }
             id={`${column}Input`}
+            // onBlur={column === 'shortCode' ? () => setIsSaveDisabled(checkDuplicateItems(item['shortCode'])) : null}
             onChange={e => onChangeItemForm(column, e.target.value, formType)}
             value={isUndefined(item) || isNull(item[column]) || isUndefined(item[column]) ? '' : item[column]}
           />

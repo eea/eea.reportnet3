@@ -38,7 +38,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import styles from './InputText.module.css';
+import './InputText.css';
 
 import logo from 'assets/images/logo.png';
 
@@ -152,7 +152,7 @@ export class InputText extends Component {
           autoFocus={this.props.autoFocus}
           ref={el => (this.element = el)}
           {...inputProps}
-          className={`${className}${this.props.required ? ` ${styles.required}` : ''}`}
+          className={className}
           onInput={this.onInput}
           onKeyPress={this.onKeyPress}
         />

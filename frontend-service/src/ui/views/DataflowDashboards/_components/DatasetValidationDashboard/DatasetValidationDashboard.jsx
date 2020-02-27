@@ -8,8 +8,10 @@ import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
 import { FilterList } from './_components/FilterList';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { filterReducer } from './_functions/filterReducer';
 
@@ -26,6 +28,7 @@ import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
   const resources = useContext(ResourcesContext);
+  const themeContext = useContext(ThemeContext);
   const initialFiltersState = {
     reporterFilter: [],
     tableFilter: [],
@@ -53,6 +56,11 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
   }, [validationDashboardData]);
+
+  // useEffect(() => {
+  //   console.log(chartRef.current);
+  //   // chartRef.current.refresh();
+  // }, [themeContext.currentTheme]);
 
   // const onChangeColor = (color, type) => {
   //   setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
@@ -166,7 +174,11 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
       xAxes: [
         {
           stacked: true,
-          maxBarThickness: 100
+          maxBarThickness: 100,
+          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
+          ticks: {
+            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+          }
         }
       ],
       yAxes: [
@@ -174,13 +186,16 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
           stacked: true,
           scaleLabel: {
             display: true,
-            labelString: resources.messages['percentage']
+            labelString: resources.messages['percentage'],
+            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
           },
           ticks: {
             min: 0,
             max: 100,
-            callback: (value, index, values) => `${value}%`
-          }
+            callback: (value, index, values) => `${value}%`,
+            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+          },
+          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
         }
       ]
     }

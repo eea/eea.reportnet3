@@ -148,7 +148,7 @@ const useBigButtonList = ({
         disabled: true
       }
     ],
-    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections)
+    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -157,10 +157,10 @@ const useBigButtonList = ({
       return dataset.datasetSchemaName;
     });
     const uniqRepresentatives = uniq(representatives);
-    if (uniqRepresentatives.length === 1) {
+    if (uniqRepresentatives.length === 1 && !isCustodian) {
       const [representative] = uniqRepresentatives;
       return datasets.map(dataset => {
-        const datasetName = isCustodian ? representative : dataset.name;
+        const datasetName = dataset.name;
         return {
           layout: 'defaultBigButton',
           buttonClass: 'dataset',
