@@ -342,7 +342,13 @@
           "fixed": false
         },
         {
-          "key": "RELEASE_BLOCKED_EVENT",
+          "key": "RELEASE_BLOCKED_EVENT"
+        },
+        {
+          "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
+        },
+        {
+          "key": "DELETE_RULE_ERROR",
           "lifeTime": 5000,
           "fixed": false
         }
