@@ -182,6 +182,7 @@
   --paginator-pages-highlight-bg: var(--white);
   --paginator-pages-highlight-color: var(--black);
   --paginator-pages-color: var(--white);
+  --paginator-right-content: var(--white);
 
   /* Dropdown */
   --dropdown-bg: var(--bg);

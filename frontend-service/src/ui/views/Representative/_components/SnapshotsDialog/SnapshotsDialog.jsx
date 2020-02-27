@@ -15,6 +15,8 @@ import { SnapshotService } from 'core/services/Snapshot';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 export const SnapshotsDialog = ({
   dataflowData,
   dataflowId,
@@ -32,8 +34,18 @@ export const SnapshotsDialog = ({
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-  const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDescription, setSnapshotDescription] = useState();
+  const [snapshotsListData, setSnapshotsListData] = useState([]);
+
+  useCheckNotifications(
+    [
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT',
+      'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT',
+      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
+    setIsLoading,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(
@@ -91,8 +103,6 @@ export const SnapshotsDialog = ({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
         content: {}
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -177,9 +187,9 @@ export const SnapshotsDialog = ({
       <ReleaseSnapshotDialog
         dataflowId={dataflowId}
         datasetId={datasetId}
-        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
-        isReleased={isReleased}
         hideReleaseDialog={onHideReleaseDialog}
+        isReleased={isReleased}
+        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
         onLoadSnapshotList={onLoadSnapshotList}
         setIsLoading={setIsLoading}
         snapshotDataToRelease={snapshotDataToRelease}
