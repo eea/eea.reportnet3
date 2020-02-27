@@ -8,16 +8,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Rule.
+ * The Class Rule VO.
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class RuleVO {
 

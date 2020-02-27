@@ -14,25 +14,8 @@ import lombok.ToString;
  * The Class Rule.
  */
 
-/**
- * Gets the short code.
- *
- * @return the short code
- */
 @Getter
-
-/**
- * Sets the short code.
- *
- * @param shortCode the new short code
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class Rule {
   /** The rule id. */
