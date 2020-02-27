@@ -54,7 +54,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [ruleData, setRuleData] = useState({});
+  const [validationId, setValidationId] = useState('');
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
@@ -141,7 +141,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const onDeleteValidation = async () => {
     try {
-      await ValidationService.deleteById(datasetSchemaId, ruleData.id);
+      await ValidationService.deleteById(datasetSchemaId, validationId);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_RULE_ERROR'
@@ -187,7 +187,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
     setValidationListDialogVisible(true);
-    setRuleData({});
+    setValidationId('');
   };
 
   const onHideValidationsDialog = () => {
@@ -245,7 +245,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           <TabsValidations
             datasetSchemaId={datasetSchemaId}
             onShowDeleteDialog={onShowDeleteDialog}
-            setRuleData={setRuleData}
+            setValidationId={setValidationId}
           />
         </Dialog>
       );
