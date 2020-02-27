@@ -32,7 +32,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   const [codelistsInEdition, setCodelistsInEdition] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorMessageTitle, setErrorMessageTitle] = useState('');
-  const [isEditionModeOn, setIsEditionModeOn] = useState(false);
+  const [isEditionModeOn, setIsEditionModeOn] = useState();
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isIncorrect, setIsIncorrect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -142,6 +142,15 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
   //   }
   // };
 
+  const onRefreshCategory = (newCategory, updatedCodelists) => {
+    console.log({ newCategory, updatedCodelists });
+    newCategory.codelists = updatedCodelists;
+    const inmCategories = cloneDeep(codelistsManagerState.categories);
+    const updatedCategories = inmCategories.map(category => (newCategory.id === category.id ? newCategory : category));
+    console.log(updatedCategories);
+    dispatchCodelistsManager({ type: 'SET_CATEGORIES', payload: { categories: updatedCategories } });
+  };
+
   const onSaveCategory = async () => {
     try {
       const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
@@ -231,6 +240,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
           onCodelistError={onCodelistError}
           onCodelistSelected={onCodelistSelected}
           onLoadCategories={onLoadCategories}
+          onRefreshCategory={onRefreshCategory}
           // onLoadCategory={onLoadCategory}
           onToggleIncorrect={onToggleIncorrect}
           updateEditingCodelists={updateEditingCodelists}
@@ -289,7 +299,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
         {
           <div>
             <Button
-              className={`p-button-secondary ${styles.orderIcon}`}
+              className={`p-button-secondary-transparent ${styles.orderIcon}`}
               icon={codelistsManagerState.order === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
               onClick={() => onOrderCategories(codelistsManagerState.order)}
               style={{ fontSize: '12pt' }}
@@ -297,7 +307,7 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
               tooltipOptions={{ position: 'bottom' }}
             />
             <Button
-              className={`p-button-secondary ${styles.orderIcon}`}
+              className={`p-button-secondary-transparent ${styles.orderIcon}`}
               icon={codelistsManagerState.toggleExpandCollapseAll === 1 ? 'angleRight' : 'angleDown'}
               onClick={() => onToggleExpandCollapseAll()}
               tooltip={
@@ -309,7 +319,6 @@ const CodelistsManager = ({ isDataCustodian = true, isInDesign = false, onCodeli
             />
           </div>
         }
-        {console.log(codelistsInEdition)}
         {
           <Button
             className={styles.newCategoryButton}

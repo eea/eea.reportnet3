@@ -1,5 +1,5 @@
 export class Validation {
-  constructor(id, levelError, entityType, date, message) {
+  constructor({ id, levelError, entityType, date, message } = {}) {
     this.date = date;
     this.entityType = entityType;
     this.id = id;

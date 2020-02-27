@@ -1,7 +1,20 @@
 import React from 'react';
 import { Checkbox as PrimeCheckbox } from 'primereact/checkbox';
 
-const Checkbox = ({ id, className, style, defaultChecked, onChange, htmlFor, isChecked, disabled }) => {
+import './Checkbox.scss';
+
+const Checkbox = ({
+  className,
+  defaultChecked,
+  disabled,
+  htmlFor,
+  id,
+  isChecked,
+  labelClassName,
+  labelMessage,
+  onChange,
+  style
+}) => {
   return (
     <>
       <PrimeCheckbox onChange={onChange} checked={isChecked} disabled={disabled} />

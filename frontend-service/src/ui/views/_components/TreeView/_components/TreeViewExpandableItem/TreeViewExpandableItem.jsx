@@ -139,9 +139,9 @@ const TreeViewExpandableItem = ({
       </div>
       {/* <div className={styles.treeChildrenWrapper}> */}
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
-      {React.Children.count(children) === 0 && isOpen && !isUndefined(items[0])
-        ? `${resources.messages['emptyDatasetDesign']} ${items[0].label}`
-        : null}
+      {React.Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
+        <span className={styles.emptyProperty}>{`${resources.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
+      ) : null}
       {/* </div> */}
     </React.Fragment>
   );

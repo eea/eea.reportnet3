@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
 
+import './TabView.scss';
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
