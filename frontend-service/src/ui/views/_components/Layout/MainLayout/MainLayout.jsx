@@ -45,7 +45,7 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
     window.scrollTo(0, 0);
-    //  themeContext.onToggleTheme(localStorage.getItem('theme'));
+    themeContext.onToggleTheme(localStorage.getItem('theme'));
   }, []);
 
   useEffect(() => {
