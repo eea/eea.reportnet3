@@ -152,9 +152,12 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
 };
 
 const automaticTemplate = rowData => (
-  <div>
+  <div style={{ display: 'flex', justifyContent: 'center' }}>
     {rowData.automatic || rowData.enabled ? (
-      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+      <FontAwesomeIcon
+        icon={AwesomeIcons('check')}
+        style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+      />
     ) : null}
   </div>
 );

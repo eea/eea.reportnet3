@@ -40,6 +40,7 @@
   --c-corporate-blue-lighter: #0286c9;
   --c-corporate-aqua-marine: #008675;
   --c-corporate-yellow: #ffd902;
+  --c-corporate-yellow-lighter: #ffec81;
   /* Blue palette */
   --c-blue-400: #4f758b;
   --c-blue-300: #6ba4b8;
@@ -399,6 +400,12 @@
   /* Form field */
   --form-field-bg: var(--white);
   --form-field-color: var(--black);
+
+  /* Hyperlinks */
+  --hyperlink-color: var(--c-corporate-blue);
+  --hyperlink-color-hover: var(--c-corporate-blue-lighter);
+  --hyperlink-color-active: var(--c-purple);
+  --hyperlink-color-visited: var(--c-purple);
 }
 body {
   margin: 0px;
