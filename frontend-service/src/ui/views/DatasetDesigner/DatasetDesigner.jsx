@@ -59,10 +59,10 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const {
     isLoadingSnapshotListData,
-    isSnapshotsBarVisible,
-    setIsSnapshotsBarVisible,
     isSnapshotDialogVisible,
+    isSnapshotsBarVisible,
     setIsSnapshotDialogVisible,
+    setIsSnapshotsBarVisible,
     snapshotDispatch,
     snapshotListData,
     snapshotState
@@ -268,16 +268,16 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   return layout(
     <SnapshotContext.Provider
       value={{
-        snapshotState: snapshotState,
-        snapshotDispatch: snapshotDispatch,
         isSnapshotsBarVisible: isSnapshotsBarVisible,
-        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
+        snapshotDispatch: snapshotDispatch,
+        snapshotState: snapshotState
       }}>
       <Title
-        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
-        subtitle={dataflowName}
         icon="pencilRuler"
         iconSize="3.4rem"
+        subtitle={dataflowName}
+        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
       />
       <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
       <div className={styles.ButtonsBar}>
@@ -304,24 +304,25 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
+
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
+              disabled={false}
               icon={'validate'}
-              label={resources.messages['validate']}
-              onClick={() => null}
-              ownButtonClasses={null}
               iconClasses={null}
+              label={resources.messages['validate']}
+              ownButtonClasses={null}
             />
 
             <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={false}
               icon={'list'}
+              iconClasses={null}
               label={resources.messages['qcRules']}
               onClick={() => setValidationListDialogVisible(true)}
               ownButtonClasses={null}
-              iconClasses={null}
             />
 
             <Button

@@ -220,8 +220,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
 
   const checkDuplicates = (header, tabIndex) => {
     const inmTabs = [...tabs];
-    const repeteadElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
-    return repeteadElements.length > 0 && tabIndex !== repeteadElements[0].index;
+    const repeatedElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
+    return repeatedElements.length > 0 && tabIndex !== repeatedElements[0].index;
   };
 
   const checkEditingTabs = () => {
@@ -309,10 +309,10 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
           onTabAdd={onTabAdd}
-          onTabBlur={onTableAdd}
           onTabAddCancel={onTabAddCancel}
-          onTabConfirmDelete={onTableDelete}
+          onTabBlur={onTableAdd}
           onTabClick={onTabClicked}
+          onTabConfirmDelete={onTableDelete}
           onTabDragAndDrop={onTableDragAndDrop}
           onTabDragAndDropStart={onTableDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}

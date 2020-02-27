@@ -21,9 +21,9 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
-  const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
-  const [initialTableDescription, setInitialTableDescription] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
+  const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
+  const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistSelected, setIsCodelistSelected] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
@@ -132,7 +132,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const onFieldDragAndDropStart = draggedFieldIdx => {
-    setinitialFieldIndexDragged(draggedFieldIdx);
+    setInitialFieldIndexDragged(draggedFieldIdx);
   };
 
   const onKeyChange = event => {
@@ -336,8 +336,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
               codelistName={field.codelistName}
               codelistVersion={field.codelistVersion}
               datasetId={datasetId}
-              fieldId={field.fieldId}
               fieldDescription={field.description}
+              fieldId={field.fieldId}
               fieldName={field.name}
               fieldRequired={field.required}
               fieldType={field.type}
