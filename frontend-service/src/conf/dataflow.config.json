@@ -4,6 +4,7 @@
         "DRAFT": "DRAFT"
     },
     "errorTypes": {
-        "dataflowExists": "Dataflow name already exists"
+        "dataflowExists": "Dataflow name already exists",
+        "copyWithErrors": "The snapshot contains blocker errors"
     }
 }

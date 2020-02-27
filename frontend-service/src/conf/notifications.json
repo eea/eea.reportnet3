@@ -342,6 +342,9 @@
           "fixed": false
         },
         {
+          "key": "RELEASE_BLOCKED_EVENT"
+        },
+        {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
         },
         {

@@ -448,6 +448,7 @@
 		"loadDocumentsError": "Error loading documents",
 		"loadWebLinksError": "Error loading web links",
 		"dataflowNameExists": "Dataflow name already exists, please choose another one",
+		"releaseBlockedEvent": "The data contains blocker errors",
 		"deleteRuleError": "Error deleting rule",
 		"deleteValidationConfirm": "Are you sure you want to delete the validation?",
 		"deleteValidationHeader": "Delete validation"
