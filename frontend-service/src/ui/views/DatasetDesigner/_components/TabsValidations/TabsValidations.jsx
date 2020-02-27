@@ -87,6 +87,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
     validationsView.forEach(validationDTO => {
       validationDTO.actionButtons = (
         <div className={styles.actionButtons}>
+          <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary ${styles.btnEdit}`} />
           <Button
             className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
@@ -98,7 +99,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
 
       if (validationDTO.automatic) {
         validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
         );
       } else {
         // validationDTO.actionButtons = (
@@ -108,16 +109,16 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
         //   </div>
         // );
         validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
         );
       }
       if (validationDTO.enabled) {
         validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
         );
       } else {
         validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
+          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
         );
       }
     });
