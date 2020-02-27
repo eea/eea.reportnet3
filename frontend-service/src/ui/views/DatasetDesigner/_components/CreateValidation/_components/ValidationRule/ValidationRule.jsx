@@ -7,7 +7,7 @@ import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
-const ValidationRule = ({ deleteRule, isDisabled, ruleValues, setValidationRule }) => {
+const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidationRule }) => {
   const onChangeField = field => {
     setValidationRule(ruleValues.ruleId, field);
   };
@@ -45,7 +45,9 @@ const ValidationRule = ({ deleteRule, isDisabled, ruleValues, setValidationRule 
       setOperatorValues(operatorTypes[ruleValues.operatorType].values);
     }
   }, [ruleValues.operatorType]);
-  return (
+
+  // layouts
+  const defaultLayout = (
     <tr>
       <td>
         <Checkbox
@@ -136,5 +138,10 @@ const ValidationRule = ({ deleteRule, isDisabled, ruleValues, setValidationRule 
       </td>
     </tr>
   );
+  const layouts = {
+    default: defaultLayout
+  };
+
+  return layout ? layouts[layout] : layouts['default'];
 };
 export { ValidationRule };

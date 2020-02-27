@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 
-import { capitalize, isEmpty, isEqual, isUndefined, last, pullAllWith } from 'lodash';
+import { capitalize, isEmpty, isEqual, isUndefined, last, pullAllWith, pull, findIndex } from 'lodash';
 import uuid from 'uuid';
 
 import styles from './CreateValidation.module.scss';
@@ -76,7 +76,7 @@ const createValidationReducer = (state, { type, payload }) => {
     case 'GROUP_RULES_ACTIVATOR':
       return {
         ...state,
-        groupRulesActive: state.groupRulesActive + payload
+        groupRulesActive: state.groupRulesActive + payload.groupRulesActive
       };
     case 'INIT_FORM':
       return {
@@ -100,7 +100,8 @@ const createValidationReducerInitState = {
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
   isValidationCreationDisabled: true,
-  groupRulesActive: 0
+  groupRulesActive: 0,
+  groupCandidate: []
 };
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
@@ -122,17 +123,18 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
 
   const setValidationRule = (ruleId, ruleProperty) => {
     if (ruleProperty.key == 'group') {
+      const { groupCandidate } = creationFormState;
       if (ruleProperty.value.value) {
-        creationFormDispatch({
-          type: 'GROUP_RULES_ACTIVATOR',
-          payload: 1
-        });
+        groupCandidate.push(ruleId);
       } else {
-        creationFormDispatch({
-          type: 'GROUP_RULES_ACTIVATOR',
-          payload: -1
-        });
+        pull(groupCandidate, ruleId);
       }
+      creationFormDispatch({
+        type: 'GROUP_RULES_ACTIVATOR',
+        payload: {
+          groupRulesActive: ruleProperty.value.value ? 1 : -1
+        }
+      });
     }
     const {
       candidateRule: { rules }
@@ -192,6 +194,36 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
       creationFormDispatch({
         type: 'UPDATE_RULES',
         payload: [deleteCandidate]
+      });
+    }
+  };
+  const groupRules = () => {
+    if (creationFormState.groupRulesActive >= 2) {
+      //take firs rule to group position in array
+      const {
+        candidateRule: { rules }
+      } = creationFormState;
+      const [firstId, restIds] = creationFormState.groupCandidate;
+      const firstRulePosition = findIndex(rules, rule => rule.ruleId == firstId);
+
+      //get to rules and remove from rules
+      const rulesToGroup = rules.filter(rule => creationFormState.groupCandidate.includes(rule.ruleId));
+
+      // compose group rule
+      const newGroup = getEmptyRule();
+      const [firstGroupRule] = rulesToGroup;
+      newGroup.union = firstGroupRule.union;
+      newGroup.rules = rulesToGroup;
+
+      // add to rules in first rule to group position
+      rules.splice(firstRulePosition, 0, newGroup);
+
+      //remove groupedElements from array
+      pullAllWith(rules, rulesToGroup, isEqual);
+
+      creationFormDispatch({
+        type: 'UPDATE_RULES',
+        payload: rules
       });
     }
   };
@@ -281,9 +313,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
 
   return dialogLayout(
     <div>
-      {console.log('#'.repeat(60))}
-      {console.log('groupRulesActive', creationFormState.groupRulesActive)}
-      {console.log('#'.repeat(60))}
       <form action="">
         <div id={styles.QCFormWrapper}>
           <div className={styles.section}>
@@ -413,6 +442,20 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
               </tbody>
             </table>
           </div>
+
+          {creationFormState.groupRulesActive >= 2 && (
+            <div className={styles.section}>
+              <Button
+                className="p-button-primary p-button-text"
+                type="button"
+                label="Group"
+                icon="plus"
+                onClick={e => {
+                  groupRules();
+                }}
+              />
+            </div>
+          )}
 
           <div className={styles.section}>
             <textarea name="" id="" cols="30" rows="5"></textarea>
