@@ -66,6 +66,7 @@ const createValidation = (entityType, id, levelError, message) => {
     levelError,
     message,
     null,
+    null,
     null
   );
   return validation;
@@ -366,6 +367,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
               fieldValidation.validation.levelError,
               fieldValidation.validation.message,
               null,
+              null,
               null
             );
           });
@@ -392,6 +394,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
             recordValidation.id,
             recordValidation.validation.levelError,
             recordValidation.validation.message,
+            null,
             null,
             null
           );
