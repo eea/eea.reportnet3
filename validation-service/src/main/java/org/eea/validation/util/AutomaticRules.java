@@ -25,9 +25,9 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBlank(value)",
-        "The field must be filled", LV_ERROR);
+        "The value must not be missing or empty", LV_ERROR, shortCode, description);
   }
 
   /**
@@ -39,9 +39,9 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isNumber(value)",
-        "The field must be a valid number", LV_ERROR);
+        "The field must be a valid number", LV_ERROR, shortCode, description);
   }
 
   /**
@@ -53,9 +53,9 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isDateYYYYMMDD(value)",
-        "The field must be a valid date(YYYYMMDD) ", LV_ERROR);
+        "The field must be a valid date(YYYYMMDD) ", LV_ERROR, shortCode, description);
   }
 
 
@@ -69,9 +69,9 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBoolean(value)",
-        "The field must be TRUE OR FALSE", LV_ERROR);
+        "The field must be TRUE OR FALSE", LV_ERROR, shortCode, description);
   }
 
   /**
@@ -83,9 +83,9 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLat(value)",
-        "The field must be a valid Lat(beetween -90 and 90)", LV_ERROR);
+        "The field must be a valid Lat(beetween -90 and 90)", LV_ERROR, shortCode, description);
   }
 
   /**
@@ -97,9 +97,10 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule) {
+      String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLong(value)",
-        "The field must be a valid Longitude(beetween -180 and 180)", LV_ERROR);
+        "The field must be a valid Longitude(beetween -180 and 180)", LV_ERROR, shortCode,
+        description);
   }
 
   /**
@@ -112,11 +113,11 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createCodelistAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String codelistId) {
+      String nameRule, String codelistId, String shortCode, String description) {
 
     return composeRule(referenceId, typeEntityEnum, nameRule,
         "!isCodeList(value," + codelistId + ")",
-        "The value must be avaliable value in the codelist", LV_ERROR);
+        "The value must be avaliable value in the codelist", LV_ERROR, shortCode, description);
   }
 
   /**
@@ -131,9 +132,10 @@ public class AutomaticRules {
    * @return the rule
    */
   private static Rule composeRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String whenCondition, String thenCondition0, String thenCondition1) {
+      String nameRule, String whenCondition, String thenCondition0, String thenCondition1,
+      String shortCode, String description) {
     final Rule rule = new Rule();
-    List<String> thenCondition = new ArrayList();
+    List<String> thenCondition = new ArrayList<String>();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId(referenceId));
     rule.setAutomatic(Boolean.TRUE);
@@ -144,6 +146,8 @@ public class AutomaticRules {
     thenCondition.add(thenCondition1);
     rule.setThenCondition(thenCondition);
     rule.setType(typeEntityEnum);
+    rule.setDescription(description);
+    rule.setShortCode(shortCode);
     return rule;
   }
 }

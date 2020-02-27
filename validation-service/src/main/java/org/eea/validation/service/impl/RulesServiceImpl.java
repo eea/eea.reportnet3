@@ -50,6 +50,15 @@ public class RulesServiceImpl implements RulesService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant FC_DESCRIPTION. */
+  private static final String FC_DESCRIPTION = "Checks if the field is missing or empty";
+
+  /** The Constant FT_DESCRIPTION. */
+  private static final String FT_DESCRIPTION = "Checks if the field is a valid ";
+
+  /** The Constant FIELD_TYPE. */
+  private static final String FIELD_TYPE = "Field type ";
+
   /**
    * Gets the rules schema by dataset id.
    *
@@ -158,8 +167,8 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param idDatasetSchema the id dataset schema
    * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
    * @param typeData the type data
+   * @param typeEntityEnum the type entity enum
    * @param required the required
    * @throws EEAException the EEA exception
    */
@@ -169,36 +178,44 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = new Rule();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
+    RulesSchema countRules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
+    String shortcode = "01";
+    if (null != countRules) {
+      int rulesSize = countRules.getRules().size() + 1;
+      shortcode = String.format("%02d", rulesSize);
+    }
+
     if (Boolean.TRUE.equals(required)) {
-      rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
-          UUID.randomUUID().toString());
+      rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
+          "FC" + shortcode, FC_DESCRIPTION);
     } else {
       switch (typeData) {
         case NUMBER:
           rule = AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString());
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
           break;
         case DATE:
           rule = AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString());
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
           break;
         case BOOLEAN:
           rule = AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString());
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
           break;
         case COORDINATE_LAT:
           rule = AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString());
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
           break;
         case COORDINATE_LONG:
           rule = AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString());
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
           break;
         case CODELIST:
           // we find the idcodelist to create this validate
           Document document = schemasRepository.findFieldSchema(idDatasetSchema, referenceId);
           rule = AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString(), document.get("idCodeList").toString());
+              UUID.randomUUID().toString(), document.get("idCodeList").toString(), "FT" + shortcode,
+              FT_DESCRIPTION + typeData);
           break;
         default:
           rule = null;
@@ -240,8 +257,8 @@ public class RulesServiceImpl implements RulesService {
    * Update rule.
    *
    * @param idDatasetSchema the id dataset schema
-   * @param referenceId the reference id
-   * @param ruleVO the rule
+   * @param rule the rule
+   * @return true, if successful
    */
   @Override
   public boolean updateRule(String idDatasetSchema, Rule rule) {
@@ -261,9 +278,9 @@ public class RulesServiceImpl implements RulesService {
    * Insert rule in position.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param referenceId the reference id
+   * @param ruleId the rule id
    * @param position the position
-   * @return
+   * @return true, if successful
    */
   @Override
   public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
