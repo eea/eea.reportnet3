@@ -21,7 +21,7 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRuleData }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setValidationId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -103,7 +103,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
           <Button
             className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
-            onClick={() => onShowDeleteDialog()}
+            onClick={() => {
+              setValidationId(validationDTO.id);
+              onShowDeleteDialog();
+            }}
             type="button"
           />
         </div>
@@ -149,12 +152,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setRu
             autoLayout={true}
             className={null}
             loading={false}
-            onRowSelect={event => setRuleData(Object.assign({}, event.data))}
             paginator={true}
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            selectionMode="single"
             totalRecords={validationsView.length}
             value={validationsView}>
             {columns}
