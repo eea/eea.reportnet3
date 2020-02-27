@@ -107,7 +107,14 @@ const TreeViewExpandableItem = ({
 
   return (
     <React.Fragment>
-      <div className={!isUndefined(className) ? className : styles.defaultExpandable}>
+      <div
+        style={{
+          cursor: 'pointer',
+          color: blockExpand ? 'var(--errors)' : 'inherit',
+          opacity: blockExpand ? '0.7' : '1'
+        }}
+        className={!isUndefined(className) ? className : styles.defaultExpandable}
+        onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}>
         {!isUndefined(items) & (items.length > 0) ? (
           isOpen ? (
             <FontAwesomeIcon

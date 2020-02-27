@@ -5,7 +5,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-
+import { UserImg } from './_components/UserImg/_components/UserImg';
 const UserDesignOptions = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -28,8 +28,9 @@ const UserDesignOptions = () => {
         />
 
         <div className={styles.userUploadImg}>
-          <h3 className={styles.userThemeTitle}>{resources.messages['userimgSelected']}</h3>
-          <CustomFileUpload />
+          <h3 className={styles.userThemeTitle}>{resources.messages['selectUserImg']}</h3>
+
+          <UserImg />
         </div>
       </div>
     </React.Fragment>
