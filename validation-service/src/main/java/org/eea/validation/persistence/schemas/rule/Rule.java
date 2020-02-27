@@ -42,7 +42,6 @@ public class Rule {
   @Field(value = "activationGroup")
   private String activationGroup;
 
-
   /** The type. */
   @Field(value = "type")
   private EntityTypeEnum type;
@@ -54,8 +53,6 @@ public class Rule {
   /** The then condition. */
   @Field(value = "thenCondition")
   private List<String> thenCondition;
-
-
 
   /**
    * Hash code.

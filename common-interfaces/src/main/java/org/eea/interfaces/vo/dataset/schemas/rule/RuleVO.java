@@ -12,12 +12,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class RuleVO {
 
@@ -46,12 +40,10 @@ public class RuleVO {
   private EntityTypeEnum type;
 
   /** The when condition. */
-  private String whenCondition;
+  private RuleExpressionVO whenCondition;
 
   /** The then condition. */
   private List<String> thenCondition;
-
-
 
   /**
    * Hash code.
@@ -86,6 +78,4 @@ public class RuleVO {
         && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition);
   }
-
-
 }

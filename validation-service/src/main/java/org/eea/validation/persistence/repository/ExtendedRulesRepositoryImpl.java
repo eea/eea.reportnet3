@@ -98,7 +98,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Update update =
         new Update().pull("rules", new Document().append("referenceId", new ObjectId(referenceId))
             .append("whenCondition", "!isBlank(value)"));
-    Query query = new Query().addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    Query query =
+        new Query().addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
     return mongoOperations.updateFirst(query, update, RulesSchema.class);
   }
 
@@ -112,9 +113,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public Boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
 
-    Query query = new Query().addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId))
-        .addCriteria(new Criteria("rules.referenceId").is(new ObjectId(referenceId)))
-        .addCriteria(new Criteria("rules.whenCondition").is("!isBlank(value)"));
+    Query query =
+        new Query().addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)))
+            .addCriteria(new Criteria("rules.referenceId").is(new ObjectId(referenceId)))
+            .addCriteria(new Criteria("rules.whenCondition").is("!isBlank(value)"));
     return mongoTemplate.count(query, RulesSchema.class) > 0;
   }
 

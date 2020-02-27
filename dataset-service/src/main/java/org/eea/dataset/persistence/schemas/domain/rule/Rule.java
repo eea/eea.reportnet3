@@ -54,8 +54,6 @@ public class Rule {
   @Field(value = "thenCondition")
   private List<String> thenCondition;
 
-
-
   /**
    * Hash code.
    *
