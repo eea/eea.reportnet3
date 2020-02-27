@@ -9,12 +9,13 @@
 
 window.env = {
   // This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
-  // REACT_APP_BACKEND: 'http://reportnet3-backend.altia.es',
+  REACT_APP_BACKEND: 'http://reportnet3-backend.altia.es',
   //REACT_APP_BACKEND: 'http://rn3beta-backend.altia.es',
-  REACT_APP_BACKEND: 'http://localhost:8010',
+  //REACT_APP_BACKEND: 'http://localhost:8010',
   REACT_APP_JSON: false,
-  REACT_APP_EULOGIN: false,
+  REACT_APP_EULOGIN: true,
   EULOGIN_URL:
     'http://reportnet3-backend.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3beta.altia.es%2Feulogin%2F&state=1489230d-c1b1-4e25-8b85-1f9a5b109171&response_mode=fragment&response_type=code&scope=openid',
-  WEBSOCKET_URL: 'ws://localhost:9020/communication/reportnet-websocket'
+  //WEBSOCKET_URL: 'ws://localhost:9020/communication/reportnet-websocket'
+  WEBSOCKET_URL: 'ws://reportnet3-backend.altia.es/communication/reportnet-websocket'
 };
