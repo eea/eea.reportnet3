@@ -37,7 +37,6 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
       !isUndefined(columnOptions[propertyName]['filterType']['multiselect']) &&
       !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field])
     ) {
-      console.log(treeViewState.filters[field], columnOptions[propertyName]['filterType']['multiselect'][field]);
       return (
         <MultiSelect
           style={{ width: '100%' }}
@@ -65,7 +64,7 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
   const parseData = fieldsDTO => {
     fieldsDTO.forEach(fieldDTO => {
       for (let [key, value] of Object.entries(fieldDTO)) {
-        if (typeof value !== 'string') {
+        if (typeof value === 'boolean' && !isUndefined(value)) {
           fieldDTO[key] = value.toString();
         }
       }

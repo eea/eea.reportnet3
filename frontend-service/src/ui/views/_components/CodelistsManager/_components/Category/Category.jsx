@@ -96,7 +96,6 @@ const Category = ({
   // }, []);
 
   useEffect(() => {
-    console.log({ isEditionModeOn, isInDesign });
     if (!isUndefined(isEditionModeOn)) {
       if (isEditionModeOn) {
         changeFilterValues(

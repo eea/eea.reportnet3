@@ -31,7 +31,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    console.log({ validationList });
     renderDatasetSchemas();
   }, [codelistsList, validationList]);
 
@@ -51,7 +50,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const getValidationList = async datasetsSchemas => {
     try {
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        console.log({ datasetSchema });
         return await ValidationService.getAll(datasetSchema.datasetSchemaId);
       });
       Promise.all(datasetValidations).then(allValidations => {
@@ -97,7 +95,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   };
 
   const renderDatasetSchemas = () => {
-    // console.log({ codelistsList, datasetsSchemas });
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
         return (

@@ -8,9 +8,7 @@ const DatasetSchema = ({ codelistsList, designDataset, index, validationList }) 
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList, validationList);
-      console.log({ parsedDesignDataset });
       const codelistNames = parseCodelistList(codelistsList, designDataset);
-      //  const validationNames = parseValidationList(validationList, designDataset)
 
       const codelistTitles = [];
       if (!isUndefined(codelistNames)) {

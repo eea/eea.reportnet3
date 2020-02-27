@@ -9,11 +9,10 @@ const deleteById = async (datasetSchemaId, ruleId) => {
 
 const getAll = async datasetSchemaId => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
-  console.log({ validationsListDTO });
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-
+  
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -21,7 +20,6 @@ const getAll = async datasetSchemaId => {
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
-  console.log({ validationsList });
   return validationsList;
 };
 
