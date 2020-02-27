@@ -33,6 +33,10 @@ public class DataSetSchema {
   @Indexed(unique = false)
   private Long idDataFlow;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
+
   /** The table schemas. */
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
@@ -44,7 +48,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description);
   }
 
   /**
@@ -64,7 +68,8 @@ public class DataSetSchema {
     DataSetSchema other = (DataSetSchema) obj;
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(tableSchemas, other.tableSchemas);
+        && Objects.equals(tableSchemas, other.tableSchemas)
+        && Objects.equals(description, other.description);
   }
 
 

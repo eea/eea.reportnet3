@@ -8,16 +8,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Rule.
+ * The Class Rule VO.
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class RuleVO {
 
@@ -51,7 +45,11 @@ public class RuleVO {
   /** The then condition. */
   private List<String> thenCondition;
 
+  /** The description. */
+  private String description;
 
+  /** The short code. */
+  private String shortCode;
 
   /**
    * Hash code.
@@ -61,7 +59,7 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode);
   }
 
   /**
@@ -84,7 +82,9 @@ public class RuleVO {
         && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
         && Objects.equals(activationGroup, other.activationGroup)
         && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
-        && Objects.equals(whenCondition, other.whenCondition);
+        && Objects.equals(whenCondition, other.whenCondition)
+        && Objects.equals(description, other.description)
+        && Objects.equals(shortCode, other.shortCode);
   }
 
 
