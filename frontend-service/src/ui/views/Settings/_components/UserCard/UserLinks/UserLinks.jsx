@@ -12,7 +12,6 @@ const UserLinks = withRouter(({ history }) => {
   return (
     <div className={styles.linksContainer}>
       {/* TO DO CHOOSE ICONS AND URLS */}
-      <div></div>
 
       <div></div>
 
@@ -45,8 +44,6 @@ const UserLinks = withRouter(({ history }) => {
         }}>
         <FontAwesomeIcon className={styles.link} icon={AwesomeIcons('user-profile')} />
       </a>
-
-      <div></div>
 
       <div></div>
     </div>
