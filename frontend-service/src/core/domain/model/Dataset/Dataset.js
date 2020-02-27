@@ -14,6 +14,7 @@ export class Dataset {
     levelErrorTypes,
     datasetSchemaDescription,
     name,
+    dataProviderId,
     isValid = false
   ) {
     this.datasetId = datasetId;
@@ -31,5 +32,7 @@ export class Dataset {
     this.tableStatisticValues = tableStatisticValues;
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
+    this.hasErrors = hasErrors;
+    this.dataProviderId = dataProviderId;
   }
 }

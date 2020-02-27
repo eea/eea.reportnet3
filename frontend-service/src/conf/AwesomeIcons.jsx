@@ -63,6 +63,7 @@ import {
   faPen,
   faUsersCog,
   faIgloo,
+  faFileDownload,
   faDraftingCompass,
   faClipboardList,
   faClipboard,
@@ -307,6 +308,8 @@ export const AwesomeIcons = icon => {
       return faUsersCog;
     case 'localhostAlert':
       return faIgloo;
+    case 'fileDownload':
+      return faFileDownload;
     case 'cross':
       return faTimes;
     default:
