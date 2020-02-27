@@ -153,6 +153,56 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return result.isEmpty() ? null : result.get(0);
   }
 
+
+  /**
+   * Gets the rules with type rule criteria.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param type the type
+   * @return the rules with type rule criteria
+   */
+  @Override
+  public RulesSchema getRulesWithTypeRuleCriteria(ObjectId idDatasetSchema, Boolean required) {
+    List<RulesSchema> result;
+    if (Boolean.TRUE.equals(required)) {
+      Document filterExpression = new Document();
+      filterExpression.append("input", "$rules");
+      filterExpression.append("as", "rule");
+      // look for FC rules
+      filterExpression.append("cond",
+          new Document("$lte", Arrays.asList("$$rule.shortCode", "FT")));
+      Document filter = new Document("$filter", filterExpression);
+      result =
+          mongoTemplate
+              .aggregate(
+                  Aggregation.newAggregation(
+                      Aggregation.match(Criteria.where("idDatasetSchema").is(idDatasetSchema)),
+                      Aggregation.project("idDatasetSchema")
+                          .and(aggregationOperationContext -> filter).as("rules")),
+                  RulesSchema.class, RulesSchema.class)
+              .getMappedResults();
+    } else {
+      Document filterExpression = new Document();
+      filterExpression.append("input", "$rules");
+      filterExpression.append("as", "rule");
+      filterExpression.append("cond", new Document("$gt", Arrays.asList("$$rule.shortCode", "FT")));
+      Document filter = new Document("$filter", filterExpression);
+      result =
+          mongoTemplate
+              .aggregate(
+                  Aggregation.newAggregation(
+                      Aggregation.match(Criteria.where("idDatasetSchema").is(idDatasetSchema)),
+                      Aggregation.project("idDatasetSchema")
+                          .and(aggregationOperationContext -> filter).as("rules")),
+                  RulesSchema.class, RulesSchema.class)
+              .getMappedResults();
+    }
+
+    return result.isEmpty() ? null : result.get(0);
+  }
+
+
+
   /**
    * Creates the new rule.
    *

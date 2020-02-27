@@ -2,6 +2,7 @@ package org.eea.validation.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -156,6 +157,26 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.createNewRule(idDatasetSchema, rule);
   }
 
+  /**
+   * Count rulesin schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param required the required
+   * @param shortcode the shortcode
+   * @return the string
+   */
+  private String countRulesinSchema(String idDatasetSchema, Boolean required, String shortcode) {
+    RulesSchema rules =
+        rulesRepository.getRulesWithTypeRuleCriteria(new ObjectId(idDatasetSchema), required);
+    List<Rule> rulesList = rules.getRules();
+    if (!rulesList.isEmpty()) {
+      String code = rulesList.get(rulesList.size() - 1).getShortCode();
+      String text = (code).substring(2, code.length());
+      int rulesSize = Integer.valueOf(text) + 1;
+      shortcode = String.format("%02d", rulesSize);
+    }
+    return shortcode;
+  }
 
   /**
    * Creates the automatic rules. When Input argument "required" is true it is created an automatic
@@ -175,17 +196,13 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = new Rule();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
-    RulesSchema countRules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
     String shortcode = "01";
-    if (null != countRules) {
-      int rulesSize = countRules.getRules().size() + 1;
-      shortcode = String.format("%02d", rulesSize);
-    }
-
     if (Boolean.TRUE.equals(required)) {
+      shortcode = countRulesinSchema(idDatasetSchema, required, shortcode);
       rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
           "FC" + shortcode, FC_DESCRIPTION);
     } else {
+      shortcode = countRulesinSchema(idDatasetSchema, required, shortcode);
       switch (typeData) {
         case NUMBER:
           rule = AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,

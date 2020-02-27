@@ -82,7 +82,6 @@ public interface ExtendedRulesRepository {
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    * @return the update result
-   * @throws EEAException the EEA exception
    */
   boolean updateRule(String datasetSchemaId, Rule rule);
 
@@ -113,4 +112,13 @@ public interface ExtendedRulesRepository {
    * @return the rule
    */
   Rule findRule(String datasetSchemaId, String ruleId);
+
+  /**
+   * Gets the rules with type rule criteria.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param required the required
+   * @return the rules with type rule criteria
+   */
+  RulesSchema getRulesWithTypeRuleCriteria(ObjectId idDatasetSchema, Boolean required);
 }
