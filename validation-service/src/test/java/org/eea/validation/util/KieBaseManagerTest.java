@@ -108,7 +108,7 @@ public class KieBaseManagerTest {
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.any()))
+    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
         .thenReturn(rulesSchemas);
     Document doc = new Document();
     doc.put("typeData", "DATE");
@@ -128,7 +128,7 @@ public class KieBaseManagerTest {
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.any()))
+    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
         .thenReturn(rulesSchemas);
     kieBaseManager.reloadRules(1L, new ObjectId().toString());
   }

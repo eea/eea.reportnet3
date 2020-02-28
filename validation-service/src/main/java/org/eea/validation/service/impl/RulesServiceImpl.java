@@ -303,7 +303,7 @@ public class RulesServiceImpl implements RulesService {
   public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
     Rule rule = rulesRepository.findRule(datasetSchemaId, ruleId);
     if (null != rule) {
-      if (rulesRepository.deleteRule(datasetSchemaId, ruleId)) {
+      if (rulesRepository.deleteRuleById(datasetSchemaId, ruleId)) {
         if (rulesRepository.insertRuleInPosition(datasetSchemaId, rule, position)) {
           LOG.info("Rule {} reordered in datasetSchemaId {}", ruleId, datasetSchemaId);
           return true;
