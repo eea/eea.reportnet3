@@ -1,6 +1,8 @@
 import { isNull, isUndefined } from 'lodash';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
+import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
+
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
@@ -17,6 +19,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idCodeList = datasetTableRecordField.codelistId;
+  datasetTableFieldDesign.required = datasetTableRecordField.required;
 
   const recordsAdded = await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordsAdded;
@@ -54,20 +57,13 @@ const addTableDesign = async (datasetId, tableSchemaName) => {
 };
 
 const createValidation = (entityType, id, levelError, message) => {
-  const validation = new Validation(
-    null,
-    null,
-    null,
-    new Date(Date.now()).toString(),
-    null,
-    null,
+  const validation = new Validation({
+    date: new Date(Date.now()).toString(),
     entityType,
     id,
     levelError,
-    message,
-    null,
-    null
-  );
+    message
+  });
   return validation;
 };
 
@@ -238,20 +234,10 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
-  const datasetSchemaObject = [datasetSchemaDTO];
-  const allLevelErrorsFromRules = [];
-  findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
-  let levelErrorsRepeated = [];
-  allLevelErrorsFromRules.forEach(rule => {
-    if (!isUndefined(rule.thenCondition)) {
-      levelErrorsRepeated.push(rule.thenCondition[1]);
-    }
-  });
-  let levelErrors = [...new Set(levelErrorsRepeated)];
-  levelErrors = CoreUtils.orderLevelErrors(levelErrors);
-  return levelErrors;
-};
+const getAllLevelErrorsFromRuleValidations = rulesDTO =>
+  CoreUtils.orderLevelErrors([
+    ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
+  ]);
 
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
   const fieldOrdered = await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
@@ -263,35 +249,14 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
   return tableOrdered;
 };
 
-const findObjects = (obj, targetProp, finalResults) => {
-  const getObject = theObject => {
-    if (theObject instanceof Array) {
-      for (let i = 0; i < theObject.length; i++) {
-        getObject(theObject[i]);
-      }
-    } else {
-      for (let prop in theObject) {
-        if (theObject.hasOwnProperty(prop)) {
-          if (prop.includes(targetProp) && prop !== 'ruleId') {
-            finalResults.push(theObject);
-          }
-          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
-            getObject(theObject[prop]);
-          }
-        }
-      }
-    }
-  };
-  getObject(obj);
-};
-
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   const dataset = new Dataset();
   dataset.datasetSchemaDescription = datasetSchemaDTO.description;
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
-  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
+  const rules = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
+  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(rules);
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
@@ -306,7 +271,8 @@ const schemaById = async datasetId => {
                   null,
                   null,
                   DataTableFieldDTO.description,
-                  DataTableFieldDTO.idCodeList
+                  DataTableFieldDTO.idCodeList,
+                  DataTableFieldDTO.required
                 );
               })
             : null;
@@ -354,20 +320,13 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
           field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
-            return new Validation(
-              null,
-              null,
-              null,
-              fieldValidation.validation.validationDate,
-              null,
-              null,
-              fieldValidation.validation.typeEntity,
-              fieldValidation.id,
-              fieldValidation.validation.levelError,
-              fieldValidation.validation.message,
-              null,
-              null
-            );
+            return new Validation({
+              date: fieldValidation.validation.validationDate,
+              entityType: fieldValidation.validation.typeEntity,
+              id: fieldValidation.id,
+              levelError: fieldValidation.validation.levelError,
+              message: fieldValidation.validation.message
+            });
           });
         }
         return field;
@@ -381,20 +340,13 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
       if (!isNull(dataTableRecordDTO.recordValidations)) {
         record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
-          return new Validation(
-            null,
-            null,
-            null,
-            recordValidation.validation.validationDate,
-            null,
-            null,
-            recordValidation.validation.typeEntity,
-            recordValidation.id,
-            recordValidation.validation.levelError,
-            recordValidation.validation.message,
-            null,
-            null
-          );
+          return new Validation({
+            date: recordValidation.validation.validationDate,
+            entityType: recordValidation.validation.typeEntity,
+            id: recordValidation.id,
+            levelError: recordValidation.validation.levelError,
+            message: recordValidation.validation.message
+          });
         });
       }
       return record;
@@ -543,7 +495,6 @@ const updateRecordsById = async (datasetId, record) => {
 };
 
 const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) => {
-  console.log({ datasetSchemaDescription });
   return await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
 };
 

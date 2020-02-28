@@ -45,6 +45,7 @@ const CodelistForm = ({
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={isSaveDisabled}
         icon="save"
         label={resources.messages['save']}
@@ -55,6 +56,7 @@ const CodelistForm = ({
         }}
       />
       <Button
+        className={formType === 'EDIT' ? 'p-button-danger' : 'p-button-secondary'}
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {
