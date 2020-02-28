@@ -564,7 +564,7 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(null);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(rulesControllerZuul, times(0)).createAutomaticRule(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   @Test

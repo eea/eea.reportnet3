@@ -23,7 +23,7 @@ public interface ExtendedRulesRepository {
    * @param ruleId the rule id
    * @return true, if successful
    */
-  boolean deleteRuleById(String datasetSchemaId, String ruleId);
+  boolean deleteRuleById(ObjectId datasetSchemaId, ObjectId ruleId);
 
   /**
    * Delete rule by reference id.
@@ -32,7 +32,7 @@ public interface ExtendedRulesRepository {
    * @param referenceId the reference id
    * @return true, if successful
    */
-  boolean deleteRuleByReferenceId(String datasetSchemaId, String referenceId);
+  boolean deleteRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
 
   /**
    * Delete rule required.
@@ -41,7 +41,7 @@ public interface ExtendedRulesRepository {
    * @param referenceId the reference id
    * @return true, if successful
    */
-  boolean deleteRuleRequired(String datasetSchemaId, String referenceId);
+  boolean deleteRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId);
 
   /**
    * Creates the new rule.
@@ -50,7 +50,7 @@ public interface ExtendedRulesRepository {
    * @param rule the rule
    * @return true, if successful
    */
-  boolean createNewRule(String datasetSchemaId, Rule rule);
+  boolean createNewRule(ObjectId datasetSchemaId, Rule rule);
 
   /**
    * Update rule.
@@ -59,7 +59,7 @@ public interface ExtendedRulesRepository {
    * @param rule the rule
    * @return true, if successful
    */
-  boolean updateRule(String datasetSchemaId, Rule rule);
+  boolean updateRule(ObjectId datasetSchemaId, Rule rule);
 
   /**
    * Exists rule required.
@@ -68,7 +68,7 @@ public interface ExtendedRulesRepository {
    * @param referenceId the reference id
    * @return true, if successful
    */
-  boolean existsRuleRequired(String datasetSchemaId, String referenceId);
+  boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId);
 
   /**
    * Insert rule in position.
@@ -78,7 +78,7 @@ public interface ExtendedRulesRepository {
    * @param position the position
    * @return true, if successful
    */
-  boolean insertRuleInPosition(String datasetSchemaId, Rule rule, int position);
+  boolean insertRuleInPosition(ObjectId datasetSchemaId, Rule rule, int position);
 
   /**
    * Find rule.
@@ -87,7 +87,7 @@ public interface ExtendedRulesRepository {
    * @param ruleId the rule id
    * @return the rule
    */
-  Rule findRule(String datasetSchemaId, String ruleId);
+  Rule findRule(ObjectId datasetSchemaId, ObjectId ruleId);
 
   /**
    * Gets the rules with active criteria.

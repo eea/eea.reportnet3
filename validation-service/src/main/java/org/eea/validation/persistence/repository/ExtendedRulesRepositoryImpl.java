@@ -42,10 +42,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean deleteRuleById(String datasetSchemaId, String ruleId) {
-    Document pullCriteria = new Document("_id", new ObjectId(ruleId));
+  public boolean deleteRuleById(ObjectId datasetSchemaId, ObjectId ruleId) {
+    Document pullCriteria = new Document("_id", ruleId);
     Update update = new Update().pull("rules", pullCriteria);
-    Query query = new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
     return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
@@ -57,10 +57,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean deleteRuleByReferenceId(String datasetSchemaId, String referenceId) {
-    Document pullCriteria = new Document("referenceId", new ObjectId(referenceId));
+  public boolean deleteRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document pullCriteria = new Document("referenceId", referenceId);
     Update update = new Update().pull("rules", pullCriteria);
-    Query query = new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
@@ -72,11 +72,11 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean deleteRuleRequired(String datasetSchemaId, String referenceId) {
-    Document pullCriteria = new Document("referenceId", new ObjectId(referenceId))
-        .append("whenCondition", "!isBlank(value)");
+  public boolean deleteRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document pullCriteria =
+        new Document("referenceId", referenceId).append("whenCondition", "!isBlank(value)");
     Update update = new Update().pull("rules", pullCriteria);
-    Query query = new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
     return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
@@ -88,10 +88,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean createNewRule(String datasetSchemaId, Rule rule) {
+  public boolean createNewRule(ObjectId datasetSchemaId, Rule rule) {
     Update update = new Update().push("rules", rule);
     Query query = new Query();
-    query.addCriteria(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    query.addCriteria(new Criteria("idDatasetSchema").is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
@@ -103,10 +103,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean updateRule(String datasetSchemaId, Rule rule) {
+  public boolean updateRule(ObjectId datasetSchemaId, Rule rule) {
     rule.setAutomatic(false);
     return mongoTemplate.updateFirst(
-        new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)))
+        new Query(new Criteria("idDatasetSchema").is(datasetSchemaId))
             .addCriteria(new Criteria("rules.referenceId").is(rule.getReferenceId())),
         new Update().set("rules.$", rule), RulesSchema.class).getModifiedCount() == 1;
   }
@@ -119,9 +119,9 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
-    Query query = new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)))
-        .addCriteria(new Criteria("rules.referenceId").is(new ObjectId(referenceId)))
+  public boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId))
+        .addCriteria(new Criteria("rules.referenceId").is(referenceId))
         .addCriteria(new Criteria("rules.whenCondition").is("!isBlank(value)"));
     return mongoTemplate.count(query, RulesSchema.class) == 1;
   }
@@ -135,8 +135,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    * @return true, if successful
    */
   @Override
-  public boolean insertRuleInPosition(String datasetSchemaId, Rule rule, int position) {
-    Query query = new Query(new Criteria("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+  public boolean insertRuleInPosition(ObjectId datasetSchemaId, Rule rule, int position) {
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
     Update update = new Update().push("rules").atPosition(position).each(rule);
     return mongoTemplate.updateFirst(query, update, Rule.class, "RulesSchema")
         .getModifiedCount() == 1;
@@ -151,20 +151,17 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   @CheckForNull
-  public Rule findRule(String datasetSchemaId, String ruleId) {
+  public Rule findRule(ObjectId datasetSchemaId, ObjectId ruleId) {
     Document filterExpression = new Document();
     filterExpression.append("input", "$rules");
     filterExpression.append("as", "rule");
-    filterExpression.append("cond",
-        new Document("$eq", Arrays.asList("$$rule._id", new ObjectId(ruleId))));
+    filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule._id", ruleId)));
     Document filter = new Document("$filter", filterExpression);
-    RulesSchema rulesSchema =
-        mongoTemplate.aggregate(
-            Aggregation.newAggregation(
-                Aggregation
-                    .match(Criteria.where("idDatasetSchema").is(new ObjectId(datasetSchemaId))),
-                Aggregation.project().and(aggregationOperationContext -> filter).as("rules")),
-            RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
+    RulesSchema rulesSchema = mongoTemplate.aggregate(
+        Aggregation.newAggregation(
+            Aggregation.match(Criteria.where("idDatasetSchema").is(datasetSchemaId)),
+            Aggregation.project().and(aggregationOperationContext -> filter).as("rules")),
+        RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
     if (rulesSchema != null) {
       List<Rule> rules = rulesSchema.getRules();
       if (rules != null && !rules.isEmpty()) {

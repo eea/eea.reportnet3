@@ -16,16 +16,16 @@ public interface RulesRepository
   /**
    * Find by id dataset schema.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the rules schema
    */
-  RulesSchema findByIdDatasetSchema(ObjectId idDatasetSchema);
+  RulesSchema findByIdDatasetSchema(ObjectId datasetSchemaId);
 
   /**
    * Count rules by id dataset schema.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the integer
    */
-  Integer countRulesByIdDatasetSchema(ObjectId idDatasetSchema);
+  Integer countRulesByIdDatasetSchema(ObjectId datasetSchemaId);
 }
