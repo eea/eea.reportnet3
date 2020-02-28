@@ -82,11 +82,24 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
     ];
   };
 
+  const checkedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
+  const crossedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
   const parseToValidationsView = validations => {
     let validationsView = validations;
     validationsView.forEach(validationDTO => {
       validationDTO.actionButtons = (
         <div className={styles.actionButtons}>
+          <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary ${styles.btnEdit}`} />
           <Button
             className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
@@ -100,28 +113,14 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
       );
 
       if (validationDTO.automatic) {
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.automatic = checkedField();
       } else {
-        // validationDTO.actionButtons = (
-        //   <div>
-        //     <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
-        //     <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
-        //   </div>
-        // );
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.automatic = crossedField();
       }
       if (validationDTO.enabled) {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.enabled = checkedField();
       } else {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.enabled = crossedField();
       }
     });
     return validationsView;
