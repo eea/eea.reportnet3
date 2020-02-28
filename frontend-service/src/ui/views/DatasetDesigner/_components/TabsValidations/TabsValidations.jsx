@@ -40,7 +40,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidationsList(validationsList);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // notificationContext.add({
       //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       // });
@@ -134,7 +134,6 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
         </div>
       );
     }
-    console.log({ validationsList });
     const headers = getValidationHeaders();
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;

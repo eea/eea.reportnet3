@@ -94,10 +94,11 @@ export const ReleasedDatasetsDashboard = dataflowId => {
         {
           stacked: true,
           maxBarThickness: 100,
-          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
-          ticks: {
-            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
-          }
+          gridLines: { display: false }
+          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
+          // ticks: {
+          //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+          // }
         }
       ],
       yAxes: [
@@ -111,10 +112,11 @@ export const ReleasedDatasetsDashboard = dataflowId => {
                 return value;
               }
             },
-            stepSize: 1,
-            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+            stepSize: 10
+            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
           },
-          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
+          gridLines: { display: false }
+          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
         }
       ]
     }
