@@ -4,6 +4,18 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiValidation = {
+  create: async (datasetSchemaId, validation) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(ValidationConfig.delete, {}),
+      queryString: { idDatasetSchema: datasetSchemaId },
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: validation
+    });
+    return response;
+  },
   deleteById: async (datasetSchemaId, ruleId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({

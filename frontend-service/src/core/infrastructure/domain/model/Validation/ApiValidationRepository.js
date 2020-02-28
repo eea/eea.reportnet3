@@ -3,6 +3,10 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
+const create = async (datasetSchemaId, validation) => {
+  return await apiValidation.create(datasetSchemaId, validation);
+};
+
 const deleteById = async (datasetSchemaId, ruleId) => {
   return await apiValidation.deleteById(datasetSchemaId, ruleId);
 };
@@ -12,7 +16,7 @@ const getAll = async datasetSchemaId => {
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-  
+
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -56,7 +60,29 @@ const parseDataValidationRulesDTO = validations => {
   validationsData.entityTypes = [...new Set(entityTypes)];
   return validationsData;
 };
+
+const translateRules = rule => {
+  return rule;
+};
+
+const validationToTransfer = validation => {
+  const whenCondition = translateRules(validation.rules);
+
+  return {
+    description: validation.description,
+    ensabled: validation.active,
+    referenceId: validation.fieldId,
+    ruleName: '',
+    shortCode: validation.shortCode,
+    type: 'FIELD',
+    thenCondition: [validation.errorMessage, validation.errorLevel],
+    whenCondition: {
+      whenCondition
+    }
+  };
+};
 export const ApiValidationRepository = {
+  create,
   deleteById,
   getAll
 };

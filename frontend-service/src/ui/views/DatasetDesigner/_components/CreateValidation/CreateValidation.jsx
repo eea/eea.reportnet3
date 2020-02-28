@@ -98,7 +98,16 @@ const createValidationReducer = (state, { type, payload }) => {
 };
 
 const createValidationReducerInitState = {
-  candidateRule: {},
+  candidateRule: {
+    table: null,
+    field: null,
+    shortCode: null,
+    description: null,
+    errorMessage: null,
+    errorLevel: null,
+    active: false,
+    rules: []
+  },
   datasetSchema: {},
   schemaTables: [],
   errorLevels: [],
@@ -244,10 +253,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
     const tables = rawTables.map(table => {
       return { label: table.tableSchemaName, code: table.recordSchemaId };
     });
-    const errorLevels = levelErrorTypes.map(levelErrorType => ({
-      label: capitalize(levelErrorType.toLowerCase()),
-      value: levelErrorType
-    }));
+    const errorLevels = [
+      { label: 'INFO', value: 'INFO' },
+      { label: 'WARNING', value: 'WARNING' },
+      { label: 'ERROR', value: 'ERROR' },
+      { label: 'BLOCKER', value: 'BLOCKER' }
+    ];
     creationFormDispatch({ type: 'INIT_FORM', payload: { tables, errorLevels, rules: [getEmptyRule()] } });
   }, []);
 
@@ -338,7 +349,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
     const {
       candidateRule: { rules }
     } = creationFormState;
-    if (!isUndefined(rules)) {
+    if (!isUndefined(rules) && rules.length > 0) {
       const lastRule = last(rules);
       if (lastRule.rules && lastRule.rules.length > 0) {
         return true;
@@ -452,7 +463,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
                   options={creationFormState.errorLevels}
                   onChange={e => {
                     setFormField({
-                      key: 'errorType',
+                      key: 'errorLevel',
                       value: e.target.value
                     });
                   }}
