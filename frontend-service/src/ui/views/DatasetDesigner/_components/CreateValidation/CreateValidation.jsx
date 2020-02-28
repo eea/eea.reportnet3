@@ -78,6 +78,11 @@ const createValidationReducer = (state, { type, payload }) => {
         ...state,
         groupRulesActive: state.groupRulesActive + payload.groupRulesActive
       };
+    case 'SET_EXPRESIONS_STRING':
+      return {
+        ...state,
+        validationRuleString: payload
+      };
     case 'INIT_FORM':
       return {
         ...state,
@@ -228,7 +233,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
     }
   };
 
+  //set table tada
   useEffect(() => {
+    console.log('*'.repeat(60));
+    console.log('datasetSchema', datasetSchema);
+    console.log();
+    console.log();
     const { tables: rawTables, levelErrorTypes } = datasetSchema;
     rawTables.pop();
     const tables = rawTables.map(table => {
@@ -240,6 +250,8 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
     }));
     creationFormDispatch({ type: 'INIT_FORM', payload: { tables, errorLevels, rules: [getEmptyRule()] } });
   }, []);
+
+  //set field data
   useEffect(() => {
     const { table: tableInContext } = creationFormState.candidateRule;
     if (!isEmpty(tableInContext)) {
@@ -257,6 +269,49 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
       });
     }
   }, [creationFormState.candidateRule.table]);
+
+  const getRuleString = (rules, field) => {
+    let ruleString = '';
+    if (!isUndefined(field) && rules.length > 0) {
+      const { label: fieldLabel } = field;
+      rules.forEach((rule, i) => {
+        const { union: unionValue, operatorValue: operator, ruleValue, rules } = rule;
+        if (!isUndefined(operator) && !isUndefined(ruleValue)) {
+          const ruleLeft = `${fieldLabel} ${operator} ${ruleValue}`;
+          if (i == 0) {
+            ruleString = `${ruleString} ${ruleLeft}`;
+          } else {
+            if (!isUndefined(unionValue)) {
+              ruleString = `${ruleString} ${unionValue} ${ruleLeft}`;
+            }
+          }
+        }
+      });
+    }
+    return ruleString;
+  };
+
+  //create result rule
+  const createResultString = () => {
+    const {
+      candidateRule: { field, rules }
+    } = creationFormState;
+
+    creationFormDispatch({
+      type: 'SET_EXPRESIONS_STRING',
+      payload: getRuleString(rules, field)
+    });
+  };
+  useEffect(() => {
+    creationFormDispatch({
+      type: 'UPDATE_RESULT_RULE_STRING',
+      payload: createResultString(creationFormState.candidateRule.rules)
+    });
+  }, [creationFormState.candidateRule]);
+
+  //create exchange structure
+
+  //disable manager
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
   };
@@ -458,7 +513,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
           )}
 
           <div className={styles.section}>
-            <textarea name="" id="" cols="30" rows="5"></textarea>
+            <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
           </div>
           <div className={`${styles.section} ${styles.footerToolBar}`}>
             <div>
