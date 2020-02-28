@@ -23,15 +23,15 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
         { label: '=', value: '=' },
         { label: '<>', value: '<>' }
       ]
-    },
-    string: {
-      option: { label: 'String', value: 'string' },
-      values: [{ label: 'length', value: 'length' }]
-    },
-    all: {
-      option: { label: 'All', value: 'all' },
-      values: []
     }
+    // string: {
+    //   option: { label: 'String', value: 'string' },
+    //   values: [{ label: 'length', value: 'length' }]
+    // },
+    // all: {
+    //   option: { label: 'All', value: 'all' },
+    //   values: []
+    // }
   };
   const getOperatorTypeOptions = () => {
     const options = [];
