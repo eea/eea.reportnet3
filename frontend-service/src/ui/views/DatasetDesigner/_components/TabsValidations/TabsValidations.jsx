@@ -40,7 +40,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidationsList(validationsList);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // notificationContext.add({
       //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       // });
@@ -82,11 +82,24 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
     ];
   };
 
+  const checkedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
+  const crossedField = () => (
+    <div style={{ textAlign: 'center' }}>
+      <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ color: 'var(--main-color-font)' }} />
+    </div>
+  );
+
   const parseToValidationsView = validations => {
     let validationsView = validations;
     validationsView.forEach(validationDTO => {
       validationDTO.actionButtons = (
         <div className={styles.actionButtons}>
+          <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary ${styles.btnEdit}`} />
           <Button
             className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
             icon="trash"
@@ -100,28 +113,14 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
       );
 
       if (validationDTO.automatic) {
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.automatic = checkedField();
       } else {
-        // validationDTO.actionButtons = (
-        //   <div>
-        //     <Button type="button" icon="edit" className={`p-button-rounded p-button-secondary`} />
-        //     <Button type="button" icon="trash" className={`p-button-rounded p-button-secondary`} />
-        //   </div>
-        // );
-        validationDTO.automatic = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.automatic = crossedField();
       }
       if (validationDTO.enabled) {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.enabled = checkedField();
       } else {
-        validationDTO.enabled = (
-          <FontAwesomeIcon icon={AwesomeIcons('cross')} style={{ float: 'center', color: 'var(--black)' }} />
-        );
+        validationDTO.enabled = crossedField();
       }
     });
     return validationsView;
@@ -135,7 +134,6 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
         </div>
       );
     }
-    console.log({ validationsList });
     const headers = getValidationHeaders();
     let columnsArray = headers.map(col => <Column sortable={false} key={col.id} field={col.id} header={col.header} />);
     let columns = columnsArray;

@@ -5,7 +5,7 @@ const getDataflowMetadata = async dataflowId => {
   try {
     return await DataflowService.dataflowDetails(dataflowId);
   } catch (error) {
-    console.log('dataflowDetails error', error);
+    console.error('dataflowDetails error', error);
     return {};
   }
 };
@@ -13,7 +13,7 @@ const getDatasetMetadata = async datasetId => {
   try {
     return await DatasetService.getMetaData(datasetId);
   } catch (error) {
-    console.log('DatasetService.getMetaData', error);
+    console.error('DatasetService.getMetaData', error);
     return {};
   }
 };
