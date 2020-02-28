@@ -53,9 +53,20 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
         return await ValidationService.getAll(datasetSchema.datasetSchemaId);
       });
       Promise.all(datasetValidations).then(allValidations => {
+        console.log({ allValidations });
         setValidationList(
           allValidations[0].validations.map(validation =>
-            pick(validation, 'name', 'entityType', 'levelError', 'message', 'automatic', 'enabled')
+            pick(
+              validation,
+              'shortCode',
+              'name',
+              'description',
+              'entityType',
+              'levelError',
+              'message',
+              'automatic',
+              'enabled'
+            )
           )
         );
       });

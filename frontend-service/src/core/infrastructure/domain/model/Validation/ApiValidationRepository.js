@@ -34,10 +34,7 @@ const parseDataValidationRulesDTO = validations => {
       automatic: validationDTO.automatic,
       condition: validationDTO.whenCondition,
       date: validationDTO.activationGroup,
-      description:
-        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
-          ? validationDTO.thenCondition[0]
-          : null,
+      description: validationDTO.description,
       enabled: validationDTO.enabled,
       enabled: validationDTO.enabled,
       entityType: validationDTO.type,
@@ -51,7 +48,8 @@ const parseDataValidationRulesDTO = validations => {
           ? validationDTO.thenCondition[0]
           : null,
       name: validationDTO.ruleName,
-      referenceId: validationDTO.referenceId
+      referenceId: validationDTO.referenceId,
+      shortCode: validationDTO.shortCode
     });
   });
 
