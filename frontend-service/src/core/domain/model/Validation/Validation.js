@@ -11,7 +11,8 @@ export class Validation {
     levelError,
     message,
     name,
-    referenceId
+    referenceId,
+    shortCode
   } = {}) {
     this.activationGroup = activationGroup;
     this.automatic = automatic;
@@ -25,5 +26,6 @@ export class Validation {
     this.message = message;
     this.name = name;
     this.referenceId = referenceId;
+    this.shortCode = shortCode;
   }
 }

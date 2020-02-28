@@ -104,7 +104,15 @@ const Category = ({
           category.codelists
         );
       } else {
-        changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+        if (isInDesign) {
+          changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+        } else {
+          changeFilterValues(
+            'status',
+            [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+            category.codelists
+          );
+        }
       }
     }
   }, [isEditionModeOn]);
@@ -232,6 +240,7 @@ const Category = ({
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={
           isIncorrect ||
           categoryState.isSaving ||
@@ -266,16 +275,18 @@ const Category = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={
           isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
         }
-        label={resources.messages['save']}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => onSaveCategory()}
       />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-danger"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
           dispatchCategory({

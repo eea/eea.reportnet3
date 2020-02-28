@@ -263,7 +263,7 @@ export const Tab = ({
             width: '30px',
             // border: '2px 2px 0 2px solid gray',
             marginRight: '3px',
-            backgroundColor: 'var(--yellow-120)'
+            backgroundColor: 'var(--c-corporate-yellow)'
           }}></div> */}
       </div>
       <li

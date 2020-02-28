@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, pick } from 'lodash';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -13,6 +13,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { CodelistService } from 'core/services/Codelist';
+import { ValidationService } from 'core/services/Validation';
 
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
@@ -20,16 +21,18 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const [isLoading, setIsLoading] = useState(false);
   const [codelistsList, setCodelistsList] = useState();
+  const [validationList, setValidationList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
       getCodelistsList(datasetsSchemas);
+      getValidationList(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
   useEffect(() => {
     renderDatasetSchemas();
-  }, [codelistsList]);
+  }, [codelistsList, validationList]);
 
   const getCodelistsList = async datasetsSchemas => {
     try {
@@ -44,10 +47,76 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     }
   };
 
+  const getValidationList = async datasetsSchemas => {
+    try {
+      const datasetValidations = datasetsSchemas.map(async datasetSchema => {
+        return await ValidationService.getAll(datasetSchema.datasetSchemaId);
+      });
+      Promise.all(datasetValidations).then(allValidations => {
+        console.log({ allValidations });
+        setValidationList(
+          allValidations[0].validations.map(validation =>
+            pick(
+              validation,
+              'shortCode',
+              'name',
+              'description',
+              'entityType',
+              'levelError',
+              'message',
+              'automatic',
+              'enabled'
+            )
+          )
+        );
+      });
+
+      // setValidationList([
+      //   {
+      //     automatic: 'true',
+      //     datasetSchemaId: '5e450733a268b2000140ad7c',
+      //     date: '2018-01-01',
+      //     enabled: 'true',
+      //     entityType: 'FIELD',
+      //     id: 0,
+      //     levelError: 'ERROR',
+      //     message: 'This is an error message',
+      //     ruleName: 'Test rule'
+      //   },
+      //   {
+      //     automatic: 'false',
+      //     datasetSchemaId: '5e450733a268b2000140ad7c',
+      //     date: '2018-01-01',
+      //     enabled: 'true',
+      //     entityType: 'TABLE',
+      //     id: 0,
+      //     levelError: 'WARNING',
+      //     message: 'This is a warning message 2',
+      //     ruleName: 'Test rule 2'
+      //   }
+      // ]);
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} codelistsList={codelistsList} index={i} key={i} />;
+        return (
+          <DatasetSchema
+            codelistsList={codelistsList}
+            designDataset={designDataset}
+            key={i}
+            index={i}
+            validationList={validationList}
+          />
+        );
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
@@ -59,7 +128,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
       <Toolbar className={styles.datasetSchemasToolbar}>
         <div className="p-toolbar-group-right">
           <Button
-            className={`p-button-rounded p-button-secondary-transparent`}
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin`}
             disabled={false}
             icon={'refresh'}
             label={resources.messages['refresh']}
