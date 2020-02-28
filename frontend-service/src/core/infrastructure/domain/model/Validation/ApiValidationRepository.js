@@ -9,11 +9,10 @@ const deleteById = async (datasetSchemaId, ruleId) => {
 
 const getAll = async datasetSchemaId => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
-  console.log({ validationsListDTO });
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-
+  
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -21,7 +20,6 @@ const getAll = async datasetSchemaId => {
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
-  console.log({ validationsList });
   return validationsList;
 };
 
@@ -36,10 +34,7 @@ const parseDataValidationRulesDTO = validations => {
       automatic: validationDTO.automatic,
       condition: validationDTO.whenCondition,
       date: validationDTO.activationGroup,
-      description:
-        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
-          ? validationDTO.thenCondition[0]
-          : null,
+      description: validationDTO.description,
       enabled: validationDTO.enabled,
       enabled: validationDTO.enabled,
       entityType: validationDTO.type,
@@ -53,7 +48,8 @@ const parseDataValidationRulesDTO = validations => {
           ? validationDTO.thenCondition[0]
           : null,
       name: validationDTO.ruleName,
-      referenceId: validationDTO.referenceId
+      referenceId: validationDTO.referenceId,
+      shortCode: validationDTO.shortCode
     });
   });
 

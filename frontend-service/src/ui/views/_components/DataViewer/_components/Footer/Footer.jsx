@@ -8,19 +8,21 @@ const Footer = ({ hasWritePermissions, onAddClick, onPasteClick }) => {
   return (
     <div className="p-clearfix" style={{ width: '100%' }}>
       <Button
-        style={{ float: 'left' }}
-        label={resources.messages['add']}
+        className="p-button-animated-blink"
         icon="add"
         disabled={!hasWritePermissions}
+        label={resources.messages['add']}
         onClick={() => onAddClick()}
+        style={{ float: 'left' }}
       />
       <Button
-        style={{ float: 'right' }}
-        label={resources.messages['pasteRecords']}
+        className="p-button-animated-blink"
         icon="clipboard"
+        label={resources.messages['pasteRecords']}
         onClick={async () => {
           onPasteClick();
         }}
+        style={{ float: 'right' }}
       />
     </div>
   );
