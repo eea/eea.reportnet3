@@ -12,6 +12,17 @@
   color: var(--documenticon-color);
 }
 
+.downloadIcon svg:hover {
+  animation: downloadFile 0.75s infinite;
+}
+
+.downloadIconArrow {
+  position: absolute;
+}
+.downloadIconArrow:hover {
+  position: absolute;
+}
+
 .dialog :global .p-dialog-content {
   padding-bottom: 0 !important;
 }
@@ -36,4 +47,16 @@
   border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-100) !important;
   margin-left: 3px !important;
+}
+
+@keyframes downloadFile {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(50%);
+  }
 }

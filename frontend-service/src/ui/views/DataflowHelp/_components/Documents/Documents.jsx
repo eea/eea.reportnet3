@@ -69,14 +69,14 @@ const Documents = ({
         <Button
           type="button"
           icon="edit"
-          className={`p-button-rounded p-button-secondary ${styles.editRowButton}`}
+          className={`p-button-rounded p-button-secondary-transparent ${styles.editRowButton} p-button-animated-blink`}
           disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
           onClick={e => onEditDocument()}
         />
         <Button
           type="button"
           icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-          className={`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}
+          className={`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton} p-button-animated-blink`}
           disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
           onClick={() => {
             setDeleteDialogVisible(true);
@@ -93,7 +93,10 @@ const Documents = ({
         {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
-          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+          <div>
+            <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+            {/* <FontAwesomeIcon className={styles.downloadIconArrow} icon={AwesomeIcons('arrowDown')} /> */}
+          </div>
         )}
       </span>
     );
@@ -185,8 +188,8 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              icon={'export'}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload`}
+              icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
                 setIsEditForm(false);
@@ -196,7 +199,7 @@ const Documents = ({
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin`}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={async () => {
