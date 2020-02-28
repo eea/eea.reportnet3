@@ -1,5 +1,5 @@
 export class DatasetTableField {
-  constructor(fieldId, recordId, name, type, value, validations, fieldSchemaId, description, codelistId) {
+  constructor(fieldId, recordId, name, type, value, validations, fieldSchemaId, description, codelistId, required) {
     this.codelistId = codelistId;
     this.description = description;
     this.fieldId = fieldId;
@@ -9,5 +9,6 @@ export class DatasetTableField {
     this.type = type;
     this.value = value;
     this.validations = validations;
+    this.required = required;
   }
 }
