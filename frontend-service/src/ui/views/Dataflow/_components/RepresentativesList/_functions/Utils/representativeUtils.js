@@ -31,7 +31,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
         type: 'ADD_REPRESENTATIVE'
       });
     } catch (error) {
-      console.log('error on RepresentativeService.add', error);
+      console.error('error on RepresentativeService.add', error);
       if (error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
@@ -56,7 +56,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
       payload: { responseAllDataProviders }
     });
   } catch (error) {
-    console.log('error on RepresentativeService.allDataProviders', error);
+    console.error('error on RepresentativeService.allDataProviders', error);
   }
 };
 
@@ -69,7 +69,7 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
       payload: { response: responseAllRepresentatives, representativesByCopy }
     });
   } catch (error) {
-    console.log('error on RepresentativeService.allRepresentatives', error);
+    console.error('error on RepresentativeService.allRepresentatives', error);
   }
 };
 
@@ -81,7 +81,7 @@ const getProviderTypes = async formDispatcher => {
       payload: { providerTypes }
     });
   } catch (error) {
-    console.log('error on  RepresentativeService.getProviderTypes', error);
+    console.error('error on  RepresentativeService.getProviderTypes', error);
   }
 };
 
@@ -120,7 +120,7 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
       payload: { representativeIdToDelete: formState.representativeIdToDelete }
     });
   } catch (error) {
-    console.log('error on RepresentativeService.deleteById: ', error);
+    console.error('error on RepresentativeService.deleteById: ', error);
   }
 };
 
@@ -144,7 +144,7 @@ const updateProviderId = async (formDispatcher, representativeId, newDataProvide
       payload: { dataProviderId: newDataProviderId, representativeId }
     });
   } catch (error) {
-    console.log('error on RepresentativeService.updateDataProviderId', error);
+    console.error('error on RepresentativeService.updateDataProviderId', error);
   }
 };
 
@@ -178,7 +178,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         type: 'UPDATE_ACCOUNT'
       });
     } catch (error) {
-      console.log('error on RepresentativeService.updateProviderAccount', error);
+      console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 404) {
         formDispatcher({

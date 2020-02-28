@@ -10,13 +10,13 @@ const ActionsColumn = ({ onDeleteClick, onEditClick }) => {
       <Button
         type="button"
         icon="edit"
-        className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+        className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
         onClick={() => onEditClick()}
       />
       <Button
         type="button"
         icon="trash"
-        className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+        className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
         onClick={() => onDeleteClick()}
       />
     </div>

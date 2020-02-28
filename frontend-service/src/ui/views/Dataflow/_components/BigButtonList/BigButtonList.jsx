@@ -187,7 +187,7 @@ export const BigButtonList = ({
         payload: { isLoading: true, receiptData: response }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });

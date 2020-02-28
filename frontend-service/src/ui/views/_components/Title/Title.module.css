@@ -25,7 +25,7 @@
 }
 
 .icon {
-  color: var(--icon-title-color);
+  color: var(--title-icon-color);
   opacity: 0.6;
   margin-right: 0.5rem !important;
 }
