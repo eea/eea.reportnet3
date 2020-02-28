@@ -256,7 +256,7 @@ const schemaById = async datasetId => {
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
   const rules = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
-  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(rules);
+  dataset.levelErrorTypes = !isUndefined(rules) && rules !== '' ? getAllLevelErrorsFromRuleValidations(rules) : [];
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
