@@ -9,13 +9,16 @@ import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { StatusList } from 'ui/views/_components/StatusList';
 
+import { DatasetService } from 'core/services/Dataset';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
-import { DatasetService } from 'core/services/Dataset';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 const SEVERITY_CODE = {
@@ -37,6 +40,7 @@ const Dashboard = withRouter(
     const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
     const resources = useContext(ResourcesContext);
+    const themeContext = useContext(ThemeContext);
 
     const chartRef = useRef();
 
@@ -125,7 +129,12 @@ const Dashboard = withRouter(
             stacked: true,
             scaleLabel: {
               display: true,
-              labelString: resources.messages['tables']
+              labelString: resources.messages['tables'],
+              fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+            },
+            gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
+            ticks: {
+              fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
             }
           }
         ],
@@ -134,13 +143,16 @@ const Dashboard = withRouter(
             stacked: true,
             scaleLabel: {
               display: true,
-              labelString: resources.messages['percentage']
+              labelString: resources.messages['percentage'],
+              fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
             },
             ticks: {
               min: 0,
               max: 100,
-              callback: (value, index, values) => `${value}%`
-            }
+              callback: (value, index, values) => `${value}%`,
+              fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+            },
+            gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
           }
         ]
       }

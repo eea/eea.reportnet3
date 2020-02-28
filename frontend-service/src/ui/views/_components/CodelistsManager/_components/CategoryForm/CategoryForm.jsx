@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { capitalize, isNull, isUndefined } from 'lodash';
 
 import styles from './CategoryForm.module.css';
@@ -7,23 +7,52 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { CodelistCategoryService } from 'core/services/CodelistCategory';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const CategoryForm = ({
   checkCategoryDuplicates,
+  checkNoCodelistEditing,
   columns,
+  isEditionModeOn,
   isIncorrect,
-  newCategory,
-  onChangeCategoryForm,
-  onHideDialog,
-  onSaveCategory,
-  onToggleIncorrect,
-  visible
+  isInDesign,
+  onLoadCategories,
+  onToggleIncorrect
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const [newCategory, setNewCategory] = useState({ shortCode: '', description: '' });
+  const [newCategoryVisible, setNewCategoryVisible] = useState(false);
+
+  const onChangeCategoryForm = (property, value) => {
+    const inmNewCategory = { ...newCategory };
+    inmNewCategory[property] = value;
+    setNewCategory(inmNewCategory);
+  };
+
+  const onSaveCategory = async () => {
+    try {
+      const response = await CodelistCategoryService.addById(newCategory.shortCode, newCategory.description);
+      if (response.status >= 200 && response.status <= 299) {
+        onLoadCategories();
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR'
+      });
+    } finally {
+      setNewCategoryVisible(false);
+    }
+  };
+
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-success"
         disabled={isIncorrect || Object.values(newCategory).includes('')}
         icon="save"
         label={resources.messages['save']}
@@ -32,11 +61,13 @@ const CategoryForm = ({
         }}
       />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-secondary"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           onToggleIncorrect(false);
-          onHideDialog();
+          setNewCategory({ shortCode: '', description: '' });
+          setNewCategoryVisible(false);
         }}
       />
     </div>
@@ -75,14 +106,27 @@ const CategoryForm = ({
       footer={categoryDialogFooter}
       header={resources.messages['addNewCategory']}
       modal={true}
-      onHide={() => onHideDialog()}
+      onHide={() => setNewCategoryVisible(false)}
       style={{ width: '50%' }}
-      visible={visible}>
-      <div className="p-grid p-fluid"> {addCategoryForm}</div>
+      visible={newCategoryVisible}>
+      <div className="p-grid p-fluid">{addCategoryForm}</div>
     </Dialog>
   );
 
-  return renderDialog;
+  return (
+    <React.Fragment>
+      <Button
+        className={isEditionModeOn ? styles.refreshCategoriesButton : null}
+        disabled={!checkNoCodelistEditing()}
+        icon="add"
+        label={resources.messages['newCategory']}
+        onClick={() => setNewCategoryVisible(true)}
+        style={{ marginRight: !checkNoCodelistEditing() ? '0.5rem' : '1.5rem' }}
+        visible={!isInDesign || isEditionModeOn}
+      />
+      {renderDialog}
+    </React.Fragment>
+  );
 };
 
 export { CategoryForm };

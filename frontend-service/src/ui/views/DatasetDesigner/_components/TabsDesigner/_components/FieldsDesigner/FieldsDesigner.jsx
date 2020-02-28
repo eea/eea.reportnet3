@@ -76,7 +76,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
@@ -88,7 +89,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       codelistId,
       codelistName,
       codelistVersion,
-      codelistItems
+      codelistItems,
+      required
     });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
@@ -107,7 +109,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     codelistId,
     codelistName,
     codelistVersion,
-    codelistItems
+    codelistItems,
+    required
   ) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
@@ -119,7 +122,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       inmFields[fieldIndex].codelistName = codelistName;
       inmFields[fieldIndex].codelistVersion = codelistVersion;
       inmFields[fieldIndex].codelistItems = codelistItems;
-
+      inmFields[fieldIndex].required = required;
       setFields(inmFields);
     }
   };
@@ -223,7 +226,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
               codelistId: field.codelistId,
               codelistName: field.codelistName,
               codelistVersion: field.codelistVersion,
-              codelistItems: field.codelistItems
+              codelistItems: field.codelistItems,
+              required: field.required
             };
           })
         : [];
@@ -297,11 +301,13 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistId=""
+          codelistItems={[]}
           codelistName=""
           codelistVersion=""
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
+          fieldRequired={false}
           fieldType=""
           fieldValue=""
           index="-1"
@@ -326,12 +332,14 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
             <FieldDesigner
               checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
               codelistId={field.codelistId}
+              codelistItems={field.codelistItems}
               codelistName={field.codelistName}
               codelistVersion={field.codelistVersion}
               datasetId={datasetId}
               fieldId={field.fieldId}
               fieldDescription={field.description}
               fieldName={field.name}
+              fieldRequired={field.required}
               fieldType={field.type}
               fieldValue={field.value}
               index={index}

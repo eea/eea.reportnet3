@@ -56,10 +56,10 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const renderToolbar = () => {
     return isCustodian ? (
-      <Toolbar>
+      <Toolbar className={styles.datasetSchemasToolbar}>
         <div className="p-toolbar-group-right">
           <Button
-            className={`p-button-rounded p-button-secondary`}
+            className={`p-button-rounded p-button-secondary-transparent`}
             disabled={false}
             icon={'refresh'}
             label={resources.messages['refresh']}

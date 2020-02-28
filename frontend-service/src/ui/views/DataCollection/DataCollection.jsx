@@ -18,6 +18,7 @@ import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -116,6 +117,15 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   }, []);
 
+  const getCodelistsList = async datasetSchemas => {
+    try {
+      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
+      return codelistsList;
+    } catch (error) {
+      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
+    }
+  };
+
   const getDataflowName = async () => {
     try {
       const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
@@ -178,6 +188,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      const codelistsList = await getCodelistsList([datasetSchema]);
       setDatasetSchemaName(datasetSchema.dataCollectionName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
@@ -194,12 +205,20 @@ export const DataCollection = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
+            let codelist = {};
+            if (field.type === 'CODELIST') {
+              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
+            }
             return {
-              table: table['tableSchemaName'],
+              codelistId: field.codelistId,
+              codelistItems: codelist.items,
+              codelistName: codelist.name,
+              codelistVersion: codelist.version,
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })
@@ -285,13 +304,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'import'}
               label={resources.messages['export']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
@@ -299,7 +318,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'validate'}
               iconClasses={null}
@@ -307,7 +326,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'warning'}
               iconClasses={''}
@@ -315,13 +334,13 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'camera'}
               label={resources.messages['snapshots']}

@@ -254,8 +254,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       criteria.add(idDataset);
       lockService.removeLockByCriteria(criteria);
     }
-
-    if (released || isBlocked != null && !isBlocked.isEmpty()) {
+    // release snapshot when the user press create+release
+    if (released) {
       datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
 
@@ -340,7 +340,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     setTenant(idDataset);
     List<Validation> isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
 
-    if (isBlocked == null || isBlocked.isEmpty()) {
+    if (isBlocked != null && isBlocked.isEmpty()) {
       Long providerId = 0L;
       DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
       if (metabase.getDataProviderId() != null) {

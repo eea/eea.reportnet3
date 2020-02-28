@@ -92,7 +92,7 @@ export class InputTextarea extends Component {
 
     if (this.props.expandableOnClick) {
       this.element.style.height = `${this.props.displayedHeight}px`;
-      this.element.style.boxShadow = '0 10px 6px -6px rgba(var(--blue-120-rgb), 0.2)';
+      this.element.style.boxShadow = 'var(--inputtextarea-box-shadow)';
     }
   }
 

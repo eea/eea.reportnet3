@@ -20,6 +20,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -31,6 +32,7 @@ import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -39,6 +41,7 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +112,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The validation commands. */
   @Autowired
   private List<ValidationSchemaCommand> validationCommands;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
 
   /**
@@ -622,6 +629,47 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return isValid;
+  }
+
+
+  /**
+   * Propagate rules after update schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param type the type
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      DataType type, Long datasetId) {
+
+    if (type != null) {
+      // if we change the type we need to delete all rules
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
+
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
+            EntityTypeEnum.FIELD, Boolean.TRUE);
+      }
+
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+      // update the dataset field value
+      TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+      datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+    } else {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
+          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+        }
+      } else {
+        rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());
+      }
+    }
+
+
   }
 
 }

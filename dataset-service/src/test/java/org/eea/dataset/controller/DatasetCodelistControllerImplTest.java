@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.CodelistService;
@@ -29,24 +30,36 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetCodelistControllerImplTest {
 
-  /** The dataset codelist controller impl. */
+  /**
+   * The dataset codelist controller impl.
+   */
   @InjectMocks
   DatasetCodelistControllerImpl datasetCodelistControllerImpl;
 
-  /** The codelist service. */
+  /**
+   * The codelist service.
+   */
   @Mock
   private CodelistService codelistService;
 
-  /** The codelist VO. */
+  /**
+   * The codelist VO.
+   */
   private CodelistVO codelistVO;
 
-  /** The codelists VO. */
+  /**
+   * The codelists VO.
+   */
   private List<CodelistVO> codelistsVO;
 
-  /** The codelist category VO. */
+  /**
+   * The codelist category VO.
+   */
   private CodelistCategoryVO codelistCategoryVO;
 
-  /** The codelist category VOS. */
+  /**
+   * The codelist category VOS.
+   */
   private List<CodelistCategoryVO> codelistCategoryVOS;
 
   /**
@@ -82,6 +95,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the by id exception 2 test.
    *
    * @return the by id exception 2 test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -99,6 +113,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the by id success test.
    *
    * @return the by id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -354,6 +369,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the category by id exception 2 test.
    *
    * @return the category by id exception 2 test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -371,6 +387,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the category by id success test.
    *
    * @return the category by id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -500,42 +517,12 @@ public class DatasetCodelistControllerImplTest {
     Mockito.verify(codelistService, times(1)).deleteCategory(Mockito.any());
   }
 
-  /**
-   * Gets the all by id exception 1 test.
-   *
-   * @return the all by id exception 1 test
-   */
-  @Test
-  public void getAllByIdException1Test() {
-    try {
-      datasetCodelistControllerImpl.getAllById(null);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-    }
-  }
-
-  /**
-   * Gets the all by id exception 2 test.
-   *
-   * @return the all by id exception 2 test
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void getAllByIdException2Test() throws EEAException {
-    try {
-
-      datasetCodelistControllerImpl.getAllById("");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(EEAErrorMessage.CODELIST_NOT_FOUND, e.getReason());
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-    }
-  }
-
+  
   /**
    * Gets the all by id exception 3 test.
    *
    * @return the all by id exception 3 test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -554,6 +541,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all by id success test.
    *
    * @return the all by id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -567,6 +555,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all categories exception test.
    *
    * @return the all categories exception test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -584,6 +573,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all categories success test.
    *
    * @return the all categories success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -612,6 +602,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all by category id exception 2 test.
    *
    * @return the all by category id exception 2 test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -629,6 +620,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all by category id success test.
    *
    * @return the all by category id success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -641,6 +633,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all categories complete exception test.
    *
    * @return the all categories complete exception test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -658,6 +651,7 @@ public class DatasetCodelistControllerImplTest {
    * Gets the all categories complete success test.
    *
    * @return the all categories complete success test
+   *
    * @throws EEAException the EEA exception
    */
   @Test

@@ -169,6 +169,9 @@ public class DatasetSchemaServiceTest {
   @Mock
   private RulesController rulesController;
 
+  @Mock
+  private DatasetService datasetService;
+
   /**
    * Inits the mocks.
    */
@@ -833,4 +836,57 @@ public class DatasetSchemaServiceTest {
 
     Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
   }
+
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNullTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
+        1L);
+
+  }
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNotNullTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
+        DataType.NUMBER, 1L);
+
+  }
+
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNullNotRequiredTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
+        1L);
+
+  }
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNotNullNotRequiredTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
+        DataType.NUMBER, 1L);
+
+  }
+
 }
