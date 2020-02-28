@@ -29,6 +29,8 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
@@ -37,6 +39,7 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -152,6 +155,15 @@ public class DatasetSnapshotServiceTest {
   /** The dataset snapshot controller. */
   @Mock
   private DatasetSnapshotController datasetSnapshotController;
+
+  /** The rules controller zuul. */
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
+
+  /** The rules repository. */
+  @Mock
+  private RulesRepository rulesRepository;
+
 
   /**
    * Inits the mocks.
@@ -480,6 +492,9 @@ public class DatasetSnapshotServiceTest {
 
     when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
         .thenReturn(objectMapper.writeValueAsBytes(schema));
+
+    Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString());
+    when(rulesRepository.save(Mockito.any())).thenReturn(new RulesSchema());
 
     datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
     Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
