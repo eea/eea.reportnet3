@@ -12,7 +12,7 @@ const getAll = async datasetSchemaId => {
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-  
+  console.log({ validationsListDTO });
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -28,6 +28,7 @@ const parseDataValidationRulesDTO = validations => {
   const entityTypes = [];
 
   validationsData.validations = validations.map(validationDTO => {
+    console.log({ validationDTO });
     entityTypes.push(validationDTO.type);
     return new Validation({
       activationGroup: validationDTO.activationGroup,
