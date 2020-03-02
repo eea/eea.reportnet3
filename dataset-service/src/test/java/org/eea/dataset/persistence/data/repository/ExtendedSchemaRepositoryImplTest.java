@@ -286,6 +286,9 @@ public class ExtendedSchemaRepositoryImplTest {
     extendedSchemaRepositoryImpl.insertFieldInPosition("", new Document(), 1);
   }
 
+  /**
+   * Find table schema null test.
+   */
   @Test
   public void findTableSchemaNullTest() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -297,6 +300,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema null document test.
+   */
   @Test
   public void findTableSchemaNullDocumentTest() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -308,6 +314,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema null table schemas test.
+   */
   @Test
   public void findTableSchemaNullTableSchemasTest() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -319,6 +328,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema null table schemas not array list test.
+   */
   @Test
   public void findTableSchemaNullTableSchemasNotArrayListTest() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
@@ -330,6 +342,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema null table schema test.
+   */
   @Test
   public void findTableSchemaNullTableSchemaTest() {
     List<Document> list = new ArrayList<>();
@@ -344,6 +359,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema null table schema not document test.
+   */
   @Test
   public void findTableSchemaNullTableSchemaNotDocumentTest() {
     List<String> list = new ArrayList<>();
@@ -359,6 +377,9 @@ public class ExtendedSchemaRepositoryImplTest {
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
+  /**
+   * Find table schema test.
+   */
   @Test
   public void findTableSchemaTest() {
     List<Document> list = new ArrayList<>();
