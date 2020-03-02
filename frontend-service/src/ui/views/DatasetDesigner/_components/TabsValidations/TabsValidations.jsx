@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { capitalize, isEmpty, isUndefined } from 'lodash';
@@ -11,6 +11,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView'; // Do not delete
@@ -21,16 +22,39 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setValidationId }) => {
+const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [validationId, setValidationId] = useState();
   const [validationsList, setValidationsList] = useState();
 
   useEffect(() => {
     onLoadValidationsList(datasetSchemaId);
-  }, []);
+  }, [isDataUpdated]);
+
+  const onDeleteValidation = async () => {
+    try {
+      const response = await ValidationService.deleteById(datasetSchemaId, validationId);
+      if (response.status >= 200 && response.status <= 299) {
+        onUpdateData();
+      }
+    } catch (error) {
+      notificationContext.add({
+        type: 'DELETE_RULE_ERROR'
+      });
+    } finally {
+      onHideDeleteDialog();
+    }
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setValidationId('');
+  };
 
   const onLoadValidationsList = async datasetSchemaId => {
     setIsLoading(true);
@@ -47,16 +71,21 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
     }
   };
 
-  const automaticTemplate = rowData => {
-    setValidationId(rowData.id);
-    return (
-      <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-        {rowData.automatic || rowData.enabled ? (
-          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-        ) : null}
-      </div>
-    );
+  const onShowDeleteDialog = () => {
+    setIsDeleteDialogVisible(true);
   };
+
+  const onUpdateData = () => {
+    setIsDataUpdated(!isDataUpdated);
+  };
+
+  const automaticTemplate = rowData => (
+    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
+      {rowData.automatic || rowData.enabled ? (
+        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+      ) : null}
+    </div>
+  );
 
   const getHeader = fieldHeader => {
     let header;
@@ -160,6 +189,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
             autoLayout={true}
             className={null}
             loading={false}
+            onRowClick={event => setValidationId(event.data.id)}
             paginator={true}
             paginatorRight={paginatorRightText}
             rows={10}
@@ -194,7 +224,21 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
     return <Spinner className={styles.positioning} />;
   }
 
-  return <ValidationList />;
+  return (
+    <Fragment>
+      <ValidationList />
+
+      <ConfirmDialog
+        header={resources.messages['deleteValidationHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onDeleteValidation()}
+        onHide={() => onHideDeleteDialog()}
+        visible={isDeleteDialogVisible}>
+        {resources.messages['deleteValidationConfirm']}
+      </ConfirmDialog>
+    </Fragment>
+  );
 });
 
 export { TabsValidations };
