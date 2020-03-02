@@ -96,27 +96,18 @@ const useBigButtonList = ({
       };
     });
 
-  const onBuildReceiptButton = () => {
-    const { datasets } = dataflowData;
-    const releasedStates = datasets.map(dataset => {
-      return dataset.isReleased;
-    });
-
-    return [
-      {
-        buttonClass: 'schemaDataset',
-        buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
-        buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
-        caption: resources.messages['confirmationReceipt'],
-        handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
-        infoStatus: receiptState.isOutdated,
-        layout: 'defaultBigButton',
-        visibility: !isCustodian && !releasedStates.includes(false) && !releasedStates.includes(null)
-      }
-    ];
-  };
-
-  const receiptBigButton = onBuildReceiptButton();
+  const receiptBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
+      buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+      caption: resources.messages['confirmationReceipt'],
+      handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
+      infoStatus: receiptState.isOutdated,
+      layout: 'defaultBigButton',
+      visibility: !isCustodian && !receiptState.isReleased.includes(false) && !receiptState.isReleased.includes(null)
+    }
+  ];
 
   return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
 };

@@ -268,14 +268,18 @@ const Representative = withRouter(({ history, match }) => {
           .filter(dataset => dataset.datasetSchemaName === match.params.representative)
           .map(id => id.dataProviderId);
 
+        const isReleased = dataflow.datasets
+          .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+          .map(releasedStatus => releasedStatus.isReleased);
+
         const isOutdated = dataflow.representatives
-          .filter(representative => representative.dataProviderId === uniq(representativeId))
+          .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
           .map(representative => representative.isReceiptOutdated);
 
-        if (isOutdated.length === 1) {
+        if (isOutdated.length === 1 && isReleased.length === 1) {
           receiptDispatch({
             type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {} }
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {}, isReleased }
           });
         }
       }
