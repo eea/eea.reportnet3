@@ -110,12 +110,12 @@
   /* Chevron */
   --breadCrumb-font-color: var(--c-corporate-blue);
   --breadCrumb-icon-color: var(--c-corporate-blue);
-  --breadCrumb-chevron-color: var(--c-corporate-blue);
+  --breadCrumb-chevron-color: var(--c-corporate-blue-lighter);
 
   /* Leftside bar*/
 
   --leftSideBar-bg: var(--c-corporate-blue);
-  --leftSideBar-box-shadow: 0 0 0 rgba(255, 255, 255, 0.1);
+  --leftSideBar-box-shadow: 0 5px 0.5rem rgba(0, 0, 0, 0.6);
 
   /* Header */
   --header-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
@@ -406,6 +406,12 @@
   --hyperlink-color-hover: var(--c-corporate-blue-lighter);
   --hyperlink-color-active: var(--c-purple);
   --hyperlink-color-visited: var(--c-purple);
+
+  /* Drag&drop */
+  --drag-and-drop-arrow-color: var(--c-corporate-blue);
+  --drag-and-drop-arrow-opacity: 0.6;
+  --drag-and-drop-div-border: 1px dashed var(--c-corporate-blue);
+  --drag-and-drop-div-opacity: 0.7;
 }
 body {
   margin: 0px;

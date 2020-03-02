@@ -34,9 +34,9 @@ import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDat
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const DatasetDesigner = withRouter(({ match, history }) => {
+export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
-    params: { datasetId }
+    params: { dataflowId, datasetId }
   } = match;
 
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -52,18 +52,21 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [datasetHasData, setDatasetHasData] = useState(false);
+  const [validationId, setValidationId] = useState('');
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
     isLoadingSnapshotListData,
-    isSnapshotsBarVisible,
-    setIsSnapshotsBarVisible,
     isSnapshotDialogVisible,
+    isSnapshotsBarVisible,
     setIsSnapshotDialogVisible,
+    setIsSnapshotsBarVisible,
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(match.params.dataflowId, datasetId, datasetSchemaId);
+  } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
     try {
@@ -103,7 +106,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         href: getUrl(
           routes.DATAFLOW,
           {
-            dataflowId: match.params.dataflowId
+            dataflowId
           },
           true
         ),
@@ -112,7 +115,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             getUrl(
               routes.DATAFLOW,
               {
-                dataflowId: match.params.dataflowId
+                dataflowId
               },
               true
             )
@@ -126,7 +129,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }, []);
 
   const getDataflowName = async () => {
-    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    const dataflowData = await DataflowService.dataflowDetails(dataflowId);
     setDataflowName(dataflowData.name);
   };
 
@@ -135,6 +138,8 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       onUpdateDescription(description);
     }
   };
+
+  const onLoadTableData = hasData => setDatasetHasData(hasData);
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
@@ -176,13 +181,13 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   const actionButtonsValidationDialog = (
     <>
       <Button
-        className="p-button-primary"
+        className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
         onClick={() => onHideValidationsDialog()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onHideValidationsDialog()}
@@ -223,16 +228,16 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   return layout(
     <SnapshotContext.Provider
       value={{
-        snapshotState: snapshotState,
-        snapshotDispatch: snapshotDispatch,
         isSnapshotsBarVisible: isSnapshotsBarVisible,
-        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
+        snapshotDispatch: snapshotDispatch,
+        snapshotState: snapshotState
       }}>
       <Title
-        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
-        subtitle={dataflowName}
         icon="pencilRuler"
         iconSize="3.4rem"
+        subtitle={dataflowName}
+        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
       />
       <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
       <div className={styles.ButtonsBar}>
@@ -259,24 +264,27 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
+            {console.log(datasetHasData)}
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !datasetHasData ? ' p-button-animated-blink' : null
+              }`}
+              disabled={!datasetHasData}
               icon={'validate'}
-              label={resources.messages['validate']}
-              onClick={() => null}
-              ownButtonClasses={null}
               iconClasses={null}
+              label={resources.messages['validate']}
+              onClick={() => setValidateDialogVisible(true)}
+              ownButtonClasses={null}
             />
 
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               disabled={false}
               icon={'list'}
+              iconClasses={null}
               label={resources.messages['qcRules']}
               onClick={() => setValidationListDialogVisible(true)}
               ownButtonClasses={null}
-              iconClasses={null}
             />
 
             <Button
@@ -287,7 +295,9 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
               onClick={() => null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? 'p-button-animated-blink' : null
+              }`}
               disabled={hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
@@ -296,7 +306,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} />
+      <TabsDesigner editable={true} onLoadTableData={onLoadTableData} />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
@@ -304,25 +314,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         snapshotListData={snapshotListData}
       />
       {validationsListDialog()}
-      {/* <Dialog
-        className={styles.paginatorValidationViewer}
-        dismissableMask={true}
-        header={resources.messages['titleValidations']}
-        maximizable
-        onHide={() => setValidationListDialogVisible(false)}
-        style={{ width: '80%' }}
-        visible={validationListDialogVisible}>
-        {/* <ValidationViewer
-          datasetId={datasetId}
-          datasetName={datasetName}
-          hasWritePermissions={hasWritePermissions}
-          levelErrorTypes={levelErrorTypes}
-          onSelectValidation={onSelectValidation}
-          tableSchemaNames={tableSchemaNames}
-          visible={validationsVisible}
-        /> */}
-      {/* <TabsValidations datasetSchemaId={datasetSchemaId} />
-      </Dialog>       */}
     </SnapshotContext.Provider>
   );
 });

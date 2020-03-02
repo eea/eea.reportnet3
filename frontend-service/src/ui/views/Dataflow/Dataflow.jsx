@@ -341,7 +341,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const closeBtnManageRolesDialog = (
     <Button
-      className="p-button-secondary"
+      className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onHideManageRolesDialog()}
@@ -443,7 +443,7 @@ const Dataflow = withRouter(({ history, match }) => {
               <Button className="p-button-text-only" label="Generate new API-key" disabled />
               <Button className="p-button-text-only" label="Open Metadata" disabled />
               <Button
-                className="p-button-secondary"
+                className="p-button-secondary p-button-animated-blink"
                 icon="cancel"
                 label={resources.messages['close']}
                 onClick={() => setIsActivePropertiesDialog(false)}
