@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -88,9 +89,8 @@ public class KieBaseManager {
           case FIELD:
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
-
-
-            // if the type is field and isnt automatic we create the rules to validate check if the
+            // if the type is field and isnt automatic we create the rules to validate check if
+            // the
             // data are correct
             Document documentField =
                 schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
@@ -126,14 +126,12 @@ public class KieBaseManager {
                   break;
               }
             }
-
-            break;
-        }
-        if (!expression.equals("")) {
-          String whenConditionWithParenthesis = new StringBuilder("").append("(")
-              .append(rule.getWhenCondition()).append(")").toString();
-          rule.setWhenCondition(
-              expression.append(whenConditionWithParenthesis).append(")").toString());
+            if (!StringUtils.isBlank(expression.toString())) {
+              String whenConditionWithParenthesis = new StringBuilder("").append("(")
+                  .append(rule.getWhenCondition()).append(")").toString();
+              rule.setWhenCondition(
+                  expression.append(whenConditionWithParenthesis).append(")").toString());
+            }
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
