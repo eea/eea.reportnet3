@@ -29,7 +29,6 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
-  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
@@ -53,12 +52,6 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       setIsCodelistSelected(fields.filter(field => field.type.toUpperCase() === 'CODELIST').length > 0);
     }
   }, [fields]);
-
-  useEffect(() => {
-    if (isPreviewModeOn) {
-      setLevelErrorTypes(onLoadErrorTypes());
-    }
-  }, [isPreviewModeOn]);
 
   const onCodelistShow = (fieldId, selectedField) => {
     setIsCodelistSelected(
@@ -142,11 +135,6 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       event.preventDefault();
       updateTableDescriptionDesign();
     }
-  };
-
-  const onLoadErrorTypes = async () => {
-    const datasetSchema = await DatasetService.schemaById(datasetId);
-    return datasetSchema.levelErrorTypes;
   };
 
   const onShowDialogError = (message, title) => {
@@ -239,8 +227,9 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
         onLoadTableData={onLoadTableData}
         isWebFormMMR={false}
         key={table.id}
-        levelErrorTypes={levelErrorTypes}
+        levelErrorTypes={table.levelErrorTypes}
         recordPositionId={-1}
+        tableHasErrors={table.hasErrors}
         tableId={table.tableSchemaId}
         tableName={table.tableSchemaName}
         tableSchemaColumns={tableSchemaColumns}

@@ -74,6 +74,18 @@ const ActionsToolbar = ({
   }, [isValidationSelected]);
 
   useEffect(() => {
+    // const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
+    // const dropdownFilter = colsSchema
+    //   .map(colSchema => {
+    //     if (!mustShowColumns.includes(colSchema.field)) {
+    //       return { label: colSchema.header, key: colSchema.field };
+    //     }
+    //   })
+    //   .filter(colSchema => !isUndefined(colSchema));
+    dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
+  }, [levelErrorTypesWithCorrects]);
+
+  useEffect(() => {
     if (!isUndefined(exportTableData)) {
       DownloadFile(exportTableData, exportTableDataName);
     }
@@ -120,19 +132,22 @@ const ActionsToolbar = ({
 
   const getLevelErrorFilters = () => {
     let filters = [];
-    levelErrorTypesWithCorrects.forEach(value => {
-      if (!isUndefined(value) && !isNull(value)) {
-        let filter = {
-          label: capitalize(value),
-          key: capitalize(value)
-        };
-        filters.push(filter);
-      }
-    });
+    if (!isUndefined(levelErrorTypesWithCorrects)) {
+      levelErrorTypesWithCorrects.forEach(value => {
+        if (!isUndefined(value) && !isNull(value)) {
+          let filter = {
+            label: capitalize(value),
+            key: capitalize(value)
+          };
+          filters.push(filter);
+        }
+      });
+    }
     return filters;
   };
 
   const showFilters = columnKeys => {
+    console.log({ columnKeys });
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
     const currentVisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)

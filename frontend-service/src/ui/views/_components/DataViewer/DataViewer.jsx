@@ -45,14 +45,11 @@ import {
 
 const DataViewer = withRouter(
   ({
-    correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isDataCollection,
-    isPreviewModeOn = false,
     isValidationSelected,
     isWebFormMMR,
-    levelErrorTypes = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
-    levelErrorTypesWithCorrects = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
+    levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
@@ -80,7 +77,8 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
-    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
+    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState(['CORRECT']);
+    const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
 
@@ -163,6 +161,16 @@ const DataViewer = withRouter(
       setIsCodelistInfoVisible,
       validationsTemplate
     );
+
+    useEffect(() => {
+      let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
+      inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
+      setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
+    }, [levelErrorTypes]);
+
+    useEffect(() => {
+      setLevelErrorValidations(levelErrorTypesWithCorrects);
+    }, [levelErrorTypesWithCorrects]);
 
     useEffect(() => {
       setRecordErrorPositionId(recordPositionId);

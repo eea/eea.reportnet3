@@ -78,7 +78,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
     try {
       setIsLoading(true);
       const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
+
       const inmDatasetSchema = { ...datasetSchemaDTO };
+      console.log({ inmDatasetSchema });
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
         table.description = table.tableSchemaDescription;
@@ -87,6 +89,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
         table.index = idx;
         table.showContextMenu = false;
         table.header = table.tableSchemaName;
+        table.hasErrors = true;
+        table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
       });
       //Add tab Button/Tab
       inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
