@@ -9,9 +9,6 @@ export const receiptReducer = (receiptState, { type, payload }) => {
     case 'ON_CLEAN_UP':
       return { ...receiptState, ...payload };
 
-    case 'ON_RELEASE_NEW_DATA':
-      return { ...receiptState, isOutdated: payload.isOutdated };
-
     default:
       return receiptState;
   }
