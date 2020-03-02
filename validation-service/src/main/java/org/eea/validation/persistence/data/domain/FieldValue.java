@@ -25,6 +25,12 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
@@ -74,6 +80,7 @@ public class FieldValue {
       cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
 
+  /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
 
@@ -85,6 +92,16 @@ public class FieldValue {
   @Override
   public int hashCode() {
     return Objects.hash(id, type, value, idFieldSchema, record);
+  }
+
+  /**
+   * Double data. That method we use with drools to know if the numer is numeric value avaliable
+   *
+   * @param value the value
+   * @return the double
+   */
+  public Double doubleData(String value) {
+    return Double.parseDouble(value);
   }
 
   /**
