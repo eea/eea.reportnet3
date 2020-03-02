@@ -22,7 +22,6 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
-import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -38,7 +37,10 @@ import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-const Representative = withRouter(({ history, match }) => {
+const Representative = withRouter(({ match, history }) => {
+  const {
+    params: { dataflowId, representative }
+  } = match;
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -71,21 +73,13 @@ const Representative = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
-        UserService.hasPermission(
-          user,
-          [config.permissions.PROVIDER],
-          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
-        )
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATAFLOW}${dataflowId}`)
       );
     }
 
     if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
-        UserService.hasPermission(
-          user,
-          [config.permissions.CUSTODIAN],
-          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
-        )
+        UserService.hasPermission(user, [config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
       );
     }
   }, [user]);
@@ -102,10 +96,10 @@ const Representative = withRouter(({ history, match }) => {
         label: resources.messages['dataflow'],
         icon: 'archive',
         href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId: match.params.dataflowId }, true))
+        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true))
       },
       {
-        label: match.params.representative || resources.messages['representative'],
+        label: representative || resources.messages['representative'],
         icon: 'representative'
       }
     ]);
@@ -119,7 +113,7 @@ const Representative = withRouter(({ history, match }) => {
           icon: 'edit',
           onClick: e => {
             onShowEditForm();
-            dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
+            dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: dataflowId });
           },
           title: 'edit'
         },
@@ -151,7 +145,7 @@ const Representative = withRouter(({ history, match }) => {
     setLoading(true);
     onLoadReportingDataflow();
     onLoadDataflowsData();
-  }, [match.params.dataflowId, isDataUpdated]);
+  }, [dataflowId, isDataUpdated]);
 
   useEffect(() => {
     const refresh = notificationContext.toShow.find(
@@ -184,7 +178,7 @@ const Representative = withRouter(({ history, match }) => {
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await DataflowService.deleteById(match.params.dataflowId);
+      const response = await DataflowService.deleteById(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
       } else {
@@ -194,7 +188,7 @@ const Representative = withRouter(({ history, match }) => {
       notificationContext.add({
         type: 'DATAFLOW_DELETE_BY_ID_ERROR',
         content: {
-          dataflowId: match.params.dataflowId
+          dataflowId
         }
       });
     } finally {
@@ -247,13 +241,13 @@ const Representative = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      const dataflow = await DataflowService.reporting(dataflowId);
       setDataflowData(dataflow);
       setDataflowStatus(dataflow.status);
 
       if (!isEmpty(dataflow.datasets)) {
         const representativeId = dataflow.datasets
-          .filter(dataset => dataset.datasetSchemaName === match.params.representative)
+          .filter(dataset => dataset.datasetSchemaName === representative)
           .map(id => id.dataProviderId);
         if (representativeId.length === 1) {
           setDataProviderId(uniq(representativeId)[0]);
@@ -274,7 +268,7 @@ const Representative = withRouter(({ history, match }) => {
 
       if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
         const representativeId = dataflow.datasets
-          .filter(dataset => dataset.datasetSchemaName === match.params.representative)
+          .filter(dataset => dataset.datasetSchemaName === representative)
           .map(id => id.dataProviderId);
 
         const isReleased = dataflow.datasets
@@ -299,13 +293,6 @@ const Representative = withRouter(({ history, match }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
-    const titles = [...updatedDatasetSchema];
-    titles[index].schemaName = value;
-    setUpdatedDatasetSchema(titles);
   };
 
   const onShowDeleteDataflowDialog = () => {
@@ -343,31 +330,27 @@ const Representative = withRouter(({ history, match }) => {
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          title={!isUndefined(dataflowState[match.params.dataflowId]) ? `${match.params.representative}` : null}
-          subtitle={` ${TextUtils.ellipsis(dataflowState[match.params.dataflowId].name)}`}
+          title={!isUndefined(dataflowState[dataflowId]) ? `${representative}` : null}
+          subtitle={` ${TextUtils.ellipsis(dataflowState[dataflowId].name)}`}
           icon="representative"
           iconSize="4rem"
         />
 
         <BigButtonList
           dataflowData={dataflowData}
-          dataflowId={match.params.dataflowId}
+          dataflowId={dataflowId}
           dataProviderId={dataProviderId}
-          designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
-          onUpdateData={onUpdateData}
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
-          representative={match.params.representative}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
-          updatedDatasetSchema={updatedDatasetSchema}
+          representative={representative}
         />
 
         <SnapshotsDialog
           dataflowData={dataflowData}
-          dataflowId={match.params.dataflowId}
+          dataflowId={dataflowId}
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
@@ -402,21 +385,18 @@ const Representative = withRouter(({ history, match }) => {
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
           <div className="description">
-            {!isUndefined(dataflowState[match.params.dataflowId]) && dataflowState[match.params.dataflowId].description}
+            {!isUndefined(dataflowState[dataflowId]) && dataflowState[dataflowId].description}
           </div>
           <div className="features">
             <ul>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)}{' '}
-                  functionality:
+                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} functionality:
                 </strong>
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
-                <strong>
-                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${match.params.dataflowId}`)} type:
-                </strong>
+                <strong>{UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} type:</strong>
               </li>
               <li>
                 <strong>REST API key:</strong> <a>Copy API-key</a> (API-key access for developers)
@@ -433,7 +413,7 @@ const Representative = withRouter(({ history, match }) => {
           onHide={onHideDialog}
           visible={isDataflowDialogVisible}>
           <DataflowManagementForm
-            dataflowId={match.params.dataflowId}
+            dataflowId={dataflowId}
             dataflowValues={dataflowState}
             isDialogVisible={isDataflowDialogVisible}
             isEditForm={isEditForm}
@@ -444,12 +424,12 @@ const Representative = withRouter(({ history, match }) => {
           />
         </Dialog>
 
-        {!isUndefined(dataflowState[match.params.dataflowId]) && (
+        {!isUndefined(dataflowState[dataflowId]) && (
           <ConfirmDialog
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
+            disabledConfirm={onConfirmDelete !== dataflowState[dataflowId].name.toLowerCase()}
             onConfirm={() => onDeleteDataflow()}
             onHide={onHideDeleteDataflowDialog}
             styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
@@ -458,7 +438,7 @@ const Representative = withRouter(({ history, match }) => {
             <p
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                  dataflowName: dataflowState[match.params.dataflowId].name
+                  dataflowName: dataflowState[dataflowId].name
                 })
               }}></p>
             <p>

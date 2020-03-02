@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import { isEmpty, isNull } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -6,52 +6,29 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
-import { Button } from 'ui/views/_components/Button';
-import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { Dialog } from 'ui/views/_components/Dialog';
-import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
-import { DatasetService } from 'core/services/Dataset';
-import { DataCollectionService } from 'core/services/DataCollection';
 
-import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
-import { MetadataUtils } from 'ui/views/_functions/Utils';
-
 export const BigButtonList = ({
   dataflowData,
   dataflowId,
   dataProviderId,
-  designDatasetSchemas,
   handleRedirect,
   hasWritePermissions,
   isCustodian,
-  onUpdateData,
   receiptDispatch,
   receiptState,
   representative,
-  showReleaseSnapshotDialog,
-  updatedDatasetSchema
+  showReleaseSnapshotDialog
 }) => {
-  const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
-  const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
-  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
-  const [isDuplicated, setIsDuplicated] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
-  const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const receiptBtnRef = useRef(null);
 
@@ -73,69 +50,6 @@ export const BigButtonList = ({
     }, 1000);
   }, [receiptState.receiptData]);
 
-  const errorDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setErrorDialogVisible(false);
-          setIsDuplicated(false);
-        }}
-      />
-    </div>
-  );
-
-  const getMetadata = async ids => {
-    try {
-      return await MetadataUtils.getMetadata(ids);
-    } catch (error) {
-      notificationContext.add({
-        type: 'GET_METADATA_ERROR',
-        content: {
-          dataflowId
-        }
-      });
-    }
-  };
-
-  const onCreateDatasetSchema = () => {
-    setNewDatasetDialog(false);
-  };
-
-  const onCreateDataCollection = async date => {
-    setDataCollectionDialog(false);
-    try {
-      return await DataCollectionService.create(dataflowId, date);
-    } catch (error) {
-      const {
-        dataflow: { name: dataflowName }
-      } = await getMetadata({ dataflowId });
-      notificationContext.add({
-        type: 'CREATE_DATA_COLLECTION_ERROR',
-        content: {
-          dataflowId,
-          dataflowName
-        }
-      });
-    }
-  };
-
-  const onDeleteDatasetSchema = async index => {
-    setDeleteDialogVisible(false);
-    showLoading();
-    try {
-      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
-      if (response >= 200 && response <= 299) {
-        onUpdateData();
-      }
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      hideLoading();
-    }
-  };
-
   const onDownloadReceipt = () => {
     if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
       receiptBtnRef.current.click();
@@ -144,11 +58,6 @@ export const BigButtonList = ({
         payload: { isLoading: false, isOutdated: false }
       });
     }
-  };
-
-  const onHideErrorDialog = () => {
-    setErrorDialogVisible(false);
-    setIsDuplicated(false);
   };
 
   const onLoadReceiptData = async () => {
@@ -189,69 +98,6 @@ export const BigButtonList = ({
           </div>
         </div>
       </div>
-
-      <Dialog
-        header={resources.messages['newDatasetSchema']}
-        visible={newDatasetDialog}
-        className={styles.dialog}
-        dismissableMask={false}
-        onHide={() => {
-          setNewDatasetDialog(false);
-          setIsFormReset(false);
-        }}>
-        <NewDatasetSchemaForm
-          dataflowId={dataflowId}
-          datasetSchemaInfo={updatedDatasetSchema}
-          isFormReset={isFormReset}
-          onCreate={onCreateDatasetSchema}
-          onUpdateData={onUpdateData}
-          setNewDatasetDialog={setNewDatasetDialog}
-        />
-      </Dialog>
-
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={isDuplicated}>
-        <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
-      </Dialog>
-
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={errorDialogVisible}>
-        <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
-      </Dialog>
-
-      <ConfirmDialog
-        header={resources.messages['delete'].toUpperCase()}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
-        onHide={() => setDeleteDialogVisible(false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetSchema']}
-      </ConfirmDialog>
-
-      <ConfirmDialog
-        header={resources.messages['delete'].toUpperCase()}
-        labelCancel={resources.messages['close']}
-        labelConfirm={resources.messages['create']}
-        onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
-        onHide={() => setDataCollectionDialog(false)}
-        visible={dataCollectionDialog}>
-        <div style={{ minHeight: '55vh' }}>
-          {`${resources.messages['chooseExpirationDate']}: `}
-          <Calendar
-            inline={true}
-            showWeek={true}
-            onChange={event => setDataCollectionDueDate(event.target.value)}
-            value={dataCollectionDueDate}
-          />
-        </div>
-      </ConfirmDialog>
 
       <PDFDownloadLink
         document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
