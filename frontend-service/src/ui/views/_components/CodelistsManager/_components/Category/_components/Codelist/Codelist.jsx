@@ -301,7 +301,7 @@ const Codelist = ({
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-success p-button-animated-blink"
         disabled={
           isIncorrect ||
           codelistState.clonedCodelist.codelistName.trim() === '' ||
@@ -312,7 +312,7 @@ const Codelist = ({
         onClick={() => onSaveCloneCodelist()}
       />
       <Button
-        icon="cancel"
+        icon="cancel p-button-animated-blink"
         label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_CLONE_CODELIST_DIALOG_VISIBLE', false);

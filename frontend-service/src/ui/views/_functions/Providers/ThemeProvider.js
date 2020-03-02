@@ -30,7 +30,7 @@ export const ThemeProvider = ({ children }) => {
         'breadCrumb-icon-color': 'var(--c-corporate-blue)',
         'breadCrumb-chevron-color': 'var(--c-corporate-blue)',
         'leftSideBar-bg': 'var(--c-corporate-blue)',
-        'leftSideBar-box-shadow': '0 0 0 rgba(255, 255, 255, 0.1)',
+        'leftSideBar-box-shadow': '0 5px 0.5rem rgba(0, 0, 0, 0.6)',
         'header-box-shadow': '0 0 0.5rem rgba(0, 0, 0, 0.1)',
         'title-icon-color': 'var(--gray-110)',
         'title-color': 'var(--gray-110)',
@@ -258,7 +258,11 @@ export const ThemeProvider = ({ children }) => {
         'hyperlink-color': 'var(--c-corporate-blue)',
         'hyperlink-color-hover': 'var(--c-corporate-blue-lighter)',
         'hyperlink-color-active': 'var(--c-purple)',
-        'hyperlink-color-visited': 'var(--c-purple)'
+        'hyperlink-color-visited': 'var(--c-purple)',
+        'drag-and-drop-arrow-color': 'var(--c-corporate-blue)',
+        'drag-and-drop-arrow-opacity': '0.6',
+        'drag-and-drop-div-border': '1px dashed var(--c-corporate-blue)',
+        'drag-and-drop-div-opacity': '0.7'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -267,7 +271,7 @@ export const ThemeProvider = ({ children }) => {
         'breadCrumb-icon-color': 'var(--c-corporate-yellow)',
         'breadCrumb-chevron-color': 'var(--c-corporate-blue)',
         'leftSideBar-bg': 'var(--c-dark-blue)',
-        'leftSideBar-box-shadow': '0 0 0.5rem rgba(255, 255, 255, 0.1)',
+        'leftSideBar-box-shadow': '0 5px 0.5rem rgba(255, 255, 255, 0.1)',
         'header-box-shadow': '0 0 0.5rem rgba(255, 255, 255, 0.2)',
         'title-icon-color': 'var(--white)',
         'title-color': 'var(--white)',
@@ -497,7 +501,11 @@ export const ThemeProvider = ({ children }) => {
         'hyperlink-color': 'var(--c-corporate-yellow)',
         'hyperlink-color-hover': 'var(--c-corporate-yellow-lighter)',
         'hyperlink-color-active': 'var(--c-purple)',
-        'hyperlink-color-visited': 'var(--c-purple)'
+        'hyperlink-color-visited': 'var(--c-purple)',
+        'drag-and-drop-arrow-color': 'var(--c-corporate-yellow)',
+        'drag-and-drop-arrow-opacity': '1',
+        'drag-and-drop-div-border': '1px dashed var(--c-corporate-yellow)',
+        'drag-and-drop-div-opacity': '0.7'
       }
     }
   });

@@ -122,8 +122,8 @@ export const Tab = ({
   const onTabDragOver = event => {
     if (!isUndefined(initialTabIndexDrag)) {
       if (index !== initialTabIndexDrag && !addTab) {
-        event.currentTarget.style.border = '1px dashed var(--gray-75)';
-        event.currentTarget.style.opacity = '0.7';
+        event.currentTarget.style.border = 'var(--drag-and-drop-div-border)';
+        event.currentTarget.style.opacity = 'var(--drag-and-drop-div-opacity)';
       }
       if (event.currentTarget.tabIndex !== initialTabIndexDrag) {
         if (!isDragging) {
@@ -235,12 +235,11 @@ export const Tab = ({
             !isUndefined(tabRef.current) && !isUndefined(divScrollTabsRef)
               ? `${tabRef.current.offsetLeft - divScrollTabsRef.scrollLeft - 18}px`
               : '0px',
-          opacity: '0.6',
           position: 'absolute',
           top: !isUndefined(tabRef.current) ? `${tabRef.current.offsetTop - 15}px` : '100px',
           zIndex: 9999
         }}>
-        <FontAwesomeIcon icon={AwesomeIcons('arrowDown')} />
+        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowDown')} />
       </div>
       <div
         style={{
@@ -249,14 +248,13 @@ export const Tab = ({
             !isUndefined(tabRef.current) && !isUndefined(divScrollTabsRef)
               ? `${tabRef.current.offsetLeft - divScrollTabsRef.scrollLeft - 18}px`
               : '0px',
-          opacity: '0.6',
           position: 'absolute',
           top: !isUndefined(tabRef.current)
             ? `${tabRef.current.offsetTop + tabRef.current.clientHeight - 4}px`
             : '100px',
           zIndex: 9999
         }}>
-        <FontAwesomeIcon icon={AwesomeIcons('arrowUp')} />
+        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} />
         {/* <div
           style={{
             height: '40px',

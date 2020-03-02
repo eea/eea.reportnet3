@@ -230,13 +230,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const actionButtonsValidationDialog = (
     <>
       <Button
-        className="p-button-primary"
+        className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
         onClick={() => onHideValidationsDialog()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onHideValidationsDialog()}
@@ -334,7 +334,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             /> */}
 
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !isValidationDisabled ? ' p-button-animated-blink' : null
+              }`}
               disabled={isValidationDisabled}
               icon={'validate'}
               iconClasses={null}
@@ -344,7 +346,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
 
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               disabled={false}
               icon={'list'}
               iconClasses={null}
@@ -361,7 +363,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               onClick={() => null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? 'p-button-animated-blink' : null
+              }`}
               disabled={hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
