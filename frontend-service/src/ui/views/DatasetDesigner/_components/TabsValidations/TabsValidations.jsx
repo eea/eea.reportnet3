@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { capitalize, isEmpty, isUndefined, pick } from 'lodash';
+import { capitalize, isEmpty, isUndefined } from 'lodash';
 
 import styles from './TabsValidations.module.scss';
 
@@ -50,13 +50,16 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
     }
   };
 
-  const automaticTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic || rowData.enabled ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
-    </div>
-  );
+  const automaticTemplate = rowData => {
+    setValidationId(rowData.id);
+    return (
+      <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
+        {rowData.automatic || rowData.enabled ? (
+          <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+        ) : null}
+      </div>
+    );
+  };
 
   const getHeader = fieldHeader => {
     let header;
