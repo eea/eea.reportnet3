@@ -61,10 +61,10 @@ td > .tooltip > span.tooltiptext {
   color: var(--errors) !important;
 }
 .buttonCustom.blocker {
-  color: var(--black);
+  color: var(--blockers);
 }
 .buttonCustom.blocker:hover {
-  color: var(--black) !important;
+  color: var(--blockers) !important;
 }
 .buttonCustom.multi {
   color: var(--c-lilac-400) !important;

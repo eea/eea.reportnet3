@@ -23,7 +23,6 @@ export const SnapshotsDialog = ({
   datasetId,
   hideSnapshotDialog,
   isSnapshotDialogVisible,
-  receiptDispatch,
   setSnapshotDialog
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -46,18 +45,6 @@ export const SnapshotsDialog = ({
     setIsLoading,
     false
   );
-
-  useEffect(() => {
-    const response = notificationContext.toShow.find(
-      notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
-    );
-    if (response) {
-      receiptDispatch({
-        type: 'ON_RELEASE_NEW_DATA',
-        payload: { isOutdated: true }
-      });
-    }
-  }, [notificationContext]);
 
   useEffect(() => {
     if (isSnapshotDialogVisible) {
@@ -114,7 +101,7 @@ export const SnapshotsDialog = ({
 
   const snapshotDialogFooter = (
     <Button
-      className="p-button-secondary"
+      className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resources.messages['close']}
       onClick={() => hideSnapshotDialog()}

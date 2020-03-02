@@ -17,7 +17,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
-export const TabsDesigner = withRouter(({ editable = false, match, history }) => {
+export const TabsDesigner = withRouter(({ editable = false, match, history, onLoadTableData }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -97,7 +97,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     try {
       setIsLoading(true);
       const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
+
       const inmDatasetSchema = { ...datasetSchemaDTO };
+      console.log({ inmDatasetSchema });
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
         table.description = table.tableSchemaDescription;
@@ -106,6 +108,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
         table.index = idx;
         table.showContextMenu = false;
         table.header = table.tableSchemaName;
+        table.hasErrors = true;
+        table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
       });
       //Add tab Button/Tab
       inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
@@ -239,8 +243,8 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
 
   const checkDuplicates = (header, tabIndex) => {
     const inmTabs = [...tabs];
-    const repeteadElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
-    return repeteadElements.length > 0 && tabIndex !== repeteadElements[0].index;
+    const repeatedElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
+    return repeatedElements.length > 0 && tabIndex !== repeatedElements[0].index;
   };
 
   const checkEditingTabs = () => {
@@ -328,10 +332,10 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
           onTabAdd={onTabAdd}
-          onTabBlur={onTableAdd}
           onTabAddCancel={onTabAddCancel}
-          onTabConfirmDelete={onTableDelete}
+          onTabBlur={onTableAdd}
           onTabClick={onTabClicked}
+          onTabConfirmDelete={onTableDelete}
           onTabDragAndDrop={onTableDragAndDrop}
           onTabDragAndDropStart={onTableDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}
@@ -352,6 +356,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
                         autoFocus={false}
                         dataflowId={dataflowId}
                         datasetId={datasetId}
+                        onLoadTableData={onLoadTableData}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         key={tab.index}
                         onChangeFields={onChangeFields}

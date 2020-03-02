@@ -18,18 +18,17 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTableDescription }) => {
+export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescription, onLoadTableData, table }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
-  const [initialFieldIndexDragged, setinitialFieldIndexDragged] = useState();
-  const [initialTableDescription, setInitialTableDescription] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
+  const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
+  const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistSelected, setIsCodelistSelected] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
-  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
@@ -53,12 +52,6 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       setIsCodelistSelected(fields.filter(field => field.type.toUpperCase() === 'CODELIST').length > 0);
     }
   }, [fields]);
-
-  useEffect(() => {
-    if (isPreviewModeOn) {
-      setLevelErrorTypes(onLoadErrorTypes());
-    }
-  }, [isPreviewModeOn]);
 
   const onCodelistShow = (fieldId, selectedField) => {
     setIsCodelistSelected(
@@ -96,8 +89,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     setFields(inmFields);
   };
 
-  const onFieldDelete = deletedFieldIndx => {
-    setIndexToDelete(deletedFieldIndx);
+  const onFieldDelete = deletedFieldIndex => {
+    setIndexToDelete(deletedFieldIndex);
     setIsDeleteDialogVisible(true);
   };
 
@@ -132,7 +125,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
   };
 
   const onFieldDragAndDropStart = draggedFieldIdx => {
-    setinitialFieldIndexDragged(draggedFieldIdx);
+    setInitialFieldIndexDragged(draggedFieldIdx);
   };
 
   const onKeyChange = event => {
@@ -144,22 +137,17 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
     }
   };
 
-  const onLoadErrorTypes = async () => {
-    const datasetSchema = await DatasetService.schemaById(datasetId);
-    return datasetSchema.levelErrorTypes;
-  };
-
   const onShowDialogError = (message, title) => {
     setErrorMessageAndTitle({ title, message });
     setIsErrorDialogVisible(true);
   };
 
-  const deleteField = async deletedFieldIndx => {
+  const deleteField = async deletedFieldIndex => {
     try {
-      const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndx].fieldId);
+      const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       if (fieldDeleted) {
         const inmFields = [...fields];
-        inmFields.splice(deletedFieldIndx, 1);
+        inmFields.splice(deletedFieldIndex, 1);
         onChangeFields(inmFields, table.tableSchemaId);
         setFields(inmFields);
       } else {
@@ -236,10 +224,12 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       <DataViewer
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
+        onLoadTableData={onLoadTableData}
         isWebFormMMR={false}
         key={table.id}
-        levelErrorTypes={levelErrorTypes}
+        levelErrorTypes={table.levelErrorTypes}
         recordPositionId={-1}
+        tableHasErrors={table.hasErrors}
         tableId={table.tableSchemaId}
         tableName={table.tableSchemaName}
         tableSchemaColumns={tableSchemaColumns}
@@ -273,10 +263,10 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
       return <Spinner className={styles.positioning} />;
     } else {
       return (
-        <React.Fragment>
+        <>
           {isPreviewModeOn ? previewData() : renderFields()}
           {!isPreviewModeOn ? renderNewField() : null}
-        </React.Fragment>
+        </>
       );
     }
   };
@@ -336,8 +326,8 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
               codelistName={field.codelistName}
               codelistVersion={field.codelistVersion}
               datasetId={datasetId}
-              fieldId={field.fieldId}
               fieldDescription={field.description}
+              fieldId={field.fieldId}
               fieldName={field.name}
               fieldRequired={field.required}
               fieldType={field.type}
@@ -417,6 +407,7 @@ export const FieldsDesigner = ({ datasetId, table, onChangeFields, onChangeTable
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
+          // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>

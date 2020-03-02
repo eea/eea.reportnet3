@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isUndefined, sortBy } from 'lodash';
+import { isEmpty, isUndefined, sortBy, cloneDeep } from 'lodash';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -50,6 +50,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
+  const [steps, setSteps] = useState([]);
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
@@ -97,7 +98,32 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
     leftSideBarContext.removeModels();
+    filterHelpSteps('initial');
   }, []);
+
+  useEffect(() => {
+    if (!isEmpty(steps)) {
+      leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
+    }
+  }, [steps]);
+
+  useEffect(() => {
+    console.log(documents, steps);
+    if (!isEmpty(documents)) {
+      const inmSteps = cloneDeep(steps);
+      inmSteps.push(
+        {
+          content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
+          target: '.dataflowHelp-document-edit-delete-help-step'
+        },
+        {
+          content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
+          target: '.dataflowHelp-document-icon-help-step'
+        }
+      );
+      setSteps(inmSteps);
+    }
+  }, [documents]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -236,6 +262,100 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   };
 
+  const setHelpSteps = e => {
+    console.log({ e });
+    switch (e.index) {
+      case 0:
+        filterHelpSteps('documents');
+        break;
+      case 1:
+        filterHelpSteps('weblinks');
+        break;
+      case 2:
+        filterHelpSteps('schemas');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const filterHelpSteps = type => {
+    const dataflowSteps = [];
+
+    switch (type) {
+      case 'initial':
+        dataflowSteps.push(
+          {
+            content: <h2>{resources.messages['dataflowHelp']}</h2>,
+            locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
+            placement: 'center',
+            target: 'body'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep1']}</h3>,
+            target: '.dataflowHelp-documents-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep2']}</h3>,
+            target: '.dataflowHelp-weblinks-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep3']}</h3>,
+            target: '.dataflowHelp-schemas-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
+            target: '.dataflowHelp-document-upload-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
+            target: '.dataflowHelp-document-refresh-help-step'
+          }
+        );
+        break;
+      case 'documents':
+        dataflowSteps.push(
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
+            target: '.dataflowHelp-document-upload-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
+            target: '.dataflowHelp-document-refresh-help-step'
+          }
+        );
+        console.log('DOCUMENTSSS');
+        if (!isEmpty(documents)) {
+          dataflowSteps.push(
+            {
+              content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
+              target: '.dataflowHelp-document-edit-delete-help-step'
+            },
+            {
+              content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
+              target: '.dataflowHelp-document-icon-help-step'
+            }
+          );
+        }
+        break;
+      case 'weblinks':
+        break;
+      case 'schemas':
+        break;
+
+      default:
+        break;
+    }
+
+    // const loadedClassesSteps = [...dataflowSteps].filter(
+    //   dataflowStep =>
+    //     !isUndefined(
+    //       document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]
+    //     ) || dataflowStep.target === 'body'
+    // );
+    setSteps(dataflowSteps);
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -252,8 +372,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     return layout(
       <React.Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView activeIndex={0}>
-          <TabPanel header={resources.messages['supportingDocuments']}>
+        <TabView activeIndex={0} onTabClick={e => setHelpSteps(e)}>
+          <TabPanel
+            headerClassName="dataflowHelp-documents-help-step"
+            header={resources.messages['supportingDocuments']}>
             <Documents
               dataflowId={match.params.dataflowId}
               documents={documents}
@@ -267,7 +389,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['webLinks']}>
+          <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
               dataflowId={match.params.dataflowId}
               isCustodian={isCustodian}
@@ -279,7 +401,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               webLinks={webLinks}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['datasetSchemas']}>
+          <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
             <DatasetSchemas
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
