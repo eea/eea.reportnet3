@@ -55,7 +55,7 @@ export const BigButtonList = ({
       receiptBtnRef.current.click();
       receiptDispatch({
         type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false }
+        payload: { isLoading: false, isOutdated: false, receiptData: {} }
       });
     }
   };
