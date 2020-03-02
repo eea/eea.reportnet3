@@ -318,10 +318,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasetSchema(dataschemaId);
 
-    Map<ReportingDataset, List<Statistics>> statsMap =
+    Map<DataSetMetabase, List<Statistics>> statsMap =
         stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
 
-    statsMap.values().stream().forEach(s -> {
+    Map<DataSetMetabase, List<Statistics>> statsMapsFilteredByReportings = statsMap.entrySet()
+        .stream().filter(dsMetabase -> dsMetabase.getKey() instanceof ReportingDataset)
+        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+    statsMapsFilteredByReportings.values().stream().forEach(s -> {
       try {
         statistics.add(processStatistics(s));
       } catch (InstantiationException | IllegalAccessException e) {

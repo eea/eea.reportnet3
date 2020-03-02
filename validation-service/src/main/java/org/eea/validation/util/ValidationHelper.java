@@ -112,7 +112,7 @@ public class ValidationHelper {
       List<String> itemsCodelist = new ArrayList<>();
 
       codelist.getItems().forEach(items -> {
-        itemsCodelist.add(items.getLabel());
+        itemsCodelist.add(items.getShortCode());
       });
       if (null != mapCodeList) {
         mapCodeList.put(idCodelist, itemsCodelist);
