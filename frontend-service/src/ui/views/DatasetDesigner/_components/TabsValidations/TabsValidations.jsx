@@ -189,7 +189,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         <div className={null}>
           <DataTable
             autoLayout={true}
-            className={null}
+            className={styles.paginatorValidationViewer}
             loading={false}
             onRowClick={event => setValidationId(event.data.id)}
             paginator={true}
