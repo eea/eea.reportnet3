@@ -78,7 +78,7 @@ function boolean isNumber(String value){
         Double.valueOf( aux );
         return true;
     } catch( Exception e ){
-        return false;
+        return false;        
     }
  }
 
@@ -111,4 +111,3 @@ function boolean isCordenateLong( String value ){
  }
 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
-
