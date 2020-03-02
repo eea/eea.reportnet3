@@ -18,13 +18,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({
-  datasetId,
-  onChangeFields,
-  onChangeTableDescription,
-  setIsValidationDisabled,
-  table
-}) => {
+export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescription, onLoadTableData, table }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -242,7 +236,7 @@ export const FieldsDesigner = ({
       <DataViewer
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
-        setIsValidationDisabled={setIsValidationDisabled}
+        onLoadTableData={onLoadTableData}
         isWebFormMMR={false}
         key={table.id}
         levelErrorTypes={levelErrorTypes}

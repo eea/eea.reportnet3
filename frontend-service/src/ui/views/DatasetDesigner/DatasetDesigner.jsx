@@ -54,7 +54,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isValidationDisabled, setIsValidationDisabled] = useState(true);
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [validationId, setValidationId] = useState('');
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -140,6 +140,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
+
+  const onLoadTableData = hasData => setDatasetHasData(hasData);
 
   const onConfirmValidate = async () => {
     try {
@@ -332,12 +334,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
-
+            {console.log(datasetHasData)}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !isValidationDisabled ? ' p-button-animated-blink' : null
+                !datasetHasData ? ' p-button-animated-blink' : null
               }`}
-              disabled={isValidationDisabled}
+              disabled={!datasetHasData}
               icon={'validate'}
               iconClasses={null}
               label={resources.messages['validate']}
@@ -374,7 +376,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} setIsValidationDisabled={setIsValidationDisabled} />
+      <TabsDesigner editable={true} onLoadTableData={onLoadTableData} />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

@@ -59,7 +59,6 @@ const DataViewer = withRouter(
     onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
-    setIsValidationDisabled,
     setIsValidationSelected,
     tableHasErrors,
     tableId,
@@ -223,9 +222,6 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
-
-        setIsValidationDisabled(isEmpty(tableData.records));
-
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           onLoadTableData(true);
         }
@@ -260,6 +256,7 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
+        console.error({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }

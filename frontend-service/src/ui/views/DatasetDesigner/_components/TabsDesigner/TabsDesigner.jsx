@@ -14,7 +14,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/Dataset';
 
-export const TabsDesigner = withRouter(({ editable = false, match, history, setIsValidationDisabled }) => {
+export const TabsDesigner = withRouter(({ editable = false, match, history, onLoadTableData }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -333,7 +333,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, setI
                         autoFocus={false}
                         dataflowId={dataflowId}
                         datasetId={datasetId}
-                        setIsValidationDisabled={setIsValidationDisabled}
+                        onLoadTableData={onLoadTableData}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         key={tab.index}
                         onChangeFields={onChangeFields}
