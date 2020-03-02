@@ -77,7 +77,13 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
-    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState(['CORRECT']);
+    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
+      'CORRECT',
+      'INFO',
+      'WARNING',
+      'ERROR',
+      'BLOCKER'
+    ]);
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
@@ -162,11 +168,11 @@ const DataViewer = withRouter(
       validationsTemplate
     );
 
-    useEffect(() => {
-      let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
-      inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
-      setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
-    }, [levelErrorTypes]);
+    // useEffect(() => {
+    //   let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
+    //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
+    //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
+    // }, [levelErrorTypes]);
 
     useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
@@ -196,6 +202,7 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
+      console.log({ levelErrorValidations });
       const removeSelectAllFromList = levelErrorValidations => {
         levelErrorValidations = levelErrorValidations
           .map(error => error.toUpperCase())

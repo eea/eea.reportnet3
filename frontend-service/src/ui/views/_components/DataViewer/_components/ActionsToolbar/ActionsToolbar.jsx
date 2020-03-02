@@ -82,7 +82,7 @@ const ActionsToolbar = ({
     //     }
     //   })
     //   .filter(colSchema => !isUndefined(colSchema));
-    dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
+    // dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
   }, [levelErrorTypesWithCorrects]);
 
   useEffect(() => {
