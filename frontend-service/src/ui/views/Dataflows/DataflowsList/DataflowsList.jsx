@@ -4,9 +4,18 @@ import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './DataflowsItem';
 
-const DataflowsList = ({ dataFetch, dataflowNewValues, content, description, title, type, selectedDataflowId }) => {
+const DataflowsList = ({
+  className,
+  dataFetch,
+  dataflowNewValues,
+  content,
+  description,
+  title,
+  type,
+  selectedDataflowId
+}) => {
   return (
-    <div className={styles.wrap}>
+    <div className={`${styles.wrap} ${className}`}>
       <h2>{title}</h2>
       <p>{description}</p>
 

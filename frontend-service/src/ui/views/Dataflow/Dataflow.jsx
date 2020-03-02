@@ -102,7 +102,7 @@ const Dataflow = withRouter(({ history, match }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflow'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -118,8 +118,9 @@ const Dataflow = withRouter(({ history, match }) => {
     if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
         {
-          label: 'edit',
+          className: 'dataflow-edit-help-step',
           icon: 'edit',
+          label: 'edit',
           onClick: e => {
             onShowEditForm();
             dataflowDispatch({ type: 'ON_SELECT_DATAFLOW', payload: match.params.dataflowId });
@@ -127,28 +128,31 @@ const Dataflow = withRouter(({ history, match }) => {
           title: 'edit'
         },
         {
-          label: 'manageRoles',
+          className: 'dataflow-manage-roles-help-step',
           icon: 'manageRoles',
+          label: 'manageRoles',
           onClick: () => {
             onShowManageRolesDialog();
           },
           title: 'manageRoles'
         },
         {
-          label: 'settings',
+          className: 'dataflow-settings-help-step',
           icon: 'settings',
+          label: 'settings',
           onClick: e => {
             setIsActivePropertiesDialog(true);
           },
           show: true,
-          title: 'settings'
+          title: 'properties'
         }
       ]);
     } else {
       leftSideBarContext.addModels([
         {
-          label: 'settings',
+          className: 'dataflow-settings-provider-help-step',
           icon: 'settings',
+          label: 'settings',
           onClick: e => {
             setIsActivePropertiesDialog(true);
           },
@@ -157,6 +161,19 @@ const Dataflow = withRouter(({ history, match }) => {
       ]);
     }
   }, [isCustodian, dataflowStatus]);
+
+  useEffect(() => {
+    const steps = filterHelpSteps();
+    leftSideBarContext.addHelpSteps('dataflowHelp', steps);
+  }, [
+    dataflowData,
+    dataflowStatus,
+    match.params.dataflowId,
+    designDatasetSchemas,
+    isCustodian,
+    hasRepresentatives,
+    isDataSchemaCorrect
+  ]);
 
   useEffect(() => {
     setLoading(true);
@@ -182,6 +199,76 @@ const Dataflow = withRouter(({ history, match }) => {
       onLoadReportingDataflow();
     }
   }, [notificationContext]);
+
+  const filterHelpSteps = () => {
+    const dataflowSteps = [
+      {
+        content: <h2>{resources.messages['dataflowHelp']}</h2>,
+        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
+        placement: 'center',
+        target: 'body'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep1']}</h2>,
+        target: '.dataflow-new-item-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep2']}</h2>,
+        target: '.dataflow-documents-weblinks-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep3']}</h2>,
+        target: '.dataflow-schema-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep4']}</h2>,
+        target: '.dataflow-dataset-container-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep5']}</h2>,
+        target: '.dataflow-dataset-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep6']}</h2>,
+        target: '.dataflow-datacollection-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep7']}</h2>,
+        target: '.dataflow-dashboards-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep8']}</h2>,
+        target: '.dataflow-edit-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep9']}</h2>,
+        target: '.dataflow-manage-roles-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep10']}</h2>,
+        target: '.dataflow-settings-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowHelpStep11']}</h2>,
+        target: '.dataflow-settings-provider-help-step'
+      }
+    ];
+
+    const loadedClassesSteps = [...dataflowSteps].filter(
+      dataflowStep =>
+        !isUndefined(
+          document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]
+        ) || dataflowStep.target === 'body'
+    );
+    return loadedClassesSteps;
+  };
+
+  const getElementByClass = (elements, classId) =>
+    elements
+      .map(e => {
+        return e.target;
+      })
+      .indexOf(classId);
 
   const handleRedirect = target => {
     history.push(target);
