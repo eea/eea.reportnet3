@@ -142,7 +142,7 @@ export const WebLinks = ({
         <Button
           type="button"
           icon="edit"
-          className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           onClick={_ => {
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
@@ -150,7 +150,7 @@ export const WebLinks = ({
         <Button
           type="button"
           icon="trash"
-          className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           onClick={() => setIsConfirmDeleteVisible(true)}
         />
       </div>
@@ -202,7 +202,7 @@ export const WebLinks = ({
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               style={{ float: 'left' }}
               label={resources.messages['add']}
               icon="add"
@@ -213,7 +213,7 @@ export const WebLinks = ({
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin`}
               disabled={false}
               icon={'refresh'}
               label={resources.messages['refresh']}

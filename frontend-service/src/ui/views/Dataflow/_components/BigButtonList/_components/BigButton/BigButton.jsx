@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -12,6 +12,7 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const BigButton = ({
@@ -21,10 +22,11 @@ export const BigButton = ({
   caption,
   dataflowStatus,
   datasetSchemaInfo,
-  handleRedirect,
+  handleRedirect = () => {},
   helpClassName,
   index,
-  isReleased,
+  infoStatus,
+  infoStatusIcon,
   layout,
   model,
   onDuplicateName,
@@ -128,29 +130,33 @@ export const BigButton = ({
   const defaultBigButton = (
     <>
       <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}
-          onMouseDown={event => onWheelClick(event)}>
+        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
-        </a>
-        {model ? (
-          <>
-            <DropdownButton
-              icon="caretDown"
-              model={designModel}
-              buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-              iconStyle={{ fontSize: '1.8rem' }}
-            />
-            {isReleased && (
-              <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
-            )}
-          </>
-        ) : (
-          <></>
+        </span>
+        {model && (
+          <DropdownButton
+            icon="caretDown"
+            model={designModel}
+            buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+            iconStyle={{ fontSize: '1.8rem' }}
+          />
         )}
+        {infoStatus &&
+          (infoStatusIcon ? (
+            <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
+          ) : (
+            <p
+              style={{
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                fontSize: '1.3rem',
+                margin: '0 0.5rem',
+                fontWeight: '600'
+              }}>
+              {resources.messages['new'].toUpperCase()}
+            </p>
+          ))}
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
@@ -182,13 +188,9 @@ export const BigButton = ({
   const menuBigButton = (
     <>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
-        <a
-          onClick={e => {
-            e.preventDefault();
-            menuBigButtonRef.current.show(e);
-          }}>
+        <span onClick={event => menuBigButtonRef.current.show(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
-        </a>
+        </span>
         <DropDownMenu ref={menuBigButtonRef} model={model} />
       </div>
       <p className={styles.caption}>{caption}</p>

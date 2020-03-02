@@ -1,0 +1,37 @@
+.positioning {
+  position: sticky !important;
+}
+
+.tabsValidations {
+  margin: 0.5em 0;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .btnDelete {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0em var(--blue-100) !important;
+    color: var(--errors) !important;
+    margin-left: 3px !important;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+  .btnEdit {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0em var(--blue-100) !important;
+    color: var(--main-color-font) !important;
+    margin-left: 3px !important;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+  .checkedValueColumn {
+    text-align: center !important;
+  }
+}

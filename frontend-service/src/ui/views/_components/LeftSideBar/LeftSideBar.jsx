@@ -54,7 +54,7 @@ const LeftSideBar = withRouter(() => {
         e.preventDefault();
         if (notificationContext.all.length > 0) setIsNotificationVisible(true);
       },
-      title: 'userSettings',
+      title: 'notifications',
       icon: 'notifications',
       label: 'notifications'
     };
