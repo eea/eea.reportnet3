@@ -269,7 +269,7 @@ export const ThemeProvider = ({ children }) => {
         'hyperlink-color-hover': 'var(--c-corporate-blue-lighter)',
         'hyperlink-color-active': 'var(--c-purple)',
         'hyperlink-color-visited': 'var(--c-purple)',
-        'box-shadow': 'var(--gray-15)'
+        'card-box-shadow': 'var(--gray-15)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -509,7 +509,7 @@ export const ThemeProvider = ({ children }) => {
         'hyperlink-color-hover': 'var(--c-corporate-yellow-lighter)',
         'hyperlink-color-active': 'var(--c-purple)',
         'hyperlink-color-visited': 'var(--c-purple)',
-        'box-shadow': 'var(--gray-75)'
+        'card-box-shadow': 'var(--gray-75)'
       }
     }
   });

@@ -1,8 +1,8 @@
 .userBoxContainer {
   width: 33%;
   border-radius: 5px;
-  border: 1px solid var(--box-shadow);
-  -webkit-box-shadow: 6px 8px 9px 1px var(--box-shadow);
-  -moz-box-shadow: 6px 8px 9px 1px var(--box-shadow);
-  box-shadow: 6px 8px 9px 1px var(--box-shadow);
+  border: 1px solid var(--card-box-shadow);
+  -webkit-box-shadow: 6px 8px 9px 1px var(--card-box-shadow);
+  -moz-box-shadow: 6px 8px 9px 1px var(--card-box-shadow);
+  box-shadow: 6px 8px 9px 1px var(--card-box-shadow);
 }
