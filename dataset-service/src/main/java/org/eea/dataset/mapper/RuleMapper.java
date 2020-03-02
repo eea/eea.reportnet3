@@ -2,9 +2,13 @@ package org.eea.dataset.mapper;
 
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.rule.Rule;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.mapper.IMapper;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 /**
  * The Interface RuleMapper.
@@ -12,28 +16,40 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface RuleMapper extends IMapper<Rule, RuleVO> {
 
+  @Override
+  @Mapping(source = "ruleId", target = "ruleId", ignore = true)
+  @Mapping(source = "referenceId", target = "referenceId", ignore = true)
+  @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  Rule classToEntity(RuleVO ruleVO);
 
-  /**
-   * Map.
-   *
-   * @param value the value
-   * @return the string
-   */
-  default String map(ObjectId value) {
-    return value.toString();
+  @Override
+  @Mapping(source = "ruleId", target = "ruleId", ignore = true)
+  @Mapping(source = "referenceId", target = "referenceId", ignore = true)
+  @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  RuleVO entityToClass(Rule rule);
+
+  @AfterMapping
+  default void afterMapping(RuleVO ruleVO, @MappingTarget Rule rule) {
+    String ruleId = ruleVO.getRuleId();
+    String referenceId = ruleVO.getReferenceId();
+    RuleExpressionVO ruleExpressionVO = ruleVO.getWhenCondition();
+    if (ruleId != null && !ruleId.isEmpty()) {
+      rule.setRuleId(new ObjectId(ruleId));
+    }
+    if (referenceId != null && !referenceId.isEmpty()) {
+      rule.setReferenceId(new ObjectId(referenceId));
+    }
+    if (ruleExpressionVO != null) {
+      rule.setWhenCondition(ruleExpressionVO.toString());
+    }
   }
 
-  /**
-   * Map.
-   *
-   * @param value the value
-   * @return the object id
-   */
-  default ObjectId map(String value) {
-    return new ObjectId(value);
+  @AfterMapping
+  default void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
+    ruleVO.setRuleId(rule.getRuleId().toString());
+    ruleVO.setReferenceId(rule.getReferenceId().toString());
+    if (!rule.getAutomatic()) {
+      ruleVO.setWhenCondition(new RuleExpressionVO(rule.getWhenCondition()));
+    }
   }
-
-
 }
-
-

@@ -13,22 +13,19 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface RulesRepository
     extends MongoRepository<RulesSchema, ObjectId>, ExtendedRulesRepository {
 
-
   /**
    * Find by id dataset schema.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the rules schema
    */
-  RulesSchema findByIdDatasetSchema(ObjectId idDatasetSchema);
-
-
+  RulesSchema findByIdDatasetSchema(ObjectId datasetSchemaId);
 
   /**
    * Count rules by id dataset schema.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the integer
    */
-  Integer countRulesByIdDatasetSchema(ObjectId idDatasetSchema);
+  Integer countRulesByIdDatasetSchema(ObjectId datasetSchemaId);
 }

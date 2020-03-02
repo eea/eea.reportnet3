@@ -30,96 +30,84 @@ public interface RulesController {
   /**
    * Creates the empty rules schema.
    *
-   * @param idDataSetSchema the id data set schema
-   * @param idRulesSchema the id rules schema
+   * @param datasetSchemaId the dataset schema id
+   * @param rulesSchemaId the rules schema id
    */
-  @PostMapping(value = "/createEmptyRulesSchema")
-  void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema,
-      @RequestParam("idRulesSchema") String idRulesSchema);
+  @PostMapping("/createEmptyRulesSchema")
+  void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
+      @RequestParam("idRulesSchema") String rulesSchemaId);
 
   /**
    * Find rule schema by dataset id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{idDatasetSchema}", produces = MediaType.APPLICATION_JSON_VALUE)
-  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("idDatasetSchema") String idDatasetSchema);
+  @GetMapping(value = "/{datasetSchemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId);
 
   /**
    * Find active rule schema by dataset id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{idDatasetSchema}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetSchemaId}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findActiveRuleSchemaByDatasetId(
-      @PathVariable("idDatasetSchema") String idDatasetSchema);
-
+      @PathVariable("datasetSchemaId") String datasetSchemaId);
 
   /**
-   * Creates the empty rules schema.
+   * Delete rules schema.
    *
-   * @param idDataSetSchema the id data set schema
+   * @param datasetSchemaId the dataset schema id
    */
-  @DeleteMapping(value = "/deleteRulesSchema")
-  void deleteRulesSchema(@RequestParam("idDataSetSchema") String idDataSetSchema);
-
-
+  @DeleteMapping("/deleteRulesSchema")
+  void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId);
 
   /**
    * Delete rule by id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
-  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleById/{ruleId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRuleById(
-      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
-      @PathVariable(name = "ruleId", required = true) String ruleId);
+  @DeleteMapping("{datasetSchemaId}/deleteRuleById/{ruleId}")
+  void deleteRuleById(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("ruleId") String ruleId);
 
   /**
    * Delete rule by reference id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
-  @DeleteMapping(value = "{idDatasetSchema}/deleteRuleByReferenceId/{referenceId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRuleByReferenceId(
-      @PathVariable(name = "idDatasetSchema", required = true) String idDatasetSchema,
-      @PathVariable(name = "referenceId", required = true) String referenceId);
-
+  @DeleteMapping("{datasetSchemaId}/deleteRuleByReferenceId/{referenceId}")
+  void deleteRuleByReferenceId(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("referenceId") String referenceId);
 
   /**
-   * Createnew rule.
+   * Creates the new rule.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
-  @PutMapping(value = "/createNewRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createNewRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+  @PutMapping("/createNewRule")
+  void createNewRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestBody RuleVO ruleVO);
 
   /**
    * Creates the automatic rule.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
    * @param requiredRule the required rule
    */
-  @PutMapping(value = "/createAutomaticRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createAutomaticRule(
-      @RequestParam(name = "idDatasetSchema", required = true) String idDatasetSchema,
-      @RequestParam(name = "referenceId", required = true) String referenceId,
-      @RequestParam(name = "typeData", required = true) DataType typeData,
-      @RequestParam(name = "typeEntityEnum", required = true) EntityTypeEnum typeEntityEnum,
-      @RequestParam(name = "requiredRule") Boolean requiredRule);
-
-
+  @PutMapping("/createAutomaticRule")
+  void createAutomaticRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData,
+      @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+      @RequestParam("requiredRule") boolean requiredRule);
 
   /**
    * Update rule.
@@ -139,31 +127,28 @@ public interface RulesController {
    * @return the boolean
    */
   @PutMapping("/private/existsRuleRequired")
-  public Boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  public boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
 
   /**
    * Update rule.
    *
-   * @param idDatasetSchema the id dataset schema
-   * @param referenceId the reference id
+   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
-  @PutMapping(value = "/updateRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateRule(@RequestParam(name = "idDatasetSchema") String idDatasetSchema,
+  @PutMapping("/updateRule")
+  void updateRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestBody RuleVO ruleVO);
 
   /**
    * Insert rule in position.
    *
-   * @param datasetSchemaId the dataset schema id
-   * @param ruleVO the rule VO
+   * @param ruleId the rule id
    * @param position the position
+   * @param datasetSchemaId the dataset schema id
    */
-  @PutMapping(value = "/updatePositionRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void insertRuleInPosition(@RequestParam(name = "ruleId") String ruleId,
-      @RequestParam(name = "position") int position,
-      @RequestParam(name = "datasetSchemaId") String datasetSchemaId);
-
-
+  @PutMapping("/updatePositionRule")
+  public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
+      @RequestParam("position") int position,
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
 }
