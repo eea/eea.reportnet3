@@ -4,15 +4,15 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiValidation = {
-  create: async (datasetSchemaId, validation) => {
+  create: async (datasetSchemaId, validationRule) => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.post({
-      url: getUrl(ValidationConfig.delete, {}),
-      queryString: { idDatasetSchema: datasetSchemaId },
+    const response = await HTTPRequester.update({
+      url: getUrl(ValidationConfig.create, { datasetSchemaId }),
+      queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: validation
+      data: validationRule
     });
     return response;
   },

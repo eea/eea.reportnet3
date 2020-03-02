@@ -3,7 +3,38 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
-const create = async (datasetSchemaId, validation) => {
+const buildExpresion = expresion => {
+  return {
+    leftArg: 'VALUE',
+    operator: expresion.operatorValue,
+    rightArg: expresion.ruleValue
+  };
+};
+const buildNode = (expresion, index, expresions) => {
+  return {
+    leftArg: buildExpresion(expresion),
+    operator: expresions[index + 1].union,
+    rightArg:
+      index + 1 < expresions.length - 1
+        ? buildNode(expresions[index + 1], index + 1, expresions)
+        : buildExpresion(expresions[index + 1])
+  };
+};
+
+const create = async (datasetSchemaId, validationRule) => {
+  const { rules } = validationRule;
+  const validation = {
+    description: validationRule.description,
+    automatic: false,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.field.code,
+    ruleName: '',
+    shortCode: validationRule.shortCode,
+    type: 'FIELD',
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    whenCondition: rules.length > 1 ? buildNode(rules[0], 0, rules) : buildExpresion(rules[0])
+  };
+  console.log('validation', datasetSchemaId, validation);
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
@@ -62,6 +93,9 @@ const parseDataValidationRulesDTO = validations => {
 };
 
 const translateRules = rule => {
+  console.log('*'.repeat(60));
+  console.log('translateRules', rule);
+  console.log('*'.repeat(60));
   return rule;
 };
 

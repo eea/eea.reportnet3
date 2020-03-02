@@ -74,6 +74,11 @@
       & > div {
         width: 50%;
       }
+      div:nth-of-type(2) {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
     }
   }
 }

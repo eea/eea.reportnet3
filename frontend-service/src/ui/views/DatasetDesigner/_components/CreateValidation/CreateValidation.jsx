@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 
-import { capitalize, isEmpty, isEqual, isUndefined, last, pullAllWith, pull, findIndex } from 'lodash';
+import { isEmpty, isEqual, isUndefined, last, pullAllWith, pull, findIndex } from 'lodash';
 import uuid from 'uuid';
 
 import styles from './CreateValidation.module.scss';
@@ -13,6 +13,8 @@ import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ValidationRule } from './_components/ValidationRule';
+
+import { ValidationService } from 'core/services/Validation';
 
 const createValidationReducer = (state, { type, payload }) => {
   switch (type) {
@@ -52,7 +54,7 @@ const createValidationReducer = (state, { type, payload }) => {
         ...state,
         isRuleAddingDisabled: payload
       };
-    case 'SET_IS_VALIDATION_ADDING_DISABLED':
+    case 'SET_IS_VALIDATION_CREATION_DISABLED':
       return {
         ...state,
         isValidationCreationDisabled: payload
@@ -99,12 +101,12 @@ const createValidationReducer = (state, { type, payload }) => {
 
 const createValidationReducerInitState = {
   candidateRule: {
-    table: null,
-    field: null,
-    shortCode: null,
-    description: null,
-    errorMessage: null,
-    errorLevel: null,
+    table: undefined,
+    field: undefined,
+    shortCode: undefined,
+    description: undefined,
+    errorMessage: undefined,
+    errorLevel: undefined,
     active: false,
     rules: []
   },
@@ -118,7 +120,7 @@ const createValidationReducerInitState = {
   groupCandidate: []
 };
 
-const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
+const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
   const [creationFormState, creationFormDispatch] = useReducer(
     createValidationReducer,
     createValidationReducerInitState
@@ -244,10 +246,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
 
   //set table tada
   useEffect(() => {
-    console.log('*'.repeat(60));
-    console.log('datasetSchema', datasetSchema);
-    console.log();
-    console.log();
     const { tables: rawTables, levelErrorTypes } = datasetSchema;
     rawTables.pop();
     const tables = rawTables.map(table => {
@@ -371,11 +369,52 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
     });
   }, [...ruleAdditionCheckListener]);
 
+  const createValidationRule = async () => {
+    try {
+      console.log('creationFormState', creationFormState, datasetSchema);
+      const { candidateRule } = creationFormState;
+      const { datasetSchemaId } = datasetSchema;
+      await ValidationService.create(datasetSchemaId, candidateRule);
+    } catch (error) {
+      console.log('createValidationRule error', error);
+    }
+  };
+
   const dialogLayout = children => (
-    <Dialog header="Create Field Validation rule" visible={isVisible} style={{ width: '70%' }}>
+    <Dialog
+      header="Create Field Validation rule"
+      visible={isVisible}
+      style={{ width: '70%' }}
+      onHide={e => {
+        toggleVisibility(false);
+      }}>
       {children}
     </Dialog>
   );
+  const checkValidationFilledIn = () => {
+    let isValidated = true;
+    const { candidateRule } = creationFormState;
+    const ruleKeys = Object.keys(candidateRule);
+
+    ruleKeys.forEach(ruleKey => {
+      if (ruleKey != 'rules' && ruleKey != 'active') {
+        if (isUndefined(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
+          isValidated = false;
+        }
+      } else if (ruleKey == 'rules') {
+        if (checkRulefilled()) {
+          isValidated = false;
+        }
+      }
+    });
+    return isValidated;
+  };
+  useEffect(() => {
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_CREATION_DISABLED',
+      payload: !checkValidationFilledIn()
+    });
+  }, [creationFormState.candidateRule]);
 
   return dialogLayout(
     <div>
@@ -544,12 +583,14 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field }) => {
                 type="button"
                 label="create"
                 icon="check"
+                onClick={e => createValidationRule()}
               />
               <Button
                 className="p-button-secondary p-button-text-icon-left"
                 type="button"
                 label="cancel"
                 icon="cancel"
+                onClick={e => toggleVisibility(false)}
               />
             </div>
           </div>

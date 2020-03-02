@@ -1,2 +1,2 @@
-export const Create = ({ validationRepository }) => async validationRule =>
-  validationRepository.deleteById(validationRule);
+export const Create = ({ validationRepository }) => async (datasetSchemaId, validationRule) =>
+  validationRepository.create(datasetSchemaId, validationRule);

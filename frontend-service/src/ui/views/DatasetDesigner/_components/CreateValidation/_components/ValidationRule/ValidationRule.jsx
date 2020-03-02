@@ -21,7 +21,7 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
         { label: '>=', value: '>=' },
         { label: '<=', value: '<=' },
         { label: '=', value: '=' },
-        { label: '<>', value: '<>' }
+        { label: '!=', value: '!=' }
       ]
     }
     // string: {
