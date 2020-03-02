@@ -284,10 +284,12 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
-    const {
+    //  QUE ES ESO??
+    /*     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId });
+    } = await getMetadata({ dataflowId, datasetId }); */
+
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
@@ -571,7 +573,9 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? null : 'p-button-animated-upload'
+              }`}
               disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
@@ -587,7 +591,9 @@ export const Dataset = withRouter(({ match, history }) => {
               }}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-blink'
+              }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
               disabled={!hasWritePermissions || isWebFormMMR}
@@ -603,7 +609,9 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={null}
             /> */}
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+              }`}
               disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
@@ -612,7 +620,9 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !datasetHasErrors || isWebFormMMR ? null : 'p-button-animated-blink'
+              }`}
               disabled={!datasetHasErrors || isWebFormMMR}
               icon={'warning'}
               label={resources.messages['showValidations']}
@@ -621,14 +631,18 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+              }`}
               disabled={isWebFormMMR || !datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? null : 'p-button-animated-blink'
+              }`}
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}

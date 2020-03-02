@@ -101,7 +101,7 @@ export const SnapshotsDialog = ({
 
   const snapshotDialogFooter = (
     <Button
-      className="p-button-secondary"
+      className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resources.messages['close']}
       onClick={() => hideSnapshotDialog()}

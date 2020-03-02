@@ -170,14 +170,16 @@ const DataflowManagementForm = ({
                       ? styles.primaryButton
                       : styles.disabledButton
                     : styles.disabledButton
-                } p-button-success`}
+                } p-button-success p-button-animated-blink`}
                 label={isEditForm ? resources.messages['save'] : resources.messages['create']}
                 disabled={isSubmitting}
                 icon={isEditForm ? 'save' : 'add'}
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={`${styles.cancelButton} ${!isEditForm ? 'p-button-secondary' : 'p-button-danger'}`}
+                className={`${styles.cancelButton} ${
+                  !isEditForm ? 'p-button-secondary' : 'p-button-danger'
+                }  p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
                 onClick={() => onCancel()}
