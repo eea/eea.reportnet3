@@ -98,6 +98,11 @@ public class KieBaseManager {
 
             if (null != datatype && null != rule.getAutomatic()
                 && rule.getAutomatic().equals(false)) {
+              rule.setWhenCondition(rule.getWhenCondition().replaceAll("\"", ""));
+              rule.setWhenCondition(rule.getWhenCondition().replaceAll("AND", "&&"));
+              rule.setWhenCondition(rule.getWhenCondition().replaceAll("OR", "||"));
+              rule.setWhenCondition(rule.getWhenCondition().replaceAll("<>", "!="));
+              rule.setWhenCondition(rule.getWhenCondition().replaceAll("VALUE", "value"));
               switch (datatype) {
                 case NUMBER:
                   expression.append("(!isNumber(value) || ");
