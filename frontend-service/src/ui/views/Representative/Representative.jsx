@@ -162,6 +162,15 @@ const Representative = withRouter(({ history, match }) => {
     }
   }, [notificationContext]);
 
+  useEffect(() => {
+    const response = notificationContext.toShow.find(
+      notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
+    );
+    if (response) {
+      onLoadReportingDataflow();
+    }
+  }, [notificationContext]);
+
   const handleRedirect = target => {
     history.push(target);
   };
@@ -362,7 +371,6 @@ const Representative = withRouter(({ history, match }) => {
           datasetId={datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
-          receiptDispatch={receiptDispatch}
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
         />
 

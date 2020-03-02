@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isEmpty, isNull, isUndefined, uniq } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
@@ -22,7 +22,6 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
-import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
