@@ -25,12 +25,6 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
