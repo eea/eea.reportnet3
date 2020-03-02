@@ -53,6 +53,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
         title: 'settings'
       }
     ]);
+    onLoadSchema(datasetId);
   }, []);
 
   useEffect(() => {
