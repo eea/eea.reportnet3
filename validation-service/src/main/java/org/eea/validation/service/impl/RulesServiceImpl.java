@@ -2,7 +2,6 @@ package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
@@ -221,7 +220,7 @@ public class RulesServiceImpl implements RulesService {
           // we find the idcodelist to create this validate
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           rule = AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              UUID.randomUUID().toString(), document.get("idCodeList").toString(), "FT" + shortcode,
+              FIELD_TYPE + typeData, document.get("idCodeList").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData);
           break;
         default:
