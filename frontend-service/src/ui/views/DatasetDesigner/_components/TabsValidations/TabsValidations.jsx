@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
-import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -101,8 +100,6 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
   const actionTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} onEditClick={() => ''} />;
 
   const renderColumns = validations => {
-    console.log(getOrderedValidations(Object.keys(validations[0])));
-
     let fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       return (
         <Column
