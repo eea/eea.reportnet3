@@ -245,7 +245,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     if (document != null) {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           return (Document) tableSchema;
         }
@@ -273,7 +274,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     if (document != null) {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           Object recordSchema = ((Document) tableSchema).get("recordSchema");
           if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
@@ -306,6 +308,13 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
         new Document("$set", new Document("description", description)));
   }
 
+  /**
+   * Find record schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the document
+   */
   @Override
   public Document findRecordSchema(String datasetSchemaId, String tableSchemaId) {
 
@@ -317,7 +326,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     if (document != null) {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           Object recordSchema = ((Document) tableSchema).get("recordSchema");
           if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
