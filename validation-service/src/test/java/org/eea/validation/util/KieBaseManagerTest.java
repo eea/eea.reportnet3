@@ -27,18 +27,24 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class KieBaseManagerTest {
+
   /** The kie base manager. */
   @InjectMocks
   private KieBaseManager kieBaseManager;
+
   /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
+
   /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
+
   /** The dataset metabase controller. */
   @Mock
   private DatasetMetabaseController datasetMetabaseController;
+
+
   private RulesSchema rulesSchemas;
 
   /**
@@ -46,6 +52,7 @@ public class KieBaseManagerTest {
    */
   @Before
   public void initMocks() {
+
     rulesSchemas = new RulesSchema();
     // LIST STRINGS
     List<String> listString = new ArrayList<>();
@@ -63,6 +70,7 @@ public class KieBaseManagerTest {
     ruleDataset.setThenCondition(listString);
     ruleKiebase.add(ruleDataset);
     // RULE TABLE
+
     Rule ruleTable = new Rule();
     ruleTable.setReferenceId(new ObjectId());
     ruleTable.setRuleId(new ObjectId());
@@ -72,6 +80,7 @@ public class KieBaseManagerTest {
     ruleTable.setWhenCondition("id == null");
     ruleTable.setThenCondition(listString);
     ruleKiebase.add(ruleTable);
+
     // RULES RECORDS
     Rule ruleRecord = new Rule();
     ruleRecord.setReferenceId(new ObjectId());
@@ -82,6 +91,7 @@ public class KieBaseManagerTest {
     ruleRecord.setWhenCondition("id == null");
     ruleRecord.setThenCondition(listString);
     ruleKiebase.add(ruleRecord);
+
     // RULES FIELDS
     ruleDataset.setReferenceId(new ObjectId());
     Rule ruleField = new Rule();
@@ -94,6 +104,7 @@ public class KieBaseManagerTest {
     ruleField.setWhenCondition("id == null");
     ruleField.setThenCondition(listString);
     ruleKiebase.add(ruleField);
+
     rulesSchemas.setRules(ruleKiebase);
     MockitoAnnotations.initMocks(this);
   }
@@ -105,16 +116,19 @@ public class KieBaseManagerTest {
    */
   @Test()
   public void testKieBaseManager() throws FileNotFoundException {
+
+    ObjectId idObject = new ObjectId();
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(rulesSchemas);
+    when(rulesRepository.getRulesWithActiveCriteria(idObject, true)).thenReturn(rulesSchemas);
     Document doc = new Document();
     doc.put("typeData", "DATE");
     when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
-    kieBaseManager.reloadRules(1L, new ObjectId().toString());
+
+    kieBaseManager.reloadRules(1L, idObject.toString());
   }
+
 
   /**
    * Test kie base manager null.
@@ -125,11 +139,11 @@ public class KieBaseManagerTest {
   public void testKieBaseManagerNull() throws FileNotFoundException {
     RulesSchema rulesSchemas = new RulesSchema();
     rulesSchemas.setRules(null);
+    ObjectId idObject = new ObjectId();
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(rulesSchemas);
-    kieBaseManager.reloadRules(1L, new ObjectId().toString());
+    when(rulesRepository.getRulesWithActiveCriteria(idObject, true)).thenReturn(rulesSchemas);
+    kieBaseManager.reloadRules(1L, idObject.toString());
   }
 }

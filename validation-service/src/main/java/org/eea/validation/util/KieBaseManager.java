@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -30,10 +31,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class KieBaseManager {
+
   /**
    * The Constant REGULATION_TEMPLATE_FILE.
    */
   private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
+
+
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
@@ -42,6 +46,7 @@ public class KieBaseManager {
    */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
+
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
@@ -57,9 +62,11 @@ public class KieBaseManager {
   public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
+
     // we take all actives kiebase
     RulesSchema schemaRules =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchema), true);
+
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
@@ -82,46 +89,63 @@ public class KieBaseManager {
           case FIELD:
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
-            // if the type is field and isnt automatic we create the rules to validate check if the
+            // if the type is field and isnt automatic we create the rules to validate check if
+            // the
             // data are correct
             Document documentField =
                 schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
             DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+
             if (null != datatype && null != rule.getAutomatic()
                 && rule.getAutomatic().equals(false)) {
               switch (datatype) {
                 case NUMBER:
-                  expression.append("!isNumber(value) || ");
+                  expression.append("(!isNumber(value) || ");
+                  rule.setWhenCondition(
+                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case DATE:
-                  expression.append("!isDateYYYYMMDD(value) || ");
+                  expression.append("( !isDateYYYYMMDD(value) || ");
+                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case BOOLEAN:
-                  expression.append("!isBoolean(value) || ");
+                  expression.append("( !isBoolean(value) || ");
+                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case COORDINATE_LAT:
-                  expression.append("!isCordenateLat(value) || ");
+                  expression.append("( !isCordenateLat(value) || ");
+                  rule.setWhenCondition(
+                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case COORDINATE_LONG:
-                  expression.append("!isCordenateLong(value) || ");
+                  expression.append("( !isCordenateLong(value) || ");
+                  rule.setWhenCondition(
+                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
                   break;
               }
             }
-            break;
+            if (!StringUtils.isBlank(expression.toString())) {
+              String whenConditionWithParenthesis = new StringBuilder("").append("(")
+                  .append(rule.getWhenCondition()).append(")").toString();
+              rule.setWhenCondition(
+                  expression.append(whenConditionWithParenthesis).append(")").toString());
+            }
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-            rule.getRuleId().toString(), typeValidation, schemasDrools,
-            expression.append(rule.getWhenCondition()).toString(), rule.getThenCondition().get(0),
-            rule.getThenCondition().get(1),
+            rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+            rule.getThenCondition().get(0), rule.getThenCondition().get(1),
             null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
+
       });
     }
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     String generatedDRL =
         compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
+
     KieServices kieServices = KieServices.Factory.get();
+
     KieHelper kieHelper = new KieHelper();
     // multiple such resoures/rules can be added
     byte[] b1 = generatedDRL.getBytes();
@@ -160,4 +184,5 @@ public class KieBaseManager {
         tableSchemaName != null ? tableSchemaName : "");
     return ruleAdd;
   }
+
 }
