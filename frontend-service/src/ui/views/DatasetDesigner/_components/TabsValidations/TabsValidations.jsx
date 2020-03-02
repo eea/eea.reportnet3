@@ -29,9 +29,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
   const [validationsList, setValidationsList] = useState();
 
   useEffect(() => {
-    if (isUndefined(validationsList)) {
-      onLoadValidationsList(datasetSchemaId);
-    }
+    onLoadValidationsList(datasetSchemaId);
   }, []);
 
   const onLoadValidationsList = async datasetSchemaId => {
@@ -99,8 +97,24 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
 
   const actionTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} onEditClick={() => ''} />;
 
+  const columnStyles = field => {
+    const style = {};
+    const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
+    if (field.toUpperCase() === 'DESCRIPTION') {
+      style.width = '40%';
+    } else {
+      style.width = '20%';
+    }
+    if (invisibleFields.includes(field)) {
+      style.display = 'none';
+    } else {
+      style.display = 'auto';
+    }
+    return style;
+  };
+
   const renderColumns = validations => {
-    let fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
+    const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       return (
         <Column
           body={field === 'automatic' || field === 'enabled' ? automaticTemplate : null}
@@ -109,18 +123,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
           field={field}
           header={getHeader(field)}
           sortable={true}
-          style={{
-            width: field.toUpperCase() === 'DESCRIPTION' ? '40%' : '20%',
-            display:
-              field === 'id' ||
-              field === 'referenceId' ||
-              field === 'activationGroup' ||
-              field === 'condition' ||
-              field === 'date' ||
-              field === 'entityType'
-                ? 'none'
-                : 'auto'
-          }}
+          style={columnStyles(field)}
         />
       );
     });
@@ -188,7 +191,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, onShowDeleteDialog, setVa
   };
 
   if (isLoading) {
-    return <Spinner />;
+    return <Spinner className={styles.positioning} />;
   }
 
   return <ValidationList />;
