@@ -175,10 +175,11 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
         {
           stacked: true,
           maxBarThickness: 100,
-          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
-          ticks: {
-            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
-          }
+          gridLines: { display: false }
+          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
+          // ticks: {
+          //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+          // }
         }
       ],
       yAxes: [
@@ -186,16 +187,17 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
           stacked: true,
           scaleLabel: {
             display: true,
-            labelString: resources.messages['percentage'],
-            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+            labelString: resources.messages['percentage']
+            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
           },
           ticks: {
             min: 0,
             max: 100,
-            callback: (value, index, values) => `${value}%`,
-            fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+            callback: (value, index, values) => `${value}%`
+            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
           },
-          gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
+          gridLines: { display: false }
+          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
         }
       ]
     }
@@ -229,6 +231,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
                 options={datasetOptionsObject}
                 width="100%"
                 height="30%"
+                style={{ marginTop: '3rem' }}
               />
             </>
           ) : (
