@@ -1,3 +1,7 @@
+.positioning {
+  position: sticky !important;
+}
+
 .tabsValidations {
   margin: 0.5em 0;
 }
@@ -26,5 +30,8 @@
     &:focus {
       box-shadow: none;
     }
+  }
+  .checkedValueColumn {
+    text-align: center !important;
   }
 }

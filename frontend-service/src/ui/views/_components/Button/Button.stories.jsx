@@ -16,4 +16,12 @@ storiesOf('Button', module)
   .add('Icon Right', () => <Button label="Icon Right" icon="eye" iconPos="right" className={`p-button-rounded`} />)
   .add('Icon Left Secondary', () => (
     <Button label="Icon Left & secondary" icon="eye" iconPos="left" className={`p-button-rounded p-button-secondary`} />
+  ))
+  .add('Animated', () => (
+    <Button
+      label="Animated button"
+      icon="eye"
+      iconPos="left"
+      className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+    />
   ));

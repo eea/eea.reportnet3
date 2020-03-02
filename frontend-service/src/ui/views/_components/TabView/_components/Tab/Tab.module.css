@@ -14,3 +14,8 @@ input.p_tabview_input_design {
   min-width: 140px;
   height: 21px;
 }
+
+.dragArrow {
+  color: var(--drag-and-drop-arrow-color);
+  opacity: var(--drag-and-drop-arrow-opacity);
+}

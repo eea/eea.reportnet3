@@ -45,14 +45,14 @@ import {
 
 const DataViewer = withRouter(
   ({
-    correctLevelError = ['CORRECT'],
     hasWritePermissions,
-    isPreviewModeOn = false,
     isDataCollection,
     isValidationSelected,
     isWebFormMMR,
-    levelErrorTypes = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
-    levelErrorTypesWithCorrects = !isPreviewModeOn ? correctLevelError.concat(levelErrorTypes) : correctLevelError,
+    levelErrorTypes,
+    match: {
+      params: { datasetId, dataflowId }
+    },
     onLoadTableData,
     recordPositionId,
     selectedRecordErrorId,
@@ -60,12 +60,7 @@ const DataViewer = withRouter(
     tableHasErrors,
     tableId,
     tableName,
-    tableSchemaColumns,
-    match: {
-      params: { datasetId, dataflowId }
-    },
-    match: { params },
-    history
+    tableSchemaColumns
   }) => {
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [codelistInfo, setCodelistInfo] = useState({});
@@ -79,26 +74,27 @@ const DataViewer = withRouter(
     const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
-    const [isNewRecord, setIsNewRecord] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
-    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypesWithCorrects);
+    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState(['CORRECT']);
+    const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
-      totalRecords: 0,
-      totalFilteredRecords: 0,
+      editedRecord: {},
+      fetchedDataFirstRecord: [],
       firstPageRecord: 0,
-      recordsPerPage: 10,
       initialRecordValue: undefined,
       isRecordDeleted: false,
-      editedRecord: {},
-      selectedRecord: {},
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
-      fetchedDataFirstRecord: []
+      recordsPerPage: 10,
+      selectedRecord: {},
+      totalFilteredRecords: 0,
+      totalRecords: 0
     });
     const [sort, dispatchSort] = useReducer(sortReducer, {
       sortField: undefined,
@@ -121,11 +117,11 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
-          record={record}
+          onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
-          onEditorKeyChange={onEditorKeyChange}
+          record={record}
         />
       );
     };
@@ -165,6 +161,16 @@ const DataViewer = withRouter(
       setIsCodelistInfoVisible,
       validationsTemplate
     );
+
+    useEffect(() => {
+      let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
+      inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
+      setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
+    }, [levelErrorTypes]);
+
+    useEffect(() => {
+      setLevelErrorValidations(levelErrorTypesWithCorrects);
+    }, [levelErrorTypesWithCorrects]);
 
     useEffect(() => {
       setRecordErrorPositionId(recordPositionId);
@@ -227,6 +233,7 @@ const DataViewer = withRouter(
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           onLoadTableData(true);
         }
+
         if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
             if (tableData.records.length > 0) {
@@ -257,6 +264,7 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
+        console.error({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
