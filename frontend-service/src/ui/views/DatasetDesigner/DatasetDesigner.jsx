@@ -190,7 +190,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     </>
   );
 
-  const ValidationsListDialog = () => {
+  const validationsListDialog = () => {
     if (validationListDialogVisible) {
       return (
         <Dialog
@@ -206,7 +206,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         </Dialog>
       );
     }
-    return <></>;
   };
 
   const layout = children => {
@@ -304,7 +303,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
         snapshotListData={snapshotListData}
       />
-      <ValidationsListDialog />
+      {validationsListDialog()}
       {/* <Dialog
         className={styles.paginatorValidationViewer}
         dismissableMask={true}

@@ -39,6 +39,9 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const onDeleteValidation = async () => {
     try {
       const response = await ValidationService.deleteById(datasetSchemaId, validationId);
+      notificationContext.add({
+        type: 'DELETE_RULE_ERROR'
+      });
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
@@ -57,15 +60,14 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   };
 
   const onLoadValidationsList = async datasetSchemaId => {
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const validationsList = await ValidationService.getAll(datasetSchemaId);
       setValidationsList(validationsList);
     } catch (error) {
-      console.log(error);
-      // notificationContext.add({
-      //   type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
-      // });
+      notificationContext.add({
+        type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -169,7 +171,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     return fieldColumns;
   };
 
-  const ValidationList = () => {
+  const validationList = () => {
     if (isUndefined(validationsList) || isEmpty(validationsList)) {
       return (
         <div>
@@ -226,7 +228,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   return (
     <Fragment>
-      <ValidationList />
+      {validationList()}
 
       <ConfirmDialog
         header={resources.messages['deleteValidationHeader']}
