@@ -591,9 +591,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Remove from the metabase
     snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
     metabaseRepository.deleteSnapshotDatasetByIdSnapshot(idSnapshot);
-    // Delete the file
+    // Delete the schema file
     String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
+
+    // Delete the rules file
+    String nameRulesFile = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+    documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameRulesFile);
 
     // Delete the file values
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
