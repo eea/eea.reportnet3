@@ -110,7 +110,7 @@
   /* Chevron */
   --breadCrumb-font-color: var(--c-corporate-blue);
   --breadCrumb-icon-color: var(--c-corporate-blue);
-  --breadCrumb-chevron-color: var(--c-corporate-blue);
+  --breadCrumb-chevron-color: var(--c-corporate-blue-lighter);
 
   /* Leftside bar*/
 

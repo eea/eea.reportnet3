@@ -418,6 +418,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
+          // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>
