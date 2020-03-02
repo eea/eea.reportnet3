@@ -54,7 +54,8 @@ const useBigButtonList = ({
         buttonClass: 'dataset',
         buttonIcon: 'dataset',
         caption: datasetName,
-        isReleased: dataset.isReleased,
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
           handleRedirect(
             getUrl(
