@@ -159,7 +159,6 @@ const useBigButtonList = ({
       return dataset.datasetSchemaName;
     });
     const uniqRepresentatives = uniq(representatives);
-    console.log('uniqRepresentatives', uniqRepresentatives);
     if (uniqRepresentatives.length === 1 && !isCustodian) {
       const [representative] = uniqRepresentatives;
       return datasets.map(dataset => {

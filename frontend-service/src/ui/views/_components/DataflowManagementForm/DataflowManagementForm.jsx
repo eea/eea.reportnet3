@@ -164,20 +164,20 @@ const DataflowManagementForm = ({
             <hr />
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
-                className={
+                className={`${
                   !isEmpty(touched)
                     ? isEmpty(errors)
                       ? styles.primaryButton
                       : styles.disabledButton
                     : styles.disabledButton
-                }
+                } p-button-success`}
                 label={isEditForm ? resources.messages['save'] : resources.messages['create']}
                 disabled={isSubmitting}
                 icon={isEditForm ? 'save' : 'add'}
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={`${styles.cancelButton} p-button-secondary`}
+                className={`${styles.cancelButton} ${!isEditForm ? 'p-button-secondary' : 'p-button-danger'}`}
                 label={resources.messages['cancel']}
                 icon="cancel"
                 onClick={() => onCancel()}

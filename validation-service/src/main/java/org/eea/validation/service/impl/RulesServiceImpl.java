@@ -1,14 +1,16 @@
 package org.eea.validation.service.impl;
 
-
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -35,19 +37,18 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The rule mapper. */
+  @Autowired
+  private RuleMapper ruleMapper;
+
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant FC_DESCRIPTION. */
@@ -62,55 +63,52 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Gets the rules schema by dataset id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the rules schema by dataset id
    */
   @Override
-  public RulesSchemaVO getRulesSchemaByDatasetId(String idDatasetSchema) {
+  public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), false);
+        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
     return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
   }
-
 
   /**
    * Gets the active rules schema by dataset id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @return the active rules schema by dataset id
    */
   @Override
-  public RulesSchemaVO getActiveRulesSchemaByDatasetId(String idDatasetSchema) {
+  public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(idDatasetSchema), true);
+        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
     return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
-
   }
 
   /**
-   * Creates the empty rules scehma.
+   * Creates the empty rules schema.
    *
-   * @param schemaId the schema id
-   * @param ruleSchemaId the rule schema id
+   * @param datasetSchemaId the dataset schema id
+   * @param rulesSchemaId the rules schema id
    */
   @Override
-  public void createEmptyRulesSchema(ObjectId schemaId, ObjectId ruleSchemaId) {
+  public void createEmptyRulesSchema(String datasetSchemaId, String rulesSchemaId) {
     RulesSchema rSchema = new RulesSchema();
-    rSchema.setIdDatasetSchema(schemaId);
-    rSchema.setRulesSchemaId(ruleSchemaId);
+    rSchema.setIdDatasetSchema(new ObjectId(datasetSchemaId));
+    rSchema.setRulesSchemaId(new ObjectId(rulesSchemaId));
     rSchema.setRules(new ArrayList<Rule>());
     rulesRepository.save(rSchema);
   }
 
   /**
-   * Delete empty rules scehma.
+   * Delete empty rules schema.
    *
-   * @param schemaId the schema id
+   * @param datasetSchemaId the dataset schema id
    */
   @Override
-  public void deleteEmptyRulesScehma(ObjectId schemaId) {
-
-    RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(schemaId);
+  public void deleteEmptyRulesSchema(String datasetSchemaId) {
+    RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
     if (null != ruleSchema) {
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
     }
@@ -119,50 +117,66 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Delete rule by id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
-   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteRuleById(String idDatasetSchema, String ruleId) throws EEAException {
-    rulesRepository.deleteRuleById(idDatasetSchema, ruleId);
+  public void deleteRuleById(String datasetSchemaId, String ruleId) {
+    rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
   }
 
   /**
    * Delete rule by reference id.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
-   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteRuleByReferenceId(String idDatasetSchema, String referenceId)
-      throws EEAException {
-    rulesRepository.deleteRuleByReferenceId(idDatasetSchema, referenceId);
-
+  public void deleteRuleByReferenceId(String datasetSchemaId, String referenceId) {
+    rulesRepository.deleteRuleByReferenceId(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceId));
   }
-
 
   /**
    * Creates the new rule.
    *
-   * @param idDatasetSchema the id dataset schema
-   * @param rule the rule
-   * @return the update result
-   * @throws EEAException the EEA exception
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
    */
   @Override
-  public void createNewRule(String idDatasetSchema, Rule rule) throws EEAException {
-    rulesRepository.createNewRule(idDatasetSchema, rule);
+  public void createNewRule(String datasetSchemaId, RuleVO ruleVO) {
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    if (rule.getRuleId() == null) {
+      rule.setRuleId(new ObjectId());
+    }
+    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
+  /**
+   * Count rules in schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param required the required
+   * @param shortcode the shortcode
+   * @return the string
+   */
+  private String countRulesInSchema(String datasetSchemaId, boolean required, String shortcode) {
+    RulesSchema rules =
+        rulesRepository.getRulesWithTypeRuleCriteria(new ObjectId(datasetSchemaId), required);
+    List<Rule> rulesList = rules.getRules();
+    if (!rulesList.isEmpty()) {
+      String code = rulesList.get(rulesList.size() - 1).getShortCode();
+      String text = (code).substring(2, code.length());
+      int rulesSize = Integer.valueOf(text) + 1;
+      shortcode = String.format("%02d", rulesSize);
+    }
+    return shortcode;
+  }
 
   /**
-   * Creates the automatic rules. When Input argument "required" is true it is created an automatic
-   * rule to validate if the field has been informed or not. Otherwise, a Rule based on the field's
-   * DataType (number, boolean, codelist...) is created
+   * Creates the automatic rules.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
@@ -170,22 +184,18 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createAutomaticRules(String idDatasetSchema, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, Boolean required) throws EEAException {
+  public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
+      EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
     Rule rule = new Rule();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
-    RulesSchema countRules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
     String shortcode = "01";
-    if (null != countRules) {
-      int rulesSize = countRules.getRules().size() + 1;
-      shortcode = String.format("%02d", rulesSize);
-    }
-
-    if (Boolean.TRUE.equals(required)) {
+    if (required) {
+      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
           "FC" + shortcode, FC_DESCRIPTION);
     } else {
+      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       switch (typeData) {
         case NUMBER:
           rule = AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
@@ -209,7 +219,7 @@ public class RulesServiceImpl implements RulesService {
           break;
         case CODELIST:
           // we find the idcodelist to create this validate
-          Document document = schemasRepository.findFieldSchema(idDatasetSchema, referenceId);
+          Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           rule = AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               UUID.randomUUID().toString(), document.get("idCodeList").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData);
@@ -221,9 +231,8 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (null != rule) {
-      rulesRepository.createNewRule(idDatasetSchema, rule);
+      rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
     }
-
   }
 
   /**
@@ -234,7 +243,7 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteRuleRequired(String datasetSchemaId, String referenceId) {
-    rulesRepository.deleteRuleRequired(datasetSchemaId, referenceId);
+    rulesRepository.deleteRuleRequired(new ObjectId(datasetSchemaId), new ObjectId(referenceId));
   }
 
   /**
@@ -245,30 +254,22 @@ public class RulesServiceImpl implements RulesService {
    * @return the boolean
    */
   @Override
-  public Boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
-    return rulesRepository.existsRuleRequired(datasetSchemaId, referenceId);
+  public boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
+    return rulesRepository.existsRuleRequired(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceId));
   }
-
 
   /**
    * Update rule.
    *
-   * @param idDatasetSchema the id dataset schema
-   * @param rule the rule
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
    * @return true, if successful
    */
   @Override
-  public boolean updateRule(String idDatasetSchema, Rule rule) {
-    if (null != rule) {
-      if (rulesRepository.updateRule(idDatasetSchema, rule)) {
-        LOG.info("Rule {} reordered in datasetSchemaId {}", rule.getRuleId(), idDatasetSchema);
-        return true;
-      }
-      LOG_ERROR.error("Error updating rule for idDatasetSchema {} ", idDatasetSchema);
-      return false;
-    }
-    LOG_ERROR.error("Error updating rule for idDatasetSchema {} ", idDatasetSchema);
-    return false;
+  public boolean updateRule(String datasetSchemaId, RuleVO ruleVO) {
+    return rulesRepository.updateRule(new ObjectId(datasetSchemaId),
+        ruleMapper.classToEntity(ruleVO));
   }
 
   /**
@@ -281,10 +282,10 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
-    Rule rule = rulesRepository.findRule(datasetSchemaId, ruleId);
+    Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
     if (null != rule) {
-      if (rulesRepository.deleteRule(datasetSchemaId, ruleId)) {
-        if (rulesRepository.insertRuleInPosition(datasetSchemaId, rule, position)) {
+      if (rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId))) {
+        if (rulesRepository.insertRuleInPosition(new ObjectId(datasetSchemaId), rule, position)) {
           LOG.info("Rule {} reordered in datasetSchemaId {}", ruleId, datasetSchemaId);
           return true;
         }
@@ -298,5 +299,4 @@ public class RulesServiceImpl implements RulesService {
     LOG_ERROR.error("Rule {} not found", ruleId);
     return false;
   }
-
 }

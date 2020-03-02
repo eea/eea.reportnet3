@@ -25,6 +25,8 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -37,6 +39,7 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -168,12 +171,23 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
 
 
   /**
    * The Constant FILE_PATTERN_NAME.
    */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_RULES. */
+  private static final String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
 
   /**
    * The Constant LOG.
@@ -254,8 +268,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       criteria.add(idDataset);
       lockService.removeLockByCriteria(criteria);
     }
-    // release snapshot when the dataset not have blocked errors and the user press create+release
-    if (released && isBlocked != null && !isBlocked.isEmpty()) {
+    // release snapshot when the user press create+release
+    if (released) {
       datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
 
@@ -340,7 +354,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     setTenant(idDataset);
     List<Validation> isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
 
-    if (isBlocked == null || isBlocked.isEmpty()) {
+    if (isBlocked != null && isBlocked.isEmpty()) {
       Long providerId = 0L;
       DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
       if (metabase.getDataProviderId() != null) {
@@ -494,6 +508,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
           nameFile);
 
+      // Also, we need to create a rules file from the schema in Mongo
+      RulesSchema rules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
+      // RulesSchema rules = rulesControllerZuul.findRuleSchemaByDatasetId(idDatasetSchema);
+      ObjectMapper objectMapperRules = new ObjectMapper();
+      String nameFileRules =
+          String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+      outStream.reset();
+      objectMapperRules.writeValue(outStream, rules);
+      documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
+          nameFileRules);
+
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
@@ -533,6 +558,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
     DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
     LOG.info("Schema class recovered");
+
+    // Get the rules document to mapper it to DataSchema class
+    String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+    ObjectMapper objectMapperRules = new ObjectMapper();
+    objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+    RulesSchema rules = objectMapperRules.readValue(contentRules, RulesSchema.class);
+    LOG.info("Schema rules class recovered");
+    rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
+    rulesRepository.save(rules);
 
     // Replace the schema: delete the older and save the new we have already recovered on step
     // Also in the service we call the recordstore to do the restore of the dataset_X data

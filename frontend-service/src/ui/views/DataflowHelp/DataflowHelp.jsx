@@ -103,7 +103,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     setIsLoading(true);
     fetchDocumentsData();
     setIsLoading(false);
-  }, [isCustodian, isDataUpdated]);
+  }, [isDataUpdated]);
+
+  useEffect(() => {
+    onLoadDatasetsSchemas();
+  }, [isCustodian]);
 
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
@@ -120,7 +124,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     getDataflowName();
     onLoadDocuments();
     onLoadWebLinks();
-    onLoadDatasetsSchemas();
   };
 
   const getDataflowName = async () => {

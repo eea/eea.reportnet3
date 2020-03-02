@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 /**
  * The Interface RulesSchemaMapper.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RuleMapper.class})
 public interface RulesSchemaMapper extends IMapper<RulesSchema, RulesSchemaVO> {
 
   /**

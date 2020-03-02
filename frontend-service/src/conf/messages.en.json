@@ -453,7 +453,7 @@
 		"loadWebLinksError": "Error loading web links",
 		"dataflowNameExists": "Dataflow name already exists, please choose another one",
 		"loadReceiptDataError": "Error loading receipt data",
-		"releaseBlockedEvent": "The data contains blocker errors",
+		"releaseBlockedEvent": "The data can´t be released because contains blocker errors",
 		"deleteRuleError": "Error deleting rule",
 		"deleteValidationConfirm": "Are you sure you want to delete the validation?",
 		"deleteValidationHeader": "Delete validation"

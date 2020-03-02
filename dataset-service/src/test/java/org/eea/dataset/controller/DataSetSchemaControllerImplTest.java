@@ -525,12 +525,6 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
-    Mockito.doNothing().when(rulesControllerZuul).deleteRuleByReferenceId(Mockito.any(),
-        Mockito.any());
-    Mockito.doNothing().when(rulesControllerZuul).createAutomaticRule(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
-        Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
   }
 
@@ -542,11 +536,9 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
-    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
-        Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
-    Mockito.verify(datasetService, times(1)).updateFieldValueType(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -557,12 +549,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
-    Mockito.when(rulesControllerZuul.existsRuleRequired(Mockito.any(), Mockito.any()))
-        .thenReturn(false);
-    Mockito.doNothing().when(rulesControllerZuul).createAutomaticRule(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
-    Mockito.verify(rulesControllerZuul, times(1)).createAutomaticRule(Mockito.any(), Mockito.any(),
+    Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
   }
 
@@ -574,11 +562,9 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
-    Mockito.when(rulesControllerZuul.existsRuleRequired(Mockito.any(), Mockito.any()))
-        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(rulesControllerZuul, times(0)).createAutomaticRule(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   @Test
@@ -589,9 +575,9 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
-    Mockito.doNothing().when(rulesControllerZuul).deleteRuleRequired(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
-    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test

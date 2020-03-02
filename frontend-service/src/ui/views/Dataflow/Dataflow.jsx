@@ -332,7 +332,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const closeBtnManageRolesDialog = (
     <Button
-      className="p-button-primary"
+      className="p-button-secondary"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onHideManageRolesDialog()}
