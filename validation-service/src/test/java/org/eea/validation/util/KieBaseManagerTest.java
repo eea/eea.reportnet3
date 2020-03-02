@@ -4,11 +4,13 @@ import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.junit.Before;
@@ -20,25 +22,31 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class KieBaseManagerTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class KieBaseManagerTest {
-
+  /** The kie base manager. */
   @InjectMocks
   private KieBaseManager kieBaseManager;
+  /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
-
+  /** The schemas repository. */
+  @Mock
+  private SchemasRepository schemasRepository;
+  /** The dataset metabase controller. */
   @Mock
   private DatasetMetabaseController datasetMetabaseController;
+  private RulesSchema rulesSchemas;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
-  }
-
-  @Test()
-  public void testKieBaseManager() throws FileNotFoundException {
-    RulesSchema rulesSchemas = new RulesSchema();
+    rulesSchemas = new RulesSchema();
     // LIST STRINGS
     List<String> listString = new ArrayList<>();
     listString.add("ERROR VALIDATION");
@@ -55,7 +63,6 @@ public class KieBaseManagerTest {
     ruleDataset.setThenCondition(listString);
     ruleKiebase.add(ruleDataset);
     // RULE TABLE
-
     Rule ruleTable = new Rule();
     ruleTable.setReferenceId(new ObjectId());
     ruleTable.setRuleId(new ObjectId());
@@ -65,7 +72,6 @@ public class KieBaseManagerTest {
     ruleTable.setWhenCondition("id == null");
     ruleTable.setThenCondition(listString);
     ruleKiebase.add(ruleTable);
-
     // RULES RECORDS
     Rule ruleRecord = new Rule();
     ruleRecord.setReferenceId(new ObjectId());
@@ -76,7 +82,6 @@ public class KieBaseManagerTest {
     ruleRecord.setWhenCondition("id == null");
     ruleRecord.setThenCondition(listString);
     ruleKiebase.add(ruleRecord);
-
     // RULES FIELDS
     ruleDataset.setReferenceId(new ObjectId());
     Rule ruleField = new Rule();
@@ -84,28 +89,47 @@ public class KieBaseManagerTest {
     ruleField.setRuleId(new ObjectId());
     ruleField.setRuleName("regla field");
     ruleField.setEnabled(Boolean.TRUE);
+    ruleField.setAutomatic(false);
     ruleField.setType(EntityTypeEnum.FIELD);
     ruleField.setWhenCondition("id == null");
     ruleField.setThenCondition(listString);
     ruleKiebase.add(ruleField);
+    rulesSchemas.setRules(ruleKiebase);
+    MockitoAnnotations.initMocks(this);
+  }
 
-    rulesSchemas.setRules(ruleKiebase);;
+  /**
+   * Test kie base manager.
+   *
+   * @throws FileNotFoundException the file not found exception
+   */
+  @Test()
+  public void testKieBaseManager() throws FileNotFoundException {
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchemas);
+    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
+        .thenReturn(rulesSchemas);
+    Document doc = new Document();
+    doc.put("typeData", "DATE");
+    when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
     kieBaseManager.reloadRules(1L, new ObjectId().toString());
   }
 
+  /**
+   * Test kie base manager null.
+   *
+   * @throws FileNotFoundException the file not found exception
+   */
   @Test()
   public void testKieBaseManagerNull() throws FileNotFoundException {
     RulesSchema rulesSchemas = new RulesSchema();
     rulesSchemas.setRules(null);
-
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchemas);
+    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
+        .thenReturn(rulesSchemas);
     kieBaseManager.reloadRules(1L, new ObjectId().toString());
   }
 }
