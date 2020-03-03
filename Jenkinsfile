@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Compile') {
             parallel {
-                stage('Compile JAVA') {
+               /* stage('Compile JAVA') {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
@@ -33,7 +33,7 @@ pipeline {
                             junit '**/target/surefire-reports/*.xml'
                         }
                     }
-                }
+                }*/
                 stage('Compile NPM') {
                     steps {
                         sh '''
@@ -48,7 +48,7 @@ pipeline {
                 }
             }
         }
-        stage('Static Code Analysis') {
+        /*stage('Static Code Analysis') {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
@@ -57,9 +57,9 @@ pipeline {
                     sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
             }
-        }
+        }*/
 
-        stage("Quality Gate"){
+        /*stage("Quality Gate"){
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
@@ -121,7 +121,7 @@ pipeline {
                     slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                 }
             }
-        }
+        }*/
         
         stage('Install in Nexus') {
             when {
@@ -176,7 +176,7 @@ pipeline {
                 }
             }
             parallel {
-                stage('Build Core Platform') {
+                /*stage('Build Core Platform') {
                     steps {
                         script {
                             echo 'Dataflow Service'
@@ -253,7 +253,7 @@ pipeline {
 
 
                   }
-                }
+                }*/
 
 
                 stage('Build Frontend') {
