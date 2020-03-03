@@ -30,7 +30,7 @@ pipeline {
                             slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - JAVA Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
                         }
                         always {
-                            junit '**/target/surefire-reports/*.xml'
+                           // junit '**/target/surefire-reports/*.xml'
                         }
                     }
                 }*/
