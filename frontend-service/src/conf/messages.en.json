@@ -59,6 +59,7 @@
     "create": "Create",
     "createAndRelease": "Create a copy and release it",
     "createDataCollection": "Create data collections",
+    "createFieldQC": "Create field QC",
     "createNewDataflow": "Create new dataflow",
     "createNewDatasetFromTemplate": "New dataset from template",
     "createNewEmptyDatasetSchema": "New empty dataset schema",
