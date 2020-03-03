@@ -6,29 +6,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Stack;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import lombok.Getter;
+import lombok.Setter;
 
+/**
+ * The Class RuleExpressionVO.
+ */
 @Getter
+@Setter
 public class RuleExpressionVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 23125812873889682L;
 
+  /** The left arg. */
   private Object leftArg;
 
-  private String operator;
+  /** The operator. */
+  private RuleOperatorEnum operator;
 
+  /** The right arg. */
   private Object rightArg;
 
+  /**
+   * Instantiates a new rule expression VO.
+   */
   public RuleExpressionVO() {}
 
+  /**
+   * Instantiates a new rule expression VO.
+   *
+   * @param expression the expression
+   */
   public RuleExpressionVO(String expression) {
     Map<Integer, Integer> map = new HashMap<>();
     List<String> tokens = new ArrayList<>();
-    tokenize(expression, tokens, map);
-    ruleExpression(0, tokens.size(), tokens, map);
+    tokenize(expression, tokens, map, 0, 0);
+    compose(0, tokens, map);
   }
 
+  /**
+   * Instantiates a new rule expression VO.
+   *
+   * @param map the map
+   */
   @SuppressWarnings("unchecked")
   private RuleExpressionVO(Map<String, Object> map) {
 
@@ -43,7 +65,7 @@ public class RuleExpressionVO implements Serializable {
     }
 
     // operator
-    operator = (String) map.get("operator");
+    setOperator(RuleOperatorEnum.valueOf((String) map.get("operator")));
 
     // rightArg
     if (r instanceof Map) {
@@ -53,99 +75,74 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
-  private RuleExpressionVO(int begin, int end, List<String> tokens, Map<Integer, Integer> map) {
-    ruleExpression(begin, end, tokens, map);
+  /**
+   * Instantiates a new rule expression VO.
+   *
+   * @param index the index
+   * @param tokens the tokens
+   * @param map the map
+   */
+  private RuleExpressionVO(int index, List<String> tokens, Map<Integer, Integer> map) {
+    compose(index, tokens, map);
   }
 
-  private void ruleExpression(int begin, int end, List<String> tokens, Map<Integer, Integer> map) {
+  /**
+   * Compose.
+   *
+   * @param index the index
+   * @param tokens the tokens
+   * @param map the map
+   */
+  private void compose(int index, List<String> tokens, Map<Integer, Integer> map) {
 
-    int index = begin;
     String actual = null;
 
     // leftArg
     actual = tokens.get(index);
     if (actual.equals("(")) {
-      leftArg = new RuleExpressionVO(index + 1, index = map.get(index), tokens, map);
+      leftArg = new RuleExpressionVO(index + 1, tokens, map);
+      index = map.get(index);
+    } else if (actual.equals("VALUE") || actual.equals("LENGTH")) {
+      leftArg = actual;
     } else if (actual.startsWith("\"")) {
       leftArg = actual.substring(1, actual.length() - 1);
     } else if (actual.contains(".")) {
       leftArg = Double.parseDouble(actual);
     } else {
       leftArg = Long.parseLong(actual);
+      if ((Long) leftArg <= Integer.MAX_VALUE) {
+        leftArg = ((Long) leftArg).intValue();
+      }
     }
     index++;
 
     // operator
-    operator = tokens.get(index++);
+    operator = RuleOperatorEnum.valueOf(tokens.get(index++));
 
     // rightArg
     actual = tokens.get(index);
     if (actual.equals("(")) {
-      rightArg = new RuleExpressionVO(index + 1, index = map.get(index), tokens, map);
+      rightArg = new RuleExpressionVO(index + 1, tokens, map);
+      index = map.get(index);
+    } else if (actual.equals("VALUE") || actual.equals("LENGTH")) {
+      rightArg = actual;
     } else if (actual.startsWith("\"")) {
       rightArg = actual.substring(1, actual.length() - 1);
     } else if (actual.contains(".")) {
       rightArg = Double.parseDouble(actual);
     } else {
       rightArg = Long.parseLong(actual);
-    }
-  }
-
-  private void tokenize(String expression, List<String> tokens, Map<Integer, Integer> map) {
-
-    Stack<Integer> stack = new Stack<>();
-    int length = expression.length();
-    String token = "";
-    char actual;
-    boolean isString = false;
-
-    for (int i = 0; i < length; i++) {
-      actual = expression.charAt(i);
-      switch (actual) {
-        case '(':
-          if (!token.isEmpty()) {
-            tokens.add(token);
-            token = "";
-          }
-          token += actual;
-          tokens.add(token);
-          token = "";
-          stack.push(tokens.size() - 1);
-          break;
-        case ')':
-          token += actual;
-          tokens.add(token);
-          token = "";
-          map.put(stack.pop(), tokens.size() - 1);
-          break;
-        case '"':
-          token += actual;
-          if (!(isString = !isString)) {
-            tokens.add(token);
-            token = "";
-          }
-          break;
-        case ' ':
-          if (!token.isEmpty()) {
-            tokens.add(token);
-            token = "";
-          }
-          break;
-        default:
-          token += actual;
-          if (i + 1 == length || (isNum(actual) != isNum(expression.charAt(i + 1)))) {
-            tokens.add(token);
-            token = "";
-          }
-          break;
+      if ((Long) rightArg <= Integer.MAX_VALUE) {
+        rightArg = ((Long) rightArg).intValue();
       }
     }
   }
 
-  private boolean isNum(char c) {
-    return c >= '0' && c <= '9' || c == '.';
-  }
-
+  /**
+   * Sets the left arg.
+   *
+   * @param leftArg the new left arg
+   */
   @SuppressWarnings("unchecked")
   public void setLeftArg(Object leftArg) {
     if (leftArg instanceof Map) {
@@ -155,10 +152,11 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
-  public void setOperator(String operator) {
-    this.operator = operator;
-  }
-
+  /**
+   * Sets the right arg.
+   *
+   * @param rightArg the new right arg
+   */
   @SuppressWarnings("unchecked")
   public void setRightArg(Object rightArg) {
     if (rightArg instanceof Map) {
@@ -168,6 +166,142 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Input type.
+   *
+   * @param actual the actual
+   * @return the int
+   */
+  private int inputType(char actual) {
+
+    if (actual == ' ') {
+      return 0;
+    }
+
+    if (actual >= '0' && actual <= '9' || actual == '.') {
+      return 1;
+    }
+
+    if (actual == '=' || actual == '!' || actual == '<' || actual == '>' || actual == '|'
+        || actual == '&') {
+      return 2;
+    }
+
+    return 3;
+  }
+
+  /**
+   * Tokenize element.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param tokens the tokens
+   * @return the int
+   */
+  private int tokenizeElement(String expression, int index, List<String> tokens) {
+
+    int inputType = inputType(expression.charAt(index));
+    int length = expression.length();
+    StringBuilder token = new StringBuilder();
+    char actual;
+
+    for (int i = index; i < length; i++) {
+      actual = expression.charAt(i);
+      if (inputType != inputType(actual)) {
+        tokens.add(token.toString());
+        return i - 1;
+      }
+      token.append(actual);
+    }
+
+    tokens.add(token.toString());
+    return length;
+  }
+
+  /**
+   * Tokenize string.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param tokens the tokens
+   * @return the int
+   */
+  private int tokenizeString(String expression, int index, List<String> tokens) {
+
+    int length = expression.length();
+    boolean ignoreNext = false;
+    StringBuilder token = new StringBuilder();
+    char actual;
+
+    for (int i = index; i < length; i++) {
+      actual = expression.charAt(i);
+      switch (actual) {
+        case '\\':
+          ignoreNext = true;
+          break;
+        case '"':
+          if (ignoreNext) {
+            token.append(actual);
+            ignoreNext = false;
+            break;
+          } else {
+            tokens.add("\"" + token + "\"");
+            return i;
+          }
+        default:
+          token.append(actual);
+      }
+    }
+
+    return length;
+  }
+
+  /**
+   * Tokenize.
+   *
+   * @param expression the expression
+   * @param tokens the tokens
+   * @param map the map
+   * @param index the index
+   * @param begin the begin
+   * @return the int
+   */
+  private int tokenize(String expression, List<String> tokens, Map<Integer, Integer> map, int index,
+      int begin) {
+
+    int length = expression.length();
+    char actual;
+
+    for (int i = index; i < length; i++) {
+      actual = expression.charAt(i);
+      switch (actual) {
+        case '(':
+          tokens.add("(");
+          i = tokenize(expression, tokens, map, i + 1, tokens.size() - 1);
+          break;
+        case ')':
+          tokens.add(")");
+          map.put(begin, tokens.size() - 1); // tokens based
+          // map.put(index - 1, i); // expression based
+          return i;
+        case '"':
+          i = tokenizeString(expression, i + 1, tokens);
+          break;
+        case ' ':
+          break;
+        default:
+          i = tokenizeElement(expression, i, tokens);
+      }
+    }
+
+    return length;
+  }
+
+  /**
+   * To string.
+   *
+   * @return the string
+   */
   @Override
   public String toString() {
 
@@ -178,9 +312,13 @@ public class RuleExpressionVO implements Serializable {
       sb.append(((RuleExpressionVO) leftArg).toString());
       sb.append(")");
     } else if (leftArg instanceof String) {
-      sb.append("\"");
-      sb.append(leftArg);
-      sb.append("\"");
+      if (leftArg.equals("VALUE") || leftArg.equals("LENGTH")) {
+        sb.append(leftArg);
+      } else {
+        sb.append("\"");
+        sb.append(leftArg);
+        sb.append("\"");
+      }
     } else {
       sb.append(leftArg);
     }
@@ -194,9 +332,13 @@ public class RuleExpressionVO implements Serializable {
       sb.append(((RuleExpressionVO) rightArg).toString());
       sb.append(")");
     } else if (rightArg instanceof String) {
-      sb.append("\"");
-      sb.append(rightArg);
-      sb.append("\"");
+      if (rightArg.equals("VALUE") || rightArg.equals("LENGTH")) {
+        sb.append(rightArg);
+      } else {
+        sb.append("\"");
+        sb.append(rightArg);
+        sb.append("\"");
+      }
     } else {
       sb.append(rightArg);
     }
@@ -204,23 +346,22 @@ public class RuleExpressionVO implements Serializable {
     return sb.toString();
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-
-    Object l = leftArg;
-    Object r = rightArg;
-
-    if (l instanceof RuleExpressionVO) {
-      l = ((RuleExpressionVO) l).hashCode();
-    }
-
-    if (r instanceof RuleExpressionVO) {
-      r = ((RuleExpressionVO) r).hashCode();
-    }
-
-    return Objects.hash(l, operator, r);
+    return Objects.hash(leftArg, operator.ordinal(), rightArg);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
 
@@ -228,16 +369,12 @@ public class RuleExpressionVO implements Serializable {
       return true;
     }
 
-    if (obj == null) {
-      return false;
-    }
-
     if (obj instanceof RuleExpressionVO) {
       RuleExpressionVO other = (RuleExpressionVO) obj;
-      if (leftArg.equals(other.leftArg) && operator.equals(other.operator)
-          && rightArg.equals(other.rightArg)) {
-        return true;
-      }
+      boolean o = operator.equals(other.operator);
+      boolean l = leftArg.equals(other.leftArg);
+      boolean r = rightArg.equals(other.rightArg);
+      return o && l && r;
     }
 
     return false;
