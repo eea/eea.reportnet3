@@ -39,9 +39,6 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const onDeleteValidation = async () => {
     try {
       const response = await ValidationService.deleteById(datasetSchemaId, validationId);
-      notificationContext.add({
-        type: 'DELETE_RULE_ERROR'
-      });
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }

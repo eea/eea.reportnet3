@@ -8,6 +8,7 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -136,6 +137,38 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onBlurDescription = description => {
     if (description !== initialDatasetDescription) {
       onUpdateDescription(description);
+    }
+  };
+
+  const onConfirmValidate = async () => {
+    //  QUE ES ESO??
+    /*     const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId }); */
+
+    try {
+      setValidateDialogVisible(false);
+      await DatasetService.validateDataById(datasetId);
+      notificationContext.add({
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName: datasetSchemaName
+        }
+      });
+    } catch (error) {
+      notificationContext.add({
+        type: 'VALIDATE_DATA_BY_ID_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName: datasetSchemaName
+        }
+      });
     }
   };
 
@@ -314,6 +347,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         snapshotListData={snapshotListData}
       />
       {validationsListDialog()}
+      <ConfirmDialog
+        header={resources.messages['validateDataset']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmValidate}
+        onHide={() => setValidateDialogVisible(false)}
+        visible={validateDialogVisible}>
+        {resources.messages['validateDatasetConfirm']}
+      </ConfirmDialog>
     </SnapshotContext.Provider>
   );
 });
