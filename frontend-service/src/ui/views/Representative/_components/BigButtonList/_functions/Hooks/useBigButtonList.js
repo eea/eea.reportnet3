@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
 import { routes } from 'ui/routes';
 
@@ -13,8 +13,11 @@ const useBigButtonList = ({
   dataflowId,
   handleRedirect,
   hasWritePermissions,
-  showReleaseSnapshotDialog,
-  representative
+  isCustodian,
+  onLoadReceiptData,
+  receiptState,
+  representative,
+  showReleaseSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
@@ -32,6 +35,7 @@ const useBigButtonList = ({
           true
         )
       ),
+    helpClassName: 'dataflow-documents-weblinks-help-step',
     onWheel: getUrl(
       routes.DOCUMENTS,
       {
@@ -51,7 +55,8 @@ const useBigButtonList = ({
         buttonClass: 'dataset',
         buttonIcon: 'dataset',
         caption: datasetName,
-        isReleased: dataset.isReleased,
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
           handleRedirect(
             getUrl(
@@ -64,6 +69,7 @@ const useBigButtonList = ({
             )
           );
         },
+        helpClassName: 'dataflow-dataset-container-help-step',
         onWheel: getUrl(
           routes.DATASET,
           {
@@ -91,7 +97,21 @@ const useBigButtonList = ({
         visibility: !isEmpty(dataflowData.datasets)
       };
     });
-  return [helpButton, ...groupByRepresentativeModels];
+
+  const receiptBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
+      buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+      caption: resources.messages['confirmationReceipt'],
+      handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
+      infoStatus: receiptState.isOutdated,
+      layout: 'defaultBigButton',
+      visibility: !isCustodian && !receiptState.isReleased.includes(false) && !receiptState.isReleased.includes(null)
+    }
+  ];
+
+  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
 };
 
 export { useBigButtonList };

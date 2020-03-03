@@ -1,6 +1,8 @@
 import { isNull, isUndefined } from 'lodash';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
+import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
+
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
@@ -17,6 +19,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idCodeList = datasetTableRecordField.codelistId;
+  datasetTableFieldDesign.required = datasetTableRecordField.required;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
@@ -209,20 +212,10 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
-  const datasetSchemaObject = [datasetSchemaDTO];
-  const allLevelErrorsFromRules = [];
-  findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
-  let levelErrorsRepeated = [];
-  allLevelErrorsFromRules.forEach(rule => {
-    if (!isUndefined(rule.thenCondition)) {
-      levelErrorsRepeated.push(rule.thenCondition[1]);
-    }
-  });
-  let levelErrors = [...new Set(levelErrorsRepeated)];
-  levelErrors = CoreUtils.orderLevelErrors(levelErrors);
-  return levelErrors;
-};
+const getAllLevelErrorsFromRuleValidations = rulesDTO =>
+  CoreUtils.orderLevelErrors([
+    ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
+  ]);
 
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
   const fieldOrdered = await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
@@ -234,48 +227,30 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
   return tableOrdered;
 };
 
-const findObjects = (obj, targetProp, finalResults) => {
-  const getObject = theObject => {
-    if (theObject instanceof Array) {
-      for (let i = 0; i < theObject.length; i++) {
-        getObject(theObject[i]);
-      }
-    } else {
-      for (let prop in theObject) {
-        if (theObject.hasOwnProperty(prop)) {
-          if (prop.includes(targetProp) && prop !== 'ruleId') {
-            finalResults.push(theObject);
-          }
-          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
-            getObject(theObject[prop]);
-          }
-        }
-      }
-    }
-  };
-  getObject(obj);
-};
-
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
+  const rulesDTO = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
+
   const dataset = new Dataset({
     datasetSchemaDescription: datasetSchemaDTO.description,
     datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
     datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
-    levelErrorTypes: getAllLevelErrorsFromRuleValidations(datasetSchemaDTO)
+    levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
   });
+
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
           const fields = !isNull(dataTableRecordDTO.fieldSchema)
             ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
                 return new DatasetTableField({
-                  fieldId: DataTableFieldDTO.id,
-                  recordId: DataTableFieldDTO.idRecord,
-                  name: DataTableFieldDTO.name,
-                  type: DataTableFieldDTO.type,
+                  codelistId: DataTableFieldDTO.idCodeList,
                   description: DataTableFieldDTO.description,
-                  codelistId: DataTableFieldDTO.idCodeList
+                  fieldId: DataTableFieldDTO.id,
+                  name: DataTableFieldDTO.name,
+                  recordId: DataTableFieldDTO.idRecord,
+                  required: DataTableFieldDTO.required,
+                  type: DataTableFieldDTO.type
                 });
               })
             : null;
@@ -326,10 +301,10 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
           field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
             return new Validation({
               date: fieldValidation.validation.validationDate,
+              entityType: fieldValidation.validation.typeEntity,
               id: fieldValidation.id,
               levelError: fieldValidation.validation.levelError,
-              message: fieldValidation.validation.message,
-              typeEntity: fieldValidation.validation.typeEntity
+              message: fieldValidation.validation.message
             });
           });
         }
@@ -347,10 +322,10 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
         record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
           return new Validation({
             date: recordValidation.validation.validationDate,
+            entityType: recordValidation.validation.typeEntity,
             id: recordValidation.id,
             levelError: recordValidation.validation.levelError,
-            message: recordValidation.validation.message,
-            typeEntity: recordValidation.validation.typeEntity
+            message: recordValidation.validation.message
           });
         });
       }
@@ -494,8 +469,9 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
-const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) =>
-  await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
+const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) => {
+  return await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
+};
 
 const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
   await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);

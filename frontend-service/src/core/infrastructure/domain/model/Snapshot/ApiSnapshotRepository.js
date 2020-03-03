@@ -4,19 +4,18 @@ import { Snapshot } from 'core/domain/model/Snapshot/Snapshot';
 const allDesigner = async datasetSchemaId => {
   const snapshotsDTO = await apiSnapshot.allDesigner(datasetSchemaId);
 
-  const snapshotsList = snapshotsDTO
+  return snapshotsDTO
     ? snapshotsDTO.map(
         snapshotDTO =>
           new Snapshot({
             creationDate: snapshotDTO.creationDate,
             description: snapshotDTO.description,
             id: snapshotDTO.id,
+            isBlocked: snapshotDTO.blocked,
             isReleased: snapshotDTO.release
           })
       )
     : [];
-
-  return snapshotsList;
 };
 
 const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {
@@ -44,6 +43,7 @@ const allReporter = async datasetId => {
         creationDate: snapshotDTO.creationDate,
         description: snapshotDTO.description,
         id: snapshotDTO.id,
+        isBlocked: snapshotDTO.blocked,
         isReleased: snapshotDTO.release
       })
   );

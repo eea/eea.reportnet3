@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
+import Joyride, { STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
@@ -22,6 +23,16 @@ const LeftSideBar = withRouter(() => {
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [run, setRun] = useState(false);
+
+  const handleJoyrideCallback = data => {
+    const { status, type } = data;
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    if (finishedStatuses.includes(status)) {
+      setRun(false);
+    }
+  };
 
   const renderUserProfile = () => {
     const userButtonProps = {
@@ -43,11 +54,25 @@ const LeftSideBar = withRouter(() => {
         e.preventDefault();
         if (notificationContext.all.length > 0) setIsNotificationVisible(true);
       },
-      title: 'userSettings',
+      title: 'notifications',
       icon: 'notifications',
       label: 'notifications'
     };
     return <LeftSideBarButton {...userNotificationsProps} />;
+  };
+
+  const renderHelp = () => {
+    const userHelpProps = {
+      href: '#',
+      onClick: async e => {
+        e.preventDefault();
+        setRun(true);
+      },
+      title: leftSideBarContext.helpTitle,
+      icon: 'questionCircle',
+      label: leftSideBarContext.helpTitle
+    };
+    return <LeftSideBarButton {...userHelpProps} />;
   };
 
   const renderSectionButtons = () => {
@@ -90,27 +115,44 @@ const LeftSideBar = withRouter(() => {
   };
 
   return (
-    <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
-      {
-        <>
-          <div className={styles.barSection}>
-            {renderUserProfile()}
-            {renderUserNotifications()}
-          </div>
-          <hr />
-          <div className={styles.barSection}>{renderSectionButtons()}</div>
-          <hr />
-          <div className={styles.barSection}>
-            {renderLogout()}
-            <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
-          </div>
-          <NotificationsList
-            isNotificationVisible={isNotificationVisible}
-            setIsNotificationVisible={setIsNotificationVisible}
-          />
-        </>
-      }
-    </div>
+    <>
+      <Joyride
+        callback={handleJoyrideCallback}
+        continuous={true}
+        run={run}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={true}
+        steps={leftSideBarContext.steps}
+        styles={{
+          options: {
+            zIndex: 10000
+          }
+        }}
+      />
+      <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
+        {
+          <>
+            <div className={styles.barSection}>
+              {renderUserProfile()}
+              {renderUserNotifications()}
+              {renderHelp()}
+            </div>
+            <hr />
+            <div className={styles.barSection}>{renderSectionButtons()}</div>
+            <hr />
+            <div className={styles.barSection}>
+              {renderLogout()}
+              <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
+            </div>
+            <NotificationsList
+              isNotificationVisible={isNotificationVisible}
+              setIsNotificationVisible={setIsNotificationVisible}
+            />
+          </>
+        }
+      </div>
+    </>
   );
 });
 

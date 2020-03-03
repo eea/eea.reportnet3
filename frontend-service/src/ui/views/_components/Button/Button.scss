@@ -205,3 +205,90 @@ body .p-buttonset.p-button-danger > .p-button:enabled:active {
   color: #ffffff;
   border-color: #a90000;
 }
+
+body .p-button.p-button-animated-spin:hover span:first-child:not(:hover) {
+  animation: spin 2s linear infinite;
+}
+
+body .p-button.p-button-animated-spin span:first-child:hover {
+  animation: spin 2s linear infinite;
+}
+
+body .p-button.p-button-animated-blink:hover span:first-child:not(:hover) {
+  transform: scale(1.25);
+  transition: 0.08s linear;
+}
+
+body .p-button.p-button-animated-blink span:first-child:hover {
+  transform: scale(1.25);
+  transition: 0.08s linear;
+}
+
+body .p-button.p-button-animated-upload:hover span:first-child:not(:hover) {
+  animation: upload 1s linear infinite;
+}
+
+body .p-button.p-button-animated-upload span:first-child:hover {
+  animation: upload 1s linear infinite;
+}
+
+body .p-button.p-button-animated-download:hover span:first-child:not(:hover) {
+  animation: download 1s linear infinite;
+}
+
+body .p-button.p-button-animated-download span:first-child:hover {
+  animation: download 1s linear infinite;
+}
+
+body .p-button.p-button-animated-delete:hover span:first-child:not(:hover) {
+  animation: delete 1s linear infinite;
+}
+
+body .p-button.p-button-animated-delete span:first-child:hover {
+  animation: delete 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes download {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(50%);
+  }
+}
+
+@keyframes upload {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes delete {
+  0% {
+    opacity: 1;
+    transform: scale(1, 1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1, 0);
+  }
+}

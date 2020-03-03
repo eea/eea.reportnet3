@@ -90,7 +90,7 @@ export const FieldDesigner = ({
   const [isEditing, setIsEditing] = useState(false);
   // const [position, setPosition] = useState({});
   const [selectedCodelist, setSelectedCodelist] = useState({
-    codelistId: !isUndefined(codelistId) ? codelistId : 1,
+    codelistId: !isUndefined(codelistId) ? codelistId : '',
     codelistName: !isUndefined(codelistName) ? codelistName : '',
     codelistVersion: !isUndefined(codelistVersion) ? codelistVersion : ''
   });
@@ -172,19 +172,39 @@ export const FieldDesigner = ({
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldValue) && fieldValue !== '') {
-            onFieldAdd(recordId, parseGeospatialTypes(type.fieldType), fieldValue, fieldDescriptionValue);
+            onFieldAdd(
+              recordId,
+              parseGeospatialTypes(type.fieldType),
+              fieldValue,
+              fieldDescriptionValue,
+              null,
+              null,
+              null,
+              null,
+              fieldRequiredValue
+            );
           }
         }
       } else {
         if (type !== '' && type !== fieldValue) {
-          fieldUpdate(fieldId, parseGeospatialTypes(type.fieldType), fieldValue);
+          fieldUpdate(
+            fieldId,
+            parseGeospatialTypes(type.fieldType),
+            fieldValue,
+            fieldDescriptionValue,
+            null,
+            null,
+            null,
+            null,
+            fieldRequiredValue
+          );
         } else {
           if (type !== '') {
             onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
           }
         }
       }
-      // setSelectedCodelist({ codelistId: 0, codelistName: '', codelistVersion: '' });
+      setSelectedCodelist({ codelistId: null, codelistName: null, codelistVersion: null });
     }
     onCodelistShow(fieldId, type);
   };
@@ -350,6 +370,7 @@ export const FieldDesigner = ({
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
       } else {
+        setFieldRequiredValue(false);
         setFieldValue('');
         setFieldTypeValue('');
         setFieldDescriptionValue('');
@@ -577,7 +598,7 @@ export const FieldDesigner = ({
   const qcDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-secondary-transparent"
+        className="p-button-secondary-transparent p-button-animated-blink"
         icon="cancel"
         label={resources.messages['close']}
         onClick={() => setIsQCManagerVisible(false)}
@@ -732,7 +753,7 @@ export const FieldDesigner = ({
             icon="horizontalSliders"
             onClick={() => setIsQCManagerVisible(true)}
             style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['editFieldQC']}
+            tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}

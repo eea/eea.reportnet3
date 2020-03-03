@@ -6,6 +6,7 @@ import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
@@ -21,6 +22,7 @@ const parseDataflowDTO = dataflowDTO =>
     documents: parseDocumentListDTO(dataflowDTO.documents),
     id: dataflowDTO.id,
     name: dataflowDTO.name,
+    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     status: dataflowDTO.status,
     userRequestStatus: dataflowDTO.userRequestStatus,
@@ -61,15 +63,15 @@ const parseDatasetListDTO = datasetsDTO => {
   return;
 };
 
-const parseDatasetDTO = datasetDTO => {
-  return new Dataset({
+const parseDatasetDTO = datasetDTO =>
+  new Dataset({
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
-    name: datasetDTO.nameDatasetSchema
+    name: datasetDTO.nameDatasetSchema,
+    dataProviderId: datasetDTO.dataProviderId
   });
-};
 
 const parseDocumentListDTO = documentsDTO => {
   if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
@@ -90,6 +92,28 @@ const parseDocumentDTO = documentDTO => {
     language: documentDTO.language,
     title: documentDTO.name
   });
+};
+
+const parseRepresentativeListDTO = representativesDTO => {
+  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
+    const representatives = [];
+    representativesDTO.forEach(representativeDTO => {
+      representatives.push(parseRepresentativeDTO(representativeDTO));
+    });
+    return representatives;
+  }
+  return;
+};
+
+const parseRepresentativeDTO = representativeDTO => {
+  return new Representative(
+    representativeDTO.id,
+    representativeDTO.provideraccount,
+    representativeDTO.dataProviderId,
+    representativeDTO.dataProviderGroupId,
+    representativeDTO.receiptDownloaded,
+    representativeDTO.receiptOutdated
+  );
 };
 
 const parseWebLinkListDTO = webLinksDTO => {
