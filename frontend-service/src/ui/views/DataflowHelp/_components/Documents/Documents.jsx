@@ -65,7 +65,7 @@ const Documents = ({
 
   const documentsEditButtons = rowData => {
     return (
-      <div className={styles.documentsEditButtons}>
+      <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
         <Button
           type="button"
           icon="edit"
@@ -89,7 +89,9 @@ const Documents = ({
 
   const downloadColumnTemplate = rowData => {
     return (
-      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
+      <span
+        className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
+        onClick={() => onDownloadDocument(rowData)}>
         {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
@@ -188,7 +190,7 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload dataflowHelp-document-upload-help-step`}
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
@@ -199,7 +201,7 @@ const Documents = ({
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin dataflowHelp-document-refresh-help-step`}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={async () => {

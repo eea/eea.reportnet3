@@ -68,7 +68,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
                     !isEmpty(errors.createSnapshotDescription) && touched.createSnapshotDescription ? ' error' : ''
                   }`}>
                   <Field
-                    autocomplete="off"
+                    autoComplete="off"
                     className={styles.formField}
                     name="createSnapshotDescription"
                     placeholder={resources.messages.createSnapshotPlaceholder}
