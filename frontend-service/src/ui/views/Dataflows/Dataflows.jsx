@@ -10,6 +10,7 @@ import { config } from 'conf';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { DataflowsList } from './DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
+
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
@@ -42,6 +43,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
+
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowAcceptedPendingTab'],
@@ -97,15 +99,50 @@ const Dataflows = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
+    const steps = [
+      {
+        content: <h2>{resources.messages['dataflowListHelp']}</h2>,
+        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
+        placement: 'center',
+        target: 'body'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep1']}</h2>,
+        target: '.dataflowList-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep2']}</h2>,
+        target: '.dataflowList-pending-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep3']}</h2>,
+        target: '.dataflowList-accepted-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep4']}</h2>,
+        target: '.dataflowList-delivery-date-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep5']}</h2>,
+        target: '.dataflowList-name-description-help-step'
+      },
+      {
+        content: <h2>{resources.messages['dataflowListHelpStep6']}</h2>,
+        target: '.dataflowList-status-help-step'
+      }
+    ];
+
     if (isCustodian) {
       leftSideBarContext.addModels([
         {
+          className: 'dataflowList-create-dataflow-help-step',
           icon: 'plus',
           label: 'createNewDataflow',
           onClick: () => onShowAddForm(),
           title: 'createNewDataflow'
         },
         {
+          className: 'dataflowList-manage-codelists-help-step',
           href: getUrl(routes['CODELISTS']),
           icon: 'clipboard',
           label: 'manageCodelists',
@@ -116,9 +153,20 @@ const Dataflows = withRouter(({ match, history }) => {
           title: 'manageCodelists'
         }
       ]);
+      steps.push(
+        {
+          content: <h2>{resources.messages['dataflowListHelpStep7']}</h2>,
+          target: '.dataflowList-create-dataflow-help-step'
+        },
+        {
+          content: <h2>{resources.messages['dataflowListHelpStep8']}</h2>,
+          target: '.dataflowList-manage-codelists-help-step'
+        }
+      );
     } else {
       leftSideBarContext.removeModels();
     }
+    leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
   }, [isCustodian]);
 
   const onCreateDataflow = () => {
@@ -167,11 +215,12 @@ const Dataflows = withRouter(({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12`}>
+      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
             <DataflowsList
+              className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
               description={resources.messages.pendingDataflowText}
@@ -180,6 +229,7 @@ const Dataflows = withRouter(({ match, history }) => {
               type="pending"
             />
             <DataflowsList
+              className="dataflowList-accepted-help-step"
               content={acceptedContent}
               dataFetch={dataFetch}
               dataflowNewValues={dataflowState.selectedDataflow}

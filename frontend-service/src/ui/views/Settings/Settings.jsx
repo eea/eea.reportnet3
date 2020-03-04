@@ -69,7 +69,7 @@ const Settings = withRouter(({ history }) => {
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['settingsUser'],
+        label: resources.messages['userSettingsBreadcrumbs'],
         icon: 'user-profile',
         href: getUrl(routes.SETTINGS),
         command: () => history.push(getUrl(routes.SETTINGS))
@@ -132,10 +132,10 @@ const Settings = withRouter(({ history }) => {
       <div className="rep-row">
         <div className={` rep-col-12 rep-col-sm-12`}>
           <Title
-            title={resources.messages['settingsUser']}
+            title={resources.messages['userSettingsTitle']}
             icon="dataset"
             iconSize="4rem"
-            subtitle={resources.messages['manageUserSettings']}
+            subtitle={resources.messages['userSettingsSubtitle']}
           />
         </div>
       </div>

@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { routes } from 'ui/routes';
+import Joyride, { STATUS } from 'react-joyride';
+
 import styles from './LeftSideBar.module.scss';
 
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
@@ -25,6 +27,17 @@ const LeftSideBar = withRouter(({ history }) => {
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [logoutConfirmvisible, setlogoutConfirmVisible] = useState(undefined);
+  const [run, setRun] = useState(false);
+
+  const handleJoyrideCallback = data => {
+    const { status, type } = data;
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    if (finishedStatuses.includes(status)) {
+      setRun(false);
+    }
+  };
+
   const renderUserProfile = () => {
     const userButtonProps = {
       href: getUrl(routes['SETTINGS']),
@@ -52,6 +65,20 @@ const LeftSideBar = withRouter(({ history }) => {
       label: 'notifications'
     };
     return <LeftSideBarButton {...userNotificationsProps} />;
+  };
+
+  const renderHelp = () => {
+    const userHelpProps = {
+      href: '#',
+      onClick: async e => {
+        e.preventDefault();
+        setRun(true);
+      },
+      title: leftSideBarContext.helpTitle,
+      icon: 'questionCircle',
+      label: leftSideBarContext.helpTitle
+    };
+    return <LeftSideBarButton {...userHelpProps} />;
   };
 
   const renderSectionButtons = () => {
@@ -101,40 +128,58 @@ const LeftSideBar = withRouter(({ history }) => {
   };
 
   return (
-    <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
-      {
-        <>
-          <div className={styles.barSection}>
-            {renderUserProfile()}
-            {renderUserNotifications()}
-          </div>
-          <hr />
-          <div className={styles.barSection}>{renderSectionButtons()}</div>
-          <hr />
-          <div className={styles.barSection}>
-            {renderLogout()}
-            <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
-          </div>
-          <NotificationsList
-            isNotificationVisible={isNotificationVisible}
-            setIsNotificationVisible={setIsNotificationVisible}
-          />
-          {userContext.userProps.showLogoutConfirmation && (
-            <ConfirmDialog
-              onConfirm={() => {
-                userLogout();
-              }}
-              onHide={() => setlogoutConfirmVisible(false)}
-              visible={logoutConfirmvisible}
-              header={resources.messages['logout']}
-              labelConfirm={resources.messages['yes']}
-              labelCancel={resources.messages['no']}>
-              {resources.messages['confirmationLogout']}
-            </ConfirmDialog>
-          )}
-        </>
-      }
-    </div>
+    <>
+      <Joyride
+        callback={handleJoyrideCallback}
+        continuous={true}
+        run={run}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={true}
+        steps={leftSideBarContext.steps}
+        styles={{
+          options: {
+            zIndex: 10000
+          }
+        }}
+      />
+      <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
+        {
+          <>
+            <div className={styles.barSection}>
+              {renderUserProfile()}
+              {renderUserNotifications()}
+              {renderHelp()}
+            </div>
+            <hr />
+            <div className={styles.barSection}>{renderSectionButtons()}</div>
+            <hr />
+            <div className={styles.barSection}>
+              {renderLogout()}
+              <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
+            </div>
+            <NotificationsList
+              isNotificationVisible={isNotificationVisible}
+              setIsNotificationVisible={setIsNotificationVisible}
+            />
+
+            {userContext.userProps.showLogoutConfirmation && (
+              <ConfirmDialog
+                onConfirm={() => {
+                  userLogout();
+                }}
+                onHide={() => setlogoutConfirmVisible(false)}
+                visible={logoutConfirmvisible}
+                header={resources.messages['logout']}
+                labelConfirm={resources.messages['yes']}
+                labelCancel={resources.messages['no']}>
+                {resources.messages['confirmationLogout']}
+              </ConfirmDialog>
+            )}
+          </>
+        }
+      </div>
+    </>
   );
 });
 

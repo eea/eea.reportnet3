@@ -56,9 +56,11 @@ const Header = withRouter(({ history }) => {
       return;
     } else
       return (
-        <div className={styles.localhostAlert}>
-          <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
-        </div>
+        <React.Fragment>
+          <div className={styles.localhostAlert}>
+            <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
+          </div>
+        </React.Fragment>
       );
   };
   ////////////////////////////////////////////

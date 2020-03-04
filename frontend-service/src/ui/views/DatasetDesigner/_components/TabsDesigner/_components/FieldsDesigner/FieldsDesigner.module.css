@@ -48,6 +48,7 @@
 }
 .tableDescriptionInput {
   width: 68vw;
+  transition: 0.5s !important;
 }
 .positioning {
   top: 0 !important;

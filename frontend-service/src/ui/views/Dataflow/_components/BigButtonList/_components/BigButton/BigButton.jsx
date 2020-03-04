@@ -23,6 +23,7 @@ export const BigButton = ({
   dataflowStatus,
   datasetSchemaInfo,
   handleRedirect = () => {},
+  helpClassName,
   index,
   infoStatus,
   infoStatusIcon,
@@ -128,7 +129,7 @@ export const BigButton = ({
 
   const defaultBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]}`}>
+      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>
@@ -186,7 +187,7 @@ export const BigButton = ({
 
   const menuBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]}`}>
+      <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>

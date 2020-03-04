@@ -10,7 +10,7 @@ export const ToggleUserConfirmation = () => {
 
   return (
     <div>
-      <h3>{resources.messages['confirmationUserLogout']}</h3>
+      <h3>{resources.messages['userConfirmationLogout']}</h3>
       <InputSwitch
         checked={userContext.userProps.showLogoutConfirmation}
         style={{ marginRight: '1rem' }}

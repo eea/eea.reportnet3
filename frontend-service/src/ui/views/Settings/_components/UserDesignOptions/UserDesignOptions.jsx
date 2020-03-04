@@ -14,7 +14,7 @@ const UserDesignOptions = () => {
   return (
     <React.Fragment>
       <div className={styles.userDesignContainer}>
-        <h3 className={styles.userThemeTitle}>{resources.messages['defaultVisualTheme']}</h3>
+        <h3 className={styles.userThemeTitle}>{resources.messages['userThemeSelection']}</h3>
         <Dropdown
           name="visualTheme"
           className={styles.dropdownFieldType}
@@ -28,7 +28,7 @@ const UserDesignOptions = () => {
         />
 
         <div className={styles.userUploadImg}>
-          <h3 className={styles.userThemeTitle}>{resources.messages['selectUserImg']}</h3>
+          <h3 className={styles.userThemeTitle}>{resources.messages['userSelectImage']}</h3>
 
           <UserImgUpload />
         </div>

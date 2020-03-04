@@ -27,7 +27,7 @@ export const IconTooltip = ({ levelError, message, style }) => {
       buttonProps.className = `${styles.buttonCustom} ${styles.error}`;
       break;
     case 'BLOCKER':
-      buttonProps.icon = 'warning';
+      buttonProps.icon = 'blocker';
       buttonProps.className = `${styles.buttonCustom} ${styles.blocker}`;
       break;
     case 'MULTI':

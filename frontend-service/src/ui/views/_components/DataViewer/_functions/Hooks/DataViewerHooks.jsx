@@ -183,8 +183,7 @@ export const useSetColumns = (
           style={{
             width: !invisibleColumn
               ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
-              : '',
-            display: !invisibleColumn ? 'auto' : 'none'
+              : '0.01px'
           }}
         />
       );

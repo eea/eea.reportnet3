@@ -27,7 +27,7 @@
   overflow: hidden;
   box-shadow: var(--leftSideBar-box-shadow);
   .barSection {
-    --top-height: 100px;
+    --top-height: 150px;
     --botton-height: 100px;
     --middle-height: calc(100% - var(--top-height) - var(--botton-height) - (1rem * 3));
     padding: 1rem 0;

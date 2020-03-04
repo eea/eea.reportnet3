@@ -599,7 +599,7 @@ export const FieldDesigner = ({
   const qcDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-secondary-transparent"
+        className="p-button-secondary-transparent p-button-animated-blink"
         icon="cancel"
         label={resources.messages['close']}
         onClick={() => setIsQCManagerVisible(false)}
@@ -754,7 +754,7 @@ export const FieldDesigner = ({
             icon="horizontalSliders"
             onClick={() => setIsQCManagerVisible(true)}
             style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['editFieldQC']}
+            tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}

@@ -216,12 +216,12 @@ body .p-button.p-button-animated-spin span:first-child:hover {
 
 body .p-button.p-button-animated-blink:hover span:first-child:not(:hover) {
   transform: scale(1.25);
-  transition: 0.08s ease-in;
+  transition: 0.08s linear;
 }
 
 body .p-button.p-button-animated-blink span:first-child:hover {
   transform: scale(1.25);
-  transition: 0.08s ease-in;
+  transition: 0.08s linear;
 }
 
 body .p-button.p-button-animated-upload:hover span:first-child:not(:hover) {
@@ -230,6 +230,14 @@ body .p-button.p-button-animated-upload:hover span:first-child:not(:hover) {
 
 body .p-button.p-button-animated-upload span:first-child:hover {
   animation: upload 1s linear infinite;
+}
+
+body .p-button.p-button-animated-download:hover span:first-child:not(:hover) {
+  animation: download 1s linear infinite;
+}
+
+body .p-button.p-button-animated-download span:first-child:hover {
+  animation: download 1s linear infinite;
 }
 
 body .p-button.p-button-animated-delete:hover span:first-child:not(:hover) {
@@ -246,21 +254,6 @@ body .p-button.p-button-animated-delete span:first-child:hover {
   }
   100% {
     -webkit-transform: rotate(360deg);
-  }
-}
-
-@keyframes blink {
-  0% {
-    -webkit-transform: scale(1);
-    transform: scale(1);
-  }
-  50% {
-    -webkit-transform: scale(1.25);
-    transform: scale(1.25);
-  }
-  100% {
-    -webkit-transform: scale(1);
-    transform: scale(1);
   }
 }
 
