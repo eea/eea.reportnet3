@@ -376,7 +376,7 @@ public class DataflowServiceImpl implements DataflowService {
   public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
     Dataflow dataFlowSaved;
     // we find if the name of this dataflow exist
-    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+    if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
@@ -408,7 +408,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
-    Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
+    Optional<Dataflow> dataflow = dataflowRepository.findByNameIgnoreCase(dataflowVO.getName());
     // we find if the name of this dataflow exist
     if (dataflow.isPresent() && !dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
