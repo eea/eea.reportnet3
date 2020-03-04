@@ -3,6 +3,7 @@
  */
 package org.eea.dataset.persistence.schemas.domain;
 
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -53,6 +54,14 @@ public class FieldSchema {
   @Field(value = "required")
   private Boolean required;
 
+  /** The is PK. */
+  @Field(value = "isPK")
+  private Boolean isPK;
+
+  /** The reference FK. */
+  @Field(value = "referenceFK")
+  private List<ObjectId> referenceFK;
+
   /**
    * Hash code.
    *
@@ -84,7 +93,7 @@ public class FieldSchema {
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(codeListItems, other.codeListItems)
-        && Objects.equals(required, other.required)
+        && Objects.equals(required, other.required) && Objects.equals(isPK, other.isPK)
         && Objects.equals(description, other.description);
   }
 
