@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.CodelistVO;
 /**
  * The Interface CodelistService.
  */
+@Deprecated
 public interface CodelistService {
 
   /**

@@ -11,6 +11,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Deprecated
 public class CodelistCategoryFullVO {
 
   /** The id. */
