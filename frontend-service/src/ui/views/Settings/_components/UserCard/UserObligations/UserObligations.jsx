@@ -121,7 +121,6 @@ const UserObligations = () => {
 
   return (
     <div className={styles.userObligationsContainer}>
-      <button onClick={() => console.log(schemaById())}>consol</button>
       <div className={styles.userObligationsTitle}>{resources.messages['userObligations']}</div>
       {renderChildrenArray()}
     </div>

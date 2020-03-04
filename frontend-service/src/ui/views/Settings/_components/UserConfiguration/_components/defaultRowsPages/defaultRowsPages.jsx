@@ -13,7 +13,7 @@ export const DefaultRowsPages = () => {
   return (
     <React.Fragment>
       {' '}
-      <h3>{resources.messages['defaultRowsPage']}</h3>
+      <h3>{resources.messages['userDefaultRowsPage']}</h3>
       <Dropdown
         name="rowPerPage"
         placeholder="select"
