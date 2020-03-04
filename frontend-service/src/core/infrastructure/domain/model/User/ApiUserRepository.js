@@ -16,14 +16,14 @@ const timeOut = time => {
 const login = async code => {
   const userDTO = await apiUser.login(code);
   const { accessToken, refreshToken } = userDTO;
-  const user = new User(
-    userDTO.userId,
-    userDTO.preferredUsername,
-    userDTO.roles,
-    userDTO.groups,
-    userDTO.preferredUsername,
-    userDTO.accessTokenExpiration
-  );
+  const user = new User({
+    accessRole: userDTO.roles,
+    contextRoles: userDTO.groups,
+    id: userDTO.userId,
+    name: userDTO.preferredUsername,
+    preferredUsername: userDTO.preferredUsername,
+    tokenExpireTime: userDTO.accessTokenExpiration
+  });
   userStorage.set({ accessToken, refreshToken });
   //calculate difference between now and expiration
   const remain = userDTO.accessTokenExpiration - moment().unix();
@@ -46,36 +46,33 @@ const uploadImg = async (userId, imgData) => {
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
-  const user = new User(
-    userDTO.userId,
-    userDTO.preferredUsername,
-    userDTO.roles,
-    userDTO.groups,
-    userDTO.preferredUsername,
-    userDTO.accessTokenExpiration
-  );
+  const user = new User({
+    accessRole: userDTO.roles,
+    contextRoles: userDTO.groups,
+    id: userDTO.userId,
+    name: userDTO.preferredUsername,
+    preferredUsername: userDTO.preferredUsername,
+    tokenExpireTime: userDTO.accessTokenExpiration
+  });
   userStorage.set({ accessToken, refreshToken });
   //calculate difference between now and expiration
   const remain = userDTO.accessTokenExpiration - moment().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
-const refreshToken = async refreshToken => {
+const refreshToken = async () => {
   try {
     const currentTokens = userStorage.get();
     const userDTO = await apiUser.refreshToken(currentTokens.refreshToken);
     const { accessToken, refreshToken } = userDTO;
-
-    const user = new User(
-      userDTO.userId,
-      userDTO.preferredUsername,
-      userDTO.roles,
-      userDTO.groups,
-      userDTO.preferredUsername,
-      userDTO.accessTokenExpiration
-      //    userDto.img
-    );
-
+    const user = new User({
+      accessRole: userDTO.roles,
+      contextRoles: userDTO.groups,
+      id: userDTO.userId,
+      name: userDTO.preferredUsername,
+      preferredUsername: userDTO.preferredUsername,
+      tokenExpireTime: userDTO.accessTokenExpiration
+    });
     userStorage.set({ accessToken, refreshToken });
     //calculate difference between now and expiration
     const remain = userDTO.accessTokenExpiration - moment().unix();

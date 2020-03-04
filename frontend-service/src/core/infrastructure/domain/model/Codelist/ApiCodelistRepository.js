@@ -10,31 +10,38 @@ const allInCategory = async codelistCategoryId => {
   const orderedCodelistsDTO = codelistsDTO.data.sort((a, b) => a.id - b.id);
   return orderedCodelistsDTO.map(codelistDTO => {
     const codelistItems = codelistDTO.items.map(
-      itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+      itemDTO =>
+        new CodelistItem({
+          codelistId: codelistDTO.id,
+          definition: itemDTO.definition,
+          id: itemDTO.id,
+          label: itemDTO.label,
+          shortCode: itemDTO.shortCode
+        })
     );
-    return new Codelist(
-      codelistDTO.id,
-      codelistDTO.name,
-      codelistDTO.description,
-      codelistDTO.version,
-      capitalize(codelistDTO.status.toLowerCase()),
-      codelistItems
-    );
+    return new Codelist({
+      id: codelistDTO.id,
+      name: codelistDTO.name,
+      description: codelistDTO.description,
+      version: codelistDTO.version,
+      status: capitalize(codelistDTO.status.toLowerCase()),
+      items: codelistItems
+    });
   });
 };
 
 const addById = async (description, items, name, status, version, categoryId) => {
-  const categoryDTO = new CodelistCategory(categoryId);
-  const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
-  const codelistDTO = new Codelist(null, name, description, version, status, codelistItemsDTO);
+  const categoryDTO = new CodelistCategory({ id: categoryId });
+  const codelistItemsDTO = items.map(item => new CodelistItem(item));
+  const codelistDTO = new Codelist({ description, items: codelistItemsDTO, name, status, version });
   codelistDTO.category = categoryDTO;
   return await apiCodelist.addById(codelistDTO);
 };
 
 const cloneById = async (codelistId, description, items, name, version, categoryId) => {
-  const categoryDTO = new CodelistCategory(categoryId);
-  const codelistItemsDTO = items.map(item => new CodelistItem(null, item.shortCode, item.label, item.definition, null));
-  const codelistDTO = new Codelist(null, name, description, version, undefined, codelistItemsDTO);
+  const categoryDTO = new CodelistCategory({ id: categoryId });
+  const codelistItemsDTO = items.map(item => new CodelistItem(item));
+  const codelistDTO = new Codelist({ description, items: codelistItemsDTO, name, version });
   codelistDTO.category = categoryDTO;
   return await apiCodelist.cloneById(codelistId, codelistDTO);
 };
@@ -46,16 +53,23 @@ const deleteById = async codelistId => {
 const getById = async codelistId => {
   const codelistDTO = await apiCodelist.getById(codelistId);
   const codelistItems = codelistDTO.data.items.map(
-    itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+    itemDTO =>
+      new CodelistItem({
+        codelistId: codelistDTO.id,
+        definition: itemDTO.definition,
+        id: itemDTO.id,
+        label: itemDTO.label,
+        shortCode: itemDTO.shortCode
+      })
   );
-  return new Codelist(
-    codelistDTO.data.id,
-    codelistDTO.data.name,
-    codelistDTO.data.description,
-    codelistDTO.data.version,
-    codelistDTO.data.status,
-    codelistItems
-  );
+  return new Codelist({
+    description: codelistDTO.data.description,
+    id: codelistDTO.data.id,
+    items: codelistItems,
+    name: codelistDTO.data.name,
+    status: codelistDTO.data.status,
+    version: codelistDTO.data.version
+  });
 };
 
 const getCodelistsList = async datasetSchemas => {
@@ -100,23 +114,33 @@ const getCodelistsByIds = async codelistIds => {
   }
   try {
     const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
+    console.log({ codelistsDTO });
     let codelistItems = [];
     codelistsDTO.data.sort((a, b) => a.id - b.id);
     const codelists = codelistsDTO.data.map(codelistDTO => {
       if (!isEmpty(codelistDTO.items)) {
         codelistItems = codelistDTO.items.map(
-          itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+          itemDTO =>
+            new CodelistItem({
+              codelistId: codelistDTO.id,
+              definition: itemDTO.definition,
+              id: itemDTO.id,
+              label: itemDTO.label,
+              shortCode: itemDTO.shortCode
+            })
         );
       }
-      return new Codelist(
-        codelistDTO.id,
-        codelistDTO.category.shortCode,
-        codelistDTO.category.description,
-        codelistDTO.version,
-        codelistDTO.status,
-        codelistItems
-      );
+      console.log({ codelistDTO });
+      return new Codelist({
+        description: codelistDTO.description,
+        id: codelistDTO.id,
+        items: codelistItems,
+        name: codelistDTO.name,
+        status: codelistDTO.status,
+        version: codelistDTO.version
+      });
     });
+    console.log({ codelists });
     return codelists;
   } catch (error) {
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
@@ -184,18 +208,26 @@ const getCodelistsByCodelistsIds = async codelistIds => {
     codelistsDTO.data.sort((a, b) => a.id - b.id);
     const codelists = codelistsDTO.data.map(codelistDTO => {
       if (!isEmpty(codelistDTO.items)) {
+        console.log({ codelistDTO });
         codelistItems = codelistDTO.items.map(
-          itemDTO => new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+          itemDTO =>
+            new CodelistItem({
+              codelistId: codelistDTO.id,
+              definition: itemDTO.definition,
+              id: itemDTO.id,
+              label: itemDTO.label,
+              shortCode: itemDTO.shortCode
+            })
         );
       }
-      return new Codelist(
-        codelistDTO.id,
-        codelistDTO.name,
-        codelistDTO.description,
-        codelistDTO.version,
-        codelistDTO.status,
-        codelistItems
-      );
+      return new Codelist({
+        id: codelistDTO.id,
+        name: codelistDTO.name,
+        description: codelistDTO.description,
+        version: codelistDTO.version,
+        status: codelistDTO.status,
+        items: codelistItems
+      });
     });
     return codelists;
   } catch (error) {
@@ -205,18 +237,18 @@ const getCodelistsByCodelistsIds = async codelistIds => {
 };
 
 const updateById = async (id, description, items, name, status, version, categoryId) => {
-  const categoryDTO = new CodelistCategory(categoryId);
+  const categoryDTO = new CodelistCategory({ id: categoryId });
   const codelistItemsDTO = items.map(
     item =>
-      new CodelistItem(
-        item.id.toString().includes('-') ? null : item.id,
-        item.shortCode,
-        item.label,
-        item.definition,
-        id
-      )
+      new CodelistItem({
+        codelistId: id,
+        definition: item.definition,
+        id: item.id.toString().includes('-') ? null : item.id,
+        label: item.label,
+        shortCode: item.shortCode
+      })
   );
-  const codelistDTO = new Codelist(id, name, description, version, status, codelistItemsDTO);
+  const codelistDTO = new Codelist({ description, id, items: codelistItemsDTO, name, status, version });
   codelistDTO.category = categoryDTO;
   return await apiCodelist.updateById(codelistDTO);
 };

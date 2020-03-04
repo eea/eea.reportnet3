@@ -49,17 +49,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
     }
   });
-  return new Notification(
-    notificationDTO.id,
-    notificationDTO.key,
-    notificationDTO.message,
-    notificationDTO.redirectionUrl,
-    notificationDTO.downloadLink,
-    notificationDTO.type,
-    notificationDTO.fixed,
-    notificationDTO.lifeTime,
-    notificationDTO.readed
-  );
+  return new Notification(notificationDTO);
 };
 
 export const ApiNotificationRepository = { all, parse, removeAll, removeById, readAll, readById };

@@ -1,5 +1,5 @@
 export class DatasetError {
-  constructor(
+  constructor({
     entityType,
     levelError,
     message,
@@ -10,7 +10,7 @@ export class DatasetError {
     tableSchemaName,
     validationDate,
     validationId
-  ) {
+  } = {}) {
     this.entityType = entityType;
     this.levelError = levelError;
     this.message = message;
