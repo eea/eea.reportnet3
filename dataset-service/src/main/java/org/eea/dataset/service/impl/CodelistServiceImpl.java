@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  * The Class CodelistServiceImpl.
  */
 @Service("codelistService")
+@Deprecated
 public class CodelistServiceImpl implements CodelistService {
 
   /** The codelist repository. */

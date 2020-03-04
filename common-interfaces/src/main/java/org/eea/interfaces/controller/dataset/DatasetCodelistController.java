@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The Interface DatasetCodelistController.
  */
+@Deprecated
 public interface DatasetCodelistController {
 
   /**
