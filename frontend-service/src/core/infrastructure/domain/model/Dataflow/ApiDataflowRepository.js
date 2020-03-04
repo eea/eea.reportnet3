@@ -106,14 +106,14 @@ const parseRepresentativeListDTO = representativesDTO => {
 };
 
 const parseRepresentativeDTO = representativeDTO => {
-  return new Representative(
-    representativeDTO.id,
-    representativeDTO.provideraccount,
-    representativeDTO.dataProviderId,
-    representativeDTO.dataProviderGroupId,
-    representativeDTO.receiptDownloaded,
-    representativeDTO.receiptOutdated
-  );
+  return new Representative({
+    dataProviderGroupId: representativeDTO.dataProviderGroupId,
+    dataProviderId: representativeDTO.dataProviderId,
+    id: representativeDTO.id,
+    isReceiptDownloaded: representativeDTO.receiptDownloaded,
+    isReceiptOutdated: representativeDTO.receiptOutdated,
+    providerAccount: representativeDTO.provideraccount
+  });
 };
 
 const parseWebLinkListDTO = webLinksDTO => {
