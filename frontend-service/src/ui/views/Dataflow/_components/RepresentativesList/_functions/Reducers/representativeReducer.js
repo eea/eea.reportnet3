@@ -1,17 +1,16 @@
-import { includes, isUndefined, isNull } from 'lodash';
+import includes from 'lodash/includes';
+import isNil from 'lodash/isNil';
 
 import { Representative } from 'core/domain/model/Representative/Representative';
 
 export const reducer = (state, { type, payload }) => {
   const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
-
   let updatedList = [];
 
   switch (type) {
     case 'ADD_REPRESENTATIVE':
       return {
         ...state,
-
         refresher: !state.refresher
       };
 
@@ -97,8 +96,8 @@ export const reducer = (state, { type, payload }) => {
       const getSelectedProviderGroup = () => {
         let selectedGroup = null;
 
-        if (isNull(state.selectedDataProviderGroup)) {
-          selectedGroup = isUndefined(group[0]) ? null : group[0];
+        if (isNil(state.selectedDataProviderGroup)) {
+          selectedGroup = isNil(group[0]) ? null : group[0];
         } else {
           selectedGroup = state.selectedDataProviderGroup;
         }
