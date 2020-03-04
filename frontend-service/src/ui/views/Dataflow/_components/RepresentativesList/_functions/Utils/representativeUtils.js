@@ -1,11 +1,14 @@
-import { isEmpty, isNull, isUndefined, cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
 import { RepresentativeService } from 'core/services/Representative';
 
 export const autofocusOnEmptyInput = formState => {
   if (!isEmpty(formState.representatives)) {
     if (
-      isNull(formState.representatives[formState.representatives.length - 1].representativeId) &&
-      !isNull(document.getElementById('emptyInput'))
+      isNil(formState.representatives[formState.representatives.length - 1].representativeId) &&
+      !isNil(document.getElementById('emptyInput'))
     ) {
       const activeElement = document.activeElement;
 
@@ -19,7 +22,7 @@ export const autofocusOnEmptyInput = formState => {
 };
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
-  const newRepresentative = representatives.filter(representative => isNull(representative.representativeId));
+  const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
       await RepresentativeService.add(
@@ -95,13 +98,13 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
 };
 
 export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
-  isNull(representative.representativeId)
+  isNil(representative.representativeId)
     ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
     : updateRepresentative(formDispatcher, formState, representative);
 };
 
 export const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
-  if (!isNull(representative.representativeId) && !isUndefined(representative.representativeId)) {
+  if (!isNil(representative.representativeId) && !isNil(representative.representativeId)) {
     updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
     formDispatcher({

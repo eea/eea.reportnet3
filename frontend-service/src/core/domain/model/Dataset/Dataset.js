@@ -1,22 +1,23 @@
 export class Dataset {
-  constructor(
-    errors,
+  constructor({
+    dataProviderId,
     datasetId,
+    datasetSchemaDescription,
     datasetSchemaId,
     datasetSchemaName,
-    totalErrors,
-    totalFilteredErrors,
-    tables,
+    errors,
     hasErrors,
+    isReleased,
+    isValid = false,
+    levelErrorTypes,
+    name,
+    tables,
     tableStatisticPercentages,
     tableStatisticValues,
-    isReleased,
-    levelErrorTypes,
-    datasetSchemaDescription,
-    name,
-    dataProviderId,
-    isValid = false
-  ) {
+    totalErrors,
+    totalFilteredErrors
+  } = {}) {
+    this.dataProviderId = dataProviderId;
     this.datasetId = datasetId;
     this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;
@@ -32,7 +33,5 @@ export class Dataset {
     this.tableStatisticValues = tableStatisticValues;
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
-    this.hasErrors = hasErrors;
-    this.dataProviderId = dataProviderId;
   }
 }
