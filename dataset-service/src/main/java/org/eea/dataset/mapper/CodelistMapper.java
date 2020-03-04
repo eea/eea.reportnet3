@@ -14,6 +14,7 @@ import org.mapstruct.MappingTarget;
  * The Interface CodelistMapper.
  */
 @Mapper(componentModel = "spring")
+@Deprecated
 public interface CodelistMapper extends IMapper<Codelist, CodelistVO> {
 
   /**

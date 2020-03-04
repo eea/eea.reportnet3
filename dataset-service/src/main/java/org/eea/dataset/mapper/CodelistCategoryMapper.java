@@ -10,6 +10,7 @@ import org.mapstruct.Mapper;
  * The Interface CodelistCategoryMapper.
  */
 @Mapper(componentModel = "spring")
+@Deprecated
 public interface CodelistCategoryMapper extends IMapper<CodelistCategory, CodelistCategoryVO> {
 
   /**

@@ -24,6 +24,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "CODELIST_CATEGORY")
+@Deprecated
 public class CodelistCategory {
 
   /** The id. */

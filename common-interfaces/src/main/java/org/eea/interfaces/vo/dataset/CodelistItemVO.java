@@ -10,6 +10,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Deprecated
 public class CodelistItemVO {
 
   /** The id. */
