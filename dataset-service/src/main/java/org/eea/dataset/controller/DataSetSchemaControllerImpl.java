@@ -166,8 +166,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
-  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("/getDataSchema/{datasetId}")
   public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDatasetSchemaId(datasetId);
