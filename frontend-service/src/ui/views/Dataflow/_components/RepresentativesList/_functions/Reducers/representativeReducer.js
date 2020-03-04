@@ -17,13 +17,11 @@ export const reducer = (state, { type, payload }) => {
     case 'CREATE_UNUSED_OPTIONS_LIST':
       const unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
         let result = true;
-
         for (let index = 0; index < state.representatives.length; index++) {
           if (state.representatives[index].dataProviderId === dataProviderOption.dataProviderId) {
             result = false;
           }
         }
-
         return result;
       });
 
@@ -33,7 +31,6 @@ export const reducer = (state, { type, payload }) => {
       updatedList = state.representatives.filter(
         representative => representative.representativeId !== payload.representativeIdToDelete
       );
-
       return {
         ...state,
         representatives: updatedList,
@@ -43,11 +40,9 @@ export const reducer = (state, { type, payload }) => {
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
       const providersNoSelect = [...payload.responseAllDataProviders];
-
       if (state.representatives.length <= payload.responseAllDataProviders.length) {
         payload.responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
       }
-
       return {
         ...state,
         allPossibleDataProviders: payload.responseAllDataProviders,
@@ -80,7 +75,6 @@ export const reducer = (state, { type, payload }) => {
     case 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG':
       return {
         ...state,
-
         refresher: !state.refresher
       };
 
@@ -95,7 +89,6 @@ export const reducer = (state, { type, payload }) => {
 
       const getSelectedProviderGroup = () => {
         let selectedGroup = null;
-
         if (isNil(state.selectedDataProviderGroup)) {
           selectedGroup = isNil(group[0]) ? null : group[0];
         } else {
@@ -103,7 +96,6 @@ export const reducer = (state, { type, payload }) => {
         }
         return selectedGroup;
       };
-
       return {
         ...state,
         representatives: payload.response.representatives,
@@ -115,14 +107,12 @@ export const reducer = (state, { type, payload }) => {
     case 'UPDATE_ACCOUNT':
       return {
         ...state,
-
         refresher: !state.refresher
       };
 
     case 'UPDATE_DATA_PROVIDER':
       return {
         ...state,
-
         refresher: !state.refresher
       };
 
@@ -133,7 +123,6 @@ export const reducer = (state, { type, payload }) => {
         }
         return representative;
       });
-
       return {
         ...state,
         representatives: updatedList
@@ -146,8 +135,7 @@ export const reducer = (state, { type, payload }) => {
         }
         return representative;
       });
-
-      if (payload.representativeId !== null) {
+      if (!isNil(payload.representativeId)) {
         return {
           ...state,
           refresher: !state.refresher
