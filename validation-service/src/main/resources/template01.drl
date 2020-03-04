@@ -35,11 +35,11 @@ end template
 //////////////////////////////////////////DEFAULT VALIDATIONS////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
-function boolean isCodeList( String value ,Long codeList){
+function boolean isCodeList( String value , String codeListItems , boolean sensitive){
 	if(!isBlank(value)){
-		value = "";
+		return true;
 	}
-	return CodeListUtils.codeListValidate(value,codeList);
+	return CodeListUtils.codeListValidate(value,codeListItems,sensitive);
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
@@ -50,7 +50,10 @@ function boolean isBlank(String value){
 
 //////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
 function boolean isBoolean(String value){
-	if(null == value || (!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
+	if(!isBlank(value)){
+		return true;
+	}	
+	if((!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
 		return false;
 	}
 		return true;
@@ -58,8 +61,15 @@ function boolean isBoolean(String value){
 
 //////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
 function boolean isDateYYYYMMDD( String value ){
+	if(!isBlank(value)){
+		return true;
+	}	
+	
  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
- Date dateDrools = null;
+ 	if(!isBlank(value)){
+		return true;
+	}
+ 	Date dateDrools = null;
     try {
       sdf.setLenient(false);
       dateDrools = sdf.parse(value);
@@ -72,6 +82,9 @@ function boolean isDateYYYYMMDD( String value ){
 
 //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
 function boolean isNumber(String value){
+	if(!isBlank(value)){
+		return true;
+	}
     try {
     	String aux = value.replace(".","");
     	aux = aux.replace(",",".");
@@ -85,7 +98,7 @@ function boolean isNumber(String value){
 //////////////////////////////////////////VALIDATION LATITUDE///////////////////////////////////////////////////////////
 function boolean isCordenateLat( String value ){
 	if(!isBlank(value)){
-		value = "";
+		return true;
 	}
    if (value.contains(",")){
    	value = value.replace(",",".");
@@ -99,7 +112,7 @@ function boolean isCordenateLat( String value ){
 //////////////////////////////////////////VALIDATION LONGITUDE///////////////////////////////////////////////////////////
 function boolean isCordenateLong( String value ){	
 	if(!isBlank(value)){
-		value = "";
+		return true;
 	}
    if (value.contains(",")){
    	value = value.replace(",",".");

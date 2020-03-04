@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
 /**
@@ -13,8 +14,6 @@ public class AutomaticRules {
 
   // we use that class to create a specifies rule for any of diferent automatic validation
 
-  private static final String LV_ERROR = "ERROR";
-
 
   /**
    * Creates the required rule.
@@ -22,12 +21,15 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBlank(value)",
-        "The value must not be missing or empty", LV_ERROR, shortCode, description);
+        "The value must not be missing or empty", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
   }
 
   /**
@@ -36,12 +38,14 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isNumber(value)",
-        "The field must be a valid number", LV_ERROR, shortCode, description);
+        "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
   /**
@@ -50,12 +54,15 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isDateYYYYMMDD(value)",
-        "The field must be a valid date(YYYYMMDD) ", LV_ERROR, shortCode, description);
+        "The field must be a valid date(YYYYMMDD) ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
   }
 
 
@@ -66,12 +73,14 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isBoolean(value)",
-        "The field must be TRUE OR FALSE", LV_ERROR, shortCode, description);
+        "The field must be TRUE OR FALSE", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
   /**
@@ -80,12 +89,15 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLat(value)",
-        "The field must be a valid Lat(beetween -90 and 90)", LV_ERROR, shortCode, description);
+        "The field must be a valid Lat(beetween -90 and 90)", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
   }
 
   /**
@@ -94,31 +106,47 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLong(value)",
-        "The field must be a valid Longitude(beetween -180 and 180)", LV_ERROR, shortCode,
-        description);
+        "The field must be a valid Longitude(beetween -180 and 180)",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
+
   /**
-   * Creates the automatic codelist rule.
+   * Creates the codelist automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
-   * @param codelistId the codelist id
-   * @return the rule
+   * @param codeListItems the code list items
+   * @param shortCode the short code
+   * @param description the description
+   * @return the list
    */
-  public static Rule createCodelistAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String codelistId, String shortCode, String description) {
+  public static List<Rule> createCodelistAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String codeListItems, String shortCode,
+      String description) {
+    List<Rule> ruleList = new ArrayList();
+    // PART INSENSITIVE
+    ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
+        "!isCodeList(value,'" + codeListItems + "',false)",
+        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description));
+    // PART SENSITIVE
+    ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
+        "!isCodeList(value,'" + codeListItems.toString() + "',true)",
+        "The value must be avaliable value in the codelist with sensitive case",
+        ErrorTypeEnum.WARNING.getValue(), shortCode, description));
 
-    return composeRule(referenceId, typeEntityEnum, nameRule,
-        "!isCodeList(value," + codelistId + ")",
-        "The value must be avaliable value in the codelist", LV_ERROR, shortCode, description);
+    return ruleList;
   }
+
 
   /**
    * Compose rule.
@@ -129,6 +157,8 @@ public class AutomaticRules {
    * @param whenCondition the when condition
    * @param thenCondition0 the then condition 0
    * @param thenCondition1 the then condition 1
+   * @param shortCode the short code
+   * @param description the description
    * @return the rule
    */
   private static Rule composeRule(String referenceId, EntityTypeEnum typeEntityEnum,

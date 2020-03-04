@@ -1,43 +1,40 @@
 package org.eea.validation.util;
 
-
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-
 /**
- * The Class ValidationRuleDrools.
+ * The Class CodeListUtils.
  */
-@Component("codeListUtils")
 public class CodeListUtils {
-
-
-  /** The validation helper. */
-  private static ValidationHelper validationHelper;
-
-  @Autowired
-  private void setValidationHelperRepository(ValidationHelper validationHelper) {
-    CodeListUtils.validationHelper = validationHelper;
-  }
 
   /**
    * Code list validate.
    *
    * @param value the value
-   * @param idCodelist the id codelist
+   * @param codeListItems the code list items
+   * @param sensitive the sensitive
    * @return the boolean
    */
-  public static Boolean codeListValidate(final String value, final Long idCodelist) {
-    Boolean codeList = Boolean.FALSE;
+  public static Boolean codeListValidate(final String value, String codeListItems,
+      final boolean sensitive) {
+    Boolean codeList = false;
     // we can validation helper and put in memory the codeList
-    List<String> itemsCodelist = validationHelper.listItemsCodelist(idCodelist);
-    // we find all the values avaliables of codelist and we find if the codelist is correct
-    for (String item : itemsCodelist) {
-      if (item.equalsIgnoreCase(value)) {
-        codeList = Boolean.TRUE;
+    codeListItems = codeListItems.replace("[", "");
+    codeListItems = codeListItems.replace("]", "");
+    String[] arrayItems = codeListItems.split(",");
+
+    if (Boolean.TRUE.equals(sensitive)) {
+      for (int i = 0; i < arrayItems.length; i++) {
+        if (arrayItems[i].trim().equals(value)) {
+          codeList = Boolean.TRUE;
+        }
+      }
+    } else {
+      for (int i = 0; i < arrayItems.length; i++) {
+        if (arrayItems[i].trim().equalsIgnoreCase(value)) {
+          codeList = Boolean.TRUE;
+        }
       }
     }
+
     return codeList;
   }
 
