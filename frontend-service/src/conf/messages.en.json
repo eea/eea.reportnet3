@@ -379,6 +379,7 @@
     "urlError": "Please enter a valid URL",
     "userConfigurationOptions": "Configuration",
     "userConfirmationLogout": "Confirmation user Logout",
+    "userLogout": "Are you sure you want to logout?",
     "userDefaultRowsPage": "Default rows per page",
     "userDesignOptions": "Design",
     "userLogoutError": "Error in logout process",
