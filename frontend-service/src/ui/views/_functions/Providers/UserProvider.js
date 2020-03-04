@@ -7,7 +7,8 @@ const userSettingsDefaultState = {
   userProps: {
     defaultRowSelected: 10,
     defaultVisualTheme: 'light',
-    showLogoutConfirmation: false
+    showLogoutConfirmation: false,
+    userIconPatch: {}
   }
 };
 
@@ -52,6 +53,14 @@ const userReducer = (state, { type, payload }) => {
         userProps: {
           ...state.userProps,
           defaultVisualTheme: payload
+        }
+      };
+    case 'USER_ICON_PATH':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          userIconPatch: payload
         }
       };
 
@@ -117,6 +126,12 @@ export const UserProvider = ({ children }) => {
           dispatch({
             type: 'DEFAULT_VISUAL_THEME',
             payload: currentTheme
+          });
+        },
+        onClickUserIcon: path => {
+          dispatch({
+            type: 'USER_ICON_PATH',
+            payload: path
           });
         }
       }}>
