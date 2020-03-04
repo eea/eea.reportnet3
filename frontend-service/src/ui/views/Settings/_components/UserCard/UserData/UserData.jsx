@@ -11,7 +11,7 @@ const UserData = () => {
   return (
     <div className={styles.userDataContainer}>
       <div className={styles.userLogoBoxContainer}>
-        <UserImg></UserImg>
+        <UserImg />
       </div>
 
       <div className={styles.userName}>{userContext.preferredUsername}</div>

@@ -1,1 +1,1 @@
-export { UserImg } from './UserImg';
+export { UserImgUpload } from './UserImgUpload';
