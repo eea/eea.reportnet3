@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
-import { isUndefined, isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
-const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidationRule }) => {
-  const onChangeField = field => {
-    setValidationRule(ruleValues.ruleId, field);
-  };
+const ValidationExpresion = ({
+  expresionValues,
+  isDisabled,
+  layout,
+  onExpresionDelete,
+  onExpresionFieldUpdate,
+  onExpresionGroup
+}) => {
+  const { expresionId } = expresionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const operatorTypes = {
     number: {
@@ -41,20 +46,18 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
     return options;
   };
   useEffect(() => {
-    if (ruleValues.operatorType) {
-      setOperatorValues(operatorTypes[ruleValues.operatorType].values);
+    if (expresionValues.operatorType) {
+      setOperatorValues(operatorTypes[expresionValues.operatorType].values);
     }
-  }, [ruleValues.operatorType]);
+  }, [expresionValues.operatorType]);
 
   // layouts
   const defaultLayout = (
     <tr>
       <td>
         <Checkbox
-          onChange={e => {
-            onChangeField({ key: 'group', value: { value: e.checked } });
-          }}
-          isChecked={ruleValues.group}
+          onChange={e => onExpresionGroup({ key: 'group', value: { value: e.checked } })}
+          isChecked={expresionValues.group}
           disabled={isDisabled}
         />
       </td>
@@ -68,13 +71,13 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
             { label: 'AND', value: 'AND' },
             { label: 'OR', value: 'OR' }
           ]}
-          onChange={e => {
-            onChangeField({
+          onChange={e =>
+            onExpresionFieldUpdate(expresionId, {
               key: 'union',
               value: e.target.value
-            });
-          }}
-          value={{ label: ruleValues.union, value: ruleValues.union }}
+            })
+          }
+          value={{ label: expresionValues.union, value: expresionValues.union }}
         />
       </td>
       <td>
@@ -84,13 +87,13 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
           placeholder="Operator type"
           optionLabel="label"
           options={getOperatorTypeOptions()}
-          onChange={e => {
-            onChangeField({
+          onChange={e =>
+            onExpresionFieldUpdate(expresionId, {
               key: 'operatorType',
               value: e.target.value
-            });
-          }}
-          value={!isEmpty(ruleValues.operatorType) ? operatorTypes[ruleValues.operatorType].option : null}
+            })
+          }
+          value={!isEmpty(expresionValues.operatorType) ? operatorTypes[expresionValues.operatorType].option : null}
         />
       </td>
       <td>
@@ -100,15 +103,15 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
           placeholder="Operator"
           optionLabel="label"
           options={operatorValues}
-          onChange={e => {
-            onChangeField({
+          onChange={e =>
+            onExpresionFieldUpdate(expresionId, {
               key: 'operatorValue',
               value: e.target.value
-            });
-          }}
+            })
+          }
           value={
-            !isEmpty(ruleValues.operatorValue)
-              ? { label: ruleValues.operatorValue, value: ruleValues.operatorValue }
+            !isEmpty(expresionValues.operatorValue)
+              ? { label: expresionValues.operatorValue, value: expresionValues.operatorValue }
               : null
           }
         />
@@ -117,13 +120,13 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
         <InputText
           disabled={isDisabled}
           placeholder="Value"
-          value={ruleValues.ruleValue}
-          onChange={e => {
-            onChangeField({
-              key: 'ruleValue',
+          value={expresionValues.ruleValue}
+          onChange={e =>
+            onExpresionFieldUpdate(expresionId, {
+              key: 'expresionValue',
               value: { value: e.target.value }
-            });
-          }}
+            })
+          }
         />
       </td>
       <td>
@@ -132,7 +135,7 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
           type="button"
           icon="trash"
           onClick={e => {
-            deleteRule(ruleValues.ruleId);
+            onExpresionDelete(expresionId);
           }}
         />
       </td>
@@ -144,4 +147,4 @@ const ValidationRule = ({ deleteRule, isDisabled, layout, ruleValues, setValidat
 
   return layout ? layouts[layout] : layouts['default'];
 };
-export { ValidationRule };
+export { ValidationExpresion };

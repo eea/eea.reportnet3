@@ -1,7 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 
-import { isEmpty, isEqual, isUndefined, last, pullAllWith, pull, findIndex } from 'lodash';
-import uuid from 'uuid';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
 
@@ -9,116 +10,24 @@ import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputText } from 'ui/views/_components/InputText';
-import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { ValidationRule } from './_components/ValidationRule';
+import { ValidationExpresion } from './_components/ValidationExpresion';
 
 import { ValidationService } from 'core/services/Validation';
 
-const createValidationReducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'SET_FORM_FIELD':
-      return {
-        ...state,
-        candidateRule: {
-          ...state.candidateRule,
-          [payload.key]: payload.value
-        }
-      };
-    case 'SET_TABLES':
-      return {
-        ...state,
-        schemaTables: payload
-      };
-    case 'SET_FIELDS':
-      return {
-        ...state,
-        tableFields: payload
-      };
-    case 'UPDATE_RULES':
-      return {
-        ...state,
-        candidateRule: {
-          ...state.candidateRule,
-          rules: payload
-        }
-      };
-    case 'SET_ARE_RULES_DISABLED':
-      return {
-        ...state,
-        areRulesDisabled: payload
-      };
-    case 'SET_IS_VALIDATION_ADDING_DISABLED':
-      return {
-        ...state,
-        isRuleAddingDisabled: payload
-      };
-    case 'SET_IS_VALIDATION_CREATION_DISABLED':
-      return {
-        ...state,
-        isValidationCreationDisabled: payload
-      };
-    case 'ADD_EMPTY_RULE':
-      return {
-        ...state,
-        candidateRule: {
-          ...state.candidateRule,
-          rules: [...state.candidateRule.rules, payload]
-        }
-      };
-    case 'DELETE_RULE':
-      return {
-        ...state,
-        candidateRule: {
-          ...state.candidateRule,
-          rules: payload
-        }
-      };
-    case 'GROUP_RULES_ACTIVATOR':
-      return {
-        ...state,
-        groupRulesActive: state.groupRulesActive + payload.groupRulesActive
-      };
-    case 'SET_EXPRESIONS_STRING':
-      return {
-        ...state,
-        validationRuleString: payload
-      };
-    case 'INIT_FORM':
-      return {
-        ...state,
-        schemaTables: payload.tables,
-        errorLevels: payload.errorLevels,
-        candidateRule: {
-          rules: payload.rules
-        }
-      };
-    default:
-      return state;
-  }
-};
+import {
+  createValidationReducerInitState,
+  createValidationReducer
+} from './_functions/reducers/CreateValidationReducer';
 
-const createValidationReducerInitState = {
-  candidateRule: {
-    table: undefined,
-    field: undefined,
-    shortCode: undefined,
-    description: undefined,
-    errorMessage: undefined,
-    errorLevel: undefined,
-    active: false,
-    rules: []
-  },
-  datasetSchema: {},
-  schemaTables: [],
-  errorLevels: [],
-  areRulesDisabled: true,
-  isRuleAddingDisabled: true,
-  isValidationCreationDisabled: true,
-  groupRulesActive: 0,
-  groupCandidate: []
-};
+import { checkExpresions } from './_functions/utils/checkExpresions';
+import { checkValidation } from './_functions/utils/checkValidation';
+import { deleteExpresion } from './_functions/utils/deleteExpresion';
+import { getEmptyExpresion } from './_functions/utils/getEmptyExpresion';
+import { getExpresionString } from './_functions/utils/getExpresionString';
+import { groupExpresions } from './_functions/utils/groupExpresions';
+import { setFormField } from './_functions/utils/setFormField';
+import { setValidationExpresion } from './_functions/utils/setValidationExpresion';
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
   const [creationFormState, creationFormDispatch] = useReducer(
@@ -129,121 +38,43 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
   const validationCreationCheckListener = [ruleAdditionCheckListener, creationFormState.candidateRule];
-
-  const setFormField = field => {
-    creationFormDispatch({
-      type: 'SET_FORM_FIELD',
-      payload: field
-    });
-  };
-
-  const setValidationRule = (ruleId, ruleProperty) => {
-    if (ruleProperty.key == 'group') {
-      const { groupCandidate } = creationFormState;
-      if (ruleProperty.value.value) {
-        groupCandidate.push(ruleId);
+  const onExpresionGroup = (expresionId, field) => {
+    const {
+      candidateRule: { expresions },
+      groupCandidate
+    } = creationFormState;
+    if (field.key == 'group') {
+      if (field.value.value) {
+        groupCandidate.push(expresionId);
       } else {
-        pull(groupCandidate, ruleId);
+        pull(groupCandidate, expresionId);
       }
       creationFormDispatch({
         type: 'GROUP_RULES_ACTIVATOR',
         payload: {
-          groupRulesActive: ruleProperty.value.value ? 1 : -1
+          groupRulesActive: field.value.value ? 1 : -1
         }
       });
     }
+  };
+  const onExpresionFieldUpdate = (expresionId, field) => {
     const {
-      candidateRule: { rules }
+      candidateRule: { expresions }
     } = creationFormState;
-    const [targetRule] = rules.filter(fRule => ruleId === fRule.ruleId);
-    targetRule[ruleProperty.key] = ruleProperty.value.value;
     creationFormDispatch({
       type: 'UPDATE_RULES',
-      payload: rules
+      payload: setValidationExpresion(expresionId, field, expresions)
     });
   };
-
-  const getEmptyRule = () => {
-    const ruleId = uuid.v4();
-    return {
-      ruleId,
-      group: false,
-      union: '',
-      operatorType: '',
-      operatorValue: '',
-      ruleValue: '',
-      rules: []
-    };
-  };
-
-  const addEmptyRule = () => {
-    creationFormDispatch({
-      type: 'ADD_EMPTY_RULE',
-      payload: getEmptyRule()
-    });
-  };
-
-  const deleteRule = ruleId => {
+  const onExpresionDelete = expresionId => {
     const {
-      candidateRule: { rules }
+      candidateRule: { expresions }
     } = creationFormState;
-    const [deleteCandidate] = rules.filter(rule => rule.ruleId == ruleId);
-    if (rules.length > 1) {
-      if (deleteCandidate.rules.length === 0) {
-        const remainRules = pullAllWith(rules, [deleteCandidate], isEqual);
-        creationFormDispatch({
-          type: 'UPDATE_RULES',
-          payload: remainRules
-        });
-      }
-    } else {
-      const rulesKey = Object.keys(deleteCandidate);
-      rulesKey.forEach(ruleKey => {
-        if (ruleKey != 'ruleId') {
-          if (ruleKey == 'rules') {
-            deleteCandidate[ruleKey] = [];
-          } else {
-            deleteCandidate[ruleKey] = '';
-          }
-        }
-      });
-      creationFormDispatch({
-        type: 'UPDATE_RULES',
-        payload: [deleteCandidate]
-      });
-    }
+    creationFormDispatch({
+      type: 'UPDATE_RULES',
+      payload: deleteExpresion(expresionId, expresions)
+    });
   };
-  const groupRules = () => {
-    if (creationFormState.groupRulesActive >= 2) {
-      //take firs rule to group position in array
-      const {
-        candidateRule: { rules }
-      } = creationFormState;
-      const [firstId, restIds] = creationFormState.groupCandidate;
-      const firstRulePosition = findIndex(rules, rule => rule.ruleId == firstId);
-
-      //get to rules and remove from rules
-      const rulesToGroup = rules.filter(rule => creationFormState.groupCandidate.includes(rule.ruleId));
-
-      // compose group rule
-      const newGroup = getEmptyRule();
-      const [firstGroupRule] = rulesToGroup;
-      newGroup.union = firstGroupRule.union;
-      newGroup.rules = rulesToGroup;
-
-      // add to rules in first rule to group position
-      rules.splice(firstRulePosition, 0, newGroup);
-
-      //remove groupedElements from array
-      pullAllWith(rules, rulesToGroup, isEqual);
-
-      creationFormDispatch({
-        type: 'UPDATE_RULES',
-        payload: rules
-      });
-    }
-  };
-
   //set table tada
   useEffect(() => {
     const { tables: rawTables, levelErrorTypes } = datasetSchema;
@@ -257,7 +88,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       { label: 'ERROR', value: 'ERROR' },
       { label: 'BLOCKER', value: 'BLOCKER' }
     ];
-    creationFormDispatch({ type: 'INIT_FORM', payload: { tables, errorLevels, rules: [getEmptyRule()] } });
+    creationFormDispatch({ type: 'INIT_FORM', payload: { tables, errorLevels, expresions: [getEmptyExpresion()] } });
   }, []);
 
   //set field data
@@ -266,7 +97,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     if (!isEmpty(tableInContext)) {
       const [selectedTable] = datasetSchema.tables.filter(table => table.recordSchemaId === tableInContext.code);
       const fields =
-        !isUndefined(selectedTable) && !isEmpty(selectedTable)
+        !isNil(selectedTable) && !isEmpty(selectedTable)
           ? selectedTable.records[0].fields.map(field => ({
               label: field.name,
               code: field.fieldId
@@ -279,46 +110,16 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     }
   }, [creationFormState.candidateRule.table]);
 
-  const getRuleString = (rules, field) => {
-    let ruleString = '';
-    if (!isUndefined(field) && rules.length > 0) {
-      const { label: fieldLabel } = field;
-      rules.forEach((rule, i) => {
-        const { union: unionValue, operatorValue: operator, ruleValue, rules } = rule;
-        if (!isUndefined(operator) && !isUndefined(ruleValue)) {
-          const ruleLeft = `${fieldLabel} ${operator} ${ruleValue}`;
-          if (i == 0) {
-            ruleString = `${ruleString} ${ruleLeft}`;
-          } else {
-            if (!isUndefined(unionValue)) {
-              ruleString = `${ruleString} ${unionValue} ${ruleLeft}`;
-            }
-          }
-        }
-      });
-    }
-    return ruleString;
-  };
-
-  //create result rule
-  const createResultString = () => {
+  useEffect(() => {
     const {
-      candidateRule: { field, rules }
+      candidateRule: { field, expresions }
     } = creationFormState;
 
     creationFormDispatch({
       type: 'SET_EXPRESIONS_STRING',
-      payload: getRuleString(rules, field)
-    });
-  };
-  useEffect(() => {
-    creationFormDispatch({
-      type: 'UPDATE_RESULT_RULE_STRING',
-      payload: createResultString(creationFormState.candidateRule.rules)
+      payload: getExpresionString(expresions, field)
     });
   }, [creationFormState.candidateRule]);
-
-  //create exchange structure
 
   //disable manager
   const checkActivateRules = () => {
@@ -343,29 +144,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       });
     }
   }, [...ruleDisablingCheckListener]);
-  const checkRulefilled = () => {
-    const {
-      candidateRule: { rules }
-    } = creationFormState;
-    if (!isUndefined(rules) && rules.length > 0) {
-      const lastRule = last(rules);
-      if (lastRule.rules && lastRule.rules.length > 0) {
-        return true;
-      } else {
-        const deactivate =
-          isEmpty(lastRule.union) ||
-          isEmpty(lastRule.operatorType) ||
-          isEmpty(lastRule.operatorValue) ||
-          isEmpty(lastRule.ruleValue);
-        return deactivate;
-      }
-    }
-    return true;
-  };
   useEffect(() => {
+    const {
+      candidateRule: { expresions }
+    } = creationFormState;
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
-      payload: checkRulefilled()
+      payload: checkExpresions(expresions)
     });
   }, [...ruleAdditionCheckListener]);
 
@@ -391,28 +176,11 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       {children}
     </Dialog>
   );
-  const checkValidationFilledIn = () => {
-    let isValidated = true;
-    const { candidateRule } = creationFormState;
-    const ruleKeys = Object.keys(candidateRule);
 
-    ruleKeys.forEach(ruleKey => {
-      if (ruleKey != 'rules' && ruleKey != 'active') {
-        if (isUndefined(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
-          isValidated = false;
-        }
-      } else if (ruleKey == 'rules') {
-        if (checkRulefilled()) {
-          isValidated = false;
-        }
-      }
-    });
-    return isValidated;
-  };
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidationFilledIn()
+      payload: !checkValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
 
@@ -430,10 +198,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   optionLabel="label"
                   options={creationFormState.schemaTables}
                   onChange={e => {
-                    setFormField({
-                      key: 'table',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'table',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                   value={creationFormState.candidateRule.table}
                 />
@@ -446,10 +217,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   optionLabel="label"
                   options={creationFormState.tableFields}
                   onChange={e => {
-                    setFormField({
-                      key: 'field',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'field',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                   value={creationFormState.candidateRule.field}
                 />
@@ -460,10 +234,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   placeholder="short code"
                   value={creationFormState.candidateRule.shortCode}
                   onChange={e => {
-                    setFormField({
-                      key: 'shortCode',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'shortCode',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                 />
               </label>
@@ -473,10 +250,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   placeholder="Description"
                   value={creationFormState.candidateRule.description}
                   onChange={e => {
-                    setFormField({
-                      key: 'description',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'description',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                 />
               </label>
@@ -486,10 +266,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   placeholder="errorMessage"
                   value={creationFormState.candidateRule.errorMessage}
                   onChange={e => {
-                    setFormField({
-                      key: 'errorMessage',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'errorMessage',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                 />
               </label>
@@ -501,10 +284,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                   optionLabel="label"
                   options={creationFormState.errorLevels}
                   onChange={e => {
-                    setFormField({
-                      key: 'errorLevel',
-                      value: e.target.value
-                    });
+                    setFormField(
+                      {
+                        key: 'errorLevel',
+                        value: e.target.value
+                      },
+                      creationFormDispatch
+                    );
                   }}
                   value={creationFormState.candidateRule.errorLevel}
                 />
@@ -515,7 +301,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 Active
                 <Checkbox
                   onChange={e => {
-                    setFormField({ key: 'active', value: e.checked });
+                    setFormField({ key: 'active', value: e.checked }, creationFormDispatch);
                   }}
                   isChecked={creationFormState.candidateRule.active}
                 />
@@ -535,13 +321,14 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 </tr>
               </thead>
               <tbody>
-                {creationFormState.candidateRule.rules &&
-                  creationFormState.candidateRule.rules.map(rule => (
-                    <ValidationRule
+                {creationFormState.candidateRule.expresions &&
+                  creationFormState.candidateRule.expresions.map(expresion => (
+                    <ValidationExpresion
                       isDisabled={creationFormState.areRulesDisabled}
-                      setValidationRule={setValidationRule}
-                      deleteRule={deleteRule}
-                      ruleValues={rule}
+                      expresionValues={expresion}
+                      onExpresionFieldUpdate={onExpresionFieldUpdate}
+                      onExpresionDelete={onExpresionDelete}
+                      onExpresionGroup={onExpresionGroup}
                     />
                   ))}
               </tbody>
@@ -556,7 +343,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 label="Group"
                 icon="plus"
                 onClick={e => {
-                  groupRules();
+                  groupExpresions(
+                    creationFormState.candidateRule.expresions,
+                    creationFormState.groupRulesActive,
+                    creationFormState.groupCandidate,
+                    creationFormDispatch
+                  );
                 }}
               />
             </div>
@@ -573,7 +365,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 type="button"
                 label="Add new rule"
                 icon="plus"
-                onClick={e => addEmptyRule()}
+                onClick={e =>
+                  creationFormDispatch({
+                    type: 'ADD_EMPTY_RULE',
+                    payload: getEmptyExpresion()
+                  })
+                }
               />
             </div>
             <div>
