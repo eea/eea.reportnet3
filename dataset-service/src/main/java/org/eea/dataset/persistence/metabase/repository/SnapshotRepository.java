@@ -42,9 +42,12 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * Find by reporting dataset and release.
    *
    * @param datasetIds the dataset ids
+   * @param released the released
    * @return the list
    */
   @Query(
-      value = "select s.reportingDataset.id from Snapshot s where s.release=true AND  s.reportingDataset.id IN :datasetIds")
-  List<Long> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds);
+      value = "select s from Snapshot s where s.release=:released AND s.reportingDataset.id IN :datasetIds")
+  List<Snapshot> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds,
+      @Param("released") Boolean released);
+
 }

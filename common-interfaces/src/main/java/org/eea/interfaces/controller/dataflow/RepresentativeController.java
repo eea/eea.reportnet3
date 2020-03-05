@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface RepresentativeController.
@@ -67,12 +68,14 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId);
 
+
   /**
    * Update representative.
    *
    * @param dataflowRepresentativeVO the dataflow representative VO
+   * @return the response entity
    */
-  @PutMapping(value = "/update")
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**
@@ -93,4 +96,13 @@ public interface RepresentativeController {
    */
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId);
+
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider id
+   * @return the list
+   */
+  @GetMapping("/private/dataProvider")
+  List<DataProviderVO> findDataProvidersByIds(@RequestParam("id") List<Long> dataProviderIds);
 }

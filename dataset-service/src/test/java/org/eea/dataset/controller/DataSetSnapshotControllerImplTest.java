@@ -5,8 +5,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -297,4 +299,27 @@ public class DataSetSnapshotControllerImplTest {
         Mockito.any());
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
   }
+
+
+  @Test
+  public void testGetReleased() throws Exception {
+
+    dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).getReleasedAndUpdatedStatus(Mockito.any(),
+        Mockito.any());
+  }
+
+
+  @Test
+  public void testGetReleasedException() throws Exception {
+
+    try {
+      doThrow(new EEAException()).when(datasetSnapshotService)
+          .getReleasedAndUpdatedStatus(Mockito.any(), Mockito.any());
+      dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals("Same message", EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+    }
+  }
+
 }

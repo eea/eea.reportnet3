@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -51,6 +51,12 @@ public class RecordValue {
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
 
+
+  /** The data provider code. */
+  @Column(name = "DATA_PROVIDER_CODE")
+  private String dataProviderCode;
+
+
   /**
    * The table value.
    */
@@ -78,7 +84,7 @@ public class RecordValue {
   private String sortCriteria;
 
   @Transient
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * Hash code.

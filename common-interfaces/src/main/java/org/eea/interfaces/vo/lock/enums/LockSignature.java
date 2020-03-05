@@ -49,6 +49,11 @@ public enum LockSignature {
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 
   /**
+   * The create data collection.
+   */
+  CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
+
+  /**
    * The delete import table.
    */
   DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)");

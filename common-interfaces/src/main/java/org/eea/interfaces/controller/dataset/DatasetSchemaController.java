@@ -30,16 +30,6 @@ public interface DatasetSchemaController {
   }
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @PostMapping(value = "/createDataSchema/{id}")
-  void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId);
-
-  /**
    * Creates the empty data schema.
    *
    * @param dataflowId the dataflow id
@@ -152,7 +142,7 @@ public interface DatasetSchemaController {
    * @param fieldSchemaVO the field schema VO
    * @return the string
    */
-  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{datasetId}/fieldSchema")
   String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
@@ -193,7 +183,7 @@ public interface DatasetSchemaController {
    * @return the boolean
    */
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
+  Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
 
 
   /**
@@ -204,5 +194,6 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+  Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+
 }

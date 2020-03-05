@@ -4,8 +4,9 @@ package org.eea.recordstore.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
@@ -14,9 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -161,7 +165,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) TypeDatasetEnum datasetType,
+      @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "user", required = true) String user,
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
       @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
@@ -209,5 +213,28 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   public void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName) {
     recordStoreService.deleteDataset(datasetSchemaName);
+  }
+
+  /**
+   * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
+  public void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
+      @PathVariable("dataflowId") Long dataflowId) {
+
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    // This method will release the lock
+    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId);
   }
 }

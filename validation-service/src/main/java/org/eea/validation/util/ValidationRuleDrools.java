@@ -2,8 +2,8 @@ package org.eea.validation.util;
 
 import java.util.ArrayList;
 import java.util.Date;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -32,7 +32,7 @@ public class ValidationRuleDrools {
   public static void fillValidation(DatasetValue dataSetValue, String message, String typeError,
       String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET, originName);
+        createValidationObject(message, typeError, ruleId, EntityTypeEnum.DATASET, originName);
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setValidation(newValidation);
     if (null == dataSetValue.getDatasetValidations()) {
@@ -54,7 +54,7 @@ public class ValidationRuleDrools {
   public static void fillValidation(TableValue tableValue, String message, String typeError,
       String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE, originName);
+        createValidationObject(message, typeError, ruleId, EntityTypeEnum.TABLE, originName);
     TableValidation tableValidation = new TableValidation();
     tableValidation.setValidation(newValidation);
     if (null == tableValue.getTableValidations()) {
@@ -76,7 +76,7 @@ public class ValidationRuleDrools {
       String ruleId, String originName) {
 
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD, originName);
+        createValidationObject(message, typeError, ruleId, EntityTypeEnum.FIELD, originName);
     FieldValidation fieldValidation = new FieldValidation();
     fieldValidation.setValidation(newValidation);
     if (null == fieldValue.getFieldValidations()) {
@@ -98,7 +98,7 @@ public class ValidationRuleDrools {
   public static void fillValidation(RecordValue recordValue, String message, String typeError,
       String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD, originName);
+        createValidationObject(message, typeError, ruleId, EntityTypeEnum.RECORD, originName);
     RecordValidation recordValidation = new RecordValidation();
     recordValidation.setValidation(newValidation);
     if (null == recordValue.getRecordValidations()) {
@@ -118,9 +118,9 @@ public class ValidationRuleDrools {
    * @return the validation VO
    */
   private static Validation createValidationObject(String message, String typeError, String ruleId,
-      TypeEntityEnum typeEntityEnum, String originName) {
+      EntityTypeEnum typeEntityEnum, String originName) {
     Validation newValidation = new Validation();
-    newValidation.setLevelError(TypeErrorEnum.valueOf(typeError.toUpperCase()));
+    newValidation.setLevelError(ErrorTypeEnum.valueOf(typeError.toUpperCase()));
     newValidation.setMessage(message);
     newValidation.setIdRule(ruleId);
     newValidation.setValidationDate(new Date().toString());

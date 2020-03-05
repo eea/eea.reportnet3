@@ -4,7 +4,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -23,7 +23,7 @@ public interface RecordExtendedQueriesRepository {
    * @param sortFields the sort fields
    * @return the list
    */
-  TableVO findByTableValueWithOrder(String idTableSchema, List<TypeErrorEnum> levelErrorList,
+  TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
       Pageable pageable, SortField... sortFields);
 
 

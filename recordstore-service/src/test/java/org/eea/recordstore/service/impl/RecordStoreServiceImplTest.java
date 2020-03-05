@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.controller.RecordStoreControllerImpl;
@@ -240,7 +240,7 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void restoreDataSnapshotTest()
       throws RecordStoreAccessException, SQLException, IOException {
-    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN, false, false);
+    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
   }
 
   /**

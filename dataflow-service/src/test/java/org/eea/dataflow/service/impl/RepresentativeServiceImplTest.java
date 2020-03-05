@@ -273,9 +273,13 @@ public class RepresentativeServiceImplTest {
   public void updateDataflowRepresentativeException3Test() throws EEAException {
     representative.setUserMail("mail");
     representativeVO.setDataProviderId(null);
+    representativeVO.setReceiptDownloaded(false);
+    representativeVO.setReceiptOutdated(false);
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(1L);
     representative.setDataProvider(dataProvider);
+    representative.setReceiptDownloaded(false);
+    representative.setReceiptOutdated(false);
     when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.of(representative));
     when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(Optional.of(arrayId));

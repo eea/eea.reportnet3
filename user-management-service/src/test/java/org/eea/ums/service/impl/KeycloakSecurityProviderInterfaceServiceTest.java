@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -181,7 +182,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
   @Test
-  public void createResourceInstance() {
+  public void createResourceInstance() throws EEAException {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setResourceId(1l);
     resourceInfoVO.setSecurityRoleEnum(SecurityRoleEnum.DATA_PROVIDER);
@@ -233,7 +234,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
   @Test
-  public void addUserToUserGroup() {
+  public void addUserToUserGroup() throws EEAException {
     GroupInfo[] groupInfos = new GroupInfo[1];
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setId("idGroupInfo");
