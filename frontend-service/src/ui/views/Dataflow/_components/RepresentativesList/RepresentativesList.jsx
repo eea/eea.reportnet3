@@ -122,7 +122,6 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <>
         <select
-          disabled={hasError}
           className={styles.selectDataProvider}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
