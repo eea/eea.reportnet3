@@ -26,7 +26,7 @@ public class LockController {
    *
    * @param lockId the lock id
    */
-  @PostMapping("/remove/{lockId}")
+  @PostMapping("/private/remove/{lockId}")
   public void removeLock(@PathVariable("lockId") final Integer lockId) {
     lockService.removeLock(lockId);
   }
@@ -36,7 +36,7 @@ public class LockController {
    *
    * @return the list
    */
-  @GetMapping("/findAll")
+  @GetMapping("/private/findAll")
   public List<LockVO> findAllLocks() {
     return lockService.findAll();
   }
@@ -47,7 +47,7 @@ public class LockController {
    * @param lockId the lock id
    * @return the lock VO
    */
-  @GetMapping("/findOne/{lockId}")
+  @GetMapping("/private/findOne/{lockId}")
   public LockVO findOneLock(@PathVariable("lockId") final Integer lockId) {
     return lockService.findById(lockId);
   }

@@ -445,7 +445,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateFlowThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setDeadlineDate(new Date(-1));
@@ -458,7 +458,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     try {
@@ -466,7 +466,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
     }
   }
 
@@ -475,7 +474,7 @@ public class DataFlowControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateDataFlowDateTodayThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     Date date = new Date();
@@ -486,7 +485,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
     }
   }
 
@@ -496,7 +494,7 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    * @throws ParseException the parse exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateDataThrowRepeatName() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -511,7 +509,6 @@ public class DataFlowControllerImplTest {
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
-      throw ex;
     }
   }
 

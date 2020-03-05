@@ -1,8 +1,8 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +26,8 @@ public interface ValidationRepositoryPaginated {
    * @param asc the asc
    * @return the page
    */
-  Page<Validation> findAllRecordsByFilter(Long datasetId, List<TypeErrorEnum> levelErrorsFilter,
-      List<TypeEntityEnum> typeEntitiesFilter, String originsFilter, Pageable pageable,
+  Page<Validation> findAllRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter, Pageable pageable,
       String headerField, Boolean asc);
 
   /**
@@ -39,6 +39,6 @@ public interface ValidationRepositoryPaginated {
    * @param originsFilter the origins filter
    * @return the long
    */
-  Long countRecordsByFilter(Long datasetId, List<TypeErrorEnum> levelErrorsFilter,
-      List<TypeEntityEnum> typeEntitiesFilter, String originsFilter);
+  Long countRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter);
 }

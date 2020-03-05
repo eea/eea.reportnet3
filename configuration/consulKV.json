@@ -364,6 +364,10 @@
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
   {
+  	"key": "config/apiGateway/zuul.ignoredPatterns",
+  	"value": "LyoqL3ByaXZhdGUvKio="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.dataflow.path",
     "value": "L2RhdGFmbG93Lyoq"
   },
@@ -1013,9 +1017,9 @@
   },
   {
     "key": "config/application/spring.redis.port",
-    "value": "JHtSRURJU19QT1JUOjMyNTYyfQ=="
+    "value": "JHtSRURJU19QT1JUOjMyMDk2fQ=="
   },
-   {
+  {
     "key": "config/dataset/dataset.propagation.fieldBatchSize",
     "value": "JHtEQVRBU0NIRU1BX0ZJRUxEX0JBVENIX1NJWkU6MzAwMH0="
   },
@@ -1086,5 +1090,17 @@
   {
     "key": "config/application/spring.redis.jedis.pool.min-idle",
     "value": "JHtSRURJU19QT09MX01JTl9JRExFOjV9"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.path",
+    "value": "L3J1bGVzLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.serviceId",
+    "value": "dmFsaWRhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

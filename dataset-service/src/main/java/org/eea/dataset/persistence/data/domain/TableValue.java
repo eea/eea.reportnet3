@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -67,7 +67,7 @@ public class TableValue {
   private DatasetValue datasetId;
 
   @Transient
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * Hash code.

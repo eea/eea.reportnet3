@@ -48,7 +48,7 @@ public class Statistics {
   /** The dataset. */
   @OneToOne(orphanRemoval = false)
   @JoinColumn(name = "ID_DATASET", referencedColumnName = "id")
-  private ReportingDataset dataset;
+  private DataSetMetabase dataset;
 
 
   /**

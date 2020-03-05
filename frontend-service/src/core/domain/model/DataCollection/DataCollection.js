@@ -1,10 +1,18 @@
 export class DataCollection {
-  constructor(dataCollectionId, dataCollectionName, dataflowId, datasetSchemaId, creationDate, expirationDate, status) {
+  constructor({
+    creationDate,
+    dataCollectionId,
+    dataCollectionName,
+    dataflowId,
+    datasetSchemaId,
+    expirationDate,
+    status
+  } = {}) {
+    this.creationDate = creationDate;
     this.dataCollectionId = dataCollectionId;
     this.dataCollectionName = dataCollectionName;
     this.dataflowId = dataflowId;
     this.datasetSchemaId = datasetSchemaId;
-    this.creationDate = creationDate;
     this.expirationDate = expirationDate;
     this.status = status;
   }

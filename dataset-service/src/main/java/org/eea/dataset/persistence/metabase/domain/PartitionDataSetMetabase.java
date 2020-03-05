@@ -20,7 +20,7 @@ import lombok.ToString;
 /**
  * The Class PartitionDataSetMetabase.
  *
- * @author Mario Severa
+ * 
  */
 @Getter
 @Setter

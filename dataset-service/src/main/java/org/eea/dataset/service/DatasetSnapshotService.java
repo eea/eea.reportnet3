@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 
 /**
@@ -115,6 +116,18 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void deleteAllSnapshots(Long idDataset) throws EEAException;
+
+
+  /**
+   * Gets the released and updated status.
+   *
+   * @param idDataflow the id dataflow
+   * @param idDataProvider the id data provider
+   * @return the released and updated status
+   * @throws EEAException the EEA exception
+   */
+  ReleaseReceiptVO getReleasedAndUpdatedStatus(Long idDataflow, Long idDataProvider)
+      throws EEAException;
 
 
 }

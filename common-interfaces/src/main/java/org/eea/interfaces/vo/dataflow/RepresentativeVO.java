@@ -28,4 +28,10 @@ public class RepresentativeVO implements Serializable {
   /** The data provider group id. */
   private Long dataProviderGroupId;
 
+  /** The receipt downloaded. */
+  private Boolean receiptDownloaded;
+
+  /** The receipt outdated. */
+  private Boolean receiptOutdated;
+
 }
