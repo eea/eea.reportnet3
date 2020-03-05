@@ -202,6 +202,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
       )}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={() => {
           onDeleteConfirm(formDispatcher, formState);
         }}

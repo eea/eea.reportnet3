@@ -18,7 +18,7 @@ const Snapshots = ({
 }) => {
   const resources = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
-
+  console.log(snapshotContext.snapshotState.dialogMessage);
   return (
     <>
       <SnapshotSlideBar
@@ -30,6 +30,7 @@ const Snapshots = ({
 
       <ConfirmDialog
         className={styles.snapshotDialog}
+        classNameConfirm={snapshotContext.snapshotState.dialogMessage === 'Delete copy' ? 'p-button-danger' : undefined}
         header={snapshotContext.snapshotState.dialogMessage}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

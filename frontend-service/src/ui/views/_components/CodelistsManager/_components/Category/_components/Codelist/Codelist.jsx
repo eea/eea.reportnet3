@@ -386,6 +386,7 @@ const Codelist = ({
   const renderDeleteDialog = () => {
     return codelistState.isDeleteCodelistItemVisible ? (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={onConfirmDeleteItem}
         onHide={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false)}
         visible={codelistState.isDeleteCodelistItemVisible}

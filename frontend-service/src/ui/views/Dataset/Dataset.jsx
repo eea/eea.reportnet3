@@ -682,6 +682,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       </Dialog>
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

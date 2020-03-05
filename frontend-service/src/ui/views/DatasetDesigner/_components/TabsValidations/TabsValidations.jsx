@@ -228,6 +228,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       {validationList()}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

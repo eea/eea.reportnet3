@@ -939,6 +939,7 @@ const DataViewer = withRouter(
 
         {deleteDialogVisible && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
@@ -951,6 +952,7 @@ const DataViewer = withRouter(
 
         {confirmDeleteVisible && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={resources.messages['deleteRow']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}

@@ -385,6 +385,7 @@ const Category = ({
   const renderDeleteDialog = () => {
     return categoryState.isDeleteConfirmDialogVisible ? (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={onConfirmDeleteCategory}
         onHide={() => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', false)}
         visible={categoryState.isDeleteConfirmDialogVisible}
