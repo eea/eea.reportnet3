@@ -86,7 +86,7 @@ const Header = withRouter(({ history }) => {
           }
           tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
         /> */}
-        {/* {localhostEnvironmentAlert()} */}
+        {localhostEnvironmentAlert()}
         <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
       </div>
       <div className={styles.logoutWrapper}>

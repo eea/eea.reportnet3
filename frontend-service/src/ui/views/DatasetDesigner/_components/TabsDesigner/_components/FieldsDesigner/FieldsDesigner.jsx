@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { capitalize, isUndefined, isNull } from 'lodash';
 
-import styles from './FieldsDesigner.module.css';
+import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -423,7 +423,15 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
-      <div className={styles.fieldsWrapper}>{renderAllFields()}</div>
+      <div className={styles.fieldsHeader}>
+        <label></label>
+        <label>{resources.messages['required']}</label>
+        <label>{resources.messages['pk']}</label>
+        <label>{resources.messages['newFieldPlaceHolder']}</label>
+        <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
+        <label>{resources.messages['newFieldTypePlaceHolder']}</label>
+      </div>
+      {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible ? renderConfirmDialog() : null}
     </React.Fragment>

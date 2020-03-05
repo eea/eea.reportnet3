@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useReducer, useRef } from 'react';
 import { isUndefined, isNull } from 'lodash';
 
-import styles from './FieldDesigner.module.css';
+import styles from './FieldDesigner.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -10,10 +10,13 @@ import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'primereact/checkbox';
 import { CodelistsManager } from 'ui/views/_components/CodelistsManager';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { Dropdown } from 'ui/views/_components/Dropdown';
+
+import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -27,6 +30,7 @@ export const FieldDesigner = ({
   fieldId,
   fieldDescription,
   fieldName,
+  fieldPK,
   fieldRequired,
   fieldType,
   index,
@@ -42,6 +46,14 @@ export const FieldDesigner = ({
   recordId,
   totalFields
 }) => {
+  const initialFieldDesignerState = {
+    fieldPKValue: fieldPK,
+    fieldRequiredValue: fieldRequired,
+    initialFieldValue: undefined
+  };
+
+  const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
+
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
@@ -52,7 +64,8 @@ export const FieldDesigner = ({
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
+    { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
     // { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' },
@@ -78,10 +91,9 @@ export const FieldDesigner = ({
 
   const [fieldDescriptionValue, setFieldDescriptionValue] = useState(fieldDescription);
   const [fieldPreviousTypeValue, setFieldPreviousTypeValue] = useState('');
-  const [fieldRequiredValue, setFieldRequiredValue] = useState(fieldRequired);
+
   const [fieldTypeValue, setFieldTypeValue] = useState(getFieldTypeValue(fieldType));
   const [fieldValue, setFieldValue] = useState(fieldName);
-  const [initialFieldValue, setInitialFieldValue] = useState();
   const [initialDescriptionValue, setInitialDescriptionValue] = useState();
   // const [inEffect, setInEffect] = useState();
   const [isCodelistManagerVisible, setIsCodelistManagerVisible] = useState(false);
@@ -181,7 +193,7 @@ export const FieldDesigner = ({
               null,
               null,
               null,
-              fieldRequiredValue
+              fieldDesignerState.fieldRequiredValue
             );
           }
         }
@@ -196,7 +208,7 @@ export const FieldDesigner = ({
             null,
             null,
             null,
-            fieldRequiredValue
+            fieldDesignerState.fieldRequiredValue
           );
         } else {
           if (type !== '') {
@@ -273,15 +285,15 @@ export const FieldDesigner = ({
                 resources.messages['duplicatedFieldMessage'],
                 resources.messages['duplicatedFieldTitle']
               );
-              setFieldValue(initialFieldValue);
+              setFieldValue(fieldDesignerState.initialFieldValue);
             }
           }
         } else {
           if (name === '') {
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
-            setFieldValue(initialFieldValue);
+            setFieldValue(fieldDesignerState.initialFieldValue);
           } else {
-            if (name !== initialFieldValue) {
+            if (name !== fieldDesignerState.initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
                 fieldUpdate(
                   fieldId,
@@ -297,7 +309,7 @@ export const FieldDesigner = ({
                   resources.messages['duplicatedFieldMessage'],
                   resources.messages['duplicatedFieldTitle']
                 );
-                setFieldValue(initialFieldValue);
+                setFieldValue(fieldDesignerState.initialFieldValue);
               }
             }
           }
@@ -321,7 +333,7 @@ export const FieldDesigner = ({
           codelistName,
           codelistVersion,
           codelistItems,
-          fieldRequiredValue
+          fieldDesignerState.fieldRequiredValue
         );
       } else {
         fieldUpdate(
@@ -333,7 +345,7 @@ export const FieldDesigner = ({
           codelistName,
           codelistVersion,
           codelistItems,
-          fieldRequiredValue
+          fieldDesignerState.fieldRequiredValue
         );
       }
     }
@@ -370,7 +382,7 @@ export const FieldDesigner = ({
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
       } else {
-        setFieldRequiredValue(false);
+        dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
         setFieldValue('');
         setFieldTypeValue('');
         setFieldDescriptionValue('');
@@ -469,7 +481,9 @@ export const FieldDesigner = ({
 
   const onKeyChange = (event, input) => {
     if (event.key === 'Escape') {
-      input === 'NAME' ? setFieldValue(initialFieldValue) : setFieldDescriptionValue(initialDescriptionValue);
+      input === 'NAME'
+        ? setFieldValue(fieldDesignerState.initialFieldValue)
+        : setFieldDescriptionValue(initialDescriptionValue);
     } else if (event.key == 'Enter') {
       if (input === 'NAME') {
         onBlurFieldName(event.target.value);
@@ -513,7 +527,46 @@ export const FieldDesigner = ({
         );
       }
     }
-    setFieldRequiredValue(checked);
+    dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
+  };
+
+  const onPKChange = checked => {
+    if (!isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isUndefined(fieldTypeValue) &&
+          !isNull(fieldTypeValue) &&
+          (fieldTypeValue !== '') & !isUndefined(fieldValue) &&
+          !isNull(fieldValue) &&
+          fieldValue !== ''
+        ) {
+          // onFieldAdd(
+          //   recordId,
+          //   parseGeospatialTypes(fieldTypeValue.fieldType),
+          //   fieldValue,
+          //   fieldDescriptionValue,
+          //   selectedCodelist.codelistId,
+          //   selectedCodelist.codelistName,
+          //   selectedCodelist.codelistVersion,
+          //   undefined,
+          //   checked
+          // );
+        }
+      } else {
+        // fieldUpdate(
+        //   fieldId,
+        //   parseGeospatialTypes(fieldTypeValue.fieldType),
+        //   fieldValue,
+        //   fieldDescriptionValue,
+        //   selectedCodelist.codelistId,
+        //   selectedCodelist.codelistName,
+        //   selectedCodelist.codelistVersion,
+        //   undefined,
+        //   checked
+        // );
+      }
+    }
+    dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
   };
 
   const codelistDialogFooter = (
@@ -576,7 +629,7 @@ export const FieldDesigner = ({
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
-        setFieldValue(initialFieldValue);
+        setFieldValue(fieldDesignerState.initialFieldValue);
       } else {
         onFieldUpdate(
           fieldId,
@@ -648,24 +701,28 @@ export const FieldDesigner = ({
 
         <div className="requiredCheckbox">
           {!addField ? (
-            <FontAwesomeIcon icon={AwesomeIcons('move')} />
+            <FontAwesomeIcon icon={AwesomeIcons('move')} style={{ width: '32px' }} />
           ) : (
             <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
           )}
-          <label htmlFor={`${fieldId}_check`}>{resources.messages['required']}</label>
           <Checkbox
-            checked={fieldRequiredValue}
+            checked={fieldDesignerState.fieldRequiredValue}
+            className={styles.checkRequired}
             inputId={`${fieldId}_check`}
             label="Default"
             onChange={e => {
               onRequiredChange(e.checked);
             }}
-            style={{
-              marginLeft: '0.4rem',
-              marginRight: '0.4rem'
-              // alignSelf: !isEditing ? 'center' : 'flex-end',
-              // justifySelf: 'flex-end'
+            style={{ width: '70px' }}
+          />
+          <Checkbox
+            checked={fieldDesignerState.fieldPKValue}
+            inputId={`${fieldId}_check_pk`}
+            label="Default"
+            onChange={e => {
+              onPKChange(e.checked);
             }}
+            style={{ width: '35px' }}
           />
         </div>
 
@@ -680,7 +737,7 @@ export const FieldDesigner = ({
           }}
           onChange={e => setFieldValue(e.target.value)}
           onFocus={e => {
-            setInitialFieldValue(e.target.value);
+            dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value });
             setIsEditing(true);
           }}
           onKeyDown={e => onKeyChange(e, 'NAME')}

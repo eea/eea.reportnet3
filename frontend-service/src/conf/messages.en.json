@@ -297,6 +297,7 @@
     "pendingDataflowText": "You are required to accept and report data to these dataflows",
     "pendingDataflowTitle": "Pending dataflows",
     "percentage": "Percentage",
+    "pk": "PK",
     "preview": "View data",
     "properties": "Properties",
     "qcManager": "QC Manager",
