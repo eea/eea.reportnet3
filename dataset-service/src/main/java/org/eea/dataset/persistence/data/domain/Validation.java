@@ -9,8 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -59,14 +59,14 @@ public class Validation {
    */
   @Column(name = "LEVEL_ERROR")
   @Enumerated(EnumType.STRING)
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * The type entity.
    */
   @Column(name = "TYPE_ENTITY")
   @Enumerated(EnumType.STRING)
-  private TypeEntityEnum typeEntity;
+  private EntityTypeEnum typeEntity;
 
   /** The origin name. */
   @Column(name = "ORIGIN_NAME")

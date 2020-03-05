@@ -16,10 +16,7 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
-import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -35,8 +32,10 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -64,12 +63,6 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
-
-  /**
-   * The data set metabase table collection.
-   */
-  @Mock
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /**
    * The data flow controller zuul.
@@ -161,12 +154,23 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaVO tableSchemaVO;
 
+  /** The validation commands. */
   @Spy
   private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
 
+  /** The command. */
   @Mock
   private ValidationSchemaIntegrityCommand command;
 
+  /** The rules controller zuul. */
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
+
+  @Mock
+  private RulesController rulesController;
+
+  @Mock
+  private DatasetService datasetService;
 
   /**
    * Inits the mocks.
@@ -176,192 +180,6 @@ public class DatasetSchemaServiceTest {
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
     validationCommands.add(command);
-  }
-
-  /**
-   * Test create data schema.
-   */
-  @Test
-  public void testCreateDataSchema() {
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    // header.setTableId(1L);
-    header.setHeaderType(TypeData.TEXT);
-    headers.add(header);
-    List<TableCollection> tables = new ArrayList<>();
-    TableCollection table = new TableCollection();
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables.add(table);
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema integer.
-   */
-  @Test
-  public void testCreateDataSchemaInteger() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.NUMBER);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema boolean.
-   */
-  @Test
-  public void testCreateDataSchemaBoolean() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.BOOLEAN);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-
-  /**
-   * Test create data schema coordinate lat.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateLat() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.COORDINATE_LAT);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-  /**
-   * Test create data schema coordinate long.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateLong() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.COORDINATE_LONG);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
-  }
-
-  /**
-   * Test create data schema coordinate date.
-   */
-  @Test
-  public void testCreateDataSchemaCoordinateDate() {
-
-    List<TableCollection> tables2 = new ArrayList<>();
-
-    TableCollection table = new TableCollection();
-    TableHeadersCollection header = new TableHeadersCollection();
-    List<TableHeadersCollection> headers = new ArrayList<>();
-
-    header.setHeaderName("test");
-    header.setId(1L);
-    header.setHeaderType(TypeData.DATE);
-    headers.add(header);
-
-    table.setId(1L);
-    table.setDataFlowId(1L);
-    table.setDataSetId(1L);
-    table.setTableName("test");
-    table.setTableHeadersCollections(headers);
-    tables2.add(table);
-
-    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-
-    dataSchemaServiceImpl.createDataSchema(1L, 1L);
-
-    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   /**
@@ -385,14 +203,12 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDatasetId() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
-    dataSetSchema.setRuleDataSet(new ArrayList<>());
     DataSetMetabase metabase = new DataSetMetabase();
     metabase.setDatasetSchema(new ObjectId().toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(metabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     DataSetSchemaVO value = new DataSetSchemaVO();
-    value.setRuleDataSet(new ArrayList<>());
     Mockito.doReturn(value).when(dataSchemaMapper).entityToClass(Mockito.any(DataSetSchema.class));
     assertEquals(value, dataSchemaServiceImpl.getDataSchemaByDatasetId(true, 1L));
 
@@ -406,7 +222,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDataFlowNoRules() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
-    dataSetSchema.setRuleDataSet(new ArrayList<>());
+    // dataSetSchema.setRuleDataSet(new ArrayList<>());
     DataSetMetabase metabase = new DataSetMetabase();
     metabase.setDatasetSchema(new ObjectId().toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
@@ -417,7 +233,7 @@ public class DatasetSchemaServiceTest {
         .entityToClass(Mockito.any(DataSetSchema.class));
     DataSetSchemaVO result = dataSchemaServiceImpl.getDataSchemaByDatasetId(false, 1L);
     Assert.assertNotNull(result);
-    Assert.assertNull(result.getRuleDataSet());
+    // Assert.assertNull(result.getRuleDataSet());
     Mockito.verify(dataSchemaMapper, Mockito.times(0))
         .entityToClass(Mockito.any(DataSetSchema.class));
     Mockito.verify(noRulesDataSchemaMapper, Mockito.times(1))
@@ -448,11 +264,11 @@ public class DatasetSchemaServiceTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType(TypeData.TEXT);
+    field.setType(DataType.TEXT);
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType(TypeData.TEXT);
+    field2.setType(DataType.TEXT);
 
     assertEquals("Not equals", field, field2);
 
@@ -500,6 +316,7 @@ public class DatasetSchemaServiceTest {
   public void createEmptyDataSetSchemaTest() throws EEAException {
     Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
+    doNothing().when(rulesControllerZuul).createEmptyRulesSchema(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
   }
 
@@ -519,7 +336,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void deleteDatasetSchemaTest() {
-    dataSchemaServiceImpl.deleteDatasetSchema(1L, "idTableSchema");
+    dataSchemaServiceImpl.deleteDatasetSchema("idTableSchema");
     Mockito.verify(schemasRepository, times(1)).deleteDatasetSchemaById(Mockito.any());
   }
 
@@ -631,15 +448,16 @@ public class DatasetSchemaServiceTest {
   public void updateFieldSchemaTest1() throws EEAException {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.NUMBER);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER);
     Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT.getValue());
+        .thenReturn(DataType.TEXT.getValue());
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn("description");
     Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
-    Assert.assertEquals("NUMBER", dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+    Assert.assertEquals(DataType.NUMBER,
+        dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
   }
 
   /**
@@ -651,9 +469,9 @@ public class DatasetSchemaServiceTest {
   public void updateFieldSchemaTest2() throws EEAException {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(TypeData.TEXT);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.TEXT);
     Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
-        .thenReturn(TypeData.TEXT.getValue());
+        .thenReturn(DataType.TEXT.getValue());
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn(null);
     Mockito.when(fieldSchemaVO.getName()).thenReturn(null);
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
@@ -730,6 +548,19 @@ public class DatasetSchemaServiceTest {
     schema.setTableSchemas(listaTables);
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
+    Document documentRecord = new Document();
+    ObjectId objIdRecord = new ObjectId();
+    documentRecord.put("_id", objIdRecord);
+    List<Document> docFieldSchmea = new ArrayList<>();
+    Document documentField = new Document();
+    documentField.put("_id", objIdRecord);
+    docFieldSchmea.add(documentField);
+    documentRecord.put("fieldSchemas", docFieldSchmea);
+
+    Mockito.when(schemasRepository.findRecordSchema(id.toString(), id.toString()))
+        .thenReturn(documentRecord);
+    doNothing().when(rulesController).deleteRuleByReferenceId(id.toString(),
+        objIdRecord.toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
     Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
@@ -972,6 +803,11 @@ public class DatasetSchemaServiceTest {
     Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
   }
 
+  /**
+   * Gets the table schema name test 1.
+   *
+   * @return the table schema name test 1
+   */
   @Test
   public void getTableSchemaNameTest1() {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
@@ -981,15 +817,76 @@ public class DatasetSchemaServiceTest {
         dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
 
+  /**
+   * Gets the table schema name test 2.
+   *
+   * @return the table schema name test 2
+   */
   @Test
   public void getTableSchemaNameTest2() {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Assert.assertNull(dataSchemaServiceImpl.getTableSchemaName("datasetSchemaId", "tableSchemaId"));
   }
 
+  /**
+   * Validate schema test.
+   */
   @Test
   public void validateSchemaTest() {
 
     Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
   }
+
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNullTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
+        1L);
+
+  }
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNotNullTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
+        DataType.NUMBER, 1L);
+
+  }
+
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNullNotRequiredTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
+        1L);
+
+  }
+
+  @Test
+  public void propagateRulesAfterUpdateTypeNotNullNotRequiredTest() throws EEAException {
+
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(false);
+    fieldSchemaVO.setId("fieldSchemaId");
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+    dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
+        DataType.NUMBER, 1L);
+
+  }
+
 }

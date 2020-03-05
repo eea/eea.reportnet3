@@ -1,6 +1,8 @@
 package org.eea.ums.controller;
 
 import java.util.List;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.ResourceManagementController;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -8,6 +10,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -38,7 +42,12 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.CREATED)
   public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
-    securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
+    try {
+      securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
   }
 
   /**
@@ -65,6 +74,13 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @ResponseStatus(HttpStatus.OK)
   public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
+  }
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/delete_by_dataset_id")
+  public void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds) {
+    securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
   }
 
   /**
@@ -110,6 +126,11 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @RequestMapping(value = "/createList", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.CREATED)
   public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
-    securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
+    try {
+      securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
   }
 }

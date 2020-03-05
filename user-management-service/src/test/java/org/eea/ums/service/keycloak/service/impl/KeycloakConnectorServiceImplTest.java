@@ -3,6 +3,7 @@ package org.eea.ums.service.keycloak.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
@@ -131,7 +132,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[]{info};
+    ClientInfo[] body = new ClientInfo[] {info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -145,7 +146,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[]{"resource1"};
+    String[] bodyResourceSet = new String[] {"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -185,7 +186,7 @@ public class KeycloakConnectorServiceImplTest {
     groupInfo.setId("1");
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
@@ -271,7 +272,7 @@ public class KeycloakConnectorServiceImplTest {
   }
 
   @Test
-  public void addUserToGroup() {
+  public void addUserToGroup() throws EEAException {
     ResponseEntity<Void> responseAddUserToGroup = new ResponseEntity<>(null, HttpStatus.OK);
     Mockito
         .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -283,15 +284,15 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
-  @Test(expected = RestClientException.class)
-  public void addUserToGroupError() {
+  @Test(expected = EEAException.class)
+  public void addUserToGroupError() throws EEAException {
     Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
         Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
         Mockito.any(Class.class));
     try {
       keycloakConnectorService.addUserToGroup("user1", "");
-    } catch (RestClientException e) {
-      Assert.assertEquals("error test", e.getMessage());
+    } catch (EEAException e) {
+      Assert.assertEquals("Permission not created", e.getMessage());
       throw e;
     }
   }
@@ -324,7 +325,7 @@ public class KeycloakConnectorServiceImplTest {
   }
 
   @Test
-  public void createGroupDetail() {
+  public void createGroupDetail() throws EEAException {
     GroupInfo groupInfo = new GroupInfo();
     ResponseEntity<Void> result = new ResponseEntity<>(null, HttpStatus.OK);
 

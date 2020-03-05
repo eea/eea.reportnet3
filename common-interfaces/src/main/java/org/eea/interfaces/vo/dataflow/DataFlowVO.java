@@ -71,6 +71,9 @@ public class DataFlowVO implements Serializable {
   /** The contributors. */
   private List<ContributorVO> contributors;
 
+  /** The representatives. */
+  private List<RepresentativeVO> representatives;
+
   /**
    * Equals.
    *

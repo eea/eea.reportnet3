@@ -110,7 +110,7 @@ public class UserManagementControllerImplTest {
   }
 
   @Test
-  public void addContributorToResource() {
+  public void addContributorToResource() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
@@ -228,13 +228,13 @@ public class UserManagementControllerImplTest {
     List<ResourceAssignationVO> resources = new ArrayList<>();
     resources.add(resource);
     userManagementController.addContributorsToResources(resources);
-    Mockito.verify(securityProviderInterfaceService, Mockito.times(1)).addContributorToUserGroup(
-        "userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .addContributorsToUserGroup(resources);
   }
 
 
   @Test
-  public void addUserToResources() {
+  public void addUserToResources() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();

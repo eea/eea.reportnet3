@@ -30,6 +30,12 @@ public class ReportingDatasetVO implements Serializable {
   /** The is released. */
   private Boolean isReleased;
 
+  /** The date released. */
+  private Date dateReleased;
+
+  /** The data provider id. */
+  private Long dataProviderId;
+
   /** The dataset schema. */
   private String datasetSchema;
 
