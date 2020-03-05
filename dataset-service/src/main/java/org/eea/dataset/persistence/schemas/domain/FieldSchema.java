@@ -82,9 +82,7 @@ public class FieldSchema {
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
-        && Objects.equals(idRecord, other.idRecord)
-        && Objects.equals(codelistItems, other.codelistItems)
-        && Objects.equals(required, other.required)
+        && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(description, other.description);
   }
 

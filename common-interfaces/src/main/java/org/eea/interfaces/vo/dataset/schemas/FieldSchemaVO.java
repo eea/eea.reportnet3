@@ -62,7 +62,6 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(type, other.type) && Objects.equals(codelistItems, other.codelistItems)
-        && Objects.equals(required, other.required);
+        && Objects.equals(type, other.type) && Objects.equals(required, other.required);
   }
 }
