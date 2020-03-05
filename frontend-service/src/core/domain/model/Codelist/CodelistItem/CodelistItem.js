@@ -1,5 +1,5 @@
 export class CodelistItem {
-  constructor(id, shortCode, label, definition, codelistId) {
+  constructor({ codelistId, definition, id, label, shortCode } = {}) {
     this.codelistId = codelistId;
     this.definition = definition;
     this.id = id;

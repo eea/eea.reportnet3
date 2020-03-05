@@ -1,5 +1,12 @@
 export class Representative {
-  constructor(id, providerAccount, dataProviderId, dataProviderGroupId, isReceiptDownloaded, isReceiptOutdated) {
+  constructor({
+    dataProviderGroupId,
+    dataProviderId,
+    id,
+    isReceiptDownloaded,
+    isReceiptOutdated,
+    providerAccount
+  } = {}) {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderId = dataProviderId;
     this.isReceiptDownloaded = isReceiptDownloaded;

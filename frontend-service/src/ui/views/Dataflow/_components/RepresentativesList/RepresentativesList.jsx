@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import { isEmpty, isNull } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
 
@@ -84,7 +87,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
-          autoFocus={isNull(representative.representativeId)}
+          autoFocus={isNil(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
             representative.providerAccount = representative.providerAccount.toLowerCase();
@@ -140,7 +143,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return !isNull(representative.representativeId) ? (
+    return !isNil(representative.representativeId) ? (
       <Button
         tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
         tooltipOptions={{ position: 'right' }}
@@ -180,7 +183,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
         </div>
       </div>
 
-      {!isNull(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
+      {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
         <DataTable
           value={
             formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length

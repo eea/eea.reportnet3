@@ -11,24 +11,23 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
-const parseDataflowDTO = dataflowDTO => {
-  const dataflow = new Dataflow();
-  dataflow.creationDate = dataflowDTO.creationDate;
-  dataflow.dataCollections = parseDataCollectionListDTO(dataflowDTO.dataCollections);
-  dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
-  dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
-  dataflow.description = dataflowDTO.description;
-  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
-  dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
-  dataflow.id = dataflowDTO.id;
-  dataflow.name = dataflowDTO.name;
-  dataflow.representatives = parseRepresentativeListDTO(dataflowDTO.representatives);
-  dataflow.requestId = dataflowDTO.requestId;
-  dataflow.status = dataflowDTO.status;
-  dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
-  dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
-  return dataflow;
-};
+const parseDataflowDTO = dataflowDTO =>
+  new Dataflow({
+    creationDate: dataflowDTO.creationDate,
+    dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
+    deadlineDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    description: dataflowDTO.description,
+    designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
+    documents: parseDocumentListDTO(dataflowDTO.documents),
+    id: dataflowDTO.id,
+    name: dataflowDTO.name,
+    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
+    requestId: dataflowDTO.requestId,
+    status: dataflowDTO.status,
+    userRequestStatus: dataflowDTO.userRequestStatus,
+    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+  });
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
   if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
@@ -42,15 +41,15 @@ const parseDataCollectionListDTO = dataCollectionsDTO => {
 };
 
 const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection(
-    dataCollectionDTO.id,
-    dataCollectionDTO.dataSetName,
-    dataCollectionDTO.idDataflow,
-    dataCollectionDTO.datasetSchema,
-    dataCollectionDTO.creationDate,
-    dataCollectionDTO.dueDate,
-    dataCollectionDTO.status
-  );
+  return new DataCollection({
+    creationDate: dataCollectionDTO.creationDate,
+    dataCollectionId: dataCollectionDTO.id,
+    dataCollectionName: dataCollectionDTO.dataSetName,
+    dataflowId: dataCollectionDTO.idDataflow,
+    datasetSchemaId: dataCollectionDTO.datasetSchema,
+    expirationDate: dataCollectionDTO.dueDate,
+    status: dataCollectionDTO.status
+  });
 };
 
 const parseDatasetListDTO = datasetsDTO => {
@@ -64,25 +63,15 @@ const parseDatasetListDTO = datasetsDTO => {
   return;
 };
 
-const parseDatasetDTO = datasetDTO => {
-  return new Dataset(
-    null,
-    datasetDTO.id,
-    datasetDTO.datasetSchema,
-    datasetDTO.dataSetName,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    datasetDTO.isReleased,
-    null,
-    null,
-    datasetDTO.nameDatasetSchema,
-    datasetDTO.dataProviderId
-  );
-};
+const parseDatasetDTO = datasetDTO =>
+  new Dataset({
+    datasetId: datasetDTO.id,
+    datasetSchemaId: datasetDTO.datasetSchema,
+    datasetSchemaName: datasetDTO.dataSetName,
+    isReleased: datasetDTO.isReleased,
+    name: datasetDTO.nameDatasetSchema,
+    dataProviderId: datasetDTO.dataProviderId
+  });
 
 const parseDocumentListDTO = documentsDTO => {
   if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
@@ -96,14 +85,13 @@ const parseDocumentListDTO = documentsDTO => {
 };
 
 const parseDocumentDTO = documentDTO => {
-  return new Document(
-    documentDTO.category,
-    documentDTO.dataflowId,
-    documentDTO.description,
-    documentDTO.id,
-    documentDTO.language,
-    documentDTO.name
-  );
+  return new Document({
+    category: documentDTO.category,
+    description: documentDTO.description,
+    id: documentDTO.id,
+    language: documentDTO.language,
+    title: documentDTO.name
+  });
 };
 
 const parseRepresentativeListDTO = representativesDTO => {
@@ -118,14 +106,14 @@ const parseRepresentativeListDTO = representativesDTO => {
 };
 
 const parseRepresentativeDTO = representativeDTO => {
-  return new Representative(
-    representativeDTO.id,
-    representativeDTO.provideraccount,
-    representativeDTO.dataProviderId,
-    representativeDTO.dataProviderGroupId,
-    representativeDTO.receiptDownloaded,
-    representativeDTO.receiptOutdated
-  );
+  return new Representative({
+    dataProviderGroupId: representativeDTO.dataProviderGroupId,
+    dataProviderId: representativeDTO.dataProviderId,
+    id: representativeDTO.id,
+    isReceiptDownloaded: representativeDTO.receiptDownloaded,
+    isReceiptOutdated: representativeDTO.receiptOutdated,
+    providerAccount: representativeDTO.provideraccount
+  });
 };
 
 const parseWebLinkListDTO = webLinksDTO => {
@@ -139,9 +127,7 @@ const parseWebLinkListDTO = webLinksDTO => {
   return;
 };
 
-const parseWebLinkDTO = webLinkDTO => {
-  return new WebLink(webLinkDTO.description, webLinkDTO.url);
-};
+const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 
 const parseDataflowDTOs = dataflowDTOs => {
   let dataflows = dataflowDTOs.map(dataflowDTO => {
