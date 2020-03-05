@@ -511,8 +511,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
           if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              && fieldSchema.containsKey("codeListItems")) {
-            fieldSchema.remove("codeListItems");
+              && fieldSchema.containsKey("codelistItems")) {
+            fieldSchema.remove("codelistItems");
           }
         }
         if (fieldSchemaVO.getDescription() != null) {
@@ -521,9 +521,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getName() != null) {
           fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
-        if (fieldSchemaVO.getCodeListItems() != null && fieldSchemaVO.getCodeListItems().length != 0
+        if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
             && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
-          fieldSchema.put("codeListItems", Arrays.asList(fieldSchemaVO.getCodeListItems()));
+          fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
         }
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());

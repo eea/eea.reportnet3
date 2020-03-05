@@ -223,7 +223,7 @@ public class RulesServiceImpl implements RulesService {
           // capital letter and without capital letters
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, document.get("codeListItems").toString(), "FT" + shortcode,
+              FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
 
           break;

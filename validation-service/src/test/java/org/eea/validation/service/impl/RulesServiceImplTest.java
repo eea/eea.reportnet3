@@ -173,7 +173,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codeListItems", "[2, 2]");
+    doc.put("codelistItems", "[2, 2]");
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
     RulesSchema ruleSchema = new RulesSchema();

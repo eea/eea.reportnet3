@@ -35,11 +35,11 @@ end template
 //////////////////////////////////////////DEFAULT VALIDATIONS////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
-function boolean isCodeList( String value , String codeListItems , boolean sensitive){
+function boolean isCodelist( String value , String codelistItems , boolean sensitive){
 	if(!isBlank(value)){
 		return true;
 	}
-	return CodeListUtils.codeListValidate(value,codeListItems,sensitive);
+	return CodelistUtils.codelistValidate(value,codelistItems,sensitive);h
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////

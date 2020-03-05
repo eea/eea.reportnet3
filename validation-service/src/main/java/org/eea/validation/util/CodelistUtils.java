@@ -1,42 +1,42 @@
 package org.eea.validation.util;
 
 /**
- * The Class CodeListUtils.
+ * The Class CodelistUtils.
  */
-public class CodeListUtils {
+public class CodelistUtils {
 
   /**
    * This class checks whether the values are available inside the array of code list items in a
    * sensitive or insenstive way
    *
    * @param value the value
-   * @param codeListItems the code list items
+   * @param codelistItems the code list items
    * @param sensitive the sensitive
    * @return the boolean
    */
-  public static Boolean codeListValidate(final String value, String codeListItems,
+  public static Boolean codelistValidate(final String value, String codelistItems,
       final boolean sensitive) {
-    Boolean codeList = false;
-    // we can validation helper and put in memory the codeList
-    codeListItems = codeListItems.replace("[", "");
-    codeListItems = codeListItems.replace("]", "");
-    String[] arrayItems = codeListItems.split(",");
+    Boolean codelist = false;
+    // we can validation helper and put in memory the codelist
+    codelistItems = codelistItems.replace("[", "");
+    codelistItems = codelistItems.replace("]", "");
+    String[] arrayItems = codelistItems.split(",");
 
     if (Boolean.TRUE.equals(sensitive)) {
       for (int i = 0; i < arrayItems.length; i++) {
         if (arrayItems[i].trim().equals(value)) {
-          codeList = Boolean.TRUE;
+          codelist = Boolean.TRUE;
         }
       }
     } else {
       for (int i = 0; i < arrayItems.length; i++) {
         if (arrayItems[i].trim().equalsIgnoreCase(value)) {
-          codeList = Boolean.TRUE;
+          codelist = Boolean.TRUE;
         }
       }
     }
 
-    return codeList;
+    return codelist;
   }
 
 }
