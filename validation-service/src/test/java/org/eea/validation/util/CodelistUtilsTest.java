@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.validation.util;
 
 import org.junit.Assert;
@@ -8,29 +11,29 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 
 /**
- * The Class CodeListUtilsTest.
+ * The Class CodelistUtilsTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CodeListUtilsTest {
+public class CodelistUtilsTest {
 
   /** The code list utils. */
   @InjectMocks
-  private CodeListUtils codeListUtils;
+  private CodelistUtils codelistUtils;
 
   /**
    * Test sensitive code list validate.
    */
   @Test
-  public void testSensitiveCodeListValidate() {
-    Assert.assertEquals(true, codeListUtils.codeListValidate("1", "[1, 2]", true));
+  public void testSensitiveCodelistValidate() {
+    Assert.assertEquals(true, codelistUtils.codelistValidate("1", "[1, 2]", true));
   }
 
   /**
    * Test non sensitive code list validate.
    */
   @Test
-  public void testNonSensitiveCodeListValidate() {
-    Assert.assertEquals(true, codeListUtils.codeListValidate("1", "[1, 2]", false));
+  public void testNonSensitiveCodelistValidate() {
+    Assert.assertEquals(true, codelistUtils.codelistValidate("1", "[1, 2]", false));
   }
 
 }

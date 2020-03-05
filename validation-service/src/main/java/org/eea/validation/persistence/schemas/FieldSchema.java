@@ -44,8 +44,8 @@ public class FieldSchema {
   private String headerName;
 
   /** The code list items. */
-  @Field(value = "codeListItems")
-  private String[] codeListItems;
+  @Field(value = "codelistItems")
+  private String[] codelistItems;
 
   /** The required. */
   @Field(value = "required")
@@ -58,7 +58,7 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, type, codeListItems, required);
+    return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required);
   }
 
 
@@ -80,7 +80,7 @@ public class FieldSchema {
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord)
-        && Objects.equals(codeListItems, other.codeListItems)
+        && Objects.equals(codelistItems, other.codelistItems)
         && Objects.equals(required, other.required);
   }
 
