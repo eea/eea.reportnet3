@@ -6,8 +6,8 @@ package org.eea.validation.util;
 public class CodeListUtils {
 
   /**
-   * Code list validate. That clase check if the value are avaliable inside the array of values,
-   * with case sensitive and insensitive
+   * This class checks whether the values are available inside the array of code list items in a
+   * sensitive or insenstive way
    *
    * @param value the value
    * @param codeListItems the code list items
