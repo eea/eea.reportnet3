@@ -467,7 +467,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema in mongo.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
@@ -488,7 +488,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Update field schema.
+   * Update field schema in mongo and check if the field is a codelist or not.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO

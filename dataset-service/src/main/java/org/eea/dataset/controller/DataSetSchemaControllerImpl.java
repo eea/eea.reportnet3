@@ -344,7 +344,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema and propagate the mew field to create it in the dataset for testing.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
@@ -387,7 +387,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Update field schema.
+   * Update field schema and propagate the rules to dataset.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO

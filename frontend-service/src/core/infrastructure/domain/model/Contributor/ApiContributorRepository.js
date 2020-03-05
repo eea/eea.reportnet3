@@ -3,9 +3,7 @@ import { Contributor } from 'core/domain/model/Contributor/Contributor';
 
 const all = async dataflowId => {
   const contributorsDTO = await apiContributor.all(dataflowId);
-  return contributorsDTO.map(
-    contributorDTO => new Contributor(contributorDTO.id, contributorDTO.login, contributorDTO.role)
-  );
+  return contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
 };
 
 const addByLogin = async (dataflowId, login, role) => {

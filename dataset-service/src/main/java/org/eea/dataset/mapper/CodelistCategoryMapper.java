@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 
 /**
  * The Interface CodelistCategoryMapper.
+ *
+ * @deprecated (unused)
  */
 @Mapper(componentModel = "spring")
 @Deprecated

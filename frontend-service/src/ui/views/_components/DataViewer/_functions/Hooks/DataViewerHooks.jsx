@@ -141,6 +141,7 @@ export const useSetColumns = (
     };
 
     //Calculate the max width of data column
+    console.log({ colsSchema });
     const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
     const maxWidth = Math.max(...textMaxWidth) + 30;
 
@@ -163,6 +164,7 @@ export const useSetColumns = (
                   icon="infoCircle"
                   onClick={() => {
                     const inmCodeListInfo = cloneDeep(codelistInfo);
+                    console.log({ column });
                     inmCodeListInfo.name = column.codelistName;
                     inmCodeListInfo.version = column.codelistVersion;
                     inmCodeListInfo.items = column.codelistItems;

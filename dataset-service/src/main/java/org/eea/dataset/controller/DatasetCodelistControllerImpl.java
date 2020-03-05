@@ -29,6 +29,8 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The Class DatasetCodelistControllerImpl.
+ *
+ * @deprecated (unused)
  */
 @RestController
 @RequestMapping("/codelist")
