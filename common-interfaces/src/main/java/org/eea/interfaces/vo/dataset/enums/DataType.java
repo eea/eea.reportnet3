@@ -88,9 +88,11 @@ public enum DataType {
   /** The codelist. */
   CODELIST("CODELIST"),
 
+  /** The link. */
+  LINK("LINK"),
 
-  /** The Reference to PK */
-  REFERENCE("REFERENCE");
+  /** The link data. */
+  LINK_DATA("LINK_DATA");
 
   /** The value. */
   private final String value;
