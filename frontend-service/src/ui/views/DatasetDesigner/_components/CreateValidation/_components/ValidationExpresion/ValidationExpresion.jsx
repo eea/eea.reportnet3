@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,6 +6,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const ValidationExpresion = ({
   expresionValues,
@@ -15,6 +17,7 @@ const ValidationExpresion = ({
   onExpresionFieldUpdate,
   onExpresionGroup
 }) => {
+  const resourcesContext = useContext(ResourcesContext);
   const { expresionId } = expresionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const operatorTypes = {
@@ -65,7 +68,7 @@ const ValidationExpresion = ({
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
-          placeholder="union"
+          placeholder={resourcesContext.messages.union}
           optionLabel="label"
           options={[
             { label: 'AND', value: 'AND' },
@@ -84,7 +87,7 @@ const ValidationExpresion = ({
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
-          placeholder="Operator type"
+          placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
           options={getOperatorTypeOptions()}
           onChange={e =>
@@ -100,7 +103,7 @@ const ValidationExpresion = ({
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
-          placeholder="Operator"
+          placeholder={resourcesContext.messages.operator}
           optionLabel="label"
           options={operatorValues}
           onChange={e =>
@@ -119,7 +122,7 @@ const ValidationExpresion = ({
       <td>
         <InputText
           disabled={isDisabled}
-          placeholder="Value"
+          placeholder={resourcesContext.messages.value}
           value={expresionValues.ruleValue}
           onChange={e =>
             onExpresionFieldUpdate(expresionId, {

@@ -496,6 +496,7 @@
     "operatorType": "Operator type",
     "operator": "Operator",
     "value": "Value",
-    "addNewRule": "Add new rule"
+    "addNewRule": "Add new rule",
+    "union": "Union"
   }
 }
