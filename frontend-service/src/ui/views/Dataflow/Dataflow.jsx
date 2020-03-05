@@ -315,6 +315,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onHideDeleteDataflowDialog = () => {
     setIsDeleteDialogVisible(false);
+    setOnConfirmDelete(false);
     setIsActivePropertiesDialog(true);
     setDataflowTitle('');
   };
