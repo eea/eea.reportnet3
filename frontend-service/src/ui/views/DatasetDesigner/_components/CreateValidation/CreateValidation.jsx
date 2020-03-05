@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -15,6 +15,8 @@ import { ValidationExpresion } from './_components/ValidationExpresion';
 
 import { ValidationService } from 'core/services/Validation';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import {
   createValidationReducerInitState,
   createValidationReducer
@@ -30,6 +32,7 @@ import { setFormField } from './_functions/utils/setFormField';
 import { setValidationExpresion } from './_functions/utils/setValidationExpresion';
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
+  const resourcesContext = useContext(ResourcesContext);
   const [creationFormState, creationFormDispatch] = useReducer(
     createValidationReducer,
     createValidationReducerInitState
@@ -191,10 +194,10 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
           <div className={styles.section}>
             <div>
               <label htmlFor="table">
-                Table
+                {resourcesContext.messages.table}
                 <Dropdown
                   appendTo={document.body}
-                  placeholder="Table"
+                  placeholder={resourcesContext.messages.table}
                   optionLabel="label"
                   options={creationFormState.schemaTables}
                   onChange={e => {
@@ -210,10 +213,10 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </label>
               <label htmlFor="field">
-                Field
+                {resourcesContext.messages.field}
                 <Dropdown
                   appendTo={document.body}
-                  placeholder="field"
+                  placeholder={resourcesContext.messages.field}
                   optionLabel="label"
                   options={creationFormState.tableFields}
                   onChange={e => {
@@ -229,9 +232,9 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </label>
               <label htmlFor="shortCode">
-                Short code
+                {resourcesContext.messages.ruleShortCode}
                 <InputText
-                  placeholder="short code"
+                  placeholder={resourcesContext.messages.ruleShortCode}
                   value={creationFormState.candidateRule.shortCode}
                   onChange={e => {
                     setFormField(
@@ -245,9 +248,9 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </label>
               <label htmlFor="description">
-                Description
+                {resourcesContext.messages.description}
                 <InputText
-                  placeholder="Description"
+                  placeholder={resourcesContext.messages.description}
                   value={creationFormState.candidateRule.description}
                   onChange={e => {
                     setFormField(
@@ -261,9 +264,9 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </label>
               <label htmlFor="errorMessage" className={styles.errorMessage}>
-                Error message
+                {resourcesContext.messages.errorMessage}
                 <InputText
-                  placeholder="errorMessage"
+                  placeholder={resourcesContext.messages.errorMessage}
                   value={creationFormState.candidateRule.errorMessage}
                   onChange={e => {
                     setFormField(
@@ -277,9 +280,9 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </label>
               <label htmlFor="description">
-                Error type
+                {resourcesContext.messages.errorType}
                 <Dropdown
-                  placeholder="Error type"
+                  placeholder={resourcesContext.messages.errorType}
                   appendTo={document.body}
                   optionLabel="label"
                   options={creationFormState.errorLevels}
@@ -298,7 +301,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             </div>
             <div>
               <label htmlFor="QcActive">
-                Active
+                {resourcesContext.messages.active}
                 <Checkbox
                   onChange={e => {
                     setFormField({ key: 'active', value: e.checked }, creationFormDispatch);
@@ -312,11 +315,11 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <table>
               <thead>
                 <tr>
-                  <th>Group</th>
-                  <th>AND / OR</th>
-                  <th>Opertators type</th>
-                  <th>Operator</th>
-                  <th>Value</th>
+                  <th>{resourcesContext.messages.group}</th>
+                  <th>{resourcesContext.messages.andor}</th>
+                  <th>{resourcesContext.messages.operatorType}</th>
+                  <th>{resourcesContext.messages.operator}</th>
+                  <th>{resourcesContext.messages.value}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -363,7 +366,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 disabled={creationFormState.isRuleAddingDisabled}
                 className="p-button-primary p-button-text-icon-left"
                 type="button"
-                label="Add new rule"
+                label={resourcesContext.messages.addNewRule}
                 icon="plus"
                 onClick={e =>
                   creationFormDispatch({
@@ -378,14 +381,14 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 disabled={creationFormState.isValidationCreationDisabled}
                 className="p-button-primary p-button-text-icon-left"
                 type="button"
-                label="create"
+                label={resourcesContext.messages.create}
                 icon="check"
                 onClick={e => createValidationRule()}
               />
               <Button
                 className="p-button-secondary p-button-text-icon-left"
                 type="button"
-                label="cancel"
+                label={resourcesContext.messages.cancel}
                 icon="cancel"
                 onClick={e => toggleVisibility(false)}
               />
