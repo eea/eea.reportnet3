@@ -240,7 +240,7 @@ const Category = ({
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-primary"
         disabled={
           isIncorrect ||
           categoryState.isSaving ||
@@ -275,7 +275,7 @@ const Category = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-primary"
         disabled={
           isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
         }

@@ -301,7 +301,7 @@ const Codelist = ({
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success p-button-animated-blink"
+        className="p-button-primary p-button-animated-blink"
         disabled={
           isIncorrect ||
           codelistState.clonedCodelist.codelistName.trim() === '' ||

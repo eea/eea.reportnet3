@@ -74,7 +74,7 @@ const ConfirmDialog = forwardRef((props, _) => {
       ) : null}
       {hasPasteOption ? (
         <Button
-          className={`p-button-success ${disabledConfirm || isPasting ? null : 'p-button-animated-blink'}`}
+          className={`p-button-primary ${disabledConfirm || isPasting ? null : 'p-button-animated-blink'}`}
           disabled={disabledConfirm || isPasting}
           icon={!isPasting ? (iconConfirm ? iconConfirm : 'check') : 'spinnerAnimate'}
           label={labelConfirm}
@@ -82,7 +82,7 @@ const ConfirmDialog = forwardRef((props, _) => {
         />
       ) : (
         <Button
-          className={`${!isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-success'} ${
+          className={`${!isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary'} ${
             !disabledConfirm ? 'p-button-animated-blink' : null
           }`}
           disabled={disabledConfirm}
