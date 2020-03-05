@@ -13,21 +13,14 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
-import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleDataSet;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleField;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -35,8 +28,11 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -45,12 +41,13 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The type Dataschema service.
@@ -64,12 +61,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /**
-   * The data set metabase table collection.
-   */
-  @Autowired
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
-
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
@@ -81,6 +72,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The rules controller. */
+  @Autowired
+  private RulesController rulesController;
 
   /**
    * The dataschema mapper.
@@ -104,6 +99,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
@@ -113,57 +113,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private List<ValidationSchemaCommand> validationCommands;
 
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
+
 
   /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-
-  /**
-   * The Constant GENERAL_WARNING.
-   */
-  private static final String GENERAL_WARNING = "WARNING";
-
-  /**
-   * The Constant VALIDATION_WARNING.
-   */
-  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-
-  /**
-   * The Constant GENERAL_ERROR.
-   */
-  private static final String GENERAL_ERROR = "ERROR";
-
-  /**
-   * The Constant INTEGER_ERROR.
-   */
-  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-
-  /**
-   * The Constant BOOLEAN_ERROR.
-   */
-  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-
-  /**
-   * The Constant COORDINATE_LAT_ERROR.
-   */
-  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-
-  /**
-   * The Constant COORDINATE_LONG_ERROR.
-   */
-  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-
-  /**
-   * The Constant DATE_ERROR.
-   */
-  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
-
-  /**
-   * The Constant NULL.
-   */
-  private static final String NULL = "id == null";
 
   /**
    * The data set metabase repository.
@@ -184,16 +143,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
-
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
-
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
     dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
-
     schemasRepository.save(dataSetSchema);
+
+    // create the schema of its rules
+    rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
+        new ObjectId().toString());
 
     return idDataSetSchema;
   }
@@ -253,222 +212,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the data schema.
+   * Gets the data schema by id.
    *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  public void createDataSchema(Long datasetId, Long dataflowId) {
-
-    DataSetSchema dataSetSchema = new DataSetSchema();
-    Iterable<TableCollection> tables = dataSetMetabaseTableCollection.findAllByDataSetId(datasetId);
-    ArrayList<TableCollection> values = Lists.newArrayList(tables);
-
-    List<TableSchema> tableSchemas = new ArrayList<>();
-
-    ObjectId idDataSetSchema = new ObjectId();
-    dataSetSchema.setIdDataFlow(dataflowId);
-    dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    List<RuleDataSet> ruleDataSetList = new ArrayList<>();
-    RuleDataSet ruleDataset = new RuleDataSet();
-    List<String> listaStrinsDataset = new ArrayList<>();
-    listaStrinsDataset.add(GENERAL_ERROR);
-    listaStrinsDataset.add(GENERAL_WARNING);
-    ruleDataset.setThenCondition(listaStrinsDataset);
-
-    ruleDataset.setRuleId(new ObjectId());
-    ruleDataset.setDataFlowId(dataflowId);
-    ruleDataset.setIdDataSetSchema(idDataSetSchema);
-    ruleDataset.setScope(TypeEntityEnum.DATASET);
-    ruleDataset.setWhenCondition(NULL);
-    ruleDataset.setRuleName("dataset regla");
-    ruleDataSetList.add(ruleDataset);
-    dataSetSchema.setRuleDataSet(ruleDataSetList);
-
-    for (int i = 1; i <= values.size(); i++) {
-      ObjectId idTableSchema = new ObjectId();
-      TableCollection table = values.get(i - 1);
-      TableSchema tableSchema = new TableSchema();
-      tableSchema.setIdTableSchema(idTableSchema);
-
-      List<RuleTable> ruleTableList = new ArrayList<>();
-      RuleTable ruleTable = new RuleTable();
-      List<String> listaStrinsRuleTable = new ArrayList<>();
-      listaStrinsRuleTable.add(VALIDATION_WARNING);
-      listaStrinsRuleTable.add(GENERAL_ERROR);
-      ruleTable.setThenCondition(listaStrinsRuleTable);
-
-      ruleTable.setRuleId(new ObjectId());
-      ruleTable.setDataFlowId(dataflowId);
-      ruleTable.setIdTableSchema(idTableSchema);
-      ruleTable.setWhenCondition(NULL);
-      ruleTable.setRuleName("table regla" + i);
-      ruleTable.setScope(TypeEntityEnum.TABLE);
-      ruleTableList.add(ruleTable);
-
-      tableSchema.setNameTableSchema(table.getTableName());
-      ObjectId idRecordSchema = new ObjectId();
-      RecordSchema recordSchema = new RecordSchema();
-      recordSchema.setIdRecordSchema(idRecordSchema);
-      recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
-
-      // Create Records in the Schema
-      List<RuleRecord> ruleRecordList = new ArrayList<>();
-
-      // Create fields in the Schema
-      List<FieldSchema> fieldSchemas = new ArrayList<>();
-      int headersSize = table.getTableHeadersCollections().size();
-      createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
-
-      RuleRecord ruleRecord = new RuleRecord();
-      List<String> listaStrinsRuleRecord = new ArrayList<>();
-      ruleRecord.setRuleId(new ObjectId());
-      ruleRecord.setDataFlowId(dataflowId);
-      ruleRecord.setScope(TypeEntityEnum.RECORD);
-      ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
-      ruleRecord.setRuleName("RecordRule_" + i + "_");
-      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
-      listaStrinsRuleRecord.add(GENERAL_ERROR);
-      ruleRecord.setThenCondition(listaStrinsRuleRecord);
-      ruleRecordList.add(ruleRecord);
-
-      recordSchema.setRuleRecord(ruleRecordList);
-      recordSchema.setFieldSchema(fieldSchemas);
-      tableSchema.setRecordSchema(recordSchema);
-      tableSchema.setRuleTable(ruleTableList);
-      tableSchemas.add(tableSchema);
-    }
-    dataSetSchema.setTableSchemas(tableSchemas);
-    schemasRepository.save(dataSetSchema);
-
-  }
-
-
-  /**
-   * Creates the rule fields.
-   *
-   * @param i the i
-   * @param table the table
-   * @param recordSchema the record schema
-   * @param fieldSchemas the field schemas
-   * @param headersSize the headers size
-   * @param dataflowId the dataflow id
-   */
-  private void createRuleFields(int i, TableCollection table, RecordSchema recordSchema,
-      List<FieldSchema> fieldSchemas, int headersSize, Long dataflowId) {
-    for (int j = 1; j <= headersSize; j++) {
-      ObjectId idFieldSchema = new ObjectId();
-      TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
-
-      List<RuleField> ruleField = new ArrayList<>();
-      RuleField rule = new RuleField();
-      rule.setRuleId(new ObjectId());
-      rule.setDataFlowId(dataflowId);
-      rule.setIdFieldSchema(idFieldSchema);
-      rule.setWhenCondition("!isBlank(value)");
-      rule.setRuleName("FieldRule_" + i + "." + j);
-      List<String> listaMsgValidation = new ArrayList<>();
-      listaMsgValidation.add("that field must be filled");
-      listaMsgValidation.add(GENERAL_WARNING);
-      rule.setThenCondition(listaMsgValidation);
-      ruleField.add(rule);
-      rule.setScope(TypeEntityEnum.FIELD);
-
-      RuleField rule2 = new RuleField();
-      List<String> listaMsgTypeValidation = new ArrayList<>();
-      switch (header.getHeaderType().toString().toLowerCase().trim()) {
-        case "text":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isText(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add("that text have invalid caracteres");
-          listaMsgTypeValidation.add("ERROR");
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "number":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value,'') || value == null");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(INTEGER_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "boolean":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("value==true || value==false");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(BOOLEAN_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "coordinate_lat":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isCordenateLat(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_LAT_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "coordinate_long":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isCordenateLong(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_LONG_ERROR);
-          listaMsgTypeValidation.add("WARNING");
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "date":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isDateYYYYMMDD(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(DATE_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-      }
-      ruleField.add(rule2);
-      FieldSchema fieldSchema = new FieldSchema();
-      fieldSchema.setIdFieldSchema(idFieldSchema);
-      fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-      fieldSchema.setHeaderName(header.getHeaderName());
-      fieldSchema.setType(header.getHeaderType());
-      fieldSchema.setRuleField(ruleField);
-
-      fieldSchemas.add(fieldSchema);
-    }
-  }
-
-  /**
-   * Find the dataschema per id.
-   *
-   * @param dataschemaId the idDataschema
-   *
+   * @param dataschemaId the dataschema id
    * @return the data schema by id
    */
   @Override
@@ -524,7 +270,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
-
   /**
    * Gets the dataset schema id.
    *
@@ -558,12 +303,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Delete dataset schema.
    *
-   * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   @Override
   @Transactional
-  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+  public void deleteDatasetSchema(String schemaId) {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
@@ -599,7 +343,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -685,6 +429,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
+    // when we delete a table we need to delete all rules of this table, we mean, rules of the
+    // records fields, etc
+    Document recordSchemadocument =
+        schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
+    // if the table havent got any record he hasnt any document too
+    if (null != recordSchemadocument) {
+      List<Document> fieldSchemasList = (List<Document>) recordSchemadocument.get("fieldSchemas");
+      fieldSchemasList.stream().forEach(document -> {
+        rulesController.deleteRuleByReferenceId(datasetSchemaId, document.get("_id").toString());
+      });
+      rulesController.deleteRuleByReferenceId(datasetSchemaId,
+          recordSchemadocument.get("_id").toString());
+    }
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
 
@@ -735,11 +492,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return the string
+   * @return the type data
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     boolean typeModified = false;
     try {
@@ -753,6 +510,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
+          if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
+              && fieldSchema.containsKey("idCodeList")) {
+            fieldSchema.remove("idCodeList");
+          }
         }
         if (fieldSchemaVO.getDescription() != null) {
           fieldSchema.put("description", fieldSchemaVO.getDescription());
@@ -763,11 +524,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getIdCodeList() != null) {
           fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
         }
+        if (fieldSchemaVO.getRequired() != null) {
+          fieldSchema.put("required", fieldSchemaVO.getRequired());
+        }
+
         // Guardar el FieldSchema modificado en MongoDB
-        if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
-            .getModifiedCount() == 1) {
-          if (typeModified) {
-            return fieldSchemaVO.getType().getValue();
+        UpdateResult updateResult =
+            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        if (updateResult.getMatchedCount() == 1) {
+          if (updateResult.getModifiedCount() == 1 && typeModified) {
+            return fieldSchemaVO.getType();
           }
           return null;
         }
@@ -864,4 +630,46 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return isValid;
   }
+
+
+  /**
+   * Propagate rules after update schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param type the type
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      DataType type, Long datasetId) {
+
+    if (type != null) {
+      // if we change the type we need to delete all rules
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
+
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
+            EntityTypeEnum.FIELD, Boolean.TRUE);
+      }
+
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+      // update the dataset field value
+      TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+      datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+    } else {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
+          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+        }
+      } else {
+        rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());
+      }
+    }
+
+
+  }
+
 }

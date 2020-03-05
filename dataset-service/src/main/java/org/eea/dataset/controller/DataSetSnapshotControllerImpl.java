@@ -7,6 +7,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -74,7 +75,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of snapshots. ", e.getMessage(), e);
     }
     return snapshots;
 
@@ -124,9 +125,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
 
@@ -158,9 +159,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -215,7 +216,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSchemaSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of schema snapshots. ", e.getMessage(), e);
     }
     return snapshots;
   }
@@ -272,9 +273,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a schema snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
 
@@ -303,9 +304,38 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a schema snapshot", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
+
+
+  /**
+   * Gets the released and updated status.
+   *
+   * @param idDataflow the id dataflow
+   * @param idDataProvider the id data provider
+   * @return the released and updated status
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataflow/{idDataflow}/releaseStatus/{idDataProvider}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_PROVIDER')")
+  public ReleaseReceiptVO getReleasedAndUpdatedStatus(@PathVariable("idDataflow") Long idDataflow,
+      @PathVariable("idDataProvider") Long idDataProvider) {
+
+    ReleaseReceiptVO receipt = null;
+    try {
+      receipt = datasetSnapshotService.getReleasedAndUpdatedStatus(idDataflow, idDataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the data to make the receipt of the release. ", e.getMessage(),
+          e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+    return receipt;
+  }
+
 }

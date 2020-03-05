@@ -10,7 +10,7 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * The Interface PartitionDataSetMetabaseRepository.
  *
- * @author Mario Severa
+ *
  */
 public interface PartitionDataSetMetabaseRepository
     extends CrudRepository<PartitionDataSetMetabase, Long> {

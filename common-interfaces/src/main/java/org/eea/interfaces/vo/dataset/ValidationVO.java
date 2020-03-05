@@ -1,8 +1,8 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,10 +30,10 @@ public class ValidationVO implements Serializable {
   private String idRule;
 
   /** The level error. */
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /** The type entity. */
-  private TypeEntityEnum typeEntity;
+  private EntityTypeEnum typeEntity;
 
   /** The validation date. */
   private String validationDate;

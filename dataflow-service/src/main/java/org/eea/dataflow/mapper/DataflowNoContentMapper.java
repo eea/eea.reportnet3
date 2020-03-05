@@ -24,6 +24,7 @@ public interface DataflowNoContentMapper extends IMapper<Dataflow, DataFlowVO> {
   @Mapping(source = "documents", target = "documents", ignore = true)
   @Mapping(source = "weblinks", target = "weblinks", ignore = true)
   @Mapping(source = "contributors", target = "contributors", ignore = true)
+  @Mapping(source = "representatives", target = "representatives", ignore = true)
   DataFlowVO entityToClass(Dataflow entity);
 
 }

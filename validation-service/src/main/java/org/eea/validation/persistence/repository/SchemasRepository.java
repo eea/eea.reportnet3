@@ -7,12 +7,12 @@ import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+
 /**
  * The Interface SchemasRepository.
- *
- * @author Mario Severa
  */
-public interface SchemasRepository extends MongoRepository<DataSetSchema, ObjectId> {
+public interface SchemasRepository
+    extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
 
 
 

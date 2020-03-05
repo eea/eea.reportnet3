@@ -3,7 +3,7 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -55,7 +55,7 @@ public class RecordVO implements Serializable {
   private String sortCriteria;
 
   /** The level error. */
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * Hash code.

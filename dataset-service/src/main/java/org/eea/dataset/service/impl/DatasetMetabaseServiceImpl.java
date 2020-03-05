@@ -37,7 +37,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -318,10 +318,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasetSchema(dataschemaId);
 
-    Map<ReportingDataset, List<Statistics>> statsMap =
+    Map<DataSetMetabase, List<Statistics>> statsMap =
         stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
 
-    statsMap.values().stream().forEach(s -> {
+    Map<DataSetMetabase, List<Statistics>> statsMapsFilteredByReportings = statsMap.entrySet()
+        .stream().filter(dsMetabase -> dsMetabase.getKey() instanceof ReportingDataset)
+        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+    statsMapsFilteredByReportings.values().stream().forEach(s -> {
       try {
         statistics.add(processStatistics(s));
       } catch (InstantiationException | IllegalAccessException e) {
@@ -338,12 +342,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Creates the group provider and add user.
    *
    * @param datasetIdsEmail the dataset ids email
-   * @param representatives the representatives
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail,
-      List<RepresentativeVO> representatives, Long dataflowId) {
+  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long dataflowId) {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     Set<Long> datasetIds = datasetIdsEmail.keySet();
@@ -449,7 +451,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Async
   @org.springframework.transaction.annotation.Transactional(
       value = "metabaseDataSetsTransactionManager")
-  public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+  public Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
 
@@ -465,7 +467,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
               datasetIdsEmail
                   .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
             }
-            this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
+            this.createGroupProviderAndAddUser(datasetIdsEmail, dataflowId);
             if (iterationDC == 0) {
               // Notification
               kafkaSenderUtils.releaseNotificableKafkaEvent(

@@ -8,7 +8,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
@@ -142,7 +142,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   @Async
   public void propagateNewFieldDesign(Long datasetId, String idTableSchema, Integer sizeRecords,
-      Integer numPag, String uuId, String idFieldSchema, TypeData typeField) {
+      Integer numPag, String uuId, String idFieldSchema, DataType typeField) {
 
     synchronized (processesMap) {
       processesMap.put(uuId, 0);
@@ -170,7 +170,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param typeField the type field
    */
   public void releaseFieldPropagation(final Long datasetId, final String uuid, int numPag,
-      String idTableSchema, String idFieldSchema, TypeData typeField) {
+      String idTableSchema, String idFieldSchema, DataType typeField) {
 
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
