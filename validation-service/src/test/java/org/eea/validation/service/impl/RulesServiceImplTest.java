@@ -173,7 +173,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("idCodeList", 1L);
+    doc.put("codeListItems", "[2, 2]");
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
     RulesSchema ruleSchema = new RulesSchema();
@@ -182,7 +182,7 @@ public class RulesServiceImplTest {
         .thenReturn(ruleSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.CODELIST, EntityTypeEnum.FIELD, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 

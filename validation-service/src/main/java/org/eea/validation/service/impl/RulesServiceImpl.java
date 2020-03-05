@@ -173,8 +173,9 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Creates the automatic rules.
-   *
+   * Creates the automatic rules. That method create all automatic rules, and this check if that
+   * rules are about diferent types
+   * 
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
@@ -185,52 +186,57 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
       EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
-    Rule rule = new Rule();
+
+    List<Rule> ruleList = new ArrayList();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
     String shortcode = "01";
     if (required) {
       shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
-      rule = AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
-          "FC" + shortcode, FC_DESCRIPTION);
+      ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
+          "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
     } else {
       shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       switch (typeData) {
         case NUMBER:
-          rule = AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
+          ruleList.add(AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case DATE:
-          rule = AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
+          ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case BOOLEAN:
-          rule = AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
+          ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case COORDINATE_LAT:
-          rule = AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
+          ruleList.add(AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case COORDINATE_LONG:
-          rule = AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData);
+          ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case CODELIST:
-          // we find the idcodelist to create this validate
+          // we find values avaliable to create this validation for a codelist, same value with
+          // capital letter and without capital letters
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
-          rule = AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, document.get("idCodeList").toString(), "FT" + shortcode,
-              FT_DESCRIPTION + typeData);
+          ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, document.get("codeListItems").toString(), "FT" + shortcode,
+              FT_DESCRIPTION + typeData));
+
           break;
         default:
-          rule = null;
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
           break;
       }
     }
-    if (null != rule) {
-      rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+    if (!ruleList.isEmpty()) {
+      ruleList.stream().forEach(rule -> {
+        rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+      });
+
     }
   }
 
