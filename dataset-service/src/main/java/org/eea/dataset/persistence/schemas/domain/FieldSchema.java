@@ -3,7 +3,6 @@
  */
 package org.eea.dataset.persistence.schemas.domain;
 
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -59,8 +58,8 @@ public class FieldSchema {
   private Boolean isPK;
 
   /** The reference FK. */
-  @Field(value = "referenceFK")
-  private List<ObjectId> referenceFK;
+  @Field(value = "referencedField")
+  private ReferencedFieldSchema referencedField;
 
   /**
    * Hash code.
