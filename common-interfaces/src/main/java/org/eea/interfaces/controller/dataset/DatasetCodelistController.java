@@ -17,12 +17,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DatasetCodelistController.
+ *
+ * @deprecated (unused)
  */
 @Deprecated
 public interface DatasetCodelistController {
 
   /**
    * The Interface DataSetCodelistControllerZuul.
+   *
+   * @deprecated (unused)
    */
   @FeignClient(value = "dataset", contextId = "codelist", path = "/codelist")
   @Deprecated

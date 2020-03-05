@@ -8,6 +8,8 @@ import org.eea.interfaces.vo.dataset.CodelistVO;
 
 /**
  * The Interface CodelistService.
+ *
+ * @deprecated (unused)
  */
 @Deprecated
 public interface CodelistService {

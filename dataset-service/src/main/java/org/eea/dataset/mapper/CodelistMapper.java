@@ -12,6 +12,8 @@ import org.mapstruct.MappingTarget;
 
 /**
  * The Interface CodelistMapper.
+ *
+ * @deprecated (unused)
  */
 @Mapper(componentModel = "spring")
 @Deprecated

@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * The Interface CodelistRepository.
+ *
+ * @deprecated (unused)
  */
 @Deprecated
 public interface CodelistItemRepository extends JpaRepository<CodelistItem, Long> {
