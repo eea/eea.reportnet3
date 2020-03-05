@@ -6,7 +6,7 @@ import { Codelist } from 'core/domain/model/Codelist/Codelist';
 import { CodelistItem } from 'core/domain/model/Codelist/CodelistItem/CodelistItem';
 
 const addById = async (shortCode, description) => {
-  const codelistCategoryDTO = new CodelistCategory(null, shortCode, description);
+  const codelistCategoryDTO = new CodelistCategory({ description, shortCode });
   return await apiCodelistCategory.addById(codelistCategoryDTO);
 };
 
@@ -19,40 +19,48 @@ const all = async () => {
           const codelistItems = !isUndefined(codelistDTO.items)
             ? codelistDTO.items.map(
                 itemDTO =>
-                  new CodelistItem(itemDTO.id, itemDTO.shortCode, itemDTO.label, itemDTO.definition, codelistDTO.id)
+                  new CodelistItem({
+                    codelistId: codelistDTO.id,
+                    definition: itemDTO.definition,
+                    id: itemDTO.id,
+                    label: itemDTO.label,
+                    shortCode: itemDTO.shortCode
+                  })
               )
             : [];
-          return new Codelist(
-            codelistDTO.id,
-            codelistDTO.name,
-            codelistDTO.description,
-            codelistDTO.version,
-            codelistDTO.status,
-            codelistItems
-          );
+          return new Codelist({
+            description: codelistDTO.description,
+            id: codelistDTO.id,
+            items: codelistItems,
+            name: codelistDTO.name,
+            status: codelistDTO.status,
+            version: codelistDTO.version
+          });
         })
       : [];
-    return new CodelistCategory(
-      categoryDTO.id,
-      categoryDTO.shortCode,
-      categoryDTO.description,
+    return new CodelistCategory({
+      codelistNumber: categoryDTO.codelistNumber,
       codelists,
-      categoryDTO.codelistNumber
-    );
+      id: categoryDTO.id,
+      description: categoryDTO.description,
+      shortCode: categoryDTO.shortCode
+    });
   });
 };
 
-const deleteById = async codelistCategoryId => {
-  return await apiCodelistCategory.deleteById(codelistCategoryId);
-};
+const deleteById = async codelistCategoryId => await apiCodelistCategory.deleteById(codelistCategoryId);
 
 const getCategoryInfo = async codelistCategoryId => {
   const categoryDTO = await apiCodelistCategory.getCategoryInfo(codelistCategoryId);
-  return new CodelistCategory(categoryDTO.id, categoryDTO.shortCode, categoryDTO.description, null);
+  return new CodelistCategory({
+    description: categoryDTO.description,
+    id: categoryDTO.id,
+    shortCode: categoryDTO.shortCode
+  });
 };
 
 const updateById = async (id, shortCode, description) => {
-  const codelistCategoryDTO = new CodelistCategory(id, shortCode, description);
+  const codelistCategoryDTO = new CodelistCategory({ description, id, shortCode });
   return await apiCodelistCategory.updateById(codelistCategoryDTO);
 };
 

@@ -191,9 +191,7 @@ export const Tab = ({
         onInputBlur(event.target.value, index, initialTitleHeader);
       } else {
         if (!isUndefined(onTabNameError)) {
-          onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
-          setEditingHeader(true);
-          setHasErrors(true);
+          onTabAddCancel();
         }
       }
     }
@@ -335,9 +333,7 @@ export const Tab = ({
                   onInputBlur(e.target.value, index, initialTitleHeader);
                 } else {
                   if (!isUndefined(onTabNameError)) {
-                    onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
-                    setEditingHeader(true);
-                    setHasErrors(true);
+                    onTabAddCancel();
                   }
                 }
               }}
