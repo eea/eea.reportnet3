@@ -62,12 +62,10 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
         ThreadPropertiesManager.setVariable("user", user);
       }
       if (message.getData().containsKey("token")) {
-        String token =
-            jwtTokenProvider.retrieveAccessToken(message.getData().get("token").toString());
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-                token, null));
-        message.getData().put("token", token);
+        SecurityContextHolder.getContext()
+            .setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(user, new HashSet<>()),
+                message.getData().get("token").toString(), null));
       }
 
       command.execute(message);

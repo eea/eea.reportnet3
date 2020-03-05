@@ -14,7 +14,7 @@ import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +170,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the list
    */
   @Override
-  public TableVO findByTableValueWithOrder(String idTableSchema, List<TypeErrorEnum> levelErrorList,
+  public TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
       Pageable pageable, SortField... sortFields) {
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
@@ -179,13 +179,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     createSorterQuery(sortQueryBuilder, directionQueryBuilder, criteriaNumber, sortFields);
     String filter = "";
     Boolean containsCorrect = false;
-    List<TypeErrorEnum> errorList = new ArrayList<>();
+    List<ErrorTypeEnum> errorList = new ArrayList<>();
     // Filter Query by level Error if we havent lv error we do other things
     if (!levelErrorList.isEmpty()) {
 
       switch (levelErrorList.size()) {
         case 1:
-          if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
+          if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
             filter = CORRECT_APPEND_QUERY;
             containsCorrect = true;
           } else {
@@ -194,14 +194,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           }
           break;
         default:
-          if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
+          if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
             filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
             containsCorrect = true;
           } else {
             filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
           }
           for (int i = 0; i < levelErrorList.size(); i++) {
-            if (!levelErrorList.get(i).equals(TypeErrorEnum.CORRECT)) {
+            if (!levelErrorList.get(i).equals(ErrorTypeEnum.CORRECT)) {
               errorList.add(levelErrorList.get(i));
             }
           }

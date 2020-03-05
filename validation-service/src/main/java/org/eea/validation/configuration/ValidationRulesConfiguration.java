@@ -20,6 +20,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 
 /**
  * The Class ValidationConfiguration.
@@ -102,6 +103,16 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   @Override
   public MongoClient mongoClient() {
     return new MongoClient(host, port);
+  }
+
+  /**
+   * Mongo database.
+   *
+   * @return the mongo database
+   */
+  @Bean
+  public MongoDatabase mongoDatabase() {
+    return mongoClient().getDatabase(getDatabaseName());
   }
 
 

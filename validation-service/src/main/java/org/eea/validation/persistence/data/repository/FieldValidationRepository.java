@@ -1,7 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -63,7 +63,7 @@ public interface FieldValidationRepository extends CrudRepository<FieldValidatio
       + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=?1 and fv.fieldValue.record.tableValue.idTableSchema=?2 "
       + " AND fv.validation.levelError=?3")
   Long countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(Long datasetId,
-      String idTableSchema, TypeErrorEnum typeError);
+      String idTableSchema, ErrorTypeEnum typeError);
 
 
   /**

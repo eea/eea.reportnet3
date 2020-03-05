@@ -30,7 +30,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
@@ -138,7 +138,7 @@ public class DatasetMetabaseServiceTest {
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
     representative.setProviderAccount("test@reportnet.net");
-    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
+    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
         "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
 
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
@@ -157,7 +157,7 @@ public class DatasetMetabaseServiceTest {
   @Test
   public void createEmptyDatasetTest() throws EEAException {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
-    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, "datasetName",
+    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN, "datasetName",
         (new ObjectId()).toString(), 1L, null, null, 0);
   }
 
@@ -253,8 +253,7 @@ public class DatasetMetabaseServiceTest {
     representative.setDataProviderId(1L);
     Map<Long, String> mapTest = new HashMap<>();
     mapTest.put(1L, "test@reportnet.net");
-    datasetMetabaseService.createGroupProviderAndAddUser(mapTest, Arrays.asList(representative),
-        1L);
+    datasetMetabaseService.createGroupProviderAndAddUser(mapTest, 1L);
 
     Mockito.verify(resourceManagementControllerZuul, times(1)).createResources(Mockito.any());
 
@@ -277,7 +276,7 @@ public class DatasetMetabaseServiceTest {
     dataprovider.setLabel("test");
 
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
-    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.COLLECTION, "testName",
+    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.COLLECTION, "testName",
         "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<RepresentativeVO>(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());

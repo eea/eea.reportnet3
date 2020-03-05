@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetCodelistController.DataSetCodelistControllerZuul;
+import org.eea.interfaces.vo.dataset.CodelistVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -63,6 +65,8 @@ public class ValidationHelper {
   /** The drools active sessions. */
   private Map<String, KieBase> droolsActiveSessions;
 
+  /** The map code list. */
+  private ConcurrentHashMap<Long, List<String>> mapCodeList;
   /**
    * The field batch size.
    */
@@ -79,6 +83,11 @@ public class ValidationHelper {
   @Autowired
   private TableRepository tableRepository;
 
+
+  /** The data set codelist controller. */
+  @Autowired
+  private DataSetCodelistControllerZuul dataSetCodelistController;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -86,6 +95,30 @@ public class ValidationHelper {
     super();
     processesMap = new ConcurrentHashMap<>();
     droolsActiveSessions = new ConcurrentHashMap<>();
+    mapCodeList = new ConcurrentHashMap<>();
+  }
+
+  /**
+   * List items codelist.
+   *
+   * @param idCodelist the id codelist
+   * @return the list
+   */
+  public List<String> listItemsCodelist(Long idCodelist) {
+
+    // we find if that codelist is alredy inside the array
+    if (null == mapCodeList || null == mapCodeList.get(idCodelist)) {
+      CodelistVO codelist = dataSetCodelistController.getById(idCodelist);
+      List<String> itemsCodelist = new ArrayList<>();
+
+      codelist.getItems().forEach(items -> {
+        itemsCodelist.add(items.getShortCode());
+      });
+      if (null != mapCodeList) {
+        mapCodeList.put(idCodelist, itemsCodelist);
+      }
+    }
+    return null != mapCodeList ? mapCodeList.get(idCodelist) : new ArrayList<>();
   }
 
   /**
@@ -99,6 +132,7 @@ public class ValidationHelper {
    * @throws EEAException the eea exception
    */
   public KieBase getKieBase(String processId, Long datasetId) throws EEAException {
+
     KieBase kieBase = null;
     synchronized (droolsActiveSessions) {
       if (!droolsActiveSessions.containsKey(processId)) {
@@ -120,6 +154,7 @@ public class ValidationHelper {
       if (droolsActiveSessions.containsKey(processId)) {
         LOG.info("KieBase removed for process {}", processId);
         droolsActiveSessions.remove(processId);
+
       }
     }
   }
@@ -309,6 +344,7 @@ public class ValidationHelper {
       value.put("dataset_id", datasetId);
       value.put("uuid", uuid);
       this.removeKieBase(uuid);
+      mapCodeList.clear();
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))

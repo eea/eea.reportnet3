@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -34,7 +35,9 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/codelist")
 public class DatasetCodelistControllerImpl implements DatasetCodelistController {
 
-  /** The codelist service. */
+  /**
+   * The codelist service.
+   */
   @Autowired
   private CodelistService codelistService;
 
@@ -47,6 +50,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Gets the by id.
    *
    * @param codelistId the codelist id
+   *
    * @return the by id
    */
   @Override
@@ -71,6 +75,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Creates the.
    *
    * @param codelistVO the codelist VO
+   *
    * @return the long
    */
   @Override
@@ -99,6 +104,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Update.
    *
    * @param codelistVO the codelist VO
+   *
    * @return the long
    */
   @Override
@@ -128,6 +134,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    *
    * @param codelistId the codelist id
    * @param codelistVO the codelist VO
+   *
    * @return the long
    */
   @Override
@@ -172,6 +179,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Gets the category by id.
    *
    * @param codelistCategoryId the codelist category id
+   *
    * @return the category by id
    */
   @Override
@@ -218,6 +226,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Creates the category.
    *
    * @param codelistCategoryVO the codelist category VO
+   *
    * @return the long
    */
   @Override
@@ -244,6 +253,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Update category.
    *
    * @param codelistCategoryVO the codelist category VO
+   *
    * @return the long
    */
   @Override
@@ -287,15 +297,14 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Gets the all by id.
    *
    * @param codelistIds the codelist ids
+   *
    * @return the all by id
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<CodelistVO> getAllById(String codelistIds) {
-    if (StringUtils.isBlank(codelistIds)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CODELIST_NOT_FOUND);
-    }
+  public List<CodelistVO> getAllById(@RequestParam(value = "codelistIds") String codelistIds) {
+   
     Set<Long> codelistIdsSet = new HashSet<>();
     for (String item : codelistIds.split(",")) {
       codelistIdsSet.add(Long.valueOf(item));
@@ -316,6 +325,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
    * Gets the all by category id.
    *
    * @param codelistCategoryId the codelist category id
+   *
    * @return the all by category id
    */
   @Override

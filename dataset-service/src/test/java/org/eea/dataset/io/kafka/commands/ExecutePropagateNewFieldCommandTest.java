@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Before;
@@ -73,7 +73,7 @@ public class ExecutePropagateNewFieldCommandTest {
     data.put("idTableSchema", "5cf0e9b3b793310e9ceca190");
     data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
     data.put("uuId", "1");
-    data.put("typeField", TypeData.TEXT);
+    data.put("typeField", DataType.TEXT);
     data.put("numPag", 1);
     eeaEventVO.setData(data);
 
@@ -95,7 +95,7 @@ public class ExecutePropagateNewFieldCommandTest {
     data.put("sizeRecords", 1);
     data.put("idTableSchema", "5cf0e9b3b793310e9ceca190");
     data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
-    data.put("typeField", TypeData.TEXT);
+    data.put("typeField", DataType.TEXT);
     data.put("uuId", "1");
     eeaEventVO.setData(data);
 

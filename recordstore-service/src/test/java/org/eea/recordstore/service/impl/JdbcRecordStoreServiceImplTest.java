@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -186,7 +186,7 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
     Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(),
         Mockito.any());
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, TypeDatasetEnum.DESIGN, false, false);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

@@ -24,9 +24,8 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -141,21 +140,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Test load dataset data success.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDatasetDataSuccess() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    final EEAMockMultipartFile file =
-        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadTableData(1L, file, "example");
-  }
-
-
-  /**
    * Test load dataset data success 2.
    *
    * @throws Exception the exception
@@ -211,7 +195,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     String fields = "field_1,fields_2,fields_3";
-    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter);
   }
 
@@ -225,7 +209,7 @@ public class DataSetControllerImplTest {
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter);
   }
 
@@ -264,7 +248,7 @@ public class DataSetControllerImplTest {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     String fields = "field_1,fields_2,fields_3";
-    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
   }
 
@@ -280,73 +264,11 @@ public class DataSetControllerImplTest {
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
-  }
-
-
-
-  /**
-   * Load schema mongo exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(null, 1L, new TableCollectionVO());
-  }
-
-  /**
-   * Load schema mongo exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException2() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(1L, null, new TableCollectionVO());
-  }
-
-  /**
-   * Load schema mongo exception 3.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetSchemaException3() throws Exception {
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, null);
-  }
-
-  /**
-   * Load schema mongo EEA exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
-
-    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Load schema mongo success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
-
-    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
   }
 
   /**
@@ -467,7 +389,7 @@ public class DataSetControllerImplTest {
 
     when(datasetService.getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new ValidationLinkVO());
-    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.TABLE);
     Mockito.verify(datasetService, times(1)).getPositionFromAnyObjectId(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -494,7 +416,7 @@ public class DataSetControllerImplTest {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
         .getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, TypeEntityEnum.TABLE);
+    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.TABLE);
   }
 
 

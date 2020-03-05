@@ -50,6 +50,14 @@ public class Representative {
   @Column(name = "user_mail")
   private String userMail;
 
+  /** The receipt downloaded. */
+  @Column(name = "receipt_downloaded")
+  private Boolean receiptDownloaded;
+
+  /** The receipt outdated. */
+  @Column(name = "receipt_outdated")
+  private Boolean receiptOutdated;
+
   /**
    * Equals.
    *

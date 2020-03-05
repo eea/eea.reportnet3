@@ -30,4 +30,7 @@ public class SnapshotVO implements Serializable {
   /** The release. */
   private Boolean release;
 
+  /** The blocked. */
+  private Boolean blocked;
+
 }
