@@ -39,7 +39,7 @@ function boolean isCodelist( String value , String codelistItems , boolean sensi
 	if(!isBlank(value)){
 		return true;
 	}
-	return CodelistUtils.codelistValidate(value,codelistItems,sensitive);h
+	return CodelistUtils.codelistValidate(value,codelistItems,sensitive);
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
