@@ -1,7 +1,7 @@
 package org.eea.validation.util;
 
 /**
- * The Class CodeListUtils.
+ * The Class CodelistUtils.
  */
 public class CodelistUtils {
 
