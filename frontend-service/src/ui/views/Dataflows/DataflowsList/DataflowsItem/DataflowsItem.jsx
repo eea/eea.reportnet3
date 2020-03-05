@@ -103,6 +103,9 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedData
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
         </p>
+        <p>
+          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole}
+        </p>
       </div>
 
       <div className={`${styles.toolbar}`}>
