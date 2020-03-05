@@ -9,6 +9,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import styles from './DataflowsItem.module.scss';
 
 import { routes } from 'ui/routes';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -103,8 +104,10 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedData
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
         </p>
+      </div>
+      <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole}
+          <span>{`${resources.messages['role']}:`}</span> {DataflowConf.dataflowRoles[itemContent.userRole]}
         </p>
       </div>
 
