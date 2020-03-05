@@ -358,15 +358,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
-
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
     try {
-      String response;
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (StringUtils.isBlank(
-          response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO))) {
+      String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
+      if (StringUtils.isBlank(response)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
       // propagate the new field to the existing records in the dataset value
