@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -133,5 +134,16 @@ public interface DatasetSnapshotController {
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
 
 
+  /**
+   * Gets the released and updated status.
+   *
+   * @param idDataflow the id dataflow
+   * @param idDataProvider the id data provider
+   * @return the released and updated status
+   */
+  @GetMapping(value = "/dataflow/{idDataflow}/releaseStatus/{idDataProvider}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ReleaseReceiptVO getReleasedAndUpdatedStatus(@PathVariable("idDataflow") Long idDataflow,
+      @PathVariable("idDataProvider") Long idDataProvider);
 
 }

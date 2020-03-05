@@ -140,18 +140,19 @@ const Dataflows = withRouter(({ match, history }) => {
           label: 'createNewDataflow',
           onClick: () => onShowAddForm(),
           title: 'createNewDataflow'
-        },
-        {
-          className: 'dataflowList-manage-codelists-help-step',
-          href: getUrl(routes['CODELISTS']),
-          icon: 'clipboard',
-          label: 'manageCodelists',
-          onClick: e => {
-            e.preventDefault();
-            history.push(getUrl(routes['CODELISTS']));
-          },
-          title: 'manageCodelists'
         }
+        // {
+        //   className: 'dataflowList-manage-codelists-help-step',
+        //   href: getUrl(routes['CODELISTS']),
+        //   icon: 'clipboard',
+        //   label: 'manageCodelists',
+
+        //   onClick: e => {
+        //     e.preventDefault();
+        //     history.push(getUrl(routes['CODELISTS']));
+        //   },
+        //   title: 'manageCodelists'
+        // }
       ]);
       steps.push(
         {

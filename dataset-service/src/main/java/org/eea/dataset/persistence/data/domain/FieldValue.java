@@ -15,8 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,7 +49,7 @@ public class FieldValue {
    */
   @Column(name = "TYPE")
   @Enumerated(EnumType.STRING)
-  private TypeData type;
+  private DataType type;
 
   /**
    * The value.
@@ -78,7 +78,7 @@ public class FieldValue {
   private List<FieldValidation> fieldValidations;
 
   @Transient
-  private TypeErrorEnum levelError;
+  private ErrorTypeEnum levelError;
 
   /**
    * Hash code.

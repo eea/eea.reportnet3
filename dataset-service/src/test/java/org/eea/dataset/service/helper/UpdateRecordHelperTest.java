@@ -11,7 +11,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
@@ -87,7 +87,7 @@ public class UpdateRecordHelperTest {
   @Test
   public void propagateNewFieldDesignTest() {
     updateRecordHelper.propagateNewFieldDesign(1L, "5cf0e9b3b793310e9ceca190", 1, 1, "testUuid",
-        "5cf0e9b3b793310e9ceca190", TypeData.TEXT);
+        "5cf0e9b3b793310e9ceca190", DataType.TEXT);
     Mockito.verify(kafkaSender, times(2)).sendMessage(Mockito.any());
   }
 

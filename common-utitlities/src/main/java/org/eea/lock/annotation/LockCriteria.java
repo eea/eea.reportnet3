@@ -23,4 +23,11 @@ public @interface LockCriteria {
    * @return the string
    */
   public String name();
+
+  /**
+   * Path.
+   *
+   * @return the string
+   */
+  public String path() default "";
 }

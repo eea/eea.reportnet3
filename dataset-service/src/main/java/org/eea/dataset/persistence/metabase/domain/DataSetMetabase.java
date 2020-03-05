@@ -24,10 +24,8 @@ import lombok.ToString;
 /**
  * The Class DataSetMetabase.
  *
- * @author Mario Severa
+ * 
  */
-
-
 @Getter
 @Setter
 @ToString
