@@ -173,8 +173,9 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Creates the automatic rules.
-   *
+   * Creates the automatic rules. That method create all automatic rules, and this check if that
+   * rules are about diferent types
+   * 
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
