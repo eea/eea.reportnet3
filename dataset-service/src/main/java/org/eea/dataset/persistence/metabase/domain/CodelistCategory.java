@@ -18,12 +18,15 @@ import lombok.ToString;
 
 /**
  * The Class CodelistCategory.
+ *
+ * @deprecated (unused)
  */
 @Entity
 @Getter
 @Setter
 @ToString
 @Table(name = "CODELIST_CATEGORY")
+@Deprecated
 public class CodelistCategory {
 
   /** The id. */

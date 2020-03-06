@@ -9,10 +9,13 @@ import lombok.ToString;
 
 /**
  * The Class CodelistVO.
+ *
+ * @deprecated (unused)
  */
 @Getter
 @Setter
 @ToString
+@Deprecated
 public class CodelistVO {
 
   /** The id. */

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.CodelistService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -30,9 +29,12 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The Class DatasetCodelistControllerImpl.
+ *
+ * @deprecated (unused)
  */
 @RestController
 @RequestMapping("/codelist")
+@Deprecated
 public class DatasetCodelistControllerImpl implements DatasetCodelistController {
 
   /**
@@ -304,7 +306,7 @@ public class DatasetCodelistControllerImpl implements DatasetCodelistController 
   @HystrixCommand
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<CodelistVO> getAllById(@RequestParam(value = "codelistIds") String codelistIds) {
-   
+
     Set<Long> codelistIdsSet = new HashSet<>();
     for (String item : codelistIds.split(",")) {
       codelistIdsSet.add(Long.valueOf(item));
