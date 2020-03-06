@@ -489,6 +489,7 @@
     "deleteRuleError": "Error deleting rule",
     "deleteValidationConfirm": "Are you sure you want to delete the validation?",
     "deleteValidationHeader": "Delete validation",
-    "role": "Role"
+    "role": "Role",
+    "documentsActionColumns": "Actions"
   }
 }

@@ -301,7 +301,7 @@ const Codelist = ({
   const cloneCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success p-button-animated-blink"
+        className="p-button-primary p-button-animated-blink"
         disabled={
           isIncorrect ||
           codelistState.clonedCodelist.codelistName.trim() === '' ||
@@ -386,6 +386,7 @@ const Codelist = ({
   const renderDeleteDialog = () => {
     return codelistState.isDeleteCodelistItemVisible ? (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={onConfirmDeleteItem}
         onHide={() => toggleDialog('TOGGLE_DELETE_CODELIST_ITEM_VISIBLE', false)}
         visible={codelistState.isDeleteCodelistItemVisible}
