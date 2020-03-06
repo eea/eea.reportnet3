@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { config } from 'conf';
 import styles from './DataflowsList.module.scss';
+
+import { config } from 'conf';
 
 import { DataflowsItem } from './DataflowsItem';
 
@@ -29,9 +30,17 @@ const DataflowsList = ({
   });
 
   for (let i = 0; i < content.length; i++) {
+    const isDuplicated = DataflowsUtils.isDuplicateInObject(userRoles, 'id');
     dataflows.push({
       ...content[i],
-      ...userRoles.find(item => item.id === content[i].id)
+      ...(isDuplicated
+        ? userRoles.filter(item =>
+            item.duplicatedRoles
+              ? item.userRole === config.permissions['CUSTODIAN'] && delete item.duplicatedRoles
+              : item
+          )
+        : userRoles
+      ).find(item => item.id === content[i].id)
     });
   }
 
