@@ -244,6 +244,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   const renderConfirmDialog = () => {
     return (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteFieldTitle']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

@@ -52,7 +52,7 @@ const CategoryForm = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-primary"
         disabled={isIncorrect || Object.values(newCategory).includes('')}
         icon="save"
         label={resources.messages['save']}
