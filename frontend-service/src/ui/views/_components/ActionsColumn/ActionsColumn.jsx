@@ -1,13 +1,15 @@
 import React from 'react';
 
+import isNil from 'lodash/isNil';
+
 import styles from './ActionsColumn.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-const ActionsColumn = ({ onDeleteClick = undefined, onEditClick = undefined }) => {
+const ActionsColumn = ({ onDeleteClick, onEditClick }) => {
   return (
     <div className={styles.actionTemplate}>
-      {onEditClick && (
+      {!isNil(onEditClick) && (
         <Button
           type="button"
           icon="edit"
@@ -15,7 +17,7 @@ const ActionsColumn = ({ onDeleteClick = undefined, onEditClick = undefined }) =
           onClick={() => onEditClick()}
         />
       )}
-      {onDeleteClick && (
+      {!isNil(onDeleteClick) && (
         <Button
           type="button"
           icon="trash"

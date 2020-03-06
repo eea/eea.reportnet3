@@ -18,7 +18,6 @@ const Snapshots = ({
 }) => {
   const resources = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
-  console.log(snapshotContext.snapshotState.dialogMessage);
   return (
     <>
       <SnapshotSlideBar

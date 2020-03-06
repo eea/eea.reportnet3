@@ -74,23 +74,6 @@ const Documents = ({
           }}
           onEditClick={e => onEditDocument()}
         />
-        {/* <Button
-          type="button"
-          icon="edit"
-          className={`p-button-rounded p-button-secondary-transparent ${styles.editRowButton} p-button-animated-blink`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={e => onEditDocument()}
-        />
-        <Button
-          type="button"
-          icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-          className={`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton} p-button-animated-blink`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={() => {
-            setDeleteDialogVisible(true);
-            setRowDataState(rowData);
-          }}
-        /> */}
       </div>
     );
   };
@@ -105,7 +88,6 @@ const Documents = ({
         ) : (
           <div>
             <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
-            {/* <FontAwesomeIcon className={styles.downloadIconArrow} icon={AwesomeIcons('arrowDown')} /> */}
           </div>
         )}
       </span>

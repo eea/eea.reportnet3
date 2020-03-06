@@ -123,7 +123,14 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+  const actionTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}
+      onEditClick={() => {
+        '';
+      }}
+    />
+  );
 
   const columnStyles = field => {
     const style = {};
