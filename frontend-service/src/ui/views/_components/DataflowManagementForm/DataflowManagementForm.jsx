@@ -170,7 +170,7 @@ const DataflowManagementForm = ({
                       ? styles.primaryButton
                       : styles.disabledButton
                     : styles.disabledButton
-                } p-button-success p-button-animated-blink`}
+                } p-button-primary p-button-animated-blink`}
                 label={isEditForm ? resources.messages['save'] : resources.messages['create']}
                 disabled={isSubmitting}
                 icon={isEditForm ? 'save' : 'add'}

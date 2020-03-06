@@ -9,8 +9,11 @@ import org.mapstruct.Mapping;
 
 /**
  * The Interface CodelistItemMapper.
+ *
+ * @deprecated (unused)
  */
 @Mapper(componentModel = "spring")
+@Deprecated
 public interface CodelistItemMapper extends IMapper<CodelistItem, CodelistItemVO> {
 
   /**

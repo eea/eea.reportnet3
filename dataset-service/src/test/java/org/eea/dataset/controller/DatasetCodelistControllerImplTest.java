@@ -3,7 +3,6 @@ package org.eea.dataset.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.CodelistService;
@@ -26,7 +25,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DatasetCodelistControllerImplTest.
+ *
+ * @deprecated (unused)
  */
+@Deprecated
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetCodelistControllerImplTest {
 
@@ -517,7 +519,7 @@ public class DatasetCodelistControllerImplTest {
     Mockito.verify(codelistService, times(1)).deleteCategory(Mockito.any());
   }
 
-  
+
   /**
    * Gets the all by id exception 3 test.
    *

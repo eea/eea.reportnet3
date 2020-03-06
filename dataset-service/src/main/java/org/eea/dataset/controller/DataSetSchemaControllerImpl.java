@@ -166,8 +166,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
-  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("/getDataSchema/{datasetId}")
   public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDatasetSchemaId(datasetId);
@@ -345,7 +344,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema and propagate the mew field to create it in the dataset for testing.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
@@ -359,15 +358,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
-
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
     try {
-      String response;
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (StringUtils.isBlank(
-          response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO))) {
+      String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
+      if (StringUtils.isBlank(response)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
       // propagate the new field to the existing records in the dataset value
@@ -390,7 +387,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Update field schema.
+   * Update field schema and propagate the rules to dataset.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO

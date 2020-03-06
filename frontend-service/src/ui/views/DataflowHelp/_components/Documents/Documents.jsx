@@ -8,6 +8,7 @@ import styles from './Documents.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -66,22 +67,12 @@ const Documents = ({
   const documentsEditButtons = rowData => {
     return (
       <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
-        <Button
-          type="button"
-          icon="edit"
-          className={`p-button-rounded p-button-secondary-transparent ${styles.editRowButton} p-button-animated-blink`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={e => onEditDocument()}
-        />
-        <Button
-          type="button"
-          icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-          className={`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton} p-button-animated-blink`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={() => {
+        <ActionsColumn
+          onDeleteClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
           }}
+          onEditClick={e => onEditDocument()}
         />
       </div>
     );
@@ -97,7 +88,6 @@ const Documents = ({
         ) : (
           <div>
             <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
-            {/* <FontAwesomeIcon className={styles.downloadIconArrow} icon={AwesomeIcons('arrowDown')} /> */}
           </div>
         )}
       </span>
@@ -231,12 +221,6 @@ const Documents = ({
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
         value={documents}>
-        {isCustodian && !isEmpty(documents) ? (
-          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
-        ) : (
-          <Column className={styles.hideColumn} />
-        )}
-
         <Column
           body={titleColumnTemplate}
           columnResizeMode="expand"
@@ -299,6 +283,16 @@ const Documents = ({
           header={resources.messages['file']}
           style={{ textAlign: 'center', width: '8em' }}
         />
+        {isCustodian && !isEmpty(documents) ? (
+          <Column
+            className={styles.crudColumn}
+            body={documentsEditButtons}
+            header={resources.messages['documentsActionColumns']}
+            style={{ width: '5em' }}
+          />
+        ) : (
+          <Column className={styles.hideColumn} />
+        )}
       </DataTable>
 
       <Dialog
@@ -319,6 +313,7 @@ const Documents = ({
       </Dialog>
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

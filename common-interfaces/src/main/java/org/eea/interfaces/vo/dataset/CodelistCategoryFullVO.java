@@ -7,10 +7,13 @@ import lombok.ToString;
 
 /**
  * The Class CodelistVO.
+ *
+ * @deprecated (unused)
  */
 @Getter
 @Setter
 @ToString
+@Deprecated
 public class CodelistCategoryFullVO {
 
   /** The id. */
