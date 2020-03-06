@@ -8,7 +8,7 @@ import styles from './Dataflows.module.scss';
 import { config } from 'conf';
 
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
-import { DataflowsList } from './DataflowsList';
+import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
