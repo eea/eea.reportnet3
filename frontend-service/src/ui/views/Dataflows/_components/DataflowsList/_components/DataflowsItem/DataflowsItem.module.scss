@@ -15,7 +15,7 @@
       height: 100%;
       flex: auto;
       display: grid;
-      grid-template-columns: 4% 76% 20%;
+      grid-template-columns: 4% 76% 16%;
       grid-template-rows: 15% 50% 15%;
       row-gap: 1rem;
       column-gap: 1.5rem;
@@ -129,6 +129,21 @@
     }
   }
 
+  .role {
+    grid-row: 1/2;
+    grid-column: 3/3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    p {
+      margin: 0px;
+      font-weight: bold;
+      span {
+        font-weight: normal;
+      }
+    }
+  }
+
   .toolbar {
     grid-column: 3/4;
     grid-row: 3/4;
@@ -199,6 +214,10 @@
       grid-column: 1/2;
       justify-content: center;
       font-size: 0.9rem;
+    }
+    .role {
+      grid-column: 2/2;
+      justify-content: center;
     }
     .toolbar {
       grid-column: 2/3;
