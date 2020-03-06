@@ -6,42 +6,34 @@ import java.util.Map;
 public enum RuleOperatorEnum {
 
   // Arithmetic operators
-  EQ("==", false), DIST("!=", false), GT(">", false), LT("<", false), GTEQ(">=", false), LTEQ("<=",
-      false),
+  EQ("=="), DIST("!="), GT(">"), LT("<"), GTEQ(">="), LTEQ("<="),
 
   // Logical operators
-  AND("&&", false), OR("||", false), NOT("!", true),
+  AND("&&"), OR("||"), NOT("!"),
 
-  // String operators
-  SEQ("equals", true), SEQIC("equalsIgnoreCase", true);
+  // Functions
+  LEN("length"), SEQ("equals"), SEQIC("equalsIgnoreCase");
 
   private final String label;
-
-  private final boolean isBasic;
 
   private final static Map<String, RuleOperatorEnum> map;
 
   static {
     map = new HashMap<>();
     for (RuleOperatorEnum e : values()) {
-      map.put(e.getValue(), e);
+      map.put(e.getLabel(), e);
     }
   }
 
-  RuleOperatorEnum(String label, boolean isBasic) {
+  RuleOperatorEnum(String label) {
     this.label = label;
-    this.isBasic = isBasic;
   }
 
   public static RuleOperatorEnum valueOfLabel(String label) {
     return map.get(label);
   }
 
-  public String getValue() {
+  public String getLabel() {
     return label;
-  }
-
-  public boolean isBasic() {
-    return isBasic;
   }
 }
