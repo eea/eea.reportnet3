@@ -202,7 +202,6 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
-      console.log({ levelErrorValidations });
       const removeSelectAllFromList = levelErrorValidations => {
         levelErrorValidations = levelErrorValidations
           .map(error => error.toUpperCase())

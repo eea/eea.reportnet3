@@ -108,7 +108,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, [steps]);
 
   useEffect(() => {
-    console.log(documents, steps);
     if (!isEmpty(documents)) {
       const inmSteps = cloneDeep(steps);
       inmSteps.push(
@@ -263,7 +262,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   };
 
   const setHelpSteps = e => {
-    console.log({ e });
     switch (e.index) {
       case 0:
         filterHelpSteps('documents');
@@ -324,7 +322,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             target: '.dataflowHelp-document-refresh-help-step'
           }
         );
-        console.log('DOCUMENTSSS');
         if (!isEmpty(documents)) {
           dataflowSteps.push(
             {

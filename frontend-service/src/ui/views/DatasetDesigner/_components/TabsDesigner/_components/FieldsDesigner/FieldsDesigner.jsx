@@ -1,5 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { capitalize, isUndefined, isNull } from 'lodash';
+
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './FieldsDesigner.module.scss';
 
@@ -40,7 +45,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       !isUndefined(table.records) &&
       !isNull(table.records[0].fields)
     ) {
-      getCodelistInfo(table.records[0].fields);
+      setFields(table.records[0].fields);
     }
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description);
@@ -60,28 +65,14 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     );
   };
 
-  const onFieldAdd = (
-    fieldId,
-    fieldName,
-    recordId,
-    fieldType,
-    fieldDescription,
-    codelistId,
-    codelistName,
-    codelistVersion,
-    codelistItems,
-    required
-  ) => {
+  const onFieldAdd = ({ codelistItems, description, id, name, type, recordId, required }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
-      fieldId,
-      name: fieldName,
+      id,
+      name,
       recordId,
-      type: fieldType,
-      description: fieldDescription,
-      codelistId,
-      codelistName,
-      codelistVersion,
+      type,
+      description,
       codelistItems,
       required
     });
@@ -94,26 +85,13 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = (
-    fieldId,
-    fieldName,
-    fieldType,
-    fieldDescription,
-    codelistId,
-    codelistName,
-    codelistVersion,
-    codelistItems,
-    required
-  ) => {
+  const onFieldUpdate = ({ id, name, type, description, codelistItems, required }) => {
     const inmFields = [...fields];
-    const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
+    const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
     if (fieldIndex > -1) {
-      inmFields[fieldIndex].name = fieldName;
-      inmFields[fieldIndex].type = fieldType;
-      inmFields[fieldIndex].description = fieldDescription;
-      inmFields[fieldIndex].codelistId = codelistId;
-      inmFields[fieldIndex].codelistName = codelistName;
-      inmFields[fieldIndex].codelistVersion = codelistVersion;
+      inmFields[fieldIndex].name = name;
+      inmFields[fieldIndex].type = type;
+      inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].required = required;
       setFields(inmFields);
@@ -171,36 +149,6 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     </div>
   );
 
-  const getCodelistInfo = tableFields => {
-    const tableFieldsWithCodelistData = tableFields.map(async field => {
-      if (field.type.toUpperCase() === 'CODELIST' && !isNull(field.codelistId)) {
-        try {
-          const response = await CodelistService.getById(field.codelistId);
-          field.codelistId = response.id;
-          field.codelistName = response.name;
-          field.codelistVersion = response.version;
-          field.codelistItems = response.items;
-
-          return field;
-        } catch (error) {
-          console.error(error);
-          // notificationContext.add({
-          //   type: 'CLONE_CODELIST_ERROR',
-          //   content: {
-          //     // dataflowId,
-          //     // datasetId
-          //   }
-          // });
-        }
-      } else {
-        return field;
-      }
-    });
-    Promise.all(tableFieldsWithCodelistData).then(completeFields => {
-      setFields(completeFields);
-    });
-  };
-
   const previewData = () => {
     const tableSchemaColumns =
       !isUndefined(fields) && !isNull(fields)
@@ -211,9 +159,6 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
               header: `${capitalize(field['name'])}`,
               type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: field.codelistName,
-              codelistVersion: field.codelistVersion,
               codelistItems: field.codelistItems,
               required: field.required
             };
@@ -290,10 +235,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
         <FieldDesigner
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-          codelistId=""
           codelistItems={[]}
-          codelistName=""
-          codelistVersion=""
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
@@ -316,15 +258,12 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
 
   const renderFields = () => {
     const renderedFields =
-      !isUndefined(fields) && !isNull(fields) ? (
+      !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => (
           <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
             <FieldDesigner
               checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-              codelistId={field.codelistId}
-              codelistItems={field.codelistItems}
-              codelistName={field.codelistName}
-              codelistVersion={field.codelistVersion}
+              codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
               datasetId={datasetId}
               fieldDescription={field.description}
               fieldId={field.fieldId}
@@ -423,14 +362,16 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
-      <div className={styles.fieldsHeader}>
-        <label></label>
-        <label>{resources.messages['required']}</label>
-        <label>{resources.messages['pk']}</label>
-        <label>{resources.messages['newFieldPlaceHolder']}</label>
-        <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
-        <label>{resources.messages['newFieldTypePlaceHolder']}</label>
-      </div>
+      {!isPreviewModeOn ? (
+        <div className={styles.fieldsHeader}>
+          <label></label>
+          <label>{resources.messages['required']}</label>
+          <label>{resources.messages['pk']}</label>
+          <label>{resources.messages['newFieldPlaceHolder']}</label>
+          <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
+          <label>{resources.messages['newFieldTypePlaceHolder']}</label>
+        </div>
+      ) : null}
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible ? renderConfirmDialog() : null}

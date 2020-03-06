@@ -13,12 +13,12 @@ import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});
-
+  console.log({ datasetTableRecordField });
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
-  datasetTableFieldDesign.idCodeList = datasetTableRecordField.codelistId;
+  datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
@@ -244,7 +244,7 @@ const schemaById = async datasetId => {
           const fields = !isNull(dataTableRecordDTO.fieldSchema)
             ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
                 return new DatasetTableField({
-                  codelistId: DataTableFieldDTO.idCodeList,
+                  codelistItems: DataTableFieldDTO.codelistItems,
                   description: DataTableFieldDTO.description,
                   fieldId: DataTableFieldDTO.id,
                   name: DataTableFieldDTO.name,
@@ -438,12 +438,13 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
+  console.log({ record });
   const datasetTableFieldDesign = new DatasetTableField({});
   datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
-  datasetTableFieldDesign.idCodeList = record.codelistId;
+  datasetTableFieldDesign.codelistItems = record.codelistItems;
   datasetTableFieldDesign.required = record.required;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;

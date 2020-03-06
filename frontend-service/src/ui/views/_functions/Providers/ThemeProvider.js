@@ -262,7 +262,14 @@ export const ThemeProvider = ({ children }) => {
         'drag-and-drop-arrow-color': 'var(--c-corporate-blue)',
         'drag-and-drop-arrow-opacity': '0.6',
         'drag-and-drop-div-border': '1px dashed var(--c-corporate-blue)',
-        'drag-and-drop-div-opacity': '0.7'
+        'drag-and-drop-div-opacity': '0.7',
+        'chips-input-box-shadow': '0 0 0 0.2em var(--c-corporate-blue)',
+        'chips-input-box-shadow-error': '0 0 0 0.2em var(--errors)',
+        'chips-input-border-color': 'var(--c-corporate-blue)',
+        'chips-input-border-color-hover': 'var(--c-corporate-blue)',
+        'chips-input-color': 'var(--black)',
+        'chips-token-bg': 'var(--c-corporate-blue)',
+        'chips-token-color': 'var(--white)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -505,7 +512,14 @@ export const ThemeProvider = ({ children }) => {
         'drag-and-drop-arrow-color': 'var(--c-corporate-yellow)',
         'drag-and-drop-arrow-opacity': '1',
         'drag-and-drop-div-border': '1px dashed var(--c-corporate-yellow)',
-        'drag-and-drop-div-opacity': '0.7'
+        'drag-and-drop-div-opacity': '0.7',
+        'chips-input-box-shadow': '0 0 0 0.2em var(--c-corporate--lighter)',
+        'chips-input-box-shadow-error': '0 0 0 0.2em var(--errors)',
+        'chips-input-border-color': 'var(--c-corporate-blue-lighter)',
+        'chips-input-border-color-hover': 'var(--c-corporate-blue-lighter)',
+        'chips-input-color': 'var(--white)',
+        'chips-token-bg': 'var(--c-corporate-blue-lighter)',
+        'chips-token-color': 'var(--white)'
       }
     }
   });
