@@ -45,7 +45,7 @@ const CodelistForm = ({
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success p-button-animated-blink"
+        className="p-button-primary p-button-animated-blink"
         disabled={isSaveDisabled}
         icon="save"
         label={resources.messages['save']}

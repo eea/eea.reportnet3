@@ -497,6 +497,7 @@
     "operator": "Operator",
     "value": "Value",
     "addNewRule": "Add new rule",
-    "union": "Union"
+    "union": "Union",
+    "documentsActionColumns": "Actions"
   }
 }

@@ -467,7 +467,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema in mongo.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
@@ -488,7 +488,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Update field schema.
+   * Update field schema in mongo and check if the field is a codelist or not.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
@@ -511,8 +511,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
           if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              && fieldSchema.containsKey("idCodeList")) {
-            fieldSchema.remove("idCodeList");
+              && fieldSchema.containsKey("codelistItems")) {
+            fieldSchema.remove("codelistItems");
           }
         }
         if (fieldSchemaVO.getDescription() != null) {
@@ -521,8 +521,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getName() != null) {
           fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
-        if (fieldSchemaVO.getIdCodeList() != null) {
-          fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
+        if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
+            && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
+          fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
         }
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
