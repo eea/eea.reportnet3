@@ -240,7 +240,7 @@ const Category = ({
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-primary"
         disabled={
           isIncorrect ||
           categoryState.isSaving ||
@@ -275,7 +275,7 @@ const Category = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-success"
+        className="p-button-primary"
         disabled={
           isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
         }
@@ -385,6 +385,7 @@ const Category = ({
   const renderDeleteDialog = () => {
     return categoryState.isDeleteConfirmDialogVisible ? (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={onConfirmDeleteCategory}
         onHide={() => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', false)}
         visible={categoryState.isDeleteConfirmDialogVisible}
