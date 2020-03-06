@@ -4,9 +4,9 @@ import styles from './DataflowsList.module.scss';
 
 import { config } from 'conf';
 
-import { DataflowsItem } from './DataflowsItem';
+import { DataflowsItem } from './_components/DataflowsItem';
 
-import { DataflowsUtils } from '../_functions/Utils/DataflowsUtils';
+import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 
 const DataflowsList = ({
   className,
@@ -30,7 +30,7 @@ const DataflowsList = ({
   });
 
   for (let i = 0; i < content.length; i++) {
-    const isDuplicated = DataflowsUtils.isDuplicateInObject(userRoles, 'id');
+    const isDuplicated = DataflowsUtils.isDuplicatedInObject(userRoles, 'id');
     dataflows.push({
       ...content[i],
       ...(isDuplicated

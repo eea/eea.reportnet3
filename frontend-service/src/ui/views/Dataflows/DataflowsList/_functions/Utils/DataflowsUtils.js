@@ -1,9 +1,9 @@
-const isDuplicateInObject = (array, property) => {
+const isDuplicatedInObject = (array, property) => {
   let isDuplicated = false,
     testObject = {};
 
   array.map(item => {
-    let itemPropertyName = item[property];
+    const itemPropertyName = item[property];
     if (itemPropertyName in testObject) {
       testObject[itemPropertyName].duplicatedRoles = true;
       item.duplicatedRoles = true;
@@ -17,26 +17,24 @@ const isDuplicateInObject = (array, property) => {
 };
 
 const reduceString = (text, prefix, suffix) => {
-  let string = text;
-  let index = string.indexOf(prefix);
-
+  let index = text.indexOf(prefix);
   if (index >= 0) {
-    string = string.substring(index + prefix.length);
+    text = text.substring(index + prefix.length);
   } else {
     return '';
   }
   if (suffix) {
-    index = string.indexOf(suffix);
+    index = text.indexOf(suffix);
     if (index < 0) {
       return '';
     } else {
-      string = string.substring(0, index);
+      text = text.substring(0, index);
     }
   }
-  return string;
+  return text;
 };
 
 export const DataflowsUtils = {
-  isDuplicateInObject,
+  isDuplicatedInObject,
   reduceString
 };
