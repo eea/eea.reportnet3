@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { config } from 'conf/';
+
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -20,27 +22,7 @@ const ValidationExpresion = ({
   const resourcesContext = useContext(ResourcesContext);
   const { expresionId } = expresionValues;
   const [operatorValues, setOperatorValues] = useState([]);
-  const operatorTypes = {
-    number: {
-      option: { label: 'Number', value: 'number' },
-      values: [
-        { label: '>', value: '>' },
-        { label: '<', value: '<' },
-        { label: '>=', value: '>=' },
-        { label: '<=', value: '<=' },
-        { label: '=', value: '=' },
-        { label: '!=', value: '!=' }
-      ]
-    }
-    // string: {
-    //   option: { label: 'String', value: 'string' },
-    //   values: [{ label: 'length', value: 'length' }]
-    // },
-    // all: {
-    //   option: { label: 'All', value: 'all' },
-    //   values: []
-    // }
-  };
+  const operatorTypes = config.validations.operatorTypes;
   const getOperatorTypeOptions = () => {
     const options = [];
     for (const type in operatorTypes) {
@@ -70,10 +52,7 @@ const ValidationExpresion = ({
           appendTo={document.body}
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
-          options={[
-            { label: 'AND', value: 'AND' },
-            { label: 'OR', value: 'OR' }
-          ]}
+          options={config.validations.logicalOperators}
           onChange={e =>
             onExpresionFieldUpdate(expresionId, {
               key: 'union',
