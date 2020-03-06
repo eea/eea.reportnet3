@@ -488,6 +488,7 @@
     "releaseBlockedEvent": "The data can't be released because contains blocker errors",
     "deleteRuleError": "Error deleting rule",
     "deleteValidationConfirm": "Are you sure you want to delete the validation?",
-    "deleteValidationHeader": "Delete validation"
+    "deleteValidationHeader": "Delete validation",
+    "documentsActionColumns": "Actions"
   }
 }

@@ -10,7 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
-export function SnapshotItem({ itemData, isReleaseVisible }) {
+const SnapshotItem = ({ itemData, isReleaseVisible }) => {
   const snapshotContext = useContext(SnapshotContext);
 
   const resources = useContext(ResourcesContext);
@@ -92,4 +92,5 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
       </div>
     </li>
   );
-}
+};
+export { SnapshotItem };

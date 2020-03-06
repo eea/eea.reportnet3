@@ -313,6 +313,7 @@ export const WebLinks = ({
       </Dialog>
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
