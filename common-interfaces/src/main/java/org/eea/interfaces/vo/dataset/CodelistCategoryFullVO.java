@@ -7,6 +7,8 @@ import lombok.ToString;
 
 /**
  * The Class CodelistVO.
+ *
+ * @deprecated (unused)
  */
 @Getter
 @Setter

@@ -39,9 +39,6 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const onDeleteValidation = async () => {
     try {
       const response = await ValidationService.deleteById(datasetSchemaId, validationId);
-      notificationContext.add({
-        type: 'DELETE_RULE_ERROR'
-      });
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
@@ -126,7 +123,14 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} onEditClick={() => ''} />;
+  const actionTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}
+      onEditClick={() => {
+        '';
+      }}
+    />
+  );
 
   const columnStyles = field => {
     const style = {};
@@ -189,7 +193,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         <div className={null}>
           <DataTable
             autoLayout={true}
-            className={null}
+            className={styles.paginatorValidationViewer}
             loading={false}
             onRowClick={event => setValidationId(event.data.id)}
             paginator={true}
@@ -231,6 +235,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       {validationList()}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

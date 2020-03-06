@@ -37,6 +37,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * The Class CodelistServiceImplTest.
+ *
+ * @deprecated (unused)
  */
 @RunWith(MockitoJUnitRunner.class)
 @Deprecated

@@ -25,6 +25,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DatasetCodelistControllerImplTest.
+ *
+ * @deprecated (unused)
  */
 @Deprecated
 @RunWith(MockitoJUnitRunner.class)

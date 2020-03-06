@@ -275,6 +275,7 @@ export const BigButtonList = ({
       </Dialog>
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['delete'].toUpperCase()}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

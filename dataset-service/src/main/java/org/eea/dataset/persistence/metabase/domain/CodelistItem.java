@@ -16,6 +16,8 @@ import lombok.ToString;
 
 /**
  * The Class CodelistItem.
+ *
+ * @deprecated (unused)
  */
 @Entity
 @Getter

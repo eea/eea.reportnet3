@@ -59,6 +59,7 @@
     "create": "Create",
     "createAndRelease": "Create a copy and release it",
     "createDataCollection": "Create data collections",
+    "createFieldQC": "Create field QC",
     "createNewDataflow": "Create new dataflow",
     "createNewDatasetFromTemplate": "New dataset from template",
     "createNewEmptyDatasetSchema": "New empty dataset schema",
@@ -200,7 +201,6 @@
     "emptyReleasedDashboard": "There is no released data available",
     "emptySnapshotList": "There is no created copy to release",
     "emptyTabHeader": "Empty table name",
-    "emptyTabHeaderError": "Table should have a name, please enter one",
     "emptyTitleValidationError": "Please enter a title",
     "emptyValidations": "There are no validations defined yet.",
     "error": "Error",
@@ -488,6 +488,8 @@
     "releaseBlockedEvent": "The data can't be released because contains blocker errors",
     "deleteRuleError": "Error deleting rule",
     "deleteValidationConfirm": "Are you sure you want to delete the validation?",
-    "deleteValidationHeader": "Delete validation"
+    "deleteValidationHeader": "Delete validation",
+    "role": "Role",
+    "documentsActionColumns": "Actions"
   }
 }

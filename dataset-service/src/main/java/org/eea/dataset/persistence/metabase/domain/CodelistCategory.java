@@ -18,6 +18,8 @@ import lombok.ToString;
 
 /**
  * The Class CodelistCategory.
+ *
+ * @deprecated (unused)
  */
 @Entity
 @Getter

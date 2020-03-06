@@ -753,7 +753,7 @@ export const FieldDesigner = ({
             icon="horizontalSliders"
             onClick={() => setIsQCManagerVisible(true)}
             style={{ marginLeft: '0.4rem', alignSelf: !isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['editFieldQC']}
+            tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}

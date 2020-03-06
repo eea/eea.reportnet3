@@ -1,15 +1,15 @@
 export class DatasetTable {
-  constructor(
+  constructor({
     hasErrors,
-    tableSchemaId,
-    tableSchemaName,
-    recordsWithoutErrorsPercentage,
+    recordSchemaId,
+    records,
     recordsWithErrorsPercentage,
     recordsWithWarningsPercentage,
-    records,
-    totalRecords,
-    recordSchemaId
-  ) {
+    recordsWithoutErrorsPercentage,
+    tableSchemaId,
+    tableSchemaName,
+    totalRecords
+  } = {}) {
     this.hasErrors = hasErrors;
     this.records = records;
     this.recordSchemaId = recordSchemaId;

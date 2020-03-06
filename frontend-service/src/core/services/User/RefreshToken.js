@@ -1,1 +1,1 @@
-export const RefreshToken = ({ userRepository }) => async refreshToken => userRepository.refreshToken(refreshToken);
+export const RefreshToken = ({ userRepository }) => async () => userRepository.refreshToken();
