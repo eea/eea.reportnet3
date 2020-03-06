@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
 
@@ -43,7 +43,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
-
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowAcceptedPendingTab'],

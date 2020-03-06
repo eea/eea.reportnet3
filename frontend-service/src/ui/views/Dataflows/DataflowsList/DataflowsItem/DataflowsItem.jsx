@@ -1,21 +1,23 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import { isEmpty, isUndefined } from 'lodash';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowsItem.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedDataflowId, type }) => {
   const resources = useContext(ResourcesContext);
