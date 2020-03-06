@@ -498,6 +498,7 @@
     "value": "Value",
     "addNewRule": "Add new rule",
     "union": "Union",
+    "role": "Role",
     "documentsActionColumns": "Actions"
   }
 }

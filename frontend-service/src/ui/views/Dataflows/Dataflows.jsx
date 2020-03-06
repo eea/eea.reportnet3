@@ -1,16 +1,15 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
-import { DataflowsList } from './DataflowsList';
+import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
-
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
@@ -19,11 +18,12 @@ import { DataflowService } from 'core/services/Dataflow';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -43,7 +43,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setpendingContent] = useState([]);
-
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowAcceptedPendingTab'],
@@ -228,6 +227,7 @@ const Dataflows = withRouter(({ match, history }) => {
               isCustodian={isCustodian}
               title={resources.messages.pendingDataflowTitle}
               type="pending"
+              user={user}
             />
             <DataflowsList
               className="dataflowList-accepted-help-step"
@@ -238,6 +238,7 @@ const Dataflows = withRouter(({ match, history }) => {
               selectedDataflowId={dataflowState.selectedDataflowId}
               title={resources.messages.acceptedDataflowTitle}
               type="accepted"
+              user={user}
             />
           </>
         ) : (
@@ -249,6 +250,7 @@ const Dataflows = withRouter(({ match, history }) => {
               isCustodian={isCustodian}
               title={resources.messages.completedDataflowTitle}
               type="completed"
+              user={user}
             />
           </>
         )}
