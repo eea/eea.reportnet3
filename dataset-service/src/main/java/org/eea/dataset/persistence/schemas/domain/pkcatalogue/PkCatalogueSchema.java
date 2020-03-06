@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.schemas.domain.pkcatalogue;
 
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -21,6 +22,7 @@ import lombok.ToString;
 public class PkCatalogueSchema {
 
   /** The id pk. */
+  @Id
   @Field(value = "idPk")
   private ObjectId idPk;
 

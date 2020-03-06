@@ -18,6 +18,8 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -117,6 +119,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DatasetService datasetService;
 
+
+  @Autowired
+  private PkCatalogueRepository pkCatalogueRepository;
 
   /**
    * The Constant LOG.
@@ -529,6 +534,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
         }
 
+
         // Guardar el FieldSchema modificado en MongoDB
         UpdateResult updateResult =
             schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
@@ -671,6 +677,61 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
 
+  }
+
+  @Override
+  public Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
+
+    Boolean allow = true;
+    DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+
+    TableSchemaVO table =
+        schema.getTableSchemas().stream()
+            .filter(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
+                .allMatch(field -> field.getId().equals(fieldSchemaVO.getId())))
+            .findAny().orElse(null);
+
+    Boolean existingPK = false;
+    if (table != null) {
+      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIsPK() != null && field.getIsPK()
+            && !field.getId().equals(fieldSchemaVO.getId())) {
+          existingPK = true;
+        }
+      }
+    }
+
+    Boolean isPKused = false;
+    PkCatalogueSchema catalogue =
+        pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
+            .orElse(new PkCatalogueSchema());
+    if (catalogue != null && catalogue.getReferenced() != null
+        && !catalogue.getReferenced().isEmpty()) {
+      isPKused = true;
+    }
+
+    if (existingPK || isPKused) {
+      allow = false;
+    }
+    return allow;
+
+  }
+
+
+  @Override
+  public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
+
+    PkCatalogueSchema catalogue =
+        pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
+            .orElse(new PkCatalogueSchema());
+    if (catalogue.getIdPk() != null) {
+      catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+    } else {
+      catalogue.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      catalogue.setReferenced(new ArrayList<>());
+      catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+    }
+    pkCatalogueRepository.save(catalogue);
   }
 
 }

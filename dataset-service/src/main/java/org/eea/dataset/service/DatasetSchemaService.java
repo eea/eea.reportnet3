@@ -206,4 +206,8 @@ public interface DatasetSchemaService {
   void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
       DataType type, Long datasetId);
 
+  Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
+
+  void updatePkCatalogue(FieldSchemaVO fieldSchemaVO);
+
 }
