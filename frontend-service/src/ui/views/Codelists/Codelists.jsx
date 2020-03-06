@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
-const Codelists = withRouter(({ match, history, isCustodian = false }) => {
+const Codelists = withRouter(({ history, isCustodian = false, match }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);

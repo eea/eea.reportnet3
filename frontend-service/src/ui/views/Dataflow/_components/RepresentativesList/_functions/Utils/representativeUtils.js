@@ -104,7 +104,7 @@ export const onAddProvider = (formDispatcher, formState, representative, dataflo
 };
 
 export const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
-  if (!isNil(representative.representativeId) && !isNil(representative.representativeId)) {
+  if (!isNil(representative.representativeId)) {
     updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
   } else {
     formDispatcher({

@@ -29,8 +29,8 @@ public class FieldSchemaVO {
   /** The type. */
   private DataType type;
 
-  /** The id code list. */
-  private Long idCodeList;
+  /** The code list items. */
+  private String[] codelistItems;
 
   /** The required. */
   private Boolean required;
@@ -42,7 +42,7 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, idRecord, name, type, idCodeList, required);
+    return Objects.hash(id, description, idRecord, name, type, codelistItems, required);
   }
 
   /**
@@ -62,7 +62,6 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(type, other.type) && Objects.equals(idCodeList, other.idCodeList)
-        && Objects.equals(required, other.required);
+        && Objects.equals(type, other.type) && Objects.equals(required, other.required);
   }
 }

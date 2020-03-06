@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, uniq } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import styles from './Representative.module.scss';
 

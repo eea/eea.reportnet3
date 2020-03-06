@@ -8,7 +8,10 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * The Interface CodelistRepository.
+ *
+ * @deprecated (unused)
  */
+@Deprecated
 public interface CodelistRepository extends PagingAndSortingRepository<Codelist, Long> {
 
   /**

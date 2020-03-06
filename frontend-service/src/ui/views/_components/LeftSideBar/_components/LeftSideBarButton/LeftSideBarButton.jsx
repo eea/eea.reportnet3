@@ -9,7 +9,7 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const LeftSideBarButton = ({ buttonType = 'default', className, href, onClick, title, icon, label }) => {
+const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -40,6 +40,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, onClick, t
       className={className}
       href={href}
       onClick={onClick}
+      style={style}
       title={!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}>
       <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
     </a>

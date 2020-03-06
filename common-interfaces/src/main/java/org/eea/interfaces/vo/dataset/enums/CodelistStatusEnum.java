@@ -3,6 +3,7 @@ package org.eea.interfaces.vo.dataset.enums;
 /**
  * The Enum CodelistStatusEnum.
  */
+@Deprecated
 public enum CodelistStatusEnum {
 
   /** The ready. */
