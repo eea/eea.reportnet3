@@ -17,13 +17,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DatasetCodelistController.
+ *
+ * @deprecated (unused)
  */
+@Deprecated
 public interface DatasetCodelistController {
 
   /**
    * The Interface DataSetCodelistControllerZuul.
+   *
+   * @deprecated (unused)
    */
   @FeignClient(value = "dataset", contextId = "codelist", path = "/codelist")
+  @Deprecated
   interface DataSetCodelistControllerZuul extends DatasetCodelistController {
 
   }
@@ -35,6 +41,7 @@ public interface DatasetCodelistController {
    * @return the by id
    */
   @GetMapping(value = "/{codelistId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   CodelistVO getById(@PathVariable("codelistId") Long codelistId);
 
   /**
@@ -44,6 +51,7 @@ public interface DatasetCodelistController {
    * @return the long
    */
   @PostMapping
+  @Deprecated
   Long create(@RequestBody CodelistVO codelistVO);
 
   /**
@@ -53,6 +61,7 @@ public interface DatasetCodelistController {
    * @return the long
    */
   @PutMapping(value = "/update")
+  @Deprecated
   Long update(@RequestBody CodelistVO codelistVO);
 
   /**
@@ -63,6 +72,7 @@ public interface DatasetCodelistController {
    * @return the long
    */
   @PostMapping(value = "/clone/{codelistId}")
+  @Deprecated
   Long clone(@PathVariable("codelistId") Long codelistId, @RequestBody CodelistVO codelistVO);
 
   /**
@@ -71,6 +81,7 @@ public interface DatasetCodelistController {
    * @param codelistId the codelist id
    */
   @DeleteMapping(value = "/{codelistId}")
+  @Deprecated
   void delete(@PathVariable("codelistId") Long codelistId);
 
   /**
@@ -80,6 +91,7 @@ public interface DatasetCodelistController {
    * @return the category by id
    */
   @GetMapping(value = "/category/{codelistCategoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   CodelistCategoryVO getCategoryById(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 
   /**
@@ -88,6 +100,7 @@ public interface DatasetCodelistController {
    * @return the all categories
    */
   @GetMapping(value = "/category/all", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   List<CodelistCategoryVO> getAllCategories();
 
   /**
@@ -97,6 +110,7 @@ public interface DatasetCodelistController {
    * @return the long
    */
   @PostMapping(value = "/category")
+  @Deprecated
   Long createCategory(@RequestBody CodelistCategoryVO codelistCategoryVO);
 
   /**
@@ -106,6 +120,7 @@ public interface DatasetCodelistController {
    * @return the long
    */
   @PutMapping(value = "/category/update")
+  @Deprecated
   Long updateCategory(@RequestBody CodelistCategoryVO codelistCategoryVO);
 
   /**
@@ -114,6 +129,7 @@ public interface DatasetCodelistController {
    * @param codelistCategoryId the codelist category id
    */
   @DeleteMapping(value = "/category/{codelistCategoryId}")
+  @Deprecated
   void deleteCategory(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 
   /**
@@ -123,6 +139,7 @@ public interface DatasetCodelistController {
    * @return the all by id
    */
   @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   List<CodelistVO> getAllById(@RequestParam(value = "codelistIds") String codelistIds);
 
   /**
@@ -133,6 +150,7 @@ public interface DatasetCodelistController {
    */
   @GetMapping(value = "/find/category/{codelistCategoryId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   List<CodelistVO> getAllByCategoryId(@PathVariable("codelistCategoryId") Long codelistCategoryId);
 
   /**
@@ -141,5 +159,6 @@ public interface DatasetCodelistController {
    * @return the all categories complete
    */
   @GetMapping(value = "/category/complete", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Deprecated
   List<CodelistCategoryFullVO> getAllCategoriesComplete();
 }

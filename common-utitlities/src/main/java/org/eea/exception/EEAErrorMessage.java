@@ -134,16 +134,31 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 
-  /** The Constant CODELIST_NOT_FOUND. */
+  /**
+   * The Constant CODELIST_NOT_FOUND.
+   *
+   * @deprecated (unused)
+   */
+  @Deprecated
   public static final String CODELIST_NOT_FOUND = "Codelist not found";
 
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
 
-  /** The Constant CODELIST_CATEGORY_NOT_FOUND. */
+  /**
+   * The Constant CODELIST_CATEGORY_NOT_FOUND.
+   *
+   * @deprecated (unused)
+   */
+  @Deprecated
   public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
 
-  /** The Constant CODELIST_VERSION_DUPLICATED. */
+  /**
+   * The Constant CODELIST_VERSION_DUPLICATED.
+   *
+   * @deprecated (unused)
+   */
+  @Deprecated
   public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
   /** The Constant ERROR_DELETING_RULE. */

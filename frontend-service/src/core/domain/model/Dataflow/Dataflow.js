@@ -1,20 +1,20 @@
 export class Dataflow {
-  constructor(
-    id,
+  constructor({
+    creationDate,
     dataCollections,
     datasets,
-    designDatasets,
-    description,
-    name,
     deadlineDate,
-    creationDate,
-    userRequestStatus,
-    status,
+    description,
+    designDatasets,
     documents,
-    weblinks,
+    id,
+    name,
+    representatives,
     requestId,
-    representatives
-  ) {
+    status,
+    userRequestStatus,
+    weblinks
+  } = {}) {
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;

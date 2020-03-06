@@ -419,7 +419,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void createDataFlowExist() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
-    when(dataflowRepository.findByName(dataFlowVO.getName()))
+    when(dataflowRepository.findByNameIgnoreCase(dataFlowVO.getName()))
         .thenReturn(Optional.of(new Dataflow()));
     try {
       dataflowServiceImpl.createDataFlow(dataFlowVO);
@@ -458,7 +458,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setId(1L);
     Dataflow dataflowResponse = new Dataflow();
     dataflowResponse.setId(2l);
-    when(dataflowRepository.findByName(dataFlowVO.getName()))
+    when(dataflowRepository.findByNameIgnoreCase(dataFlowVO.getName()))
         .thenReturn(Optional.of(dataflowResponse));
     try {
       dataflowServiceImpl.updateDataFlow(dataFlowVO);
@@ -478,7 +478,8 @@ public class DataFlowServiceImplTest {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setId(1L);
     dataflowVO.setName("test");
-    when(dataflowRepository.findByName(dataflowVO.getName())).thenReturn(Optional.empty());
+    when(dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()))
+        .thenReturn(Optional.empty());
     when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.updateDataFlow(dataflowVO);
     Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
