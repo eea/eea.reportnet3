@@ -92,9 +92,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         schemaTables: payload.tables,
         errorLevels: payload.errorLevels,
-        candidateRule: {
-          expresions: payload.expresions
-        }
+        candidateRule: payload.candidateRule
       };
     default:
       return state;

@@ -123,7 +123,7 @@ const ValidationExpresion = ({
         <InputText
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
-          value={expresionValues.ruleValue}
+          value={expresionValues.expresionValue}
           onChange={e =>
             onExpresionFieldUpdate(expresionId, {
               key: 'expresionValue',

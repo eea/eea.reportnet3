@@ -79,8 +79,8 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     });
   };
   //set table tada
-  useEffect(() => {
-    const { tables: rawTables, levelErrorTypes } = datasetSchema;
+  const initValidationRuleCreation = () => {
+    const { tables: rawTables } = datasetSchema;
     rawTables.pop();
     const tables = rawTables.map(table => {
       return { label: table.tableSchemaName, code: table.recordSchemaId };
@@ -91,7 +91,34 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       { label: 'ERROR', value: 'ERROR' },
       { label: 'BLOCKER', value: 'BLOCKER' }
     ];
-    creationFormDispatch({ type: 'INIT_FORM', payload: { tables, errorLevels, expresions: [getEmptyExpresion()] } });
+    return {
+      tables,
+      errorLevels,
+      candidateRule: {
+        table: undefined,
+        field: undefined,
+        shortCode: '',
+        description: '',
+        errorMessage: '',
+        errorLevel: undefined,
+        active: false,
+        expresions: [getEmptyExpresion()]
+      }
+    };
+  };
+  useEffect(() => {
+    const { tables: rawTables } = datasetSchema;
+    rawTables.pop();
+    const tables = rawTables.map(table => {
+      return { label: table.tableSchemaName, code: table.recordSchemaId };
+    });
+    const errorLevels = [
+      { label: 'INFO', value: 'INFO' },
+      { label: 'WARNING', value: 'WARNING' },
+      { label: 'ERROR', value: 'ERROR' },
+      { label: 'BLOCKER', value: 'BLOCKER' }
+    ];
+    creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation() });
   }, []);
 
   //set field data
@@ -197,6 +224,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 {resourcesContext.messages.table}
                 <Dropdown
                   appendTo={document.body}
+                  filterPlaceholder={resourcesContext.messages.table}
                   placeholder={resourcesContext.messages.table}
                   optionLabel="label"
                   options={creationFormState.schemaTables}
@@ -216,6 +244,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 {resourcesContext.messages.field}
                 <Dropdown
                   appendTo={document.body}
+                  filterPlaceholder={resourcesContext.messages.field}
                   placeholder={resourcesContext.messages.field}
                   optionLabel="label"
                   options={creationFormState.tableFields}
@@ -282,6 +311,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
               <label htmlFor="description">
                 {resourcesContext.messages.errorType}
                 <Dropdown
+                  filterPlaceholder={resourcesContext.messages.errorType}
                   placeholder={resourcesContext.messages.errorType}
                   appendTo={document.body}
                   optionLabel="label"
@@ -390,7 +420,10 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 type="button"
                 label={resourcesContext.messages.cancel}
                 icon="cancel"
-                onClick={e => toggleVisibility(false)}
+                onClick={e => {
+                  creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation() });
+                  toggleVisibility(false);
+                }}
               />
             </div>
           </div>
