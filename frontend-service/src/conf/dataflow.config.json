@@ -1,4 +1,8 @@
 {
+  "dataflowRoles": {
+    "DATA_CUSTODIAN": "REQUESTER",
+    "DATA_PROVIDER": "REPORTER"
+  },
   "dataflowStatus": {
     "DESIGN": "DESIGN",
     "DRAFT": "DRAFT"
@@ -6,9 +10,5 @@
   "errorTypes": {
     "dataflowExists": "Dataflow name already exists",
     "copyWithErrors": "The snapshot contains blocker errors"
-  },
-  "dataflowRoles": {
-    "DATA_CUSTODIAN": "REQUESTER",
-    "DATA_PROVIDER": "REPORTER"
   }
 }
