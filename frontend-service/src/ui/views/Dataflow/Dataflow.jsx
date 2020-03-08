@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, uniq } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import styles from './Dataflow.module.scss';
 
@@ -315,6 +317,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onHideDeleteDataflowDialog = () => {
     setIsDeleteDialogVisible(false);
+    setOnConfirmDelete(false);
     setIsActivePropertiesDialog(true);
     setDataflowTitle('');
   };
@@ -589,13 +592,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {!isUndefined(dataflowState[match.params.dataflowId]) && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={resources.messages['delete'].toUpperCase()}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             disabledConfirm={onConfirmDelete !== dataflowState[match.params.dataflowId].name.toLowerCase()}
             onConfirm={() => onDeleteDataflow()}
             onHide={onHideDeleteDataflowDialog}
-            styleConfirm={{ backgroundColor: colors.errors, borderColor: colors.errors }}
             visible={isDeleteDialogVisible}>
             <p>{resources.messages['deleteDataflow']}</p>
             <p

@@ -20,12 +20,15 @@ import lombok.ToString;
 
 /**
  * The Class Codelist.
+ *
+ * @deprecated (unused)
  */
 @Entity
 @Getter
 @Setter
 @ToString
 @Table(name = "CODELIST")
+@Deprecated
 public class Codelist {
 
   /** The id. */

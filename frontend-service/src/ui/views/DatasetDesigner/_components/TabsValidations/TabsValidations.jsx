@@ -123,7 +123,14 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} onEditClick={() => ''} />;
+  const actionTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}
+      onEditClick={() => {
+        '';
+      }}
+    />
+  );
 
   const columnStyles = field => {
     const style = {};
@@ -228,6 +235,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       {validationList()}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

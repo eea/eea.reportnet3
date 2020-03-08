@@ -405,8 +405,8 @@
   /* Hyperlinks */
   --hyperlink-color: var(--c-corporate-blue);
   --hyperlink-color-hover: var(--c-corporate-blue-lighter);
-  --hyperlink-color-active: var(--c-purple);
-  --hyperlink-color-visited: var(--c-purple);
+  --hyperlink-color-active: var(--c-corporate-blue-lighter);
+  --hyperlink-color-visited: var(--c-corporate-blue);
 
   /* Drag&drop */
   --drag-and-drop-arrow-color: var(--c-corporate-blue);

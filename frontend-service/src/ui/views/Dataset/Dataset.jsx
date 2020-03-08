@@ -402,7 +402,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await getCodelistsList([datasetSchema]);
+      console.log({ datasetSchema });
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -427,20 +427,14 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
-            let codelist = {};
-            if (field.type === 'CODELIST') {
-              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
-            }
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: codelist.name,
-              codelistVersion: codelist.version,
-              codelistItems: codelist.items
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })
@@ -680,6 +674,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       </Dialog>
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

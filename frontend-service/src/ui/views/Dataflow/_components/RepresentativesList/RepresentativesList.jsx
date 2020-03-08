@@ -20,6 +20,7 @@ import {
   onKeyDown
 } from './_functions/Utils/representativeUtils';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -122,7 +123,6 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <>
         <select
-          disabled={hasError}
           className={styles.selectDataProvider}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
@@ -143,22 +143,17 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return !isNil(representative.representativeId) ? (
-      <Button
-        tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
-        tooltipOptions={{ position: 'right' }}
-        icon="trash"
-        disabled={false}
-        className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
-        onClick={() => {
+    return isNil(representative.representativeId) ? (
+      <></>
+    ) : (
+      <ActionsColumn
+        onDeleteClick={() => {
           formDispatcher({
             type: 'SHOW_CONFIRM_DIALOG',
             payload: { representativeId: representative.representativeId }
           });
         }}
       />
-    ) : (
-      <></>
     );
   };
 
@@ -202,6 +197,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
       )}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={() => {
           onDeleteConfirm(formDispatcher, formState);
         }}

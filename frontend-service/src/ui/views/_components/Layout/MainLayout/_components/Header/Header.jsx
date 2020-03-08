@@ -53,18 +53,6 @@ const Header = withRouter(({ history }) => {
     } else
       return (
         <React.Fragment>
-          <InputSwitch
-            checked={themeContext.currentTheme === 'dark'}
-            onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
-            sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-            style={{ marginRight: '1rem' }}
-            tooltip={
-              themeContext.currentTheme === 'light'
-                ? resources.messages['toggleDarkTheme']
-                : resources.messages['toggleLightTheme']
-            }
-            tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-          />
           <div className={styles.localhostAlert}>
             <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
           </div>
@@ -74,7 +62,7 @@ const Header = withRouter(({ history }) => {
   const loadUser = () => (
     <>
       <div className={styles.userWrapper}>
-        {/* <InputSwitch
+        <InputSwitch
           checked={themeContext.currentTheme === 'dark'}
           onChange={e => themeContext.onToggleTheme(e.value ? 'dark' : 'light')}
           sliderCheckedClassName={styles.themeSwitcherInputSwitch}
@@ -85,7 +73,7 @@ const Header = withRouter(({ history }) => {
               : resources.messages['toggleLightTheme']
           }
           tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-        /> */}
+        />
         {localhostEnvironmentAlert()}
         <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
       </div>

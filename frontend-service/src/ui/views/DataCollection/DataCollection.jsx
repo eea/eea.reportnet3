@@ -205,15 +205,9 @@ export const DataCollection = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
-            let codelist = {};
-            if (field.type === 'CODELIST') {
-              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
-            }
             return {
-              codelistId: field.codelistId,
-              codelistItems: codelist.items,
-              codelistName: codelist.name,
-              codelistVersion: codelist.version,
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               recordId: field['recordId'],

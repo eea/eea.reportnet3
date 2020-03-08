@@ -43,3 +43,8 @@ body .p-chips > ul.p-inputtext .p-chips-token {
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
+
+body .p-disabled {
+  background-color: transparent !important;
+  border: none !important;
+}

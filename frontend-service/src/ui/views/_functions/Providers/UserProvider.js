@@ -1,6 +1,7 @@
-import React, { useReducer, useContext } from 'react';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import React, { useContext, useReducer } from 'react';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const userReducer = (state, { type, payload }) => {
   switch (type) {
@@ -28,8 +29,9 @@ const userReducer = (state, { type, payload }) => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(userReducer, {});
   const notificationContext = useContext(NotificationContext);
+
+  const [state, dispatch] = useReducer(userReducer, {});
 
   return (
     <UserContext.Provider

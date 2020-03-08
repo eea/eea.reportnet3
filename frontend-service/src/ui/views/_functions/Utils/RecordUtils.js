@@ -73,9 +73,10 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
+  console.log({ codelistItems });
   return !isUndefined(codelistItems)
     ? codelistItems.map(codelistItem => {
-        return { itemType: `${codelistItem.shortCode}-${codelistItem.label}`, value: codelistItem.shortCode };
+        return { itemType: codelistItem, value: codelistItem };
       })
     : [];
 };

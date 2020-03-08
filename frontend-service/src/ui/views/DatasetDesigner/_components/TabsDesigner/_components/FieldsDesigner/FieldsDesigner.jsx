@@ -160,7 +160,8 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
               type: field['type'],
               recordId: field['recordId'],
               codelistItems: field.codelistItems,
-              required: field.required
+              required: field.required,
+              description: field.description
             };
           })
         : [];
@@ -189,6 +190,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   const renderConfirmDialog = () => {
     return (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteFieldTitle']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
