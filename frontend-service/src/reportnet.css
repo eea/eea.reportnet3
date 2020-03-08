@@ -258,6 +258,7 @@
   --inputtext-border-color-hover: var(--gray-110);
   --inputtext-border-color-focus: var(--c-corporate-blue);
   --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue);
+  --inputtext-placeholder: var(--main-font-color);
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);

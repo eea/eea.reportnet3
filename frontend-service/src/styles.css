@@ -1006,15 +1006,27 @@ body .p-fluid .p-inputgroup .p-button.p-button-icon-only {
 }
 body ::-webkit-input-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body :-moz-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body ::-moz-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body :-ms-input-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body .p-inputtext.p-error,
 body .p-dropdown.p-error,
