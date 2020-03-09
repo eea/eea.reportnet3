@@ -36,16 +36,10 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
-	if(!isBlank(value)){
-		return true;
-	}
 	return CodelistUtils.codelistValidate(value,codelistItems,true);
 }
 
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
-	if(!isBlank(value)){
-		return true;
-	}
 	return CodelistUtils.codelistValidate(value,codelistItems,false);
 }
 
