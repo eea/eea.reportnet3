@@ -20,7 +20,7 @@ const Codelists = withRouter(({ history, isCustodian = false, match }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
