@@ -38,6 +38,9 @@ public class FieldSchemaVO {
   /** The is PK. */
   private Boolean isPK;
 
+  /** The is P kreferenced. */
+  private Boolean isPKreferenced;
+
   /** The referenced field. */
   private ReferencedFieldSchemaVO referencedField;
 
@@ -49,7 +52,7 @@ public class FieldSchemaVO {
   @Override
   public int hashCode() {
 
-    return Objects.hash(id, description, idRecord, name, type, codelistItems, required);
+    return Objects.hash(id, description, idRecord, name, type, codelistItems, required, isPK);
 
   }
 

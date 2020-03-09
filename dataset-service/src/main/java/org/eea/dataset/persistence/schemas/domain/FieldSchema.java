@@ -57,6 +57,11 @@ public class FieldSchema {
   @Field(value = "isPK")
   private Boolean isPK;
 
+
+  /** The is P kreferenced. */
+  @Field(value = "isPKreferenced")
+  private Boolean isPKreferenced;
+
   /** The reference FK. */
   @Field(value = "referencedField")
   private ReferencedFieldSchema referencedField;
@@ -69,7 +74,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description);
+        description, isPK);
   }
 
 

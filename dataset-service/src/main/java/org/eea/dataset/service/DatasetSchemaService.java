@@ -210,4 +210,6 @@ public interface DatasetSchemaService {
 
   void updatePkCatalogue(FieldSchemaVO fieldSchemaVO);
 
+  Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO);
+
 }

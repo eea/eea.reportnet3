@@ -534,6 +534,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
         }
 
+        fieldSchema.put("isPKreferenced", this.checkExistingPkReferenced(fieldSchemaVO));
 
         // Guardar el FieldSchema modificado en MongoDB
         UpdateResult updateResult =
@@ -719,6 +720,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
 
   @Override
+  public Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO) {
+    Boolean isReferenced = false;
+    if (fieldSchemaVO.getIsPK() != null) {
+      PkCatalogueSchema catalogue =
+          pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
+              .orElse(new PkCatalogueSchema());
+      if (catalogue != null && catalogue.getReferenced() != null
+          && !catalogue.getReferenced().isEmpty()) {
+        isReferenced = true;
+      }
+
+    }
+    return isReferenced;
+  }
+
+
+  @Override
   public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
 
     if (fieldSchemaVO.getReferencedField() != null) {
@@ -735,5 +753,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       pkCatalogueRepository.save(catalogue);
     }
   }
+
+
 
 }
