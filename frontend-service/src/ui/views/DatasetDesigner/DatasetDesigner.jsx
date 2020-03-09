@@ -96,7 +96,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -297,7 +297,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
-            {console.log(datasetHasData)}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
                 !datasetHasData ? ' p-button-animated-blink' : null
