@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -21,8 +21,6 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
@@ -59,8 +57,6 @@ const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
-
   const dataFetch = async () => {
     setLoading(true);
     try {
@@ -68,14 +64,6 @@ const Dataflows = withRouter(({ match, history }) => {
       setpendingContent(allDataflows.pending);
       setacceptedContent(allDataflows.accepted);
       setcompletedContent(allDataflows.completed);
-      const dataflowInitialValues = {};
-      allDataflows.accepted.forEach(element => {
-        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-      });
-      dataflowDispatch({
-        type: 'ON_INIT_DATA',
-        payload: dataflowInitialValues
-      });
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -197,9 +185,6 @@ const Dataflows = withRouter(({ match, history }) => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
     setIsFormReset(true);
-    dataflowDispatch({
-      type: 'ON_RESET_DATAFLOW_DATA'
-    });
   };
 
   const layout = children => {
@@ -234,9 +219,7 @@ const Dataflows = withRouter(({ match, history }) => {
               className="dataflowList-accepted-help-step"
               content={acceptedContent}
               dataFetch={dataFetch}
-              dataflowNewValues={dataflowState.selectedDataflow}
               // description={resources.messages['acceptedDataflowText']}
-              selectedDataflowId={dataflowState.selectedDataflowId}
               // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
               user={user}
