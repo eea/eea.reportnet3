@@ -1,6 +1,7 @@
 package org.eea.kafka.handler;
 
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -20,11 +21,15 @@ import org.mockito.MockitoAnnotations;
  */
 public class EEAEventHandlerImplTest {
 
-  /** The eea event handler. */
+  /**
+   * The eea event handler.
+   */
   @InjectMocks
   private EEAEventHandlerImpl eeaEventHandler;
 
-  /** The eea eent command factory. */
+  /**
+   * The eea eent command factory.
+   */
   @Mock
   private EEAEventCommandFactory eeaEentCommandFactory;
 
