@@ -32,6 +32,7 @@ import { getEmptyExpresion } from './_functions/utils/getEmptyExpresion';
 import { getExpresionString } from './_functions/utils/getExpresionString';
 import { groupExpresions } from './_functions/utils/groupExpresions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
+import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setFormField } from './_functions/utils/setFormField';
 import { setValidationExpresion } from './_functions/utils/setValidationExpresion';
 
@@ -163,14 +164,13 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     });
   }, [creationFormState.candidateRule]);
 
+  const onHide = () => {
+    creationFormDispatch({ type: 'RESET_CREATION_FORM', payload: resetValidationRuleCreation() });
+    toggleVisibility(false);
+  };
+
   const dialogLayout = children => (
-    <Dialog
-      header="Create Field Validation rule"
-      visible={isVisible}
-      style={{ width: '90%' }}
-      onHide={e => {
-        toggleVisibility(false);
-      }}>
+    <Dialog header="Create Field Validation rule" visible={isVisible} style={{ width: '90%' }} onHide={e => onHide()}>
       {children}
     </Dialog>
   );
@@ -380,10 +380,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
               type="button"
               label={resourcesContext.messages.cancel}
               icon="cancel"
-              onClick={e => {
-                creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation() });
-                toggleVisibility(false);
-              }}
+              onClick={e => onHide()}
             />
           </div>
         </div>

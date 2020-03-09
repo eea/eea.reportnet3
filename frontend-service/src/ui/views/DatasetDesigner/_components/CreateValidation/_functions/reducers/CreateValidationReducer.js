@@ -94,6 +94,14 @@ export const createValidationReducer = (state, { type, payload }) => {
         errorLevels: payload.errorLevels,
         candidateRule: payload.candidateRule
       };
+    case 'RESET_CREATION_FORM':
+      return {
+        ...state,
+        tableFields: [],
+        candidateRule: {
+          ...payload
+        }
+      };
     default:
       return state;
   }
