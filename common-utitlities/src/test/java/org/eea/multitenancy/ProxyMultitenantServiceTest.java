@@ -1,6 +1,7 @@
 package org.eea.multitenancy;
 
 import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import org.eea.exception.EEAException;
@@ -47,7 +48,7 @@ public class ProxyMultitenantServiceTest {
     ProxyMultitenantService<ProxyTestInterface> proxy =
         new ProxyMultitenantService<>(proxyTestInterface);
 
-    Object result = proxy.invoke(proxyTestInterface, method, new Object[] {"id"});
+    Object result = proxy.invoke(proxyTestInterface, method, new Object[]{"id"});
     assertNull("result not null", result);
   }
 
@@ -63,7 +64,7 @@ public class ProxyMultitenantServiceTest {
     ProxyMultitenantService<ProxyTestInterface> proxy =
         new ProxyMultitenantService<>(proxyTestInterface);
 
-    Object result = proxy.invoke(proxyTestInterface, method, new Object[] {"id"});
+    Object result = proxy.invoke(proxyTestInterface, method, new Object[]{"id"});
   }
 
 }

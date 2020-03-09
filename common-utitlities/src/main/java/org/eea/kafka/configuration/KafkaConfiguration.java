@@ -1,7 +1,11 @@
 package org.eea.kafka.configuration;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -84,7 +88,9 @@ public class KafkaConfiguration {
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EEAEventSerializer.class);
     configProps.put("enable.idempotence", "true");
-//    configProps.put("transactional.id", "prod-1");
+    configProps.put(ACKS_CONFIG, "all");
+    configProps.put("transactional.id", groupId + UUID
+        .randomUUID());//Single transactional id since every sender must use a different one
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
@@ -108,8 +114,7 @@ public class KafkaConfiguration {
     final Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-    props.put("heartbeat.interval.ms", 3000);
-    props.put("session.timeout.ms", 130000);
+    props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
     props.put("isolation.level", "read_committed");
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
