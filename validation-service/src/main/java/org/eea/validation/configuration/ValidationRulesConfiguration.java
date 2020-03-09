@@ -1,5 +1,7 @@
 package org.eea.validation.configuration;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -126,13 +128,11 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
     final Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + UUID.randomUUID());// single group in one
-                                                                           // partition topic
-                                                                           // garantees broadcasting
+    // partition topic
+    // garantees broadcasting
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
-    props.put("heartbeat.interval.ms", 3000);
-    props.put("session.timeout.ms", 150000);
-    // props.put("enable.auto.commit", "false");
+    props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
     props.put("isolation.level", "read_committed");
 
     return new DefaultKafkaConsumerFactory<>(props);

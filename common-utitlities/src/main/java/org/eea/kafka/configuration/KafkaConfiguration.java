@@ -18,6 +18,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.serializer.EEAEventDeserializer;
 import org.eea.kafka.serializer.EEAEventSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -32,6 +33,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.transaction.KafkaTransactionManager;
 
 /**
  * The Class KafkaConfiguration.
@@ -91,7 +93,16 @@ public class KafkaConfiguration {
     configProps.put(ACKS_CONFIG, "all");
     configProps.put("transactional.id", groupId + UUID
         .randomUUID());//Single transactional id since every sender must use a different one
-    return new DefaultKafkaProducerFactory<>(configProps);
+    DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory = new DefaultKafkaProducerFactory<>(
+        configProps);
+    defaultKafkaProducerFactory.setTransactionIdPrefix("txn-ingestor");
+    return defaultKafkaProducerFactory;
+  }
+
+  @Bean
+  public KafkaTransactionManager<String, EEAEventVO> kafkaTransactionManager(
+      @Autowired ProducerFactory<String, EEAEventVO> pf) {
+    return new KafkaTransactionManager<>(pf);
   }
 
   /**

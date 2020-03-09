@@ -15,6 +15,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
@@ -47,6 +48,7 @@ public class KafkaSender {
    *
    * @param event the event
    */
+  @Transactional("kafkaTransactionManager")
   public void sendMessage(final EEAEventVO event) {
 
     event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
@@ -98,6 +100,7 @@ public class KafkaSender {
         LOG_ERROR.error("Unable to send message=[ {} ] due to: {} ", event, ex.getMessage());
       }
     });
+
   }
 
 
