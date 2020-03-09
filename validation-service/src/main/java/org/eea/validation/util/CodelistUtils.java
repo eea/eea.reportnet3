@@ -18,9 +18,8 @@ public class CodelistUtils {
       final boolean sensitive) {
     Boolean codelist = false;
     // we can validation helper and put in memory the codelist
-    codelistItems = codelistItems.replace("[", "");
-    codelistItems = codelistItems.replace("]", "");
-    String[] arrayItems = codelistItems.split(",");
+    // we delete the 1 character and the last because we recieve a string with '[' ']' values
+    final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
 
     if (Boolean.TRUE.equals(sensitive)) {
       for (int i = 0; i < arrayItems.length; i++) {
