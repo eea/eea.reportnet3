@@ -106,7 +106,7 @@
     "dataflowHelpHelpStep9": "And manage the providers roles",
     "dataflowHelpHelpStep10": "View the dataflow settings. Here you can delete your design dataflow",
     "dataflowHelpHelpStep11": "View the dataflow settings.",
-    "dataflowList": "Dataflows",
+    "dataflows": "Dataflows",
     "dataflowListHelp": "Dataflows help",
     "dataflowListHelpStep1": "This is your dataflow list!",
     "dataflowListHelpStep2": "These are your pending dataflows...",

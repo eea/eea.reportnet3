@@ -100,7 +100,7 @@ export const Dataset = withRouter(({ match, history }) => {
       console.info('dataset.Metadata: %o', metaData);
       const breadCrumbs = [
         {
-          label: resources.messages['dataflowList'],
+          label: resources.messages['dataflows'],
           icon: 'home',
           href: getUrl(routes.DATAFLOWS),
           command: () => history.push(getUrl(routes.DATAFLOWS))
