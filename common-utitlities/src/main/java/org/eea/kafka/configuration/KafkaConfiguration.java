@@ -6,6 +6,7 @@ import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -122,7 +123,7 @@ public class KafkaConfiguration {
    */
   @Bean
   public ConsumerFactory<String, EEAEventVO> defaultConsumerFactory() {
-    final Map<String, Object> props = new HashMap<>();
+    final Map<String, Object> props = new ConcurrentHashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
