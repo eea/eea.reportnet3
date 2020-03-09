@@ -490,6 +490,7 @@
     "deleteValidationConfirm": "Are you sure you want to delete the validation?",
     "deleteValidationHeader": "Delete validation",
     "role": "Role",
-    "documentsActionColumns": "Actions"
+    "documentsActionColumns": "Actions",
+    "myDataflows": "My dataflows"
   }
 }

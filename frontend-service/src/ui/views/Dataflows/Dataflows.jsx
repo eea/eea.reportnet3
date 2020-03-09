@@ -45,7 +45,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const [pendingContent, setpendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
-      label: resources.messages['dataflowAcceptedPendingTab'],
+      // label: resources.messages['dataflowAcceptedPendingTab'],
+      label: resources.messages['myDataflows'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
@@ -223,9 +224,9 @@ const Dataflows = withRouter(({ match, history }) => {
               className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
-              description={resources.messages.pendingDataflowText}
+              // description={resources.messages['pendingDataflowText']}
               isCustodian={isCustodian}
-              title={resources.messages.pendingDataflowTitle}
+              // title={resources.messages['pendingDataflowTitle']}
               type="pending"
               user={user}
             />
@@ -234,9 +235,9 @@ const Dataflows = withRouter(({ match, history }) => {
               content={acceptedContent}
               dataFetch={dataFetch}
               dataflowNewValues={dataflowState.selectedDataflow}
-              description={resources.messages.acceptedDataflowText}
+              // description={resources.messages['acceptedDataflowText']}
               selectedDataflowId={dataflowState.selectedDataflowId}
-              title={resources.messages.acceptedDataflowTitle}
+              // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
               user={user}
             />
