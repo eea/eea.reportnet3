@@ -1,6 +1,8 @@
 package org.eea.dataset.controller;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +10,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -16,6 +19,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -98,6 +102,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
+
+  @Autowired
+  private DesignDatasetService designDatasetService;
 
   /**
    * Creates the empty dataset schema.
@@ -401,11 +408,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
+      if (dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO)) {
+        DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
-      // After the update, we create the rules needed and change the type of the field if neccessary
-      dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-          datasetId);
+        // After the update, we create the rules needed and change the type of the field if
+        // neccessary
+        dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+            datasetId);
+
+        // Add the Pk if needed to the catalogue
+        dataschemaService.updatePkCatalogue(fieldSchemaVO);
+
+      }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
@@ -523,6 +537,30 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
+  }
+
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
+      @PathVariable("idDataflow") Long idDataflow) {
+
+    List<DataSetSchemaVO> schemas = new ArrayList<>();
+
+    List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+    designs.stream().forEach(design -> {
+      try {
+        schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
+      } catch (EEAException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+            e);
+      }
+    });
+
+
+    return schemas;
   }
 
 }

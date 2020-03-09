@@ -683,35 +683,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
 
     Boolean allow = true;
-    DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+    if (fieldSchemaVO.getIsPK() != null) {
+      DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+      TableSchemaVO table = schema.getTableSchemas().stream()
+          .filter(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
+              .allMatch(field -> field.getId().equals(fieldSchemaVO.getId())))
+          .findAny().orElse(null);
 
-    TableSchemaVO table =
-        schema.getTableSchemas().stream()
-            .filter(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
-                .allMatch(field -> field.getId().equals(fieldSchemaVO.getId())))
-            .findAny().orElse(null);
-
-    Boolean existingPK = false;
-    if (table != null) {
-      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getIsPK() != null && field.getIsPK()
-            && !field.getId().equals(fieldSchemaVO.getId())) {
-          existingPK = true;
+      Boolean existingPK = false;
+      if (table != null) {
+        for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getIsPK() != null && field.getIsPK()
+              && !field.getId().equals(fieldSchemaVO.getId())) {
+            existingPK = true;
+          }
         }
       }
-    }
 
-    Boolean isPKused = false;
-    PkCatalogueSchema catalogue =
-        pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
-            .orElse(new PkCatalogueSchema());
-    if (catalogue != null && catalogue.getReferenced() != null
-        && !catalogue.getReferenced().isEmpty()) {
-      isPKused = true;
-    }
+      Boolean isPKused = false;
+      PkCatalogueSchema catalogue =
+          pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
+              .orElse(new PkCatalogueSchema());
+      if (catalogue != null && catalogue.getReferenced() != null
+          && !catalogue.getReferenced().isEmpty()) {
+        isPKused = true;
+      }
 
-    if (existingPK || isPKused) {
-      allow = false;
+      if (existingPK || isPKused) {
+        allow = false;
+      }
     }
     return allow;
 
@@ -721,17 +721,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
 
-    PkCatalogueSchema catalogue =
-        pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
-            .orElse(new PkCatalogueSchema());
-    if (catalogue.getIdPk() != null) {
-      catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
-    } else {
-      catalogue.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-      catalogue.setReferenced(new ArrayList<>());
-      catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+    if (fieldSchemaVO.getReferencedField() != null) {
+      PkCatalogueSchema catalogue =
+          pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
+              .orElse(new PkCatalogueSchema());
+      if (catalogue.getIdPk() != null) {
+        catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+      } else {
+        catalogue.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+        catalogue.setReferenced(new ArrayList<>());
+        catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+      }
+      pkCatalogueRepository.save(catalogue);
     }
-    pkCatalogueRepository.save(catalogue);
   }
 
 }

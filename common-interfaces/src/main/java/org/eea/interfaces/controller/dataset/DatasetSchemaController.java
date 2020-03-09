@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -195,5 +196,9 @@ public interface DatasetSchemaController {
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+
+  @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
 
 }
