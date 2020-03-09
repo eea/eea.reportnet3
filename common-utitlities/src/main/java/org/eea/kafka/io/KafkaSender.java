@@ -74,7 +74,7 @@ public class KafkaSender {
           .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
     }
     final ListenableFuture<SendResult<String, EEAEventVO>> future = kafkaTemplate.send(message);
-
+    kafkaTemplate.flush();
     future.addCallback(new ListenableFutureCallback<SendResult<String, EEAEventVO>>() {
 
       /**
