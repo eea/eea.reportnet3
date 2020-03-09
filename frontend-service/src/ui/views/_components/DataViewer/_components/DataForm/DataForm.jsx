@@ -12,12 +12,15 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
   const resources = useContext(ResourcesContext);
 
   const getCodelistItemsWithEmptyOption = (colsSchema, field) => {
-    const codelistsItems = RecordUtils.getCodelistItems(colsSchema, field);
-    codelistsItems.unshift({
+    const column = colsSchema.filter(e => e.field === field)[0];
+    const codelistItems = column.codelistItems.map(codelistItem => {
+      return { itemType: codelistItem, value: codelistItem };
+    });
+    codelistItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
     });
-    return codelistsItems;
+    return codelistItems;
   };
 
   const renderDropdown = (field, fieldValue) => {

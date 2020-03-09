@@ -1,6 +1,6 @@
 export class DatasetTableField {
   constructor({
-    codelistId,
+    codelistItems,
     description,
     fieldId,
     fieldSchemaId,
@@ -11,7 +11,7 @@ export class DatasetTableField {
     validations,
     value
   } = {}) {
-    this.codelistId = codelistId;
+    this.codelistItems = codelistItems;
     this.description = description;
     this.fieldId = fieldId;
     this.fieldSchemaId = fieldSchemaId;

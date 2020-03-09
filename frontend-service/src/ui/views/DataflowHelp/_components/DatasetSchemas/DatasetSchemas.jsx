@@ -12,7 +12,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-import { CodelistService } from 'core/services/Codelist';
 import { ValidationService } from 'core/services/Validation';
 
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
@@ -20,32 +19,17 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [codelistsList, setCodelistsList] = useState();
   const [validationList, setValidationList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
-      getCodelistsList(datasetsSchemas);
       getValidationList(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
   useEffect(() => {
     renderDatasetSchemas();
-  }, [codelistsList, validationList]);
-
-  const getCodelistsList = async datasetsSchemas => {
-    try {
-      setCodelistsList(await CodelistService.getCodelistsListWithSchemas(datasetsSchemas));
-    } catch (error) {
-      const schemaError = {
-        type: error.message
-      };
-      notificationContext.add(schemaError);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [validationList]);
 
   const getValidationList = async datasetsSchemas => {
     try {
@@ -109,15 +93,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return (
-          <DatasetSchema
-            codelistsList={codelistsList}
-            designDataset={designDataset}
-            key={i}
-            index={i}
-            validationList={validationList}
-          />
-        );
+        return <DatasetSchema designDataset={designDataset} key={i} index={i} validationList={validationList} />;
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>

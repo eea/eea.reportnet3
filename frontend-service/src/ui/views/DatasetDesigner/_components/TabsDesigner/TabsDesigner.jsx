@@ -98,9 +98,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
     try {
       setIsLoading(true);
       const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
-
       const inmDatasetSchema = { ...datasetSchemaDTO };
-      console.log({ inmDatasetSchema });
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
         table.description = table.tableSchemaDescription;

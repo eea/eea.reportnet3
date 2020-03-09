@@ -71,7 +71,6 @@ const parseDataValidationRulesDTO = validations => {
       date: validationDTO.activationGroup,
       description: validationDTO.description,
       enabled: validationDTO.enabled,
-      enabled: validationDTO.enabled,
       entityType: validationDTO.type,
       id: validationDTO.ruleId,
       levelError:

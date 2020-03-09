@@ -113,7 +113,6 @@ const getCodelistsByIds = async codelistIds => {
   }
   try {
     const codelistsDTO = await apiCodelist.getAllByIds(codelistIds);
-    console.log({ codelistsDTO });
     let codelistItems = [];
     codelistsDTO.data.sort((a, b) => a.id - b.id);
     const codelists = codelistsDTO.data.map(codelistDTO => {
@@ -129,7 +128,6 @@ const getCodelistsByIds = async codelistIds => {
             })
         );
       }
-      console.log({ codelistDTO });
       return new Codelist({
         description: codelistDTO.description,
         id: codelistDTO.id,
@@ -139,7 +137,6 @@ const getCodelistsByIds = async codelistIds => {
         version: codelistDTO.version
       });
     });
-    console.log({ codelists });
     return codelists;
   } catch (error) {
     throw new Error('CODELIST_SERVICE_GET_CODELISTS_BY_IDS');
@@ -206,7 +203,6 @@ const getCodelistsByCodelistsIds = async codelistIds => {
     codelistsDTO.data.sort((a, b) => a.id - b.id);
     const codelists = codelistsDTO.data.map(codelistDTO => {
       if (!isEmpty(codelistDTO.items)) {
-        console.log({ codelistDTO });
         codelistItems = codelistDTO.items.map(
           itemDTO =>
             new CodelistItem({

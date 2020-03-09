@@ -297,7 +297,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
-            {console.log(datasetHasData)}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
                 !datasetHasData ? ' p-button-animated-blink' : null

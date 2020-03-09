@@ -28,6 +28,10 @@
     "close": "Close",
     "closeSidebar": "Close sidebar",
     "codelist": "Codelist",
+    "codelistEditor": "Codelist editor",
+    "codelistEditorItems": "Codelist items",
+    "codelistEditorItemsMessage": "(press enter or tab to add new item)",
+    "codelistEditorMessage": "Enter your codelist items",
     "codelistInfo": "Codelist info",
     "codelistName": "Name",
     "codelists": "Codelists",
@@ -297,6 +301,7 @@
     "pendingDataflowText": "You are required to accept and report data to these dataflows",
     "pendingDataflowTitle": "Pending dataflows",
     "percentage": "Percentage",
+    "pk": "PK",
     "preview": "View data",
     "properties": "Properties",
     "qcManager": "QC Manager",
@@ -499,6 +504,10 @@
     "addNewRule": "Add new rule",
     "union": "Union",
     "role": "Role",
-    "documentsActionColumns": "Actions"
+    "documentsActionColumns": "Actions",
+    "columnInfo": "Column Info",
+    "columnInfoDescription": "Description",
+    "columnInfoName": "Name",
+    "columnInfoType": "Type"
   }
 }
