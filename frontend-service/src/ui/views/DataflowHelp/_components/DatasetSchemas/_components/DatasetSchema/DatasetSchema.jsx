@@ -1,24 +1,22 @@
 import React from 'react';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ codelistsList, designDataset, index, validationList }) => {
+const DatasetSchema = ({ designDataset, index, validationList }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList, validationList);
-      const codelistNames = parseCodelistList(codelistsList, designDataset);
-
-      const codelistTitles = [];
-      if (!isUndefined(codelistNames)) {
-        codelistNames.forEach(name => {
-          codelistTitles.push(name);
-        });
-      }
+      const parsedDesignDataset = parseDesignDataset(designDataset, validationList);
 
       const columnOptions = {
-        fields: { filtered: false, groupable: true, names: { shortCode: 'Shortcode' } },
+        fields: {
+          filtered: false,
+          groupable: true,
+          names: { shortCode: 'Shortcode', codelistItems: 'Codelist items' }
+        },
         validations: {
           filtered: true,
           filterType: {
@@ -41,10 +39,13 @@ const DatasetSchema = ({ codelistsList, designDataset, index, validationList }) 
           },
           groupable: true,
           invisible: ['datasetSchemaId', 'id'],
-          names: { entityType: 'Entity type', levelError: 'Level error', ruleName: 'Rule name' }
+          names: {
+            entityType: 'Entity type',
+            levelError: 'Level error',
+            ruleName: 'Rule name'
+          }
         }
       };
-      codelistTitles.forEach(codelistTitle => (columnOptions[codelistTitle] = { groupable: true }));
       return (
         <div>
           <TreeView
@@ -75,105 +76,27 @@ const DatasetSchema = ({ codelistsList, designDataset, index, validationList }) 
 //   }
 // };
 
-const parseCodelistList = (codelistsList, designDataset) => {
-  if (isUndefined(codelistsList)) {
-    return;
-  }
-  const codelistsSchema = codelistsList.filter(
-    codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
-  );
-  if (isUndefined(codelistsSchema)) {
-    return;
-  }
-  const codelistNames = [];
-  codelistsSchema.forEach(codelistList => {
-    codelistList.codelists.forEach(codelist => {
-      let title = `${codelist.name} (${codelist.version})`;
-      codelistNames.push(title);
-    });
-  });
-  return codelistNames;
-};
-
-const parseValidationList = (validationList, designDataset) => {
-  if (isUndefined(validationList)) {
-    return;
-  }
-  const schemaValidations = validationList.filter(
-    validation => validation.datasetSchemaId === designDataset.datasetSchemaId
-  );
-  if (isUndefined(schemaValidations)) {
-    return;
-  }
-  return schemaValidations.map(validation => `${validation.ruleName}`);
-};
-
-const parseDesignDataset = (design, codelistsListWithSchema, validationList) => {
+const parseDesignDataset = (design, validationList) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  parsedDataset.codelists = [];
   parsedDataset.validations = validationList;
-  const codelistItemsData = [];
-  let codelistsBySchema = [];
-  if (!isUndefined(codelistsListWithSchema)) {
-    codelistsBySchema = codelistsListWithSchema.find(x => x.schema.datasetSchemaName === design.datasetSchemaName);
-    if (!isUndefined(codelistsBySchema)) {
-      codelistsBySchema = codelistsBySchema.codelists;
-    }
-  }
 
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
-      if (
-        !isNull(tableDTO.records) &&
-        !isUndefined(tableDTO.records[0].fields) &&
-        !isNull(tableDTO.records[0].fields) &&
-        tableDTO.records[0].fields.length > 0
-      ) {
-        const existACodelist = tableDTO.records[0].fields.filter(field => field.type === 'CODELIST');
+      if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
-          if (!isEmpty(existACodelist)) {
-            let fieldCodelist;
-            if (fieldDTO.type === 'CODELIST') {
-              if (!isUndefined(codelistsListWithSchema) && !isEmpty(codelistsBySchema)) {
-                const codelist = codelistsBySchema.find(codelist => codelist.id === fieldDTO.codelistId);
-                if (!isUndefined(codelist)) {
-                  const codelistView = [];
-                  fieldCodelist = `${codelist.name} (${codelist.version})`;
-                  if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
-                    codelist.items.forEach(itemDTO => {
-                      const isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
-                      if (!isUndefined(isRepeatedCodelistItem) && isRepeatedCodelistItem.length > 0) {
-                        return;
-                      }
-                      const codelistItemView = {};
-                      codelistItemView.shortCode = itemDTO.shortCode;
-                      codelistItemView.label = itemDTO.label;
-                      codelistItemView.definition = itemDTO.definition;
-                      codelistView.push(codelistItemView);
-                    });
-                  }
-                  parsedDataset.codelists.push({ [fieldCodelist]: codelistView });
-                }
-              }
-            }
-            return {
-              codelist: !isNull(fieldCodelist) ? fieldCodelist : '',
-              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-',
-              name: fieldDTO.name,
-              type: fieldDTO.type
-            };
-          } else {
-            return {
-              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-',
-              name: fieldDTO.name,
-              type: fieldDTO.type
-            };
+          const field = {};
+          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
+          field.name = fieldDTO.name;
+          field.type = fieldDTO.type;
+          if (fieldDTO.type === 'CODELIST') {
+            field.codelistItems = fieldDTO.codelistItems;
           }
+          return field;
         });
         table.fields = fields;
       }

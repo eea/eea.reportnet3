@@ -5,6 +5,7 @@ import { capitalize, isUndefined, isNull } from 'lodash';
 import styles from './TreeView.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -74,7 +75,15 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
   const renderColumns = fields =>
     Object.keys(fields[0]).map(field => (
       <Column
-        body={field === 'type' ? typeTemplate : field === 'automatic' || field === 'enabled' ? automaticTemplate : null}
+        body={
+          field === 'type'
+            ? typeTemplate
+            : field === 'automatic' || field === 'enabled'
+            ? automaticTemplate
+            : field === 'codelistItems'
+            ? codelistTemplate
+            : null
+        }
         key={field}
         columnResizeMode="expand"
         field={field}
@@ -163,6 +172,8 @@ const automaticTemplate = rowData => (
 
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
+const codelistTemplate = rowData => <Chips disabled={true} value={rowData.codelistItems}></Chips>;
+
 const getFieldTypeValue = value => {
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
@@ -186,14 +197,7 @@ const getFieldTypeValue = value => {
   return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
 };
 
-const getInitialFilter = (columnOptions, field) =>
-  !isUndefined(columnOptions.validations) &&
-  !isUndefined(columnOptions.validations.filterType) &&
-  !isUndefined(columnOptions.validations.filterType.multiselect)
-    ? columnOptions.validations.filterType.multiselect[field]
-    : [];
-
-const typeTemplate = (rowData, column) => {
+const typeTemplate = rowData => {
   return (
     <div>
       <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>

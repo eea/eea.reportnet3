@@ -1,3 +1,9 @@
+.checkRequired {
+  width: 70px;
+  div:nth-child(2) {
+    margin-left: 33%;
+  }
+}
 .draggableFieldDiv .inputField {
   width: 20%;
 }

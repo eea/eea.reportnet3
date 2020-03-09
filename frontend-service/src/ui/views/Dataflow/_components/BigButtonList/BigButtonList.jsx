@@ -126,6 +126,7 @@ export const BigButtonList = ({
     try {
       return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
+      console.error(error);
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });

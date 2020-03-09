@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, uniq } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import styles from './Representative.module.scss';
 
@@ -75,7 +77,7 @@ const Representative = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))

@@ -299,51 +299,6 @@ body .p-fluid .p-autocomplete.p-autocomplete-dd .p-inputtext {
   border-right: 0 none;
   width: calc(100% - 2.357em);
 }
-body .p-chips > ul.p-inputtext {
-  padding: 0.2145em 0.429em;
-  display: inline-block;
-}
-body .p-chips > ul.p-inputtext:not(.p-disabled):hover {
-  border-color: #212121;
-}
-body .p-chips > ul.p-inputtext:not(.p-disabled).p-focus {
-  outline: 0 none;
-  outline-offset: 0;
-  -webkit-box-shadow: 0 0 0 0.2em #004494;
-  -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;
-  border-color: #004494;
-}
-body .p-chips > ul.p-inputtext .p-chips-input-token {
-  padding: 0.2145em 0;
-}
-body .p-chips > ul.p-inputtext .p-chips-input-token input {
-  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
-  padding: 0;
-  margin: 0;
-  color: #404040;
-}
-body .p-chips > ul.p-inputtext .p-chips-input-token input:hover {
-  border: 0 none;
-}
-body .p-chips > ul.p-inputtext .p-chips-input-token input:focus {
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-  outline: 0 none;
-  border: 0 none;
-}
-body .p-chips > ul.p-inputtext .p-chips-token {
-  font-size: 14px;
-  padding: 0.2145em 0.429em;
-  margin: 0 0.286em 0 0;
-  background: #004494;
-  color: #ffffff;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
-}
 
 body .p-multiselect {
   background: var(--multiselect-bg);
@@ -1051,15 +1006,27 @@ body .p-fluid .p-inputgroup .p-button.p-button-icon-only {
 }
 body ::-webkit-input-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body :-moz-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body ::-moz-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body :-ms-input-placeholder {
   color: #666666;
+  color: var(--inputtext-placeholder);
+  font-style: italic;
+  opacity: 0.6;
 }
 body .p-inputtext.p-error,
 body .p-dropdown.p-error,

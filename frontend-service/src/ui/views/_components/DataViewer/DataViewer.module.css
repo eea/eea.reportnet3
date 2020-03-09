@@ -17,11 +17,12 @@
   width: 1em !important;
   height: 1em !important;
   font-size: 12pt !important;
-  color: var(--blue-75) !important;
+  color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
 }
 
 .codelistInfoButton span {
+  left: 46% !important;
   margin-top: -0.5em !important;
 }
 
