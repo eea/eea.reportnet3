@@ -205,16 +205,16 @@ const Dataflows = withRouter(({ match, history }) => {
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
-            <DataflowsList
+            {/* <DataflowsList
               className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
-              // description={resources.messages['pendingDataflowText']}
+              description={resources.messages['pendingDataflowText']}
               isCustodian={isCustodian}
-              // title={resources.messages['pendingDataflowTitle']}
+              title={resources.messages['pendingDataflowTitle']}
               type="pending"
-              user={user}
-            />
+              userContextRoles={user.contextRoles}
+            /> */}
             <DataflowsList
               className="dataflowList-accepted-help-step"
               content={acceptedContent}
@@ -222,7 +222,7 @@ const Dataflows = withRouter(({ match, history }) => {
               // description={resources.messages['acceptedDataflowText']}
               // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
-              user={user}
+              userContextRoles={user.contextRoles}
             />
           </>
         ) : (
@@ -234,7 +234,7 @@ const Dataflows = withRouter(({ match, history }) => {
               isCustodian={isCustodian}
               title={resources.messages.completedDataflowTitle}
               type="completed"
-              user={user}
+              userContextRoles={user.contextRoles}
             />
           </>
         )}

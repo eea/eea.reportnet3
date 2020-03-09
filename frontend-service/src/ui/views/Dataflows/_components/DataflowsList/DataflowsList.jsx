@@ -17,12 +17,12 @@ const DataflowsList = ({
   selectedDataflowId,
   title,
   type,
-  user
+  userContextRoles
 }) => {
   const dataflows = [];
   const userRoles = [];
 
-  const dataflowsRoles = user.contextRoles.filter(role => role.includes(config.permissions['DATAFLOW']));
+  const dataflowsRoles = userContextRoles.filter(role => role.includes(config.permissions['DATAFLOW']));
 
   dataflowsRoles.map((item, i) => {
     const role = DataflowsUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
