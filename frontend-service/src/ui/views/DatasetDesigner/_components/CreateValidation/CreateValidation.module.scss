@@ -19,7 +19,7 @@
           justify-content: space-between;
           flex-wrap: wrap;
           width: 80%;
-          label {
+          > label {
             width: 23%;
             margin-bottom: 0.5rem;
             &.errorMessage {
