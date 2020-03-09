@@ -38,6 +38,7 @@ import { setValidationExpresion } from './_functions/utils/setValidationExpresio
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const [creationFormState, creationFormDispatch] = useReducer(
     createValidationReducer,
     createValidationReducerInitState
@@ -47,51 +48,10 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
   const validationCreationCheckListener = [ruleAdditionCheckListener, creationFormState.candidateRule];
 
-  const onExpresionGroup = (expresionId, field) => {
-    const {
-      candidateRule: { expresions },
-      groupCandidate
-    } = creationFormState;
-    if (field.key == 'group') {
-      if (field.value.value) {
-        groupCandidate.push(expresionId);
-      } else {
-        pull(groupCandidate, expresionId);
-      }
-      creationFormDispatch({
-        type: 'GROUP_RULES_ACTIVATOR',
-        payload: {
-          groupRulesActive: field.value.value ? 1 : -1
-        }
-      });
-    }
-  };
-
-  const onExpresionFieldUpdate = (expresionId, field) => {
-    const {
-      candidateRule: { expresions }
-    } = creationFormState;
-    creationFormDispatch({
-      type: 'UPDATE_RULES',
-      payload: setValidationExpresion(expresionId, field, expresions)
-    });
-  };
-
-  const onExpresionDelete = expresionId => {
-    const {
-      candidateRule: { expresions }
-    } = creationFormState;
-    creationFormDispatch({
-      type: 'UPDATE_RULES',
-      payload: deleteExpresion(expresionId, expresions)
-    });
-  };
-
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
   }, []);
 
-  //set field data
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
     if (!isEmpty(table)) {
@@ -113,16 +73,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     });
   }, [creationFormState.candidateRule]);
 
-  //disable manager
-  const checkActivateRules = () => {
-    return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
-  };
-  const checkDesactivateRules = () => {
-    return (
-      (!creationFormState.candidateRule.table || !creationFormState.candidateRule.field) &&
-      !creationFormState.areRulesDisabled
-    );
-  };
   useEffect(() => {
     if (checkActivateRules()) {
       creationFormDispatch({
@@ -136,6 +86,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       });
     }
   }, [...ruleDisablingCheckListener]);
+
   useEffect(() => {
     const {
       candidateRule: { expresions }
@@ -145,6 +96,24 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       payload: checkExpresions(expresions)
     });
   }, [...ruleAdditionCheckListener]);
+
+  useEffect(() => {
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_CREATION_DISABLED',
+      payload: !checkValidation(creationFormState.candidateRule)
+    });
+  }, [creationFormState.candidateRule]);
+
+  const checkActivateRules = () => {
+    return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
+  };
+
+  const checkDesactivateRules = () => {
+    return (
+      (!creationFormState.candidateRule.table || !creationFormState.candidateRule.field) &&
+      !creationFormState.areRulesDisabled
+    );
+  };
 
   const createValidationRule = async () => {
     try {
@@ -157,12 +126,45 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     }
   };
 
-  useEffect(() => {
+  const onExpresionDelete = expresionId => {
+    const {
+      candidateRule: { expresions }
+    } = creationFormState;
     creationFormDispatch({
-      type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidation(creationFormState.candidateRule)
+      type: 'UPDATE_RULES',
+      payload: deleteExpresion(expresionId, expresions)
     });
-  }, [creationFormState.candidateRule]);
+  };
+
+  const onExpresionFieldUpdate = (expresionId, field) => {
+    const {
+      candidateRule: { expresions }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_RULES',
+      payload: setValidationExpresion(expresionId, field, expresions)
+    });
+  };
+
+  const onExpresionGroup = (expresionId, field) => {
+    const {
+      candidateRule: { expresions },
+      groupCandidate
+    } = creationFormState;
+    if (field.key == 'group') {
+      if (field.value.value) {
+        groupCandidate.push(expresionId);
+      } else {
+        pull(groupCandidate, expresionId);
+      }
+      creationFormDispatch({
+        type: 'GROUP_RULES_ACTIVATOR',
+        payload: {
+          groupRulesActive: field.value.value ? 1 : -1
+        }
+      });
+    }
+  };
 
   const onHide = () => {
     creationFormDispatch({ type: 'RESET_CREATION_FORM', payload: resetValidationRuleCreation() });
