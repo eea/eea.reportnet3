@@ -92,7 +92,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR (hasRole('DATA_PROVIDER') OR (hasRole('DATA_REQUESTER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER') OR hasRole('DATA_REQUESTER')")
   public List<DataFlowVO> findByStatus(TypeStatusEnum status) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -114,7 +114,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR (hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public List<DataFlowVO> findPendingAccepted() {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -142,7 +142,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR (hasRole('DATA_PROVIDER') OR (hasRole('DATA_REQUESTER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER') OR hasRole('DATA_REQUESTER')")
   public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -170,7 +170,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR (hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public List<DataFlowVO> findUserDataflowsByStatus(TypeRequestEnum type) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -196,6 +196,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
       TypeRequestEnum type) {
 
@@ -384,7 +385,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR (hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
       @RequestParam(value = "status", required = true) TypeStatusEnum status) {
     try {
