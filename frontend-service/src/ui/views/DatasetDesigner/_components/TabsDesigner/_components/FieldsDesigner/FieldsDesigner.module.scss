@@ -15,9 +15,35 @@
   margin-bottom: 1rem;
 }
 
-.fieldsWrapper {
-  /* border: 1px solid var(--c-custom-gray);
-  padding: 10px 0; */
+.fieldsHeader {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+  color: var(--main-font-color);
+  font-weight: bold;
+  label {
+    &:first-child {
+      width: 32px;
+    }
+    &:nth-child(2) {
+      width: 70px;
+    }
+    &:nth-child(3) {
+      width: 35px;
+    }
+    &:nth-child(4) {
+      width: 20%;
+      margin-right: 0.4rem;
+    }
+    &:nth-child(5) {
+      width: 25%;
+      margin-right: 0.4rem;
+    }
+    &:nth-child(6) {
+      width: 20%;
+      margin-right: 0.4rem;
+    }
+  }
 }
 
 .switchContainerInput {
