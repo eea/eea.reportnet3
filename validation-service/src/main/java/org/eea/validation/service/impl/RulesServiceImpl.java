@@ -139,27 +139,27 @@ public class RulesServiceImpl implements RulesService {
 
   private void validateRule(Rule rule) throws EEAException {
 
-    if (rule.getRuleId() != null) {
+    if (rule.getRuleId() == null) {
       throw new EEAException(EEAErrorMessage.RULE_ID_REQUIRED);
     }
 
-    if (rule.getReferenceId() != null) {
+    if (rule.getReferenceId() == null) {
       throw new EEAException(EEAErrorMessage.REFERENCE_ID_REQUIRED);
     }
 
-    if (rule.getDescription() != null) {
+    if (rule.getDescription() == null) {
       throw new EEAException(EEAErrorMessage.DESCRIPTION_REQUIRED);
     }
 
-    if (rule.getRuleName() != null) {
+    if (rule.getRuleName() == null) {
       throw new EEAException(EEAErrorMessage.RULE_NAME_REQUIRED);
     }
 
-    if (rule.getWhenCondition() != null) {
+    if (rule.getWhenCondition() == null) {
       throw new EEAException(EEAErrorMessage.WHEN_CONDITION_REQUIRED);
     }
 
-    if (rule.getThenCondition() != null && rule.getThenCondition().size() == 2) {
+    if (rule.getThenCondition() == null || rule.getThenCondition().size() != 2) {
       throw new EEAException(EEAErrorMessage.THEN_CONDITION_REQUIRED);
     }
   }
