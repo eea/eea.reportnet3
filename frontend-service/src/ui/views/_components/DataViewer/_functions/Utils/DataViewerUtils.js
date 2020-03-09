@@ -1,4 +1,8 @@
-import { capitalize, isUndefined, isNull, isEmpty } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+import isEmpty from 'lodash/isEmpty';
+import pick from 'lodash/pick';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -8,6 +12,19 @@ const editLargeStringWithDots = (string, length) => {
   } else {
     return string;
   }
+};
+
+const getColumnByHeader = (columns, header) => columns.filter(e => e.header === header)[0];
+
+const getFieldValues = (columns, header, filterColumns) => {
+  const filteredColumn = columns.filter(e => {
+    return e.header === header;
+  })[0];
+
+  const filteredValues = pick(filteredColumn, ...filterColumns);
+  return Object.keys(filteredValues).map(key => {
+    return { field: key === 'codelistItems' ? 'Codelist items' : capitalize(key), value: filteredValues[key] };
+  });
 };
 
 const getLevelError = validations => {
@@ -138,22 +155,6 @@ const orderValidationsByLevelError = validations => {
     .reverse();
 };
 
-const parseCodelistValue = (field, colsSchema) => {
-  try {
-    const filteredCodelistItems = colsSchema.filter(col => col.field === field.fieldData.fieldSchemaId)[0];
-    const codelistItem = filteredCodelistItems.codelistItems.filter(
-      item => item.shortCode === field.fieldData[field.fieldData.fieldSchemaId]
-    )[0];
-    if (!isUndefined(codelistItem)) {
-      return `${codelistItem.shortCode}-${codelistItem.label}`;
-    } else {
-      return field.fieldData[field.fieldData.fieldSchemaId];
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const parseData = data =>
   data.records.map(record => {
     const datasetPartitionId = record.datasetPartitionId;
@@ -187,10 +188,11 @@ const parseData = data =>
 
 export const DataViewerUtils = {
   editLargeStringWithDots,
+  getColumnByHeader,
+  getFieldValues,
   formatValidations,
   getLevelError,
   groupValidations,
   orderValidationsByLevelError,
-  parseCodelistValue,
   parseData
 };
