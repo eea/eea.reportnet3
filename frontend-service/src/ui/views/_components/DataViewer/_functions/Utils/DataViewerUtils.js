@@ -155,22 +155,6 @@ const orderValidationsByLevelError = validations => {
     .reverse();
 };
 
-const parseCodelistValue = (field, colsSchema) => {
-  try {
-    const filteredCodelistItems = colsSchema.filter(col => col.field === field.fieldData.fieldSchemaId)[0];
-    const codelistItem = filteredCodelistItems.codelistItems.filter(
-      item => item.shortCode === field.fieldData[field.fieldData.fieldSchemaId]
-    )[0];
-    if (!isUndefined(codelistItem)) {
-      return `${codelistItem.shortCode}-${codelistItem.label}`;
-    } else {
-      return field.fieldData[field.fieldData.fieldSchemaId];
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const parseData = data =>
   data.records.map(record => {
     const datasetPartitionId = record.datasetPartitionId;
@@ -210,6 +194,5 @@ export const DataViewerUtils = {
   getLevelError,
   groupValidations,
   orderValidationsByLevelError,
-  parseCodelistValue,
   parseData
 };

@@ -117,15 +117,6 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   }, []);
 
-  const getCodelistsList = async datasetSchemas => {
-    try {
-      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
-      return codelistsList;
-    } catch (error) {
-      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
-    }
-  };
-
   const getDataflowName = async () => {
     try {
       const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
@@ -188,7 +179,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      const codelistsList = await getCodelistsList([datasetSchema]);
       setDatasetSchemaName(datasetSchema.dataCollectionName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];

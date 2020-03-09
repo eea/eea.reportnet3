@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -716,7 +715,6 @@ const DataViewer = withRouter(
     };
 
     const requiredTemplate = rowData => {
-      console.log({ rowData });
       return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           {rowData.field === 'Required' ? (

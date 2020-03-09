@@ -78,7 +78,6 @@ export const useSetColumns = (
   setIsColumnInfoVisible,
   validationsTemplate
 ) => {
-  console.log({ colsSchema });
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
@@ -118,24 +117,13 @@ export const useSetColumns = (
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-            {' '}
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}{' '}
+            {field ? field.fieldData[column.field] : null}
             <IconTooltip levelError={levelError} message={message} />
           </div>
         );
       } else {
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
         );
       }
     };

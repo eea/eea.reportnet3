@@ -1,4 +1,8 @@
-import { isUndefined, isNull, isString, isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isString from 'lodash/isString';
+import isUndefined from 'lodash/isUndefined';
 
 const changeCellValue = (tableData, rowIndex, field, value) => {
   tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
@@ -73,8 +77,7 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
-  console.log({ codelistItems });
-  return !isUndefined(codelistItems)
+  return !isNil(codelistItems)
     ? codelistItems.map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })

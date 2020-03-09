@@ -28,7 +28,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -390,19 +389,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getCodelistsList = async datasetSchemas => {
-    try {
-      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
-      return codelistsList;
-    } catch (error) {
-      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      console.log({ datasetSchema });
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)

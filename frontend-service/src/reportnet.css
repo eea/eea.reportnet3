@@ -170,6 +170,7 @@
   --datatable-header-footer-bg: var(--gray-10);
   --datatable-header-footer-color: var(--gray-110);
   --datatable-header-footer-border: 1px solid var(--gray-25);
+  --datatable-header-info-button-color: var(--c-corporate-blue);
   --datatable-column-sortable-icon-color: var(--gray-110);
   --datatable-column-sortable-hightlight-bg-hover: var(--c-corporate-yellow);
   --datatable-column-sortable-hightlight-color-hover: var(--gray-110);

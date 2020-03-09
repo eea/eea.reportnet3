@@ -278,34 +278,6 @@ export const FieldDesigner = ({
     }
   };
 
-  const onSaveCodelist = codelistItems => {
-    dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
-    if (fieldDesignerState.fieldValue === '') {
-      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
-    } else {
-      if (fieldId.toString() === '-1') {
-        onFieldAdd({
-          codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          recordId,
-          required: fieldDesignerState.fieldRequiredValue,
-          type: 'CODELIST',
-          name: fieldDesignerState.fieldValue
-        });
-      } else {
-        fieldUpdate({
-          codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          fieldSchemaId: fieldId,
-          required: fieldDesignerState.fieldRequiredValue,
-          type: 'CODELIST',
-          name: fieldDesignerState.fieldValue
-        });
-      }
-    }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
-  };
-
   const onCancelSaveCodelist = () => {
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST', payload: fieldDesignerState.fieldPreviousTypeValue });
   };
@@ -332,7 +304,7 @@ export const FieldDesigner = ({
       } else {
         dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
         onNewFieldAdd({
-          id: response.data,
+          fieldId: response.data,
           name,
           recordId,
           type,
@@ -421,38 +393,6 @@ export const FieldDesigner = ({
     }
   };
 
-  const onRequiredChange = checked => {
-    if (!fieldDesignerState.isDragging) {
-      if (fieldId === '-1') {
-        if (
-          !isNil(fieldDesignerState.fieldTypeValue) &&
-          fieldDesignerState.fieldTypeValue !== '' &&
-          !isNil(fieldDesignerState.fieldValue) &&
-          fieldDesignerState.fieldValue !== ''
-        ) {
-          onFieldAdd({
-            codelistItems: fieldDesignerState.codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            recordId,
-            required: checked,
-            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-            name: fieldDesignerState.fieldValue
-          });
-        }
-      } else {
-        fieldUpdate({
-          codelistItems: fieldDesignerState.codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          fieldSchemaId: fieldId,
-          required: checked,
-          type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-          name: fieldDesignerState.fieldValue
-        });
-      }
-    }
-    dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
-  };
-
   const onPKChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
@@ -485,6 +425,68 @@ export const FieldDesigner = ({
       }
     }
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
+  };
+
+  const onRequiredChange = checked => {
+    if (!fieldDesignerState.isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isNil(fieldDesignerState.fieldTypeValue) &&
+          fieldDesignerState.fieldTypeValue !== '' &&
+          !isNil(fieldDesignerState.fieldValue) &&
+          fieldDesignerState.fieldValue !== ''
+        ) {
+          onFieldAdd({
+            codelistItems: fieldDesignerState.codelistItems,
+            description: fieldDesignerState.fieldDescriptionValue,
+            recordId,
+            required: checked,
+            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+            name: fieldDesignerState.fieldValue
+          });
+        }
+      } else {
+        fieldUpdate({
+          codelistItems: fieldDesignerState.codelistItems,
+          description: fieldDesignerState.fieldDescriptionValue,
+          fieldSchemaId: fieldId,
+          required: checked,
+          type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+          name: fieldDesignerState.fieldValue
+        });
+      }
+    }
+    dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
+  };
+
+  const onSaveCodelist = codelistItems => {
+    dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
+    if (fieldDesignerState.fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+    } else {
+      if (!isUndefined(fieldId)) {
+        if (fieldId.toString() === '-1') {
+          onFieldAdd({
+            codelistItems,
+            description: fieldDesignerState.fieldDescriptionValue,
+            recordId,
+            required: fieldDesignerState.fieldRequiredValue,
+            type: 'CODELIST',
+            name: fieldDesignerState.fieldValue
+          });
+        } else {
+          fieldUpdate({
+            codelistItems,
+            description: fieldDesignerState.fieldDescriptionValue,
+            fieldSchemaId: fieldId,
+            required: fieldDesignerState.fieldRequiredValue,
+            type: 'CODELIST',
+            name: fieldDesignerState.fieldValue
+          });
+        }
+      }
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
   const parseGeospatialTypes = value => {

@@ -141,7 +141,6 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   });
 
   const dataset = new Dataset({});
-  console.log('LLEGO');
   dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
   const tableStatisticValues = [];

@@ -65,10 +65,10 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, id, name, type, recordId, required }) => {
+  const onFieldAdd = ({ codelistItems, description, fieldId, name, type, recordId, required }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
-      id,
+      fieldId,
       name,
       recordId,
       type,

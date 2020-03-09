@@ -24,8 +24,6 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
   };
 
   const renderDropdown = (field, fieldValue) => {
-    console.log({ field, fieldValue });
-    console.log(getCodelistItemsWithEmptyOption(colsSchema, field));
     return (
       <Dropdown
         appendTo={document.body}
