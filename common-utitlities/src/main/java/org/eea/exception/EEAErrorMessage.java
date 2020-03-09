@@ -149,6 +149,7 @@ public final class EEAErrorMessage {
   /** The Constant THEN_CONDITION_REQUIRED. */
   public static final String THEN_CONDITION_REQUIRED = "ThenCondition is required";
 
+  /** The Constant RULE_ID_REQUIRED. */
   public static final String RULE_ID_REQUIRED = "RuleId is required";
 
   /**

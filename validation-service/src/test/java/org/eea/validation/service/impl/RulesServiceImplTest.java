@@ -1,6 +1,3 @@
-/*
- * 
- */
 package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;

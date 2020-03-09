@@ -19,18 +19,31 @@ import lombok.Setter;
 @Setter
 public class RuleExpressionVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 23125812873889682L;
 
+  /** The operator. */
   private RuleOperatorEnum operator;
 
+  /** The argument 1. */
   private Object arg1;
 
+  /** The argument 2. */
   private Object arg2;
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * Instantiates a new RuleExpressionVO.
+   */
   public RuleExpressionVO() {}
 
+  /**
+   * Instantiates a new RuleExpressionVO from a Java expression contained in the String.
+   *
+   * @param expression the Java expression
+   */
   public RuleExpressionVO(String expression) {
     Map<Integer, Integer> map = new HashMap<>();
     List<String> tokens = new ArrayList<>();
@@ -38,6 +51,12 @@ public class RuleExpressionVO implements Serializable {
     compose(0, tokens, map);
   }
 
+  /**
+   * Instantiates a new RuleExpressionVO. Used to construct a new object recursively from a
+   * serialized RuleExpressionVO.
+   *
+   * @param map contains the RuleExpressionVO serialized.
+   */
   private RuleExpressionVO(Map<String, Object> map) {
 
     Object mapEntry;
@@ -62,10 +81,23 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Instantiates a new RuleExpressionVO. Used to generate a new RuleExpressionVO from a Java
+   * expression contained in a String.
+   *
+   * @param index the index
+   * @param tokens the tokens
+   * @param map the map
+   */
   private RuleExpressionVO(int index, List<String> tokens, Map<Integer, Integer> map) {
     compose(index, tokens, map);
   }
 
+  /**
+   * Sets the arg 1.
+   *
+   * @param arg1 the new arg 1
+   */
   @SuppressWarnings("unchecked")
   public void setArg1(Object arg1) {
     if (arg1 != null) {
@@ -77,6 +109,11 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Sets the arg 2.
+   *
+   * @param arg2 the new arg 2
+   */
   @SuppressWarnings("unchecked")
   public void setArg2(Object arg2) {
     if (arg2 != null) {
@@ -88,6 +125,16 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Tokenize a function. A function starts with ".", the first word is the operator, and the
+   * elements in parenthesis are the arguments. Ej. .equals("hello").<br>
+   * <b>*NOTE*</b> Actually only reads the first argument, but it is intented to read all of them.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param tokens the tokens
+   * @return the int
+   */
   private int tokenizeFunction(String expression, int index, List<String> tokens) {
 
     char actual;
@@ -111,6 +158,14 @@ public class RuleExpressionVO implements Serializable {
     return index;
   }
 
+  /**
+   * Auxiliary function to tokenize a raw value. Ej.: &&, >=, equals, equalsIgnoreCase...
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param tokens the tokens
+   * @return the int
+   */
   private int tokenizeElement(String expression, int index, List<String> tokens) {
 
     int inputType = inputType(expression.charAt(index), 0);
@@ -131,6 +186,15 @@ public class RuleExpressionVO implements Serializable {
     return length;
   }
 
+  /**
+   * Auxiliary function to tokenize an String. A word is considered String if begins with ". Ej.:
+   * "hello", "world", "\"quoted\"", "\\scaped backslash"
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param tokens the tokens
+   * @return the int
+   */
   private int tokenizeString(String expression, int index, List<String> tokens) {
 
     int length = expression.length();
@@ -166,6 +230,18 @@ public class RuleExpressionVO implements Serializable {
     return length;
   }
 
+  /**
+   * Split the string into tokens. Each token is a word. Tokenization example:
+   * (value.equals("hello")) || (value.equals("world")) -> [(, VALUE, SEQ, "hello", ), ||, (, VALUE,
+   * SEQ, "world", )]
+   *
+   * @param expression the expression
+   * @param tokens the tokens
+   * @param map the map
+   * @param index the index
+   * @param begin the begin
+   * @return the int
+   */
   private int tokenize(String expression, List<String> tokens, Map<Integer, Integer> map, int index,
       int begin) {
 
@@ -182,7 +258,6 @@ public class RuleExpressionVO implements Serializable {
         case ')':
           tokens.add(")");
           map.put(begin, tokens.size() - 1);
-          System.out.println(tokens);
           return i;
         case '"':
           i = tokenizeString(expression, i + 1, tokens);
@@ -200,6 +275,13 @@ public class RuleExpressionVO implements Serializable {
     return length;
   }
 
+  /**
+   * Organize all tokens to convert them into a RuleExpressionVO.
+   *
+   * @param index the index
+   * @param tokens the tokens
+   * @param map the map
+   */
   private void compose(int index, List<String> tokens, Map<Integer, Integer> map) {
 
     String actual = null;
@@ -265,6 +347,14 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Classifies a character: 0 (whitespace), 1 (number), 2 (logical operator), 3 (function
+   * operator), 4 (end of expression) and 5 (other element)
+   *
+   * @param actual the actual
+   * @param lastInputType the last input type
+   * @return the int
+   */
   private int inputType(char actual, int lastInputType) {
     switch (actual) {
       case ' ':
@@ -299,6 +389,12 @@ public class RuleExpressionVO implements Serializable {
     }
   }
 
+  /**
+   * Auxiliary method to string serialize recursively a RuleExpressionVO object.
+   *
+   * @param branch the branch
+   * @return the string
+   */
   private String toStringBranch(Object branch) {
 
     if (branch instanceof RuleExpressionVO) {
@@ -318,6 +414,11 @@ public class RuleExpressionVO implements Serializable {
     return branch.toString();
   }
 
+  /**
+   * Serializes a RuleExpressionVO object into a Java string expression.
+   *
+   * @return the string
+   */
   @Override
   public String toString() {
     if (operator != null) {
@@ -345,11 +446,22 @@ public class RuleExpressionVO implements Serializable {
     return "OPERATOR IS NULL";
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(operator != null ? operator.ordinal() : null, arg1, arg2);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
 
