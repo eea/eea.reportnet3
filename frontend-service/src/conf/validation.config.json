@@ -10,6 +10,18 @@
         { "label": "=", "value": "=" },
         { "label": "!=", "value": "!=" }
       ]
+    },
+    "string": {
+      "option": { "label": "String Length", "value": "string" },
+      "values": [
+        { "label": "Equals", "value": "SEQ" },
+        { "label": "Equals ignore case", "value": "SEQIC" },
+        { "label": "Greater than", "value": "GT" },
+        { "label": "Greater or equal than", "value": "GTEQ" },
+        { "label": "littler than", "value": "LT" },
+        { "label": "littler or equal", "value": "LTEQ" },
+        { "label": "Distinct", "value": "DIST" }
+      ]
     }
   },
   "errorLevels": [
