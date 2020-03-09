@@ -328,7 +328,7 @@ export const FieldDesigner = ({
         if (childs[i].nodeName === 'INPUT') {
           if (!isUndefined(onFieldDragAndDrop)) {
             onFieldDragAndDrop(initialFieldIndexDragged, childs[i].value);
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
+            dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
           }
         }
       }
@@ -340,7 +340,7 @@ export const FieldDesigner = ({
       onFieldDragAndDropStart(undefined);
       inputRef.current.element.focus();
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
+    dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
   };
 
   const onFieldDragEnter = event => {
@@ -350,7 +350,7 @@ export const FieldDesigner = ({
   const onFieldDragLeave = event => {
     if (!isUndefined(initialFieldIndexDragged)) {
       if (event.currentTarget.tabIndex !== initialFieldIndexDragged) {
-        dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
+        dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
       }
     }
   };
@@ -363,7 +363,7 @@ export const FieldDesigner = ({
             (index === '-1' && totalFields - initialFieldIndexDragged !== 1) ||
             (index !== '-1' && initialFieldIndexDragged - index !== -1)
           ) {
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
+            dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: true });
           }
         }
       }
@@ -564,6 +564,7 @@ export const FieldDesigner = ({
           onFieldDragDrop(e);
         }}
         ref={fieldRef}>
+        {console.log(fieldDesignerState.isDragging)}
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
