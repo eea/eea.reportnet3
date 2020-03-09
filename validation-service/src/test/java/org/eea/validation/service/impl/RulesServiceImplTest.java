@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
@@ -5,9 +8,11 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -303,24 +308,174 @@ public class RulesServiceImplTest {
 
   /**
    * Creates the new rule test.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void createNewRuleTest() {
-    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+  public void createNewRuleTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   /**
-   * Creates the new rule with empty id test.
+   * Creates the new rule repository exception test.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void createNewRuleWithEmptyIdTest() {
+  @Test(expected = EEAException.class)
+  public void createNewRuleRepositoryExceptionTest() throws EEAException {
+
     Rule rule = new Rule();
-    rule.setRuleId(new ObjectId());
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(false);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
-    rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule then condition size exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleThenConditionSizeExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success"));
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.THEN_CONDITION_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule then condition null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleThenConditionNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.THEN_CONDITION_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule when condition null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleWhenConditionNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.WHEN_CONDITION_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule rule name null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleRuleNameNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.RULE_NAME_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule description null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleDescriptionNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.DESCRIPTION_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule reference id null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleReferenceIdNullExceptionTest() throws EEAException {
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    try {
+      rulesServiceImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.REFERENCE_ID_REQUIRED, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -345,20 +500,61 @@ public class RulesServiceImplTest {
 
   /**
    * Update rule test.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void updateRuleTest() {
-    when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+  public void updateRuleTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
     rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
   /**
-   * Update rule no rule test.
+   * Update rule exception test.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void updateRuleNoRuleTest() {
-    rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", null);
+  @Test(expected = EEAException.class)
+  public void updateRuleRuleIdExceptionTest() throws EEAException {
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    try {
+      rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.RULE_ID_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateRuleExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(false);
+    try {
+      rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_UPDATING_RULE, e.getMessage());
+      throw e;
+    }
   }
 
   /**

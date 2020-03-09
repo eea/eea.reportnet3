@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -136,19 +137,50 @@ public class RulesServiceImpl implements RulesService {
         new ObjectId(referenceId));
   }
 
+  private void validateRule(Rule rule) throws EEAException {
+    if (rule.getRuleId() != null) {
+      if (rule.getReferenceId() != null) {
+        if (rule.getDescription() != null) {
+          if (rule.getRuleName() != null) {
+            if (rule.getWhenCondition() != null) {
+              if (rule.getThenCondition() != null && rule.getThenCondition().size() == 2) {
+                return;
+              }
+              throw new EEAException(EEAErrorMessage.THEN_CONDITION_REQUIRED);
+            }
+            throw new EEAException(EEAErrorMessage.WHEN_CONDITION_REQUIRED);
+          }
+          throw new EEAException(EEAErrorMessage.RULE_NAME_REQUIRED);
+        }
+        throw new EEAException(EEAErrorMessage.DESCRIPTION_REQUIRED);
+      }
+      throw new EEAException(EEAErrorMessage.REFERENCE_ID_REQUIRED);
+    }
+    throw new EEAException(EEAErrorMessage.RULE_ID_REQUIRED);
+  }
+
   /**
    * Creates the new rule.
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void createNewRule(String datasetSchemaId, RuleVO ruleVO) {
+  public void createNewRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException {
+
     Rule rule = ruleMapper.classToEntity(ruleVO);
-    if (rule.getRuleId() == null) {
-      rule.setRuleId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+    rule.setType(EntityTypeEnum.FIELD);
+    rule.setEnabled(true);
+    rule.setAutomatic(false);
+    rule.setShortCode(null);
+    rule.setActivationGroup(null);
+
+    validateRule(rule);
+    if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
-    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**
@@ -269,12 +301,20 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
-   * @return true, if successful
+   * @throws EEAExcpetion the EEA excpetion
    */
   @Override
-  public boolean updateRule(String datasetSchemaId, RuleVO ruleVO) {
-    return rulesRepository.updateRule(new ObjectId(datasetSchemaId),
-        ruleMapper.classToEntity(ruleVO));
+  public void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException {
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    rule.setType(EntityTypeEnum.FIELD);
+    rule.setAutomatic(false);
+    rule.setShortCode(null);
+    rule.setActivationGroup(null);
+
+    validateRule(rule);
+    if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
+    }
   }
 
   /**

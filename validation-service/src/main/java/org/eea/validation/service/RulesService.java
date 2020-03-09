@@ -63,17 +63,18 @@ public interface RulesService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
+   * @throws EEAException the EEA exception
    */
-  void createNewRule(String datasetSchemaId, RuleVO ruleVO);
+  void createNewRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException;
 
   /**
    * Update rule.
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
-   * @return true, if successful
+   * @throws EEAException the EEA exception
    */
-  boolean updateRule(String datasetSchemaId, RuleVO ruleVO);
+  void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException;
 
   /**
    * Creates the automatic rules.

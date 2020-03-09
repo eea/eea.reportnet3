@@ -104,10 +104,9 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean updateRule(ObjectId datasetSchemaId, Rule rule) {
-    rule.setAutomatic(false);
     return mongoTemplate.updateFirst(
         new Query(new Criteria("idDatasetSchema").is(datasetSchemaId))
-            .addCriteria(new Criteria("rules.referenceId").is(rule.getReferenceId())),
+            .addCriteria(new Criteria("rules._id").is(rule.getRuleId())),
         new Update().set("rules.$", rule), RulesSchema.class).getModifiedCount() == 1;
   }
 
