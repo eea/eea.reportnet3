@@ -376,6 +376,9 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   };
 
   const updateTableDescriptionDesign = async () => {
+    if (isUndefined(tableDescriptionValue)) {
+      return;
+    }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         table.tableSchemaId,
