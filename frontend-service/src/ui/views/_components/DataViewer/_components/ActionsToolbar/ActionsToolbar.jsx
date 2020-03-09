@@ -147,7 +147,6 @@ const ActionsToolbar = ({
   };
 
   const showFilters = columnKeys => {
-    console.log({ columnKeys });
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
     const currentVisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
