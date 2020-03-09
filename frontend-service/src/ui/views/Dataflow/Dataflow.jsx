@@ -104,7 +104,7 @@ const Dataflow = withRouter(({ history, match }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflow'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
