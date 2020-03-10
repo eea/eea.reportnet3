@@ -42,6 +42,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         }
       ]
     },
+    isKeyFiltered: false,
     filteredDataflows: cloneDeep(content),
     order: { name: 1, description: 1, status: 1, role: 1 }
   };
@@ -62,7 +63,27 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     }
   };
 
+  const changeFilterValues = (filter, value, data) => {
+    dataflowItemDispatch({
+      type: 'FILTER_DATAFLOWS',
+      payload: { data, filter, value }
+    });
+  };
+
   const dataflowItemReducer = (state, { type, payload }) => {
+    const getFilterKeys = () => Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
+
+    const checkFilters = (filteredKeys, dataflow) => {
+      for (let i = 0; i < filteredKeys.length; i++) {
+        if (state.filter[filteredKeys[i]].toLowerCase() !== '') {
+          if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filter[filteredKeys[i]].toLowerCase())) {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
     switch (type) {
       case 'ORDER_DATAFLOWS':
         return {
@@ -70,6 +91,26 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
           dataflows: sortData([...state.dataflows], payload.order, payload.property),
           filteredDataflows: sortData([...state.filteredDataflows], payload.order, payload.property),
           order: { ...state.order, [payload.property]: -payload.order }
+        };
+
+      case 'FILTER_DATAFLOWS':
+        return {
+          ...state,
+          isKeyFiltered: true,
+          filter: { ...state.filter, [payload.filter]: payload.value },
+          filteredDataflows: [
+            ...payload.data.filter(data =>
+              payload.filter === 'status'
+                ? [...payload.value.map(status => status.value.toLowerCase())].includes(
+                    data.status.toLowerCase() && checkFilters(getFilterKeys, data)
+                  )
+                : data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
+                  [...state.filter.status.map(status => status.value.toLowerCase())].includes(
+                    data.status.toLowerCase()
+                  ) &&
+                  checkFilters(getFilterKeys, data)
+            )
+          ]
         };
 
       default:
@@ -115,7 +156,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         <InputText
           className={styles.inputFilter}
           id={'filterNameInput'}
-          // onChange={e => changeFilterValues('name', e.target.value, dataflowItemState.dataflows)}
+          onChange={e => changeFilterValues('name', e.target.value, dataflowItemState.dataflows)}
           value={dataflowItemState.filter.name}
         />
         <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
@@ -126,10 +167,10 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
           className={styles.multiselectFilter}
           filter={false}
           itemTemplate={statusTemplate}
-          // onChange={e => changeFilterValues('status', e.value, dataflowItemState.dataflows)}
+          onChange={event => changeFilterValues('status', event.value, dataflowItemState.dataflows)}
           optionLabel="type"
           options={statusTypes}
-          placeholder={resources.messages['codelistStatus']}
+          placeholder={resources.messages['ok']}
           style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
           value={dataflowItemState.filter.status}
         />
