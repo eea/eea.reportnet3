@@ -27,7 +27,6 @@ public interface DatasetMetabaseController {
 
   }
 
-
   /**
    * Find data set id by dataflow id.
    *
@@ -37,7 +36,6 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(
       @PathVariable("id") final Long idDataflow);
-
 
   /**
    * Creates the empty data set.
@@ -72,7 +70,6 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
-
   /**
    * Update dataset name.
    *
@@ -83,8 +80,6 @@ public interface DatasetMetabaseController {
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
 
-
-
   /**
    * Gets the statistics by id.
    *
@@ -94,8 +89,6 @@ public interface DatasetMetabaseController {
 
   @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
-
-
 
   /**
    * Gets the global statistics by dataschema id.
@@ -108,7 +101,6 @@ public interface DatasetMetabaseController {
   List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId);
 
-
   /**
    * Gets the reportings id by schema id.
    *
@@ -118,5 +110,12 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
 
-
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @GetMapping("/private/findDatasetSchemaIdById")
+  String findDatasetSchemaIdById(@RequestParam("datasetId") long datasetId);
 }

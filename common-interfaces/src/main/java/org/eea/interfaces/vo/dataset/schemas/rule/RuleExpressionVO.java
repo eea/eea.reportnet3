@@ -153,6 +153,7 @@ public class RuleExpressionVO implements Serializable {
         break;
       default:
         index = tokenizeElement(expression, index, tokens);
+        break;
     }
 
     return index;
@@ -223,6 +224,7 @@ public class RuleExpressionVO implements Serializable {
           return i;
         default:
           token.append(actual);
+          break;
       }
     }
 
@@ -269,6 +271,7 @@ public class RuleExpressionVO implements Serializable {
           break;
         default:
           i = tokenizeElement(expression, i, tokens);
+          break;
       }
     }
 
@@ -349,6 +352,7 @@ public class RuleExpressionVO implements Serializable {
         default:
           arg1 = args.get(0);
           arg2 = args.get(1);
+          break;
       }
     } else {
       LOG_ERROR.error("Error composing RuleExpressionVO: operator={}, args={}", operator, args);

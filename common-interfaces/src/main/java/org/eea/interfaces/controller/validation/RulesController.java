@@ -71,12 +71,10 @@ public interface RulesController {
    * Delete rule by id.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
   @DeleteMapping("/deleteRule")
-  void deleteRuleById(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId,
+  void deleteRuleById(@RequestParam("datasetId") long datasetId,
       @RequestParam("ruleId") String ruleId);
 
   /**
@@ -93,12 +91,10 @@ public interface RulesController {
    * Creates the new rule.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
   @PutMapping("/createNewRule")
-  void createNewRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
+  void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 
   /**
    * Creates the automatic rule.

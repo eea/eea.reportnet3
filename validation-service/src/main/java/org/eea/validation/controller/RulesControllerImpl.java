@@ -110,12 +110,14 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @DeleteMapping("/deleteRule")
-  public void deleteRuleById(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId,
+  public void deleteRuleById(@RequestParam("datasetId") long datasetId,
       @RequestParam("ruleId") String ruleId) {
-    rulesService.deleteRuleById(datasetSchemaId, ruleId);
-    LOG.info("Delete the rule with id {} in datasetSchema {} successfully", ruleId,
-        datasetSchemaId);
+    try {
+      rulesService.deleteRuleById(datasetId, ruleId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting rule: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
@@ -139,17 +141,15 @@ public class RulesControllerImpl implements RulesController {
    * Creates the new rule.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public void createNewRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
+  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
-      rulesService.createNewRule(datasetSchemaId, ruleVO);
+      rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating rule: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
