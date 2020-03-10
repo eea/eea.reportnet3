@@ -48,6 +48,8 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
   const validationCreationCheckListener = [ruleAdditionCheckListener, creationFormState.candidateRule];
 
+  const componentName = 'createValidation';
+
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
   }, []);
@@ -117,7 +119,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   const createValidationRule = async () => {
     try {
-      console.log('creationFormState', creationFormState, datasetSchema);
       const { candidateRule } = creationFormState;
       const { datasetSchemaId } = datasetSchema;
       await ValidationService.create(datasetSchemaId, candidateRule);
@@ -137,6 +138,8 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   };
 
   const onExpresionFieldUpdate = (expresionId, field) => {
+    console.log('onExpresionFieldUpdate', expresionId, field);
+
     const {
       candidateRule: { expresions }
     } = creationFormState;
@@ -185,6 +188,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={styles.field}>
               <label htmlFor="table">{resourcesContext.messages.table}</label>
               <Dropdown
+                id={`${componentName}__table`}
                 appendTo={document.body}
                 filterPlaceholder={resourcesContext.messages.table}
                 placeholder={resourcesContext.messages.table}
@@ -205,6 +209,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={styles.field}>
               <label htmlFor="field">{resourcesContext.messages.field}</label>
               <Dropdown
+                id={`${componentName}__field`}
                 appendTo={document.body}
                 filterPlaceholder={resourcesContext.messages.field}
                 placeholder={resourcesContext.messages.field}
@@ -225,6 +230,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={styles.field}>
               <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
               <InputText
+                id={`${componentName}__shortCode`}
                 placeholder={resourcesContext.messages.ruleShortCode}
                 value={creationFormState.candidateRule.shortCode}
                 onChange={e => {
@@ -241,6 +247,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={styles.field}>
               <label htmlFor="description">{resourcesContext.messages.description}</label>
               <InputText
+                id={`${componentName}__description`}
                 placeholder={resourcesContext.messages.description}
                 value={creationFormState.candidateRule.description}
                 onChange={e => {
@@ -257,6 +264,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={`${styles.field} ${styles.errorMessage}`}>
               <label htmlFor="errorMessage">{resourcesContext.messages.errorMessage}</label>
               <InputText
+                id={`${componentName}__errorMessage`}
                 placeholder={resourcesContext.messages.errorMessage}
                 value={creationFormState.candidateRule.errorMessage}
                 onChange={e => {
@@ -273,6 +281,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={styles.field}>
               <label htmlFor="description">{resourcesContext.messages.errorType}</label>
               <Dropdown
+                id={`${componentName}__errorType`}
                 filterPlaceholder={resourcesContext.messages.errorType}
                 placeholder={resourcesContext.messages.errorType}
                 appendTo={document.body}
@@ -295,6 +304,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             <div className={`${styles.field} ${styles.qcActive}`}>
               <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
               <Checkbox
+                id={`${componentName}__active`}
                 onChange={e => {
                   setFormField({ key: 'active', value: e.checked }, creationFormDispatch);
                 }}
@@ -333,6 +343,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
         {creationFormState.groupRulesActive >= 2 && (
           <div className={styles.section}>
             <Button
+              id={`${componentName}__groupExpresions`}
               className="p-button-primary p-button-text"
               type="button"
               label="Group"
@@ -355,6 +366,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
         <div className={`${styles.section} ${styles.footerToolBar}`}>
           <div className={styles.subsection}>
             <Button
+              id={`${componentName}__addExpresion`}
               disabled={creationFormState.isRuleAddingDisabled}
               className="p-button-primary p-button-text-icon-left"
               type="button"
@@ -370,6 +382,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
           </div>
           <div className={styles.subsection}>
             <Button
+              id={`${componentName}__create`}
               disabled={creationFormState.isValidationCreationDisabled}
               className="p-button-primary p-button-text-icon-left"
               type="button"
@@ -378,6 +391,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
               onClick={e => createValidationRule()}
             />
             <Button
+              id={`${componentName}__cancel`}
               className="p-button-secondary p-button-text-icon-left"
               type="button"
               label={resourcesContext.messages.cancel}
