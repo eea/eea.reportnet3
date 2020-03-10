@@ -27,7 +27,7 @@ public class AutomaticRules {
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isBlank(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isBlank(value)",
         "The value must not be missing or empty", ErrorTypeEnum.ERROR.getValue(), shortCode,
         description);
   }
@@ -44,7 +44,7 @@ public class AutomaticRules {
    */
   public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isNumber(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumber(value)",
         "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -60,7 +60,7 @@ public class AutomaticRules {
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isDateYYYYMMDD(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
         "The field must be a valid date(YYYYMMDD) ", ErrorTypeEnum.ERROR.getValue(), shortCode,
         description);
   }
@@ -79,7 +79,7 @@ public class AutomaticRules {
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isBoolean(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isBoolean(value)",
         "The field must be TRUE OR FALSE", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -95,7 +95,7 @@ public class AutomaticRules {
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLat(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLat(value)",
         "The field must be a valid Lat(beetween -90 and 90)", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description);
   }
@@ -112,7 +112,7 @@ public class AutomaticRules {
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "!isCordenateLong(value)",
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLong(value)",
         "The field must be a valid Longitude(beetween -180 and 180)",
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
