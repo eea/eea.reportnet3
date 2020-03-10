@@ -1,9 +1,7 @@
 package org.eea.kafka.io;
 
+import static org.mockito.Mockito.times;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Before;
@@ -11,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -48,14 +47,16 @@ public class KafkaSenderTest {
    *
    * @throws Exception the exception
    */
-  @Test(expected = Exception.class)
+  @Test
   public void testFullTest() throws Exception {
+
     EEAEventVO event = new EEAEventVO();
-    List<PartitionInfo> infoList = new ArrayList<>();
-    PartitionInfo partition = new PartitionInfo("1", 1, null, null, null);
-    infoList.add(partition);
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
+
+    Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
+    Mockito.doNothing().when(kafkaTemplate).flush();
     kafkaSender.sendMessage(event);
+    Mockito.verify(kafkaTemplate, times(1)).flush();
   }
 
 }

@@ -34,11 +34,11 @@ public class Rule {
 
   /** The automatic. */
   @Field(value = "automatic")
-  private Boolean automatic;
+  private boolean automatic;
 
   /** The enabled. */
   @Field(value = "enabled")
-  private Boolean enabled;
+  private boolean enabled;
 
   /** The activation_group. */
   @Field(value = "activationGroup")
