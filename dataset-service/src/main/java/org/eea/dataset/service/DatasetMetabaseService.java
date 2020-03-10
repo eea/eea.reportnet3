@@ -114,4 +114,12 @@ public interface DatasetMetabaseService {
    * @param idDataflow the id dataflow
    */
   void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long idDataflow);
+
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  String findDatasetSchemaIdById(long datasetId);
 }

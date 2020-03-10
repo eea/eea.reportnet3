@@ -72,24 +72,31 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
+  /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
 
+  /** The user management controller zuul. */
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
+  /** The resource management controller zuul. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The data collection repository. */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -146,6 +153,11 @@ public class DatasetMetabaseServiceTest {
 
   }
 
+  /**
+   * Find dataset metabase.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void findDatasetMetabase() throws Exception {
     when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
@@ -154,6 +166,11 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
   }
 
+  /**
+   * Creates the empty dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createEmptyDatasetTest() throws EEAException {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
@@ -161,6 +178,9 @@ public class DatasetMetabaseServiceTest {
         (new ObjectId()).toString(), 1L, null, null, 0);
   }
 
+  /**
+   * Update dataset name test 1.
+   */
   @Test
   public void updateDatasetNameTest1() {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
@@ -169,28 +189,40 @@ public class DatasetMetabaseServiceTest {
     Assert.assertTrue(datasetMetabaseService.updateDatasetName(1L, "datasetName"));
   }
 
+  /**
+   * Update dataset name test 2.
+   */
   @Test
   public void updateDatasetNameTest2() {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
   }
 
+  /**
+   * Delete design dataset test.
+   */
   @Test
   public void deleteDesignDatasetTest() {
     datasetMetabaseService.deleteDesignDataset(1L);
     Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
   }
 
-
+  /**
+   * Test get statistics success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccess() throws Exception {
-
     datasetMetabaseService.getStatistics(1L);
     Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDataset(Mockito.any());
   }
 
-
-
+  /**
+   * Test get statistics success 2.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccess2() throws Exception {
 
@@ -208,7 +240,11 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDataset(Mockito.any());
   }
 
-
+  /**
+   * Test global statistics success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGlobalStatisticsSuccess() throws Exception {
 
@@ -224,11 +260,16 @@ public class DatasetMetabaseServiceTest {
 
     when(statisticsRepository.findStatisticsByIdDatasetSchema(Mockito.any())).thenReturn(stats);
 
-
     datasetMetabaseService.getGlobalStatistics("5ce524fad31fc52540abae73");
     Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDatasetSchema(Mockito.any());
   }
 
+  /**
+   * Test set entity property.
+   *
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
   @Test
   public void testSetEntityProperty() throws InstantiationException, IllegalAccessException {
     StatisticsVO stats = new StatisticsVO();
@@ -237,6 +278,12 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.setEntityProperty(instance, "idDataSetSchema", "0sdferf");
   }
 
+  /**
+   * Test set entity property 2.
+   *
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
   @Test
   public void testSetEntityProperty2() throws InstantiationException, IllegalAccessException {
     StatisticsVO stats = new StatisticsVO();
@@ -245,6 +292,9 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.setEntityProperty(instance, "datasetErrors", "false");
   }
 
+  /**
+   * Creates the group and add user test.
+   */
   @Test
   public void createGroupAndAddUserTest() {
 
@@ -256,9 +306,11 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.createGroupProviderAndAddUser(mapTest, 1L);
 
     Mockito.verify(resourceManagementControllerZuul, times(1)).createResources(Mockito.any());
-
   }
 
+  /**
+   * Creates the group DC and add user test.
+   */
   @Test
   public void createGroupDCAndAddUserTest() {
     Mockito.doNothing().when(resourceManagementControllerZuul).createResource(Mockito.any());
@@ -269,7 +321,11 @@ public class DatasetMetabaseServiceTest {
         Mockito.any());
   }
 
-
+  /**
+   * Creates the empty DC test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createEmptyDCTest() throws EEAException {
     DataProviderVO dataprovider = new DataProviderVO();
@@ -280,7 +336,13 @@ public class DatasetMetabaseServiceTest {
         "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<RepresentativeVO>(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
-
   }
 
+  @Test
+  public void findDatasetSchemaIdByIdTest() {
+    Mockito.when(dataSetMetabaseRepository.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Assert.assertEquals("5ce524fad31fc52540abae73",
+        datasetMetabaseService.findDatasetSchemaIdById(1L));
+  }
 }
