@@ -114,4 +114,7 @@ public interface RulesService {
    * @return true, if successful
    */
   boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position);
+
+  void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+      String idFieldSchemaReference, Long datasetIdReference);
 }

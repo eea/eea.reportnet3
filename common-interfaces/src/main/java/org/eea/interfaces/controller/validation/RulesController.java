@@ -151,4 +151,11 @@ public interface RulesController {
   public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
+  @PutMapping("/createAutomaticPKRule")
+  public void createAutomaticPKRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
+      @RequestParam("referenceIdRule") String referenceIdRule,
+      @RequestParam("idFieldSchemaReference") String idFieldSchemaReference,
+      @RequestParam("datasetIdReference") Long datasetIdReference);
 }
