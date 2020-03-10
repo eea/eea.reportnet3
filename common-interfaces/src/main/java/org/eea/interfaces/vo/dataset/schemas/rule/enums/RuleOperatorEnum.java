@@ -9,13 +9,34 @@ import java.util.Map;
 public enum RuleOperatorEnum {
 
   // Arithmetic operators
-  EQ("=="), DIST("!="), GT(">"), LT("<"), GTEQ(">="), LTEQ("<="),
+  /** Equals. */
+  EQ("=="),
+  /** Distinct. */
+  DIST("!="),
+  /** Greater than. */
+  GT(">"),
+  /** Less than. */
+  LT("<"),
+  /** Greater than or equals. */
+  GTEQ(">="),
+  /** Less than or equals. */
+  LTEQ("<="),
 
   // Logical operators
-  AND("&&"), OR("||"), NOT("!"),
+  /** And. */
+  AND("&&"),
+  /** Or. */
+  OR("||"),
+  /** Not. */
+  NOT("!"),
 
   // Functions
-  LEN("length"), SEQ("equals"), SEQIC("equalsIgnoreCase");
+  /** Length. */
+  LEN("length"),
+  /** Equals for strings. */
+  SEQ("equals"),
+  /** Equals for string ignoring case. */
+  SEQIC("equalsIgnoreCase");
 
   /** Operator's Java representation. */
   private final String label;
