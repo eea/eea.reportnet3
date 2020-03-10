@@ -419,6 +419,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // Add the Pk if needed to the catalogue
         dataschemaService.updatePkCatalogue(fieldSchemaVO);
 
+        // Add the register into the metabase fieldRelations
+        dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
+
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -544,7 +547,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATASCHEMA_CUSTODIAN')")
+  // @PreAuthorize("hasRole('DATASCHEMA_CUSTODIAN')")
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
       @PathVariable("idDataflow") Long idDataflow) {
 

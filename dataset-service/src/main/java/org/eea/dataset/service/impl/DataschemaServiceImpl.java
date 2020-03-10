@@ -21,6 +21,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
@@ -134,6 +135,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
 
   /**
    * Creates the empty data set schema.
@@ -533,8 +537,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
         }
+        if (fieldSchemaVO.getIsPK() != null) {
+          fieldSchema.put("isPK", fieldSchemaVO.getIsPK());
+        }
+        if (fieldSchemaVO.getReferencedField() != null) {
+          Document referenced = new Document();
+          referenced.put("idDatasetSchema",
+              new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
+          referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+          fieldSchema.put("referencedField", referenced);
+          // We need to update the fieldSchema is referenced, the property isPKreferenced to true
+          Document fieldSchemaReferenced = schemasRepository.findFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+              fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaReferenced.put("isPKreferenced", true);
+          schemasRepository.updateFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(), fieldSchemaReferenced);
+        }
 
-        fieldSchema.put("isPKreferenced", this.checkExistingPkReferenced(fieldSchemaVO));
 
         // Guardar el FieldSchema modificado en MongoDB
         UpdateResult updateResult =
@@ -701,18 +721,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
 
-      Boolean isPKused = false;
-      PkCatalogueSchema catalogue =
-          pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
-              .orElse(new PkCatalogueSchema());
-      if (catalogue != null && catalogue.getReferenced() != null
-          && !catalogue.getReferenced().isEmpty()) {
-        isPKused = true;
-      }
-
-      if (existingPK || isPKused) {
-        allow = false;
-      }
+      /*
+       * Boolean isPKused = false; PkCatalogueSchema catalogue = pkCatalogueRepository.findById(new
+       * ObjectId(fieldSchemaVO.getReferencedField().getIdPk())) .orElse(new PkCatalogueSchema());
+       * if (catalogue != null && catalogue.getReferenced() != null &&
+       * !catalogue.getReferenced().isEmpty()) { isPKused = true; }
+       * 
+       * if (existingPK || isPKused) { allow = false; }
+       */
     }
     return allow;
 
@@ -722,16 +738,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO) {
     Boolean isReferenced = false;
-    if (fieldSchemaVO.getIsPK() != null) {
-      PkCatalogueSchema catalogue =
-          pkCatalogueRepository.findById(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()))
-              .orElse(new PkCatalogueSchema());
+
+    if (fieldSchemaVO.getIsPK() != null && fieldSchemaVO.getIsPK()) {
+      PkCatalogueSchema catalogue = pkCatalogueRepository
+          .findById(new ObjectId(fieldSchemaVO.getId())).orElse(new PkCatalogueSchema());
       if (catalogue != null && catalogue.getReferenced() != null
           && !catalogue.getReferenced().isEmpty()) {
         isReferenced = true;
       }
 
     }
+
     return isReferenced;
   }
 
@@ -754,6 +771,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  @Override
+  public void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
+    if (fieldSchemaVO.getReferencedField() != null) {
+      datasetMetabaseService.addForeignRelation(idDatasetOrigin,
+          this.getDesignDatasetIdDestinationFromFk(fieldSchemaVO),
+          fieldSchemaVO.getReferencedField().getIdPk());
+    }
+  }
+
+
+  private Long getDesignDatasetIdDestinationFromFk(FieldSchemaVO fieldSchemaVO) {
+    Long datasetIdDestination = null;
+    if (fieldSchemaVO.getReferencedField() != null) {
+      Optional<DesignDataset> designDataset = designDatasetRepository
+          .findFirstByDatasetSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema());
+      if (designDataset.isPresent()) {
+        datasetIdDestination = designDataset.get().getId();
+      }
+    }
+    return datasetIdDestination;
+  }
 
 
 }

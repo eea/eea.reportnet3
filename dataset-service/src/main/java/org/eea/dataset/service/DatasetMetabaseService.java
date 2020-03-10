@@ -114,4 +114,8 @@ public interface DatasetMetabaseService {
    * @param idDataflow the id dataflow
    */
   void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long idDataflow);
+
+  void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
+
+  Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
 }

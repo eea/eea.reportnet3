@@ -212,4 +212,6 @@ public interface DatasetSchemaService {
 
   Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO);
 
+  void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
+
 }

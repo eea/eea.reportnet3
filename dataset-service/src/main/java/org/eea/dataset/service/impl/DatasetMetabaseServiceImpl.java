@@ -17,12 +17,14 @@ import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -108,6 +110,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private ForeignRelationsRepository foreignRelationsRepository;
 
 
 
@@ -567,6 +572,29 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         idDataset, provider.getLabel());
 
     return datasetIdsEmail;
+  }
+
+
+
+  @Override
+  public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
+    ForeignRelations foreign = new ForeignRelations();
+    DataSetMetabase dsOrigin = new DataSetMetabase();
+    DataSetMetabase dsDestination = new DataSetMetabase();
+    dsOrigin.setId(datasetIdOrigin);
+    dsDestination.setId(datasetIdDestination);
+    foreign.setIdDatasetOrigin(dsOrigin);
+    foreign.setIdDatasetDestination(dsDestination);
+    foreign.setIdPk(idPk);
+
+    foreignRelationsRepository.save(foreign);
+  }
+
+
+
+  @Override
+  public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
+    return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
   }
 
 
