@@ -261,7 +261,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN','DATA_REQUESTER')")
   public ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
 
     String message = "";
@@ -385,7 +385,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN','DATA_PROVIDER')")
   public void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
       @RequestParam(value = "status", required = true) TypeStatusEnum status) {
     try {
