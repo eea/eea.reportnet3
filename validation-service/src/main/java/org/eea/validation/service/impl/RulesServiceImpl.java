@@ -6,6 +6,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -36,6 +37,10 @@ public class RulesServiceImpl implements RulesService {
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The rules schema mapper. */
   @Autowired
@@ -117,11 +122,18 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Delete rule by id.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleId the rule id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteRuleById(String datasetSchemaId, String ruleId) {
+  public void deleteRuleById(long datasetId, String ruleId) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
     rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
   }
 
@@ -137,6 +149,12 @@ public class RulesServiceImpl implements RulesService {
         new ObjectId(referenceId));
   }
 
+  /**
+   * Validate rule.
+   *
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
   private void validateRule(Rule rule) throws EEAException {
 
     if (rule.getRuleId() == null) {
@@ -167,12 +185,17 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Creates the new rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createNewRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException {
+  public void createNewRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
 
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setRuleId(new ObjectId());
@@ -224,7 +247,7 @@ public class RulesServiceImpl implements RulesService {
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
       EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
 
-    List<Rule> ruleList = new ArrayList();
+    List<Rule> ruleList = new ArrayList<>();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
     String shortcode = "01";
@@ -306,7 +329,7 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
-   * @throws EEAExcpetion the EEA excpetion
+   * @throws EEAException the EEA exception
    */
   @Override
   public void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException {

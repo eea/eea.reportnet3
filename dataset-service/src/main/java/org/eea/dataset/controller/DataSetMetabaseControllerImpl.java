@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -68,8 +69,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Find data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
-   *
+   * @param schemaId the schema id
    * @return the list
    */
   @Override
@@ -209,6 +209,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return statistics;
   }
 
-
-
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Override
+  @CheckForNull
+  @GetMapping("/private/findDatasetSchemaIdById")
+  public String findDatasetSchemaIdById(@RequestParam("datasetId") long datasetId) {
+    return datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+  }
 }
