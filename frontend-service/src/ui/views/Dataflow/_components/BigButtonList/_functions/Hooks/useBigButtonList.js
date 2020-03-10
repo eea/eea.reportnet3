@@ -305,28 +305,28 @@ const useBigButtonList = ({
     },
     helpClassName: 'dataflow-datacollection-help-step',
     layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['rename'],
-        icon: 'pencil',
-        disabled: true
-      },
-      {
-        label: resources.messages['duplicate'],
-        icon: 'clone',
-        disabled: true
-      },
-      {
-        label: resources.messages['delete'],
-        icon: 'trash',
-        disabled: true
-      },
-      {
-        label: resources.messages['properties'],
-        icon: 'info',
-        disabled: true
-      }
-    ],
+    // model: [
+    //   {
+    //     label: resources.messages['rename'],
+    //     icon: 'pencil',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['duplicate'],
+    //     icon: 'clone',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['delete'],
+    //     icon: 'trash',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['properties'],
+    //     icon: 'info',
+    //     disabled: true
+    //   }
+    // ],
     visibility: !isEmpty(dataflowData.dataCollections)
   }));
 
