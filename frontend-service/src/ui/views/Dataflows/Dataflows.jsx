@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
@@ -33,8 +34,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [acceptedContent, setacceptedContent] = useState([]);
-  const [completedContent, setcompletedContent] = useState([]);
+  const [acceptedContent, setAcceptedContent] = useState([]);
+  const [completedContent, setCompletedContent] = useState([]);
   const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
@@ -42,7 +43,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isFormReset, setIsFormReset] = useState(true);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [pendingContent, setpendingContent] = useState([]);
+  const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
       // label: resources.messages['dataflowAcceptedPendingTab'],
@@ -62,10 +63,10 @@ const Dataflows = withRouter(({ match, history }) => {
   const dataFetch = async () => {
     setLoading(true);
     try {
-      const allDataflows = await DataflowService.all();
-      setpendingContent(allDataflows.pending);
-      setacceptedContent(allDataflows.accepted);
-      setcompletedContent(allDataflows.completed);
+      const allDataflows = await DataflowService.all(user.contextRoles);
+      setAcceptedContent(allDataflows.accepted);
+      setCompletedContent(allDataflows.completed);
+      setPendingContent(allDataflows.pending);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -73,9 +74,11 @@ const Dataflows = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    dataFetch();
+    if (!isNil(user.contextRoles)) {
+      dataFetch();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem]);
+  }, [resources.messages, tabMenuActiveItem, user]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -240,10 +243,8 @@ const Dataflows = withRouter(({ match, history }) => {
               content={pendingContent}
               dataFetch={dataFetch}
               description={resources.messages['pendingDataflowText']}
-              isCustodian={isCustodian}
               title={resources.messages['pendingDataflowTitle']}
               type="pending"
-              userContextRoles={user.contextRoles}
             /> */}
           <DataflowsList
             className="dataflowList-accepted-help-step"
@@ -253,7 +254,6 @@ const Dataflows = withRouter(({ match, history }) => {
             // description={resources.messages['acceptedDataflowText']}
             // title={resources.messages['acceptedDataflowTitle']}
             type="accepted"
-            userContextRoles={user.contextRoles}
           />
         </>
       ) : (
@@ -265,7 +265,6 @@ const Dataflows = withRouter(({ match, history }) => {
             isCustodian={isCustodian}
             title={resources.messages.completedDataflowTitle}
             type="completed"
-            userContextRoles={user.contextRoles}
           />
         </>
       )}

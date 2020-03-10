@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -19,20 +17,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedDataflowId, type }) => {
+const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
-
-  let dataflowTitles = {
-    name: itemContent.name,
-    description: itemContent.description,
-    id: itemContent.id
-  };
-
-  if (!isUndefined(selectedDataflowId)) {
-    if (dataflowTitles.id === selectedDataflowId && !isEmpty(dataflowNewValues)) {
-      dataflowTitles = dataflowNewValues;
-    }
-  }
 
   const onAccept = async () => {
     try {
@@ -98,9 +84,8 @@ const DataflowsItem = ({ dataFetch, dataflowNewValues, itemContent, selectedData
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`}>{dataflowTitles.name}</h3>
-
-        <p>{dataflowTitles.description}</p>
+        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
+        <p>{itemContent.description}</p>
       </div>
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         <p>
