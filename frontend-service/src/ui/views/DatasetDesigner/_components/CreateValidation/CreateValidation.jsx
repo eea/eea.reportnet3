@@ -327,14 +327,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
             </thead>
             <tbody>
               {creationFormState.candidateRule.expresions &&
-                creationFormState.candidateRule.expresions.map(expresion => (
+                creationFormState.candidateRule.expresions.map((expresion, i) => (
                   <ValidationExpresion
-                    key={expresion.expresionId}
-                    isDisabled={creationFormState.areRulesDisabled}
                     expresionValues={expresion}
-                    onExpresionFieldUpdate={onExpresionFieldUpdate}
+                    isDisabled={creationFormState.areRulesDisabled}
+                    key={expresion.expresionId}
                     onExpresionDelete={onExpresionDelete}
+                    onExpresionFieldUpdate={onExpresionFieldUpdate}
                     onExpresionGroup={onExpresionGroup}
+                    position={i}
                   />
                 ))}
             </tbody>

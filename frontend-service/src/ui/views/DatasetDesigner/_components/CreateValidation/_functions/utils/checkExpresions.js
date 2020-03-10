@@ -7,9 +7,15 @@ export const checkExpresions = expresions => {
     const lastExpresion = last(expresions);
     if (lastExpresion.expresions && lastExpresion.expresions.length > 0) {
       return true;
-    } else {
+    } else if (expresions.length > 1) {
       const deactivate =
         isEmpty(lastExpresion.union) ||
+        isEmpty(lastExpresion.operatorType) ||
+        isEmpty(lastExpresion.operatorValue) ||
+        isEmpty(lastExpresion.expresionValue);
+      return deactivate;
+    } else {
+      const deactivate =
         isEmpty(lastExpresion.operatorType) ||
         isEmpty(lastExpresion.operatorValue) ||
         isEmpty(lastExpresion.expresionValue);

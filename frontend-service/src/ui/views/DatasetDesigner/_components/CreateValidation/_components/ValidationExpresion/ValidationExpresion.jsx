@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import indexOf from 'lodash/indexOf';
 
 import { config } from 'conf/';
 
@@ -17,12 +18,19 @@ const ValidationExpresion = ({
   layout,
   onExpresionDelete,
   onExpresionFieldUpdate,
-  onExpresionGroup
+  onExpresionGroup,
+  position
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expresionId } = expresionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const operatorTypes = config.validations.operatorTypes;
+  useEffect(() => {
+    if (expresionValues.operatorType) {
+      setOperatorValues(operatorTypes[expresionValues.operatorType].values);
+    }
+  }, [expresionValues.operatorType]);
+
   const getOperatorTypeOptions = () => {
     const options = [];
     for (const type in operatorTypes) {
@@ -30,11 +38,6 @@ const ValidationExpresion = ({
     }
     return options;
   };
-  useEffect(() => {
-    if (expresionValues.operatorType) {
-      setOperatorValues(operatorTypes[expresionValues.operatorType].values);
-    }
-  }, [expresionValues.operatorType]);
 
   // layouts
   const defaultLayout = (
@@ -48,7 +51,7 @@ const ValidationExpresion = ({
       </td>
       <td>
         <Dropdown
-          disabled={isDisabled}
+          disabled={isDisabled || position == 0}
           appendTo={document.body}
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
