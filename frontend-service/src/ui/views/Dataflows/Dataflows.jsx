@@ -194,7 +194,7 @@ const Dataflows = withRouter(({ match, history }) => {
     <MainLayout>
       <div className="dataflowList-help-step">
         <div className="rep-container">
-          <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 rep-row`}>
+          <div className={`${styles.container} `}>
             <TabMenu
               model={tabMenuItems}
               activeItem={tabMenuActiveItem}
