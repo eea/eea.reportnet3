@@ -225,7 +225,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN','DATA_PROVIDER')")
   public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
     if (null == dataProviderId) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
