@@ -907,7 +907,7 @@ const DataViewer = withRouter(
             className="edit-table"
             blockScroll={false}
             footer={addRowDialogFooter}
-            header={resources.messages['addNewRow']}
+            header={resources.messages['addRecord']}
             modal={true}
             onHide={() => setAddDialogVisible(false)}
             style={{ width: '50%' }}
