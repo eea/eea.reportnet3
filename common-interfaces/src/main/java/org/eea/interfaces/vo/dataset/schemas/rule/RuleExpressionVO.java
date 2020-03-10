@@ -290,22 +290,26 @@ public class RuleExpressionVO implements Serializable {
     while (index < tokens.size()) {
       actual = tokens.get(index);
 
+      // End of expression: Finish
       if (actual.equals(")")) {
         break;
       }
 
+      // Begin of expression: Compose recursively and move the reading pointer to the supposed end
       if (actual.equals("(")) {
         args.add(new RuleExpressionVO(index + 1, tokens, map));
         index = map.get(index) + 1;
         continue;
       }
 
+      // RuleOperatorEnum match: Set the operator for this RuleExpressionVO
       if (RuleOperatorEnum.valueOfLabel(actual) != null) {
         operator = RuleOperatorEnum.valueOfLabel(actual);
         index++;
         continue;
       }
 
+      // String match: Remove quotes and escape characters
       if (actual.startsWith("\"")) {
         args.add(
             actual.substring(1, actual.length() - 1).replace("\\\\", "\\").replace("\\\"", "\""));
@@ -313,18 +317,21 @@ public class RuleExpressionVO implements Serializable {
         continue;
       }
 
+      // Keyword 'value' match: Transform to keyword 'VALUE'
       if (actual.equals("value")) {
         args.add("VALUE");
         index++;
         continue;
       }
 
+      // Double match: Assume that double values contains '.' character
       if (actual.contains(".")) {
         args.add(Double.parseDouble(actual));
         index++;
         continue;
       }
 
+      // Long or Integer match: By default, assume that the token is a integer number representation
       Long n = Long.parseLong(actual);
       if (n <= Integer.MAX_VALUE) {
         args.add(n.intValue());
@@ -332,6 +339,7 @@ public class RuleExpressionVO implements Serializable {
       index++;
     }
 
+    // Compose the arguments depending on the operator
     if (operator != null) {
       switch (operator) {
         case NOT:
