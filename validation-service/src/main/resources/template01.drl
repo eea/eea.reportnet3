@@ -125,3 +125,8 @@ function boolean isCordenateLong( String value ){
  }
 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
+
+function boolean isfieldPK( String value, Long datasetIdReference, String idFieldSchema ){	
+
+		return isfieldPK(value,datasetIdReference,idFieldSchema);
+ }
