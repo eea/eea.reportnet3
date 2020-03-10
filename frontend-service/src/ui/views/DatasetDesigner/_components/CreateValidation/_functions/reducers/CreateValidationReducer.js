@@ -2,9 +2,9 @@ export const createValidationReducerInitState = {
   candidateRule: {
     table: undefined,
     field: undefined,
-    shortCode: undefined,
-    description: undefined,
-    errorMessage: undefined,
+    shortCode: '',
+    description: '',
+    errorMessage: '',
     errorLevel: undefined,
     active: false,
     expresions: []

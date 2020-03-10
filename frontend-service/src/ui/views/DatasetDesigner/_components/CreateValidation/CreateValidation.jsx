@@ -6,8 +6,6 @@ import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
 
-import { config } from 'conf/';
-
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -33,7 +31,6 @@ import { getExpresionString } from './_functions/utils/getExpresionString';
 import { groupExpresions } from './_functions/utils/groupExpresions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
-import { setFormField } from './_functions/utils/setFormField';
 import { setValidationExpresion } from './_functions/utils/setValidationExpresion';
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
@@ -181,7 +178,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   );
 
   return dialogLayout(
-    <form action="">
+    <form>
       <div id={styles.QCFormWrapper}>
         <div className={styles.section}>
           <div className={styles.subsection}>
@@ -194,15 +191,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 placeholder={resourcesContext.messages.table}
                 optionLabel="label"
                 options={creationFormState.schemaTables}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'table',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
                 value={creationFormState.candidateRule.table}
               />
             </div>
@@ -215,15 +212,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 placeholder={resourcesContext.messages.field}
                 optionLabel="label"
                 options={creationFormState.tableFields}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'field',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
                 value={creationFormState.candidateRule.field}
               />
             </div>
@@ -233,15 +230,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 id={`${componentName}__shortCode`}
                 placeholder={resourcesContext.messages.ruleShortCode}
                 value={creationFormState.candidateRule.shortCode}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'shortCode',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
               />
             </div>
             <div className={styles.field}>
@@ -250,15 +247,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 id={`${componentName}__description`}
                 placeholder={resourcesContext.messages.description}
                 value={creationFormState.candidateRule.description}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'description',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
               />
             </div>
             <div className={`${styles.field} ${styles.errorMessage}`}>
@@ -267,15 +264,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 id={`${componentName}__errorMessage`}
                 placeholder={resourcesContext.messages.errorMessage}
                 value={creationFormState.candidateRule.errorMessage}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'errorMessage',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
               />
             </div>
             <div className={styles.field}>
@@ -287,15 +284,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 appendTo={document.body}
                 optionLabel="label"
                 options={creationFormState.errorLevels}
-                onChange={e => {
-                  setFormField(
-                    {
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: {
                       key: 'errorLevel',
                       value: e.target.value
-                    },
-                    creationFormDispatch
-                  );
-                }}
+                    }
+                  })
+                }
                 value={creationFormState.candidateRule.errorLevel}
               />
             </div>
@@ -305,9 +302,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
               <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
               <Checkbox
                 id={`${componentName}__active`}
-                onChange={e => {
-                  setFormField({ key: 'active', value: e.checked }, creationFormDispatch);
-                }}
+                onChange={e =>
+                  creationFormDispatch({
+                    type: 'SET_FORM_FIELD',
+                    payload: { key: 'active', value: e.checked }
+                  })
+                }
                 isChecked={creationFormState.candidateRule.active}
               />
             </div>
@@ -329,6 +329,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
               {creationFormState.candidateRule.expresions &&
                 creationFormState.candidateRule.expresions.map(expresion => (
                   <ValidationExpresion
+                    key={expresion.expresionId}
                     isDisabled={creationFormState.areRulesDisabled}
                     expresionValues={expresion}
                     onExpresionFieldUpdate={onExpresionFieldUpdate}
