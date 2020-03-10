@@ -45,10 +45,11 @@ public interface RulesService {
   /**
    * Delete rule by id.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleId the rule id
+   * @throws EEAException the EEA exception
    */
-  void deleteRuleById(String datasetSchemaId, String ruleId);
+  void deleteRuleById(long datasetId, String ruleId) throws EEAException;
 
   /**
    * Delete rule by reference id.
@@ -61,19 +62,20 @@ public interface RulesService {
   /**
    * Creates the new rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
+   * @throws EEAException the EEA exception
    */
-  void createNewRule(String datasetSchemaId, RuleVO ruleVO);
+  void createNewRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
   /**
    * Update rule.
    *
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
-   * @return true, if successful
+   * @throws EEAException the EEA exception
    */
-  boolean updateRule(String datasetSchemaId, RuleVO ruleVO);
+  void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException;
 
   /**
    * Creates the automatic rules.

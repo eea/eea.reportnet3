@@ -39,41 +39,32 @@ public class RulesControllerImplTest {
   private RuleMapper ruleMapper;
 
   /**
-   * Delete rule by id throw id dataset schema.
-   */
-  @Test
-  public void deleteRuleByIdThrowIdDatasetSchema() {
-    try {
-      rulesControllerImpl.deleteRuleById("", "ObjectId");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-
-  }
-
-  /**
-   * Delete rule by id throw rule id.
-   */
-  @Test
-  public void deleteRuleByIdThrowRuleId() {
-    try {
-      rulesControllerImpl.deleteRuleById("ObjectId", "");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getReason());
-    }
-  }
-
-  /**
-   * Delete rule by id.
+   * Delete rule by id test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void deleteRuleById() throws EEAException {
-    rulesControllerImpl.deleteRuleById("ObjectId", "ObjectId");
-    Mockito.verify(rulesService, times(1)).deleteRuleById("ObjectId", "ObjectId");
+  public void deleteRuleByIdTest() throws EEAException {
+    Mockito.doNothing().when(rulesService).deleteRuleById(Mockito.anyLong(), Mockito.any());
+    rulesControllerImpl.deleteRuleById(1L, "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteRuleById(Mockito.anyLong(), Mockito.any());
+  }
+
+  /**
+   * Delete rule by id exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteRuleByIdExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(rulesService).deleteRuleById(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      rulesControllerImpl.deleteRuleById(1L, "5e44110d6a9e3a270ce13fac");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -299,48 +290,58 @@ public class RulesControllerImplTest {
 
   /**
    * Creates the new rule test.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void createNewRuleTest() {
-    rulesControllerImpl.createNewRule("5e44110d6a9e3a270ce13fac", new RuleVO());
-    Mockito.verify(rulesService, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  public void createNewRuleTest() throws EEAException {
+    Mockito.doNothing().when(rulesService).createNewRule(Mockito.anyLong(), Mockito.any());
+    rulesControllerImpl.createNewRule(1L, new RuleVO());
+    Mockito.verify(rulesService, times(1)).createNewRule(Mockito.anyLong(), Mockito.any());
   }
 
   /**
-   * Creates the new rule no data schema is test.
+   * Creates the new rule exception test.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void createNewRuleNoDataSchemaIsTest() {
+  @Test(expected = ResponseStatusException.class)
+  public void createNewRuleExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
+        Mockito.any());
     try {
-      rulesControllerImpl.createNewRule(null, null);
+      rulesControllerImpl.createNewRule(1L, new RuleVO());
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+      throw e;
     }
   }
 
   /**
    * Update rule test.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void updateRuleTest() {
-    RuleVO ruleVO = new RuleVO();
-    when(rulesService.updateRule("5e44110d6a9e3a270ce13fac", ruleVO)).thenReturn(true);
-    rulesControllerImpl.updateRule("5e44110d6a9e3a270ce13fac", ruleVO);
+  public void updateRuleTest() throws EEAException {
+    Mockito.doNothing().when(rulesService).updateRule(Mockito.any(), Mockito.any());
+    rulesControllerImpl.updateRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
     Mockito.verify(rulesService, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
   /**
    * Update rule not work test.
+   *
+   * @throws EEAException the EEA exception
    */
-  @Test
-  public void updateRuleNotWorkTest() {
-    when(rulesService.updateRule(Mockito.any(), Mockito.any())).thenReturn(false);
+  @Test(expected = ResponseStatusException.class)
+  public void updateRuleExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(rulesService).updateRule(Mockito.any(), Mockito.any());
     try {
-      rulesControllerImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+      rulesControllerImpl.updateRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.ERROR_UPDATING_RULE, e.getReason());
+      throw e;
     }
   }
 

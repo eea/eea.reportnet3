@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
@@ -574,6 +575,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return datasetIdsEmail;
   }
 
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Override
+  @CheckForNull
+  public String findDatasetSchemaIdById(long datasetId) {
+    return dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+  }
 
 
   @Override
@@ -596,7 +608,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
     return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
   }
-
 
 
 }

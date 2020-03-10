@@ -134,6 +134,24 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 
+  /** The Constant REFERENCE_ID_REQUIRED. */
+  public static final String REFERENCE_ID_REQUIRED = "ReferenceId is required";
+
+  /** The Constant DESCRIPTION_REQUIRED. */
+  public static final String DESCRIPTION_REQUIRED = "Description is required";
+
+  /** The Constant RULE_NAME_REQUIRED. */
+  public static final String RULE_NAME_REQUIRED = "RuleName is required";
+
+  /** The Constant WHEN_CONDITION_REQUIRED. */
+  public static final String WHEN_CONDITION_REQUIRED = "WhenCondition is required";
+
+  /** The Constant THEN_CONDITION_REQUIRED. */
+  public static final String THEN_CONDITION_REQUIRED = "ThenCondition is required";
+
+  /** The Constant RULE_ID_REQUIRED. */
+  public static final String RULE_ID_REQUIRED = "RuleId is required";
+
   /**
    * The Constant CODELIST_NOT_FOUND.
    *
@@ -167,7 +185,7 @@ public final class EEAErrorMessage {
   public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
   /** The Constant ERROR_CREATING_RULE. */
-  public static final String ERROR_CREATING_RULE = "Error creating rules";
+  public static final String ERROR_CREATING_RULE = "Error creating rule";
 
   /** The Constant ERROR_ORDERING_RULE. */
   public static final String ERROR_ORDERING_RULE = "Error ordering rule";

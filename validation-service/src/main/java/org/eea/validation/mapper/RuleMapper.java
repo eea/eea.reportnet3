@@ -48,7 +48,7 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   default void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
-    if (!rule.getAutomatic()) {
+    if (!rule.isAutomatic()) {
       ruleVO.setWhenCondition(new RuleExpressionVO(rule.getWhenCondition()));
     }
   }
