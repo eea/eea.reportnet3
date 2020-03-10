@@ -251,4 +251,12 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
   }
+
+  @Override
+  @PutMapping("/createAutomaticPKRule")
+  public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+      String idFieldSchemaReference, Long datasetIdReference) {
+    rulesService.createAutomaticPKRule(datasetSchemaId, referenceIdRule, idFieldSchemaReference,
+        datasetIdReference);
+  }
 }

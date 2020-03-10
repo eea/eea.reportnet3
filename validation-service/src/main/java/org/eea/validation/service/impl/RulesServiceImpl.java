@@ -304,4 +304,13 @@ public class RulesServiceImpl implements RulesService {
     LOG_ERROR.error("Rule {} not found", ruleId);
     return false;
   }
+
+  @Override
+  public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+      String idFieldSchemaReference, Long datasetIdReference) {
+    Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
+        "description", idFieldSchemaReference, datasetIdReference);
+    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+
+  }
 }
