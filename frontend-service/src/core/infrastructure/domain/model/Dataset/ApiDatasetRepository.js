@@ -13,7 +13,6 @@ import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});
-  console.log({ datasetTableRecordField });
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
@@ -131,7 +130,7 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 
@@ -437,7 +436,6 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
-  console.log({ record });
   const datasetTableFieldDesign = new DatasetTableField({});
   datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.name = record.name;

@@ -33,6 +33,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, fieldTypeValue: payload.type, fieldPreviousTypeValue: payload.previousType };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
       return { ...state, isCodelistEditorVisible: payload };
+    case 'TOGGLE_IS_DRAGGING':
+      return { ...state, isDragging: payload };
     case 'TOGGLE_IS_EDITING':
       return { ...state, isEditing: payload };
     case 'TOGGLE_QC_MANAGER_VISIBLE':

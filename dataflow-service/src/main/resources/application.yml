@@ -3,10 +3,3 @@ server:
 spring:
   application:
     name: dataflow
-eea:
-  security:
-    authenticatedRequest: /dataflow/pendingaccepted, /dataflow/request/*, /dataflow/completed, /dataflow/status/*
-    roleProtectedRequest:
-      DATA_CUSTODIAN: /dataflow/createDataFlow,/dataflow/*/contributor/*,/representative/*
-      DATA_REQUESTER: /dataflow/createDataFlow
-      DATA_PROVIDER: /representative/update

@@ -2,7 +2,6 @@ package org.eea.kafka.configuration;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -86,16 +85,17 @@ public class KafkaConfiguration {
    */
   @Bean
   public ProducerFactory<String, EEAEventVO> producerFactory() {
-    final Map<String, Object> configProps = new HashMap<>();
+    final Map<String, Object> configProps = new ConcurrentHashMap<>();
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EEAEventSerializer.class);
     configProps.put("enable.idempotence", "true");
     configProps.put(ACKS_CONFIG, "all");
-    configProps.put("transactional.id", groupId + UUID
-        .randomUUID());//Single transactional id since every sender must use a different one
-    DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory = new DefaultKafkaProducerFactory<>(
-        configProps);
+    configProps.put("transactional.id", groupId + UUID.randomUUID());// Single transactional id
+                                                                     // since every sender must use
+                                                                     // a different one
+    DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory =
+        new DefaultKafkaProducerFactory<>(configProps);
     defaultKafkaProducerFactory.setTransactionIdPrefix("txn-ingestor");
     return defaultKafkaProducerFactory;
   }
