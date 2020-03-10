@@ -99,25 +99,25 @@ public class KieBaseManager {
             if (null != datatype && !rule.isAutomatic()) {
               switch (datatype) {
                 case NUMBER:
-                  expression.append("(isNumber(value) || ");
+                  expression.append("(isNumber(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case DATE:
-                  expression.append("( isDateYYYYMMDD(value) || ");
+                  expression.append("( isDateYYYYMMDD(value) && ");
                   rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case BOOLEAN:
-                  expression.append("( isBoolean(value) || ");
+                  expression.append("( isBoolean(value) && ");
                   rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case COORDINATE_LAT:
-                  expression.append("( isCordenateLat(value) || ");
+                  expression.append("( isCordenateLat(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case COORDINATE_LONG:
-                  expression.append("( isCordenateLong(value) || ");
+                  expression.append("( isCordenateLong(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;

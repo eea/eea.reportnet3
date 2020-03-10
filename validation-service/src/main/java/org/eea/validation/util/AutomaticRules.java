@@ -135,7 +135,7 @@ public class AutomaticRules {
     List<Rule> ruleList = new ArrayList();
     // PART INSENSITIVE
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "!isCodelistInsensitive(value,'" + codelistItems + "')",
+        "isCodelistInsensitive(value,'" + codelistItems + "')",
         "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
