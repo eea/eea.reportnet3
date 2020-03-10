@@ -48,7 +48,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
@@ -56,57 +56,85 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant FILE_PATTERN_NAME. */
+  /**
+   * The Constant FILE_PATTERN_NAME.
+   */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data collection controller zuul. */
+  /**
+   * The data collection controller zuul.
+   */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /** The user postgre db. */
+  /**
+   * The user postgre db.
+   */
   @Value("${spring.datasource.username}")
   private String userPostgreDb;
 
-  /** The pass postgre db. */
+  /**
+   * The pass postgre db.
+   */
   @Value("${spring.datasource.password}")
   private String passPostgreDb;
 
-  /** The conn string postgre. */
+  /**
+   * The conn string postgre.
+   */
   @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
-  /** The sql get datasets name. */
+  /**
+   * The sql get datasets name.
+   */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /** The jdbc template. */
+  /**
+   * The jdbc template.
+   */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  /** The resource file. */
+  /**
+   * The resource file.
+   */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
-  /** The path snapshot. */
+  /**
+   * The path snapshot.
+   */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The data source. */
+  /**
+   * The data source.
+   */
   @Autowired
   private DataSource dataSource;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
   /**
@@ -165,7 +193,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     try (Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement();
         BufferedReader br =
-            new BufferedReader(new InputStreamReader(resourceFile.getInputStream()));) {
+            new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
 
       // Read file and create queries
       String command;
@@ -240,6 +268,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data for dataset
    */
   @Override
@@ -275,6 +304,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Creates the connection data VO.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data VO
    */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
@@ -290,6 +320,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the all data sets name.
    *
    * @param datasetName the dataset name
+   *
    * @return the all data sets name
    */
   private List<String> getAllDataSetsName(String datasetName) {
@@ -319,6 +350,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -385,6 +417,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param fileName the file name
    * @param query the query
    * @param copyManager the copy manager
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -413,6 +446,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -422,20 +456,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
 
-
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
@@ -545,6 +578,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param query the query
    * @param fileName the file name
    * @param copyManager the copy manager
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
@@ -570,10 +604,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
     String nameFileDatasetValue =
@@ -601,7 +635,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetSchemaName the dataset schema name
    */
   @Override
-  @Transactional
   public void deleteDataset(String datasetSchemaName) {
     StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA ");
     stringBuilder.append(datasetSchemaName).append(" CASCADE");
