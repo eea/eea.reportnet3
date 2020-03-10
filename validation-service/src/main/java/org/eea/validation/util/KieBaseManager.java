@@ -96,8 +96,7 @@ public class KieBaseManager {
                 schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
             DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
 
-            if (null != datatype && null != rule.getAutomatic()
-                && rule.getAutomatic().equals(false)) {
+            if (null != datatype && !rule.isAutomatic()) {
               rule.setWhenCondition(rule.getWhenCondition().replaceAll("\"", ""));
               rule.setWhenCondition(rule.getWhenCondition().replaceAll("AND", "&&"));
               rule.setWhenCondition(rule.getWhenCondition().replaceAll("OR", "||"));

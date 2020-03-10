@@ -25,10 +25,10 @@ public class RuleVO {
   private String ruleName;
 
   /** The automatic. */
-  private Boolean automatic;
+  private boolean automatic;
 
   /** The enabled. */
-  private Boolean enabled;
+  private boolean enabled;
 
   /** The salience. */
   private Integer salience;
