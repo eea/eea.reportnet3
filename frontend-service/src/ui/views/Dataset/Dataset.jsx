@@ -28,7 +28,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -390,20 +389,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getCodelistsList = async datasetSchemas => {
-    try {
-      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
-      return codelistsList;
-    } catch (error) {
-      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await getCodelistsList([datasetSchema]);
-      console.log({ codelistsList });
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -412,7 +400,6 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
-      console.log({ datasetSchema });
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
@@ -429,20 +416,14 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
-            let codelist = {};
-            if (field.type === 'CODELIST') {
-              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
-            }
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: codelist.name,
-              codelistVersion: codelist.version,
-              codelistItems: codelist.items
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })

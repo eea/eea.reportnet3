@@ -1,0 +1,52 @@
+body .p-chips > ul.p-inputtext {
+  padding: 0.2145em 0.429em;
+  display: inline-block;
+}
+body .p-chips > ul.p-inputtext:not(.p-disabled):hover {
+  border-color: var(--chips-input-border-color-hover);
+}
+body .p-chips > ul.p-inputtext:not(.p-disabled).p-focus {
+  outline: 0 none;
+  outline-offset: 0;
+  -webkit-box-shadow: var(--chips-input-box-shadow);
+  -moz-box-shadow: var(--chips-input-box-shadow);
+  box-shadow: var(--chips-input-box-shadow);
+  border-color: var(--chips-input-border-color);
+}
+body .p-chips > ul.p-inputtext .p-chips-input-token {
+  padding: 0.2145em 0;
+}
+body .p-chips > ul.p-inputtext .p-chips-input-token input {
+  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
+  color: var(--chips-input-color);
+}
+body .p-chips > ul.p-inputtext .p-chips-input-token input:hover {
+  border: 0 none;
+}
+body .p-chips > ul.p-inputtext .p-chips-input-token input:focus {
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  outline: 0 none;
+  border: 0 none;
+}
+body .p-chips > ul.p-inputtext .p-chips-token {
+  font-size: 14px;
+  padding: 0.2145em 0.429em;
+  margin: 0 0.286em 0 0;
+  background: var(--chips-token-bg);
+  color: var(--chips-token-color);
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
+body .p-chips .p-disabled {
+  background-color: transparent !important;
+  border: none !important;
+  opacity: 0.6;
+  margin-right: 0 !important;
+}
