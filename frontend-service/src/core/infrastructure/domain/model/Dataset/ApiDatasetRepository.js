@@ -443,6 +443,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
   datasetTableFieldDesign.required = record.required;
+  datasetTableFieldDesign.isPK = record.isPK;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };

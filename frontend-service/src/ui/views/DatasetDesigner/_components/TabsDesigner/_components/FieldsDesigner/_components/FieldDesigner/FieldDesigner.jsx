@@ -13,6 +13,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { FKSelector } from './_components/FKSelector';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
@@ -30,9 +31,10 @@ export const FieldDesigner = ({
   fieldId,
   fieldDescription,
   fieldName,
-  fieldPK,
+  fieldIsPK,
   fieldRequired,
   fieldType,
+  hasPK,
   index,
   initialFieldIndexDragged,
   isCodelistSelected,
@@ -57,10 +59,10 @@ export const FieldDesigner = ({
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
-    { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
+    { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' }
+    // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
-    // { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
@@ -82,7 +84,7 @@ export const FieldDesigner = ({
   const initialFieldDesignerState = {
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
-    fieldPKValue: fieldPK,
+    fieldIsPKValue: fieldIsPK,
     fieldPreviousTypeValue: '',
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
@@ -92,7 +94,9 @@ export const FieldDesigner = ({
     isCodelistEditorVisible: false,
     isEditing: false,
     isDragging: false,
-    isQCManagerVisible: false
+    isFKSelectorVisible: false,
+    isQCManagerVisible: false,
+    selectedFK: ''
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -139,14 +143,14 @@ export const FieldDesigner = ({
         }
       }
     }
-    const requiredCheckboxes = document.getElementsByClassName('requiredCheckbox');
-    if (!isUndefined(requiredCheckboxes)) {
-      for (let i = 0; i < requiredCheckboxes.length; i++) {
-        for (let j = 0; j < requiredCheckboxes[i].childNodes.length; j++) {
+    const requiredAndPKCheckboxes = document.getElementsByClassName('requiredAndPKCheckboxes');
+    if (!isUndefined(requiredAndPKCheckboxes)) {
+      for (let i = 0; i < requiredAndPKCheckboxes.length; i++) {
+        for (let j = 0; j < requiredAndPKCheckboxes[i].childNodes.length; j++) {
           if (fieldDesignerState.isDragging) {
-            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
+            requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
           } else {
-            requiredCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
+            requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
           }
         }
       }
@@ -157,12 +161,15 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
     if (type.fieldType.toLowerCase() === 'codelist') {
       onCodelistDropdownSelected(type);
+    } else if (type.fieldType.toLowerCase() === 'link') {
+      onFKDropdownSelected();
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
             onFieldAdd({
               description: fieldDesignerState.fieldDescriptionValue,
+              isPK: fieldDesignerState.fieldIsPKValue,
               recordId,
               required: fieldDesignerState.fieldRequiredValue,
               type: parseGeospatialTypes(type.fieldType),
@@ -175,6 +182,7 @@ export const FieldDesigner = ({
           fieldUpdate({
             description: fieldDesignerState.fieldDescriptionValue,
             fieldSchemaId: fieldId,
+            isPK: fieldDesignerState.fieldIsPKValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: parseGeospatialTypes(type.fieldType),
             name: fieldDesignerState.fieldValue
@@ -261,6 +269,7 @@ export const FieldDesigner = ({
                   codelistItems: fieldDesignerState.codelistItems,
                   description: fieldDesignerState.fieldDescriptionValue,
                   fieldSchemaId: fieldId,
+                  isPK: fieldDesignerState.fieldIsPKValue,
                   type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
                   name: fieldDesignerState.fieldValue
                 });
@@ -278,6 +287,10 @@ export const FieldDesigner = ({
     }
   };
 
+  const onCancelSaveFK = () => {
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_FK', payload: fieldDesignerState.fieldPreviousTypeValue });
+  };
+
   const onCancelSaveCodelist = () => {
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST', payload: fieldDesignerState.fieldPreviousTypeValue });
   };
@@ -289,15 +302,20 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: true });
   };
 
-  const onFieldAdd = async ({ codelistItems, description, recordId, required, type, name }) => {
+  const onFKDropdownSelected = () => {
+    dispatchFieldDesigner({ type: 'TOGGLE_FK_SELECTOR_VISIBLE', payload: true });
+  };
+
+  const onFieldAdd = async ({ codelistItems, description, isPK, name, recordId, required, type }) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
-        recordId,
-        name,
-        type,
-        description,
         codelistItems,
-        required
+        description,
+        isPK,
+        name,
+        recordId,
+        required,
+        type
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -402,26 +420,26 @@ export const FieldDesigner = ({
           !isNil(fieldDesignerState.fieldValue) &&
           fieldDesignerState.fieldValue !== ''
         ) {
-          // onFieldAdd(
-          //   recordId,
-          //   parseGeospatialTypes(fieldTypeValue.fieldType),
-          //   fieldValue,
-          //   fieldDescriptionValue,
-          //   selectedCodelist.codelistItems
-          //   undefined,
-          //   checked
-          // );
+          onFieldAdd({
+            codelistItems: fieldDesignerState.codelistItems,
+            description: fieldDesignerState.fieldDescriptionValue,
+            isPK: checked,
+            recordId,
+            required: fieldDesignerState.fieldRequiredValue,
+            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+            name: fieldDesignerState.fieldValue
+          });
         }
       } else {
-        // fieldUpdate(
-        //   fieldId,
-        //   parseGeospatialTypes(fieldTypeValue.fieldType),
-        //   fieldValue,
-        //   fieldDescriptionValue,
-        //   selectedCodelist.codelistItems
-        //   undefined,
-        //   checked
-        // );
+        fieldUpdate({
+          codelistItems: fieldDesignerState.codelistItems,
+          description: fieldDesignerState.fieldDescriptionValue,
+          fieldSchemaId: fieldId,
+          isPK: checked,
+          required: checked ? true : fieldDesignerState.fieldRequiredValue,
+          type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+          name: fieldDesignerState.fieldValue
+        });
       }
     }
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
@@ -439,6 +457,7 @@ export const FieldDesigner = ({
           onFieldAdd({
             codelistItems: fieldDesignerState.codelistItems,
             description: fieldDesignerState.fieldDescriptionValue,
+            isPK: fieldDesignerState.fieldIsPKValue,
             recordId,
             required: checked,
             type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
@@ -450,6 +469,7 @@ export const FieldDesigner = ({
           codelistItems: fieldDesignerState.codelistItems,
           description: fieldDesignerState.fieldDescriptionValue,
           fieldSchemaId: fieldId,
+          isPK: fieldDesignerState.fieldIsPKValue,
           required: checked,
           type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
           name: fieldDesignerState.fieldValue
@@ -469,6 +489,7 @@ export const FieldDesigner = ({
           onFieldAdd({
             codelistItems,
             description: fieldDesignerState.fieldDescriptionValue,
+            isPK: fieldDesignerState.fieldIsPKValue,
             recordId,
             required: fieldDesignerState.fieldRequiredValue,
             type: 'CODELIST',
@@ -479,6 +500,7 @@ export const FieldDesigner = ({
             codelistItems,
             description: fieldDesignerState.fieldDescriptionValue,
             fieldSchemaId: fieldId,
+            isPK: fieldDesignerState.fieldIsPKValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: 'CODELIST',
             name: fieldDesignerState.fieldValue
@@ -487,6 +509,10 @@ export const FieldDesigner = ({
       }
     }
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
+  };
+
+  const onSaveFK = fk => {
+    dispatchFieldDesigner({ type: 'TOGGLE_FK_SELECTOR_VISIBLE', payload: false });
   };
 
   const parseGeospatialTypes = value => {
@@ -512,12 +538,13 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async ({ codelistItems, description, fieldSchemaId, required, type, name }) => {
+  const fieldUpdate = async ({ codelistItems, description, fieldSchemaId, isPK, required, type, name }) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
+        isPK,
         name,
         required,
         type
@@ -570,7 +597,7 @@ export const FieldDesigner = ({
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
           }`}></div>
 
-        <div className="requiredCheckbox">
+        <div className="requiredAndPKCheckboxes">
           {!addField ? (
             <FontAwesomeIcon icon={AwesomeIcons('move')} style={{ width: '32px' }} />
           ) : (
@@ -587,7 +614,8 @@ export const FieldDesigner = ({
             style={{ width: '70px' }}
           />
           <Checkbox
-            checked={fieldDesignerState.fieldPKValue}
+            checked={fieldDesignerState.fieldIsPKValue}
+            disabled={hasPK && !fieldDesignerState.fieldIsPKValue}
             inputId={`${fieldId}_check_pk`}
             label="Default"
             onChange={e => {
@@ -713,6 +741,14 @@ export const FieldDesigner = ({
           onCancelSaveCodelist={onCancelSaveCodelist}
           onSaveCodelist={onSaveCodelist}
           selectedCodelist={fieldDesignerState.codelistItems}
+        />
+      ) : null}
+      {fieldDesignerState.isFKSelectorVisible ? (
+        <FKSelector
+          isFKSelectorVisible={fieldDesignerState.isFKSelectorVisible}
+          onCancelSaveFK={onCancelSaveFK}
+          onSaveFK={onSaveFK}
+          selectedFK={fieldDesignerState.selectedFK}
         />
       ) : null}
       {fieldDesignerState.isQCManagerVisible ? (

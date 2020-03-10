@@ -65,16 +65,17 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, fieldId, name, type, recordId, required }) => {
+  const onFieldAdd = ({ codelistItems, description, fieldId, isPK, name, recordId, required, type }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
+      codelistItems,
+      description,
       fieldId,
+      isPK,
       name,
       recordId,
-      type,
-      description,
-      codelistItems,
-      required
+      required,
+      type
     });
     onChangeFields(inmFields, table.tableSchemaId);
     setFields(inmFields);
@@ -85,7 +86,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = ({ id, name, type, description, codelistItems, required }) => {
+  const onFieldUpdate = ({ codelistItems, description, id, isPK, name, required, type }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
     if (fieldIndex > -1) {
@@ -94,6 +95,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].isPK = isPK;
       setFields(inmFields);
     }
   };
@@ -244,6 +246,8 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           fieldRequired={false}
           fieldType=""
           fieldValue=""
+          hasPK={!isNil(fields) && fields.filter(field => field.isPK === true).length > 0}
+          // hasPK={true}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
           isCodelistSelected={isCodelistSelected}
@@ -252,7 +256,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
-          totalFields={!isUndefined(fields) && !isNull(fields) ? fields.length : 0}
+          totalFields={!isNil(fields) ? fields.length : 0}
         />
       </div>
     );
@@ -269,10 +273,14 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
               datasetId={datasetId}
               fieldDescription={field.description}
               fieldId={field.fieldId}
+              fieldIsPK={field.isPK}
+              // fieldIsPK={index === 0}
               fieldName={field.name}
               fieldRequired={field.required}
               fieldType={field.type}
               fieldValue={field.value}
+              hasPK={fields.filter(field => field.isPK === true).length > 0}
+              // hasPK={true}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
               isCodelistSelected={isCodelistSelected}
