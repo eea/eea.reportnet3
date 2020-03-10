@@ -13,6 +13,7 @@ export class Dataflow {
     requestId,
     status,
     userRequestStatus,
+    userRole,
     weblinks
   } = {}) {
     this.creationDate = creationDate;
@@ -28,6 +29,7 @@ export class Dataflow {
     this.requestId = requestId;
     this.status = status;
     this.userRequestStatus = userRequestStatus;
+    this.userRole = userRole;
     this.weblinks = weblinks;
   }
 }

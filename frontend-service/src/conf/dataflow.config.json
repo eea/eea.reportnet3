@@ -10,5 +10,10 @@
   "errorTypes": {
     "dataflowExists": "Dataflow name already exists",
     "copyWithErrors": "The snapshot contains blocker errors"
+  },
+  "userRequestStatus": {
+    "accepted": [],
+    "completed": [],
+    "pending": []
   }
 }
