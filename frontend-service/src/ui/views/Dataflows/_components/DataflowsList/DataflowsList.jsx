@@ -121,6 +121,16 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
       </span>
       {renderFilterOrder('name')}
+      <span className={`${styles.dataflowInput} p-float-label`}>
+        <InputText
+          className={styles.inputFilter}
+          id={'filterDescriptionInput'}
+          // onChange={e => changeFilterValues('name', e.target.value, dataflowItemState.dataflows)}
+          value={dataflowItemState.filter.description}
+        />
+        <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
+      </span>
+      {renderFilterOrder('description')}
       <span className={`${styles.dataflowInput}`}>
         <MultiSelect
           className={styles.multiselectFilter}
