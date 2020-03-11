@@ -110,7 +110,6 @@ const ConfirmDialog = forwardRef((props, _) => {
   return (
     <div onPaste={onPaste} ref={divRef} onKeyPress={onKeyPress}>
       <Dialog
-        onClick={onClick}
         className={className}
         focusOnShow={true}
         footer={footer}
