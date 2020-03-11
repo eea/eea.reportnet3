@@ -18,18 +18,24 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescription, onLoadTableData, table }) => {
+export const FieldsDesigner = ({
+  datasetId,
+  datasetSchemas,
+  onChangeFields,
+  onChangeTableDescription,
+  onLoadTableData,
+  table
+}) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
-  const [isCodelistSelected, setIsCodelistSelected] = useState(false);
+  const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,18 +60,38 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
 
   useEffect(() => {
     if (!isUndefined(fields)) {
-      setIsCodelistSelected(fields.filter(field => field.type.toUpperCase() === 'CODELIST').length > 0);
+      setIsCodelistOrLink(
+        fields.filter(field => field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK').length >
+          0
+      );
     }
   }, [fields]);
 
-  const onCodelistShow = (fieldId, selectedField) => {
-    setIsCodelistSelected(
-      fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId).length > 0 ||
-        selectedField.fieldType.toUpperCase() === 'CODELIST'
+  const onCodelistAndLinkShow = (fieldId, selectedField) => {
+    console.log({ selectedField });
+    setIsCodelistOrLink(
+      fields.filter(field => {
+        console.log({ field });
+        return (
+          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+        );
+      }).length > 0 ||
+        selectedField.fieldType.toUpperCase() === 'CODELIST' ||
+        selectedField.fieldType.toUpperCase() === 'LINK'
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, fieldId, isPK, name, recordId, required, type }) => {
+  const onFieldAdd = ({
+    codelistItems,
+    description,
+    fieldId,
+    isPK,
+    name,
+    recordId,
+    referencedField,
+    required,
+    type
+  }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
@@ -74,6 +100,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       isPK,
       name,
       recordId,
+      referencedField,
       required,
       type
     });
@@ -240,9 +267,11 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
+          datasetSchemas={datasetSchemas}
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
+          fieldLink={{}}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
@@ -250,8 +279,8 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           // hasPK={true}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
-          isCodelistSelected={isCodelistSelected}
-          onCodelistShow={onCodelistShow}
+          isCodelistOrLink={isCodelistOrLink}
+          onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
@@ -271,11 +300,13 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
               checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
               codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
               datasetId={datasetId}
+              datasetSchemas={datasetSchemas}
               fieldDescription={field.description}
               fieldId={field.fieldId}
               fieldIsPK={field.isPK}
               // fieldIsPK={index === 0}
               fieldName={field.name}
+              fieldLink={field.referencedField}
               fieldRequired={field.required}
               fieldType={field.type}
               fieldValue={field.value}
@@ -283,9 +314,9 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
               // hasPK={true}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
-              isCodelistSelected={isCodelistSelected}
+              isCodelistOrLink={isCodelistOrLink}
               key={field.fieldId}
-              onCodelistShow={onCodelistShow}
+              onCodelistAndLinkShow={onCodelistAndLinkShow}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
               onFieldDragAndDropStart={onFieldDragAndDropStart}

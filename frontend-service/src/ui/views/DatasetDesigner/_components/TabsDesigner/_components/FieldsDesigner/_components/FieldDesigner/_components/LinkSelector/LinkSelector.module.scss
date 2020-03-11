@@ -1,0 +1,18 @@
+.schemaWrapper {
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+}
+.schemaWrapper div {
+  min-width: 33%;
+}
+.schemaWrapper > div {
+  margin-right: 1rem;
+  flex-grow: 1;
+}
+.selectedLinkWrapper {
+  margin-top: 1rem;
+}
+.selectedLinkWrapper span:first-child {
+  font-weight: bold;
+}

@@ -13,7 +13,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { FKSelector } from './_components/FKSelector';
+import { LinkSelector } from './_components/LinkSelector';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
@@ -30,15 +30,17 @@ export const FieldDesigner = ({
   datasetId,
   fieldId,
   fieldDescription,
+  datasetSchemas,
   fieldName,
   fieldIsPK,
+  fieldLink,
   fieldRequired,
   fieldType,
   hasPK,
   index,
   initialFieldIndexDragged,
-  isCodelistSelected,
-  onCodelistShow,
+  isCodelistOrLink,
+  onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
   onFieldDragAndDropStart,
@@ -86,6 +88,7 @@ export const FieldDesigner = ({
     fieldDescriptionValue: fieldDescription,
     fieldIsPKValue: fieldIsPK,
     fieldPreviousTypeValue: '',
+    fieldLinkValue: fieldLink || {},
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
@@ -94,9 +97,8 @@ export const FieldDesigner = ({
     isCodelistEditorVisible: false,
     isEditing: false,
     isDragging: false,
-    isFKSelectorVisible: false,
-    isQCManagerVisible: false,
-    selectedFK: ''
+    isLinkSelectorVisible: false,
+    isQCManagerVisible: false
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -162,7 +164,7 @@ export const FieldDesigner = ({
     if (type.fieldType.toLowerCase() === 'codelist') {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
-      onFKDropdownSelected();
+      onLinkDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
@@ -171,6 +173,7 @@ export const FieldDesigner = ({
               description: fieldDesignerState.fieldDescriptionValue,
               isPK: fieldDesignerState.fieldIsPKValue,
               recordId,
+              referencedField: fieldDesignerState.fieldLinkValue,
               required: fieldDesignerState.fieldRequiredValue,
               type: parseGeospatialTypes(type.fieldType),
               name: fieldDesignerState.fieldValue
@@ -183,6 +186,7 @@ export const FieldDesigner = ({
             description: fieldDesignerState.fieldDescriptionValue,
             fieldSchemaId: fieldId,
             isPK: fieldDesignerState.fieldIsPKValue,
+            referencedField: fieldDesignerState.fieldLinkValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: parseGeospatialTypes(type.fieldType),
             name: fieldDesignerState.fieldValue
@@ -195,7 +199,7 @@ export const FieldDesigner = ({
       }
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
     }
-    onCodelistShow(fieldId, type);
+    onCodelistAndLinkShow(fieldId, type);
   };
 
   const onBlurFieldDescription = description => {
@@ -287,8 +291,8 @@ export const FieldDesigner = ({
     }
   };
 
-  const onCancelSaveFK = () => {
-    dispatchFieldDesigner({ type: 'CANCEL_SELECT_FK', payload: fieldDesignerState.fieldPreviousTypeValue });
+  const onCancelSaveLink = () => {
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK', payload: fieldDesignerState.fieldPreviousTypeValue });
   };
 
   const onCancelSaveCodelist = () => {
@@ -296,17 +300,22 @@ export const FieldDesigner = ({
   };
 
   const onCodelistDropdownSelected = fieldType => {
+    console.log({ fieldType });
     if (!isUndefined(fieldType)) {
-      onCodelistShow(fieldId, fieldType);
+      onCodelistAndLinkShow(fieldId, fieldType);
     }
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: true });
   };
 
-  const onFKDropdownSelected = () => {
-    dispatchFieldDesigner({ type: 'TOGGLE_FK_SELECTOR_VISIBLE', payload: true });
+  const onLinkDropdownSelected = fieldType => {
+    console.log({ fieldType });
+    if (!isUndefined(fieldType)) {
+      onCodelistAndLinkShow(fieldId, fieldType);
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: true });
   };
 
-  const onFieldAdd = async ({ codelistItems, description, isPK, name, recordId, required, type }) => {
+  const onFieldAdd = async ({ codelistItems, description, isPK, name, recordId, referencedField, required, type }) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         codelistItems,
@@ -314,6 +323,7 @@ export const FieldDesigner = ({
         isPK,
         name,
         recordId,
+        referencedField,
         required,
         type
       });
@@ -322,13 +332,14 @@ export const FieldDesigner = ({
       } else {
         dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
         onNewFieldAdd({
+          codelistItems,
+          description,
           fieldId: response.data,
           name,
           recordId,
-          type,
-          description,
-          codelistItems,
-          required
+          referencedField,
+          required,
+          type
         });
       }
     } catch (error) {
@@ -425,6 +436,7 @@ export const FieldDesigner = ({
             description: fieldDesignerState.fieldDescriptionValue,
             isPK: checked,
             recordId,
+            referencedField: fieldDesignerState.fieldLinkValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
             name: fieldDesignerState.fieldValue
@@ -436,6 +448,7 @@ export const FieldDesigner = ({
           description: fieldDesignerState.fieldDescriptionValue,
           fieldSchemaId: fieldId,
           isPK: checked,
+          referencedField: fieldDesignerState.fieldLinkValue,
           required: checked ? true : fieldDesignerState.fieldRequiredValue,
           type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
           name: fieldDesignerState.fieldValue
@@ -459,6 +472,7 @@ export const FieldDesigner = ({
             description: fieldDesignerState.fieldDescriptionValue,
             isPK: fieldDesignerState.fieldIsPKValue,
             recordId,
+            referencedField: fieldDesignerState.fieldLinkValue,
             required: checked,
             type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
             name: fieldDesignerState.fieldValue
@@ -491,6 +505,7 @@ export const FieldDesigner = ({
             description: fieldDesignerState.fieldDescriptionValue,
             isPK: fieldDesignerState.fieldIsPKValue,
             recordId,
+            referencedField: fieldDesignerState.fieldLinkValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: 'CODELIST',
             name: fieldDesignerState.fieldValue
@@ -501,6 +516,7 @@ export const FieldDesigner = ({
             description: fieldDesignerState.fieldDescriptionValue,
             fieldSchemaId: fieldId,
             isPK: fieldDesignerState.fieldIsPKValue,
+            referencedField: fieldDesignerState.fieldLinkValue,
             required: fieldDesignerState.fieldRequiredValue,
             type: 'CODELIST',
             name: fieldDesignerState.fieldValue
@@ -511,8 +527,42 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
-  const onSaveFK = fk => {
-    dispatchFieldDesigner({ type: 'TOGGLE_FK_SELECTOR_VISIBLE', payload: false });
+  const onSaveLink = link => {
+    dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
+
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({
+          codelistItems,
+          description: fieldDesignerState.fieldDescriptionValue,
+          isPK: fieldDesignerState.fieldIsPKValue,
+          recordId,
+          required: fieldDesignerState.fieldRequiredValue,
+          type: 'LINK',
+          name: fieldDesignerState.fieldValue,
+          referencedField: {
+            idDatasetSchema: link.referencedField.datasetSchemaId,
+            idPk: link.referencedField.fieldSchemaId
+          }
+        });
+      } else {
+        fieldUpdate({
+          codelistItems,
+          description: fieldDesignerState.fieldDescriptionValue,
+          fieldSchemaId: fieldId,
+          isPK: fieldDesignerState.fieldIsPKValue,
+          required: fieldDesignerState.fieldRequiredValue,
+          type: 'LINK',
+          name: fieldDesignerState.fieldValue,
+          referencedField: {
+            idDatasetSchema: link.referencedField.datasetSchemaId,
+            idPk: link.referencedField.fieldSchemaId
+          }
+        });
+      }
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
+    dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false });
   };
 
   const parseGeospatialTypes = value => {
@@ -538,7 +588,16 @@ export const FieldDesigner = ({
     }
   };
 
-  const fieldUpdate = async ({ codelistItems, description, fieldSchemaId, isPK, required, type, name }) => {
+  const fieldUpdate = async ({
+    codelistItems,
+    description,
+    fieldSchemaId,
+    isPK,
+    name,
+    referencedField,
+    required,
+    type
+  }) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
@@ -546,6 +605,7 @@ export const FieldDesigner = ({
         fieldSchemaId,
         isPK,
         name,
+        referencedField,
         required,
         type
       });
@@ -571,6 +631,159 @@ export const FieldDesigner = ({
     </div>
   );
 
+  const renderCheckboxes = () => (
+    <div className="requiredAndPKCheckboxes">
+      {!addField ? (
+        <FontAwesomeIcon icon={AwesomeIcons('move')} style={{ width: '32px' }} />
+      ) : (
+        <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
+      )}
+      <Checkbox
+        checked={fieldDesignerState.fieldRequiredValue}
+        className={styles.checkRequired}
+        disabled={hasPK && fieldDesignerState.fieldIsPKValue}
+        inputId={`${fieldId}_check`}
+        label="Default"
+        onChange={e => {
+          onRequiredChange(e.checked);
+        }}
+        style={{ width: '70px' }}
+      />
+      <Checkbox
+        checked={fieldDesignerState.fieldIsPKValue}
+        disabled={hasPK && !fieldDesignerState.fieldIsPKValue}
+        inputId={`${fieldId}_check_pk`}
+        label="Default"
+        onChange={e => {
+          onPKChange(e.checked);
+        }}
+        style={{ width: '35px' }}
+      />
+    </div>
+  );
+
+  const renderCodelistAndLinkButtons = () =>
+    !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
+      <Button
+        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        label={
+          !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
+            ? `${fieldDesignerState.codelistItems.join(', ')}`
+            : resources.messages['codelistSelection']
+        }
+        onClick={() => onCodelistDropdownSelected()}
+        style={{ pointerEvents: 'auto' }}
+        tooltip={
+          !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
+            ? `${fieldDesignerState.codelistItems.join(', ')}`
+            : resources.messages['codelistSelection']
+        }
+        tooltipOptions={{ position: 'top' }}
+      />
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'link' ? (
+      <Button
+        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        label={
+          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
+            ? `${fieldDesignerState.fieldLinkValue.name}`
+            : resources.messages['linkSelection']
+        }
+        onClick={() => onLinkDropdownSelected()}
+        style={{ pointerEvents: 'auto' }}
+        tooltip={
+          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
+            ? `${fieldDesignerState.fieldLinkValue.name}`
+            : resources.messages['linkSelection']
+        }
+        tooltipOptions={{ position: 'top' }}
+      />
+    ) : isCodelistOrLink ? (
+      <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
+    ) : null;
+
+  const renderDeleteButton = () =>
+    !addField ? (
+      <a
+        draggable={true}
+        className={`${styles.button} ${styles.deleteButton}`}
+        href="#"
+        onClick={e => {
+          e.preventDefault();
+          onFieldDelete(index);
+        }}
+        onDragStart={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}>
+        <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+      </a>
+    ) : null;
+
+  const renderInputs = () => (
+    <React.Fragment>
+      <InputText
+        autoFocus={false}
+        className={styles.inputField}
+        // key={`${fieldId}_${index}`} --> Problem with DOM modification
+        ref={inputRef}
+        onBlur={e => {
+          dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
+          onBlurFieldName(e.target.value);
+        }}
+        onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
+        onFocus={e => {
+          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value });
+          dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
+        }}
+        onKeyDown={e => onKeyChange(e, 'NAME')}
+        placeholder={resources.messages['newFieldPlaceHolder']}
+        required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
+        value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
+      />
+      <InputTextarea
+        autoFocus={false}
+        collapsedHeight={33}
+        expandableOnClick={true}
+        className={styles.inputFieldDescription}
+        key={fieldId}
+        onBlur={e => {
+          dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
+          onBlurFieldDescription(e.target.value);
+        }}
+        onChange={e => dispatchFieldDesigner({ type: 'SET_DESCRIPTION', payload: e.target.value })}
+        onFocus={e => {
+          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_DESCRIPTION', payload: e.target.value });
+          dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
+        }}
+        onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
+        placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
+        value={
+          !isUndefined(fieldDesignerState.fieldDescriptionValue)
+            ? fieldDesignerState.fieldDescriptionValue
+            : fieldDescription
+        }
+      />
+      <Dropdown
+        className={styles.dropdownFieldType}
+        itemTemplate={fieldTypeTemplate}
+        onChange={e => onChangeFieldType(e.target.value)}
+        onMouseDown={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        optionLabel="fieldType"
+        options={fieldTypes}
+        required={true}
+        placeholder={resources.messages['newFieldTypePlaceHolder']}
+        scrollHeight="450px"
+        style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto' }}
+        value={
+          fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
+        }
+      />
+    </React.Fragment>
+  );
+
   return (
     <React.Fragment>
       <div
@@ -591,123 +804,14 @@ export const FieldDesigner = ({
           onFieldDragDrop(e);
         }}
         ref={fieldRef}>
-        {console.log(fieldDesignerState.isDragging)}
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
           }`}></div>
 
-        <div className="requiredAndPKCheckboxes">
-          {!addField ? (
-            <FontAwesomeIcon icon={AwesomeIcons('move')} style={{ width: '32px' }} />
-          ) : (
-            <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
-          )}
-          <Checkbox
-            checked={fieldDesignerState.fieldRequiredValue}
-            className={styles.checkRequired}
-            inputId={`${fieldId}_check`}
-            label="Default"
-            onChange={e => {
-              onRequiredChange(e.checked);
-            }}
-            style={{ width: '70px' }}
-          />
-          <Checkbox
-            checked={fieldDesignerState.fieldIsPKValue}
-            disabled={hasPK && !fieldDesignerState.fieldIsPKValue}
-            inputId={`${fieldId}_check_pk`}
-            label="Default"
-            onChange={e => {
-              onPKChange(e.checked);
-            }}
-            style={{ width: '35px' }}
-          />
-        </div>
-
-        <InputText
-          autoFocus={false}
-          className={styles.inputField}
-          // key={`${fieldId}_${index}`} --> Problem with DOM modification
-          ref={inputRef}
-          onBlur={e => {
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
-            onBlurFieldName(e.target.value);
-          }}
-          onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
-          onFocus={e => {
-            dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value });
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
-          }}
-          onKeyDown={e => onKeyChange(e, 'NAME')}
-          placeholder={resources.messages['newFieldPlaceHolder']}
-          required={
-            !isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''
-          }
-          value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
-        />
-        <InputTextarea
-          autoFocus={false}
-          collapsedHeight={33}
-          expandableOnClick={true}
-          className={styles.inputFieldDescription}
-          key={fieldId}
-          onBlur={e => {
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
-            onBlurFieldDescription(e.target.value);
-          }}
-          onChange={e => dispatchFieldDesigner({ type: 'SET_DESCRIPTION', payload: e.target.value })}
-          onFocus={e => {
-            dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_DESCRIPTION', payload: e.target.value });
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
-          }}
-          onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
-          placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
-          value={
-            !isUndefined(fieldDesignerState.fieldDescriptionValue)
-              ? fieldDesignerState.fieldDescriptionValue
-              : fieldDescription
-          }
-        />
-        <Dropdown
-          className={styles.dropdownFieldType}
-          itemTemplate={fieldTypeTemplate}
-          onChange={e => onChangeFieldType(e.target.value)}
-          onMouseDown={event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          optionLabel="fieldType"
-          options={fieldTypes}
-          required={true}
-          placeholder={resources.messages['newFieldTypePlaceHolder']}
-          scrollHeight="450px"
-          style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto' }}
-          value={
-            fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
-          }
-        />
-        {!isUndefined(fieldDesignerState.fieldTypeValue) &&
-        fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
-          <Button
-            className={`${styles.codelistButton} p-button-secondary-transparent`}
-            label={
-              !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-                ? `${fieldDesignerState.codelistItems}`
-                : resources.messages['codelistSelection']
-            }
-            onClick={() => onCodelistDropdownSelected()}
-            style={{ pointerEvents: 'auto' }}
-            tooltip={
-              !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-                ? `${fieldDesignerState.codelistItems}`
-                : resources.messages['codelistSelection']
-            }
-            tooltipOptions={{ position: 'top' }}
-          />
-        ) : isCodelistSelected ? (
-          <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
-        ) : null}
+        {renderCheckboxes()}
+        {renderInputs()}
+        {renderCodelistAndLinkButtons()}
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
@@ -718,23 +822,9 @@ export const FieldDesigner = ({
             tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}
-        {!addField ? (
-          <a
-            draggable={true}
-            className={`${styles.button} ${styles.deleteButton}`}
-            href="#"
-            onClick={e => {
-              e.preventDefault();
-              onFieldDelete(index);
-            }}
-            onDragStart={event => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}>
-            <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-          </a>
-        ) : null}
+        {renderDeleteButton()}
       </div>
+      {console.log(fieldDesignerState.isCodelistEditorVisible)}
       {fieldDesignerState.isCodelistEditorVisible ? (
         <CodelistEditor
           isCodelistEditorVisible={fieldDesignerState.isCodelistEditorVisible}
@@ -743,12 +833,13 @@ export const FieldDesigner = ({
           selectedCodelist={fieldDesignerState.codelistItems}
         />
       ) : null}
-      {fieldDesignerState.isFKSelectorVisible ? (
-        <FKSelector
-          isFKSelectorVisible={fieldDesignerState.isFKSelectorVisible}
-          onCancelSaveFK={onCancelSaveFK}
-          onSaveFK={onSaveFK}
-          selectedFK={fieldDesignerState.selectedFK}
+      {fieldDesignerState.isLinkSelectorVisible ? (
+        <LinkSelector
+          datasetSchemas={datasetSchemas}
+          isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          onCancelSaveLink={onCancelSaveLink}
+          onSaveLink={onSaveLink}
+          selectedLink={fieldDesignerState.fieldLinkValue}
         />
       ) : null}
       {fieldDesignerState.isQCManagerVisible ? (

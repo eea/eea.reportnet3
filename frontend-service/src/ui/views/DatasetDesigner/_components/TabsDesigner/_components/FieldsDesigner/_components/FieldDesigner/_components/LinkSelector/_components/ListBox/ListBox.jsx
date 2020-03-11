@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import isNil from 'lodash/isNil';
+// import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -28,11 +29,13 @@ const ListBox = ({
   options = null,
   style = null,
   tabIndex = '0',
+  title = '',
   tooltip = null,
   tooltipOptions = null,
   value = null
 }) => {
   let myTooltip;
+  console.log({ value });
   const inputElement = useRef();
   const [filter, setFilter] = useState('');
   const [optionTouched, setOptionTouched] = useState(false);
@@ -86,10 +89,12 @@ const ListBox = ({
         }
       } else {
         value = getOptionValue(option);
+        console.log({ value });
         valueChanged = true;
       }
     } else {
       value = selected ? null : getOptionValue(option);
+      console.log({ value });
       valueChanged = true;
     }
 
@@ -166,7 +171,7 @@ const ListBox = ({
   const isSelected = option => {
     let selected = false;
     let optionValue = getOptionValue(option);
-
+    console.log({ optionValue });
     if (multiple) {
       if (value) {
         for (let val of value) {
@@ -177,7 +182,12 @@ const ListBox = ({
         }
       }
     } else {
-      selected = ObjectUtils.equals(value, optionValue, dataKey);
+      //   console.log({ value, optionValue, dataKey });
+      if (!option.disabled) {
+        selected = ObjectUtils.equals(value, optionValue, dataKey);
+      } else {
+        selected = false;
+      }
     }
 
     return selected;
@@ -195,6 +205,7 @@ const ListBox = ({
   };
 
   const getOptionValue = option => {
+    console.log(option.value, optionLabel ? option : option.value);
     return optionLabel ? option : option.value;
   };
 
@@ -218,17 +229,18 @@ const ListBox = ({
 
       items = items.map((option, index) => {
         let optionLabel = getOptionLabel(option);
-
+        console.log({ option });
         return (
           <ListBoxItem
+            disabled={option.disabled}
             key={optionLabel}
             label={optionLabel}
-            option={option}
-            template={itemTemplate}
-            selected={isSelected(option)}
-            onClick={onOptionClick}
+            onClick={option.disabled ? null : onOptionClick}
             onTouchEnd={e => onOptionTouchEnd(e, option, index)}
+            option={option}
+            selected={isSelected(option)}
             tabIndex={tabIndex}
+            template={itemTemplate}
           />
         );
       });
@@ -241,6 +253,9 @@ const ListBox = ({
     return (
       <div ref={inputElement} id={id} className={classes} style={style}>
         {header}
+        <div className="p-listbox-title-wrapper">
+          <span className="p-listbox-title">{title}</span>
+        </div>
         <div className="p-listbox-list-wrapper">
           <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
             {items}

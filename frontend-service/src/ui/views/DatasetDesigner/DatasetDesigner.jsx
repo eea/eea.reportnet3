@@ -50,6 +50,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +78,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
       };
+      const getDatasetSchemas = async () => {
+        const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        setDatasetSchemas(datasetSchemasDTO);
+      };
       getDatasetSchemaId();
+      getDatasetSchemas();
     } catch (error) {
       console.error(`Error while loading schema: ${error}`);
     } finally {
@@ -338,7 +344,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} onLoadTableData={onLoadTableData} />
+      <TabsDesigner datasetSchemas={datasetSchemas} editable={true} onLoadTableData={onLoadTableData} />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

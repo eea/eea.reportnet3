@@ -6,141 +6,22 @@ import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
+import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
+import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
 import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
-const parseDataflowDTO = dataflowDTO =>
-  new Dataflow({
-    creationDate: dataflowDTO.creationDate,
-    dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
-    datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
-    deadlineDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
-    description: dataflowDTO.description,
-    designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
-    documents: parseDocumentListDTO(dataflowDTO.documents),
-    id: dataflowDTO.id,
-    name: dataflowDTO.name,
-    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
-    requestId: dataflowDTO.requestId,
-    status: dataflowDTO.status,
-    userRequestStatus: dataflowDTO.userRequestStatus,
-    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
-  });
-
-const parseDataCollectionListDTO = dataCollectionsDTO => {
-  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
-    const dataCollections = [];
-    dataCollectionsDTO.forEach(dataCollectionDTO => {
-      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
-    });
-    return dataCollections;
-  }
-  return;
+const accept = async dataflowId => {
+  const status = await apiDataflow.accept(dataflowId);
+  return status;
 };
 
-const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection({
-    creationDate: dataCollectionDTO.creationDate,
-    dataCollectionId: dataCollectionDTO.id,
-    dataCollectionName: dataCollectionDTO.dataSetName,
-    dataflowId: dataCollectionDTO.idDataflow,
-    datasetSchemaId: dataCollectionDTO.datasetSchema,
-    expirationDate: dataCollectionDTO.dueDate,
-    status: dataCollectionDTO.status
-  });
-};
-
-const parseDatasetListDTO = datasetsDTO => {
-  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
-    const datasets = [];
-    datasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
-    });
-    return datasets;
-  }
-  return;
-};
-
-const parseDatasetDTO = datasetDTO =>
-  new Dataset({
-    datasetId: datasetDTO.id,
-    datasetSchemaId: datasetDTO.datasetSchema,
-    datasetSchemaName: datasetDTO.dataSetName,
-    isReleased: datasetDTO.isReleased,
-    name: datasetDTO.nameDatasetSchema,
-    dataProviderId: datasetDTO.dataProviderId
-  });
-
-const parseDocumentListDTO = documentsDTO => {
-  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
-    const documents = [];
-    documentsDTO.forEach(documentDTO => {
-      documents.push(parseDocumentDTO(documentDTO));
-    });
-    return documents;
-  }
-  return;
-};
-
-const parseDocumentDTO = documentDTO => {
-  return new Document({
-    category: documentDTO.category,
-    description: documentDTO.description,
-    id: documentDTO.id,
-    language: documentDTO.language,
-    title: documentDTO.name
-  });
-};
-
-const parseRepresentativeListDTO = representativesDTO => {
-  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
-    const representatives = [];
-    representativesDTO.forEach(representativeDTO => {
-      representatives.push(parseRepresentativeDTO(representativeDTO));
-    });
-    return representatives;
-  }
-  return;
-};
-
-const parseRepresentativeDTO = representativeDTO => {
-  return new Representative({
-    dataProviderGroupId: representativeDTO.dataProviderGroupId,
-    dataProviderId: representativeDTO.dataProviderId,
-    id: representativeDTO.id,
-    isReceiptDownloaded: representativeDTO.receiptDownloaded,
-    isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.provideraccount
-  });
-};
-
-const parseWebLinkListDTO = webLinksDTO => {
-  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
-    const webLinks = [];
-    webLinksDTO.forEach(webLinkDTO => {
-      webLinks.push(parseWebLinkDTO(webLinkDTO));
-    });
-    return webLinks;
-  }
-  return;
-};
-
-const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
-
-const parseDataflowDTOs = dataflowDTOs => {
-  let dataflows = dataflowDTOs.map(dataflowDTO => {
-    return parseDataflowDTO(dataflowDTO);
-  });
-
-  dataflows.sort((a, b) => {
-    let deadline_1 = a.deadlineDate;
-    let deadline_2 = b.deadlineDate;
-    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
-  });
-
-  return dataflows;
+const accepted = async () => {
+  const acceptedDataflowsDTO = await apiDataflow.accepted();
+  return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
 const all = async () => {
@@ -150,11 +31,6 @@ const all = async () => {
     accepted: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED')),
     completed: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'COMPLETED'))
   };
-};
-
-const accepted = async () => {
-  const acceptedDataflowsDTO = await apiDataflow.accepted();
-  return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
 const create = async (name, description) => {
@@ -329,14 +205,1033 @@ const deleteById = async dataflowId => {
   return await apiDataflow.deleteById(dataflowId);
 };
 
+const getAllSchemas = async dataflowId => {
+  const datasetSchemasDTO = [
+    {
+      idDataSetSchema: '5e662c48c9b42f00018d4cbc',
+      description: null,
+      nameDatasetSchema: 'schema uno',
+      tableSchemas: [
+        {
+          idTableSchema: '5e65f90b7c84f327b83722d9',
+          description: null,
+          nameTableSchema: 'Tsabla uno',
+          recordSchema: {
+            idRecordSchema: '5e65f90b7c84f327b83722da',
+            fieldSchema: [
+              {
+                id: '5e65f9197c84f327b83722db',
+                description: null,
+                idRecord: '5e65f90b7c84f327b83722da',
+                name: 'campo uno',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637684f327b83722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: false,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84fz27b83722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e63f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327bg3722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b8h722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f322b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84v327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b8g722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327d83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84fs27b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b8372ade',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b8h722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b13722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b8f722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f32ab83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b83722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b8j722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327183722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327bk3722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327e83722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c8jf327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327b837x2de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327bj3722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327bj1722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: false,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327j83722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: false,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e65f95a7c84f327b83722dc',
+          description: null,
+          nameTableSchema: 'TAbla dos',
+          recordSchema: {
+            idRecordSchema: '5e65f95a7c84f327b83722dd',
+            fieldSchema: [
+              {
+                id: '5e65f9637c84f327283722de',
+                description: null,
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo uno bis',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              },
+              {
+                id: '5e65f9687c84f327b83722df',
+                description: '',
+                idRecord: '5e65f95a7c84f327b83722dd',
+                name: 'campo dos',
+                type: 'NUMBER',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      idDataSetSchema: '5e6627461cf2e754ac519f9a',
+      description: null,
+      nameDatasetSchema: 'schema dos',
+      tableSchemas: [
+        {
+          idTableSchema: '5e66274f1cf2eg54ac519f9c',
+          description: null,
+          nameTableSchema: 'tabla tres',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac519f3d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e754ac519f93',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f3d',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551cf2e754ac519f9e',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f3d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e66274f1cf2e754ac519f9c',
+          description: null,
+          nameTableSchema: 'tabla dos',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac519f9d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e754ac513f93',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9h',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551cf2e754ac519f9e',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      idDataSetSchema: '5e6627461cf2e754ac519f9a',
+      description: null,
+      nameDatasetSchema: 'schema tres',
+      tableSchemas: [
+        {
+          idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+          description: null,
+          nameTableSchema: 'tabla tres2',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac51933d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e754a1519f33',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '6e6627551cf2e754ac519f91',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e66274f1cf2e754ac519f9c',
+          description: null,
+          nameTableSchema: 'tabla dos',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac519f9d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e75fac519f93',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9h',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551cf22744ac519f9e',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      idDataSetSchema: '5e6627461cf2e754ac519f9a',
+      description: null,
+      nameDatasetSchema: 'schema cuatro',
+      tableSchemas: [
+        {
+          idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+          description: null,
+          nameTableSchema: 'tabla tres2',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac51933d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e754a1519f33',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551cf2e752ac519f91',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e66274f1cf2e754ac519f9c',
+          description: null,
+          nameTableSchema: 'tabla dos',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac519f9d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2275fac519f93',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9h',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551cf1e744ac519f9e',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      idDataSetSchema: '5e6627461cf2e754ac519f9a',
+      description: null,
+      nameDatasetSchema: 'schema cinco',
+      tableSchemas: [
+        {
+          idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+          description: null,
+          nameTableSchema: 'tabla tres2',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac51933d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e754a1519f33',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e66275513f2e754ac519f91',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac51933d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        },
+        {
+          idTableSchema: '5e66274f1cf2e754ac519f9c',
+          description: null,
+          nameTableSchema: 'tabla dos',
+          recordSchema: {
+            idRecordSchema: '5e66274f1cf2e754ac519f9d',
+            fieldSchema: [
+              {
+                id: '5e6627551cf2e75fac519f93',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9h',
+                name: 'campito zero',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: null,
+                referencedField: null
+              },
+              {
+                id: '5e6627551c42e744ac519f9e',
+                description: null,
+                idRecord: '5e66274f1cf2e754ac519f9d',
+                name: 'campito one',
+                type: 'TEXT',
+                codelistItems: null,
+                required: false,
+                isPK: true,
+                referencedField: null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ];
+  //await apiDataflow.allSchemas(dataflowId);
+  console.log({ datasetSchemasDTO });
+  const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
+    const dataset = new Dataset({
+      datasetSchemaDescription: datasetSchemaDTO.description,
+      datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
+      datasetSchemaName: datasetSchemaDTO.nameDatasetSchema
+      // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
+    });
+
+    const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
+      const records = !isNull(datasetTableDTO.recordSchema)
+        ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
+            const fields = !isNull(dataTableRecordDTO.fieldSchema)
+              ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+                  return new DatasetTableField({
+                    codelistItems: DataTableFieldDTO.codelistItems,
+                    description: DataTableFieldDTO.description,
+                    fieldId: DataTableFieldDTO.id,
+                    isPK: !isNull(DataTableFieldDTO.isPK) ? DataTableFieldDTO.isPK : false,
+                    name: DataTableFieldDTO.name,
+                    recordId: DataTableFieldDTO.idRecord,
+                    required: DataTableFieldDTO.required,
+                    type: DataTableFieldDTO.type
+                  });
+                })
+              : null;
+            return new DatasetTableRecord({
+              datasetPartitionId: dataTableRecordDTO.id,
+              fields,
+              recordSchemaId: dataTableRecordDTO.idRecordSchema
+            });
+          })
+        : null;
+      return new DatasetTable({
+        tableSchemaId: datasetTableDTO.idTableSchema,
+        tableSchemaDescription: datasetTableDTO.description,
+        tableSchemaName: datasetTableDTO.nameTableSchema,
+        records: records,
+        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
+      });
+    });
+
+    dataset.tables = tables;
+    return dataset;
+  });
+
+  console.log({ datasetSchemas });
+  return datasetSchemas;
+};
+
+const getPercentageOfValue = (val, total) => {
+  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
+};
+
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
   return newEmptyDatasetSchemaResponse;
 };
 
+const parseDataflowDTO = dataflowDTO =>
+  new Dataflow({
+    creationDate: dataflowDTO.creationDate,
+    dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
+    deadlineDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    description: dataflowDTO.description,
+    designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
+    documents: parseDocumentListDTO(dataflowDTO.documents),
+    id: dataflowDTO.id,
+    name: dataflowDTO.name,
+    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
+    requestId: dataflowDTO.requestId,
+    status: dataflowDTO.status,
+    userRequestStatus: dataflowDTO.userRequestStatus,
+    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+  });
+
+const parseDataCollectionListDTO = dataCollectionsDTO => {
+  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
+    const dataCollections = [];
+    dataCollectionsDTO.forEach(dataCollectionDTO => {
+      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+    });
+    return dataCollections;
+  }
+  return;
+};
+
+const parseDataCollectionDTO = dataCollectionDTO => {
+  return new DataCollection({
+    creationDate: dataCollectionDTO.creationDate,
+    dataCollectionId: dataCollectionDTO.id,
+    dataCollectionName: dataCollectionDTO.dataSetName,
+    dataflowId: dataCollectionDTO.idDataflow,
+    datasetSchemaId: dataCollectionDTO.datasetSchema,
+    expirationDate: dataCollectionDTO.dueDate,
+    status: dataCollectionDTO.status
+  });
+};
+
+const parseDatasetListDTO = datasetsDTO => {
+  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
+    const datasets = [];
+    datasetsDTO.forEach(datasetDTO => {
+      datasets.push(parseDatasetDTO(datasetDTO));
+    });
+    return datasets;
+  }
+  return;
+};
+
+const parseDatasetDTO = datasetDTO =>
+  new Dataset({
+    datasetId: datasetDTO.id,
+    datasetSchemaId: datasetDTO.datasetSchema,
+    datasetSchemaName: datasetDTO.dataSetName,
+    isReleased: datasetDTO.isReleased,
+    name: datasetDTO.nameDatasetSchema,
+    dataProviderId: datasetDTO.dataProviderId
+  });
+
+const parseDocumentListDTO = documentsDTO => {
+  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
+    const documents = [];
+    documentsDTO.forEach(documentDTO => {
+      documents.push(parseDocumentDTO(documentDTO));
+    });
+    return documents;
+  }
+  return;
+};
+
+const parseDocumentDTO = documentDTO => {
+  return new Document({
+    category: documentDTO.category,
+    description: documentDTO.description,
+    id: documentDTO.id,
+    language: documentDTO.language,
+    title: documentDTO.name
+  });
+};
+
+const parseRepresentativeListDTO = representativesDTO => {
+  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
+    const representatives = [];
+    representativesDTO.forEach(representativeDTO => {
+      representatives.push(parseRepresentativeDTO(representativeDTO));
+    });
+    return representatives;
+  }
+  return;
+};
+
+const parseRepresentativeDTO = representativeDTO => {
+  return new Representative({
+    dataProviderGroupId: representativeDTO.dataProviderGroupId,
+    dataProviderId: representativeDTO.dataProviderId,
+    id: representativeDTO.id,
+    isReceiptDownloaded: representativeDTO.receiptDownloaded,
+    isReceiptOutdated: representativeDTO.receiptOutdated,
+    providerAccount: representativeDTO.provideraccount
+  });
+};
+
+const parseWebLinkListDTO = webLinksDTO => {
+  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
+    const webLinks = [];
+    webLinksDTO.forEach(webLinkDTO => {
+      webLinks.push(parseWebLinkDTO(webLinkDTO));
+    });
+    return webLinks;
+  }
+  return;
+};
+
+const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
+
+const parseDataflowDTOs = dataflowDTOs => {
+  let dataflows = dataflowDTOs.map(dataflowDTO => {
+    return parseDataflowDTO(dataflowDTO);
+  });
+
+  dataflows.sort((a, b) => {
+    let deadline_1 = a.deadlineDate;
+    let deadline_2 = b.deadlineDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+
+  return dataflows;
+};
+
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+};
+
+const reject = async dataflowId => {
+  const status = await apiDataflow.reject(dataflowId);
+  return status;
 };
 
 const reporting = async dataflowId => {
@@ -359,20 +1254,6 @@ const update = async (dataflowId, name, description) => {
   return updatedDataflow;
 };
 
-const accept = async dataflowId => {
-  const status = await apiDataflow.accept(dataflowId);
-  return status;
-};
-
-const reject = async dataflowId => {
-  const status = await apiDataflow.reject(dataflowId);
-  return status;
-};
-
-const getPercentageOfValue = (val, total) => {
-  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
-};
-
 export const ApiDataflowRepository = {
   all,
   accept,
@@ -383,6 +1264,7 @@ export const ApiDataflowRepository = {
   datasetsValidationStatistics,
   datasetsReleasedStatus,
   deleteById,
+  getAllSchemas,
   newEmptyDatasetSchema,
   pending,
   reject,

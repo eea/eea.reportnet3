@@ -27,6 +27,18 @@ export const apiDataflow = {
     });
     return response.data;
   },
+  allSchemas: async dataflowId => {
+    console.log('llego');
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.allSchemas, { dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
   accepted: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

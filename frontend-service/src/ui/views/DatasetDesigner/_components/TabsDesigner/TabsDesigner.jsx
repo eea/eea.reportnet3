@@ -1,6 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isUndefined, isNull } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -14,7 +17,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/Dataset';
 
-export const TabsDesigner = withRouter(({ editable = false, match, history, onLoadTableData }) => {
+export const TabsDesigner = withRouter(({ datasetSchemas, editable = false, match, history, onLoadTableData }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -335,6 +338,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
                         autoFocus={false}
                         dataflowId={dataflowId}
                         datasetId={datasetId}
+                        datasetSchemas={datasetSchemas}
                         onLoadTableData={onLoadTableData}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         key={tab.index}

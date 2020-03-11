@@ -4,7 +4,11 @@
 }
 
 .p-listbox .p-listbox-list-wrapper {
-  overflow: auto;
+  max-height: 50vh;
+  overflow-y: scroll;
+  scrollbar-color: var(--bg) var(--c-custom-gray);
+  scrollbar-width: thin;
+  // overflow: auto;
 }
 
 .p-listbox .p-listbox-list {
@@ -21,6 +25,10 @@
   margin-bottom: 1px;
 }
 
+.p-listbox .p-listbox-item:not(.p-highlight):not(.p-disabled):hover {
+  background-color: var(--listbox-item-highlight-bg-hover);
+}
+
 .p-listbox .p-listbox-item > span {
   vertical-align: middle;
 }
@@ -31,6 +39,16 @@
 
 .p-listbox.p-disabled .p-listbox-item {
   cursor: default;
+}
+
+.p-listbox .p-highlight {
+  background-color: var(--listbox-item-highlight-bg);
+  color: var(--listbox-item-highlight-color);
+}
+
+.p-disabled {
+  opacity: 0.6;
+  outline: none;
 }
 
 .p-listbox-header {
@@ -65,4 +83,31 @@
 .p-listbox-header .p-inputtext {
   padding: 0.125em 0.125em 0.125em 1.25em;
   width: 100%;
+}
+
+.p-listbox-title-wrapper {
+  height: 2rem;
+  border-bottom: 1px solid var(--main-font-color);
+}
+.p-listbox-title {
+  font-size: 0.9em;
+  font-weight: bold;
+  text-overflow: ellipsis;
+}
+
+.p-listbox-list-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+.p-listbox-list-wrapper::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.p-listbox-list-wrapper::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+.p-listbox-list-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
 }

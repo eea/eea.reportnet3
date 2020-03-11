@@ -3,7 +3,12 @@ import { isUndefined } from 'lodash';
 export const fieldDesignerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'CANCEL_SELECT_CODELIST':
-      return { ...state, fieldPreviousTypeValue: payload, isFKSelectorVisible: false };
+      return {
+        ...state,
+        fieldPreviousTypeValue: payload,
+        isCodelistEditorVisible: false,
+        isLinkSelectorVisible: false
+      };
     case 'RESET_NEW_FIELD':
       return {
         ...state,
@@ -24,6 +29,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, initialFieldValue: payload };
     case 'SET_NAME':
       return { ...state, fieldValue: payload };
+    case 'SET_LINK':
+      return { ...state, fieldLinkValue: payload };
     case 'SET_PK':
       return { ...state, fieldIsPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PREVIOUS_TYPE_VALUE':
@@ -33,9 +40,9 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_TYPE':
       return { ...state, fieldTypeValue: payload.type, fieldPreviousTypeValue: payload.previousType };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
-      return { ...state, isCodelistEditorVisible: payload, isFKSelectorVisible: false };
-    case 'TOGGLE_FK_SELECTOR_VISIBLE':
-      return { ...state, isFKSelectorVisible: payload, isCodelistEditorVisible: false };
+      return { ...state, isCodelistEditorVisible: payload, isLinkSelectorVisible: false };
+    case 'TOGGLE_LINK_SELECTOR_VISIBLE':
+      return { ...state, isLinkSelectorVisible: payload, isCodelistEditorVisible: false };
     case 'TOGGLE_IS_DRAGGING':
       return { ...state, isDragging: payload };
     case 'TOGGLE_IS_EDITING':
