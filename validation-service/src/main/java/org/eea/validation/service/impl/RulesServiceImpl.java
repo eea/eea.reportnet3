@@ -327,12 +327,18 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Update rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException {
+  public void updateRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
