@@ -20,11 +20,16 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
    */
   private static final Logger LOG = LoggerFactory.getLogger(BroadcastKafkaReceiver.class);
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Listen message.
    *
    * @param message the message
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -33,7 +38,11 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
   public void listenMessage(Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
-      handler.processMessage(message.getPayload());
+      try {
+        handler.processMessage(message.getPayload());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error processing message {} due to reason {}", message, e);
+      }
     }
   }
 

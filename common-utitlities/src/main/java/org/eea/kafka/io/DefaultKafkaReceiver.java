@@ -20,6 +20,11 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaReceiver.class);
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /**
    * Listen message.
@@ -30,10 +35,14 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   @Override
   @KafkaListener(topics = "DATA_REPORTING_TOPIC")
-  public void listenMessage(final Message<EEAEventVO> message) throws EEAException {
+  public void listenMessage(final Message<EEAEventVO> message) {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
-      handler.processMessage(message.getPayload());
+      try {
+        handler.processMessage(message.getPayload());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error processing message {} due to reason {}", message, e);
+      }
     }
 
   }
