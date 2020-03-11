@@ -1,6 +1,7 @@
 package org.eea.kafka.io;
 
 import static org.mockito.Mockito.times;
+
 import java.io.IOException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -54,9 +55,7 @@ public class KafkaSenderTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
 
     Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
-    Mockito.doNothing().when(kafkaTemplate).flush();
     kafkaSender.sendMessage(event);
-    Mockito.verify(kafkaTemplate, times(1)).flush();
   }
 
 }

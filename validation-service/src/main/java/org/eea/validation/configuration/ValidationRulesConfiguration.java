@@ -1,14 +1,16 @@
 package org.eea.validation.configuration;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.serializer.EEAEventDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +22,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
 
 /**
  * The Class ValidationConfiguration.
@@ -127,15 +128,14 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   public ConsumerFactory<String, EEAEventVO> broadcastConsumerFactory() {
     final Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + UUID.randomUUID());// single group in one
-    // partition topic
-    // garantees broadcasting
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
+    // single group in one partition topic garantees broadcasting
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + UUID.randomUUID());
     props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
-    props.put("isolation.level", "read_committed");
+    props.put(ISOLATION_LEVEL_CONFIG, "read_committed");
 
-    return new DefaultKafkaConsumerFactory<>(props);
+    JsonDeserializer<EEAEventVO> deserializer = new JsonDeserializer<>(EEAEventVO.class);
+    deserializer.addTrustedPackages("org.eea.kafka.domain");
+    return new DefaultKafkaConsumerFactory(props, new StringDeserializer(), deserializer);
   }
 
   /**

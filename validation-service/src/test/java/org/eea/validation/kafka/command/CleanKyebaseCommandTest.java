@@ -2,6 +2,7 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -22,11 +23,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CleanKyebaseCommandTest {
 
-  /** The clean kyebase command. */
+  /**
+   * The clean kyebase command.
+   */
   @InjectMocks
   private CleanKyebaseCommand cleanKyebaseCommand;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
@@ -48,7 +53,7 @@ public class CleanKyebaseCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_CLEAN_KYEBASE);
     eeaEventVO.setData(data);
@@ -72,7 +77,7 @@ public class CleanKyebaseCommandTest {
   @Test
   public void testData() throws EEAException {
     doNothing().when(validationHelper).removeKieBase(Mockito.anyString());
-    cleanKyebaseCommand.execute(eeaEventVO);;
+    cleanKyebaseCommand.execute(eeaEventVO);
   }
 
 }
