@@ -385,6 +385,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // and with it we create the others automatic rules like number etc
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+
+      // Add the Pk if needed to the catalogue
+      dataschemaService.updatePkCatalogue(fieldSchemaVO);
+
+      // Add the register into the metabase fieldRelations
+      dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
+
+
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -450,16 +458,19 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
-
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      // Delete the fieldSchema from the datasetSchema
-      if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+      if (dataschemaService.checkPkAllowUpdate(datasetSchemaId,
+          dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId))) {
+        // Delete the fieldSchema from the datasetSchema
+        if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.INVALID_OBJECTID);
+        }
+        // Delete the rules from the fieldSchema
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
+        // Delete the fieldSchema from the dataset
+        datasetService.deleteFieldValues(datasetId, fieldSchemaId);
       }
-      // Delete the rules from the fieldSchema
-      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
-      // Delete the fieldSchema from the dataset
-      datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
           e);

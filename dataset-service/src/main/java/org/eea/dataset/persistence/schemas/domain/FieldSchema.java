@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,6 +27,7 @@ public class FieldSchema {
   /** The id field schema. */
   @Id
   @Field(value = "_id")
+  @JsonProperty("_id")
   private ObjectId idFieldSchema;
 
   /** The description. */
@@ -39,6 +41,7 @@ public class FieldSchema {
   /** The type. */
   @Field(value = "typeData")
   @Enumerated(EnumType.STRING)
+  @JsonProperty("typeData")
   private DataType type;
 
   /** The type. */

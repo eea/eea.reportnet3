@@ -214,4 +214,6 @@ public interface DatasetSchemaService {
 
   void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
 
+  FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
+
 }

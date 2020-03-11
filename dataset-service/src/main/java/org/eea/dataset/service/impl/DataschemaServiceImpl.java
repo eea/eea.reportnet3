@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
@@ -50,6 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -802,6 +806,33 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     return datasetIdDestination;
+  }
+
+
+  @Override
+  public FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema) {
+
+    Document fieldSchemaDoc = schemasRepository.findFieldSchema(datasetSchemaId, idFieldSchema);
+    FieldSchemaVO fieldVO = new FieldSchemaVO();
+    if (fieldSchemaDoc != null) {
+      /*
+       * JsonWriterSettings settings = JsonWriterSettings.builder() .objectIdConverter((value,
+       * writer) -> writer.writeString(value.toString())) .int64Converter((value, writer) ->
+       * writer.writeNumber(value.toString())).build();
+       */
+      String json = fieldSchemaDoc.toJson(settings);
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+      try {
+        FieldSchema schema = objectMapper.readValue(json, FieldSchema.class);
+        fieldVO = fieldSchemaNoRulesMapper.entityToClass(schema);
+      } catch (JsonProcessingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    return fieldVO;
   }
 
 
