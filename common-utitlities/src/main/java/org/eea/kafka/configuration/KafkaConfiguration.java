@@ -1,7 +1,9 @@
 package org.eea.kafka.configuration;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +90,7 @@ public class KafkaConfiguration {
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
     configProps.put(ACKS_CONFIG, "all");
-    configProps.put("transactional.id", groupId + UUID.randomUUID());// Single transactional id
+    configProps.put(TRANSACTIONAL_ID_CONFIG, groupId + UUID.randomUUID());// Single transactional id
     // since every sender must use
     // a different one
     JsonSerializer<EEAEventVO> serializer = new JsonSerializer<>();
@@ -124,7 +126,7 @@ public class KafkaConfiguration {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
-    props.put("isolation.level", "read_committed");
+    props.put(ISOLATION_LEVEL_CONFIG, "read_committed");
     JsonDeserializer<EEAEventVO> deserializer = new JsonDeserializer<>(EEAEventVO.class);
     deserializer.addTrustedPackages("org.eea.kafka.domain");
     return new DefaultKafkaConsumerFactory(props, new StringDeserializer(), deserializer);
