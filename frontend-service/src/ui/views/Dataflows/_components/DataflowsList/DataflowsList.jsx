@@ -71,7 +71,8 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
   };
 
   const dataflowItemReducer = (state, { type, payload }) => {
-    const getFilterKeys = () => Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status');
+    const getFilterKeys = () =>
+      Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status' && key !== 'role');
 
     const checkFilters = (filteredKeys, dataflow) => {
       for (let i = 0; i < filteredKeys.length; i++) {
@@ -94,6 +95,8 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         };
 
       case 'FILTER_DATAFLOWS':
+        const filteredKeys = getFilterKeys();
+
         return {
           ...state,
           isKeyFiltered: true,
@@ -102,13 +105,13 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
             ...payload.data.filter(data =>
               payload.filter === 'status'
                 ? [...payload.value.map(status => status.value.toLowerCase())].includes(
-                    data.status.toLowerCase() && checkFilters(getFilterKeys, data)
+                    data.status.toLowerCase() && checkFilters(filteredKeys, data)
                   )
                 : data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
                   [...state.filter.status.map(status => status.value.toLowerCase())].includes(
                     data.status.toLowerCase()
                   ) &&
-                  checkFilters(getFilterKeys, data)
+                  checkFilters(filteredKeys, data)
             )
           ]
         };
@@ -146,31 +149,27 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     />
   );
 
+  const renderInputFilter = property => (
+    <span className={`${styles.dataflowInput} p-float-label`}>
+      <InputText
+        className={styles.inputFilter}
+        id={property}
+        onChange={event => changeFilterValues(property, event.target.value, dataflowItemState.dataflows)}
+        value={dataflowItemState.filter[property]}
+      />
+      <label htmlFor={property}>{resources.messages['codelistName']}</label>
+    </span>
+  );
+
   const statusTemplate = option => (
     <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>
   );
 
   const renderFilters = () => (
     <div className={styles.header}>
-      <span className={`${styles.dataflowInput} p-float-label`}>
-        <InputText
-          className={styles.inputFilter}
-          id={'filterNameInput'}
-          onChange={e => changeFilterValues('name', e.target.value, dataflowItemState.dataflows)}
-          value={dataflowItemState.filter.name}
-        />
-        <label htmlFor={'filterNameInput'}>{resources.messages['codelistName']}</label>
-      </span>
+      {renderInputFilter('name')}
       {renderFilterOrder('name')}
-      <span className={`${styles.dataflowInput} p-float-label`}>
-        <InputText
-          className={styles.inputFilter}
-          id={'filterDescriptionInput'}
-          // onChange={e => changeFilterValues('name', e.target.value, dataflowItemState.dataflows)}
-          value={dataflowItemState.filter.description}
-        />
-        <label htmlFor={'filterDescriptionInput'}>{resources.messages['codelistDescription']}</label>
-      </span>
+      {renderInputFilter('description')}
       {renderFilterOrder('description')}
       <span className={`${styles.dataflowInput}`}>
         <MultiSelect
