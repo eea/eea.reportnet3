@@ -58,6 +58,13 @@ const ConfirmDialog = forwardRef((props, _) => {
     return window.location.protocol === 'https:';
   };
 
+  const onKeyPress = event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onConfirm();
+    }
+  };
+
   const footer = (
     <div>
       {hasPasteOption && isHTTPS() ? (
@@ -101,8 +108,9 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div onPaste={onPaste} ref={divRef}>
+    <div onPaste={onPaste} ref={divRef} onKeyPress={onKeyPress}>
       <Dialog
+        onClick={onClick}
         className={className}
         focusOnShow={true}
         footer={footer}
