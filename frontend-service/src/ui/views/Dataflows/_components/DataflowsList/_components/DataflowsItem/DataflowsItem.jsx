@@ -20,6 +20,9 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
 
+  console.log('itemContent', itemContent);
+  console.log('itemContent.deadl', itemContent.deadl);
+
   const onAccept = async () => {
     try {
       const status = await DataflowService.accept(itemContent.requestId);
@@ -80,7 +83,11 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
-        <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
+        {itemContent.status === 'DRAFT' ? (
+          <>
+            <span>{resources.messages['deliveryDate']}:</span> <span>{itemContent.deadlineDate}</span>
+          </>
+        ) : null}
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
