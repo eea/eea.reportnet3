@@ -62,8 +62,8 @@ public class RulesServiceImplTest {
 
   /**
    * Delete rule by id.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void deleteRuleByIdTest() throws EEAException {
@@ -570,9 +570,11 @@ public class RulesServiceImplTest {
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
 
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
-    rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+    rulesServiceImpl.updateRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
@@ -583,15 +585,22 @@ public class RulesServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void updateRuleRuleIdExceptionTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
     try {
-      rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+      rulesServiceImpl.updateRule(1L, new RuleVO());
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.RULE_ID_REQUIRED, e.getMessage());
       throw e;
     }
   }
 
+  /**
+   * Update rule exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void updateRuleExceptionTest() throws EEAException {
 
@@ -603,12 +612,31 @@ public class RulesServiceImplTest {
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
 
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(false);
     try {
-      rulesServiceImpl.updateRule("5e44110d6a9e3a270ce13fac", new RuleVO());
+      rulesServiceImpl.updateRule(1L, new RuleVO());
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.ERROR_UPDATING_RULE, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Update rule dataset id exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateRuleDatasetIdExceptionTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      rulesServiceImpl.updateRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
       throw e;
     }
   }
