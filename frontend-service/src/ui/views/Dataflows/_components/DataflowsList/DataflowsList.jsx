@@ -104,9 +104,8 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
           filteredDataflows: [
             ...payload.data.filter(data =>
               payload.filter === 'status'
-                ? [...payload.value.map(status => status.value.toLowerCase())].includes(
-                    data.status.toLowerCase() && checkFilters(filteredKeys, data)
-                  )
+                ? [...payload.value.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
+                  checkFilters(filteredKeys, data)
                 : data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
                   [...state.filter.status.map(status => status.value.toLowerCase())].includes(
                     data.status.toLowerCase()
@@ -157,7 +156,23 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         onChange={event => changeFilterValues(property, event.target.value, dataflowItemState.dataflows)}
         value={dataflowItemState.filter[property]}
       />
-      <label htmlFor={property}>{resources.messages['codelistName']}</label>
+      <label htmlFor={property}>{resources.messages[property]}</label>
+    </span>
+  );
+
+  const renderSelectFilter = property => (
+    <span className={`${styles.dataflowInput}`}>
+      <MultiSelect
+        className={styles.multiselectFilter}
+        filter={false}
+        itemTemplate={statusTemplate}
+        onChange={event => changeFilterValues(property, event.value, dataflowItemState.dataflows)}
+        optionLabel="type"
+        options={statusTypes}
+        placeholder={resources.messages['ok']}
+        style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
+        value={dataflowItemState.filter[property]}
+      />
     </span>
   );
 
@@ -171,19 +186,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
       {renderFilterOrder('name')}
       {renderInputFilter('description')}
       {renderFilterOrder('description')}
-      <span className={`${styles.dataflowInput}`}>
-        <MultiSelect
-          className={styles.multiselectFilter}
-          filter={false}
-          itemTemplate={statusTemplate}
-          onChange={event => changeFilterValues('status', event.value, dataflowItemState.dataflows)}
-          optionLabel="type"
-          options={statusTypes}
-          placeholder={resources.messages['ok']}
-          style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
-          value={dataflowItemState.filter.status}
-        />
-      </span>
+      {renderSelectFilter('status')}
       {renderFilterOrder('status')}
     </div>
   );
