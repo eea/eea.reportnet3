@@ -212,7 +212,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
 
       // Release the lock and the notification
-      releaseLockAndNotification(dataflowId);
+      //   releaseLockAndNotification(dataflowId);
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating schemas. Rolling back: ", e);

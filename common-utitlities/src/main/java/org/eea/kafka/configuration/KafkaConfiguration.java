@@ -2,6 +2,7 @@ package org.eea.kafka.configuration;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -16,9 +17,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.serializer.EEAEventDeserializer;
-import org.eea.kafka.serializer.EEAEventSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -33,7 +31,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.transaction.KafkaTransactionManager;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 /**
  * The Class KafkaConfiguration.
@@ -87,33 +86,31 @@ public class KafkaConfiguration {
   public ProducerFactory<String, EEAEventVO> producerFactory() {
     final Map<String, Object> configProps = new ConcurrentHashMap<>();
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-    configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EEAEventSerializer.class);
-    configProps.put("enable.idempotence", "true");
+    configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
     configProps.put(ACKS_CONFIG, "all");
     configProps.put("transactional.id", groupId + UUID.randomUUID());// Single transactional id
-                                                                     // since every sender must use
-                                                                     // a different one
+    // since every sender must use
+    // a different one
+    JsonSerializer<EEAEventVO> serializer = new JsonSerializer<>();
+    serializer.setAddTypeInfo(false);
+
     DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory =
-        new DefaultKafkaProducerFactory<>(configProps);
+        new DefaultKafkaProducerFactory(configProps, new StringSerializer(), serializer);
+
     defaultKafkaProducerFactory.setTransactionIdPrefix("txn-ingestor");
+
     return defaultKafkaProducerFactory;
   }
 
-  @Bean
-  public KafkaTransactionManager<String, EEAEventVO> kafkaTransactionManager(
-      @Autowired ProducerFactory<String, EEAEventVO> pf) {
-    return new KafkaTransactionManager<>(pf);
-  }
 
   /**
-   * Kafka template.
+   * Creates Kafka template with autoflush flag activated
    *
    * @return the kafka template
    */
   @Bean
   public KafkaTemplate<String, EEAEventVO> kafkaTemplate() {
-    return new KafkaTemplate<>(producerFactory());
+    return new KafkaTemplate<>(producerFactory(), true);
   }
 
   /**
@@ -128,9 +125,9 @@ public class KafkaConfiguration {
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
     props.put("isolation.level", "read_committed");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
-    return new DefaultKafkaConsumerFactory<>(props);
+    JsonDeserializer<EEAEventVO> deserializer = new JsonDeserializer<>(EEAEventVO.class);
+    deserializer.addTrustedPackages("org.eea.kafka.domain");
+    return new DefaultKafkaConsumerFactory(props, new StringDeserializer(), deserializer);
   }
 
   /**
