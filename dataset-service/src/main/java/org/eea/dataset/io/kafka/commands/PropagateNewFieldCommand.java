@@ -23,7 +23,9 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The update record helper. */
+  /**
+   * The update record helper.
+   */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
@@ -46,7 +48,7 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     Integer sizeRecords = (Integer) eeaEventVO.getData().get("sizeRecords");
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
