@@ -20,7 +20,7 @@ public class CodelistUtils {
       final boolean sensitive) {
     Boolean validationResult = false;
     // we delete the first character and the last one because we receive a string with [] values
-    if (!StringUtil.isNullOrEmpty(codelistItems)) {
+    if (!StringUtil.isNullOrEmpty(value)) {
       final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
 
       if (Boolean.TRUE.equals(sensitive)) {

@@ -136,12 +136,10 @@ public interface RulesController {
    * Update rule.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
   @PutMapping("/updateRule")
-  void updateRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
+  void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 
   /**
    * Insert rule in position.

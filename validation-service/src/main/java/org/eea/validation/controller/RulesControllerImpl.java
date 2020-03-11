@@ -205,17 +205,15 @@ public class RulesControllerImpl implements RulesController {
    * Update rule.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/updateRule")
-  public void updateRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
+  public void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
-      rulesService.updateRule(datasetSchemaId, ruleVO);
+      rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating rule: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

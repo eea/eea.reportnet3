@@ -71,11 +71,11 @@ public interface RulesService {
   /**
    * Update rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    * @throws EEAException the EEA exception
    */
-  void updateRule(String datasetSchemaId, RuleVO ruleVO) throws EEAException;
+  void updateRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
   /**
    * Creates the automatic rules.

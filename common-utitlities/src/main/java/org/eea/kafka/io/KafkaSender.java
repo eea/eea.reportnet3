@@ -1,6 +1,7 @@
 package org.eea.kafka.io;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
@@ -48,7 +49,7 @@ public class KafkaSender {
    *
    * @param event the event
    */
-  @Transactional("kafkaTransactionManager")
+
   public void sendMessage(final EEAEventVO event) {
 
     kafkaTemplate.executeInTransaction(operations -> {
@@ -76,35 +77,22 @@ public class KafkaSender {
             .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
       }
       final ListenableFuture<SendResult<String, EEAEventVO>> future = operations.send(message);
-      future.addCallback(new ListenableFutureCallback<SendResult<String, EEAEventVO>>() {
+      Boolean sendResult = true;
 
-        /**
-         * On success.
-         *
-         * @param result the result
-         */
-        @Override
-        public void onSuccess(final SendResult<String, EEAEventVO> result) {
-          if (result != null && result.getRecordMetadata() != null) {
-            LOG.info("Sent message=[ {} ] with offset=[ {} ] and partition [ {} ]", event,
-                result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
-          }
-        }
-
-        /**
-         * On failure.
-         *
-         * @param ex the ex
-         */
-        @Override
-        public void onFailure(final Throwable ex) {
-          LOG_ERROR.error("Unable to send message=[ {} ] due to: {} ", event, ex.getMessage());
-        }
-      });
-      return true;
+      try {
+        SendResult<String, EEAEventVO> result = future.get();
+        LOG.info("Sent message=[ {} ] to topic=[ {} ] with offset=[ {} ] and partition [ {} ]",
+            event, event.getEventType().getTopic(),
+            result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
+      } catch (InterruptedException | ExecutionException e) {
+        LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
+            event.getEventType().getTopic(), e.getMessage());
+        sendResult = false;
+      }
+      return sendResult;
     });
 
-    kafkaTemplate.flush();
+
   }
 
 

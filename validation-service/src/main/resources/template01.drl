@@ -23,7 +23,7 @@ template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
   when
-    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});
+    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && !(@{whencondition}));
   then
    ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
 
