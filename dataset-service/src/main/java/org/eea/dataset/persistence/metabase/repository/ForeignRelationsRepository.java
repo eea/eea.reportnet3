@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface ForeignRelationsRepository extends CrudRepository<ForeignRelations, Long> {
 
 
-  @Query("Select f.idDatasetDestination From ForeignRelations f Where f.idDatasetOrigin=:idDatasetOrigin And f.idPk=:idPk")
+  @Query("Select f.idDatasetDestination.id From ForeignRelations f Where f.idDatasetOrigin.id=:idDatasetOrigin And f.idPk=:idPk")
   Long findDatasetDestinationByOriginAndPk(@Param("idDatasetOrigin") Long datasetIdOrigin,
       @Param("idPk") String idPk);
 

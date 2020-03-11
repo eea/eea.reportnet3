@@ -705,30 +705,41 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     Boolean allow = true;
     if (fieldSchemaVO.getIsPK() != null) {
-      DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
-      TableSchemaVO table = schema.getTableSchemas().stream()
-          .filter(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
-              .allMatch(field -> field.getId().equals(fieldSchemaVO.getId())))
-          .findAny().orElse(null);
-
-      Boolean existingPK = false;
-      if (table != null) {
-        for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-          if (field.getIsPK() != null && field.getIsPK()
-              && !field.getId().equals(fieldSchemaVO.getId())) {
-            existingPK = true;
+      // Check existing PKs on the same table
+      if (fieldSchemaVO.getIsPK()) {
+        DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+        TableSchemaVO table = null;
+        for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+          if (tableVO.getRecordSchema() != null
+              && tableVO.getRecordSchema().getFieldSchema() != null) {
+            if (tableVO.getRecordSchema().getFieldSchema().stream()
+                .anyMatch(field -> field.getId().equals(fieldSchemaVO.getId()))) {
+              table = tableVO;
+              break;
+            }
+          }
+        }
+        if (table != null) {
+          for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+            if (field.getIsPK() != null && field.getIsPK()
+                && !field.getId().equals(fieldSchemaVO.getId())) {
+              allow = false;
+              LOG.info("There is actually an existing PK on the table. Update denied");
+            }
           }
         }
       }
-
-      /*
-       * Boolean isPKused = false; PkCatalogueSchema catalogue = pkCatalogueRepository.findById(new
-       * ObjectId(fieldSchemaVO.getReferencedField().getIdPk())) .orElse(new PkCatalogueSchema());
-       * if (catalogue != null && catalogue.getReferenced() != null &&
-       * !catalogue.getReferenced().isEmpty()) { isPKused = true; }
-       * 
-       * if (existingPK || isPKused) { allow = false; }
-       */
+      // Check the PK is referenced or not in case we are trying to remove it
+      if (!fieldSchemaVO.getIsPK()) {
+        PkCatalogueSchema catalogue = pkCatalogueRepository
+            .findById(new ObjectId(fieldSchemaVO.getId())).orElse(new PkCatalogueSchema());
+        if (catalogue != null && catalogue.getReferenced() != null
+            && !catalogue.getReferenced().isEmpty()) {
+          allow = false;
+          LOG.info(
+              "The PK the user is trying to delete is being referenced by a FK. Update denied");
+        }
+      }
     }
     return allow;
 

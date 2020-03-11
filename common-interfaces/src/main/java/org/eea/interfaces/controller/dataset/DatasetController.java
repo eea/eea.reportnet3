@@ -200,4 +200,11 @@ public interface DatasetController {
   @RequestMapping(value = "/{id}/updateField", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
+
+
+  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema,
+      @RequestParam("searchValue") String searchValue);
 }

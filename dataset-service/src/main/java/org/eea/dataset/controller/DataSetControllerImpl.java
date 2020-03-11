@@ -505,4 +505,13 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
+
+  @Override
+  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema,
+      @RequestParam("searchValue") String searchValue) {
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
+  }
 }

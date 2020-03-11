@@ -422,6 +422,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // Add the register into the metabase fieldRelations
         dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
 
+      } else {
+        if (fieldSchemaVO.getIsPK() != null && fieldSchemaVO.getIsPK()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.PK_ALREADY_EXISTS);
+        }
+        if (fieldSchemaVO.getIsPK() != null && !fieldSchemaVO.getIsPK()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
+        }
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
