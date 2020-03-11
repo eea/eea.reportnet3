@@ -41,7 +41,9 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
       try {
         handler.processMessage(message.getPayload());
       } catch (EEAException e) {
-        LOG_ERROR.error("Error processing message {} due to reason {}", message, e);
+        LOG_ERROR.error("Error processing event {} due to reason {}", message.getPayload(), e);
+      } catch (Exception e) {
+        LOG_ERROR.error("Undetermined  processing message {} due to reason {}", message, e);
       }
     }
   }
