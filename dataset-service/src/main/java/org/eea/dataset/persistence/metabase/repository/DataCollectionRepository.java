@@ -39,6 +39,7 @@ public interface DataCollectionRepository extends CrudRepository<DataCollection,
 
   @Transactional
   @Modifying
-  @Query(nativeQuery = true, value = "update dataflow set status = :status where id = :dataflowId")
+  @Query(nativeQuery = true,
+      value = "update dataflow set status = :status, deadline_date = null where id = :dataflowId")
   void updateDataflowStatus(@Param("dataflowId") Long dataflowId, @Param("status") String status);
 }
