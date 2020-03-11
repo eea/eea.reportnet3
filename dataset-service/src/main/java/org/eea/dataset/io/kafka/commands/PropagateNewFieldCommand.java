@@ -53,7 +53,7 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
-    DataType typeField = (DataType) eeaEventVO.getData().get("typeField");
+    DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
 
     updateRecordHelper.propagateNewFieldDesign(datasetId, idTableSchema, sizeRecords, numPag,
         UUID.randomUUID().toString(), idFieldSchema, typeField);
