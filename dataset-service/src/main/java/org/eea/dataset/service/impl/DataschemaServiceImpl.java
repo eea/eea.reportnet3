@@ -820,7 +820,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
        * writer) -> writer.writeString(value.toString())) .int64Converter((value, writer) ->
        * writer.writeNumber(value.toString())).build();
        */
-      String json = fieldSchemaDoc.toJson(settings);
+      String json = fieldSchemaDoc.toJson();
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
