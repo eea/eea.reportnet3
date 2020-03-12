@@ -7,6 +7,7 @@ import styles from './DataflowsList.module.scss';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
+import { Calendar } from 'ui/views/_components/Calendar';
 import { DataflowsItem } from './_components/DataflowsItem';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'primereact/multiselect';
@@ -173,6 +174,23 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>
   );
 
+  const renderCalendarFilter = property => (
+    <span className={`${styles.dataflowInput} p-float-label`}>
+      <Calendar
+        className={styles.inputFilter}
+        minDate={new Date()}
+        monthNavigator={true}
+        onChange={event => changeFilterValues(property, event.value, dataflowItemState.dataflows)}
+        selectionMode="multiple"
+        showWeek={true}
+        value={dataflowItemState.filter[property]}
+        yearNavigator={true}
+        yearRange="2020:2030"
+      />
+      <label htmlFor={property}>{resources.messages[property]}</label>
+    </span>
+  );
+
   const renderFilters = () => (
     <div className={styles.header}>
       {renderInputFilter('name')}
@@ -183,6 +201,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
       {renderFilterOrder('status')}
       {renderSelectFilter('userRole', roleTypes)}
       {renderFilterOrder('userRole')}
+      {renderCalendarFilter('deadlineDate')}
     </div>
   );
 
