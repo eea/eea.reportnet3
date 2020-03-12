@@ -16,35 +16,39 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const DataflowsList = ({ className, content, dataFetch, description, title, type }) => {
   const resources = useContext(ResourcesContext);
 
+  const statusTypes = [
+    {
+      type: DataflowConf.dataflowStatus['DESIGN'],
+      value: DataflowConf.dataflowStatus['DESIGN']
+    },
+    {
+      type: DataflowConf.dataflowStatus['DRAFT'],
+      value: DataflowConf.dataflowStatus['DRAFT']
+    }
+  ];
+
+  const roleTypes = [
+    {
+      type: DataflowConf.dataflowRoles['DATA_CUSTODIAN'],
+      value: DataflowConf.dataflowRoles['DATA_CUSTODIAN']
+    },
+    {
+      type: DataflowConf.dataflowRoles['DATA_PROVIDER'],
+      value: DataflowConf.dataflowRoles['DATA_PROVIDER']
+    }
+  ];
+
   const dataflowItemInitialState = {
     dataflows: cloneDeep(content),
     filter: {
       name: '',
       description: '',
-      status: [
-        {
-          type: DataflowConf.dataflowStatus['DESIGN'],
-          value: DataflowConf.dataflowStatus['DESIGN']
-        },
-        {
-          type: DataflowConf.dataflowStatus['DRAFT'],
-          value: DataflowConf.dataflowStatus['DRAFT']
-        }
-      ],
-      role: [
-        {
-          type: DataflowConf.dataflowRoles['DATA_CUSTODIAN'],
-          value: DataflowConf.dataflowRoles['DATA_CUSTODIAN']
-        },
-        {
-          type: DataflowConf.dataflowRoles['DATA_PROVIDER'],
-          value: DataflowConf.dataflowRoles['DATA_PROVIDER']
-        }
-      ]
+      status: statusTypes,
+      userRole: roleTypes,
+      deadlineDate: ''
     },
-    isKeyFiltered: false,
     filteredDataflows: cloneDeep(content),
-    order: { name: 1, description: 1, status: 1, role: 1 }
+    order: { name: 1, description: 1, status: 1, userRole: 1, deadlineDate: 1 }
   };
 
   const sortData = (data, order, property) => {
@@ -72,7 +76,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
 
   const dataflowItemReducer = (state, { type, payload }) => {
     const getFilterKeys = () =>
-      Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status' && key !== 'role');
+      Object.keys(state.filter).filter(key => key !== payload.filter && key !== 'status' && key !== 'userRole');
 
     const checkFilters = (filteredKeys, dataflow) => {
       for (let i = 0; i < filteredKeys.length; i++) {
@@ -96,16 +100,15 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
 
       case 'FILTER_DATAFLOWS':
         const filteredKeys = getFilterKeys();
-
         return {
           ...state,
-          isKeyFiltered: true,
           filter: { ...state.filter, [payload.filter]: payload.value },
           filteredDataflows: [
             ...payload.data.filter(data =>
-              payload.filter === 'status'
-                ? [...payload.value.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
-                  checkFilters(filteredKeys, data)
+              payload.filter === 'status' || payload.filter === 'userRole'
+                ? [...payload.value.map(type => type.value.toLowerCase())].includes(
+                    data[payload.filter].toLowerCase()
+                  ) && checkFilters(filteredKeys, data)
                 : data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
                   [...state.filter.status.map(status => status.value.toLowerCase())].includes(
                     data.status.toLowerCase()
@@ -121,17 +124,6 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
   };
 
   const [dataflowItemState, dataflowItemDispatch] = useReducer(dataflowItemReducer, dataflowItemInitialState);
-
-  const statusTypes = [
-    {
-      type: DataflowConf.dataflowStatus['DESIGN'],
-      value: DataflowConf.dataflowStatus['DESIGN']
-    },
-    {
-      type: DataflowConf.dataflowStatus['DRAFT'],
-      value: DataflowConf.dataflowStatus['DRAFT']
-    }
-  ];
 
   const onOrderData = (order, property) => {
     dataflowItemDispatch({ type: 'ORDER_DATAFLOWS', payload: { order, property } });
@@ -156,19 +148,20 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         onChange={event => changeFilterValues(property, event.target.value, dataflowItemState.dataflows)}
         value={dataflowItemState.filter[property]}
       />
+      <Button className={`p-button-secondary-transparent ${styles.clearIcon}`} icon="cancel" />
       <label htmlFor={property}>{resources.messages[property]}</label>
     </span>
   );
 
-  const renderSelectFilter = property => (
+  const renderSelectFilter = (property, optionTypes) => (
     <span className={`${styles.dataflowInput}`}>
       <MultiSelect
         className={styles.multiselectFilter}
         filter={false}
-        itemTemplate={statusTemplate}
+        itemTemplate={selectTemplate}
         onChange={event => changeFilterValues(property, event.value, dataflowItemState.dataflows)}
         optionLabel="type"
-        options={statusTypes}
+        options={optionTypes}
         placeholder={resources.messages['ok']}
         style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
         value={dataflowItemState.filter[property]}
@@ -176,7 +169,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     </span>
   );
 
-  const statusTemplate = option => (
+  const selectTemplate = option => (
     <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>
   );
 
@@ -186,8 +179,10 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
       {renderFilterOrder('name')}
       {renderInputFilter('description')}
       {renderFilterOrder('description')}
-      {renderSelectFilter('status')}
+      {renderSelectFilter('status', statusTypes)}
       {renderFilterOrder('status')}
+      {renderSelectFilter('userRole', roleTypes)}
+      {renderFilterOrder('userRole')}
     </div>
   );
 
