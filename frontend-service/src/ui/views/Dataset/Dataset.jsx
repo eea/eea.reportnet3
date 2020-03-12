@@ -575,7 +575,7 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-blink'
+                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}

@@ -81,6 +81,7 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
+    const [isTableDeleted, setIsTableDeleted] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
       'INFO',
@@ -97,6 +98,7 @@ const DataViewer = withRouter(
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
       initialRecordValue: undefined,
+      isRecordAdded: false,
       isRecordDeleted: false,
       newRecord: {},
       numCopiedRecords: undefined,
@@ -348,6 +350,7 @@ const DataViewer = withRouter(
       try {
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
+        setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
@@ -549,6 +552,7 @@ const DataViewer = withRouter(
         try {
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
           const {
@@ -775,6 +779,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
+          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
