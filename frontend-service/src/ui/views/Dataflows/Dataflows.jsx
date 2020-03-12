@@ -54,7 +54,7 @@ const Dataflows = withRouter(({ match, history }) => {
     {
       label: resources.messages['dataflowCompletedTab'],
       className: styles.flow_tab,
-      disabled: false,
+      disabled: true,
       tabKey: 'completed'
     }
   ]);
