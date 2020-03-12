@@ -14,12 +14,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink, onSaveLink, selectedLink }) => {
   const resources = useContext(ResourcesContext);
+  console.log({ selectedLink });
   const [link, setLink] = useState(selectedLink);
   const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
-
-  useEffect(() => {
-    console.log({ datasetSchemas });
-  }, []);
 
   const linkSelectorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -50,7 +47,6 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
       const hasPK = !isUndefined(table.records[0].fields.filter(field => field.isPK === true)[0]);
       if (hasPK) {
         const pkField = table.records[0].fields.filter(field => field.isPK === true)[0];
-        console.log({ pkField });
         return {
           name: `${table.tableSchemaName} - ${pkField.name}`,
           value: `${table.tableSchemaName} - ${pkField.fieldId}`,
@@ -92,7 +88,7 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
         </div>
         <div className={styles.selectedLinkWrapper}>
           <span>{`${resources.messages['selectedLink']}: `}</span>
-          <span>{link.name}</span>
+          <span>{!isNil(link) ? link.name : ''}</span>
         </div>
         {/* <span>{JSON.stringify(referencedField)}</span> */}
       </React.Fragment>

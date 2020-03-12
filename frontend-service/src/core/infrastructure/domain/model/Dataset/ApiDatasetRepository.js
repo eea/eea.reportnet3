@@ -12,14 +12,16 @@ import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/Datas
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
+  console.log({ datasetTableRecordField });
   const datasetTableFieldDesign = new DatasetTableField({});
-  datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.name = datasetTableRecordField.name;
-  datasetTableFieldDesign.type = datasetTableRecordField.type;
-  datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
+  datasetTableFieldDesign.description = datasetTableRecordField.description;
+  datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
+  datasetTableFieldDesign.isPK = datasetTableRecordField.isPK;
+  datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
+  datasetTableFieldDesign.type = datasetTableRecordField.type;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
@@ -286,6 +288,7 @@ const schemaById = async datasetId => {
                   codelistItems: DataTableFieldDTO.codelistItems,
                   description: DataTableFieldDTO.description,
                   fieldId: DataTableFieldDTO.id,
+                  isPK: DataTableFieldDTO.isPK,
                   name: DataTableFieldDTO.name,
                   recordId: DataTableFieldDTO.idRecord,
                   required: DataTableFieldDTO.required,

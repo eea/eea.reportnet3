@@ -169,6 +169,7 @@ export const FieldDesigner = ({
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+            console.log(fieldDesignerState.fieldIsPKValue);
             onFieldAdd({
               description: fieldDesignerState.fieldDescriptionValue,
               isPK: fieldDesignerState.fieldIsPKValue,
@@ -248,10 +249,13 @@ export const FieldDesigner = ({
             if (!checkDuplicates(name, fieldId)) {
               if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
                 onFieldAdd({
+                  codelistItems: fieldDesignerState.codelistItems,
                   description: fieldDesignerState.fieldDescriptionValue,
+                  fieldSchemaId: fieldId,
+                  isPK: fieldDesignerState.fieldIsPKValue,
+                  name: fieldDesignerState.fieldValue,
                   recordId,
-                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-                  name: fieldDesignerState.fieldValue
+                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
                 });
               }
             } else {
@@ -274,8 +278,8 @@ export const FieldDesigner = ({
                   description: fieldDesignerState.fieldDescriptionValue,
                   fieldSchemaId: fieldId,
                   isPK: fieldDesignerState.fieldIsPKValue,
-                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-                  name: fieldDesignerState.fieldValue
+                  name: fieldDesignerState.fieldValue,
+                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
                 });
               } else {
                 onShowDialogError(
@@ -335,6 +339,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           fieldId: response.data,
+          isPK,
           name,
           recordId,
           referencedField,
