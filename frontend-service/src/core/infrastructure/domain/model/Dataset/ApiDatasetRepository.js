@@ -211,6 +211,46 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
+const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken) => {
+  const referencedFieldValuesDTO = [
+    {
+      type: 'TEXT',
+      value: 'dsf',
+      id: 'DAE9DEAEE201134051F6629FDBD5787C',
+      idFieldSchema: '5e68dfe56db34537dc076eae'
+    },
+    {
+      type: 'TEXT',
+      value: '3dsf',
+      id: '8482FDE6AD5FC155A5E7B4A44EEF1E4D',
+      idFieldSchema: '5e68dfe56db34537dc076eae'
+    },
+    {
+      type: 'TEXT',
+      value: '4dsf',
+      id: 'DAE9DEAEE201134051F6629FDBD5787C',
+      idFieldSchema: '5e68dfe56db34537dc076eae'
+    },
+    {
+      type: 'TEXT',
+      value: 'ds3f',
+      id: '8482FDE6AD5FC155A5E7B4A44EEF1E4D',
+      idFieldSchema: '5e68dfe56db34537dc076eae'
+    }
+  ];
+  //await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+
+  return referencedFieldValuesDTO.map(
+    referencedFieldDTO =>
+      new DatasetTableField({
+        fieldId: referencedFieldDTO.id,
+        fieldSchemaId: referencedFieldDTO.idFieldSchema,
+        type: referencedFieldDTO.type,
+        value: referencedFieldDTO.value
+      })
+  );
+};
+
 const getAllLevelErrorsFromRuleValidations = rulesDTO =>
   CoreUtils.orderLevelErrors([
     ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
@@ -522,6 +562,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportTableDataById,
   getMetaData,
+  getReferencedFieldValues,
   orderFieldSchema,
   orderTableSchema,
   schemaById,

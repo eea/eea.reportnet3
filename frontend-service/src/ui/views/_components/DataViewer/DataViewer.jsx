@@ -127,6 +127,8 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
+          datasetId={datasetId}
+          fieldSchemaId={RecordUtils.getCellFieldSchemaId(cells, cells.field)}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}

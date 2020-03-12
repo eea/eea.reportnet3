@@ -502,6 +502,7 @@
     "columnInfoType": "Type",
     "linkSelector": "Select a Link",
     "selectedLink": "Selected Link",
-    "linkSelection": "No link selected"
+    "linkSelection": "No link selected",
+    "linkFilterPlaceholder": "Search value"
   }
 }

@@ -61,7 +61,7 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
         return {
           name: `${table.tableSchemaName} - No PK`,
           value: `${table.tableSchemaName} - No PK`,
-          referencedField: {},
+          referencedField: null,
           disabled: true
         };
       }

@@ -49,6 +49,7 @@ export class Dropdown extends Component {
     ariaLabel: null,
     ariaLabelledBy: null,
     onChange: null,
+    onFilterInputChangeBackend: null,
     onMouseDown: null,
     onContextMenu: null,
     onEmptyList: null
@@ -86,6 +87,7 @@ export class Dropdown extends Component {
     ariaLabel: PropTypes.string,
     ariaLabelledBy: PropTypes.string,
     onChange: PropTypes.func,
+    onFilterInputChangeBackend: PropTypes.func,
     onMouseDown: PropTypes.func,
     onContextMenu: PropTypes.func,
     onEmptyList: PropTypes.func
@@ -363,10 +365,19 @@ export class Dropdown extends Component {
   }
 
   onFilterInputChange(event) {
-    this.setState({ filter: event.target.value });
+    if (this.props.onFilterInputChangeBackend) {
+      this.props.onFilterInputChangeBackend(event.target.value);
+      // .then(response => {
+      //   console.log({ response });
+      this.setState({ filter: event.target.value });
+      // });
+    } else {
+      this.setState({ filter: event.target.value });
+    }
   }
 
   onFilterInputKeyDown(event) {
+    console.log(event.which);
     switch (event.which) {
       //down
       case 40:

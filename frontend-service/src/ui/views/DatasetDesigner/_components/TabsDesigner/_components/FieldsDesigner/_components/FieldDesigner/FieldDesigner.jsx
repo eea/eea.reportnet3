@@ -88,7 +88,7 @@ export const FieldDesigner = ({
     fieldDescriptionValue: fieldDescription,
     fieldIsPKValue: fieldIsPK,
     fieldPreviousTypeValue: '',
-    fieldLinkValue: fieldLink || {},
+    fieldLinkValue: fieldLink || null,
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
