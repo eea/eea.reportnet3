@@ -67,6 +67,8 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns
   }) => {
+    const [isSaving, setisSaving] = useState(false);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -541,6 +543,7 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
+      setisSaving(true);
       //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
@@ -594,6 +597,7 @@ const DataViewer = withRouter(
           setIsLoading(false);
         }
       }
+      setisSaving(false);
     };
 
     const onSetVisible = (fnUseState, visible) => {
@@ -627,6 +631,7 @@ const DataViewer = withRouter(
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
+          disabled={isSaving}
           label={resources.messages['save']}
           icon="save"
           onClick={() => {
