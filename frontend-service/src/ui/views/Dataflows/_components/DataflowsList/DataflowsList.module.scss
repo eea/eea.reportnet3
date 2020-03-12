@@ -19,7 +19,7 @@
 .header {
   display: flex;
   flex-direction: row;
-  // margin: 1rem 0rem 0rem 0rem;
+  margin: 2rem 0;
   width: 100%;
 }
 .header > span {
@@ -58,6 +58,15 @@
   color: black;
 }
 
+.reporter {
+  background-color: rgba(#6565a8, 0.9);
+}
+
+.requester {
+  background-color: rgba(#c2c8cf, 0.8);
+  color: black;
+}
+
 .orderIcon {
   font-size: 16pt !important;
   // margin-top: 0.4rem !important;
@@ -76,4 +85,13 @@
 .orderIcon:enabled:hover {
   background-color: transparent !important;
   border-color: transparent !important;
+}
+
+.multiselectFilter {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  color: var(--floating-label-color) !important;
+  width: 100% !important;
 }

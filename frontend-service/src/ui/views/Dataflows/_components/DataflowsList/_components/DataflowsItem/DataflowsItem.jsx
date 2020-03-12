@@ -7,7 +7,6 @@ import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 
@@ -98,7 +97,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resources.messages['role']}:`}</span> {DataflowConf.dataflowRoles[itemContent.userRole]}
+          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole}
         </p>
       </div>
 

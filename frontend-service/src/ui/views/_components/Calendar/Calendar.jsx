@@ -11,6 +11,7 @@ export const Calendar = ({
   minDate,
   monthNavigator,
   onChange,
+  selectionMode,
   showWeek,
   value,
   yearNavigator,
@@ -26,6 +27,7 @@ export const Calendar = ({
       minDate={minDate}
       monthNavigator={monthNavigator}
       onChange={onChange}
+      selectionMode={selectionMode}
       showWeek={showWeek}
       value={value}
       yearNavigator={yearNavigator}

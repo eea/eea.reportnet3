@@ -153,7 +153,7 @@ const all = async userData => {
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: role });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: DataflowConf.dataflowRoles[role] });
     });
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
@@ -163,7 +163,7 @@ const all = async userData => {
         ...(isDuplicated
           ? userRoles.filter(item =>
               item.duplicatedRoles
-                ? item.userRole === config.permissions['CUSTODIAN'] && delete item.duplicatedRoles
+                ? item.userRole === DataflowConf.dataflowRoles['DATA_CUSTODIAN'] && delete item.duplicatedRoles
                 : item
             )
           : userRoles

@@ -500,6 +500,7 @@
     "columnInfo": "Column Info",
     "columnInfoDescription": "Description",
     "columnInfoName": "Name",
-    "columnInfoType": "Type"
+    "columnInfoType": "Type",
+    "name": "Name"
   }
 }

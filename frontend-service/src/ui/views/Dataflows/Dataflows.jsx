@@ -268,7 +268,8 @@ const Dataflows = withRouter(({ match, history }) => {
           />
         </>
       )}
-      {/* </div> */}
+      {/* </div>
+      </div> */}
 
       <Dialog
         className={styles.dialog}
