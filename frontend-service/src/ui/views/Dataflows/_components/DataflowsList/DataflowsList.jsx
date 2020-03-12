@@ -133,6 +133,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
   const renderOrderFilter = property => (
     <Button
       className={`p-button-secondary-transparent ${styles.orderIcon}`}
+      disabled={property.includes('ROD3')}
       icon={dataflowItemState.order[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
       onClick={() => onOrderData(dataflowItemState.order[property], property)}
       style={{ fontSize: '12pt' }}
@@ -145,6 +146,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     <span className={`${styles.dataflowInput} p-float-label`}>
       <InputText
         className={styles.inputFilter}
+        disabled={property.includes('ROD3')}
         id={property}
         onChange={event => changeFilterValues(property, event.target.value, dataflowItemState.dataflows)}
         value={dataflowItemState.filter[property]}
@@ -180,7 +182,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
   const renderCalendarFilter = property => (
     <span className={`${styles.dataflowInput} p-float-label`}>
       <Calendar
-        className={styles.inputFilter}
+        className={styles.calendarFilter}
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => changeFilterValues(property, event.value, dataflowItemState.dataflows)}
@@ -205,6 +207,11 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
       {renderSelectFilter('userRole', roleTypes)}
       {renderOrderFilter('userRole')}
       {renderCalendarFilter('deadlineDate')}
+      {renderOrderFilter('deadlineDate')}
+      {renderInputFilter('Instrument (ROD3)')}
+      {renderOrderFilter('Instrument (ROD3)')}
+      {renderInputFilter('Obligation (ROD3)')}
+      {renderOrderFilter('Obligation (ROD3)')}
     </div>
   );
 
