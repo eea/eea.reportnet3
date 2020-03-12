@@ -130,7 +130,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
     dataflowItemDispatch({ type: 'ORDER_DATAFLOWS', payload: { order, property } });
   };
 
-  const renderFilterOrder = property => (
+  const renderOrderFilter = property => (
     <Button
       className={`p-button-secondary-transparent ${styles.orderIcon}`}
       icon={dataflowItemState.order[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
@@ -149,7 +149,9 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         onChange={event => changeFilterValues(property, event.target.value, dataflowItemState.dataflows)}
         value={dataflowItemState.filter[property]}
       />
-      <Button className={`p-button-secondary-transparent ${styles.clearIcon}`} icon="cancel" />
+      {dataflowItemState.filter[property] && (
+        <Button className={`p-button-secondary-transparent ${styles.clearIcon}`} icon="cancel" />
+      )}
       <label htmlFor={property}>{resources.messages[property]}</label>
     </span>
   );
@@ -159,11 +161,12 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
       <MultiSelect
         className={styles.multiselectFilter}
         filter={false}
+        id={property}
         itemTemplate={selectTemplate}
         onChange={event => changeFilterValues(property, event.value, dataflowItemState.dataflows)}
         optionLabel="type"
         options={optionTypes}
-        placeholder={resources.messages['ok']}
+        placeholder={resources.messages['select']}
         style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
         value={dataflowItemState.filter[property]}
       />
@@ -194,13 +197,13 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
   const renderFilters = () => (
     <div className={styles.header}>
       {renderInputFilter('name')}
-      {renderFilterOrder('name')}
+      {renderOrderFilter('name')}
       {renderInputFilter('description')}
-      {renderFilterOrder('description')}
+      {renderOrderFilter('description')}
       {renderSelectFilter('status', statusTypes)}
-      {renderFilterOrder('status')}
+      {renderOrderFilter('status')}
       {renderSelectFilter('userRole', roleTypes)}
-      {renderFilterOrder('userRole')}
+      {renderOrderFilter('userRole')}
       {renderCalendarFilter('deadlineDate')}
     </div>
   );
