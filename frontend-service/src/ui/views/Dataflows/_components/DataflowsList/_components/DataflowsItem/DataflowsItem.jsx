@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { routes } from 'ui/routes';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 
@@ -15,6 +15,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);

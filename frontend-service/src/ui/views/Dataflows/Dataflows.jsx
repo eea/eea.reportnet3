@@ -54,7 +54,7 @@ const Dataflows = withRouter(({ match, history }) => {
     {
       label: resources.messages['dataflowCompletedTab'],
       className: styles.flow_tab,
-      disabled: true,
+      disabled: false,
       tabKey: 'completed'
     }
   ]);
@@ -193,52 +193,25 @@ const Dataflows = withRouter(({ match, history }) => {
     setIsFormReset(true);
   };
 
-  const layout = children => (
-    <MainLayout>
-      <div className="dataflowList-help-step">
-        <div className="rep-container">
-          <div className={`${styles.container} `}>
-            <TabMenu
-              model={tabMenuItems}
-              activeItem={tabMenuActiveItem}
-              onTabChange={e => setTabMenuActiveItem(e.value)}
-            />
-          </div>
-          <div className={`${styles.dataflowsActions}`}>
-            <Button
-              icon="refresh"
-              label={resources.messages['refresh']}
-              onClick={() => dataFetch()}
-              style={{ marginRight: '0.5rem' }}
-            />
-
-            {isCustodian ? (
-              <Button
-                icon="plus"
-                label={resources.messages['createNewDataflow']}
-                onClick={() => onShowAddForm()}
-                style={{ marginRight: '0.5rem' }}
-              />
-            ) : null}
-          </div>
-        </div>
-
+  const layout = children => {
+    return (
+      <MainLayout>
         <div className="rep-container">{children}</div>
-      </div>
-    </MainLayout>
-  );
+      </MainLayout>
+    );
+  };
 
   if (loading) {
     return layout(<Spinner />);
   }
 
   return layout(
-    <>
-      {/* <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} /> */}
-      {tabMenuActiveItem.tabKey === 'pending' ? (
-        <>
-          {/* <DataflowsList
+    <div className="rep-row">
+      <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
+        <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
+        {tabMenuActiveItem.tabKey === 'pending' ? (
+          <>
+            {/* <DataflowsList
               className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
@@ -246,30 +219,29 @@ const Dataflows = withRouter(({ match, history }) => {
               title={resources.messages['pendingDataflowTitle']}
               type="pending"
             /> */}
-          <DataflowsList
-            className="dataflowList-accepted-help-step"
-            content={acceptedContent}
-            dataFetch={dataFetch}
-            onShowAddForm={onShowAddForm}
-            // description={resources.messages['acceptedDataflowText']}
-            // title={resources.messages['acceptedDataflowTitle']}
-            type="accepted"
-          />
-        </>
-      ) : (
-        <>
-          <DataflowsList
-            content={completedContent}
-            dataFetch={dataFetch}
-            description={resources.messages.completedDataflowText}
-            isCustodian={isCustodian}
-            title={resources.messages.completedDataflowTitle}
-            type="completed"
-          />
-        </>
-      )}
-      {/* </div>
-      </div> */}
+            <DataflowsList
+              className="dataflowList-accepted-help-step"
+              content={acceptedContent}
+              dataFetch={dataFetch}
+              onShowAddForm={onShowAddForm}
+              // description={resources.messages['acceptedDataflowText']}
+              // title={resources.messages['acceptedDataflowTitle']}
+              type="accepted"
+            />
+          </>
+        ) : (
+          <>
+            <DataflowsList
+              content={completedContent}
+              dataFetch={dataFetch}
+              description={resources.messages.completedDataflowText}
+              isCustodian={isCustodian}
+              title={resources.messages.completedDataflowTitle}
+              type="completed"
+            />
+          </>
+        )}
+      </div>
 
       <Dialog
         className={styles.dialog}
@@ -288,7 +260,7 @@ const Dataflows = withRouter(({ match, history }) => {
           setIsNameDuplicated={setIsNameDuplicated}
         />
       </Dialog>
-    </>
+    </div>
   );
 });
 
