@@ -324,9 +324,9 @@ public class RulesControllerImplTest {
    */
   @Test
   public void updateRuleTest() throws EEAException {
-    Mockito.doNothing().when(rulesService).updateRule(Mockito.any(), Mockito.any());
-    rulesControllerImpl.updateRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
-    Mockito.verify(rulesService, times(1)).updateRule(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(rulesService).updateRule(Mockito.anyLong(), Mockito.any());
+    rulesControllerImpl.updateRule(1L, new RuleVO());
+    Mockito.verify(rulesService, times(1)).updateRule(Mockito.anyLong(), Mockito.any());
   }
 
   /**
@@ -336,9 +336,10 @@ public class RulesControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateRuleExceptionTest() throws EEAException {
-    Mockito.doThrow(EEAException.class).when(rulesService).updateRule(Mockito.any(), Mockito.any());
+    Mockito.doThrow(EEAException.class).when(rulesService).updateRule(Mockito.anyLong(),
+        Mockito.any());
     try {
-      rulesControllerImpl.updateRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
+      rulesControllerImpl.updateRule(1L, new RuleVO());
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;

@@ -46,22 +46,5 @@ public class DefaultKafkaReceiverTest {
 
   }
 
-  /**
-   * Listen message error test.
-   *
-   * @throws EEAException the eea exception
-   */
-  @Test
-  public void listenMessageErrorTest() throws EEAException {
-    Message<EEAEventVO> messageMock = Mockito.mock(Message.class);
-    Mockito.when(messageMock.getPayload()).thenReturn(new EEAEventVO());
-    Mockito.doThrow(new EEAException("test")).when(handler)
-        .processMessage(Mockito.any(EEAEventVO.class));
-    try {
-      defaultKafkaReceiver.listenMessage(messageMock);
-    } catch (EEAException e) {
-      Mockito.verify(handler, Mockito.times(1)).processMessage(messageMock.getPayload());
-      Assert.assertEquals("Wrong exception caught", "test", e.getMessage());
-    }
-  }
+
 }

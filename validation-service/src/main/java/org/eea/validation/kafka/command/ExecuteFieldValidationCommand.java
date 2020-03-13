@@ -70,12 +70,13 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
    * Perform action.
    *
    * @param eeaEventVO the eea event VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
-    final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     final String uuid = (String) eeaEventVO.getData().get("uuid");
     TenantResolver.setTenantName("dataset_" + datasetId);
     final int numPag = (int) eeaEventVO.getData().get("numPag");
