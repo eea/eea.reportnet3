@@ -47,7 +47,7 @@ export const FieldDesigner = ({
   onFieldUpdate,
   onNewFieldAdd,
   onShowDialogError,
-  recordId,
+  recordSchemaId,
   totalFields
 }) => {
   const fieldTypes = [
@@ -170,28 +170,12 @@ export const FieldDesigner = ({
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
             console.log(fieldDesignerState.fieldIsPKValue);
-            onFieldAdd({
-              description: fieldDesignerState.fieldDescriptionValue,
-              isPK: fieldDesignerState.fieldIsPKValue,
-              recordId,
-              referencedField: fieldDesignerState.fieldLinkValue,
-              required: fieldDesignerState.fieldRequiredValue,
-              type: parseGeospatialTypes(type.fieldType),
-              name: fieldDesignerState.fieldValue
-            });
+            onFieldAdd({ type: parseGeospatialTypes(type.fieldType) });
           }
         }
       } else {
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
-          fieldUpdate({
-            description: fieldDesignerState.fieldDescriptionValue,
-            fieldSchemaId: fieldId,
-            isPK: fieldDesignerState.fieldIsPKValue,
-            referencedField: fieldDesignerState.fieldLinkValue,
-            required: fieldDesignerState.fieldRequiredValue,
-            type: parseGeospatialTypes(type.fieldType),
-            name: fieldDesignerState.fieldValue
-          });
+          fieldUpdate({ type: parseGeospatialTypes(type.fieldType) });
         } else {
           if (type !== '') {
             onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
@@ -213,22 +197,11 @@ export const FieldDesigner = ({
             (fieldDesignerState.fieldTypeValue !== '') & !isNil(fieldDesignerState.fieldValue) &&
             fieldDesignerState.fieldValue !== ''
           ) {
-            onFieldAdd({
-              description: fieldDesignerState.fieldDescriptionValue,
-              recordId,
-              type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-              name: fieldDesignerState.fieldValue
-            });
+            onFieldAdd({ description: description });
           }
         } else {
           if (description !== fieldDesignerState.initialDescriptionValue) {
-            fieldUpdate({
-              codelistItems: fieldDesignerState.codelistItems,
-              description,
-              fieldSchemaId: fieldId,
-              type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-              name: fieldDesignerState.fieldValue
-            });
+            fieldUpdate({ description });
           }
         }
       }
@@ -248,15 +221,7 @@ export const FieldDesigner = ({
           } else {
             if (!checkDuplicates(name, fieldId)) {
               if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
-                onFieldAdd({
-                  codelistItems: fieldDesignerState.codelistItems,
-                  description: fieldDesignerState.fieldDescriptionValue,
-                  fieldSchemaId: fieldId,
-                  isPK: fieldDesignerState.fieldIsPKValue,
-                  name: fieldDesignerState.fieldValue,
-                  recordId,
-                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
-                });
+                onFieldAdd({ name });
               }
             } else {
               onShowDialogError(
@@ -273,14 +238,7 @@ export const FieldDesigner = ({
           } else {
             if (name !== fieldDesignerState.initialFieldValue) {
               if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate({
-                  codelistItems: fieldDesignerState.codelistItems,
-                  description: fieldDesignerState.fieldDescriptionValue,
-                  fieldSchemaId: fieldId,
-                  isPK: fieldDesignerState.fieldIsPKValue,
-                  name: fieldDesignerState.fieldValue,
-                  type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
-                });
+                fieldUpdate({ name });
               } else {
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
@@ -319,7 +277,16 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: true });
   };
 
-  const onFieldAdd = async ({ codelistItems, description, isPK, name, recordId, referencedField, required, type }) => {
+  const onFieldAdd = async ({
+    codelistItems = fieldDesignerState.codelistItems,
+    description = fieldDesignerState.fieldDescriptionValue,
+    isPK = fieldDesignerState.fieldIsPKValue,
+    name = fieldDesignerState.fieldValue,
+    recordId = recordSchemaId,
+    referencedField = fieldDesignerState.fieldLinkValue,
+    required = fieldDesignerState.fieldRequiredValue,
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
+  }) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         codelistItems,
@@ -436,28 +403,10 @@ export const FieldDesigner = ({
           !isNil(fieldDesignerState.fieldValue) &&
           fieldDesignerState.fieldValue !== ''
         ) {
-          onFieldAdd({
-            codelistItems: fieldDesignerState.codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            isPK: checked,
-            recordId,
-            referencedField: fieldDesignerState.fieldLinkValue,
-            required: fieldDesignerState.fieldRequiredValue,
-            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-            name: fieldDesignerState.fieldValue
-          });
+          onFieldAdd({ isPK: checked });
         }
       } else {
-        fieldUpdate({
-          codelistItems: fieldDesignerState.codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          fieldSchemaId: fieldId,
-          isPK: checked,
-          referencedField: fieldDesignerState.fieldLinkValue,
-          required: checked ? true : fieldDesignerState.fieldRequiredValue,
-          type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-          name: fieldDesignerState.fieldValue
-        });
+        fieldUpdate({ isPK: checked, required: checked ? true : fieldDesignerState.fieldRequiredValue });
       }
     }
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
@@ -472,27 +421,10 @@ export const FieldDesigner = ({
           !isNil(fieldDesignerState.fieldValue) &&
           fieldDesignerState.fieldValue !== ''
         ) {
-          onFieldAdd({
-            codelistItems: fieldDesignerState.codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            isPK: fieldDesignerState.fieldIsPKValue,
-            recordId,
-            referencedField: fieldDesignerState.fieldLinkValue,
-            required: checked,
-            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-            name: fieldDesignerState.fieldValue
-          });
+          onFieldAdd({ required: checked });
         }
       } else {
-        fieldUpdate({
-          codelistItems: fieldDesignerState.codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          fieldSchemaId: fieldId,
-          isPK: fieldDesignerState.fieldIsPKValue,
-          required: checked,
-          type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-          name: fieldDesignerState.fieldValue
-        });
+        fieldUpdate({ required: checked });
       }
     }
     dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
@@ -505,27 +437,9 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          onFieldAdd({
-            codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            isPK: fieldDesignerState.fieldIsPKValue,
-            recordId,
-            referencedField: fieldDesignerState.fieldLinkValue,
-            required: fieldDesignerState.fieldRequiredValue,
-            type: 'CODELIST',
-            name: fieldDesignerState.fieldValue
-          });
+          onFieldAdd({ codelistItems, type: 'CODELIST' });
         } else {
-          fieldUpdate({
-            codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            fieldSchemaId: fieldId,
-            isPK: fieldDesignerState.fieldIsPKValue,
-            referencedField: fieldDesignerState.fieldLinkValue,
-            required: fieldDesignerState.fieldRequiredValue,
-            type: 'CODELIST',
-            name: fieldDesignerState.fieldValue
-          });
+          fieldUpdate({ codelistItems, type: 'CODELIST' });
         }
       }
     }
@@ -539,12 +453,7 @@ export const FieldDesigner = ({
       if (fieldId.toString() === '-1') {
         onFieldAdd({
           codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          isPK: fieldDesignerState.fieldIsPKValue,
-          recordId,
-          required: fieldDesignerState.fieldRequiredValue,
           type: 'LINK',
-          name: fieldDesignerState.fieldValue,
           referencedField: {
             idDatasetSchema: link.referencedField.datasetSchemaId,
             idPk: link.referencedField.fieldSchemaId
@@ -553,12 +462,7 @@ export const FieldDesigner = ({
       } else {
         fieldUpdate({
           codelistItems,
-          description: fieldDesignerState.fieldDescriptionValue,
-          fieldSchemaId: fieldId,
-          isPK: fieldDesignerState.fieldIsPKValue,
-          required: fieldDesignerState.fieldRequiredValue,
           type: 'LINK',
-          name: fieldDesignerState.fieldValue,
           referencedField: {
             idDatasetSchema: link.referencedField.datasetSchemaId,
             idPk: link.referencedField.fieldSchemaId
@@ -594,14 +498,14 @@ export const FieldDesigner = ({
   };
 
   const fieldUpdate = async ({
-    codelistItems,
-    description,
-    fieldSchemaId,
-    isPK,
-    name,
-    referencedField,
-    required,
-    type
+    codelistItems = fieldDesignerState.codelistItems,
+    description = fieldDesignerState.fieldDescriptionValue,
+    fieldSchemaId = fieldId,
+    isPK = fieldDesignerState.fieldIsPKValue,
+    name = fieldDesignerState.fieldValue,
+    referencedField = fieldDesignerState.fieldLinkValue,
+    required = fieldDesignerState.fieldRequiredValue,
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
   }) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
@@ -618,7 +522,7 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       } else {
-        onFieldUpdate({ id: fieldId, name, type, description, codelistItems, required });
+        onFieldUpdate({ codelistItems, description, id: fieldId, isPK, name, required, type });
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -646,7 +550,7 @@ export const FieldDesigner = ({
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
         className={styles.checkRequired}
-        disabled={hasPK && fieldDesignerState.fieldIsPKValue}
+        disabled={Boolean(fieldDesignerState.fieldIsPKValue)}
         inputId={`${fieldId}_check`}
         label="Default"
         onChange={e => {
@@ -656,7 +560,7 @@ export const FieldDesigner = ({
       />
       <Checkbox
         checked={fieldDesignerState.fieldIsPKValue}
-        disabled={hasPK && !fieldDesignerState.fieldIsPKValue}
+        disabled={Boolean(hasPK && !fieldDesignerState.fieldIsPKValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
         onChange={e => {

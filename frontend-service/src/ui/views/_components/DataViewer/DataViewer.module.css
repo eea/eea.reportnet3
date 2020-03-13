@@ -33,3 +33,7 @@
 .codelistInfoButton:enabled:hover {
   background-color: var(--white) !important;
 }
+
+.fieldColumn {
+  width: 95px;
+}

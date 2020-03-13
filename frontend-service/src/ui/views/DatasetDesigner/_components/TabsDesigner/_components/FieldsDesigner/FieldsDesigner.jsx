@@ -284,7 +284,7 @@ export const FieldsDesigner = ({
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
-          recordId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
           totalFields={!isNil(fields) ? fields.length : 0}
         />
       </div>
@@ -307,7 +307,7 @@ export const FieldsDesigner = ({
               // fieldIsPK={index === 0}
               fieldName={field.name}
               fieldLink={field.referencedField}
-              fieldRequired={field.required}
+              fieldRequired={Boolean(field.required)}
               fieldType={field.type}
               fieldValue={field.value}
               hasPK={fields.filter(field => field.isPK === true).length > 0}
@@ -322,7 +322,7 @@ export const FieldsDesigner = ({
               onFieldDragAndDropStart={onFieldDragAndDropStart}
               onFieldUpdate={onFieldUpdate}
               onShowDialogError={onShowDialogError}
-              recordId={field.recordId}
+              recordSchemaId={field.recordId}
               totalFields={fields.length}
             />
           </div>

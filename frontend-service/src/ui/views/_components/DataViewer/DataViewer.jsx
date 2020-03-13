@@ -875,7 +875,13 @@ const DataViewer = withRouter(
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
-                <Column body={column === 'value' ? requiredTemplate : null} field={column} header={''} key={i} />
+                <Column
+                  body={column === 'value' ? requiredTemplate : null}
+                  className={column === 'field' ? styles.fieldColumn : ''}
+                  field={column}
+                  header={''}
+                  key={i}
+                />
               ))}
             </DataTable>
           </Dialog>
