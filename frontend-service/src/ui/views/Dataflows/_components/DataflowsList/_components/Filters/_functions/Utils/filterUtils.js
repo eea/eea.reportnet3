@@ -1,26 +1,27 @@
 import uniq from 'lodash/uniq';
 
-const getFilterInitialState = (data, input, select, date) => {
+const getFilterInitialState = (data, input = [], select = [], date = []) => {
   const filterByGroup = input.concat(select, date);
   const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
 
-  select.forEach(element => {
-    const selectItems = uniq(data.map(item => item[element]));
-    for (let i = 0; i < selectItems.length; i++) {
-      const data = [];
-      selectItems.forEach(item => {
-        data.push({ type: item, value: item });
-      });
-      filterBy[element] = data;
-    }
-  });
+  if (select) {
+    select.forEach(element => {
+      const selectItems = uniq(data.map(item => item[element]));
+      for (let i = 0; i < selectItems.length; i++) {
+        const data = [];
+        selectItems.forEach(item => {
+          data.push({ type: item, value: item });
+        });
+        filterBy[element] = data;
+      }
+    });
+  }
   return filterBy;
 };
 
-const getOrderInitialState = (input, select, date) => {
+const getOrderInitialState = (input = [], select = [], date = []) => {
   const orderByGroup = input.concat(select, date);
-  const orderBy = orderByGroup.reduce((obj, key) => Object.assign(obj, { [key]: 1 }), {});
-  return orderBy;
+  return orderByGroup.reduce((obj, key) => Object.assign(obj, { [key]: 1 }), {});
 };
 
 const getOptionTypes = (data, option) => {

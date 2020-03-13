@@ -123,30 +123,35 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   return (
     <div className={styles.header}>
-      {inputOptions.map(option => (
-        <Fragment>
-          {renderInputFilter(option)}
-          {renderOrderFilter(option)}
-        </Fragment>
-      ))}
-      {selectOptions.map(option => (
-        <Fragment>
-          {renderSelectFilter(option)}
-          {renderOrderFilter(option)}
-        </Fragment>
-      ))}
-      {dateOptions.map(option => (
-        <Fragment>
-          {renderCalendarFilter(option)}
-          {renderOrderFilter(option)}
-        </Fragment>
-      ))}
-      <Button
-        className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-        icon="trash"
-        onClick={() => onClearAllFilters()}
-        tooltip="clear filters"
-      />
+      {inputOptions &&
+        inputOptions.map(option => (
+          <Fragment>
+            {renderInputFilter(option)}
+            {renderOrderFilter(option)}
+          </Fragment>
+        ))}
+      {selectOptions &&
+        selectOptions.map(option => (
+          <Fragment>
+            {renderSelectFilter(option)}
+            {renderOrderFilter(option)}
+          </Fragment>
+        ))}
+      {dateOptions &&
+        dateOptions.map(option => (
+          <Fragment>
+            {renderCalendarFilter(option)}
+            {renderOrderFilter(option)}
+          </Fragment>
+        ))}
+      {(inputOptions || selectOptions || dateOptions) && (
+        <Button
+          className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+          icon="trash"
+          onClick={() => onClearAllFilters()}
+          tooltip="clear filters"
+        />
+      )}
     </div>
   );
 };
