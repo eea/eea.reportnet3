@@ -20,7 +20,6 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
 
   const linkSelectorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      {console.log(isUndefined(link), link === '')}
       <Button
         disabled={isUndefined(link) || isEmpty(link)}
         icon="check"

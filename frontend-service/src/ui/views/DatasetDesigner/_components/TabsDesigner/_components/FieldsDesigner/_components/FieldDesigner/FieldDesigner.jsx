@@ -614,7 +614,9 @@ export const FieldDesigner = ({
     !addField ? (
       <a
         draggable={true}
-        className={`${styles.button} ${styles.deleteButton}`}
+        className={`${styles.button} ${styles.deleteButton} ${
+          fieldDesignerState.fieldIsPKValue ? styles.disabledDeleteButton : ''
+        }`}
         href="#"
         onClick={e => {
           e.preventDefault();

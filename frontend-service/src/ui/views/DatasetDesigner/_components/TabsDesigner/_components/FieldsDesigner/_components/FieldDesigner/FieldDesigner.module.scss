@@ -82,6 +82,16 @@
   color: var(--errors);
 }
 
+.disabledDeleteButton {
+  pointer-events: none !important;
+  text-decoration: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.disabledDeleteButton:hover {
+  background-color: transparent;
+}
+
 .fieldSeparator {
   box-shadow: var(--field-designer-separator-box-shadow);
   width: 74.5vw;
