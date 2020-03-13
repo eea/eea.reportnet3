@@ -119,6 +119,12 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
           ]
         };
 
+      case 'CLEAR_INPUT':
+        return {
+          ...state,
+          filter: { ...state.filter, [payload.property]: '' }
+        };
+
       default:
         return state;
     }
@@ -128,6 +134,10 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
 
   const onOrderData = (order, property) => {
     dataflowItemDispatch({ type: 'ORDER_DATAFLOWS', payload: { order, property } });
+  };
+
+  const onCancelButton = property => {
+    dataflowItemDispatch({ type: 'CLEAR_INPUT', payload: { property } });
   };
 
   const renderOrderFilter = property => (
@@ -150,7 +160,11 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         value={dataflowItemState.filter[property]}
       />
       {dataflowItemState.filter[property] && (
-        <Button className={`p-button-secondary-transparent ${styles.clearIcon}`} icon="cancel" />
+        <Button
+          className={`p-button-secondary-transparent ${styles.clearIcon}`}
+          icon="cancel"
+          onClick={event => onCancelButton(property)}
+        />
       )}
       <label htmlFor={property}>{resources.messages[property]}</label>
     </span>
