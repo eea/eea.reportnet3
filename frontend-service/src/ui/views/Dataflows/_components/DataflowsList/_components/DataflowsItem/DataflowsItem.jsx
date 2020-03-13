@@ -82,7 +82,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         {itemContent.status == DataflowConf.dataflowStatus['DRAFT'] ? (
           <>
-            <span>{resources.messages['deliveryDate']}:</span> {itemContent.deadlineDate}
+            <span>{resources.messages['deliveryDate']}:</span> {itemContent.expirationDate}
           </>
         ) : null}
       </div>

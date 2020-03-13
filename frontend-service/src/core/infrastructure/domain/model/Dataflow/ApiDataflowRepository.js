@@ -18,8 +18,8 @@ import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 const parseDataflowDTOs = dataflowDTOs => {
   const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   dataflows.sort((a, b) => {
-    const deadline_1 = a.deadlineDate;
-    const deadline_2 = b.deadlineDate;
+    const deadline_1 = a.expirationDate;
+    const deadline_2 = b.expirationDate;
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
   return dataflows;
@@ -30,10 +30,10 @@ const parseDataflowDTO = dataflowDTO =>
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
-    deadlineDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
+    expirationDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),

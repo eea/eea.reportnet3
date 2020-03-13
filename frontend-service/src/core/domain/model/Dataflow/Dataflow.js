@@ -3,10 +3,10 @@ export class Dataflow {
     creationDate,
     dataCollections,
     datasets,
-    deadlineDate,
     description,
     designDatasets,
     documents,
+    expirationDate,
     id,
     name,
     representatives,
@@ -19,10 +19,10 @@ export class Dataflow {
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;
-    this.deadlineDate = deadlineDate;
     this.description = description;
     this.designDatasets = designDatasets;
     this.documents = documents;
+    this.expirationDate = expirationDate;
     this.id = id;
     this.name = name;
     this.representatives = representatives;

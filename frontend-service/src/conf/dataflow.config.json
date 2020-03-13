@@ -15,5 +15,10 @@
     "accepted": [],
     "completed": [],
     "pending": []
+  },
+  "filterItems": {
+    "input": ["name", "description"],
+    "select": ["status", "userRole"],
+    "date": ["expirationDate"]
   }
 }
