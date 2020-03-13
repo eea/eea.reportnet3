@@ -62,7 +62,6 @@ public class KafkaSender {
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
-      Message<EEAEventVO> message = null;
       final List<PartitionInfo> partitions =
           kafkaTemplate.partitionsFor(event.getEventType().getTopic());
       Integer partitionId = null;

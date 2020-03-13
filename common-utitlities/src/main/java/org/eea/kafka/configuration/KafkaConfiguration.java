@@ -92,14 +92,13 @@ public class KafkaConfiguration {
     configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
     configProps.put(ACKS_CONFIG, "all");
     configProps.put(RETRIES_CONFIG, 3);
-    configProps.put(TRANSACTIONAL_ID_CONFIG, groupId);
     JsonSerializer<EEAEventVO> serializer = new JsonSerializer<>();
     serializer.setAddTypeInfo(false);
 
     DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory =
         new DefaultKafkaProducerFactory(configProps, new StringSerializer(), serializer);
 
-    defaultKafkaProducerFactory.setTransactionIdPrefix(groupId);
+    defaultKafkaProducerFactory.setTransactionIdPrefix(groupId + UUID.randomUUID());
 
     return defaultKafkaProducerFactory;
   }

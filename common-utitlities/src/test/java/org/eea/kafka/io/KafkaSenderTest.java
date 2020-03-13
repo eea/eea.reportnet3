@@ -58,6 +58,7 @@ public class KafkaSenderTest {
 
     Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
     kafkaSender.sendMessage(event);
+    Mockito.verify(kafkaTemplate, Mockito.times(1)).executeInTransaction(Mockito.any());
   }
 
 }
