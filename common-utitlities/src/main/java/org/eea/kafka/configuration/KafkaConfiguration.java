@@ -3,6 +3,7 @@ package org.eea.kafka.configuration;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
 
 import java.util.HashMap;
@@ -90,16 +91,15 @@ public class KafkaConfiguration {
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
     configProps.put(ACKS_CONFIG, "all");
-    configProps.put(TRANSACTIONAL_ID_CONFIG, groupId + UUID.randomUUID());// Single transactional id
-    // since every sender must use
-    // a different one
+    configProps.put(RETRIES_CONFIG, 3);
+    configProps.put(TRANSACTIONAL_ID_CONFIG, groupId);
     JsonSerializer<EEAEventVO> serializer = new JsonSerializer<>();
     serializer.setAddTypeInfo(false);
 
     DefaultKafkaProducerFactory<String, EEAEventVO> defaultKafkaProducerFactory =
         new DefaultKafkaProducerFactory(configProps, new StringSerializer(), serializer);
 
-    defaultKafkaProducerFactory.setTransactionIdPrefix("txn-ingestor");
+    defaultKafkaProducerFactory.setTransactionIdPrefix(groupId);
 
     return defaultKafkaProducerFactory;
   }

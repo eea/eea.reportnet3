@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.kafka.core.KafkaOperations;
+import org.springframework.kafka.core.KafkaOperations.OperationsCallback;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
@@ -54,7 +56,7 @@ public class KafkaSenderTest {
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
 
-    Mockito.when(kafkaTemplate.execute(Mockito.any())).thenReturn(true);
+    Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
     kafkaSender.sendMessage(event);
   }
 
