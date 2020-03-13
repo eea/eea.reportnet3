@@ -76,6 +76,7 @@ const DataViewer = withRouter(
     const [fetchedData, setFetchedData] = useState([]);
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isAllDataDeleted, setIsAllDataDeleted] = useState(false);
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
@@ -204,10 +205,12 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
+      // setIsAllDataDeleted);
       if (isDatasetDeleted) {
         onRefresh();
       }
     }, [isDatasetDeleted]);
+    console.log('DELETE ALL', isDatasetDeleted);
 
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
