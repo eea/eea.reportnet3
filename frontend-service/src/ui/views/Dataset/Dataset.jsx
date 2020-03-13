@@ -265,13 +265,22 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
+      notificationContext.add({
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DELETE_DATA_BY_ID_ERROR',
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -500,6 +509,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           activeIndex={dataViewerOptions.activeIndex}
           hasWritePermissions={hasWritePermissions}
+          isDatasetDeleted={isDataDeleted}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
           levelErrorTypes={levelErrorTypes}

@@ -51,6 +51,7 @@ import {
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
+    isDatasetDeleted,
     isDataCollection,
     isValidationSelected,
     isWebFormMMR,
@@ -201,6 +202,12 @@ const DataViewer = withRouter(
         setConfirmDeleteVisible(false);
       }
     }, [records.isRecordDeleted]);
+
+    useEffect(() => {
+      if (isDatasetDeleted) {
+        onRefresh();
+      }
+    }, [isDatasetDeleted]);
 
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
@@ -545,13 +552,13 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
-      setIsSaving(true);
       //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
       if (isNewRecord) {
         try {
+          setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           setIsTableDeleted(false);
