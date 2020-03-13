@@ -26,7 +26,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   });
 
   useEffect(() => {
-    getFiltredData(filterState.filteredData);
+    if (getFiltredData) {
+      getFiltredData(filterState.filteredData);
+    }
   }, [filterState.filteredData]);
 
   const changeFilterValues = (filter, value, data) => {
@@ -40,15 +42,18 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({ type: 'CLEAR_INPUT', payload: { property } });
   };
 
-  const onOrderData = (order, property) => {
-    filterDispatch({ type: 'ORDER_DATA', payload: { order, property } });
-  };
-
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL_FILTERS',
-      payload: filterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions)
+      payload: {
+        filterBy: filterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+        filteredData: cloneDeep(data)
+      }
     });
+  };
+
+  const onOrderData = (order, property) => {
+    filterDispatch({ type: 'ORDER_DATA', payload: { order, property } });
   };
 
   const renderCalendarFilter = property => (
