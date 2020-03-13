@@ -63,14 +63,12 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   };
 
   const onLoadSnapshotList = async () => {
-    setIsLoadingSnapshotListData(true);
     try {
       //Settimeout for avoiding the overlaping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allDesigner(datasetId);
 
         setSnapshotListData(snapshotsData);
-
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
@@ -82,7 +80,6 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
         }
       });
     } finally {
-      setIsLoadingSnapshotListData(false);
     }
   };
 
