@@ -67,6 +67,9 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns
   }) => {
+    const [isSaving, setisSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(true);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -543,6 +546,7 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
+      setisSaving(true);
       //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
@@ -596,6 +600,7 @@ const DataViewer = withRouter(
           setIsLoading(false);
         }
       }
+      setisSaving(false);
     };
 
     const onSetVisible = (fnUseState, visible) => {
@@ -629,8 +634,9 @@ const DataViewer = withRouter(
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
+          disabled={isSaving}
           label={resources.messages['save']}
-          icon="save"
+          icon={!isSaving ? 'save' : 'spinnerAnimate'}
           onClick={() => {
             onSaveRecord(records.newRecord);
           }}
@@ -661,7 +667,7 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           label={resources.messages['save']}
-          icon="save"
+          icon={isSaving === true ? 'spinnerAnimate' : 'save'}
           onClick={() => {
             try {
               onSaveRecord(records.editedRecord);
@@ -670,7 +676,7 @@ const DataViewer = withRouter(
             }
           }}
         />
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
+        <Button label={resources.messages['cancel']} icon={'cancel'} onClick={onCancelRowEdit} />
       </div>
     );
 
@@ -766,6 +772,12 @@ const DataViewer = withRouter(
         } else {
           return records.totalRecords == records.totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
+      }
+    };
+    const onKeyPress = event => {
+      if (event.key === 'Enter' && !isSaving) {
+        event.preventDefault();
+        onSaveRecord(records.newRecord);
       }
     };
 
@@ -911,26 +923,28 @@ const DataViewer = withRouter(
         )}
 
         {addDialogVisible && (
-          <Dialog
-            className="edit-table"
-            blockScroll={false}
-            footer={addRowDialogFooter}
-            header={resources.messages['addRecord']}
-            modal={true}
-            onHide={() => setAddDialogVisible(false)}
-            style={{ width: '50%' }}
-            visible={addDialogVisible}
-            zIndex={3003}>
-            <div className="p-grid p-fluid">
-              <DataForm
-                colsSchema={colsSchema}
-                formType="NEW"
-                addDialogVisible={addDialogVisible}
-                onChangeForm={onEditAddFormInput}
-                records={records}
-              />
-            </div>
-          </Dialog>
+          <div onKeyPress={onKeyPress}>
+            <Dialog
+              className="edit-table"
+              blockScroll={false}
+              footer={addRowDialogFooter}
+              header={resources.messages['addRecord']}
+              modal={true}
+              onHide={() => setAddDialogVisible(false)}
+              style={{ width: '50%' }}
+              visible={addDialogVisible}
+              zIndex={3003}>
+              <div className="p-grid p-fluid">
+                <DataForm
+                  colsSchema={colsSchema}
+                  formType="NEW"
+                  addDialogVisible={addDialogVisible}
+                  onChangeForm={onEditAddFormInput}
+                  records={records}
+                />
+              </div>
+            </Dialog>
+          </div>
         )}
 
         {editDialogVisible && (
