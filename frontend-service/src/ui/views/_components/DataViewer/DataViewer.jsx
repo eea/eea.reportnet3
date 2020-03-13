@@ -510,6 +510,7 @@ const DataViewer = withRouter(
         } else {
           onRefresh();
           setIsPasting(false);
+          setIsTableDeleted(false);
         }
       } catch (error) {
         const {
@@ -528,6 +529,7 @@ const DataViewer = withRouter(
         });
       } finally {
         setConfirmPasteVisible(false);
+        setIsPasting(false);
       }
     };
 
