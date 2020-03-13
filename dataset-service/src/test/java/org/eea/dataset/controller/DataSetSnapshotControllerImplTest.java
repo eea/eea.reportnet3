@@ -4,11 +4,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -300,26 +299,18 @@ public class DataSetSnapshotControllerImplTest {
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
   }
 
-
+  /**
+   * Gets the released and updated status test.
+   *
+   * @return the released and updated status test
+   */
   @Test
-  public void testGetReleased() throws Exception {
+  public void getReleasedAndUpdatedStatusTest() {
+    HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+    Mockito.doNothing().when(response).setContentType(Mockito.anyString());
+    Mockito.doNothing().when(response).setHeader(Mockito.anyString(), Mockito.anyString());
 
-    dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(1L, 1L);
-    Mockito.verify(datasetSnapshotService, times(1)).getReleasedAndUpdatedStatus(Mockito.any(),
-        Mockito.any());
+    dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(response, 1L, 1L);
+    Mockito.verify(response, times(1)).setContentType(Mockito.anyString());
   }
-
-
-  @Test
-  public void testGetReleasedException() throws Exception {
-
-    try {
-      doThrow(new EEAException()).when(datasetSnapshotService)
-          .getReleasedAndUpdatedStatus(Mockito.any(), Mockito.any());
-      dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(1L, 1L);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals("Same message", EEAErrorMessage.EXECUTION_ERROR, e.getReason());
-    }
-  }
-
 }

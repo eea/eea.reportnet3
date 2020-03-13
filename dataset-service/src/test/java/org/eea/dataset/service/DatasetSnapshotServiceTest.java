@@ -583,7 +583,7 @@ public class DatasetSnapshotServiceTest {
     when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(df);
     when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
         .thenReturn(Arrays.asList(representative));
-    datasetSnapshotService.getReleasedAndUpdatedStatus(1L, 1L);
+    datasetSnapshotService.getReleasedAndUpdatedStatus(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1))
         .findRepresentativesByIdDataFlow(Mockito.any());
   }
