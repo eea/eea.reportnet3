@@ -2,8 +2,14 @@ package org.eea.kafka.io;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -11,14 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * The type Kafka sender.
@@ -50,44 +53,45 @@ public class KafkaSender {
    * @param event the event
    */
 
+  @Transactional
   public void sendMessage(final EEAEventVO event) {
 
-    kafkaTemplate.executeInTransaction(operations -> {
+    kafkaTemplate.execute(producer -> {
       event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
-      Message<EEAEventVO> message = null;
+      Integer partitionId = null;
       final List<PartitionInfo> partitions =
           kafkaTemplate.partitionsFor(event.getEventType().getTopic());
       if (event.getEventType().isSorted()) {
         // partition = hash(message_key)%number_of_partitions
-        final Integer partitionId =
+        partitionId =
             Math.floorMod(event.getEventType().getKey().hashCode(), partitions.size());
-
-        message = MessageBuilder.withPayload(event)
-            .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
-            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
       } else {
-        message = MessageBuilder.withPayload(event)
-            .setHeader(KafkaHeaders.PARTITION_ID,
-                ThreadLocalRandom.current().nextInt(partitions.size()))
-            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+        partitionId = ThreadLocalRandom.current().nextInt(partitions.size());
       }
-      final ListenableFuture<SendResult<String, EEAEventVO>> future = operations.send(message);
+
+      ProducerRecord producerRecord = new ProducerRecord(event.getEventType().getTopic(),
+          partitionId, event.getEventType().getKey(), event);
+
+      final Future<RecordMetadata> future = producer.send(producerRecord);
       Boolean sendResult = true;
 
       try {
-        SendResult<String, EEAEventVO> result = future.get();
+        RecordMetadata result = future.get();
         LOG.info("Sent message=[ {} ] to topic=[ {} ] with offset=[ {} ] and partition [ {} ]",
             event, event.getEventType().getTopic(),
-            result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
+            result.offset(), result.partition());
       } catch (InterruptedException | ExecutionException e) {
         LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
             event.getEventType().getTopic(), e.getMessage());
         sendResult = false;
+        producer.close();
+      } catch (KafkaException e) {
+        sendResult = false;
+        producer.abortTransaction();
+
       }
       return sendResult;
     });

@@ -54,7 +54,7 @@ public class KafkaSenderTest {
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
 
-    Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
+    Mockito.when(kafkaTemplate.execute(Mockito.any())).thenReturn(true);
     kafkaSender.sendMessage(event);
   }
 
