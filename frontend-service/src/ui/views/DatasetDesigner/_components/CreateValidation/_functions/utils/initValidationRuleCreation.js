@@ -9,6 +9,7 @@ export const initValidationRuleCreation = rawTables => {
   });
 
   const errorLevels = config.validations.errorLevels;
+  const newExpresion = getEmptyExpresion();
   return {
     tables,
     errorLevels,
@@ -20,7 +21,8 @@ export const initValidationRuleCreation = rawTables => {
       errorMessage: '',
       errorLevel: undefined,
       active: false,
-      expresions: [getEmptyExpresion()]
+      expresions: [newExpresion],
+      allExpresions: [newExpresion]
     }
   };
 };

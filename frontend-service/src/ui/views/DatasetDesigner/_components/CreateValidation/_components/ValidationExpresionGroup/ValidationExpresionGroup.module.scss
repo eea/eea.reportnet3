@@ -1,0 +1,19 @@
+.groupExpresion {
+  > ul {
+    list-style: none;
+    padding-left: 0;
+    .expresion {
+      display: flex;
+      justify-content: flex-start;
+      > span {
+        margin-right: 1rem;
+        &:first-of-type {
+          margin-right: 2rem;
+        }
+        &:last-of-type {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}

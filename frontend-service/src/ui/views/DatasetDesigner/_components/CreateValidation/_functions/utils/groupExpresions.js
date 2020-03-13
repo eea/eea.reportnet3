@@ -4,31 +4,48 @@ import isEqual from 'lodash/isEqual';
 
 import { getEmptyExpresion } from './getEmptyExpresion';
 
-export const groupExpresions = (rules, groupRulesActive, groupCandidate, dispatcher) => {
-  if (groupRulesActive >= 2) {
-    //take firs rule to group position in array
+export const groupExpresions = (expresions, groupExpresionsActive, groupCandidate) => {
+  console.info('#'.repeat(60));
+  console.info('groupExpresions');
+  console.info('expresions: ', expresions);
+  console.info('groupExpresionsActive: ', groupExpresionsActive);
+  console.info('groupCandidate: ', groupCandidate);
+  console.info('-'.repeat(60));
+  if (groupExpresionsActive >= 2) {
+    //take position in array of the first expresion of the group
+    const [firstId] = groupCandidate;
+    const firstexpresionPosition = findIndex(expresions, expresion => expresion.expresionId == firstId);
+    console.info('firstexpresionPosition', firstexpresionPosition);
+    console.info('-'.repeat(60));
 
-    const [firstId, restIds] = groupCandidate;
-    const firstRulePosition = findIndex(rules, rule => rule.ruleId == firstId);
+    //get the expresions involved in the process
+    const expresionsToGroup = expresions.filter(expresion => groupCandidate.includes(expresion.expresionId));
+    console.info('expresionsToGroup', expresionsToGroup);
+    console.info('-'.repeat(60));
 
-    //get to rules and remove from rules
-    const rulesToGroup = rules.filter(rule => groupCandidate.includes(rule.ruleId));
-
-    // compose group rule
-    const newGroup = getEmptyExpresion();
-    const [firstGroupRule] = rulesToGroup;
-    newGroup.union = firstGroupRule.union;
-    newGroup.rules = rulesToGroup;
-
-    // add to rules in first rule to group position
-    rules.splice(firstRulePosition, 0, newGroup);
-
-    //remove groupedElements from array
-    pullAllWith(rules, rulesToGroup, isEqual);
-
-    dispatcher({
-      type: 'UPDATE_RULES',
-      payload: rules
+    // deactivate grouping check
+    expresionsToGroup.forEach(expresionToGroup => {
+      expresionToGroup.group = null;
     });
+
+    // compose group expresion
+    const newGroup = getEmptyExpresion();
+    const [firstGroupExpresion] = expresionsToGroup;
+    newGroup.union = firstGroupExpresion.union;
+    newGroup.expresions = expresionsToGroup;
+    console.info('newGroup', newGroup);
+    console.info('-'.repeat(60));
+
+    // add to expresions in the order of the first expresions involved
+    expresions.splice(firstexpresionPosition, 0, newGroup);
+    console.info('expresions', expresions);
+    console.info('-'.repeat(60));
+
+    //remove grouped elements from array
+    pullAllWith(expresions, expresionsToGroup, isEqual);
+    console.info('expresions', expresions);
+    console.info('-'.repeat(60));
+
+    return expresions;
   }
 };

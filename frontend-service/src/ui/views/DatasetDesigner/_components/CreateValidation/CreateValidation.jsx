@@ -11,7 +11,9 @@ import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 import { ValidationExpresion } from './_components/ValidationExpresion';
+import { ValidationExpresionGroup } from './_components/ValidationExpresionGroup';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -25,6 +27,7 @@ import {
 import { checkExpresions } from './_functions/utils/checkExpresions';
 import { checkValidation } from './_functions/utils/checkValidation';
 import { deleteExpresion } from './_functions/utils/deleteExpresion';
+import { deleteExpresionRecursivily } from './_functions/utils/deleteExpresionRecursivily';
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpresion } from './_functions/utils/getEmptyExpresion';
 import { getExpresionString } from './_functions/utils/getExpresionString';
@@ -50,6 +53,17 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
   }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      setTimeout(() => {
+        const body = document.querySelector(`.${styles.body}`);
+        const footer = document.querySelector(`.${styles.footer}`);
+        console.log('body', body);
+        console.log('footer', footer);
+      }, 500);
+    }
+  }, [isVisible]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
@@ -126,44 +140,50 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   const onExpresionDelete = expresionId => {
     const {
-      candidateRule: { expresions }
+      candidateRule: { expresions, allExpresions }
     } = creationFormState;
     creationFormDispatch({
       type: 'UPDATE_RULES',
-      payload: deleteExpresion(expresionId, expresions)
+      payload: deleteExpresion(expresionId, allExpresions)
+    });
+    creationFormDispatch({
+      type: 'UPDATE_EXPRESIONS_TREE',
+      payload: deleteExpresionRecursivily(expresionId, expresions)
     });
   };
 
   const onExpresionFieldUpdate = (expresionId, field) => {
-    console.log('onExpresionFieldUpdate', expresionId, field);
-
     const {
-      candidateRule: { expresions }
+      candidateRule: { expresions, allExpresions }
     } = creationFormState;
     creationFormDispatch({
       type: 'UPDATE_RULES',
-      payload: setValidationExpresion(expresionId, field, expresions)
+      payload: setValidationExpresion(expresionId, field, allExpresions)
     });
   };
 
   const onExpresionGroup = (expresionId, field) => {
     const {
-      candidateRule: { expresions },
-      groupCandidate
+      groupCandidate,
+      candidateRule: { expresions }
     } = creationFormState;
-    if (field.key == 'group') {
-      if (field.value.value) {
-        groupCandidate.push(expresionId);
-      } else {
-        pull(groupCandidate, expresionId);
-      }
-      creationFormDispatch({
-        type: 'GROUP_RULES_ACTIVATOR',
-        payload: {
-          groupRulesActive: field.value.value ? 1 : -1
-        }
-      });
+
+    const [currentExpresion] = expresions.filter(expresion => expresion.expresionId == expresionId);
+    currentExpresion[field.key] = field.value;
+
+    if (field.value) {
+      groupCandidate.push(expresionId);
+    } else {
+      pull(groupCandidate, expresionId);
     }
+    creationFormDispatch({
+      type: 'GROUP_RULES_ACTIVATOR',
+      payload: {
+        groupExpresionsActive: field.value ? 1 : -1,
+        groupCandidate,
+        expresions
+      }
+    });
   };
 
   const onHide = () => {
@@ -179,227 +199,248 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   return dialogLayout(
     <form>
+      {console.info('#'.repeat(60))}
+      {console.info('candidateRule %o', creationFormState.candidateRule)}
+      {console.info('#'.repeat(60))}
       <div id={styles.QCFormWrapper}>
-        <div className={styles.section}>
-          <div className={styles.subsection}>
-            <div className={styles.field}>
-              <label htmlFor="table">{resourcesContext.messages.table}</label>
-              <Dropdown
-                id={`${componentName}__table`}
-                appendTo={document.body}
-                filterPlaceholder={resourcesContext.messages.table}
-                placeholder={resourcesContext.messages.table}
-                optionLabel="label"
-                options={creationFormState.schemaTables}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'table',
-                      value: e.target.value
-                    }
-                  })
-                }
-                value={creationFormState.candidateRule.table}
-              />
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="field">{resourcesContext.messages.field}</label>
-              <Dropdown
-                id={`${componentName}__field`}
-                appendTo={document.body}
-                filterPlaceholder={resourcesContext.messages.field}
-                placeholder={resourcesContext.messages.field}
-                optionLabel="label"
-                options={creationFormState.tableFields}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'field',
-                      value: e.target.value
-                    }
-                  })
-                }
-                value={creationFormState.candidateRule.field}
-              />
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
-              <InputText
-                id={`${componentName}__shortCode`}
-                placeholder={resourcesContext.messages.ruleShortCode}
-                value={creationFormState.candidateRule.shortCode}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'shortCode',
-                      value: e.target.value
-                    }
-                  })
-                }
-              />
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="description">{resourcesContext.messages.description}</label>
-              <InputText
-                id={`${componentName}__description`}
-                placeholder={resourcesContext.messages.description}
-                value={creationFormState.candidateRule.description}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'description',
-                      value: e.target.value
-                    }
-                  })
-                }
-              />
-            </div>
-            <div className={`${styles.field} ${styles.errorMessage}`}>
-              <label htmlFor="errorMessage">{resourcesContext.messages.errorMessage}</label>
-              <InputText
-                id={`${componentName}__errorMessage`}
-                placeholder={resourcesContext.messages.errorMessage}
-                value={creationFormState.candidateRule.errorMessage}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'errorMessage',
-                      value: e.target.value
-                    }
-                  })
-                }
-              />
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="description">{resourcesContext.messages.errorType}</label>
-              <Dropdown
-                id={`${componentName}__errorType`}
-                filterPlaceholder={resourcesContext.messages.errorType}
-                placeholder={resourcesContext.messages.errorType}
-                appendTo={document.body}
-                optionLabel="label"
-                options={creationFormState.errorLevels}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: {
-                      key: 'errorLevel',
-                      value: e.target.value
-                    }
-                  })
-                }
-                value={creationFormState.candidateRule.errorLevel}
-              />
-            </div>
-          </div>
-          <div className={styles.subsection}>
-            <div className={`${styles.field} ${styles.qcActive}`}>
-              <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
-              <Checkbox
-                id={`${componentName}__active`}
-                onChange={e =>
-                  creationFormDispatch({
-                    type: 'SET_FORM_FIELD',
-                    payload: { key: 'active', value: e.checked }
-                  })
-                }
-                isChecked={creationFormState.candidateRule.active}
-              />
-            </div>
-          </div>
-        </div>
-        <div className={styles.section}>
-          <table>
-            <thead>
-              <tr>
-                <th>{resourcesContext.messages.group}</th>
-                <th>{resourcesContext.messages.andor}</th>
-                <th>{resourcesContext.messages.operatorType}</th>
-                <th>{resourcesContext.messages.operator}</th>
-                <th>{resourcesContext.messages.value}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {creationFormState.candidateRule.expresions &&
-                creationFormState.candidateRule.expresions.map((expresion, i) => (
-                  <ValidationExpresion
-                    expresionValues={expresion}
-                    isDisabled={creationFormState.areRulesDisabled}
-                    key={expresion.expresionId}
-                    onExpresionDelete={onExpresionDelete}
-                    onExpresionFieldUpdate={onExpresionFieldUpdate}
-                    onExpresionGroup={onExpresionGroup}
-                    position={i}
-                  />
-                ))}
-            </tbody>
-          </table>
-        </div>
-
-        {creationFormState.groupRulesActive >= 2 && (
+        <div className={styles.body}>
           <div className={styles.section}>
-            <Button
-              id={`${componentName}__groupExpresions`}
-              className="p-button-primary p-button-text"
-              type="button"
-              label="Group"
-              icon="plus"
-              onClick={e => {
-                groupExpresions(
-                  creationFormState.candidateRule.expresions,
-                  creationFormState.groupRulesActive,
-                  creationFormState.groupCandidate,
-                  creationFormDispatch
-                );
-              }}
-            />
+            <div className={styles.subsection}>
+              <div className={styles.field}>
+                <label htmlFor="table">{resourcesContext.messages.table}</label>
+                <Dropdown
+                  id={`${componentName}__table`}
+                  appendTo={document.body}
+                  filterPlaceholder={resourcesContext.messages.table}
+                  placeholder={resourcesContext.messages.table}
+                  optionLabel="label"
+                  options={creationFormState.schemaTables}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'table',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                  value={creationFormState.candidateRule.table}
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="field">{resourcesContext.messages.field}</label>
+                <Dropdown
+                  id={`${componentName}__field`}
+                  appendTo={document.body}
+                  filterPlaceholder={resourcesContext.messages.field}
+                  placeholder={resourcesContext.messages.field}
+                  optionLabel="label"
+                  options={creationFormState.tableFields}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'field',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                  value={creationFormState.candidateRule.field}
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
+                <InputText
+                  id={`${componentName}__shortCode`}
+                  placeholder={resourcesContext.messages.ruleShortCode}
+                  value={creationFormState.candidateRule.shortCode}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'shortCode',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="description">{resourcesContext.messages.description}</label>
+                <InputText
+                  id={`${componentName}__description`}
+                  placeholder={resourcesContext.messages.description}
+                  value={creationFormState.candidateRule.description}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'description',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                />
+              </div>
+              <div className={`${styles.field} ${styles.errorMessage}`}>
+                <label htmlFor="errorMessage">{resourcesContext.messages.errorMessage}</label>
+                <InputText
+                  id={`${componentName}__errorMessage`}
+                  placeholder={resourcesContext.messages.errorMessage}
+                  value={creationFormState.candidateRule.errorMessage}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'errorMessage',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="description">{resourcesContext.messages.errorType}</label>
+                <Dropdown
+                  id={`${componentName}__errorType`}
+                  filterPlaceholder={resourcesContext.messages.errorType}
+                  placeholder={resourcesContext.messages.errorType}
+                  appendTo={document.body}
+                  optionLabel="label"
+                  options={creationFormState.errorLevels}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'errorLevel',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                  value={creationFormState.candidateRule.errorLevel}
+                />
+              </div>
+            </div>
+            <div className={styles.subsection}>
+              <div className={`${styles.field} ${styles.qcActive}`}>
+                <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
+                <Checkbox
+                  id={`${componentName}__active`}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: { key: 'active', value: e.checked }
+                    })
+                  }
+                  isChecked={creationFormState.candidateRule.active}
+                />
+              </div>
+            </div>
           </div>
-        )}
+          <div className={styles.section}>
+            <ul>
+              <li className={styles.expresionsHeader}>
+                <span>{resourcesContext.messages.group}</span>
+                <span>{resourcesContext.messages.andor}</span>
+                <span>{resourcesContext.messages.operatorType}</span>
+                <span>{resourcesContext.messages.operator}</span>
+                <span>{resourcesContext.messages.value}</span>
+              </li>
+              {creationFormState.candidateRule.expresions &&
+                creationFormState.candidateRule.expresions.map((expresion, i) => {
+                  if (expresion.expresions.length == 0) {
+                    return (
+                      <ValidationExpresion
+                        expresionValues={expresion}
+                        isDisabled={creationFormState.areRulesDisabled}
+                        key={expresion.expresionId}
+                        onExpresionDelete={onExpresionDelete}
+                        onExpresionFieldUpdate={onExpresionFieldUpdate}
+                        onExpresionGroup={onExpresionGroup}
+                        position={i}
+                      />
+                    );
+                  } else {
+                    return (
+                      <ValidationExpresionGroup
+                        expresionValues={expresion}
+                        isDisabled={creationFormState.areRulesDisabled}
+                        key={expresion.expresionId}
+                        onExpresionDelete={onExpresionDelete}
+                        onExpresionFieldUpdate={onExpresionFieldUpdate}
+                        onExpresionGroup={onExpresionGroup}
+                        position={i}
+                      />
+                    );
+                  }
+                })}
+            </ul>
+          </div>
 
-        <div className={styles.section}>
-          <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
-        </div>
-        <div className={`${styles.section} ${styles.footerToolBar}`}>
-          <div className={styles.subsection}>
-            <Button
-              id={`${componentName}__addExpresion`}
-              disabled={creationFormState.isRuleAddingDisabled}
-              className="p-button-primary p-button-text-icon-left"
-              type="button"
-              label={resourcesContext.messages.addNewRule}
-              icon="plus"
-              onClick={e =>
-                creationFormDispatch({
-                  type: 'ADD_EMPTY_RULE',
-                  payload: getEmptyExpresion()
-                })
-              }
-            />
+          {creationFormState.groupExpresionsActive >= 2 && (
+            <div className={styles.section}>
+              <Button
+                id={`${componentName}__groupExpresions`}
+                className="p-button-primary p-button-text"
+                type="button"
+                label="Group"
+                icon="plus"
+                onClick={e =>
+                  creationFormDispatch({
+                    type: 'GROUP_EXPRESIONS',
+                    payload: {
+                      expresions: groupExpresions(
+                        creationFormState.candidateRule.expresions,
+                        creationFormState.groupExpresionsActive,
+                        creationFormState.groupCandidate
+                      )
+                    }
+                  })
+                }
+              />
+            </div>
+          )}
+          <div className={styles.section}>
+            <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
           </div>
-          <div className={styles.subsection}>
-            <Button
-              id={`${componentName}__create`}
-              disabled={creationFormState.isValidationCreationDisabled}
-              className="p-button-primary p-button-text-icon-left"
-              type="button"
-              label={resourcesContext.messages.create}
-              icon="check"
-              onClick={e => createValidationRule()}
-            />
-            <Button
-              id={`${componentName}__cancel`}
-              className="p-button-secondary p-button-text-icon-left"
-              type="button"
-              label={resourcesContext.messages.cancel}
-              icon="cancel"
-              onClick={e => onHide()}
-            />
+        </div>
+        <div className={styles.footer}>
+          <div className={`${styles.section} ${styles.footerToolBar}`}>
+            <div className={styles.subsection}>
+              <Button
+                id={`${componentName}__addExpresion`}
+                disabled={creationFormState.isRuleAddingDisabled}
+                className="p-button-primary p-button-text-icon-left"
+                type="button"
+                label={resourcesContext.messages.addNewRule}
+                icon="plus"
+                onClick={e =>
+                  creationFormDispatch({
+                    type: 'ADD_EMPTY_RULE',
+                    payload: getEmptyExpresion()
+                  })
+                }
+              />
+            </div>
+            <div className={styles.subsection}>
+              <Button
+                id={`${componentName}__create`}
+                disabled={creationFormState.isValidationCreationDisabled}
+                className="p-button-primary p-button-text-icon-left"
+                type="button"
+                label={resourcesContext.messages.create}
+                icon="check"
+                onClick={e => createValidationRule()}
+              />
+              <Button
+                id={`${componentName}__cancel`}
+                className="p-button-secondary p-button-text-icon-left"
+                type="button"
+                label={resourcesContext.messages.cancel}
+                icon="cancel"
+                onClick={e => onHide()}
+              />
+            </div>
           </div>
         </div>
       </div>

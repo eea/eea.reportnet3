@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import indexOf from 'lodash/indexOf';
+
+import styles from './ValidationExpresion.module.scss';
 
 import { config } from 'conf/';
 
@@ -41,15 +42,15 @@ const ValidationExpresion = ({
 
   // layouts
   const defaultLayout = (
-    <tr>
-      <td>
+    <li className={styles.expresion}>
+      <span>
         <Checkbox
-          onChange={e => onExpresionGroup({ key: 'group', value: { value: e.checked } })}
+          onChange={e => onExpresionGroup(expresionId, { key: 'group', value: e.checked })}
           isChecked={expresionValues.group}
           disabled={isDisabled}
         />
-      </td>
-      <td>
+      </span>
+      <span>
         <Dropdown
           disabled={isDisabled || position == 0}
           appendTo={document.body}
@@ -64,8 +65,8 @@ const ValidationExpresion = ({
           }
           value={{ label: expresionValues.union, value: expresionValues.union }}
         />
-      </td>
-      <td>
+      </span>
+      <span>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -80,8 +81,8 @@ const ValidationExpresion = ({
           }
           value={!isEmpty(expresionValues.operatorType) ? operatorTypes[expresionValues.operatorType].option : null}
         />
-      </td>
-      <td>
+      </span>
+      <span>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -100,8 +101,8 @@ const ValidationExpresion = ({
               : null
           }
         />
-      </td>
-      <td>
+      </span>
+      <span>
         <InputText
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
@@ -113,8 +114,8 @@ const ValidationExpresion = ({
             })
           }
         />
-      </td>
-      <td>
+      </span>
+      <span>
         <Button
           disabled={isDisabled}
           type="button"
@@ -123,8 +124,8 @@ const ValidationExpresion = ({
             onExpresionDelete(expresionId);
           }}
         />
-      </td>
-    </tr>
+      </span>
+    </li>
   );
   const layouts = {
     default: defaultLayout

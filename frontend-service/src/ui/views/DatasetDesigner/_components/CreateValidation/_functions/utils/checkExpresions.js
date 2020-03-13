@@ -6,7 +6,7 @@ export const checkExpresions = expresions => {
   if (!isNil(expresions) && expresions.length > 0) {
     const lastExpresion = last(expresions);
     if (lastExpresion.expresions && lastExpresion.expresions.length > 0) {
-      return true;
+      return false;
     } else if (expresions.length > 1) {
       const deactivate =
         isEmpty(lastExpresion.union) ||

@@ -2,6 +2,12 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  .body {
+    overflow: auto hidden;
+  }
+  .footer {
+    height: 10%;
+  }
   .section {
     display: flex;
     margin-bottom: 2rem;
@@ -50,10 +56,22 @@
     &:nth-of-type(2) {
       flex-direction: column;
       overflow-y: auto;
-      .qcHeader {
-        width: 100%;
-        border-bottom: 1px solid #333;
-        margin-bottom: 2rem;
+      ul {
+        list-style: none;
+        .expresionsHeader {
+          display: flex;
+          justify-content: flex-start;
+          span {
+            margin-right: 1rem;
+            width: 179px;
+            text-align: center;
+            &:first-of-type {
+              width: 53px;
+              margin-right: 0;
+              text-align: left;
+            }
+          }
+        }
       }
       .qcList {
         display: flex;
@@ -105,11 +123,5 @@
         }
       }
     }
-  }
-  &:after {
-    content: '';
-    display: block;
-    height: 1rem;
-    width: 100%;
   }
 }
