@@ -157,6 +157,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The receipt PDF generator. */
   @Autowired
   private ReceiptPDFGenerator receiptPDFGenerator;
 
@@ -633,13 +634,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
    * @param out the out
-   * @param dataflowId the id dataflow
-   * @param dataProviderId the id data provider
-   * @return the released and updated status
-   * @throws EEAException the EEA exception
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
    */
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {

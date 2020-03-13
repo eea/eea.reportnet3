@@ -15,12 +15,12 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * The Class ReceiptPDFGenerator.
  */
-@Component
+@Service
 public class ReceiptPDFGenerator {
 
   /** The Constant LOG. */
@@ -29,6 +29,12 @@ public class ReceiptPDFGenerator {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * Generate PDF.
+   *
+   * @param receipt the receipt
+   * @param out the out
+   */
   public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
       try {
