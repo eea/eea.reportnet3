@@ -36,6 +36,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     });
   };
 
+  const onCancelButton = property => {
+    filterDispatch({ type: 'CLEAR_INPUT', payload: { property } });
+  };
+
   const onOrderData = (order, property) => {
     filterDispatch({ type: 'ORDER_DATA', payload: { order, property } });
   };
@@ -74,7 +78,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         value={filterState.filterBy[property]}
       />
       {filterState.filterBy[property] && (
-        <Button className={`p-button-secondary-transparent ${styles.clearIcon}`} icon="cancel" />
+        <Button
+          className={`p-button-secondary-transparent ${styles.clearIcon}`}
+          icon="cancel"
+          onClick={() => onCancelButton(property)}
+        />
       )}
       <label htmlFor={property}>{resources.messages[property]}</label>
     </span>
