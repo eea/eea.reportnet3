@@ -589,7 +589,7 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'link' ? (
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Link' ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
