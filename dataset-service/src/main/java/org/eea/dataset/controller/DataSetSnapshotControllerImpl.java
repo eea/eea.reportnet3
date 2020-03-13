@@ -307,8 +307,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
   @GetMapping(value = "/receiptPDF", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_PROVIDER')")
   public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("dataProviderId") Long dataProviderId) {
@@ -316,7 +316,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
     response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "attachment;filename=file.pdf");
+    response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
 
     return new ResponseEntity<>(stream, HttpStatus.OK);
   }

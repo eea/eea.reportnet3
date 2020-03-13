@@ -31,7 +31,7 @@ public class ReceiptPDFGenerator {
 
   /** The Constant background. */
   private static final String BACKGROUND = ReceiptPDFGenerator.class.getClassLoader()
-      .getResource("pdf/receipt_background.pdf").getFile();
+      .getResource("pdf/receipt_background.png").getFile();
 
   /**
    * Generate PDF.
