@@ -1,11 +1,12 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
  * The Interface DatasetSnapshotController.
@@ -133,17 +135,16 @@ public interface DatasetSnapshotController {
   void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
 
-
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
-   * @param idDataflow the id dataflow
-   * @param idDataProvider the id data provider
-   * @return the released and updated status
+   * @param response the response
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the response entity
    */
-  @GetMapping(value = "/dataflow/{idDataflow}/releaseStatus/{idDataProvider}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  ReleaseReceiptVO getReleasedAndUpdatedStatus(@PathVariable("idDataflow") Long idDataflow,
-      @PathVariable("idDataProvider") Long idDataProvider);
-
+  @GetMapping(value = "/receiptPDF", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId);
 }
