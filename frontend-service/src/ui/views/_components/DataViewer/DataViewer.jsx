@@ -67,9 +67,6 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns
   }) => {
-    const [isSaving, setisSaving] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(true);
-
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -84,6 +81,7 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [isTableDeleted, setIsTableDeleted] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
@@ -547,7 +545,7 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
-      setisSaving(true);
+      setIsSaving(true);
       //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
@@ -576,6 +574,7 @@ const DataViewer = withRouter(
         } finally {
           setAddDialogVisible(false);
           setIsLoading(false);
+          setIsSaving(false);
         }
       } else {
         try {
@@ -600,9 +599,9 @@ const DataViewer = withRouter(
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
+          setIsSaving(false);
         }
       }
-      setisSaving(false);
     };
 
     const onSetVisible = (fnUseState, visible) => {
