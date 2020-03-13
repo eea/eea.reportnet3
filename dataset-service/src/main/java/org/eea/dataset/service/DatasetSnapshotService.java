@@ -116,12 +116,11 @@ public interface DatasetSnapshotService {
   void deleteAllSnapshots(Long idDataset) throws EEAException;
 
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
    * @param out the out
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @return the released and updated status
    */
-  void getReleasedAndUpdatedStatus(OutputStream out, Long dataflowId, Long dataProviderId);
+  void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId);
 }

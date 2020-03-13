@@ -136,16 +136,15 @@ public interface DatasetSnapshotController {
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
 
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
    * @param response the response
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @return the released and updated status
+   * @return the response entity
    */
-  @GetMapping(value = "/dataflow/{dataflowId}/releaseStatus/{dataProviderId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<StreamingResponseBody> getReleasedAndUpdatedStatus(HttpServletResponse response,
-      @PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId);
+  @GetMapping(value = "/receiptPDF", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId);
 }

@@ -33,21 +33,23 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.pdf.PDFData;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -139,6 +141,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   /** The dataset snapshot controller. */
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
@@ -150,6 +156,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
+
+  @Autowired
+  private ReceiptPDFGenerator receiptPDFGenerator;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -633,10 +642,39 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void getReleasedAndUpdatedStatus(OutputStream out, Long dataflowId, Long dataProviderId) {
-    PDFData data = PDFData.builder().dataflowId(dataflowId).dataProviderId(dataProviderId).build();
-    ReceiptPDFGenerator receiptPDFGenerator = new ReceiptPDFGenerator();
-    receiptPDFGenerator.configure(data);
-    receiptPDFGenerator.generatePDF(out);
+  public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
+    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    receipt.setIdDataflow(dataflowId);
+    receipt.setDataflowName(dataflow.getName());
+    receipt.setDatasets(dataflow.getReportingDatasets().stream()
+        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
+        .collect(Collectors.toList()));
+
+    if (!receipt.getDatasets().isEmpty()) {
+      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
+    }
+
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+
+      receipt.setProviderEmail(representative.getProviderAccount());
+
+      // Check if it's needed to update the status of the button (i.e I only want to download the
+      // receipt twice, but no state is changed)
+      if (!representative.getReceiptDownloaded() || representative.getReceiptOutdated()) {
+        // update provider. Button downloaded = true && outdated = false
+        representative.setReceiptDownloaded(true);
+        representative.setReceiptOutdated(false);
+        representativeControllerZuul.updateRepresentative(representative);
+        LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
+      }
+    }
+
+    receiptPDFGenerator.generatePDF(receipt, out);
   }
 }

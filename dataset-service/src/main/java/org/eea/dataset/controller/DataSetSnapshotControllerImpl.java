@@ -298,22 +298,22 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
-   * @param idDataflow the id dataflow
-   * @param idDataProvider the id data provider
-   * @return the released and updated status
+   * @param response the response
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{dataflowId}/releaseStatus/{dataProviderId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "/receiptPDF", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_PROVIDER')")
-  public ResponseEntity<StreamingResponseBody> getReleasedAndUpdatedStatus(
-      HttpServletResponse response, @PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId) {
+  public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId) {
     StreamingResponseBody stream =
-        out -> datasetSnapshotService.getReleasedAndUpdatedStatus(out, dataflowId, dataProviderId);
+        out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
     response.setContentType("application/pdf");
     response.setHeader("Content-Disposition", "attachment;filename=file.pdf");

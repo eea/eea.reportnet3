@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -33,6 +32,7 @@ import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
+import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -70,6 +70,10 @@ public class DatasetSnapshotServiceTest {
   /** The dataset metabase service. */
   @InjectMocks
   private DatasetSnapshotServiceImpl datasetSnapshotService;
+
+  /** The receipt PDF generator. */
+  @Mock
+  private ReceiptPDFGenerator receiptPDFGenerator;
 
   /** The data set metabase repository. */
   @Mock
@@ -540,7 +544,6 @@ public class DatasetSnapshotServiceTest {
         .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
   }
 
-
   /**
    * Test delete all snapshots.
    *
@@ -558,38 +561,6 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
   }
 
-
-  /**
-   * Test get released status.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testGetReleasedStatus() throws EEAException {
-
-    DataFlowVO df = new DataFlowVO();
-    df.setId(1L);
-    ReportingDatasetVO reporting = new ReportingDatasetVO();
-    reporting.setId(1L);
-    reporting.setDataProviderId(1L);
-    reporting.setIsReleased(true);
-    df.setReportingDatasets(Arrays.asList(reporting));
-    RepresentativeVO representative = new RepresentativeVO();
-    representative.setId(1L);
-    representative.setDataProviderId(1L);
-    representative.setReceiptDownloaded(false);
-    representative.setReceiptOutdated(false);
-
-    when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(df);
-    when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
-        .thenReturn(Arrays.asList(representative));
-    datasetSnapshotService.getReleasedAndUpdatedStatus(null, 1L, 1L);
-    Mockito.verify(representativeControllerZuul, times(1))
-        .findRepresentativesByIdDataFlow(Mockito.any());
-  }
-
-
-
   /**
    * After tests.
    */
@@ -599,5 +570,31 @@ public class DatasetSnapshotServiceTest {
     file.delete();
   }
 
-
+  /**
+   * Creates the recepit PDF.
+   */
+  @Test
+  public void createRecepitPDF() {
+    ReportingDatasetVO dataset = new ReportingDatasetVO();
+    RepresentativeVO representative = new RepresentativeVO();
+    List<ReportingDatasetVO> datasets = new ArrayList<>();
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataset.setIsReleased(true);
+    dataset.setDataProviderId(1L);
+    dataset.setDataSetName("datsetName");
+    representative.setDataProviderId(1L);
+    representative.setProviderAccount("providerAccount");
+    representative.setReceiptDownloaded(true);
+    representative.setReceiptOutdated(true);
+    datasets.add(dataset);
+    representatives.add(representative);
+    dataflowVO.setName("name");
+    dataflowVO.setReportingDatasets(datasets);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(representatives);
+    datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
+    Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
+  }
 }

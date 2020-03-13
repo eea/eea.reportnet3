@@ -310,7 +310,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.doNothing().when(response).setContentType(Mockito.anyString());
     Mockito.doNothing().when(response).setHeader(Mockito.anyString(), Mockito.anyString());
 
-    dataSetSnapshotControllerImpl.getReleasedAndUpdatedStatus(response, 1L, 1L);
+    dataSetSnapshotControllerImpl.createReceiptPDF(response, 1L, 1L);
     Mockito.verify(response, times(1)).setContentType(Mockito.anyString());
   }
 }

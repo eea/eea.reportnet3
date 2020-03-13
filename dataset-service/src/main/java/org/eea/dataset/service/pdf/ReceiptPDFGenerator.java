@@ -5,36 +5,23 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class ReceiptPDFGenerator.
  */
-public class ReceiptPDFGenerator implements PDFGenerator {
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /** The representative controller zuul. */
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
+@Component
+public class ReceiptPDFGenerator {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ReceiptPDFGenerator.class);
@@ -42,60 +29,7 @@ public class ReceiptPDFGenerator implements PDFGenerator {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The receipt. */
-  private ReleaseReceiptVO receipt;
-
-  /**
-   * Configure.
-   *
-   * @param data the data
-   */
-  @Override
-  public void configure(PDFData data) {
-    Long dataflowId = data.getDataflowId();
-    Long dataProviderId = data.getDataProviderId();
-
-    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
-    receipt.setIdDataflow(dataflowId);
-    receipt.setDataflowName(dataflow.getName());
-    receipt.setDatasets(dataflow.getReportingDatasets().stream()
-        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
-        .collect(Collectors.toList()));
-
-    if (!receipt.getDatasets().isEmpty()) {
-      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
-    }
-
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
-            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
-
-    if (!representatives.isEmpty()) {
-      RepresentativeVO representative = representatives.get(0);
-
-      receipt.setProviderEmail(representative.getProviderAccount());
-
-      // Check if it's needed to update the status of the button (i.e I only want to download the
-      // receipt twice, but no state is changed)
-      if (!(true == representative.getReceiptDownloaded()
-          && false == representative.getReceiptOutdated())) {
-        // update provider. Button downloaded = true && outdated = false
-        representative.setReceiptDownloaded(true);
-        representative.setReceiptOutdated(false);
-        representativeControllerZuul.updateRepresentative(representative);
-        LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
-      }
-    }
-  }
-
-  /**
-   * Generate PDF.
-   *
-   * @param out the out
-   */
-  @Override
-  public void generatePDF(OutputStream out) {
+  public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
       try {
         // Creating PDF document object
