@@ -308,10 +308,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
-  @GetMapping(value = "/receiptPDF", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
-      @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("dataProviderId") Long dataProviderId) {
+      @PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId) {
     StreamingResponseBody stream =
         out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
