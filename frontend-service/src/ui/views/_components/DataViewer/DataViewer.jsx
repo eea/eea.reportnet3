@@ -891,7 +891,7 @@ const DataViewer = withRouter(
                   body={column === 'value' ? requiredTemplate : null}
                   className={column === 'field' ? styles.fieldColumn : ''}
                   field={column}
-                  // headerStyle={{ display: 'none' }}
+                  headerStyle={{ display: 'none' }}
                   key={i}
                 />
               ))}
