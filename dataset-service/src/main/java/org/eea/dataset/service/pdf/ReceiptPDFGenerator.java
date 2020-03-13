@@ -29,6 +29,10 @@ public class ReceiptPDFGenerator {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant background. */
+  private static final String BACKGROUND = ReceiptPDFGenerator.class.getClassLoader()
+      .getResource("pdf/receipt_background.pdf").getFile();
+
   /**
    * Generate PDF.
    *
@@ -78,7 +82,7 @@ public class ReceiptPDFGenerator {
     PDType1Font fontBold = PDType1Font.HELVETICA_BOLD;
 
     // Print background
-    PDImageXObject pdImage = PDImageXObject.createFromFile("receipt_background.png", document);
+    PDImageXObject pdImage = PDImageXObject.createFromFile(BACKGROUND, document);
     contentStream.drawImage(pdImage, 0, 0);
 
     // Print receipt information
