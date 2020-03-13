@@ -74,7 +74,6 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
                 <ListBox
                   options={getOptions(datasetSchema)}
                   onChange={e => {
-                    console.log(e.value);
                     if (!isNil(e.value)) {
                       setLink(e.value);
                     }
@@ -90,7 +89,6 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
           <span>{`${resources.messages['selectedLink']}: `}</span>
           <span>{!isNil(link) ? link.name : ''}</span>
         </div>
-        {/* <span>{JSON.stringify(referencedField)}</span> */}
       </React.Fragment>
     );
   };
