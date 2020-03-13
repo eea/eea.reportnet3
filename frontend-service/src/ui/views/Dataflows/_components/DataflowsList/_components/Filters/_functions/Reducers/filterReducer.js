@@ -69,7 +69,9 @@ export const filterReducer = (state, { type, payload }) => {
     case 'CLEAR_INPUT':
       return {
         ...state,
-        filterBy: { ...state.filterBy, [payload.property]: '' }
+        filterBy: { ...state.filterBy, [payload.property]: '' },
+
+        filteredData: payload.filteredData
       };
 
     default:

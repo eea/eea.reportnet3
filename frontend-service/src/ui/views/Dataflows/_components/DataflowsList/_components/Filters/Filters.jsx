@@ -39,7 +39,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   };
 
   const onCancelButton = property => {
-    filterDispatch({ type: 'CLEAR_INPUT', payload: { property } });
+    filterDispatch({ type: 'CLEAR_INPUT', payload: { property, filteredData: cloneDeep(data) } });
   };
 
   const onClearAllFilters = () => {
