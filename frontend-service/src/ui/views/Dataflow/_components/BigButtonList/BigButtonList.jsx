@@ -77,6 +77,7 @@ export const BigButtonList = ({
     setTimeout(() => {
       if (!isEmpty(receiptState.receiptData)) {
         onDownloadReceipt();
+        console.log('receiptState', receiptState);
       }
     }, 1000);
   }, [receiptState.receiptData]);
@@ -308,11 +309,11 @@ export const BigButtonList = ({
         />
       </ConfirmDialog>
 
-      <PDFDownloadLink
+      {/* <PDFDownloadLink
         document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      </PDFDownloadLink>
+      </PDFDownloadLink> */}
     </>
   );
 };
