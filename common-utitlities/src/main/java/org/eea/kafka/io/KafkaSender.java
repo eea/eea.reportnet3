@@ -17,11 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * The type Kafka sender.
@@ -53,17 +55,16 @@ public class KafkaSender {
    * @param event the event
    */
 
-  @Transactional
   public void sendMessage(final EEAEventVO event) {
 
-    kafkaTemplate.execute(producer -> {
+    kafkaTemplate.executeInTransaction(operations -> {
       event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
-      Integer partitionId = null;
       final List<PartitionInfo> partitions =
           kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+      Integer partitionId = null;
       if (event.getEventType().isSorted()) {
         // partition = hash(message_key)%number_of_partitions
         partitionId =
@@ -71,27 +72,20 @@ public class KafkaSender {
       } else {
         partitionId = ThreadLocalRandom.current().nextInt(partitions.size());
       }
-
-      ProducerRecord producerRecord = new ProducerRecord(event.getEventType().getTopic(),
-          partitionId, event.getEventType().getKey(), event);
-
-      final Future<RecordMetadata> future = producer.send(producerRecord);
+      final ListenableFuture<SendResult<String, EEAEventVO>> future = operations
+          .send(new ProducerRecord(event.getEventType().getTopic(),
+              partitionId, event.getEventType().getKey(), event));
       Boolean sendResult = true;
 
       try {
-        RecordMetadata result = future.get();
+        SendResult<String, EEAEventVO> result = future.get();
         LOG.info("Sent message=[ {} ] to topic=[ {} ] with offset=[ {} ] and partition [ {} ]",
             event, event.getEventType().getTopic(),
-            result.offset(), result.partition());
+            result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
       } catch (InterruptedException | ExecutionException e) {
         LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
             event.getEventType().getTopic(), e.getMessage());
         sendResult = false;
-        producer.close();
-      } catch (KafkaException e) {
-        sendResult = false;
-        producer.abortTransaction();
-
       }
       return sendResult;
     });
