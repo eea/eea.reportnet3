@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -43,6 +44,10 @@ public class RulesServiceImplTest {
   /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
+
+  /** The table repository. */
+  @Mock
+  private TableRepository tableRepository;
 
   /** The rules schema mapper. */
   @Mock
@@ -202,6 +207,8 @@ public class RulesServiceImplTest {
   public void createAutomaticRulesPKTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
+    Mockito.when(tableRepository.findTableValueByFieldSchemaId(Mockito.any(), Mockito.any()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
         .thenReturn(ruleSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
