@@ -235,6 +235,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
@@ -1455,6 +1456,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @param searchValue the search value
+   * @return the field values referenced
+   */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
     Long idDatasetDestination =
@@ -1467,5 +1476,17 @@ public class DatasetServiceImpl implements DatasetService {
     return fieldNoValidationMapper.entityListToClass(fields);
   }
 
+
+  /**
+   * Gets the dataset id referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @return the dataset id referenced
+   */
+  @Override
+  public Long getDatasetIdReferenced(Long datasetId, String idPk) {
+    return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+  }
 
 }

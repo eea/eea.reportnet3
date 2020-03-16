@@ -514,4 +514,13 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("searchValue") String searchValue) {
     return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
   }
+
+
+  @Override
+  @GetMapping("private/getDatasetIdReferenced")
+  public Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema) {
+    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema);
+  }
+
 }

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * The Interface TableRepository.
  */
-public interface TableRepository extends JpaRepository<TableValue, Long> {
+public interface TableRepository extends JpaRepository<TableValue, Long>, TableRepositoryExtended {
 
   /**
    * Find all tables.

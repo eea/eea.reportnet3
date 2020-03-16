@@ -202,9 +202,30 @@ public interface DatasetController {
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
 
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @param searchValue the search value
+   * @return the field values referenced
+   */
   @GetMapping("/{id}/getFieldsValuesReferenced")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue);
+
+
+
+  /**
+   * Gets the dataset id referenced.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @return the dataset id referenced
+   */
+  @GetMapping("private/getDatasetIdReferenced")
+  Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema);
 }
