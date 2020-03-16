@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { FilterUtil } from './_functions/Utils/FilterUtil';
+import { FilterUtils } from './_functions/Utils/FilterUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selectOptions }) => {
@@ -22,7 +22,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: cloneDeep(data),
     dateOptions: dateOptions,
-    filterBy: FilterUtil.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+    filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
     orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
     selectOptions: selectOptions
@@ -38,15 +38,15 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({
       type: 'CLEAR_ALL_FILTERS',
       payload: {
-        filterBy: FilterUtil.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
         filteredData: cloneDeep(data)
       }
     });
   };
 
   const onFilterData = (filter, value) => {
-    const filteredKeys = FilterUtil.getFilterKeys(filterState, filter);
-    const filteredData = FilterUtil.onApplyFilters(filter, filteredKeys, filterState, value);
+    const filteredKeys = FilterUtils.getFilterKeys(filterState, filter);
+    const filteredData = FilterUtils.onApplyFilters(filter, filteredKeys, filterState, value);
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -116,7 +116,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         itemTemplate={selectTemplate}
         onChange={event => onFilterData(property, event.value, filterState.data)}
         optionLabel="type"
-        options={FilterUtil.getOptionTypes(data, property)}
+        options={FilterUtils.getOptionTypes(data, property)}
         placeholder={resources.messages['select']}
         style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
         value={filterState.filterBy[property]}

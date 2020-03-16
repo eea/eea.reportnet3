@@ -98,7 +98,7 @@ const onApplyFilters = (filter, filteredKeys, state, value) => [
   })
 ];
 
-export const FilterUtil = {
+export const FilterUtils = {
   getFilterInitialState,
   getFilterKeys,
   getOptionTypes,
