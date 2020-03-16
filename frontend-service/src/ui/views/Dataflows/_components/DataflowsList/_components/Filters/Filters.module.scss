@@ -10,6 +10,12 @@
   width: 14%;
 }
 
+.dataflowInput {
+  border-bottom: var(--inputtext-border) !important;
+  height: 2.5em;
+  color: var(--floating-label-color) !important;
+}
+
 .inputFilter {
   border-left: 0 !important;
   border-radius: 0 !important;
@@ -30,11 +36,6 @@
   font-size: 10pt;
   font-weight: 600;
   padding: 4px;
-}
-
-.dataflowInput {
-  border-bottom: var(--inputtext-border);
-  vertical-align: bottom !important;
 }
 
 .draft {
@@ -59,6 +60,7 @@
   font-size: 16pt !important;
   // margin-top: 0.4rem !important;
   opacity: 0.7;
+  height: 1.6em !important;
 }
 
 .orderIcon:hover {
@@ -75,6 +77,11 @@
   border-color: transparent !important;
 }
 
+.cancelIcon {
+  font-size: 12pt !important;
+  height: 2.1em !important;
+}
+
 .multiselectFilter {
   border-top: 0 !important;
   border-left: 0 !important;
@@ -82,12 +89,14 @@
   border-radius: 0 !important;
   color: var(--floating-label-color) !important;
   width: 100% !important;
-  padding: 1em;
+  padding-left: 0em;
+  height: 2.5em;
 }
 
 .dataflowInputDate {
   // border-bottom: 0 !important;
   padding-top: 1.2em;
+  border: none;
 }
 
 .calendarFilter {
@@ -105,4 +114,9 @@
   border-right: 0 !important;
   border-top: 0 !important;
   width: 100% !important;
+  border: none;
+}
+
+.drashInput {
+  color: red !important;
 }
