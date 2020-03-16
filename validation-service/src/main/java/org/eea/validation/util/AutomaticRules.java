@@ -156,7 +156,7 @@ public class AutomaticRules {
   public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description, String tableSchemaId, Long datasetId) {
     return composeRule(tableSchemaId, typeEntityEnum, nameRule,
-        "!isfieldPK(" + datasetId + "L,'" + referenceId + "')",
+        "isfieldPK(" + datasetId + "L,'" + referenceId + "')",
         "The value does not follow the required syntax for valid values, check the pk colum in the other table",
         ErrorTypeEnum.BLOCKER.getValue(), shortCode, description);
   }
