@@ -304,6 +304,7 @@ export const FieldsDesigner = ({
               fieldDescription={field.description}
               fieldId={field.fieldId}
               fieldIsPK={field.isPK}
+              fieldIsPKReferenced={field.isPKReferenced}
               // fieldIsPK={index === 0}
               fieldName={field.name}
               fieldLink={field.referencedField}

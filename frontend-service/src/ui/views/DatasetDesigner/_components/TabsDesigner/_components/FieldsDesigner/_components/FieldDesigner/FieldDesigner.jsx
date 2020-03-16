@@ -33,6 +33,7 @@ export const FieldDesigner = ({
   datasetSchemas,
   fieldName,
   fieldIsPK,
+  fieldIsPKReferenced,
   fieldLink,
   fieldRequired,
   fieldType,
@@ -615,7 +616,7 @@ export const FieldDesigner = ({
       <a
         draggable={true}
         className={`${styles.button} ${styles.deleteButton} ${
-          fieldDesignerState.fieldIsPKValue ? styles.disabledDeleteButton : ''
+          fieldDesignerState.fieldIsPKValue || fieldIsPKReferenced ? styles.disabledDeleteButton : ''
         }`}
         href="#"
         onClick={e => {
