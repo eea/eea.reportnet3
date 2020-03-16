@@ -77,6 +77,7 @@ public interface RulesService {
    */
   void updateRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
+
   /**
    * Creates the automatic rules.
    *
@@ -84,11 +85,12 @@ public interface RulesService {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param required the required
    * @throws EEAException the EEA exception
    */
   void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, boolean required) throws EEAException;
+      EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException;
 
   /**
    * Delete rule required.
@@ -116,7 +118,4 @@ public interface RulesService {
    * @return true, if successful
    */
   boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position);
-
-  void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
-      String idFieldSchemaReference, Long datasetIdReference);
 }

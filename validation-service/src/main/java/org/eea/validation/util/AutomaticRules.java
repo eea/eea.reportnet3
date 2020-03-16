@@ -142,11 +142,22 @@ public class AutomaticRules {
   }
 
 
-  public static Rule createPKAutomaticRule(String referenceId, String nameRule, String shortCode,
-      String description, String idFieldSchemaReference, Long datasetIdReference) {
-    return composeRule(referenceId, EntityTypeEnum.FIELD, nameRule,
-        "!isfieldPK(value," + datasetIdReference + "," + idFieldSchemaReference + ")",
-        "he value does not follow the required syntax for valid values, check the pk colum in the other table",
+  /**
+   * Creates the PK automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @param datasetId the dataset id
+   * @return the rule
+   */
+  public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description, Long datasetId) {
+    return composeRule(referenceId, typeEntityEnum, nameRule,
+        "!isfieldPK(value," + datasetId + "," + referenceId + ")",
+        "The value does not follow the required syntax for valid values, check the pk colum in the other table",
         ErrorTypeEnum.BLOCKER.getValue(), shortCode, description);
   }
 

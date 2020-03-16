@@ -380,11 +380,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
       }
       // and with it we create the others automatic rules like number etc
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
       dataschemaService.updatePkCatalogue(fieldSchemaVO);

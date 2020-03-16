@@ -245,7 +245,7 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
+      EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
@@ -278,6 +278,11 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case LINK:
+          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, typeEntityEnum.TABLE,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, datasetId));
+
+          break;
         case CODELIST:
           // we find values avaliable to create this validation for a codelist, same value with
           // capital letter and without capital letters
@@ -300,6 +305,16 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  // @Override
+  // public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+  // Long datasetId) {
+  // ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
+  // FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+  // Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
+  // FT_DESCRIPTION, datasetId);
+  // rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+  //
+  // }
   /**
    * Delete rule required.
    *
@@ -379,12 +394,5 @@ public class RulesServiceImpl implements RulesService {
     return false;
   }
 
-  @Override
-  public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
-      String idFieldSchemaReference, Long datasetIdReference) {
-    Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
-        "description", idFieldSchemaReference, datasetIdReference);
-    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
 
-  }
 }

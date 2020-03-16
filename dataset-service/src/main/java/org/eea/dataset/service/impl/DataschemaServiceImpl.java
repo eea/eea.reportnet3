@@ -680,13 +680,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // if we change the type we need to delete all rules
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
 
+
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
-            EntityTypeEnum.FIELD, Boolean.TRUE);
+            EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
       }
 
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.FALSE);
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
       TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
@@ -694,7 +695,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
           rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, Boolean.TRUE);
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
         }
       } else {
         rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());

@@ -171,13 +171,15 @@ public class RulesControllerImpl implements RulesController {
   public void createAutomaticRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData,
       @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+      @RequestParam("datasetId") Long datasetId,
       @RequestParam("requiredRule") boolean requiredRule) {
 
     // we use the required value to differentiate if the rule to create is a required rule or if the
     // rules is a automatic rule for any type (boolean, number)
     if (requiredRule) {
       try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum, true);
+        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum,
+            datasetId, true);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the required rule for idDatasetSchema {} and field with id {} ",
@@ -188,7 +190,7 @@ public class RulesControllerImpl implements RulesController {
     } else {
       try {
         rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
-            false);
+            datasetId, false);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
@@ -264,13 +266,5 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
-  }
-
-  @Override
-  @PutMapping("/createAutomaticPKRule")
-  public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
-      String idFieldSchemaReference, Long datasetIdReference) {
-    rulesService.createAutomaticPKRule(datasetSchemaId, referenceIdRule, idFieldSchemaReference,
-        datasetIdReference);
   }
 }

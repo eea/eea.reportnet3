@@ -96,6 +96,7 @@ public interface RulesController {
   @PutMapping("/createNewRule")
   void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 
+
   /**
    * Creates the automatic rule.
    *
@@ -103,12 +104,14 @@ public interface RulesController {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param requiredRule the required rule
    */
   @PutMapping("/private/createAutomaticRule")
   void createAutomaticRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData,
       @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+      @RequestParam("datasetId") Long datasetId,
       @RequestParam("requiredRule") boolean requiredRule);
 
   /**
@@ -153,10 +156,4 @@ public interface RulesController {
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
-
-  @PutMapping("/createAutomaticPKRule")
-  public void createAutomaticPKRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
-      @RequestParam("referenceIdRule") String referenceIdRule,
-      @RequestParam("idFieldSchemaReference") String idFieldSchemaReference,
-      @RequestParam("datasetIdReference") Long datasetIdReference);
 }

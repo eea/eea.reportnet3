@@ -99,7 +99,7 @@ public class KieBaseManager {
             if (null != datatype && !rule.isAutomatic()) {
               switch (datatype) {
                 case NUMBER:
-                  expression.append("(isNumber(value) && ");
+                  expression.append("( isNumber(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
