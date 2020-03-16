@@ -2,7 +2,7 @@ import { apiConfirmationReceipt } from 'core/infrastructure/api/domain/model/Con
 import { ConfirmationReceipt } from 'core/domain/model/ConfirmationReceipt/ConfirmationReceipt';
 
 const get = async (dataflowId, dataProviderId) => {
-  const confirmationReceipt = await apiConfirmationReceipt.getPDF(dataflowId, dataProviderId);
+  const confirmationReceipt = await apiConfirmationReceipt.get(dataflowId, dataProviderId);
 
   // const datasets = confirmationReceiptDTO
   //   ? confirmationReceiptDTO.datasets.map(dataset => ({
