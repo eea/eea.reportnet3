@@ -1,4 +1,5 @@
 import { filterUtils } from '../Utils/filterUtils';
+import isEmpty from 'lodash/isEmpty';
 
 const onSortData = (data, order, property) => {
   if (order === 1) {
@@ -18,7 +19,9 @@ const onSortData = (data, order, property) => {
 
 export const filterReducer = (state, { type, payload }) => {
   const getFilterKeys = () =>
-    Object.keys(state.filterBy).filter(key => key !== payload.filter && key !== 'status' && key !== 'userRole');
+    Object.keys(state.filterBy).filter(
+      key => key !== payload.filter && key !== 'status' && key !== 'userRole' && key !== 'expirationDate'
+    );
 
   const checkFilters = (filteredKeys, dataflow) => {
     for (let i = 0; i < filteredKeys.length; i++) {
@@ -31,6 +34,46 @@ export const filterReducer = (state, { type, payload }) => {
     return true;
   };
 
+  const onApplyFilters = (filteredKeys, i) => [
+    ...payload.data.filter(data => {
+      if (state.selectOptions.includes(payload.filter)) {
+        return (
+          [...payload.value.map(type => type.value.toLowerCase())].includes(data[payload.filter].toLowerCase()) &&
+          checkFilters(filteredKeys, data)
+        );
+      } else if (state.dateOptions.includes(payload.filter)) {
+        const dates = [];
+        payload.value.map(date => dates.push(new Date(date).getTime() / 1000));
+
+        if (!dates.includes(0)) {
+          return (
+            new Date(data[payload.filter]).getTime() / 1000 >= dates[0] &&
+            new Date(data[payload.filter]).getTime() / 1000 <= dates[1] &&
+            checkFilters(filteredKeys, data) &&
+            [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
+            [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
+              data.userRole.toLowerCase()
+            )
+          );
+        } else {
+          return [...state.filteredData];
+        }
+      } else {
+        const dates = state.filterBy.expirationDate.map(date => new Date(date).getTime() / 1000);
+        console.log('dates', dates);
+
+        return (
+          data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
+          checkFilters(filteredKeys, data) &&
+          [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
+          [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
+            data.userRole.toLowerCase()
+          )
+        );
+      }
+    })
+  ];
+
   switch (type) {
     case 'ORDER_DATA':
       return {
@@ -42,21 +85,12 @@ export const filterReducer = (state, { type, payload }) => {
 
     case 'FILTER_DATA':
       const filteredKeys = getFilterKeys();
+      const appliedFilters = onApplyFilters(filteredKeys);
+
       return {
         ...state,
         filterBy: { ...state.filterBy, [payload.filter]: payload.value },
-        filteredData: [
-          ...payload.data.filter(data =>
-            payload.filter === 'status' || payload.filter === 'userRole'
-              ? [...payload.value.map(type => type.value.toLowerCase())].includes(data[payload.filter].toLowerCase()) &&
-                checkFilters(filteredKeys, data)
-              : data[payload.filter].toLowerCase().includes(payload.value.toLowerCase()) &&
-                [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(
-                  data.status.toLowerCase()
-                ) &&
-                checkFilters(filteredKeys, data)
-          )
-        ]
+        filteredData: appliedFilters
       };
 
     case 'CLEAR_ALL_FILTERS':

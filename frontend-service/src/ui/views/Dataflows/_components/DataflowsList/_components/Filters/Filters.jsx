@@ -22,7 +22,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     data: cloneDeep(data),
     filterBy: filterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
-    orderBy: filterUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
+    orderBy: filterUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
+    selectOptions: selectOptions,
+    dateOptions: dateOptions
   });
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => changeFilterValues(property, event.value, filterState.data)}
-        selectionMode="multiple"
+        selectionMode="range"
         showWeek={true}
         value={filterState.filterBy[property]}
         yearNavigator={true}
