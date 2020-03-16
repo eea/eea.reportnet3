@@ -13,16 +13,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { filterUtils } from './_functions/Utils/filterUtils';
+import { FilterUtils } from './_functions/Utils/FilterUtils';
+import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selectOptions }) => {
   const resources = useContext(ResourcesContext);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: cloneDeep(data),
-    filterBy: filterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+    filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
-    orderBy: filterUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
+    orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
     selectOptions: selectOptions,
     dateOptions: dateOptions
   });
@@ -34,24 +35,24 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   }, [filterState.filteredData]);
 
   const changeFilterValues = (filter, value, data) => {
-    filterDispatch({
-      type: 'FILTER_DATA',
-      payload: { data, filter, value }
-    });
+    filterDispatch({ type: 'FILTER_DATA', payload: { data, filter, value } });
   };
 
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL_FILTERS',
       payload: {
-        filterBy: filterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
         filteredData: cloneDeep(data)
       }
     });
   };
 
   const onOrderData = (order, property) => {
-    filterDispatch({ type: 'ORDER_DATA', payload: { order, property } });
+    const data = SortUtils.onSortData([...filterState.data], order, property);
+    const filteredData = SortUtils.onSortData([...filterState.filteredData], order, property);
+
+    filterDispatch({ type: 'ORDER_DATA', payload: { data, filteredData, order, property } });
   };
 
   const renderCalendarFilter = property => (
@@ -112,7 +113,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         itemTemplate={selectTemplate}
         onChange={event => changeFilterValues(property, event.value, filterState.data)}
         optionLabel="type"
-        options={filterUtils.getOptionTypes(data, property)}
+        options={FilterUtils.getOptionTypes(data, property)}
         placeholder={resources.messages['select']}
         style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
         value={filterState.filterBy[property]}

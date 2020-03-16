@@ -1,21 +1,4 @@
-import { filterUtils } from '../Utils/filterUtils';
 import isEmpty from 'lodash/isEmpty';
-
-const onSortData = (data, order, property) => {
-  if (order === 1) {
-    return data.sort((a, b) => {
-      const textA = a[property].toUpperCase();
-      const textB = b[property].toUpperCase();
-      return textA < textB ? -1 : textA > textB ? 1 : 0;
-    });
-  } else {
-    return data.sort((a, b) => {
-      const textA = a[property].toUpperCase();
-      const textB = b[property].toUpperCase();
-      return textA < textB ? 1 : textA > textB ? -1 : 0;
-    });
-  }
-};
 
 export const filterReducer = (state, { type, payload }) => {
   const getFilterKeys = () =>
@@ -85,8 +68,8 @@ export const filterReducer = (state, { type, payload }) => {
     case 'ORDER_DATA':
       return {
         ...state,
-        data: onSortData([...state.data], payload.order, payload.property),
-        filteredData: onSortData([...state.filteredData], payload.order, payload.property),
+        data: payload.data,
+        filteredData: payload.filteredData,
         orderBy: { ...state.orderBy, [payload.property]: -payload.order }
       };
 
