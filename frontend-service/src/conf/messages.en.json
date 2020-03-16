@@ -502,6 +502,7 @@
     "columnInfoName": "Name",
     "columnInfoType": "Type",
     "name": "Name",
-    "expirationDate": "Expiration date"
+    "expirationDate": "Expiration date",
+    "clearFilters": "Clear all filters"
   }
 }

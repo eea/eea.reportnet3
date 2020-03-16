@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { FilterUtils } from './_functions/Utils/FilterUtils';
+import { FilterUtil } from './_functions/Utils/FilterUtil';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selectOptions }) => {
@@ -21,11 +21,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: cloneDeep(data),
-    filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+    dateOptions: dateOptions,
+    filterBy: FilterUtil.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
     orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
-    selectOptions: selectOptions,
-    dateOptions: dateOptions
+    selectOptions: selectOptions
   });
 
   useEffect(() => {
@@ -34,25 +34,28 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     }
   }, [filterState.filteredData]);
 
-  const changeFilterValues = (filter, value, data) => {
-    filterDispatch({ type: 'FILTER_DATA', payload: { data, filter, value } });
-  };
-
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL_FILTERS',
       payload: {
-        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+        filterBy: FilterUtil.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
         filteredData: cloneDeep(data)
       }
     });
   };
 
-  const onOrderData = (order, property) => {
-    const data = SortUtils.onSortData([...filterState.data], order, property);
-    const filteredData = SortUtils.onSortData([...filterState.filteredData], order, property);
+  const onFilterData = (filter, value) => {
+    const filteredKeys = FilterUtil.getFilterKeys(filterState, filter);
+    const filteredData = FilterUtil.onApplyFilters(filter, filteredKeys, filterState, value);
 
-    filterDispatch({ type: 'ORDER_DATA', payload: { data, filteredData, order, property } });
+    filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
+  };
+
+  const onOrderData = (order, property) => {
+    const sortedData = SortUtils.onSortData([...filterState.data], order, property);
+    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
+
+    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, order, property, sortedData } });
   };
 
   const renderCalendarFilter = property => (
@@ -61,7 +64,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         className={styles.calendarFilter}
         minDate={new Date()}
         monthNavigator={true}
-        onChange={event => changeFilterValues(property, event.value, filterState.data)}
+        onChange={event => onFilterData(property, event.value)}
         selectionMode="range"
         showWeek={true}
         value={filterState.filterBy[property]}
@@ -78,14 +81,14 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         className={styles.inputFilter}
         disabled={property.includes('ROD3')}
         id={property}
-        onChange={event => changeFilterValues(property, event.target.value, filterState.data)}
+        onChange={event => onFilterData(property, event.target.value)}
         value={filterState.filterBy[property]}
       />
       {filterState.filterBy[property] && (
         <Button
           className={`p-button-secondary-transparent ${styles.orderIcon} ${styles.cancelIcon}`}
           icon="cancel"
-          onClick={() => changeFilterValues(property, '', filterState.data)}
+          onClick={() => onFilterData(property, '')}
         />
       )}
       <label htmlFor={property}>{resources.messages[property]}</label>
@@ -111,9 +114,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         filter={false}
         id={property}
         itemTemplate={selectTemplate}
-        onChange={event => changeFilterValues(property, event.value, filterState.data)}
+        onChange={event => onFilterData(property, event.value, filterState.data)}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property)}
+        options={FilterUtil.getOptionTypes(data, property)}
         placeholder={resources.messages['select']}
         style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
         value={filterState.filterBy[property]}
@@ -153,7 +156,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.drashInput}`}
           icon="trash"
           onClick={() => onClearAllFilters()}
-          tooltip="Clear all filters"
+          tooltip={resources.messages['clearFilters']}
         />
       )}
     </div>
