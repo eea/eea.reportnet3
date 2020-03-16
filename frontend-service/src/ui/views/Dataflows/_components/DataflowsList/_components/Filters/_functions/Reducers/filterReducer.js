@@ -70,7 +70,6 @@ export const filterReducer = (state, { type, payload }) => {
       return {
         ...state,
         filterBy: { ...state.filterBy, [payload.property]: '' },
-
         filteredData: payload.filteredData
       };
 

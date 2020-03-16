@@ -57,7 +57,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   };
 
   const renderCalendarFilter = property => (
-    <span className={`${styles.dataflowInput} p-float-label`}>
+    <span className={` ${styles.dataflowInput} p-float-label`}>
       <Calendar
         className={styles.calendarFilter}
         minDate={new Date()}
@@ -74,7 +74,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   );
 
   const renderInputFilter = property => (
-    <span className={`${styles.dataflowInput} p-float-label`}>
+    <span className={`${styles.dataflowInput}  p-float-label`}>
       <InputText
         className={styles.inputFilter}
         disabled={property.includes('ROD3')}
@@ -84,7 +84,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       />
       {filterState.filterBy[property] && (
         <Button
-          className={`p-button-secondary-transparent ${styles.clearIcon}`}
+          className={`p-button-secondary-transparent ${styles.orderIcon}`}
           icon="cancel"
           onClick={() => onCancelButton(property)}
         />
