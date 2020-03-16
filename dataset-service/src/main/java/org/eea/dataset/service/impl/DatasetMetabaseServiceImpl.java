@@ -61,6 +61,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
+
 /**
  * The Class DatasetMetabaseServiceImpl.
  */
@@ -112,6 +114,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
@@ -588,6 +591,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  
+  /**
+   * Adds the foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
   @Override
   public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
     ForeignRelations foreign = new ForeignRelations();
@@ -602,12 +613,27 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     foreignRelationsRepository.save(foreign);
   }
 
+
+  /**
+   * Delete foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
   @Override
   public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
     foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin, datasetIdDestination, idPk);
   }
 
 
+  /**
+   * Gets the dataset destination foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idPk the id pk
+   * @return the dataset destination foreign relation
+   */
   @Override
   public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
     return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);

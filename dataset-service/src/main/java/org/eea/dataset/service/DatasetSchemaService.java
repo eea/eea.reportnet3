@@ -206,20 +206,70 @@ public interface DatasetSchemaService {
   void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
       DataType type, Long datasetId);
 
+  /**
+   * Check pk allow update.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
   Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
 
+  /**
+   * Update pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   */
   void updatePkCatalogue(FieldSchemaVO fieldSchemaVO);
 
+  /**
+   * Check existing pk referenced.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
   Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO);
 
+  /**
+   * Adds the foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
   void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
 
+  /**
+   * Gets the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param idFieldSchema the id field schema
+   * @return the field schema
+   */
   FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
   
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
   void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
   
+  /**
+   * Delete foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
   void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
   
+  /**
+   * Update foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   * @param datasetSchemaId the dataset schema id
+   */
   void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO, String datasetSchemaId);
 
 }

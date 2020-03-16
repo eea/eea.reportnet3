@@ -14,11 +14,13 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
@@ -99,6 +101,9 @@ public class DatasetMetabaseServiceTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+  
+  @Mock
+  private ForeignRelationsRepository foreingRelationsRepository;
 
 
   /**
@@ -344,5 +349,26 @@ public class DatasetMetabaseServiceTest {
         .thenReturn("5ce524fad31fc52540abae73");
     Assert.assertEquals("5ce524fad31fc52540abae73",
         datasetMetabaseService.findDatasetSchemaIdById(1L));
+  }
+  
+  @Test
+  public void testAddForeignRelation() {
+    Mockito.when(foreingRelationsRepository.save(Mockito.any()))
+    .thenReturn(new ForeignRelations());
+    datasetMetabaseService.addForeignRelation(1L, 1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(foreingRelationsRepository, times(1)).save(Mockito.any());
+  }
+  
+  @Test
+  public void testDeleteForeignRelation() {
+    Mockito.doNothing().when(foreingRelationsRepository).deleteFKByOriginDestinationAndPk(Mockito.any(), Mockito.any(), Mockito.any());
+    datasetMetabaseService.deleteForeignRelation(1L, 1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(foreingRelationsRepository, times(1)).deleteFKByOriginDestinationAndPk(Mockito.any(), Mockito.any(), Mockito.any());
+  }
+  
+  @Test
+  public void testGetDatasetDestinationForeignRelation() {
+    datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(foreingRelationsRepository, times(1)).findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
   }
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.bson.types.ObjectId;
@@ -17,6 +18,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -99,6 +101,9 @@ public class DataSetSchemaControllerImplTest {
 
   @Mock
   private RulesControllerZuul rulesControllerZuul;
+  
+  @Mock
+  private DesignDatasetService designDatasetService;
 
   /**
    * Inits the mocks.
@@ -525,6 +530,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
+    Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
+    .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
   }
 
@@ -536,6 +543,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
+    Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
+    .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -549,6 +558,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
+    Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
+    .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -562,6 +573,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
+    Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
+    .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(rulesControllerZuul, times(0)).createAutomaticRule(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
@@ -575,6 +588,8 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
+    Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
+    .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -773,6 +788,15 @@ public class DataSetSchemaControllerImplTest {
 
     Assert.assertFalse(dataSchemaControllerImpl.validateSchemas(1L));
 
+  }
+  
+  
+  @Test
+  public void testFindDataSchemasByIdDataflow() {
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any())).thenReturn(Arrays.asList(design));
+    dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L);
   }
 
 

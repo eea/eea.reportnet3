@@ -56,7 +56,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.UpdateResult;
-import javassist.bytecode.stackmap.TypeData;
 
 /**
  * The type Dataschema service.
@@ -127,6 +126,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private DatasetService datasetService;
 
 
+  /** The pk catalogue repository. */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
@@ -134,6 +134,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
+  
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -142,6 +147,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -745,6 +751,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   }
 
+  /**
+   * Check pk allow update.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
   @Override
   public Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
 
@@ -777,7 +790,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Check the PK is referenced or not in case we are trying to remove it
       if (!fieldSchemaVO.getIsPK()) {
         PkCatalogueSchema catalogue = pkCatalogueRepository
-            .findById(new ObjectId(fieldSchemaVO.getId())).orElse(new PkCatalogueSchema());
+            .findByIdPk(new ObjectId(fieldSchemaVO.getId()));
         if (catalogue != null && catalogue.getReferenced() != null
             && !catalogue.getReferenced().isEmpty()) {
           allow = false;
@@ -791,6 +804,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Check existing pk referenced.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
   @Override
   public Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO) {
     Boolean isReferenced = false;
@@ -809,6 +828,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Update pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   */
   @Override
   public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
     
@@ -829,6 +853,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
   
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException {
     //For fielSchemas that are PK
@@ -848,17 +878,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         pkCatalogueRepository.save(catalogue);
         //We need to update the field isReferenced from the PK referenced if this was the only field that was FK
         if(catalogue.getReferenced()!=null && catalogue.getReferenced().isEmpty()) {
-        Document fieldSchemaReferenced = schemasRepository.findFieldSchema(
-            fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-            fieldSchemaVO.getReferencedField().getIdPk());
-        fieldSchemaReferenced.put("isPKreferenced", false);
-        schemasRepository.updateFieldSchema(
-            fieldSchemaVO.getReferencedField().getIdDatasetSchema(), fieldSchemaReferenced);
+          Document fieldSchemaReferenced = schemasRepository.findFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+              fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaReferenced.put("isPKreferenced", false);
+          schemasRepository.updateFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(), fieldSchemaReferenced);
         }
       }
     }
   }
 
+  /**
+   * Adds the foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
   @Override
   public void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
     if (fieldSchemaVO.getReferencedField() != null) {
@@ -868,6 +904,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
   
+  /**
+   * Delete foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
   @Override
   public void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
     if (fieldSchemaVO.getReferencedField() != null) {
@@ -877,6 +919,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
   
+  /**
+   * Update foreign relation.
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   * @param datasetSchemaId the dataset schema id
+   */
   @Override
   public void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO, String datasetSchemaId) {
     Document fieldSchema =
@@ -901,6 +950,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Gets the design dataset id destination from fk.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the design dataset id destination from fk
+   */
   private Long getDesignDatasetIdDestinationFromFk(String idDatasetSchema) {
     Long datasetIdDestination = null;
     
@@ -914,6 +969,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Gets the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param idFieldSchema the id field schema
+   * @return the field schema
+   */
   @Override
   public FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema) {
 
@@ -932,8 +994,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         FieldSchema schema = objectMapper.readValue(json, FieldSchema.class);
         fieldVO = fieldSchemaNoRulesMapper.entityToClass(schema);
       } catch (JsonProcessingException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG_ERROR.error("Error getting the fieldSchemaVO");
       }
     }
     return fieldVO;
