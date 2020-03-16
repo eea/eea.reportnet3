@@ -112,6 +112,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
@@ -588,6 +589,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  /**
+   * Adds the foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
   @Override
   public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
     ForeignRelations foreign = new ForeignRelations();
@@ -604,6 +612,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
 
+  /**
+   * Gets the dataset destination foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idPk the id pk
+   * @return the dataset destination foreign relation
+   */
   @Override
   public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
     return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);

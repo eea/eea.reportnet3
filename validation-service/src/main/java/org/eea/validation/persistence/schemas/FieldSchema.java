@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.validation.persistence.schemas;
 
 import java.util.Objects;
@@ -23,12 +20,14 @@ import lombok.ToString;
 @ToString
 public class FieldSchema {
 
-
   /** The id field schema. */
   @Id
   @Field(value = "_id")
   private ObjectId idFieldSchema;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The idRecord. */
   @Field(value = "idRecord")
@@ -51,6 +50,19 @@ public class FieldSchema {
   @Field(value = "required")
   private Boolean required;
 
+  /** The is PK. */
+  @Field(value = "isPK")
+  private Boolean isPK;
+
+
+  /** The is P kreferenced. */
+  @Field(value = "isPKreferenced")
+  private Boolean isPKreferenced;
+
+  /** The reference FK. */
+  @Field(value = "referencedField")
+  private ReferencedFieldSchema referencedField;
+
   /**
    * Hash code.
    *
@@ -58,7 +70,8 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required);
+    return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
+        description, isPK);
   }
 
 
@@ -79,7 +92,8 @@ public class FieldSchema {
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
-        && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required);
+        && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
+        && Objects.equals(isPK, other.isPK) && Objects.equals(description, other.description);
   }
 
 
