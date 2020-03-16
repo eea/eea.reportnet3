@@ -501,6 +501,7 @@
     "columnInfoDescription": "Description",
     "columnInfoName": "Name",
     "columnInfoType": "Type",
-    "name": "Name"
+    "name": "Name",
+    "expirationDate": "Expiration date"
   }
 }
