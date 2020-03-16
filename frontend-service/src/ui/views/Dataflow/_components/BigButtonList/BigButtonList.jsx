@@ -167,7 +167,7 @@ export const BigButtonList = ({
       receiptBtnRef.current.click();
       receiptDispatch({
         type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false, receiptData: {} }
+        payload: { isLoading: false, isOutdated: false }
       });
     }
   };
@@ -184,6 +184,8 @@ export const BigButtonList = ({
   const onLoadReceiptData = async () => {
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      console.log('#'.repeat(50));
+      console.log('response', response);
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: true, receiptData: response }
@@ -308,7 +310,7 @@ export const BigButtonList = ({
           yearRange="2020:2030"
         />
       </ConfirmDialog>
-
+      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       {/* <PDFDownloadLink
         document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>

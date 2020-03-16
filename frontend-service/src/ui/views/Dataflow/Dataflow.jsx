@@ -377,7 +377,7 @@ const Dataflow = withRouter(({ history, match }) => {
         if (isOutdated.length === 1) {
           receiptDispatch({
             type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {} }
+            payload: { isLoading: false, isOutdated: isOutdated[0] }
           });
         }
       }
