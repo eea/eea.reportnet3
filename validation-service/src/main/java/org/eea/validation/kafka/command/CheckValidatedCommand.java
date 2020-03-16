@@ -23,13 +23,14 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
    * Perform action.
    *
    * @param eeaEventVO the eea event VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final String uuid = (String) eeaEventVO.getData().get("uuid");
-    final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
     synchronized (processMap) {
       if (processMap.containsKey(uuid)) {

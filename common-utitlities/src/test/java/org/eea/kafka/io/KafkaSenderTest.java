@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.kafka.core.KafkaOperations;
+import org.springframework.kafka.core.KafkaOperations.OperationsCallback;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
@@ -56,6 +58,7 @@ public class KafkaSenderTest {
 
     Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
     kafkaSender.sendMessage(event);
+    Mockito.verify(kafkaTemplate, Mockito.times(1)).executeInTransaction(Mockito.any());
   }
 
 }

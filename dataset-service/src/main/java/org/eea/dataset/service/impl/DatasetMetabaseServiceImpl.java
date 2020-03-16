@@ -602,6 +602,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     foreignRelationsRepository.save(foreign);
   }
 
+  @Override
+  public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
+    foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin, datasetIdDestination, idPk);
+  }
 
 
   @Override

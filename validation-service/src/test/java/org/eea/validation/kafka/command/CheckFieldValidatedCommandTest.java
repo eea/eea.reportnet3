@@ -65,7 +65,7 @@ public class CheckFieldValidatedCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_FIELD_COMPLETED);
     eeaEventVO.setData(data);

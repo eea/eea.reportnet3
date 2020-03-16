@@ -126,5 +126,7 @@ public interface DatasetMetabaseService {
   void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
 
   Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
+  
+  void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
 
 }
