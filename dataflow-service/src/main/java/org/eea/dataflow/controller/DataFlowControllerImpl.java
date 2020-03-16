@@ -13,6 +13,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -260,6 +261,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
+  @LockMethod
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
   public ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
