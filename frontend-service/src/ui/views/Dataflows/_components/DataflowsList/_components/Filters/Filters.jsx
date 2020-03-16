@@ -80,7 +80,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       />
       {filterState.filterBy[property] && (
         <Button
-          className={`p-button-secondary-transparent ${styles.orderIcon}`}
+          className={`p-button-secondary-transparent ${styles.orderIcon} ${styles.cancelIcon}`}
           icon="cancel"
           onClick={() => changeFilterValues(property, '', filterState.data)}
         />
@@ -147,10 +147,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         ))}
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
-          className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.drashInput}`}
           icon="trash"
           onClick={() => onClearAllFilters()}
-          tooltip="clear filters"
+          tooltip="Clear all filters"
         />
       )}
     </div>
