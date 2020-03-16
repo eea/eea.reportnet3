@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data flow controller.
@@ -252,16 +251,15 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
-
   /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
+   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
-  @LockMethod
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
   public ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
@@ -300,6 +298,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Update data flow.
    *
    * @param dataFlowVO the data flow VO
+   *
    * @return the response entity
    */
   @Override
