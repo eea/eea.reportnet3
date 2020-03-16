@@ -17,9 +17,6 @@
 .filterInactive {
   opacity: 0.25 !important;
 }
-.showValidationsData {
-  min-height: 44vh !important;
-}
 .validationCol {
   width: 15px;
 }

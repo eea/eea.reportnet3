@@ -68,7 +68,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       zIndex={3100}>
       <DataTable
         autoLayout={true}
-        className={styles.showNotificationsData}
         loading={false}
         paginator={true}
         paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}

@@ -207,7 +207,833 @@ const deleteById = async dataflowId => {
 
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
-  console.log({ datasetSchemasDTO });
+  // const datasetSchemasDTO = [
+  //   {
+  //     idDataSetSchema: '5e662c48c9b42f00018d4cbc',
+  //     description: null,
+  //     nameDatasetSchema: 'schema dos',
+  //     tableSchemas: [
+  //       {
+  //         idTableSchema: '5e65f90b7c84f327b83722d9',
+  //         description: null,
+  //         nameTableSchema: 'Tsabla uno',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f90b7c84f327b83722da',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9197c84f327b83722db',
+  //               description: null,
+  //               idRecord: '5e65f90b7c84f327b83722da',
+  //               name: 'campo uno',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637684f327b83722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: false,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84fz27b83722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e63f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327bg3722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b8h722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f322b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84v327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b8g722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327d83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84fs27b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b8372ade',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b8h722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b13722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b8f722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f32ab83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b83722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b8j722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327183722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327bk3722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327e83722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c8jf327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327b837x2de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327bj3722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327bj1722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: false,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327j83722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: false,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e65f95a7c84f327b83722dc',
+  //         description: null,
+  //         nameTableSchema: 'TAbla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e65f95a7c84f327b83722dd',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e65f9637c84f327283722de',
+  //               description: null,
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo uno bis',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e65f9687c84f327b83722df',
+  //               description: '',
+  //               idRecord: '5e65f95a7c84f327b83722dd',
+  //               name: 'campo dos',
+  //               type: 'NUMBER',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     idDataSetSchema: '5e6627461cf2e754ac519f9a',
+  //     description: null,
+  //     nameDatasetSchema: 'schema uno',
+  //     tableSchemas: [
+  //       {
+  //         idTableSchema: '5e66274f1cf2eg54ac519f9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla tres',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac519f3d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e754ac519f93',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f3d',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551cf2e754ac519f9e',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f3d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e66274f1cf2e754ac519f9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac519f9d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e754ac513f93',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9h',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551cf2e754ac519f9e',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     idDataSetSchema: '5e6627461cf2e754ac519f9a',
+  //     description: null,
+  //     nameDatasetSchema: 'schema tres',
+  //     tableSchemas: [
+  //       {
+  //         idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla tres2',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac51933d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e754a1519f33',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '6e6627551cf2e754ac519f91',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e66274f1cf2e754ac519f9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac519f9d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e75fac519f93',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9h',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551cf22744ac519f9e',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     idDataSetSchema: '5e6627461cf2e754ac519f9a',
+  //     description: null,
+  //     nameDatasetSchema: 'schema cuatro',
+  //     tableSchemas: [
+  //       {
+  //         idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla tres2',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac51933d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e754a1519f33',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551cf2e752ac519f91',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e66274f1cf2e754ac519f9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac519f9d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2275fac519f93',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9h',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551cf1e744ac519f9e',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     idDataSetSchema: '5e6627461cf2e754ac519f9a',
+  //     description: null,
+  //     nameDatasetSchema: 'schema cinco',
+  //     tableSchemas: [
+  //       {
+  //         idTableSchema: '5e66274f1cf2e7g4ac519g9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla tres2',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac51933d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e754a1519f33',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e66275513f2e754ac519f91',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac51933d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       },
+  //       {
+  //         idTableSchema: '5e66274f1cf2e754ac519f9c',
+  //         description: null,
+  //         nameTableSchema: 'tabla dos',
+  //         recordSchema: {
+  //           idRecordSchema: '5e66274f1cf2e754ac519f9d',
+  //           fieldSchema: [
+  //             {
+  //               id: '5e6627551cf2e75fac519f93',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9h',
+  //               name: 'campito zero',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: null,
+  //               referencedField: null
+  //             },
+  //             {
+  //               id: '5e6627551c42e744ac519f9e',
+  //               description: null,
+  //               idRecord: '5e66274f1cf2e754ac519f9d',
+  //               name: 'campito one',
+  //               type: 'TEXT',
+  //               codelistItems: null,
+  //               required: false,
+  //               isPK: true,
+  //               referencedField: null
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   }
+  // ];
+  // console.log({ datasetSchemasDTO });
   const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
     const dataset = new Dataset({
       datasetSchemaDescription: datasetSchemaDTO.description,
@@ -253,6 +1079,13 @@ const getAllSchemas = async dataflowId => {
     return dataset;
   });
 
+  console.log({ datasetSchemas });
+  datasetSchemas.sort((a, b) => {
+    console.log(a.datasetSchemaName, b.datasetSchemaName);
+    const textA = a.datasetSchemaName.toUpperCase();
+    const textB = b.datasetSchemaName.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
   console.log({ datasetSchemas });
   return datasetSchemas;
 };

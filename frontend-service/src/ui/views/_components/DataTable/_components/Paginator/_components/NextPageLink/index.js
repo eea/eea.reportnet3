@@ -1,0 +1,1 @@
+export { NextPageLink } from './NextPageLink';
