@@ -50,7 +50,9 @@ public class PKValidationUtils {
 
   private static final Integer PAGE_SIZE = 1000;
 
-  public static Boolean isfieldPK(Long datasetIdReference, String idFieldSchema) {
+  public static Boolean isfieldPK(String datasetId, String idFieldSchema) {
+
+    long datasetIdReference = Long.parseLong(datasetId);
 
     Long datasetIdRefered =
         dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchema);
@@ -93,6 +95,8 @@ public class PKValidationUtils {
     String queryFKPart = createQuery(datasetSchemaFK, fkId, datasetIdReference, true);
     List<String> b = datasetRepository.queryExecution(queryFKPart);
 
+
+    System.out.println("yeah");
   }
 
   private static String createQuery(DataSetSchema datasetSchema, String idFieldSchema,

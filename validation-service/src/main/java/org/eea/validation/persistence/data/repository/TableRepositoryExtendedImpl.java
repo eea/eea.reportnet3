@@ -12,9 +12,10 @@ public class TableRepositoryExtendedImpl implements TableRepositoryExtended {
 
   /** The Constant TABLE_SCHEMA_BY_ID_FIELD. */
   private static final String TABLE_SCHEMA_BY_ID_FIELD =
-      "SELECT id_table_schema from dataset_%d.table_value tv where tv.id = "
-          + "(select rv.id_table from dataset_%d.record_value rv where rv.id = "
-          + "(select fv.id_record from dataset_%d.field_value fv where fv.id_field_schema='%s'))";
+      "select distinct id_table_schema from dataset_%s.table_value tv "
+          + " inner join dataset_%s.record_value rv " + " on tv.id = rv.id_table "
+          + " inner join dataset_%s.field_value fv " + " on fv.id_record = rv.id "
+          + " where fv.id_field_schema='%s' ";
 
   /** The entity manager. */
   @PersistenceContext
