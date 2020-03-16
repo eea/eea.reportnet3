@@ -94,7 +94,8 @@ export const createValidationReducer = (state, { type, payload }) => {
         groupExpresionsActive: 0,
         candidateRule: {
           ...state.candidateRule,
-          expresions: payload.expresions
+          expresions: payload.expresions,
+          allExpresions: payload.allExpresions
         }
       };
     case 'GROUP_RULES_ACTIVATOR':

@@ -347,33 +347,17 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 <span>{resourcesContext.messages.value}</span>
               </li>
               {creationFormState.candidateRule.expresions &&
-                creationFormState.candidateRule.expresions.map((expresion, i) => {
-                  if (expresion.expresions.length == 0) {
-                    return (
-                      <ValidationExpresion
-                        expresionValues={expresion}
-                        isDisabled={creationFormState.areRulesDisabled}
-                        key={expresion.expresionId}
-                        onExpresionDelete={onExpresionDelete}
-                        onExpresionFieldUpdate={onExpresionFieldUpdate}
-                        onExpresionGroup={onExpresionGroup}
-                        position={i}
-                      />
-                    );
-                  } else {
-                    return (
-                      <ValidationExpresionGroup
-                        expresionValues={expresion}
-                        isDisabled={creationFormState.areRulesDisabled}
-                        key={expresion.expresionId}
-                        onExpresionDelete={onExpresionDelete}
-                        onExpresionFieldUpdate={onExpresionFieldUpdate}
-                        onExpresionGroup={onExpresionGroup}
-                        position={i}
-                      />
-                    );
-                  }
-                })}
+                creationFormState.candidateRule.expresions.map((expresion, i) => (
+                  <ValidationExpressionSelector
+                    expresionValues={expresion}
+                    isDisabled={creationFormState.areRulesDisabled}
+                    key={expresion.expresionId}
+                    onExpresionDelete={onExpresionDelete}
+                    onExpresionFieldUpdate={onExpresionFieldUpdate}
+                    onExpresionGroup={onExpresionGroup}
+                    position={i}
+                  />
+                ))}
             </ul>
           </div>
 
@@ -385,18 +369,20 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 type="button"
                 label="Group"
                 icon="plus"
-                onClick={e =>
+                onClick={e => {
+                  const groupingResult = groupExpresions(
+                    creationFormState.candidateRule.expresions,
+                    creationFormState.groupExpresionsActive,
+                    creationFormState.groupCandidate
+                  );
                   creationFormDispatch({
                     type: 'GROUP_EXPRESIONS',
                     payload: {
-                      expresions: groupExpresions(
-                        creationFormState.candidateRule.expresions,
-                        creationFormState.groupExpresionsActive,
-                        creationFormState.groupCandidate
-                      )
+                      expresions: groupingResult.expresions,
+                      allExpresions: [...creationFormState.candidateRule.allExpresions, groupingResult.newGroup]
                     }
-                  })
-                }
+                  });
+                }}
               />
             </div>
           )}

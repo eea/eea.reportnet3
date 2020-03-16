@@ -8,6 +8,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -45,6 +46,21 @@ const ValidationExpresionGroup = ({
       );
     }
   };
+  const getContainedExpresions = () => {
+    if (expresionValues.expresions.length > 0) {
+      return expresionValues.expresions.map((expresion, i) => (
+        <ValidationExpressionSelector
+          expresionValues={expresion}
+          isDisabled={false}
+          onExpresionDelete={onExpresionDelete}
+          onExpresionFieldUpdate={onExpresionFieldUpdate}
+          onExpresionGroup={onExpresionGroup}
+          position={i}
+        />
+      ));
+    }
+    return <></>;
+  };
 
   // layouts
   const defaultLayout = (
@@ -78,6 +94,7 @@ const ValidationExpresionGroup = ({
             <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
             {expresionsVisibilityToggleBtn()}
           </span>
+          <span>{groupExpresionsVisible && getContainedExpresions()}</span>
         </li>
       </ul>
     </li>
