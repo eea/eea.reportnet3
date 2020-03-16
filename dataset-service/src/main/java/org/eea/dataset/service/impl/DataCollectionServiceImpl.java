@@ -321,7 +321,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
       Long dataflowId, Date dueDate) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
-        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema()))) {
+        dataflowId, String.format(NAME_DC, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_DC_INTO_DATA_COLLECTION, datasetId, dueDate));
