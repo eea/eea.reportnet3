@@ -279,8 +279,8 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case LINK:
-          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, typeEntityEnum.TABLE,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, datasetId));
+          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
+              FIELD_TYPE + typeData, "FK" + shortcode, FT_DESCRIPTION + typeData, datasetId));
 
           break;
         case CODELIST:

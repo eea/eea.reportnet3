@@ -2,12 +2,12 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -38,20 +40,12 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/snapshot")
 public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Gets the snapshots by id dataset.
@@ -78,9 +72,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG_ERROR.error("Error getting the list of snapshots. ", e.getMessage(), e);
     }
     return snapshots;
-
   }
-
 
   /**
    * Creates the snapshot.
@@ -131,7 +123,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
   /**
    * Restore snapshot.
    *
@@ -165,7 +156,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
   /**
    * Release snapshot.
    *
@@ -190,9 +180,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
-
   }
-
 
   /**
    * Gets the schema snapshots by id dataset.
@@ -279,7 +267,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
   /**
    * Delete schema snapshot.
    *
@@ -310,32 +297,28 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
-   * @param idDataflow the id dataflow
-   * @param idDataProvider the id data provider
-   * @return the released and updated status
+   * @param response the response
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{idDataflow}/releaseStatus/{idDataProvider}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_PROVIDER')")
-  public ReleaseReceiptVO getReleasedAndUpdatedStatus(@PathVariable("idDataflow") Long idDataflow,
-      @PathVariable("idDataProvider") Long idDataProvider) {
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
+      @PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId) {
+    StreamingResponseBody stream =
+        out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
-    ReleaseReceiptVO receipt = null;
-    try {
-      receipt = datasetSnapshotService.getReleasedAndUpdatedStatus(idDataflow, idDataProvider);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error getting the data to make the receipt of the release. ", e.getMessage(),
-          e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
-    }
-    return receipt;
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
+
+    return new ResponseEntity<>(stream, HttpStatus.OK);
   }
-
 }

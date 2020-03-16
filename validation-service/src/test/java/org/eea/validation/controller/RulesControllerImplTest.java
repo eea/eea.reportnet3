@@ -194,10 +194,10 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createAutomaticRuleTestFalse() throws EEAException {
-    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
+    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
         Boolean.FALSE);
     Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", DataType.BOOLEAN,
-        EntityTypeEnum.FIELD, Boolean.FALSE);
+        EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
   }
 
   /**
@@ -209,9 +209,9 @@ public class RulesControllerImplTest {
   public void createAutomaticRuleTestFalseThrow() throws EEAException {
 
     doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", DataType.BOOLEAN,
-        EntityTypeEnum.FIELD, Boolean.FALSE);
+        EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     try {
-      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
+      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
           Boolean.FALSE);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -226,10 +226,10 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createAutomaticRuleTestTrue() throws EEAException {
-    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
+    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
         Boolean.TRUE);
     Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", null, EntityTypeEnum.FIELD,
-        Boolean.TRUE);
+        1L, Boolean.TRUE);
   }
 
   /**
@@ -240,9 +240,9 @@ public class RulesControllerImplTest {
   @Test
   public void createAutomaticRuleTestTrueThrow() throws EEAException {
     doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", null,
-        EntityTypeEnum.FIELD, Boolean.TRUE);
+        EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     try {
-      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD,
+      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
           Boolean.TRUE);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());

@@ -215,5 +215,11 @@ public interface DatasetSchemaService {
   void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
 
   FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
+  
+  void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
+  
+  void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
+  
+  void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO, String datasetSchemaId);
 
 }

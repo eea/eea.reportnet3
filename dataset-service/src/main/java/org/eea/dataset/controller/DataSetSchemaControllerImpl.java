@@ -417,6 +417,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
       if (dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO)) {
+        
+        // Modify the register into the metabase fieldRelations
+        dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+        
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
         // After the update, we create the rules needed and change the type of the field if
@@ -426,10 +430,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // Add the Pk if needed to the catalogue
         dataschemaService.updatePkCatalogue(fieldSchemaVO);
-
-        // Add the register into the metabase fieldRelations
-        dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
-
       } else {
         if (fieldSchemaVO.getIsPK() != null && fieldSchemaVO.getIsPK()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -459,8 +459,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (dataschemaService.checkPkAllowUpdate(datasetSchemaId,
-          dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId))) {
+      FieldSchemaVO fieldVO = dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
+      if (!dataschemaService.checkExistingPkReferenced(fieldVO)) {
         // Delete the fieldSchema from the datasetSchema
         if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -470,6 +470,15 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
         // Delete the fieldSchema from the dataset
         datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+        
+        // Delete the Pk if needed from the catalogue
+        dataschemaService.deleteFromPkCatalogue(fieldVO);
+        
+        //Delete the foreign relation between idDatasets in metabase, if needed
+        dataschemaService.deleteForeignRelation(datasetId, fieldVO);
+      }
+      else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,

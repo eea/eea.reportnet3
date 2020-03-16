@@ -2,8 +2,14 @@ package org.eea.kafka.io;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -18,7 +24,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * The type Kafka sender.
@@ -57,26 +62,19 @@ public class KafkaSender {
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
-      Message<EEAEventVO> message = null;
       final List<PartitionInfo> partitions =
           kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+      Integer partitionId = null;
       if (event.getEventType().isSorted()) {
         // partition = hash(message_key)%number_of_partitions
-        final Integer partitionId =
+        partitionId =
             Math.floorMod(event.getEventType().getKey().hashCode(), partitions.size());
-
-        message = MessageBuilder.withPayload(event)
-            .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
-            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
       } else {
-        message = MessageBuilder.withPayload(event)
-            .setHeader(KafkaHeaders.PARTITION_ID,
-                ThreadLocalRandom.current().nextInt(partitions.size()))
-            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+        partitionId = ThreadLocalRandom.current().nextInt(partitions.size());
       }
-      final ListenableFuture<SendResult<String, EEAEventVO>> future = operations.send(message);
+      final ListenableFuture<SendResult<String, EEAEventVO>> future = operations
+          .send(new ProducerRecord(event.getEventType().getTopic(),
+              partitionId, event.getEventType().getKey(), event));
       Boolean sendResult = true;
 
       try {
