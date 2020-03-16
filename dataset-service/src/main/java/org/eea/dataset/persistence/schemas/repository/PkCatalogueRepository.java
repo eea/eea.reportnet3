@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  */
 public interface PkCatalogueRepository extends MongoRepository<PkCatalogueSchema, ObjectId> {
 
+  PkCatalogueSchema findByIdPk(ObjectId idPk);
 
-
+  void deleteByIdPk(ObjectId idPk);
 }
