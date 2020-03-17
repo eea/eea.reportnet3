@@ -35,6 +35,15 @@ public class FieldSchemaVO {
   /** The required. */
   private Boolean required;
 
+  /** The is PK. */
+  private Boolean pk;
+
+  /** The is P kreferenced. */
+  private Boolean pkReferenced;
+
+  /** The referenced field. */
+  private ReferencedFieldSchemaVO referencedField;
+
   /**
    * Hash code.
    *
@@ -42,7 +51,9 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, idRecord, name, type, codelistItems, required);
+
+    return Objects.hash(id, description, idRecord, name, type, codelistItems, required, pk);
+
   }
 
   /**
@@ -62,6 +73,7 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(type, other.type) && Objects.equals(required, other.required);
+        && Objects.equals(type, other.type) && Objects.equals(required, other.required)
+        && Objects.equals(pk, other.pk);
   }
 }

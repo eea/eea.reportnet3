@@ -84,10 +84,15 @@ public enum DataType {
    */
   POLYGON("POLYGON"),
 
-  /**
-   * The codelist.
-   */
-  CODELIST("CODELIST");
+  /** The codelist. */
+  CODELIST("CODELIST"),
+
+  /** The link. */
+  LINK("LINK"),
+
+  /** The link data. */
+  LINK_DATA("LINK_DATA");
+
 
   /**
    * The value.

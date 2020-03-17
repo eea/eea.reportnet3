@@ -18,12 +18,14 @@ import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -58,6 +60,8 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -109,6 +113,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The foreign relations repository. */
+  @Autowired
+  private ForeignRelationsRepository foreignRelationsRepository;
 
 
 
@@ -581,4 +589,56 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public String findDatasetSchemaIdById(long datasetId) {
     return dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
   }
+
+
+  /**
+   * Adds the foreign relation into the metabase.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
+  @Override
+  public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
+    ForeignRelations foreign = new ForeignRelations();
+    DataSetMetabase dsOrigin = new DataSetMetabase();
+    DataSetMetabase dsDestination = new DataSetMetabase();
+    dsOrigin.setId(datasetIdOrigin);
+    dsDestination.setId(datasetIdDestination);
+    foreign.setIdDatasetOrigin(dsOrigin);
+    foreign.setIdDatasetDestination(dsDestination);
+    foreign.setIdPk(idPk);
+
+    foreignRelationsRepository.save(foreign);
+  }
+
+
+  /**
+   * Delete foreign relation from the metabase.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
+  @Override
+  public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
+    foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin,
+        datasetIdDestination, idPk);
+  }
+
+
+  /**
+   * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
+   * FK
+   * 
+   * @param datasetIdOrigin the dataset id origin
+   * @param idPk the id pk
+   * @return the dataset destination foreign relation
+   */
+  @Override
+  public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
+    return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
+  }
+
+
 }

@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -38,6 +39,10 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
+
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
@@ -45,6 +50,7 @@ public class RulesServiceImpl implements RulesService {
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
+
 
   /** The rule mapper. */
   @Autowired
@@ -235,17 +241,18 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Creates the automatic rules. That method create all automatic rules, and this check if that
    * rules are about diferent types
-   * 
+   *
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param required the required
    * @throws EEAException the EEA exception
    */
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
+      EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
@@ -278,6 +285,16 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case LINK:
+          // we call this method to find the tableschemaid because we want to create that validation
+          // at TABLE level
+          // that is for evite do many calls to database and colapse it
+          String tableSchemaId =
+              tableRepository.findTableValueByFieldSchemaId(datasetId, referenceId);
+          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, tableSchemaId,
+              datasetId));
+          break;
         case CODELIST:
           // we find values avaliable to create this validation for a codelist, same value with
           // capital letter and without capital letters
@@ -300,6 +317,16 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  // @Override
+  // public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+  // Long datasetId) {
+  // ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
+  // FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+  // Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
+  // FT_DESCRIPTION, datasetId);
+  // rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+  //
+  // }
   /**
    * Delete rule required.
    *
@@ -378,4 +405,6 @@ public class RulesServiceImpl implements RulesService {
     LOG_ERROR.error("Rule {} not found", ruleId);
     return false;
   }
+
+
 }

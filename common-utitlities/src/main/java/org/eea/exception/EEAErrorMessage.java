@@ -193,6 +193,12 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_UPDATING_RULE. */
   public static final String ERROR_UPDATING_RULE = "Error updating rule";
 
+  /** The Constant PK_REFERENCED. */
+  public static final String PK_REFERENCED = "PK with existing references";
+
+  /** The Constant PK_ALREADY_EXISTS. */
+  public static final String PK_ALREADY_EXISTS = "There is an existing PK";
+
   /**
    * Instantiates a new EEA error message.
    */
