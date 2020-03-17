@@ -103,6 +103,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
@@ -377,14 +378,19 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // propagate the new field to the existing records in the dataset value
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
       // with that we create the rule automatic required
-      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
+      // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
+      // FOR TESTING THE REST OF THE CODE
+      if (!DataType.LINK.equals(fieldSchemaVO.getType())) {
+        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+
+          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+        }
+        // and with it we create the others automatic rules like number etc
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
-      // and with it we create the others automatic rules like number etc
-      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
       dataschemaService.updatePkCatalogue(fieldSchemaVO);
@@ -417,16 +423,20 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
       if (dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO)) {
-        
+
         // Modify the register into the metabase fieldRelations
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
-        
+
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
-        dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-            datasetId);
+        // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
+        // FOR TESTING THE REST OF THE CODE
+        if (!DataType.LINK.equals(type)) {
+          dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+              datasetId);
+        }
 
         // Add the Pk if needed to the catalogue
         dataschemaService.updatePkCatalogue(fieldSchemaVO);
@@ -460,6 +470,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       FieldSchemaVO fieldVO = dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
+      // Validate if the field we want to delete is a PK and it's being referenced by another field
       if (!dataschemaService.checkExistingPkReferenced(fieldVO)) {
         // Delete the fieldSchema from the datasetSchema
         if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
@@ -470,14 +481,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
         // Delete the fieldSchema from the dataset
         datasetService.deleteFieldValues(datasetId, fieldSchemaId);
-        
+
         // Delete the Pk if needed from the catalogue
         dataschemaService.deleteFromPkCatalogue(fieldVO);
-        
-        //Delete the foreign relation between idDatasets in metabase, if needed
+
+        // Delete the foreign relation between idDatasets in metabase, if needed
         dataschemaService.deleteForeignRelation(datasetId, fieldVO);
-      }
-      else {
+      } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
     } catch (EEAException e) {
@@ -571,11 +581,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
+
+  /**
+   * Find data schemas by id dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("hasRole('DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
       @PathVariable("idDataflow") Long idDataflow) {
 
