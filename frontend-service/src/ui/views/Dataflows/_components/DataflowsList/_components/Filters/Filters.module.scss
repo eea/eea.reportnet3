@@ -64,8 +64,9 @@
   color: var(--floating-label-color) !important;
   width: 100% !important;
   padding-left: 0em;
-  height: 2.5em;
+  height: 2.8em;
   border-bottom: var(--inputtext-border) !important;
+  font-size: 9pt !important;
 }
 
 .statusBox {
@@ -98,10 +99,6 @@
   width: 100% !important;
 }
 
-.drashInput {
-  color: red !important;
-}
-
 .calendarFilter {
   border: none !important;
 }
@@ -112,4 +109,12 @@
   border-right: none !important;
   border-radius: none !important;
   border-bottom: var(--inputtext-border) !important;
+}
+
+.datePlaceholder {
+  font-size: 10pt !important;
+}
+
+.drashInput {
+  color: red !important;
 }

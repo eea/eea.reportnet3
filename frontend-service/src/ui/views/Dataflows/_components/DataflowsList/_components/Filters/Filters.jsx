@@ -69,7 +69,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         yearNavigator={true}
         yearRange="2020:2030"
       />
-      <label htmlFor={property}>{resources.messages[property]}</label>
+      <label className={styles.datePlaceholder} htmlFor={property}>
+        {resources.messages[property]}
+      </label>
     </span>
   );
 
@@ -116,7 +118,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         optionLabel="type"
         options={filterUtils.getOptionTypes(data, property)}
         placeholder={resources.messages['select']}
-        style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
+        //style={{ fontSize: '9pt' }}
         value={filterState.filterBy[property]}
       />
     </span>
