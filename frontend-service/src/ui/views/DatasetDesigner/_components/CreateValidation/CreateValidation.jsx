@@ -142,13 +142,15 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     const {
       candidateRule: { expresions, allExpresions }
     } = creationFormState;
+    const parsedAllExpressions = deleteExpresion(expresionId, allExpresions);
+    const parsedExpressions = deleteExpresionRecursivily(expresionId, expresions);
     creationFormDispatch({
       type: 'UPDATE_RULES',
-      payload: deleteExpresion(expresionId, allExpresions)
+      payload: parsedAllExpressions
     });
     creationFormDispatch({
       type: 'UPDATE_EXPRESIONS_TREE',
-      payload: deleteExpresionRecursivily(expresionId, expresions)
+      payload: parsedExpressions
     });
   };
 
@@ -199,9 +201,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   return dialogLayout(
     <form>
-      {console.info('#'.repeat(60))}
-      {console.info('candidateRule %o', creationFormState.candidateRule)}
-      {console.info('#'.repeat(60))}
       <div id={styles.QCFormWrapper}>
         <div className={styles.body}>
           <div className={styles.section}>
