@@ -32,8 +32,8 @@ export const FieldDesigner = ({
   fieldDescription,
   datasetSchemas,
   fieldName,
-  fieldIsPK,
-  fieldIsPKReferenced,
+  fieldPK,
+  fieldPKReferenced,
   fieldLink,
   fieldRequired,
   fieldType,
@@ -87,7 +87,7 @@ export const FieldDesigner = ({
   const initialFieldDesignerState = {
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
-    fieldIsPKValue: fieldIsPK,
+    fieldPKValue: fieldPK,
     fieldPreviousTypeValue: '',
     fieldLinkValue: fieldLink || null,
     fieldRequiredValue: fieldRequired,
@@ -170,13 +170,12 @@ export const FieldDesigner = ({
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-            console.log(fieldDesignerState.fieldIsPKValue);
             onFieldAdd({ type: parseGeospatialTypes(type.fieldType) });
           }
         }
       } else {
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
-          fieldUpdate({ type: parseGeospatialTypes(type.fieldType) });
+          fieldUpdate({ codelistItems: null, type: parseGeospatialTypes(type.fieldType) });
         } else {
           if (type !== '') {
             onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
@@ -281,7 +280,7 @@ export const FieldDesigner = ({
   const onFieldAdd = async ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
-    isPK = fieldDesignerState.fieldIsPKValue,
+    pk = fieldDesignerState.fieldPKValue,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
@@ -292,7 +291,7 @@ export const FieldDesigner = ({
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         codelistItems,
         description,
-        isPK,
+        pk,
         name,
         recordId,
         referencedField,
@@ -307,7 +306,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           fieldId: response.data,
-          isPK,
+          pk,
           name,
           recordId,
           referencedField,
@@ -404,10 +403,10 @@ export const FieldDesigner = ({
           !isNil(fieldDesignerState.fieldValue) &&
           fieldDesignerState.fieldValue !== ''
         ) {
-          onFieldAdd({ isPK: checked });
+          onFieldAdd({ pk: checked });
         }
       } else {
-        fieldUpdate({ isPK: checked, required: checked ? true : fieldDesignerState.fieldRequiredValue });
+        fieldUpdate({ pk: checked, required: checked ? true : fieldDesignerState.fieldRequiredValue });
       }
     }
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
@@ -502,7 +501,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     fieldSchemaId = fieldId,
-    isPK = fieldDesignerState.fieldIsPKValue,
+    pk = fieldDesignerState.fieldPKValue,
     name = fieldDesignerState.fieldValue,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -513,7 +512,7 @@ export const FieldDesigner = ({
         codelistItems,
         description,
         fieldSchemaId,
-        isPK,
+        pk,
         name,
         referencedField,
         required,
@@ -523,7 +522,7 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       } else {
-        onFieldUpdate({ codelistItems, description, id: fieldId, isPK, name, required, type });
+        onFieldUpdate({ codelistItems, description, id: fieldId, pk, name, required, type });
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
@@ -551,7 +550,7 @@ export const FieldDesigner = ({
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
         className={styles.checkRequired}
-        disabled={Boolean(fieldDesignerState.fieldIsPKValue)}
+        disabled={Boolean(fieldDesignerState.fieldPKValue)}
         inputId={`${fieldId}_check`}
         label="Default"
         onChange={e => {
@@ -560,8 +559,8 @@ export const FieldDesigner = ({
         style={{ width: '70px' }}
       />
       <Checkbox
-        checked={fieldDesignerState.fieldIsPKValue}
-        disabled={Boolean(hasPK && !fieldDesignerState.fieldIsPKValue)}
+        checked={fieldDesignerState.fieldPKValue}
+        disabled={Boolean(hasPK && !fieldDesignerState.fieldPKValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
         onChange={e => {
@@ -616,7 +615,7 @@ export const FieldDesigner = ({
       <a
         draggable={true}
         className={`${styles.button} ${styles.deleteButton} ${
-          fieldDesignerState.fieldIsPKValue || fieldIsPKReferenced ? styles.disabledDeleteButton : ''
+          fieldDesignerState.fieldPKValue || fieldPKReferenced ? styles.disabledDeleteButton : ''
         }`}
         href="#"
         onClick={e => {

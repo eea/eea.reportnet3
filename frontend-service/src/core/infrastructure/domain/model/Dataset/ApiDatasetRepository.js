@@ -17,7 +17,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.isPK = datasetTableRecordField.isPK;
+  datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
@@ -289,8 +289,8 @@ const schemaById = async datasetId => {
                   codelistItems: DataTableFieldDTO.codelistItems,
                   description: DataTableFieldDTO.description,
                   fieldId: DataTableFieldDTO.id,
-                  isPK: !isNull(DataTableFieldDTO.isPK) ? DataTableFieldDTO.isPK : false,
-                  isPKReferenced: !isNull(DataTableFieldDTO.isPKreferenced) ? DataTableFieldDTO.isPKreferenced : false,
+                  pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                  pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                   name: DataTableFieldDTO.name,
                   recordId: DataTableFieldDTO.idRecord,
                   required: DataTableFieldDTO.required,
@@ -490,7 +490,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.codelistItems = record.codelistItems;
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
-  datasetTableFieldDesign.isPK = record.isPK;
+  datasetTableFieldDesign.pk = record.pk;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };

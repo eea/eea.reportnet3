@@ -43,9 +43,9 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
 
   const getOptions = datasetSchema =>
     datasetSchema.tables.map(table => {
-      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.isPK === true)[0]);
+      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
       if (hasPK) {
-        const pkField = table.records[0].fields.filter(field => field.isPK === true)[0];
+        const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
         return {
           name: `${table.tableSchemaName} - ${pkField.name}`,
           value: `${table.tableSchemaName} - ${pkField.fieldId}`,

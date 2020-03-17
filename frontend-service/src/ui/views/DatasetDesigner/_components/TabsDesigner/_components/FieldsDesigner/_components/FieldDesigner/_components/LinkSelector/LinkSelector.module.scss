@@ -18,3 +18,20 @@
 .selectedLinkWrapper span:first-child {
   font-weight: bold;
 }
+
+.schemaWrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+.schemaWrapper::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.schemaWrapper::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+.schemaWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
+}

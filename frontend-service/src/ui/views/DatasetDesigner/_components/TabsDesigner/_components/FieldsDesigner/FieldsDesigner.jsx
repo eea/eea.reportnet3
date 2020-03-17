@@ -81,23 +81,13 @@ export const FieldsDesigner = ({
     );
   };
 
-  const onFieldAdd = ({
-    codelistItems,
-    description,
-    fieldId,
-    isPK,
-    name,
-    recordId,
-    referencedField,
-    required,
-    type
-  }) => {
+  const onFieldAdd = ({ codelistItems, description, fieldId, pk, name, recordId, referencedField, required, type }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
-      isPK,
+      pk,
       name,
       recordId,
       referencedField,
@@ -113,7 +103,7 @@ export const FieldsDesigner = ({
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = ({ codelistItems, description, id, isPK, name, required, type }) => {
+  const onFieldUpdate = ({ codelistItems, description, id, pk, name, required, type }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
     if (fieldIndex > -1) {
@@ -122,7 +112,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].required = required;
-      inmFields[fieldIndex].isPK = isPK;
+      inmFields[fieldIndex].pk = pk;
       setFields(inmFields);
     }
   };
@@ -275,7 +265,7 @@ export const FieldsDesigner = ({
           fieldRequired={false}
           fieldType=""
           fieldValue=""
-          hasPK={!isNil(fields) && fields.filter(field => field.isPK === true).length > 0}
+          hasPK={!isNil(fields) && fields.filter(field => field.pk === true).length > 0}
           // hasPK={true}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
@@ -303,16 +293,14 @@ export const FieldsDesigner = ({
               datasetSchemas={datasetSchemas}
               fieldDescription={field.description}
               fieldId={field.fieldId}
-              fieldIsPK={field.isPK}
-              fieldIsPKReferenced={field.isPKReferenced}
-              // fieldIsPK={index === 0}
+              fieldPK={field.pk}
+              fieldPKReferenced={field.pkReferenced}
               fieldName={field.name}
               fieldLink={field.referencedField}
               fieldRequired={Boolean(field.required)}
               fieldType={field.type}
               fieldValue={field.value}
-              hasPK={fields.filter(field => field.isPK === true).length > 0}
-              // hasPK={true}
+              hasPK={fields.filter(field => field.pk === true).length > 0}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
               isCodelistOrLink={isCodelistOrLink}

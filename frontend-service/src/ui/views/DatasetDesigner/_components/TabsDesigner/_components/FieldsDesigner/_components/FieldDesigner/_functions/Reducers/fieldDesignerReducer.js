@@ -17,7 +17,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldTypeValue: '',
         fieldValue: '',
         fieldDescriptionValue: '',
-        fieldIsPKValue: ''
+        fieldPKValue: ''
       };
     case 'SET_CODELIST_ITEMS':
       return { ...state, codelistItems: payload };
@@ -32,7 +32,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_LINK':
       return { ...state, fieldLinkValue: payload };
     case 'SET_PK':
-      return { ...state, fieldIsPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
+      return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PREVIOUS_TYPE_VALUE':
       return { ...state, fieldPreviousTypeValue: payload };
     case 'SET_REQUIRED':
