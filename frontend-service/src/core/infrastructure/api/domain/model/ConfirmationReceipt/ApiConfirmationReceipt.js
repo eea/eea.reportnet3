@@ -17,6 +17,7 @@ export const apiConfirmationReceipt = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('response', response.data.blob());
 
     return response.data;
     /*  const response = {

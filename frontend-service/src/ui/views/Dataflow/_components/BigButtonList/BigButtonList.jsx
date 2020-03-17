@@ -77,9 +77,9 @@ export const BigButtonList = ({
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
-      // DownloadFile(fileToDownload, 'Receipt_Hardcoded_name');
+      DownloadFile(fileToDownload, 'Receipt_Hardcoded_name');
 
-      // const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+      const url = window.URL.createObjectURL(new Blob([fileToDownload]));
 
       const link = document.createElement('a');
 
@@ -91,7 +91,7 @@ export const BigButtonList = ({
       link.click();
 
       document.body.removeChild(link);
-      // window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(url);
     }
   }, [fileToDownload]);
 
@@ -224,7 +224,6 @@ export const BigButtonList = ({
         payload: { isLoading: false }
       });
     }
-    console.log('filetodownload', fileToDownload);
   };
 
   const onShowNewSchemaDialog = () => {
