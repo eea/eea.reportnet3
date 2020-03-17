@@ -51,6 +51,7 @@ import {
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
+    isDatasetDeleted = false,
     isDataCollection,
     isValidationSelected,
     isWebFormMMR,
@@ -67,9 +68,6 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns
   }) => {
-    const [isSaving, setisSaving] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(true);
-
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -84,6 +82,8 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isTableDeleted, setIsTableDeleted] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
       'INFO',
@@ -100,6 +100,8 @@ const DataViewer = withRouter(
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
       initialRecordValue: undefined,
+      isAllDataDeleted: isDatasetDeleted,
+      isRecordAdded: false,
       isRecordDeleted: false,
       newRecord: {},
       numCopiedRecords: undefined,
@@ -205,6 +207,13 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
+      console.log('');
+      if (isDatasetDeleted) {
+        dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
+      }
+    }, [isDatasetDeleted]);
+
+    useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
 
@@ -226,7 +235,6 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
-
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
 
       setIsLoading(true);
@@ -353,6 +361,7 @@ const DataViewer = withRouter(
       try {
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
+        setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
@@ -504,6 +513,7 @@ const DataViewer = withRouter(
         } else {
           onRefresh();
           setIsPasting(false);
+          setIsTableDeleted(false);
         }
       } catch (error) {
         const {
@@ -522,6 +532,7 @@ const DataViewer = withRouter(
         });
       } finally {
         setConfirmPasteVisible(false);
+        setIsPasting(false);
       }
     };
 
@@ -546,15 +557,16 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
-      setisSaving(true);
       //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
       if (isNewRecord) {
         try {
+          setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
           const {
@@ -574,6 +586,7 @@ const DataViewer = withRouter(
         } finally {
           setAddDialogVisible(false);
           setIsLoading(false);
+          setIsSaving(false);
         }
       } else {
         try {
@@ -598,9 +611,9 @@ const DataViewer = withRouter(
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
+          setIsSaving(false);
         }
       }
-      setisSaving(false);
     };
 
     const onSetVisible = (fnUseState, visible) => {
@@ -789,6 +802,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
+          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
