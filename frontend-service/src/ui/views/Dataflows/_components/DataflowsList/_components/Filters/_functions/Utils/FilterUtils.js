@@ -20,6 +20,21 @@ const checkFilters = (filteredKeys, dataflow, state) => {
   return true;
 };
 
+const checkSelected = (state, data, selectedKeys) => {
+  for (let index = 0; index < selectedKeys.length; index++) {
+    if (selectedKeys.length !== state.selectOptions.length) {
+      if (
+        ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
+          data[selectedKeys[index]].toLowerCase()
+        )
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 const getFilterInitialState = (data, input = [], select = [], date = []) => {
   const filterByGroup = input.concat(select, date);
   const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
@@ -44,7 +59,7 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
 };
 
 const getFilterKeys = (state, filter) =>
-  Object.keys(state.filterBy).filter(key => key !== filter && key.includes(state.inputOptions));
+  Object.keys(state.filterBy).filter(key => key !== filter && state.inputOptions.includes(key));
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
@@ -57,13 +72,17 @@ const getOptionTypes = (data, option) => {
   }
 };
 
-const onApplyFilters = (filter, filteredKeys, state, value) => [
+const getSelectedKeys = (state, select) =>
+  Object.keys(state.filterBy).filter(key => key !== select && state.selectOptions.includes(key));
+
+const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
   ...state.data.filter(data => {
     if (state.selectOptions.includes(filter)) {
       return (
         [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()) &&
+        checkDates(state.filterBy.expirationDate, data.expirationDate) &&
         checkFilters(filteredKeys, data, state) &&
-        checkDates(state.filterBy.expirationDate, data.expirationDate)
+        checkSelected(state, data, selectedKeys)
       );
     } else if (state.dateOptions.includes(filter)) {
       const dates = [];
@@ -80,7 +99,14 @@ const onApplyFilters = (filter, filteredKeys, state, value) => [
           )
         );
       } else {
-        return [...state.filteredData];
+        return (
+          checkFilters(filteredKeys, data, state) &&
+          // checkSelected(state, data, selectedKeys)
+          [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
+          [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
+            data.userRole.toLowerCase()
+          )
+        );
       }
     } else {
       return (
@@ -100,5 +126,6 @@ export const FilterUtils = {
   getFilterInitialState,
   getFilterKeys,
   getOptionTypes,
+  getSelectedKeys,
   onApplyFilters
 };

@@ -24,6 +24,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     dateOptions: dateOptions,
     filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
+    inputOptions: inputOptions,
     orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
     selectOptions: selectOptions
   });
@@ -46,7 +47,8 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const onFilterData = (filter, value) => {
     const filteredKeys = FilterUtils.getFilterKeys(filterState, filter);
-    const filteredData = FilterUtils.onApplyFilters(filter, filteredKeys, filterState, value);
+    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter);
+    const filteredData = FilterUtils.onApplyFilters(filter, filteredKeys, filterState, selectedKeys, value);
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -100,6 +102,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       className={`p-button-secondary-transparent ${styles.orderIcon}`}
       disabled={property.includes('ROD3')}
       icon={filterState.orderBy[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
+      id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
       style={{ fontSize: '12pt' }}
       tooltip={resources.messages['orderAlphabetically']}
