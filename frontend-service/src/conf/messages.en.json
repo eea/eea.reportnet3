@@ -503,6 +503,7 @@
     "columnInfoType": "Type",
     "name": "Name",
     "expirationDate": "Expiration date",
-    "clearFilters": "Clear all filters"
+    "clearFilters": "Clear all filters",
+    "userRole": "Role"
   }
 }

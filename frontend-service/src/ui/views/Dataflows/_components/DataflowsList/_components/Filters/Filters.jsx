@@ -125,7 +125,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         onChange={event => onFilterData(property, event.value, filterState.data)}
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property)}
-        placeholder={resources.messages['select']}
+        placeholder={resources.messages[property]}
         //style={{ fontSize: '9pt' }}
         value={filterState.filterBy[property]}
       />
