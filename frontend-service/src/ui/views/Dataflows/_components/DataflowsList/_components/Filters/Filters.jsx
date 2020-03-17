@@ -55,12 +55,14 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   };
 
   const renderCalendarFilter = property => (
-    <span className={` ${styles.dataflowInput} p-float-label`}>
+    <span className={`p-float-label ${styles.dataflowInputDate} `}>
       <Calendar
         className={styles.calendarFilter}
+        inputClassName={styles.calendarFilterBorder}
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => changeFilterValues(property, event.value, filterState.data)}
+        placeholder={property}
         selectionMode="range"
         showWeek={true}
         value={filterState.filterBy[property]}
