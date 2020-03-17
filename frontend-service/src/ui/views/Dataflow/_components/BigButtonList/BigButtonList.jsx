@@ -8,9 +8,9 @@ import styles from './BigButtonList.module.css';
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
-import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
@@ -54,6 +54,7 @@ export const BigButtonList = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+  const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
@@ -65,6 +66,7 @@ export const BigButtonList = ({
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
+
     if (response) {
       receiptDispatch({
         type: 'ON_DOWNLOAD',
@@ -74,13 +76,31 @@ export const BigButtonList = ({
   }, [notificationContext]);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (!isEmpty(receiptState.receiptData)) {
-        onDownloadReceipt();
-        console.log('receiptState', receiptState);
-      }
-    }, 1000);
-  }, [receiptState.receiptData]);
+    if (!isUndefined(fileToDownload)) {
+      // DownloadFile(fileToDownload, 'Receipt_Hardcoded_name');
+
+      // const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+
+      const link = document.createElement('a');
+
+      link.href = fileToDownload;
+      link.setAttribute('download', 'TestName');
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      // window.URL.revokeObjectURL(url);
+    }
+  }, [fileToDownload]);
+
+  useEffect(() => {
+    if (!isEmpty(receiptState.receiptPdf)) {
+      onDownloadReceipt();
+      console.log('receiptState', receiptState);
+    }
+  }, [receiptState.receiptPdf]);
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -163,7 +183,7 @@ export const BigButtonList = ({
   };
 
   const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
+    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
       receiptBtnRef.current.click();
       receiptDispatch({
         type: 'ON_CLEAN_UP',
@@ -184,22 +204,27 @@ export const BigButtonList = ({
   const onLoadReceiptData = async () => {
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+
       console.log('#'.repeat(50));
-      console.log('response', response);
+      // console.log('response', response);
+
       receiptDispatch({
         type: 'ON_DOWNLOAD',
-        payload: { isLoading: true, receiptData: response }
+        payload: { isLoading: true }
       });
+
+      setFileToDownload(response);
     } catch (error) {
-      console.error('error', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
+    } finally {
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: false }
       });
     }
+    console.log('filetodownload', fileToDownload);
   };
 
   const onShowNewSchemaDialog = () => {
@@ -310,9 +335,10 @@ export const BigButtonList = ({
           yearRange="2020:2030"
         />
       </ConfirmDialog>
+
       {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       {/* <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
+        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       </PDFDownloadLink> */}
