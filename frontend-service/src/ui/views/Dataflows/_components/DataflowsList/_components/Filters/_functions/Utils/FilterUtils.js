@@ -22,14 +22,12 @@ const checkFilters = (filteredKeys, dataflow, state) => {
 
 const checkSelected = (state, data, selectedKeys) => {
   for (let index = 0; index < selectedKeys.length; index++) {
-    if (selectedKeys.length !== state.selectOptions.length) {
-      if (
-        ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
-          data[selectedKeys[index]].toLowerCase()
-        )
-      ) {
-        return false;
-      }
+    if (
+      ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
+        data[selectedKeys[index]].toLowerCase()
+      )
+    ) {
+      return false;
     }
   }
   return true;
@@ -80,43 +78,24 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
     if (state.selectOptions.includes(filter)) {
       return (
         [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()) &&
-        checkDates(state.filterBy.expirationDate, data.expirationDate) &&
+        checkDates(state.filterBy[state.dateOptions], data[state.dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys)
       );
     } else if (state.dateOptions.includes(filter)) {
-      const dates = [];
-      value.map(date => dates.push(new Date(date).getTime() / 1000));
-
-      if (!dates.includes(0)) {
-        return (
-          new Date(data[filter]).getTime() / 1000 >= dates[0] &&
+      const dates = value.map(date => new Date(date).getTime() / 1000);
+      !dates.includes(0)
+        ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
           new Date(data[filter]).getTime() / 1000 <= dates[1] &&
           checkFilters(filteredKeys, data, state) &&
-          [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
-          [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
-            data.userRole.toLowerCase()
-          )
-        );
-      } else {
-        return (
-          checkFilters(filteredKeys, data, state) &&
-          // checkSelected(state, data, selectedKeys)
-          [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
-          [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
-            data.userRole.toLowerCase()
-          )
-        );
-      }
+          checkSelected(state, data, selectedKeys)
+        : checkFilters(filteredKeys, data, state) && checkSelected(state, data, selectedKeys);
     } else {
       return (
         data[filter].toLowerCase().includes(value.toLowerCase()) &&
         checkFilters(filteredKeys, data, state) &&
-        [...state.filterBy.status.map(status => status.value.toLowerCase())].includes(data.status.toLowerCase()) &&
-        [...state.filterBy.userRole.map(userRole => userRole.value.toLowerCase())].includes(
-          data.userRole.toLowerCase()
-        ) &&
-        checkDates(state.filterBy.expirationDate, data.expirationDate)
+        checkSelected(state, data, selectedKeys) &&
+        checkDates(state.filterBy[state.dateOptions], data[state.dateOptions])
       );
     }
   })
