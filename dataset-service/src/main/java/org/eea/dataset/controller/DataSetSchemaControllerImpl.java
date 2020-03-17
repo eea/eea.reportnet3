@@ -441,11 +441,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // Add the Pk if needed to the catalogue
         dataschemaService.updatePkCatalogue(fieldSchemaVO);
       } else {
-        if (fieldSchemaVO.getIsPK() != null && fieldSchemaVO.getIsPK()) {
+        if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.PK_ALREADY_EXISTS);
         }
-        if (fieldSchemaVO.getIsPK() != null && !fieldSchemaVO.getIsPK()) {
+        if (fieldSchemaVO.getPk() != null && !fieldSchemaVO.getPk()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
         }
       }

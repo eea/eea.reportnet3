@@ -189,7 +189,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
     }
     dataCollectionRepository.deleteDatasetById(datasetIds);
-    dataCollectionRepository.updateDataflowStatus(dataflowId, TypeStatusEnum.DESIGN.getValue());
+    dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
   }
 
   /**

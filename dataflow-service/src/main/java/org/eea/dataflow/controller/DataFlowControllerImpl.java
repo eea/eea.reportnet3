@@ -3,6 +3,7 @@ package org.eea.dataflow.controller;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -382,19 +383,15 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
-  /**
-   * Update data flow status.
-   *
-   * @param idDataflow the id dataflow
-   * @param status the status
-   */
+
   @Override
   @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
-      @RequestParam(value = "status", required = true) TypeStatusEnum status) {
+      @RequestParam(value = "status") TypeStatusEnum status,
+      @RequestParam(value = "deadLineDate", required = false) Date deadlineDate) {
     try {
-      dataflowService.updateDataFlowStatus(idDataflow, status);
+      dataflowService.updateDataFlowStatus(idDataflow, status, deadlineDate);
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

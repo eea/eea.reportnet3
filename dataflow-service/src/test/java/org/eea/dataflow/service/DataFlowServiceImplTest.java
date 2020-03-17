@@ -869,7 +869,7 @@ public class DataFlowServiceImplTest {
   public void testUpdateDataflowStatus() throws EEAException {
 
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+    dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN, null);
     Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
   }
 
@@ -877,7 +877,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void testUpdateDataflowStatusException() {
     try {
-      dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN);
+      dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN, null);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
     }

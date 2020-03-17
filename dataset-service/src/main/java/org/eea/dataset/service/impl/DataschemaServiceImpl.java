@@ -503,12 +503,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
-        Document fieldSchemaReferenced = schemasRepository.findFieldSchema(
+        this.updateIsPkReferencedInFieldSchema(
             fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-            fieldSchemaVO.getReferencedField().getIdPk());
-        fieldSchemaReferenced.put("isPKreferenced", true);
-        schemasRepository.updateFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-            fieldSchemaReferenced);
+            fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
 
       return schemasRepository
@@ -584,8 +581,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
         }
-        if (fieldSchemaVO.getIsPK() != null) {
-          fieldSchema.put("isPK", fieldSchemaVO.getIsPK());
+        if (fieldSchemaVO.getPk() != null) {
+          fieldSchema.put("pk", fieldSchemaVO.getPk());
         }
         if (fieldSchemaVO.getReferencedField() != null) {
           Document referenced = new Document();
@@ -757,9 +754,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
 
     Boolean allow = true;
-    if (fieldSchemaVO.getIsPK() != null) {
+    if (fieldSchemaVO.getPk() != null) {
       // Check existing PKs on the same table
-      if (fieldSchemaVO.getIsPK()) {
+      if (fieldSchemaVO.getPk()) {
         DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
         TableSchemaVO table = null;
         for (TableSchemaVO tableVO : schema.getTableSchemas()) {
@@ -774,7 +771,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (table != null) {
           for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-            if (field.getIsPK() != null && field.getIsPK()
+            if (field.getPk() != null && field.getPk()
                 && !field.getId().equals(fieldSchemaVO.getId())) {
               allow = false;
               LOG_ERROR.error("There is actually an existing PK on the table. Update denied");
@@ -783,7 +780,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
       // Check the PK is referenced or not in case we are trying to remove it
-      if (!fieldSchemaVO.getIsPK()) {
+      if (!fieldSchemaVO.getPk()) {
         PkCatalogueSchema catalogue =
             pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
         if (catalogue != null && catalogue.getReferenced() != null
@@ -809,7 +806,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO) {
     Boolean isReferenced = false;
 
-    if (fieldSchemaVO.getIsPK() != null && fieldSchemaVO.getIsPK()) {
+    if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       PkCatalogueSchema catalogue =
           pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null && catalogue.getReferenced() != null
@@ -858,7 +855,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException {
     // For fielSchemas that are PK
-    if (fieldSchemaVO.getIsPK() != null && !fieldSchemaVO.getIsPK()) {
+    if (fieldSchemaVO.getPk() != null && !fieldSchemaVO.getPk()) {
       PkCatalogueSchema catalogue =
           pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null) {
@@ -1010,7 +1007,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     Document fieldSchemaReferenced =
         schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
-    fieldSchemaReferenced.put("isPKreferenced", referenced);
+    fieldSchemaReferenced.put("pkReferenced", referenced);
     schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
   }
 

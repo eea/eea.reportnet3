@@ -37,9 +37,5 @@ public interface DataCollectionRepository extends CrudRepository<DataCollection,
   @Query(nativeQuery = true, value = "delete from dataset where id in :datasetIds")
   void deleteDatasetById(@Param("datasetIds") List<Long> datasetIds);
 
-  @Transactional
-  @Modifying
-  @Query(nativeQuery = true,
-      value = "update dataflow set status = :status, deadline_date = null where id = :dataflowId")
-  void updateDataflowStatus(@Param("dataflowId") Long dataflowId, @Param("status") String status);
+
 }

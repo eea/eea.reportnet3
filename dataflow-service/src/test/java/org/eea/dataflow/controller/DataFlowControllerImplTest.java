@@ -582,8 +582,8 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void testUpdateStatus() throws EEAException {
-    dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).updateDataFlowStatus(Mockito.anyLong(),
+    dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).updateDataFlowStatus(Mockito.anyLong(), Mockito.any(),
         Mockito.any());
   }
 
@@ -592,8 +592,8 @@ public class DataFlowControllerImplTest {
   public void testUpdateStatusException() throws EEAException {
     try {
       doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
-          .updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
-      dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any());
+          .updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
+      dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
     }
