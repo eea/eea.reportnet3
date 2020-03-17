@@ -24,6 +24,18 @@
       ]
     }
   },
+  "operatorEquivalences": {
+    ">": "GT",
+    "<": "LT",
+    ">=": "GTEQ",
+    "<=": "LTEQ",
+    "=": "EQ",
+    "!=": "DIST",
+    "SEQ": "SEQ",
+    "SEQIC": "SEQIC",
+    "GTEQ": "GTEQ",
+    "LEN": "LEN"
+  },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
     { "label": "WARNING", "value": "WARNING" },
