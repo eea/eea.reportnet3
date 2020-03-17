@@ -1462,12 +1462,14 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param idPk the id pk
    * @param searchValue the search value
+   * @param idFkOrigin the id fk origin
    * @return the field values referenced
    */
   @Override
-  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
+  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue,
+      String idFkOrigin) {
     Long idDatasetDestination =
-        datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+        datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk, idFkOrigin);
     TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
@@ -1482,11 +1484,12 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
    * @return the dataset id referenced
    */
   @Override
-  public Long getDatasetIdReferenced(Long datasetId, String idPk) {
-    return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+  public Long getDatasetIdReferenced(Long datasetId, String idPk, String idFkOrigin) {
+    return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk, idFkOrigin);
   }
 
 }

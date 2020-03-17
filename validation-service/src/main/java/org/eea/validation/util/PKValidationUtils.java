@@ -50,12 +50,12 @@ public class PKValidationUtils {
 
   private static final Integer PAGE_SIZE = 1000;
 
-  public static Boolean isfieldPK(String datasetId, String idFieldSchema) {
+  public static Boolean isfieldPK(String datasetId, String idFieldSchema, String idFk) {
 
     long datasetIdReference = Long.parseLong(datasetId);
 
     Long datasetIdRefered =
-        dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchema);
+        dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchema, idFk);
 
     String fkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdReference);
     String pkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);

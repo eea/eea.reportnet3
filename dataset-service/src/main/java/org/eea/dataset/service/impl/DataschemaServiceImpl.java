@@ -893,7 +893,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       datasetMetabaseService.addForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(
               fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
     }
   }
 
@@ -909,7 +909,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(
               fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
     }
   }
 
@@ -932,7 +932,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         String previousIdPk = previousReferenced.get("idPk").toString();
         String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
         datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk);
+            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+            fieldSchemaVO.getId());
       }
 
     }
