@@ -6,7 +6,6 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
-import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 
@@ -44,18 +43,18 @@ export const BigButtonList = ({
 
   useEffect(() => {
     setTimeout(() => {
-      if (!isEmpty(receiptState.receiptData)) {
+      if (!isEmpty(receiptState.receiptPdf)) {
         onDownloadReceipt();
       }
     }, 1000);
-  }, [receiptState.receiptData]);
+  }, [receiptState.receiptPdf]);
 
   const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
+    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
       receiptBtnRef.current.click();
       receiptDispatch({
         type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false, receiptData: {} }
+        payload: { isLoading: false, isOutdated: false, receiptPdf: {} }
       });
     }
   };
@@ -65,7 +64,7 @@ export const BigButtonList = ({
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
       receiptDispatch({
         type: 'ON_DOWNLOAD',
-        payload: { isLoading: true, receiptData: response }
+        payload: { isLoading: true, receiptPdf: response }
       });
     } catch (error) {
       console.error('error', error);
@@ -99,11 +98,11 @@ export const BigButtonList = ({
         </div>
       </div>
 
-      <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
+      {/* <PDFDownloadLink
+        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      </PDFDownloadLink>
+      </PDFDownloadLink> */}
     </>
   );
 };

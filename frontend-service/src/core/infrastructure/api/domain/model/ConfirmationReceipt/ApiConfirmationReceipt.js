@@ -17,7 +17,8 @@ export const apiConfirmationReceipt = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    return response;
+
+    return response.data;
     /*  const response = {
       idDataflow: 5061,
       dataflowName: 'DF name that is very descriptive and large',
