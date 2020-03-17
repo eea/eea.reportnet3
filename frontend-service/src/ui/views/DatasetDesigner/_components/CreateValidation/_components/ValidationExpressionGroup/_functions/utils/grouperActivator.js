@@ -8,7 +8,7 @@ export const grouperActivator = () => {
     creationFormDispatch({
       type: 'GROUP_RULES_ACTIVATOR',
       payload: {
-        groupExpresionsActive: ruleProperty.value.value ? 1 : -1
+        groupExpressionsActive: ruleProperty.value.value ? 1 : -1
       }
     });
   }

@@ -1,6 +1,6 @@
 import { config } from 'conf/';
 
-import { getEmptyExpresion } from './getEmptyExpresion';
+import { getEmptyExpression } from './getEmptyExpression';
 
 export const initValidationRuleCreation = rawTables => {
   rawTables.pop();
@@ -9,7 +9,7 @@ export const initValidationRuleCreation = rawTables => {
   });
 
   const errorLevels = config.validations.errorLevels;
-  const newExpresion = getEmptyExpresion();
+  const newExpression = getEmptyExpression();
   return {
     tables,
     errorLevels,
@@ -21,8 +21,8 @@ export const initValidationRuleCreation = rawTables => {
       errorMessage: '',
       errorLevel: undefined,
       active: false,
-      expresions: [newExpresion],
-      allExpresions: [newExpresion]
+      expressions: [newExpression],
+      allExpressions: [newExpression]
     }
   };
 };

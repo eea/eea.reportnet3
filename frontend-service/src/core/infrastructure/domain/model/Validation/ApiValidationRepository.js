@@ -3,26 +3,29 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
-const buildExpresion = expresion => {
+const buildExpression = expression => {
   return {
-    leftArg: 'VALUE',
-    operator: expresion.operatorValue,
-    rightArg: expresion.ruleValue
+    arg1: 'VALUE',
+    operator: expression.operatorValue,
+    arg2: expression.ruleValue
   };
 };
-const buildNode = (expresion, index, expresions) => {
+const buildNode = (expression, index, expressions) => {
   return {
-    leftArg: buildExpresion(expresion),
-    operator: expresions[index + 1].union,
+    leftArg: buildExpression(expression),
+    operator: expressions[index + 1].union,
     rightArg:
-      index + 1 < expresions.length - 1
-        ? buildNode(expresions[index + 1], index + 1, expresions)
-        : buildExpresion(expresions[index + 1])
+      index + 1 < expressions.length - 1
+        ? buildNode(expressions[index + 1], index + 1, expressions)
+        : buildExpression(expressions[index + 1])
   };
 };
 
 const create = async (datasetSchemaId, validationRule) => {
-  const { rules } = validationRule;
+  console.info('#'.repeat(60));
+  console.info('[create]: ', create);
+  console.info('#'.repeat(60));
+  const { expressions } = validationRule;
   const validation = {
     description: validationRule.description,
     automatic: false,
@@ -32,10 +35,12 @@ const create = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    whenCondition: rules.length > 1 ? buildNode(rules[0], 0, rules) : buildExpresion(rules[0])
+    whenCondition: expressions.length > 1 ? buildNode(expressions[0], 0, expressions) : buildExpression(expressions[0])
   };
+  console.info('-'.repeat(60));
   console.log('validation', datasetSchemaId, validation);
-  return await apiValidation.create(datasetSchemaId, validation);
+  console.info('-'.repeat(60));
+  //return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const deleteById = async (datasetSchemaId, ruleId) => {

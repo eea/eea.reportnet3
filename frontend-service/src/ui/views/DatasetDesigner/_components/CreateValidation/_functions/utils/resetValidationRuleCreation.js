@@ -1,4 +1,4 @@
-import { getEmptyExpresion } from './getEmptyExpresion';
+import { getEmptyExpression } from './getEmptyExpression';
 
 export const resetValidationRuleCreation = () => {
   return {
@@ -9,6 +9,6 @@ export const resetValidationRuleCreation = () => {
     errorMessage: '',
     errorLevel: undefined,
     active: false,
-    expresions: [getEmptyExpresion()]
+    expressions: [getEmptyExpression()]
   };
 };

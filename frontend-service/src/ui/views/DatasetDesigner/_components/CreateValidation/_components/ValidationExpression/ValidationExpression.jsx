@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
-import styles from './ValidationExpresion.module.scss';
+import styles from './ValidationExpression.module.scss';
 
 import { config } from 'conf/';
 
@@ -13,24 +13,24 @@ import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const ValidationExpresion = ({
-  expresionValues,
+const ValidationExpression = ({
+  expressionValues,
   isDisabled,
   layout,
-  onExpresionDelete,
-  onExpresionFieldUpdate,
-  onExpresionGroup,
+  onExpressionDelete,
+  onExpressionFieldUpdate,
+  onExpressionGroup,
   position
 }) => {
   const resourcesContext = useContext(ResourcesContext);
-  const { expresionId } = expresionValues;
+  const { expressionId } = expressionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const operatorTypes = config.validations.operatorTypes;
   useEffect(() => {
-    if (expresionValues.operatorType) {
-      setOperatorValues(operatorTypes[expresionValues.operatorType].values);
+    if (expressionValues.operatorType) {
+      setOperatorValues(operatorTypes[expressionValues.operatorType].values);
     }
-  }, [expresionValues.operatorType]);
+  }, [expressionValues.operatorType]);
 
   const getOperatorTypeOptions = () => {
     const options = [];
@@ -42,11 +42,11 @@ const ValidationExpresion = ({
 
   // layouts
   const defaultLayout = (
-    <li className={styles.expresion}>
+    <li className={styles.expression}>
       <span>
         <Checkbox
-          onChange={e => onExpresionGroup(expresionId, { key: 'group', value: e.checked })}
-          isChecked={expresionValues.group}
+          onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
+          isChecked={expressionValues.group}
           disabled={isDisabled}
         />
       </span>
@@ -58,12 +58,12 @@ const ValidationExpresion = ({
           optionLabel="label"
           options={config.validations.logicalOperators}
           onChange={e =>
-            onExpresionFieldUpdate(expresionId, {
+            onExpressionFieldUpdate(expressionId, {
               key: 'union',
               value: e.target.value
             })
           }
-          value={{ label: expresionValues.union, value: expresionValues.union }}
+          value={{ label: expressionValues.union, value: expressionValues.union }}
         />
       </span>
       <span>
@@ -74,12 +74,12 @@ const ValidationExpresion = ({
           optionLabel="label"
           options={getOperatorTypeOptions()}
           onChange={e =>
-            onExpresionFieldUpdate(expresionId, {
+            onExpressionFieldUpdate(expressionId, {
               key: 'operatorType',
               value: e.target.value
             })
           }
-          value={!isEmpty(expresionValues.operatorType) ? operatorTypes[expresionValues.operatorType].option : null}
+          value={!isEmpty(expressionValues.operatorType) ? operatorTypes[expressionValues.operatorType].option : null}
         />
       </span>
       <span>
@@ -90,14 +90,14 @@ const ValidationExpresion = ({
           optionLabel="label"
           options={operatorValues}
           onChange={e =>
-            onExpresionFieldUpdate(expresionId, {
+            onExpressionFieldUpdate(expressionId, {
               key: 'operatorValue',
               value: e.target.value
             })
           }
           value={
-            !isEmpty(expresionValues.operatorValue)
-              ? { label: expresionValues.operatorValue, value: expresionValues.operatorValue }
+            !isEmpty(expressionValues.operatorValue)
+              ? { label: expressionValues.operatorValue, value: expressionValues.operatorValue }
               : null
           }
         />
@@ -106,10 +106,10 @@ const ValidationExpresion = ({
         <InputText
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
-          value={expresionValues.expresionValue}
+          value={expressionValues.expressionValue}
           onChange={e =>
-            onExpresionFieldUpdate(expresionId, {
-              key: 'expresionValue',
+            onExpressionFieldUpdate(expressionId, {
+              key: 'expressionValue',
               value: { value: e.target.value }
             })
           }
@@ -121,7 +121,7 @@ const ValidationExpresion = ({
           type="button"
           icon="trash"
           onClick={e => {
-            onExpresionDelete(expresionId);
+            onExpressionDelete(expressionId);
           }}
         />
       </span>
@@ -133,4 +133,4 @@ const ValidationExpresion = ({
 
   return layout ? layouts[layout] : layouts['default'];
 };
-export { ValidationExpresion };
+export { ValidationExpression };

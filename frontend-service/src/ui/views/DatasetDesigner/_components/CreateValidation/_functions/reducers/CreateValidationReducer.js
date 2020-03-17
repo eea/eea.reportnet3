@@ -7,8 +7,8 @@ export const createValidationReducerInitState = {
     errorMessage: '',
     errorLevel: undefined,
     active: false,
-    expresions: [],
-    allExpresions: [],
+    expressions: [],
+    allExpressions: [],
     allGroups: []
   },
   datasetSchema: {},
@@ -17,7 +17,7 @@ export const createValidationReducerInitState = {
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
   isValidationCreationDisabled: true,
-  groupExpresionsActive: 0,
+  groupExpressionsActive: 0,
   groupCandidate: []
 };
 export const createValidationReducer = (state, { type, payload }) => {
@@ -45,7 +45,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          allExpresions: payload
+          allExpressions: payload
         }
       };
     case 'SET_ARE_RULES_DISABLED':
@@ -68,8 +68,8 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          expresions: [...state.candidateRule.expresions, payload],
-          allExpresions: [...state.candidateRule.allExpresions, payload]
+          expressions: [...state.candidateRule.expressions, payload],
+          allExpressions: [...state.candidateRule.allExpressions, payload]
         }
       };
     case 'DELETE_RULE':
@@ -77,38 +77,38 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          allExpresions: payload
+          allExpressions: payload
         }
       };
-    case 'UPDATE_EXPRESIONS_TREE':
+    case 'UPDATE_EXPRESSIONS_TREE':
       return {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          expresions: payload
+          expressions: payload
         }
       };
-    case 'GROUP_EXPRESIONS':
+    case 'GROUP_EXPRESSIONS':
       return {
         ...state,
-        groupExpresionsActive: 0,
+        groupExpressionsActive: 0,
         candidateRule: {
           ...state.candidateRule,
-          expresions: payload.expresions,
-          allExpresions: payload.allExpresions
+          expressions: payload.expressions,
+          allExpressions: payload.allExpressions
         }
       };
     case 'GROUP_RULES_ACTIVATOR':
       return {
         ...state,
-        groupExpresionsActive: state.groupExpresionsActive + payload.groupExpresionsActive,
+        groupExpressionsActive: state.groupExpressionsActive + payload.groupExpressionsActive,
         groupCandidate: payload.groupCandidate,
         candidateRule: {
           ...state.candidateRule,
-          expresions: payload.expresions
+          expressions: payload.expressions
         }
       };
-    case 'SET_EXPRESIONS_STRING':
+    case 'SET_EXPRESSIONS_STRING':
       return {
         ...state,
         validationRuleString: payload
@@ -128,12 +128,12 @@ export const createValidationReducer = (state, { type, payload }) => {
           ...payload
         }
       };
-    case 'UPDATE_EXPRESIONS':
+    case 'UPDATE_EXPRESSIONS':
       return {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          allExpresions: payload
+          allExpressions: payload
         }
       };
     default:

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
-import styles from './ValidationExpresionGroup.module.scss';
+import styles from './ValidationExpressionGroup.module.scss';
 
 import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -12,49 +12,53 @@ import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const ValidationExpresionGroup = ({
-  expresionValues,
+const ValidationExpressionGroup = ({
+  expressionValues,
   isDisabled,
   layout,
-  onExpresionDelete,
-  onExpresionFieldUpdate,
-  onExpresionGroup,
+  onExpressionDelete,
+  onExpressionFieldUpdate,
+  onExpressionGroup,
   position
 }) => {
   const resourcesContext = useContext(ResourcesContext);
-  const { expresionId } = expresionValues;
-  const [groupExpresionsVisible, setGroupExpresionsVisible] = useState(true);
-  const expresionsVisibilityToggle = () => {
-    setGroupExpresionsVisible(!groupExpresionsVisible);
+  const { expressionId } = expressionValues;
+  const [groupExpressionsVisible, setGroupExpressionsVisible] = useState(true);
+  const expressionsVisibilityToggle = () => {
+    setGroupExpressionsVisible(!groupExpressionsVisible);
   };
-  const expresionsVisibilityToggleBtn = () => {
+  const expressionsVisibilityToggleBtn = () => {
     const btnStyle = {
       fontSize: '2rem',
       cursor: 'pointer'
     };
-    if (groupExpresionsVisible) {
+    if (groupExpressionsVisible) {
       return (
-        <FontAwesomeIcon icon={AwesomeIcons('expanded')} style={btnStyle} onClick={e => expresionsVisibilityToggle()} />
+        <FontAwesomeIcon
+          icon={AwesomeIcons('expanded')}
+          style={btnStyle}
+          onClick={e => expressionsVisibilityToggle()}
+        />
       );
     } else {
       return (
         <FontAwesomeIcon
           icon={AwesomeIcons('collapsed')}
           style={btnStyle}
-          onClick={e => expresionsVisibilityToggle()}
+          onClick={e => expressionsVisibilityToggle()}
         />
       );
     }
   };
-  const getContainedExpresions = () => {
-    if (expresionValues.expresions.length > 0) {
-      return expresionValues.expresions.map((expresion, i) => (
+  const getContainedExpressions = () => {
+    if (expressionValues.expressions.length > 0) {
+      return expressionValues.expressions.map((expression, i) => (
         <ValidationExpressionSelector
-          expresionValues={expresion}
+          expressionValues={expression}
           isDisabled={false}
-          onExpresionDelete={onExpresionDelete}
-          onExpresionFieldUpdate={onExpresionFieldUpdate}
-          onExpresionGroup={onExpresionGroup}
+          onExpressionDelete={onExpressionDelete}
+          onExpressionFieldUpdate={onExpressionFieldUpdate}
+          onExpressionGroup={onExpressionGroup}
           position={i}
         />
       ));
@@ -64,13 +68,13 @@ const ValidationExpresionGroup = ({
 
   // layouts
   const defaultLayout = (
-    <li className={styles.groupExpresion}>
+    <li className={styles.groupExpression}>
       <ul>
-        <li className={styles.expresion}>
+        <li className={styles.expression}>
           <span>
             <Checkbox
-              onChange={e => onExpresionGroup(expresionId, { key: 'group', value: e.checked })}
-              isChecked={expresionValues.group}
+              onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
+              isChecked={expressionValues.group}
               disabled={isDisabled}
             />
           </span>
@@ -82,19 +86,19 @@ const ValidationExpresionGroup = ({
               optionLabel="label"
               options={config.validations.logicalOperators}
               onChange={e =>
-                onExpresionFieldUpdate(expresionId, {
+                onExpressionFieldUpdate(expressionId, {
                   key: 'union',
                   value: e.target.value
                 })
               }
-              value={{ label: expresionValues.union, value: expresionValues.union }}
+              value={{ label: expressionValues.union, value: expressionValues.union }}
             />
           </span>
           <span>
             <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
-            {expresionsVisibilityToggleBtn()}
+            {expressionsVisibilityToggleBtn()}
           </span>
-          <span>{groupExpresionsVisible && getContainedExpresions()}</span>
+          <span>{groupExpressionsVisible && getContainedExpressions()}</span>
         </li>
       </ul>
     </li>
@@ -105,4 +109,4 @@ const ValidationExpresionGroup = ({
 
   return layout ? layouts[layout] : layouts['default'];
 };
-export { ValidationExpresionGroup };
+export { ValidationExpressionGroup };

@@ -12,8 +12,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
-import { ValidationExpresion } from './_components/ValidationExpresion';
-import { ValidationExpresionGroup } from './_components/ValidationExpresionGroup';
+import { ValidationExpression } from './_components/ValidationExpression';
+import { ValidationExpressionGroup } from './_components/ValidationExpressionGroup';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -24,17 +24,17 @@ import {
   createValidationReducer
 } from './_functions/reducers/CreateValidationReducer';
 
-import { checkExpresions } from './_functions/utils/checkExpresions';
+import { checkExpressions } from './_functions/utils/checkExpressions';
 import { checkValidation } from './_functions/utils/checkValidation';
-import { deleteExpresion } from './_functions/utils/deleteExpresion';
-import { deleteExpresionRecursivily } from './_functions/utils/deleteExpresionRecursivily';
+import { deleteExpression } from './_functions/utils/deleteExpression';
+import { deleteExpressionRecursivily } from './_functions/utils/deleteExpressionRecursivily';
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
-import { getEmptyExpresion } from './_functions/utils/getEmptyExpresion';
-import { getExpresionString } from './_functions/utils/getExpresionString';
-import { groupExpresions } from './_functions/utils/groupExpresions';
+import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
+import { getExpressionString } from './_functions/utils/getExpressionString';
+import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
-import { setValidationExpresion } from './_functions/utils/setValidationExpresion';
+import { setValidationExpression } from './_functions/utils/setValidationExpression';
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -77,12 +77,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   useEffect(() => {
     const {
-      candidateRule: { field, expresions }
+      candidateRule: { field, expressions }
     } = creationFormState;
 
     creationFormDispatch({
-      type: 'SET_EXPRESIONS_STRING',
-      payload: getExpresionString(expresions, field)
+      type: 'SET_EXPRESSIONS_STRING',
+      payload: getExpressionString(expressions, field)
     });
   }, [creationFormState.candidateRule]);
 
@@ -102,11 +102,11 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   useEffect(() => {
     const {
-      candidateRule: { expresions }
+      candidateRule: { expressions }
     } = creationFormState;
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
-      payload: checkExpresions(expresions)
+      payload: checkExpressions(expressions)
     });
   }, [...ruleAdditionCheckListener]);
 
@@ -138,52 +138,52 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     }
   };
 
-  const onExpresionDelete = expresionId => {
+  const onExpressionDelete = expressionId => {
     const {
-      candidateRule: { expresions, allExpresions }
+      candidateRule: { expressions, allExpressions }
     } = creationFormState;
-    const parsedAllExpressions = deleteExpresion(expresionId, allExpresions);
-    const parsedExpressions = deleteExpresionRecursivily(expresionId, expresions);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
+    const parsedExpressions = deleteExpressionRecursivily(expressionId, expressions);
     creationFormDispatch({
       type: 'UPDATE_RULES',
       payload: parsedAllExpressions
     });
     creationFormDispatch({
-      type: 'UPDATE_EXPRESIONS_TREE',
+      type: 'UPDATE_EXPRESSIONS_TREE',
       payload: parsedExpressions
     });
   };
 
-  const onExpresionFieldUpdate = (expresionId, field) => {
+  const onExpressionFieldUpdate = (expressionId, field) => {
     const {
-      candidateRule: { expresions, allExpresions }
+      candidateRule: { expressions, allExpressions }
     } = creationFormState;
     creationFormDispatch({
       type: 'UPDATE_RULES',
-      payload: setValidationExpresion(expresionId, field, allExpresions)
+      payload: setValidationExpression(expressionId, field, allExpressions)
     });
   };
 
-  const onExpresionGroup = (expresionId, field) => {
+  const onExpressionGroup = (expressionId, field) => {
     const {
       groupCandidate,
-      candidateRule: { expresions }
+      candidateRule: { expressions }
     } = creationFormState;
 
-    const [currentExpresion] = expresions.filter(expresion => expresion.expresionId == expresionId);
-    currentExpresion[field.key] = field.value;
+    const [currentExpression] = expressions.filter(expression => expression.expressionId == expressionId);
+    currentExpression[field.key] = field.value;
 
     if (field.value) {
-      groupCandidate.push(expresionId);
+      groupCandidate.push(expressionId);
     } else {
-      pull(groupCandidate, expresionId);
+      pull(groupCandidate, expressionId);
     }
     creationFormDispatch({
       type: 'GROUP_RULES_ACTIVATOR',
       payload: {
-        groupExpresionsActive: field.value ? 1 : -1,
+        groupExpressionsActive: field.value ? 1 : -1,
         groupCandidate,
-        expresions
+        expressions
       }
     });
   };
@@ -338,29 +338,29 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
           </div>
           <div className={styles.section}>
             <ul>
-              <li className={styles.expresionsHeader}>
+              <li className={styles.expressionsHeader}>
                 <span>{resourcesContext.messages.group}</span>
                 <span>{resourcesContext.messages.andor}</span>
                 <span>{resourcesContext.messages.operatorType}</span>
                 <span>{resourcesContext.messages.operator}</span>
                 <span>{resourcesContext.messages.value}</span>
               </li>
-              {creationFormState.candidateRule.expresions &&
-                creationFormState.candidateRule.expresions.map((expresion, i) => (
+              {creationFormState.candidateRule.expressions &&
+                creationFormState.candidateRule.expressions.map((expression, i) => (
                   <ValidationExpressionSelector
-                    expresionValues={expresion}
+                    expressionValues={expression}
                     isDisabled={creationFormState.areRulesDisabled}
-                    key={expresion.expresionId}
-                    onExpresionDelete={onExpresionDelete}
-                    onExpresionFieldUpdate={onExpresionFieldUpdate}
-                    onExpresionGroup={onExpresionGroup}
+                    key={expression.expressionId}
+                    onExpressionDelete={onExpressionDelete}
+                    onExpressionFieldUpdate={onExpressionFieldUpdate}
+                    onExpressionGroup={onExpressionGroup}
                     position={i}
                   />
                 ))}
             </ul>
           </div>
 
-          {creationFormState.groupExpresionsActive >= 2 && (
+          {creationFormState.groupExpressionsActive >= 2 && (
             <div className={styles.section}>
               <Button
                 id={`${componentName}__groupExpresions`}
@@ -369,16 +369,16 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 label="Group"
                 icon="plus"
                 onClick={e => {
-                  const groupingResult = groupExpresions(
-                    creationFormState.candidateRule.expresions,
-                    creationFormState.groupExpresionsActive,
+                  const groupingResult = groupExpressions(
+                    creationFormState.candidateRule.expressions,
+                    creationFormState.groupExpressionsActive,
                     creationFormState.groupCandidate
                   );
                   creationFormDispatch({
-                    type: 'GROUP_EXPRESIONS',
+                    type: 'GROUP_EXPRESSIONS',
                     payload: {
-                      expresions: groupingResult.expresions,
-                      allExpresions: [...creationFormState.candidateRule.allExpresions, groupingResult.newGroup]
+                      expressions: groupingResult.expressions,
+                      allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
                     }
                   });
                 }}
@@ -402,7 +402,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 onClick={e =>
                   creationFormDispatch({
                     type: 'ADD_EMPTY_RULE',
-                    payload: getEmptyExpresion()
+                    payload: getEmptyExpression()
                   })
                 }
               />
