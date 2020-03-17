@@ -30,6 +30,45 @@
   box-shadow: 0 0 0 0 var(--blue-120) !important;
 }
 
+.cancelIcon {
+  font-size: 12pt !important;
+  height: 2.1em !important;
+}
+
+.orderIcon {
+  font-size: 16pt !important;
+  // margin-top: 0.4rem !important;
+  opacity: 0.7;
+  height: 1.6em !important;
+}
+
+.orderIcon:hover {
+  opacity: 1;
+}
+
+.orderIcon:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.orderIcon:enabled:active,
+.orderIcon:enabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.multiselectFilter {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  color: var(--floating-label-color) !important;
+  width: 100% !important;
+  padding-left: 0em;
+  height: 2.8em;
+  border-bottom: var(--inputtext-border) !important;
+  font-size: 9pt !important;
+}
+
 .statusBox {
   border-radius: 3px;
   color: white;
@@ -56,65 +95,24 @@
   color: black;
 }
 
-.orderIcon {
-  font-size: 16pt !important;
-  // margin-top: 0.4rem !important;
-  opacity: 0.7;
-  height: 1.6em !important;
-}
-
-.orderIcon:hover {
-  opacity: 1;
-}
-
-.orderIcon:enabled:focus {
-  box-shadow: 0 0 0 0 var(--white) !important;
-}
-
-.orderIcon:enabled:active,
-.orderIcon:enabled:hover {
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
-.cancelIcon {
-  font-size: 12pt !important;
-  height: 2.1em !important;
-}
-
-.multiselectFilter {
-  border-top: 0 !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-radius: 0 !important;
-  color: var(--floating-label-color) !important;
+.p-calendar {
   width: 100% !important;
-  padding-left: 0em;
-  height: 2.5em;
-}
-
-.dataflowInputDate {
-  // border-bottom: 0 !important;
-  padding-top: 1.2em;
-  border: none;
 }
 
 .calendarFilter {
-  border-left: 0 !important;
-  border-radius: 0 !important;
-  border-right: 0 !important;
-  border-top: 0 !important;
-  border-bottom: 0 !important;
-  width: 100% !important;
+  border: none !important;
 }
 
-.p-calendar {
-  border-left: 0 !important;
-  border-radius: 0 !important;
-  border-right: 0 !important;
-  border-top: 0 !important;
-  width: 100% !important;
-  border: none;
+.calendarFilterBorder {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: none !important;
+  border-bottom: var(--inputtext-border) !important;
+}
+
+.datePlaceholder {
+  font-size: 10pt !important;
 }
 
 .drashInput {

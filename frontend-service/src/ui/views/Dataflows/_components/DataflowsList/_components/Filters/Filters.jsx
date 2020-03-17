@@ -61,20 +61,24 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   };
 
   const renderCalendarFilter = property => (
-    <span className={` ${styles.dataflowInput} p-float-label`}>
+    <span className={`p-float-label ${styles.dataflowInputDate} `}>
       <Calendar
         className={styles.calendarFilter}
         id={property}
+        inputClassName={styles.calendarFilterBorder}
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => onFilterData(property, event.value)}
+        placeholder={property}
         selectionMode="range"
         showWeek={true}
         value={filterState.filterBy[property]}
         yearNavigator={true}
         yearRange="2020:2030"
       />
-      <label htmlFor={property}>{resources.messages[property]}</label>
+      <label className={styles.datePlaceholder} htmlFor={property}>
+        {resources.messages[property]}
+      </label>
     </span>
   );
 
@@ -122,7 +126,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property)}
         placeholder={resources.messages['select']}
-        style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
+        //style={{ fontSize: '9pt' }}
         value={filterState.filterBy[property]}
       />
     </span>
