@@ -25,6 +25,7 @@ const ActionsToolbar = ({
   datasetId,
   dataflowId,
   hasWritePermissions,
+  isTableDeleted,
   isFilterValidationsActive,
   isLoading,
   isValidationSelected,
@@ -198,9 +199,11 @@ const ActionsToolbar = ({
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) ? null : 'p-button-animated-blink'
+            !hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+              ? null
+              : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords)}
+          disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted}
           icon={'trash'}
           label={resources.messages['deleteTable']}
           onClick={() => onSetVisible(setDeleteDialogVisible, true)}
