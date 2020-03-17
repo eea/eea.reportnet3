@@ -44,9 +44,7 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
 };
 
 const getFilterKeys = (state, filter) =>
-  Object.keys(state.filterBy).filter(
-    key => key !== filter && key !== 'status' && key !== 'userRole' && key !== 'expirationDate'
-  );
+  Object.keys(state.filterBy).filter(key => key !== filter && key.includes(state.inputOptions));
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
