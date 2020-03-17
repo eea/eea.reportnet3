@@ -50,7 +50,7 @@ public class PKValidationUtils {
 
   private static final Integer PAGE_SIZE = 1000;
 
-  public static Boolean isfieldPK(String datasetId, String idFieldSchema) {
+  public static Boolean isfieldPK(String datasetId, String idFieldSchema, String idRule) {
 
     long datasetIdReference = Long.parseLong(datasetId);
 
