@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.util.List;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Repository;
  * The Interface RecordRepository.
  */
 @Repository
-public interface FieldRepository extends PagingAndSortingRepository<FieldValue, Long> {
+public interface FieldRepository
+    extends PagingAndSortingRepository<FieldValue, Long>, FieldExtendedRepository {
 
 
   /**
@@ -26,5 +28,13 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   String findByIdAndIdFieldSchema(@Param("id") Long id,
       @Param("idFieldSchema") String idFieldSchema);
 
+  /**
+   * Find by id and id field schema.
+   *
+   * @param idFieldSchema the id field schema
+   * @return the list
+   */
+  @Query("select * from field_value v where v.id_field_schema = :idFieldSchema")
+  List<FieldValue> findByIdFieldSchema(@Param("idFieldSchema") String idFieldSchema);
 
 }
