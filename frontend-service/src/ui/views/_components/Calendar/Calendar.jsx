@@ -13,6 +13,8 @@ export const Calendar = ({
   minDate,
   monthNavigator,
   onChange,
+  placeholder,
+  readOnlyInput,
   selectionMode,
   showWeek,
   value,
@@ -31,6 +33,8 @@ export const Calendar = ({
       minDate={minDate}
       monthNavigator={monthNavigator}
       onChange={onChange}
+      placeholder={placeholder}
+      readOnlyInput={readOnlyInput}
       selectionMode={selectionMode}
       showWeek={showWeek}
       value={value}

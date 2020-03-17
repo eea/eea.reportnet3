@@ -6,7 +6,9 @@
 
   > span {
     display: flex;
+    flex-direction: row;
     font-size: 10pt;
+    justify-content: space-between;
     width: 14%;
   }
 }
@@ -102,14 +104,7 @@
 
 .calendarFilter {
   border: none !important;
-}
-
-.calendarFilterBorder {
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-radius: none !important;
-  border-bottom: var(--inputtext-border) !important;
+  width: 100%;
 }
 
 .datePlaceholder {

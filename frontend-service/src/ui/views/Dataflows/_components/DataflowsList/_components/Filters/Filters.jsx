@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
+import isEmpty from 'lodash/isEmpty';
 
 import styles from './Filters.module.scss';
 
@@ -61,21 +62,29 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   };
 
   const renderCalendarFilter = property => (
-    <span className={`p-float-label ${styles.dataflowInputDate} `}>
+    <span className={`p-float-label ${styles.dataflowInput} `}>
       <Calendar
         className={styles.calendarFilter}
-        inputClassName={styles.calendarFilterBorder}
+        inputClassName={styles.inputFilter}
         inputId={property}
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => onFilterData(property, event.value)}
         placeholder={property}
+        readOnlyInput={true}
         selectionMode="range"
         showWeek={true}
         value={filterState.filterBy[property]}
         yearNavigator={true}
         yearRange="2020:2030"
       />
+      {!isEmpty(filterState.filterBy[property]) && (
+        <Button
+          className={`p-button-secondary-transparent ${styles.orderIcon} ${styles.cancelIcon}`}
+          icon="cancel"
+          onClick={() => onFilterData(property, [])}
+        />
+      )}
       <label className={styles.datePlaceholder} htmlFor={property}>
         {resources.messages[property]}
       </label>

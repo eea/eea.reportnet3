@@ -84,7 +84,7 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
       );
     } else if (state.dateOptions.includes(filter)) {
       const dates = value.map(date => new Date(date).getTime() / 1000);
-      return !dates.includes(0)
+      return !dates.includes(0) && !isEmpty(dates)
         ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
             new Date(data[filter]).getTime() / 1000 <= dates[1] &&
             checkFilters(filteredKeys, data, state) &&
