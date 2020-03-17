@@ -588,7 +588,7 @@ public class DataFlowControllerImplTest {
   }
 
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testUpdateStatusException() throws EEAException {
     try {
       doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
@@ -596,6 +596,7 @@ public class DataFlowControllerImplTest {
       dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
+      throw e;
     }
 
   }

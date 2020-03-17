@@ -874,12 +874,13 @@ public class DataFlowServiceImplTest {
   }
 
 
-  @Test
-  public void testUpdateDataflowStatusException() {
+  @Test(expected = EEAException.class)
+  public void testUpdateDataflowStatusException() throws EEAException {
     try {
       dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN, null);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
     }
   }
 }
