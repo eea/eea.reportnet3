@@ -64,8 +64,8 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     <span className={`p-float-label ${styles.dataflowInputDate} `}>
       <Calendar
         className={styles.calendarFilter}
-        id={property}
         inputClassName={styles.calendarFilterBorder}
+        inputId={property}
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => onFilterData(property, event.value)}

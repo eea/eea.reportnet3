@@ -7,6 +7,7 @@ export const Calendar = ({
   dateFormat,
   inline,
   inputClassName,
+  inputId,
   key,
   maxDate,
   minDate,
@@ -24,6 +25,7 @@ export const Calendar = ({
       dateFormat={dateFormat}
       inline={inline}
       inputClassName={inputClassName}
+      inputId={inputId}
       key={key}
       maxDate={maxDate}
       minDate={minDate}
