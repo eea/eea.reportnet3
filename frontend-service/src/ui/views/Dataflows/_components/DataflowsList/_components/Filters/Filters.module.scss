@@ -3,11 +3,12 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
-}
-.header > span {
-  display: flex;
-  font-size: 10pt;
-  width: 14%;
+
+  > span {
+    display: flex;
+    font-size: 10pt;
+    width: 14%;
+  }
 }
 
 .dataflowInput {

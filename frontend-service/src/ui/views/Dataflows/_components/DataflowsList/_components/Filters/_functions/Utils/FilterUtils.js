@@ -84,11 +84,11 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
       );
     } else if (state.dateOptions.includes(filter)) {
       const dates = value.map(date => new Date(date).getTime() / 1000);
-      !dates.includes(0)
+      return !dates.includes(0)
         ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
-          new Date(data[filter]).getTime() / 1000 <= dates[1] &&
-          checkFilters(filteredKeys, data, state) &&
-          checkSelected(state, data, selectedKeys)
+            new Date(data[filter]).getTime() / 1000 <= dates[1] &&
+            checkFilters(filteredKeys, data, state) &&
+            checkSelected(state, data, selectedKeys)
         : checkFilters(filteredKeys, data, state) && checkSelected(state, data, selectedKeys);
     } else {
       return (

@@ -119,14 +119,12 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     <span className={`${styles.dataflowInput}`}>
       <MultiSelect
         className={styles.multiselectFilter}
-        filter={false}
         id={property}
         itemTemplate={selectTemplate}
-        onChange={event => onFilterData(property, event.value, filterState.data)}
+        onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property)}
         placeholder={resources.messages[property]}
-        //style={{ fontSize: '9pt' }}
         value={filterState.filterBy[property]}
       />
     </span>
