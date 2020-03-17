@@ -87,13 +87,13 @@ public class PKValidationUtils {
       String pkId, String fkId, Long datasetIdRefered, Long datasetIdReference) {
 
 
-    String queryPKPart = createQuery(datasetSchemaPK, pkId, datasetIdRefered, false);
-    List<String> a = datasetRepository.queryExecution(queryPKPart);
+    // String queryPKPart = createQuery(datasetSchemaPK, pkId, datasetIdRefered, false);
+    // List<String> a = datasetRepository.queryExecution(queryPKPart);
 
 
 
-    String queryFKPart = createQuery(datasetSchemaFK, fkId, datasetIdReference, true);
-    List<String> b = datasetRepository.queryExecution(queryFKPart);
+    // String queryFKPart = createQuery(datasetSchemaFK, fkId, datasetIdReference, true);
+    // List<String> b = datasetRepository.queryExecution(queryFKPart);
 
 
     System.out.println("yeah");
