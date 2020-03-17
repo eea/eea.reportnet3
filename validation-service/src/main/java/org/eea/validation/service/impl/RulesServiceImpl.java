@@ -68,6 +68,9 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant FT_DESCRIPTION. */
   private static final String FT_DESCRIPTION = "Checks if the field is a valid ";
 
+  /** The Constant TB_DESCRIPTION. */
+  private static final String TC_DESCRIPTION = "Checks if the record based on criteria is valid ";
+
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
 
@@ -292,7 +295,7 @@ public class RulesServiceImpl implements RulesService {
           String tableSchemaId =
               tableRepository.findTableValueByFieldSchemaId(datasetId, referenceId);
           ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, tableSchemaId,
+              FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
               datasetId));
           break;
         case CODELIST:

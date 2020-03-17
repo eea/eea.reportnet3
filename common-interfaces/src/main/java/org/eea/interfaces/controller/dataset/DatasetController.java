@@ -211,7 +211,7 @@ public interface DatasetController {
    * @return the field values referenced
    */
   @GetMapping("/{id}/getFieldsValuesReferenced")
-  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
   List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue);

@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 public class DataflowServiceImpl implements DataflowService {
 
 
+  /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
@@ -577,20 +578,23 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
 
+
   /**
    * Update data flow status.
    *
    * @param id the id
    * @param status the status
-   *
+   * @param deadlineDate the deadline date
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException {
+  public void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadlineDate)
+      throws EEAException {
     Optional<Dataflow> dataflow = dataflowRepository.findById(id);
     if (dataflow.isPresent()) {
       dataflow.get().setStatus(status);
+      dataflow.get().setDeadlineDate(deadlineDate);
       dataflowRepository.save(dataflow.get());
       LOG.info("The dataflow {} has been saved.", dataflow.get().getName());
     } else {

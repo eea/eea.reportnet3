@@ -61,6 +61,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
+
 /**
  * The Class DatasetMetabaseServiceImpl.
  */
@@ -590,7 +592,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Adds the foreign relation.
+   * Adds the foreign relation into the metabase.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
@@ -610,15 +612,25 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     foreignRelationsRepository.save(foreign);
   }
 
+
+  /**
+   * Delete foreign relation from the metabase.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   */
   @Override
   public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
-    foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin, datasetIdDestination, idPk);
+    foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin,
+        datasetIdDestination, idPk);
   }
 
 
   /**
-   * Gets the dataset destination foreign relation.
-   *
+   * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
+   * FK
+   * 
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
    * @return the dataset destination foreign relation

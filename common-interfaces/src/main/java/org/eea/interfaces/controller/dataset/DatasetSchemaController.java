@@ -197,6 +197,13 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
 
+
+  /**
+   * Find data schemas by id dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);

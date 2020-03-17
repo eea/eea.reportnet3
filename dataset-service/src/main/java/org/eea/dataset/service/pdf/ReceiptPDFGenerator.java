@@ -11,6 +11,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.poi.util.IOUtils;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.slf4j.Logger;
@@ -29,9 +30,8 @@ public class ReceiptPDFGenerator {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant background. */
-  private static final String BACKGROUND = ReceiptPDFGenerator.class.getClassLoader()
-      .getResource("pdf/receipt_background.png").getFile();
+  /** The Constant BACKGROUND. */
+  private static final String BACKGROUND = "pdf/receipt_background.png";
 
   /**
    * Generate PDF.
@@ -82,7 +82,8 @@ public class ReceiptPDFGenerator {
     PDType1Font fontBold = PDType1Font.HELVETICA_BOLD;
 
     // Print background
-    PDImageXObject pdImage = PDImageXObject.createFromFile(BACKGROUND, document);
+    byte[] file = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(BACKGROUND));
+    PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, file, BACKGROUND);
     contentStream.drawImage(pdImage, 0, 0);
 
     // Print receipt information
