@@ -51,7 +51,7 @@ import {
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
-    isDatasetDeleted,
+    isDatasetDeleted = false,
     isDataCollection,
     isValidationSelected,
     isWebFormMMR,
@@ -76,7 +76,6 @@ const DataViewer = withRouter(
     const [fetchedData, setFetchedData] = useState([]);
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
-    const [isAllDataDeleted, setIsAllDataDeleted] = useState(false);
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
@@ -101,6 +100,7 @@ const DataViewer = withRouter(
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
       initialRecordValue: undefined,
+      isAllDataDeleted: isDatasetDeleted,
       isRecordAdded: false,
       isRecordDeleted: false,
       newRecord: {},
@@ -205,12 +205,11 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      // setIsAllDataDeleted);
+      console.log('');
       if (isDatasetDeleted) {
-        onRefresh();
+        dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }
     }, [isDatasetDeleted]);
-    console.log('DELETE ALL', isDatasetDeleted);
 
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
@@ -234,7 +233,6 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
-
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
 
       setIsLoading(true);
