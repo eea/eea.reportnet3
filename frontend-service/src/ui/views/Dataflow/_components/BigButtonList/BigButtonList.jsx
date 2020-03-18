@@ -77,7 +77,7 @@ export const BigButtonList = ({
 
   const downloadPdf = response => {
     if (!isUndefined(response)) {
-      DownloadFile(response, `${dataflowData.name}.pdf`);
+      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
 

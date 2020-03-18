@@ -43,11 +43,47 @@ export const BigButtonList = ({
     }
   }, [notificationContext]);
 
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, 'Receipt.pdf');
+  // useEffect(() => {
+  //   if (!isUndefined(fileToDownload)) {
+  //     DownloadFile(fileToDownload, 'Receipt.pdf');
 
-      const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+  //     const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+
+  //     const link = document.createElement('a');
+
+  //     document.body.appendChild(link);
+
+  //     link.click();
+
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   }
+  // }, [fileToDownload]);
+  console.log('object', fileToDownload);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (!isEmpty(receiptState.receiptPdf)) {
+  //       onDownloadReceipt();
+  //     }
+  //   }, 1000);
+  // }, [receiptState.receiptPdf]);
+
+  // const onDownloadReceipt = () => {
+  //   if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
+  //     receiptBtnRef.current.click();
+
+  //     receiptDispatch({
+  //       type: 'ON_CLEAN_UP',
+  //       payload: { isLoading: false, isOutdated: false, receiptPdf: {} }
+  //     });
+  //   }
+  // };
+
+  const downloadPdf = response => {
+    if (!isUndefined(response)) {
+      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+
+      const url = window.URL.createObjectURL(new Blob([response]));
 
       const link = document.createElement('a');
 
@@ -58,25 +94,6 @@ export const BigButtonList = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     }
-  }, [fileToDownload]);
-  console.log('object', fileToDownload);
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (!isEmpty(receiptState.receiptPdf)) {
-  //       onDownloadReceipt();
-  //     }
-  //   }, 1000);
-  // }, [receiptState.receiptPdf]);
-
-  const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
-      receiptBtnRef.current.click();
-
-      receiptDispatch({
-        type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false, receiptPdf: {} }
-      });
-    }
   };
 
   const onLoadReceiptData = async () => {
@@ -86,15 +103,13 @@ export const BigButtonList = ({
         payload: { isLoading: true }
       });
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-      setFileToDownload(response);
+
+      downloadPdf(response);
+      removeNew();
     } catch (error) {
-      console.error('error', error);
+      console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
-      });
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
       });
     } finally {
       receiptDispatch({
@@ -102,6 +117,13 @@ export const BigButtonList = ({
         payload: { isLoading: false }
       });
     }
+  };
+
+  const removeNew = () => {
+    receiptDispatch({
+      type: 'ON_CLEAN_UP',
+      payload: { isLoading: false, isOutdated: false }
+    });
   };
 
   return (
