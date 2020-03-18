@@ -512,14 +512,15 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
+   * @param idFk the id fk
    * @return the field values referenced
    */
   @Override
   @GetMapping("/{id}/getFieldsValuesReferenced")
   @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema,
-      @RequestParam("searchValue") String searchValue) {
+      @RequestParam("idFieldSchema") String idFieldSchema,
+      @RequestParam("searchValue") String searchValue, @RequestParam("idFk") String idFk) {
     return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
   }
 

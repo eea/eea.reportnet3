@@ -41,6 +41,9 @@ public class ForeignRelations {
   @Column(name = "ID_PK")
   private String idPk;
 
+  @Column(name = "ID_FK_ORIGIN")
+  private String idFkOrigin;
+
   /**
    * Equals.
    *
@@ -57,6 +60,7 @@ public class ForeignRelations {
     }
     final ForeignRelations relation = (ForeignRelations) o;
     return idDatasetDestination.equals(relation.idDatasetDestination) && idPk.equals(relation.idPk)
+        && idDatasetOrigin.equals(relation.idDatasetOrigin)
         && idDatasetOrigin.equals(relation.idDatasetOrigin);
 
   }
@@ -68,7 +72,7 @@ public class ForeignRelations {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDatasetDestination, idDatasetOrigin, idPk);
+    return Objects.hash(idDatasetDestination, idDatasetOrigin, idPk, idFkOrigin);
   }
 
 }

@@ -1022,10 +1022,10 @@ public class DatasetSchemaServiceTest {
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
     Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
     Mockito.verify(datasetMetabaseService, times(1)).addForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
@@ -1046,10 +1046,10 @@ public class DatasetSchemaServiceTest {
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
     Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);
     Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
