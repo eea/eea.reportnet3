@@ -445,6 +445,7 @@
     "deleteDocumentFailedEvent": "Error deleting document at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "uploadDocumentFailedEvent": "Error uploading {:fileName} document at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "uploadDocumentCompletedEvent": "{:fileName} Document uploaded at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+    "updatedDocumentCompletedEvent": "{:fileName} Document updated at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "dataflowUpdatingError": "Failed updating dataflow name",
     "dataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
     "restoreDatasetSchemaSnapshotCompletedEvent": "Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -455,7 +456,8 @@
     "errorStatisticsByIdError": "Error loading schema: Failed loading statistics of <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "dataflowDetailsError": "Failed loading dataflow information",
     "reportingError": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "deleteDataByIdError": "Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "datasetServiceDeleteDataByIdError": "Failed deleting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "datasetServiceDeleteDataByIdSuccess": "Deleted data of <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "unsavedChanges": "There are unsaved changes",
     "validateDataInit": "Validating <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "validateDataByIdError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -496,9 +498,14 @@
     "deleteValidationHeader": "Delete validation",
     "role": "Role",
     "documentsActionColumns": "Actions",
+    "dataflowsListTab": "My dataflows",
     "columnInfo": "Column Info",
     "columnInfoDescription": "Description",
     "columnInfoName": "Name",
-    "columnInfoType": "Type"
+    "columnInfoType": "Type",
+    "name": "Name",
+    "expirationDate": "Expiration date",
+    "clearAllFilters": "Clear all filters",
+    "userRole": "Role"
   }
 }

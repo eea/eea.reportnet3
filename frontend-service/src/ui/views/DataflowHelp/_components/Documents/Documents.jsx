@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined, isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
@@ -72,7 +73,7 @@ const Documents = ({
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
           }}
-          onEditClick={e => onEditDocument()}
+          onEditClick={() => onEditDocument()}
         />
       </div>
     );
@@ -186,18 +187,6 @@ const Documents = ({
               onClick={() => {
                 setIsEditForm(false);
                 setIsUploadDialogVisible(true);
-              }}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin dataflowHelp-document-refresh-help-step`}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDocuments();
-                setIsLoading(false);
               }}
             />
           </div>

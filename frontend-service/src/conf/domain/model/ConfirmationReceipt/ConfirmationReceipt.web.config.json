@@ -1,4 +1,3 @@
-{   
-    "get": "/snapshot/dataflow/{:dataflowId}/releaseStatus/{:dataProviderId}" 
+{
+    "get": "/snapshot/receiptPDF/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}"
 }
-
