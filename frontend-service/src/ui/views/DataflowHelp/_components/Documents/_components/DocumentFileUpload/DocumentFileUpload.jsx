@@ -1,8 +1,13 @@
 import React, { useContext, useEffect, useRef } from 'react';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isEqual, isNull, isPlainObject, sortBy, isUndefined } from 'lodash';
 import * as Yup from 'yup';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import isNull from 'lodash/isNull';
+import isPlainObject from 'lodash/isPlainObject';
+import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 
 import styles from './DocumentFileUpload.module.scss';
 

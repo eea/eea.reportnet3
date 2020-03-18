@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined, isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
