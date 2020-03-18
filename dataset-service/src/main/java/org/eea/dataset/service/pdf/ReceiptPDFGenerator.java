@@ -3,8 +3,9 @@ package org.eea.dataset.service.pdf;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -33,6 +34,12 @@ public class ReceiptPDFGenerator {
   /** The Constant BACKGROUND. */
   private static final String BACKGROUND = "pdf/receipt_background.png";
 
+  /** The Constant POINTS_PER_INCH. */
+  private static final float POINTS_PER_INCH = 72;
+
+  /** The Constant POINTS_PER_MM. */
+  private static final float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
+
   /**
    * Generate PDF.
    *
@@ -41,13 +48,8 @@ public class ReceiptPDFGenerator {
    */
   public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
-      try {
-        // Creating PDF document object
-        PDDocument document = new PDDocument();
-
+      try (PDDocument document = new PDDocument()) {
         // Create and add an A3 landscape page
-        float POINTS_PER_INCH = 72;
-        float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
         PDPage page = new PDPage(new PDRectangle(210 * POINTS_PER_MM, 148 * POINTS_PER_MM));
         document.addPage(page);
 
@@ -57,7 +59,6 @@ public class ReceiptPDFGenerator {
         document.save(out);
         LOG.info("Receipt generated: representative={}, dataflowId={}, dataflowName={}",
             receipt.getProviderAssignation(), receipt.getIdDataflow(), receipt.getDataflowName());
-        document.close();
       } catch (IOException e) {
         LOG_ERROR.error("Unexpected exception: ", e);
       }
@@ -76,7 +77,8 @@ public class ReceiptPDFGenerator {
       throws IOException {
 
     String text;
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    ZoneId timeZone = ZoneId.of("UTC");
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
     PDType1Font font = PDType1Font.HELVETICA;
     PDType1Font fontBold = PDType1Font.HELVETICA_BOLD;
@@ -90,21 +92,25 @@ public class ReceiptPDFGenerator {
     printLinePDF(contentStream, "CONFIRMATION RECEIPT", font, 25, 25, 345);
     printLinePDF(contentStream, "Dataset", fontBold, 12, 25, 295);
     printLinePDF(contentStream, "Date", fontBold, 12, 458, 295);
-    printLinePDF(contentStream, "Date: " + dateFormatter.format(new Date()), font, 12, 25, 386);
+    printLinePDF(contentStream, "Date: " + ZonedDateTime.now(timeZone).format(dateFormatter), font,
+        12, 25, 386);
+
     text = "Representative: " + receipt.getProviderAssignation();
     printLinePDF(contentStream, text, font, 12, 570 - font.getStringWidth(text) / 1000 * 12, 386);
     printLinePDF(contentStream, receipt.getDataflowName(), font, 12, 25, 325);
 
     // Print schemas information
-    float y = 295 - 20;
+    float spaceBetweenLines = 20f;
+    float y = 295f - spaceBetweenLines;
     contentStream.setNonStrokingColor(Color.DARK_GRAY);
     for (ReportingDatasetVO dataset : receipt.getDatasets()) {
       printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, 12, 25, y);
-      text = dateFormatter.format(dataset.getDateReleased());
+      text = dateFormatter
+          .format(ZonedDateTime.ofInstant(dataset.getDateReleased().toInstant(), timeZone));
       printLinePDF(contentStream, text, font, 12, 570 - font.getStringWidth(text) / 1000 * 12, y);
       contentStream.addRect(25, y - 5.5f, 545, 0.5f);
       contentStream.fill();
-      y -= 20;
+      y -= spaceBetweenLines;
     }
 
     contentStream.close();
