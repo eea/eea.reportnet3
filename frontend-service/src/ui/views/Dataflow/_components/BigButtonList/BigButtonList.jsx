@@ -75,27 +75,26 @@ export const BigButtonList = ({
     }
   }, [notificationContext]);
 
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, 'namePd.pdf');
+  // useEffect(() => {
+  //   if (!isUndefined(fileToDownload)) {
+  //     DownloadFile(fileToDownload, 'Receipt.pdf');
 
-      const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+  //     const url = window.URL.createObjectURL(new Blob([fileToDownload]));
 
-      const link = document.createElement('a');
+  //     const link = document.createElement('a');
 
-      document.body.appendChild(link);
+  //     document.body.appendChild(link);
 
-      link.click();
+  //     link.click();
 
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    }
-  }, [fileToDownload]);
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   }
+  // }, [fileToDownload]);
 
   useEffect(() => {
     if (!isEmpty(receiptState.receiptPdf)) {
       onDownloadReceipt();
-      console.log('receiptState', receiptState);
     }
   }, [receiptState.receiptPdf]);
 
@@ -200,15 +199,11 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-
-      console.log('#'.repeat(50));
-      console.log('response', response);
-
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: true }
       });
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
 
       setFileToDownload(response);
     } catch (error) {
