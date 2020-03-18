@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { isEmpty, isNull, isUndefined, remove } from 'lodash';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
 
@@ -54,7 +53,6 @@ export const BigButtonList = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
-  const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);

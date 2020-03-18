@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
 
@@ -29,7 +28,6 @@ export const BigButtonList = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const [fileToDownload, setFileToDownload] = useState(undefined);
 
   const receiptBtnRef = useRef(null);
 
@@ -42,42 +40,6 @@ export const BigButtonList = ({
       });
     }
   }, [notificationContext]);
-
-  // useEffect(() => {
-  //   if (!isUndefined(fileToDownload)) {
-  //     DownloadFile(fileToDownload, 'Receipt.pdf');
-
-  //     const url = window.URL.createObjectURL(new Blob([fileToDownload]));
-
-  //     const link = document.createElement('a');
-
-  //     document.body.appendChild(link);
-
-  //     link.click();
-
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-  //   }
-  // }, [fileToDownload]);
-  console.log('object', fileToDownload);
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (!isEmpty(receiptState.receiptPdf)) {
-  //       onDownloadReceipt();
-  //     }
-  //   }, 1000);
-  // }, [receiptState.receiptPdf]);
-
-  // const onDownloadReceipt = () => {
-  //   if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
-  //     receiptBtnRef.current.click();
-
-  //     receiptDispatch({
-  //       type: 'ON_CLEAN_UP',
-  //       payload: { isLoading: false, isOutdated: false, receiptPdf: {} }
-  //     });
-  //   }
-  // };
 
   const downloadPdf = response => {
     if (!isUndefined(response)) {
