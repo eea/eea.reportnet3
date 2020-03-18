@@ -189,18 +189,6 @@ const Documents = ({
               }}
             />
           </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin dataflowHelp-document-refresh-help-step`}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDocuments();
-                setIsLoading(false);
-              }}
-            />
-          </div>
         </Toolbar>
       ) : (
         <></>
