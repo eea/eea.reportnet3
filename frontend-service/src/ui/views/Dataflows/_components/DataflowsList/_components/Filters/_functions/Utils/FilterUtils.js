@@ -86,7 +86,7 @@ const getYesterdayDate = () => {
 
 const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
   ...state.data.filter(data => {
-    if (state.selectOptions.includes(filter)) {
+    if (state.selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
         [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()) &&
         checkDates(state.filterBy[state.dateOptions], data[state.dateOptions]) &&
@@ -103,6 +103,7 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
         : checkFilters(filteredKeys, data, state) && checkSelected(state, data, selectedKeys);
     } else {
       return (
+        !isNil(data[filter]) &&
         data[filter].toLowerCase().includes(value.toLowerCase()) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys) &&
