@@ -45,7 +45,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const [tabMenuItems] = useState([
     {
       // label: resources.messages['dataflowAcceptedPendingTab'],
-      label: resources.messages['myDataflows'],
+      label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
