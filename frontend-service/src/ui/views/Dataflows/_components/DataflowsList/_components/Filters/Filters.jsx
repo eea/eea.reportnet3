@@ -173,10 +173,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
           className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-          iconClasses="warning"
-          icon="trash"
+          icon="undo"
           onClick={() => onClearAllFilters()}
           tooltip={resources.messages['clearAllFilters']}
+          tooltipOptions={{ position: 'left' }}
         />
       )}
     </div>
