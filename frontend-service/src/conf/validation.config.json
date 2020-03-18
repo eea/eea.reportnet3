@@ -11,16 +11,21 @@
         { "label": "!=", "value": "!=" }
       ]
     },
-    "string": {
-      "option": { "label": "String Length", "value": "string" },
+    "LEN": {
+      "option": { "label": "String Length", "value": "LEN" },
       "values": [
-        { "label": "SEQ", "value": "SEQ" },
-        { "label": "SEQIC", "value": "SEQIC" },
         { "label": "GT", "value": "GT" },
         { "label": "GTEQ", "value": "GTEQ" },
         { "label": "LT", "value": "LT" },
         { "label": "LTEQ", "value": "LTEQ" },
         { "label": "DIST", "value": "DIST" }
+      ]
+    },
+    "string": {
+      "option": { "label": "String", "value": "string" },
+      "values": [
+        { "label": "SEQ", "value": "SEQ" },
+        { "label": "SEQIC", "value": "SEQIC" }
       ]
     }
   },
@@ -31,6 +36,11 @@
     "<=": "LTEQ",
     "=": "EQ",
     "!=": "DIST",
+    "GT": "GT",
+    "LT": "LT",
+    "LTEQ": "LTEQ",
+    "EQ": "EQ",
+    "DIST": "DIST",
     "SEQ": "SEQ",
     "SEQIC": "SEQIC",
     "GTEQ": "GTEQ",

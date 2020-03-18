@@ -132,7 +132,8 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     try {
       const { candidateRule } = creationFormState;
       const { datasetSchemaId } = datasetSchema;
-      await ValidationService.create(datasetSchemaId, candidateRule);
+      await ValidationService.create(candidateRule);
+      onHide();
     } catch (error) {
       console.log('createValidationRule error', error);
     }

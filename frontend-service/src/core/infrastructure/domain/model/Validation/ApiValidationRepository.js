@@ -1,30 +1,49 @@
+import { config } from 'conf';
+
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const buildExpression = expression => {
+  if (expression.operatorType == 'LEN') {
+    return {
+      operator: config.validations.operatorEquivalences[expression.operatorValue],
+      arg1: expression.expressionValue,
+      arg2: {
+        opererator: 'LEN',
+        arg1: 'VALUE'
+      }
+    };
+  }
   return {
     arg1: 'VALUE',
-    operator: expression.operatorValue,
-    arg2: expression.ruleValue
+    operator: config.validations.operatorEquivalences[expression.operatorValue],
+    arg2: expression.expressionValue
   };
 };
 const buildNode = (expression, index, expressions) => {
   return {
-    leftArg: buildExpression(expression),
+    arg1: buildTransferDTO(expression, 0, []),
     operator: expressions[index + 1].union,
-    rightArg:
+    arg2:
       index + 1 < expressions.length - 1
-        ? buildNode(expressions[index + 1], index + 1, expressions)
-        : buildExpression(expressions[index + 1])
+        ? buildTransferDTO(expressions[index + 1], index + 1, expressions)
+        : buildTransferDTO(expressions[index + 1], 0, [])
   };
 };
 
-const create = async (datasetSchemaId, validationRule) => {
-  console.info('#'.repeat(60));
-  console.info('[create]: ', create);
-  console.info('#'.repeat(60));
+const buildTransferDTO = (expression, index, expressions) => {
+  if (expressions.length > 1) {
+    return buildNode(expression, index, expressions);
+  }
+  if (expression.expressions.length > 1) {
+    return buildNode(expression.expressions[0], 0, expression.expressions);
+  }
+  return buildExpression(expression);
+};
+
+const create = async validationRule => {
   const { expressions } = validationRule;
   const validation = {
     description: validationRule.description,
@@ -35,12 +54,12 @@ const create = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    whenCondition: expressions.length > 1 ? buildNode(expressions[0], 0, expressions) : buildExpression(expressions[0])
+    whenCondition: buildTransferDTO(expressions[0], 0, expressions)
   };
   console.info('-'.repeat(60));
-  console.log('validation', datasetSchemaId, validation);
+  console.log('validation', validation.whenCondition);
   console.info('-'.repeat(60));
-  //return await apiValidation.create(datasetSchemaId, validation);
+  return await apiValidation.create(validation);
 };
 
 const deleteById = async (datasetSchemaId, ruleId) => {
