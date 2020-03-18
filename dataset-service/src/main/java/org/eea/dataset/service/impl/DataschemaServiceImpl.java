@@ -1013,7 +1013,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
   }
 
-  public List<ReferencedFieldSchema> getReferencedFieldsByShema(String datasetSchemaId) {
+  /**
+   * Gets the referenced fields by schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the referenced fields by schema
+   */
+  public List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId) {
 
     List<ReferencedFieldSchema> references = new ArrayList<>();
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(datasetSchemaId));

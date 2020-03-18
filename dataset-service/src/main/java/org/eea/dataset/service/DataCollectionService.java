@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.Date;
 import java.util.List;
+import org.eea.dataset.persistence.metabase.domain.FKDataCollection;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 
 
@@ -42,4 +43,12 @@ public interface DataCollectionService {
    * @param dueDate the due date
    */
   void createEmptyDataCollection(Long dataflowId, Date dueDate);
+
+
+  /**
+   * Adds the foreign relations from new reportings.
+   *
+   * @param datasetsRegistry the datasets registry
+   */
+  void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry);
 }

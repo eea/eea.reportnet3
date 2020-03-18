@@ -10,8 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -38,13 +36,11 @@ public class ForeignRelations {
 
   /** The id dataset origin. */
   @ManyToOne
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "DATASET_ID_ORIGIN")
   private DataSetMetabase idDatasetOrigin;
 
   /** The id dataset destination. */
   @ManyToOne
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "DATASET_ID_DESTINATION")
   private DataSetMetabase idDatasetDestination;
 

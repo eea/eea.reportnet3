@@ -276,8 +276,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             newReporting.setRepresentative(map.get(representative.getDataProviderId()));
             newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
             newReporting.setIdDatasetOrigin(datasetId);
-            newReporting
-                .setFks(datasetSchemaService.getReferencedFieldsByShema(design.getDatasetSchema()));
+            newReporting.setFks(
+                datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
             newReportingDatasetsRegistry.add(newReporting);
           }
         }
@@ -286,6 +286,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // 8. Create permissions
         createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
         connection.commit();
+        // Add into the foreign_relations table from metabase the dataset origin-destination
+        // relation, if applies
         addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
 
         LOG.info("Metabase changes completed on DataCollection creation");
@@ -501,23 +503,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
-  /*
-   * private void manageListFk(List<FKDataCollection> datasetsRegistry) {
-   * 
-   * Map<String, List<FKDataCollection>> datasetGroupByRepresentative =
-   * datasetsRegistry.stream().collect(Collectors.groupingBy(fk -> fk.getRepresentative()));
-   * 
-   * datasetGroupByRepresentative.forEach((representative, listFkData) -> { for (FKDataCollection
-   * fkData : listFkData) { if (fkData.getFks() != null && !fkData.getFks().isEmpty()) { for
-   * (ReferencedFieldSchema referenced : fkData.getFks()) { fkData.setIdDatasetDestination(
-   * findIdDatasetDestination(referenced.getIdDatasetSchema().toString(), listFkData)); } }
-   * 
-   * // Insert into foreign_relations from metabase } });
-   * 
-   * }
+
+  /**
+   * Find id dataset destination.
+   *
+   * @param idDatasetSchemaDestination the id dataset schema destination
+   * @param listFkData the list fk data
+   * @return the long
    */
-
-
   private Long findIdDatasetDestination(String idDatasetSchemaDestination,
       List<FKDataCollection> listFkData) {
     Long idDataset = 0L;
@@ -531,6 +524,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
+  /**
+   * Adds the foreign relations from new reportings.
+   *
+   * @param datasetsRegistry the datasets registry
+   */
   public void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry) {
     List<ForeignRelations> foreignRelations = new ArrayList<>();
     Map<String, List<FKDataCollection>> groupByRepresentative =
@@ -555,6 +553,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
 
     });
+    // Save all the FK relations between datasets into the metabase
     if (!foreignRelations.isEmpty()) {
       foreignRelationsRepository.saveAll(foreignRelations);
     }

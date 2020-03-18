@@ -275,6 +275,12 @@ public interface DatasetSchemaService {
   void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO,
       String datasetSchemaId);
 
-  List<ReferencedFieldSchema> getReferencedFieldsByShema(String datasetSchemaId);
+  /**
+   * Gets the referenced fields by schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the referenced fields by schema
+   */
+  List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId);
 
 }

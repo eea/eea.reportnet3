@@ -7,18 +7,26 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+
+/**
+ * The Class FKDataCollection.
+ */
 @Getter
 @Setter
 @ToString
 public class FKDataCollection {
 
 
+  /** The id dataset schema origin. */
   private String idDatasetSchemaOrigin;
 
+  /** The representative. */
   private String representative;
 
+  /** The id dataset origin. */
   private Long idDatasetOrigin;
 
+  /** The fks. */
   private List<ReferencedFieldSchema> fks;
 
 

@@ -599,7 +599,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     List<DataSetSchemaVO> schemas = new ArrayList<>();
 
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
-    designs.parallelStream().forEach(design -> {
+    designs.stream().forEach(design -> {
       try {
         schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
       } catch (EEAException e) {
@@ -607,8 +607,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
             e);
       }
     });
-
-
     return schemas;
   }
 
