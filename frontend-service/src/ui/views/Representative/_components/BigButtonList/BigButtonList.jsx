@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './BigButtonList.module.css';
 
@@ -10,7 +10,6 @@ import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
@@ -27,7 +26,6 @@ export const BigButtonList = ({
   showReleaseSnapshotDialog
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
 
   const receiptBtnRef = useRef(null);
 
@@ -54,6 +52,7 @@ export const BigButtonList = ({
       link.click();
 
       document.body.removeChild(link);
+
       window.URL.revokeObjectURL(url);
     }
   };
@@ -109,10 +108,6 @@ export const BigButtonList = ({
       </div>
 
       {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      {/* <PDFDownloadLink
-        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
-        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-      </PDFDownloadLink> */}
     </>
   );
 };
