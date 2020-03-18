@@ -39,7 +39,7 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
   }
 }

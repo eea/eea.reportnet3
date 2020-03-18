@@ -82,9 +82,10 @@ public class ExecuteTableValidationCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     data.put("kieBase", kieBase);
     data.put("numPag", 1);
+    data.put("idTable", 1);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_TABLE);
     eeaEventVO.setData(data);

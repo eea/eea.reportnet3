@@ -13,6 +13,14 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 /**
  * The Interface DatasetMetabaseService.
  */
+/**
+ * @author vicente.cano
+ *
+ */
+/**
+ * @author vicente.cano
+ *
+ */
 public interface DatasetMetabaseService {
 
   /**
@@ -114,4 +122,34 @@ public interface DatasetMetabaseService {
    * @param idDataflow the id dataflow
    */
   void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long idDataflow);
-}
+
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  String findDatasetSchemaIdById(long datasetId);
+
+  /**
+   * @param datasetIdOrigin
+   * @param datasetIdDestination
+   * @param idPk
+   */
+  void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
+
+  /**
+   * @param datasetIdOrigin
+   * @param idPk
+   * @return
+   */
+  Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
+  
+  /**
+   * @param datasetIdOrigin
+   * @param datasetIdDestination
+   * @param idPk
+   */
+  void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
+  
+ }

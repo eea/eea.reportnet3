@@ -36,16 +36,22 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
 
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The update record helper. */
+  /**
+   * The update record helper.
+   */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
-  /** The field batch size. */
+  /**
+   * The field batch size.
+   */
   @Value("${dataset.propagation.fieldBatchSize}")
   private int fieldBatchSize;
 
@@ -68,11 +74,11 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
-    DataType typeField = (DataType) eeaEventVO.getData().get("typeField");
+    DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
     final String uuid = (String) eeaEventVO.getData().get("uuId");
 
     try {

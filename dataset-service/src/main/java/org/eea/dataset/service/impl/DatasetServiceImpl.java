@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -75,6 +76,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,6 +234,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The field no validation mapper. */
+  @Autowired
+  private FieldNoValidationMapper fieldNoValidationMapper;
 
 
 
@@ -1448,4 +1454,39 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     recordRepository.deleteByDataProviderCode(providerCode);
   }
+
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @param searchValue the search value
+   * @return the field values referenced
+   */
+  @Override
+  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
+    Long idDatasetDestination =
+        datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+    TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
+    // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
+    // want to show on the screen
+    List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
+        searchValue, PageRequest.of(0, 15));
+    return fieldNoValidationMapper.entityListToClass(fields);
+  }
+
+
+  /**
+   * Gets the dataset id referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @return the dataset id referenced
+   */
+  @Override
+  public Long getDatasetIdReferenced(Long datasetId, String idPk) {
+    return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+  }
+
 }

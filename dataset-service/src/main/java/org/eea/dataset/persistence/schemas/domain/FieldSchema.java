@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,6 +27,7 @@ public class FieldSchema {
   /** The id field schema. */
   @Id
   @Field(value = "_id")
+  @JsonProperty("_id")
   private ObjectId idFieldSchema;
 
   /** The description. */
@@ -39,6 +41,7 @@ public class FieldSchema {
   /** The type. */
   @Field(value = "typeData")
   @Enumerated(EnumType.STRING)
+  @JsonProperty("typeData")
   private DataType type;
 
   /** The type. */
@@ -53,6 +56,19 @@ public class FieldSchema {
   @Field(value = "required")
   private Boolean required;
 
+  /** The is PK. */
+  @Field(value = "pk")
+  private Boolean pk;
+
+
+  /** The is P kreferenced. */
+  @Field(value = "pkReferenced")
+  private Boolean pkReferenced;
+
+  /** The reference FK. */
+  @Field(value = "referencedField")
+  private ReferencedFieldSchema referencedField;
+
   /**
    * Hash code.
    *
@@ -61,7 +77,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description);
+        description, pk);
   }
 
 
@@ -83,7 +99,7 @@ public class FieldSchema {
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
-        && Objects.equals(description, other.description);
+        && Objects.equals(pk, other.pk) && Objects.equals(description, other.description);
   }
 
 
