@@ -6,8 +6,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
 
-import { Button } from 'ui/views/_components/Button';
-
 import { config } from 'conf';
 
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
@@ -167,7 +165,6 @@ const Dataflows = withRouter(({ match, history }) => {
     setIsDataflowDialogVisible(false);
     dataFetch();
     onRefreshToken();
-    console.log('//ir al dataflow directamente');
   };
 
   const onHideDialog = () => {

@@ -2,16 +2,14 @@
   &:last-child {
     margin-bottom: 5rem;
   }
-}
-.wrap > h2 {
-  margin-bottom: 5px;
-  color: var(--main-font-color);
-}
-.wrap > p {
-  font-weight: 300;
-  color: var(--main-font-color);
-}
 
-.dataflowInput {
-  // width: 90%;
+  > h2 {
+    margin-bottom: 5px;
+    color: var(--main-font-color);
+  }
+
+  > p {
+    font-weight: 300;
+    color: var(--main-font-color);
+  }
 }
