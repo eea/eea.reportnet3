@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from 'react';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isPlainObject, sortBy, isUndefined } from 'lodash';
+import { isEmpty, isEqual, isNull, isPlainObject, sortBy, isUndefined } from 'lodash';
 import * as Yup from 'yup';
 
 import styles from './DocumentFileUpload.module.scss';
@@ -99,46 +99,50 @@ const DocumentFileUpload = ({
       initialValues={initialValuesWithLangField}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        setSubmitting(true);
-        notificationContext.add({
-          type: 'DOCUMENT_UPLOADING_INIT_INFO',
-          content: {}
-        });
-        try {
-          if (isEditForm) {
-            onUpload();
-            await DocumentService.editDocument(
-              dataflowId,
-              values.description,
-              values.lang,
-              values.uploadFile,
-              values.isPublic,
-              values.id
-            );
-          } else {
-            onUpload();
-            await DocumentService.uploadDocument(
-              dataflowId,
-              values.description,
-              values.lang,
-              values.uploadFile,
-              values.isPublic
-            );
+        if (!isEqual(initialValuesWithLangField, values)) {
+          setSubmitting(true);
+          notificationContext.add({
+            type: 'DOCUMENT_UPLOADING_INIT_INFO',
+            content: {}
+          });
+          try {
+            if (isEditForm) {
+              onUpload();
+              await DocumentService.editDocument(
+                dataflowId,
+                values.description,
+                values.lang,
+                values.uploadFile,
+                values.isPublic,
+                values.id
+              );
+            } else {
+              onUpload();
+              await DocumentService.uploadDocument(
+                dataflowId,
+                values.description,
+                values.lang,
+                values.uploadFile,
+                values.isPublic
+              );
+            }
+          } catch (error) {
+            if (isEditForm) {
+              notificationContext.add({
+                type: 'DOCUMENT_EDITING_ERROR',
+                content: {}
+              });
+            } else {
+              notificationContext.add({
+                type: 'DOCUMENT_UPLOADING_ERROR',
+                content: {}
+              });
+            }
+          } finally {
+            setSubmitting(false);
           }
-        } catch (error) {
-          if (isEditForm) {
-            notificationContext.add({
-              type: 'DOCUMENT_EDITING_ERROR',
-              content: {}
-            });
-          } else {
-            notificationContext.add({
-              type: 'DOCUMENT_UPLOADING_ERROR',
-              content: {}
-            });
-          }
-        } finally {
-          setSubmitting(false);
+        } else {
+          setIsUploadDialogVisible(false);
         }
       }}>
       {({ isSubmitting, setFieldValue, errors, touched, values }) => (
@@ -155,7 +159,7 @@ const DocumentFileUpload = ({
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field name="lang" component="select" value={values.lang}>
-                <option value="">{resources.messages.selectLang}</option>
+                <option value="">{resources.messages['selectLang']}</option>
                 {sortBy(config.languages, ['name']).map(language => (
                   <option key={language.code} value={language.code}>
                     {language.name}

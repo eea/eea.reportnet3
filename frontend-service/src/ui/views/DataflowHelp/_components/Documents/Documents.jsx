@@ -72,7 +72,7 @@ const Documents = ({
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
           }}
-          onEditClick={e => onEditDocument()}
+          onEditClick={() => onEditDocument()}
         />
       </div>
     );
