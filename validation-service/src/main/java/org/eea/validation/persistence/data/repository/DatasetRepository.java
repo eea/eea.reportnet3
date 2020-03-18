@@ -9,8 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * The Interface DatasetRepository.
  */
-public interface DatasetRepository
-    extends JpaRepository<DatasetValue, Long>, DatasetExtendedRepository {
+public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
 
   /**
    * Empties the dataset.
