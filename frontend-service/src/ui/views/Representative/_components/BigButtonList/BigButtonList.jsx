@@ -45,7 +45,7 @@ export const BigButtonList = ({
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, 'namePd.pdf');
+      DownloadFile(fileToDownload, 'Receipt.pdf');
 
       const url = window.URL.createObjectURL(new Blob([fileToDownload]));
 
@@ -59,14 +59,14 @@ export const BigButtonList = ({
       window.URL.revokeObjectURL(url);
     }
   }, [fileToDownload]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (!isEmpty(receiptState.receiptPdf)) {
-        onDownloadReceipt();
-      }
-    }, 1000);
-  }, [receiptState.receiptPdf]);
+  console.log('object', fileToDownload);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (!isEmpty(receiptState.receiptPdf)) {
+  //       onDownloadReceipt();
+  //     }
+  //   }, 1000);
+  // }, [receiptState.receiptPdf]);
 
   const onDownloadReceipt = () => {
     if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
@@ -81,17 +81,22 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-      setFileToDownload(response);
       receiptDispatch({
         type: 'ON_DOWNLOAD',
-        payload: { isLoading: true, receiptPdf: response }
+        payload: { isLoading: true }
       });
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setFileToDownload(response);
     } catch (error) {
       console.error('error', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
+    } finally {
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: false }

@@ -75,28 +75,29 @@ export const BigButtonList = ({
     }
   }, [notificationContext]);
 
-  // useEffect(() => {
-  //   if (!isUndefined(fileToDownload)) {
-  //     DownloadFile(fileToDownload, 'Receipt.pdf');
+  const downloadPdf = response => {
+    if (!isUndefined(response)) {
+      DownloadFile(response, `${dataflowData.name}.pdf`);
 
-  //     const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+      const url = window.URL.createObjectURL(new Blob([response]));
 
-  //     const link = document.createElement('a');
+      const link = document.createElement('a');
 
-  //     document.body.appendChild(link);
+      document.body.appendChild(link);
 
-  //     link.click();
+      link.click();
 
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-  //   }
-  // }, [fileToDownload]);
-
-  useEffect(() => {
-    if (!isEmpty(receiptState.receiptPdf)) {
-      onDownloadReceipt();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     }
-  }, [receiptState.receiptPdf]);
+  };
+
+  const removeNew = () => {
+    receiptDispatch({
+      type: 'ON_CLEAN_UP',
+      payload: { isLoading: false, isOutdated: false }
+    });
+  };
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -178,16 +179,6 @@ export const BigButtonList = ({
     }
   };
 
-  const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
-      receiptBtnRef.current.click();
-      receiptDispatch({
-        type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false }
-      });
-    }
-  };
-
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -205,7 +196,8 @@ export const BigButtonList = ({
       });
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
 
-      setFileToDownload(response);
+      downloadPdf(response);
+      removeNew();
     } catch (error) {
       console.error(error);
       notificationContext.add({
