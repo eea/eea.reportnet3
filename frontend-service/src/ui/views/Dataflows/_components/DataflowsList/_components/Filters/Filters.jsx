@@ -176,7 +176,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           iconClasses="warning"
           icon="trash"
           onClick={() => onClearAllFilters()}
-          tooltip={resources.messages['clearFilters']}
+          tooltip={resources.messages['clearAllFilters']}
         />
       )}
     </div>
