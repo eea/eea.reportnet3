@@ -1,3 +1,4 @@
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
@@ -33,7 +34,9 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    expirationDate: moment.unix(dataflowDTO.deadlineDate).format('MM/DD/YYYY'),
+    expirationDate: !isNil(dataflowDTO.deadlineDate)
+      ? moment.unix(dataflowDTO.deadlineDate).format('MM/DD/YYYY')
+      : moment(dataflowDTO.deadlineDate).format('MM/DD/YYYY'),
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
