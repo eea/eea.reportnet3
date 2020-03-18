@@ -147,10 +147,9 @@ public interface DatasetMetabaseService {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
-   * @param idFkOrigin the id fk origin
    * @return the dataset destination foreign relation
    */
-  Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk, String idFkOrigin);
+  Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
 
   /**
    * Delete foreign relation.

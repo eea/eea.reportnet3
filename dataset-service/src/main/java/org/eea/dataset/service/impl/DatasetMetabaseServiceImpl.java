@@ -638,14 +638,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
-   * @param idFkOrigin the id fk origin
    * @return the dataset destination foreign relation
    */
   @Override
-  public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk,
-      String idFkOrigin) {
-    return foreignRelationsRepository
-        .findDatasetDestinationByOriginAndPkAndIdFkOrigin(datasetIdOrigin, idPk, idFkOrigin);
+  public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
+    Long idDestination = 0L;
+    List<Long> datasetsId =
+        foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
+    if (datasetsId != null && !datasetsId.isEmpty()) {
+      idDestination = datasetsId.get(0);
+    }
+    return idDestination;
   }
 
 

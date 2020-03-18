@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.metabase.repository;
 
+import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,10 +23,9 @@ public interface ForeignRelationsRepository extends CrudRepository<ForeignRelati
    * @param idFkOrigin the id fk origin
    * @return the long
    */
-  @Query("Select f.idDatasetDestination.id From ForeignRelations f Where f.idDatasetOrigin.id=:idDatasetOrigin And f.idPk=:idPk And f.idFkOrigin=:idFkOrigin")
-  Long findDatasetDestinationByOriginAndPkAndIdFkOrigin(
-      @Param("idDatasetOrigin") Long datasetIdOrigin, @Param("idPk") String idPk,
-      @Param("idFkOrigin") String idFkOrigin);
+  @Query("Select f.idDatasetDestination.id From ForeignRelations f Where f.idDatasetOrigin.id=:idDatasetOrigin And f.idPk=:idPk")
+  List<Long> findDatasetDestinationByOriginAndPk(@Param("idDatasetOrigin") Long datasetIdOrigin,
+      @Param("idPk") String idPk);
 
   /**
    * Delete FK by origin destination and pk.

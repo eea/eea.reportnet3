@@ -358,8 +358,7 @@ public interface DatasetService {
    * @param idFkOrigin the id fk origin
    * @return the field values referenced
    */
-  List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue,
-      String idFkOrigin);
+  List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
 
 
   /**
@@ -367,8 +366,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
-   * @param idFkOrigin the id fk origin
    * @return the dataset id referenced
    */
-  Long getDatasetIdReferenced(Long datasetId, String idPk, String idFkOrigin);
+  Long getDatasetIdReferenced(Long datasetId, String idPk);
 }

@@ -224,11 +224,9 @@ public interface DatasetController {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
-   * @param idFk the id fk
    * @return the dataset id referenced
    */
   @GetMapping("private/getDatasetIdReferenced")
   Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema,
-      @RequestParam("idFk") String idFk);
+      @RequestParam(value = "idFieldSchema") String idFieldSchema);
 }

@@ -373,10 +373,8 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void testGetDatasetDestinationForeignRelation() {
-    datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73",
-        "5ce524fad31fc52540abae73");
+    datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
     Mockito.verify(foreingRelationsRepository, times(1))
-        .findDatasetDestinationByOriginAndPkAndIdFkOrigin(Mockito.any(), Mockito.any(),
-            Mockito.any());
+        .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
   }
 }

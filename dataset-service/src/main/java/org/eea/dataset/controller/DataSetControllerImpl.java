@@ -521,8 +521,7 @@ public class DataSetControllerImpl implements DatasetController {
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam("idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue, @RequestParam("idFk") String idFk) {
-    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue,
-        idFk);
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
   }
 
 
@@ -536,9 +535,8 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping("private/getDatasetIdReferenced")
   public Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema,
-      @RequestParam("idFk") String idFk) {
-    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema, idFk);
+      @RequestParam(value = "idFieldSchema") String idFieldSchema) {
+    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema);
   }
 
 }
