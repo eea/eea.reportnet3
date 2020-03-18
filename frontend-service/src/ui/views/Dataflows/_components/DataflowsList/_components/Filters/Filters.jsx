@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './Filters.module.scss';
 
@@ -136,9 +137,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     </span>
   );
 
-  const selectTemplate = option => (
-    <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>
-  );
+  const selectTemplate = option => {
+    if (!isNil(option.value)) {
+      return <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
+    }
+  };
 
   return (
     <div className={styles.header}>
