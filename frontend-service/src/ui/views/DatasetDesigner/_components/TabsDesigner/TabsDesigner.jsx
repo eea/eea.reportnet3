@@ -412,6 +412,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
         <CreateValidation
           isVisible={isAddValidationVisible}
           datasetSchema={datasetSchema}
+          datasetId={datasetId}
           toggleVisibility={setIsAddValidationVisible}
         />
       )}

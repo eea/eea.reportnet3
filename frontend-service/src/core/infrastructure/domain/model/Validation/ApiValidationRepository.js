@@ -43,7 +43,7 @@ const buildTransferDTO = (expression, index, expressions) => {
   return buildExpression(expression);
 };
 
-const create = async validationRule => {
+const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
     description: validationRule.description,
@@ -56,10 +56,7 @@ const create = async validationRule => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     whenCondition: buildTransferDTO(expressions[0], 0, expressions)
   };
-  console.info('-'.repeat(60));
-  console.log('validation', validation.whenCondition);
-  console.info('-'.repeat(60));
-  return await apiValidation.create(validation);
+  return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const deleteById = async (datasetSchemaId, ruleId) => {

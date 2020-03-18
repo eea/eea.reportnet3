@@ -1,5 +1,5 @@
 {
-  "create": "/rules/createNewRule",
+  "create": "/rules/createNewRule?datasetId={:datasetId}",
   "delete": "/rules/{:datasetSchemaId}/deleteRuleById/{:ruleId}",
   "getAll": "/rules/{:datasetSchemaId}"
 }

@@ -36,7 +36,7 @@ import { initValidationRuleCreation } from './_functions/utils/initValidationRul
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
 
-const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility }) => {
+const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility, datasetId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [creationFormState, creationFormDispatch] = useReducer(
@@ -132,7 +132,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
     try {
       const { candidateRule } = creationFormState;
       const { datasetSchemaId } = datasetSchema;
-      await ValidationService.create(candidateRule);
+      await ValidationService.create(datasetId, candidateRule);
       onHide();
     } catch (error) {
       console.log('createValidationRule error', error);
