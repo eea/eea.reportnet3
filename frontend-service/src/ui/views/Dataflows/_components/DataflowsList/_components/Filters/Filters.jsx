@@ -80,7 +80,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       />
       {!isEmpty(filterState.filterBy[property]) && (
         <Button
-          className={`p-button-secondary-transparent ${styles.orderIcon} ${styles.cancelIcon}`}
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
           icon="cancel"
           onClick={() => onFilterData(property, [])}
         />
@@ -102,7 +102,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       />
       {filterState.filterBy[property] && (
         <Button
-          className={`p-button-secondary-transparent ${styles.orderIcon} ${styles.cancelIcon}`}
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
           icon="cancel"
           onClick={() => onFilterData(property, '')}
         />
@@ -113,7 +113,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const renderOrderFilter = property => (
     <Button
-      className={`p-button-secondary-transparent ${styles.orderIcon}`}
+      className={`p-button-secondary-transparent ${styles.icon}`}
       disabled={property.includes('ROD3')}
       icon={filterState.orderBy[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
       id={`${property}_sort`}
@@ -168,7 +168,8 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         ))}
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
-          className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.drashInput}`}
+          className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+          iconClasses="warning"
           icon="trash"
           onClick={() => onClearAllFilters()}
           tooltip={resources.messages['clearFilters']}
