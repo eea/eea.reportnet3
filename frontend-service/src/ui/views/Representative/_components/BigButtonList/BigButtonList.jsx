@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
@@ -8,6 +8,7 @@ import styles from './BigButtonList.module.css';
 import { BigButton } from './_components/BigButton';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -28,6 +29,7 @@ export const BigButtonList = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const [fileToDownload, setFileToDownload] = useState(undefined);
 
   const receiptBtnRef = useRef(null);
 
@@ -42,6 +44,23 @@ export const BigButtonList = ({
   }, [notificationContext]);
 
   useEffect(() => {
+    if (!isUndefined(fileToDownload)) {
+      DownloadFile(fileToDownload, 'namePd.pdf');
+
+      const url = window.URL.createObjectURL(new Blob([fileToDownload]));
+
+      const link = document.createElement('a');
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+  }, [fileToDownload]);
+
+  useEffect(() => {
     setTimeout(() => {
       if (!isEmpty(receiptState.receiptPdf)) {
         onDownloadReceipt();
@@ -52,6 +71,7 @@ export const BigButtonList = ({
   const onDownloadReceipt = () => {
     if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptPdf)) {
       receiptBtnRef.current.click();
+
       receiptDispatch({
         type: 'ON_CLEAN_UP',
         payload: { isLoading: false, isOutdated: false, receiptPdf: {} }
@@ -62,6 +82,7 @@ export const BigButtonList = ({
   const onLoadReceiptData = async () => {
     try {
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setFileToDownload(response);
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: true, receiptPdf: response }
@@ -98,10 +119,10 @@ export const BigButtonList = ({
         </div>
       </div>
 
+      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       {/* <PDFDownloadLink
         document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
       </PDFDownloadLink> */}
     </>
   );
