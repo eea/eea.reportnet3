@@ -416,6 +416,13 @@
           }
         },
         {
+          "key": "UPDATED_DOCUMENT_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DOCUMENTS",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "DELETE_DOCUMENT_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DOCUMENTS",
