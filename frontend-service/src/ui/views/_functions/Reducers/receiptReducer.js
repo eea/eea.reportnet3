@@ -4,7 +4,7 @@ export const receiptReducer = (receiptState, { type, payload }) => {
       return { ...receiptState, ...payload };
 
     case 'ON_DOWNLOAD':
-      return { ...receiptState, isLoading: payload.isLoading, receiptData: payload.receiptData };
+      return { ...receiptState, isLoading: payload.isLoading };
 
     case 'ON_CLEAN_UP':
       return { ...receiptState, ...payload };

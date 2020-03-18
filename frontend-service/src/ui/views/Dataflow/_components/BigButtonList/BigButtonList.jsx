@@ -1,16 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { isEmpty, isNull, isUndefined, remove } from 'lodash';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from './_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
-import { ConfirmationReceipt } from 'ui/views/_components/ConfirmationReceipt';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
@@ -65,6 +64,7 @@ export const BigButtonList = ({
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
+
     if (response) {
       receiptDispatch({
         type: 'ON_DOWNLOAD',
@@ -73,13 +73,29 @@ export const BigButtonList = ({
     }
   }, [notificationContext]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (!isEmpty(receiptState.receiptData)) {
-        onDownloadReceipt();
-      }
-    }, 1000);
-  }, [receiptState.receiptData]);
+  const downloadPdf = response => {
+    if (!isUndefined(response)) {
+      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+
+      const url = window.URL.createObjectURL(new Blob([response]));
+
+      const link = document.createElement('a');
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const removeNew = () => {
+    receiptDispatch({
+      type: 'ON_CLEAN_UP',
+      payload: { isLoading: false, isOutdated: false }
+    });
+  };
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -161,16 +177,6 @@ export const BigButtonList = ({
     }
   };
 
-  const onDownloadReceipt = () => {
-    if (!isNull(receiptBtnRef.current) && !isEmpty(receiptState.receiptData)) {
-      receiptBtnRef.current.click();
-      receiptDispatch({
-        type: 'ON_CLEAN_UP',
-        payload: { isLoading: false, isOutdated: false, receiptData: {} }
-      });
-    }
-  };
-
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -182,16 +188,20 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
       receiptDispatch({
         type: 'ON_DOWNLOAD',
-        payload: { isLoading: true, receiptData: response }
+        payload: { isLoading: true }
       });
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+
+      downloadPdf(response);
+      removeNew();
     } catch (error) {
-      console.error('error', error);
+      console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
+    } finally {
       receiptDispatch({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: false }
@@ -308,11 +318,12 @@ export const BigButtonList = ({
         />
       </ConfirmDialog>
 
-      <PDFDownloadLink
-        document={<ConfirmationReceipt receiptData={receiptState.receiptData} resources={resources} />}
+      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      {/* <PDFDownloadLink
+        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
         fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
         {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      </PDFDownloadLink>
+      </PDFDownloadLink> */}
     </>
   );
 };

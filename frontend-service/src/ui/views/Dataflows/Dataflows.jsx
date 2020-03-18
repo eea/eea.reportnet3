@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
@@ -22,8 +23,6 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
-
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -33,8 +32,8 @@ const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [acceptedContent, setacceptedContent] = useState([]);
-  const [completedContent, setcompletedContent] = useState([]);
+  const [acceptedContent, setAcceptedContent] = useState([]);
+  const [completedContent, setCompletedContent] = useState([]);
   const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
@@ -42,10 +41,11 @@ const Dataflows = withRouter(({ match, history }) => {
   const [isFormReset, setIsFormReset] = useState(true);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [pendingContent, setpendingContent] = useState([]);
+  const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
-      label: resources.messages['dataflowAcceptedPendingTab'],
+      // label: resources.messages['dataflowAcceptedPendingTab'],
+      label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
@@ -58,23 +58,13 @@ const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
-
   const dataFetch = async () => {
     setLoading(true);
     try {
-      const allDataflows = await DataflowService.all();
-      setpendingContent(allDataflows.pending);
-      setacceptedContent(allDataflows.accepted);
-      setcompletedContent(allDataflows.completed);
-      const dataflowInitialValues = {};
-      allDataflows.accepted.forEach(element => {
-        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-      });
-      dataflowDispatch({
-        type: 'ON_INIT_DATA',
-        payload: dataflowInitialValues
-      });
+      const allDataflows = await DataflowService.all(user.contextRoles);
+      setAcceptedContent(allDataflows.accepted);
+      setCompletedContent(allDataflows.completed);
+      setPendingContent(allDataflows.pending);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -82,9 +72,11 @@ const Dataflows = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    dataFetch();
+    if (!isNil(user.contextRoles)) {
+      dataFetch();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem]);
+  }, [resources.messages, tabMenuActiveItem, user]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -196,9 +188,6 @@ const Dataflows = withRouter(({ match, history }) => {
     setIsEditForm(false);
     setIsDataflowDialogVisible(true);
     setIsFormReset(true);
-    dataflowDispatch({
-      type: 'ON_RESET_DATAFLOW_DATA'
-    });
   };
 
   const layout = children => {
@@ -219,26 +208,22 @@ const Dataflows = withRouter(({ match, history }) => {
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
-            <DataflowsList
+            {/* <DataflowsList
               className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
-              description={resources.messages.pendingDataflowText}
-              isCustodian={isCustodian}
-              title={resources.messages.pendingDataflowTitle}
+              description={resources.messages['pendingDataflowText']}
+              title={resources.messages['pendingDataflowTitle']}
               type="pending"
-              user={user}
-            />
+            /> */}
             <DataflowsList
               className="dataflowList-accepted-help-step"
               content={acceptedContent}
               dataFetch={dataFetch}
-              dataflowNewValues={dataflowState.selectedDataflow}
-              description={resources.messages.acceptedDataflowText}
-              selectedDataflowId={dataflowState.selectedDataflowId}
-              title={resources.messages.acceptedDataflowTitle}
+              onShowAddForm={onShowAddForm}
+              // description={resources.messages['acceptedDataflowText']}
+              // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
-              user={user}
             />
           </>
         ) : (
@@ -250,7 +235,6 @@ const Dataflows = withRouter(({ match, history }) => {
               isCustodian={isCustodian}
               title={resources.messages.completedDataflowTitle}
               type="completed"
-              user={user}
             />
           </>
         )}

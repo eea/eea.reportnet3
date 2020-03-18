@@ -64,7 +64,7 @@ export const ReleaseSnapshotDialog = ({
     }
   };
 
-  const releseModalFooter = (
+  const releaseModalFooter = (
     <div>
       <Button
         icon="cloudUpload"
@@ -82,7 +82,7 @@ export const ReleaseSnapshotDialog = ({
 
   return (
     <Dialog
-      footer={releseModalFooter}
+      footer={releaseModalFooter}
       header={`${resources.messages['releaseSnapshotMessage']}`}
       onHide={() => hideReleaseDialog()}
       visible={isReleasedDialogVisible}>

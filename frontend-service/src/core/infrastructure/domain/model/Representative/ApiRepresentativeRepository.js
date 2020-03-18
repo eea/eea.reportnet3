@@ -1,6 +1,7 @@
 import { apiRepresentative } from 'core/infrastructure/api/domain/model/Representative';
 import { Representative } from 'core/domain/model/Representative/Representative';
-import { isEmpty, sortBy } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import sortBy from 'lodash/sortBy';
 
 const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
@@ -13,7 +14,7 @@ const allRepresentatives = async dataflowId => {
     group: !isEmpty(representativesDTO.data)
       ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
       : { dataProviderGroupId: null },
-    representatives: sortBy(representativesList, ['representativeId'])
+    representatives: sortBy(representativesList, ['providerAccount'])
   };
 
   return dataToConsume;
