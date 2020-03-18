@@ -1,8 +1,15 @@
 package org.eea.kafka.io;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -15,8 +22,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * The type Kafka sender.
@@ -47,57 +54,43 @@ public class KafkaSender {
    *
    * @param event the event
    */
+
   public void sendMessage(final EEAEventVO event) {
 
-    event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
-    event.getData().put("token",
-        String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+    kafkaTemplate.executeInTransaction(operations -> {
+      event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
+      event.getData().put("token",
+          String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
-    Message<EEAEventVO> message = null;
-    final List<PartitionInfo> partitions =
-        kafkaTemplate.partitionsFor(event.getEventType().getTopic());
-    if (event.getEventType().isSorted()) {
-      // partition = hash(message_key)%number_of_partitions
-      final Integer partitionId =
-          Math.floorMod(event.getEventType().getKey().hashCode(), partitions.size());
-
-      message = MessageBuilder.withPayload(event).setHeader(KafkaHeaders.PARTITION_ID, partitionId)
-          .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-          .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
-    } else {
-      message = MessageBuilder.withPayload(event)
-          .setHeader(KafkaHeaders.PARTITION_ID,
-              ThreadLocalRandom.current().nextInt(partitions.size()))
-          .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-          .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
-    }
-    final ListenableFuture<SendResult<String, EEAEventVO>> future = kafkaTemplate.send(message);
-
-    future.addCallback(new ListenableFutureCallback<SendResult<String, EEAEventVO>>() {
-
-      /**
-       * On success.
-       *
-       * @param result the result
-       */
-      @Override
-      public void onSuccess(final SendResult<String, EEAEventVO> result) {
-        if (result != null && result.getRecordMetadata() != null) {
-          LOG.info("Sent message=[ {} ] with offset=[ {} ] and partition [ {} ]", event,
-              result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
-        }
+      final List<PartitionInfo> partitions =
+          kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+      Integer partitionId = null;
+      if (event.getEventType().isSorted()) {
+        // partition = hash(message_key)%number_of_partitions
+        partitionId =
+            Math.floorMod(event.getEventType().getKey().hashCode(), partitions.size());
+      } else {
+        partitionId = ThreadLocalRandom.current().nextInt(partitions.size());
       }
+      final ListenableFuture<SendResult<String, EEAEventVO>> future = operations
+          .send(new ProducerRecord(event.getEventType().getTopic(),
+              partitionId, event.getEventType().getKey(), event));
+      Boolean sendResult = true;
 
-      /**
-       * On failure.
-       *
-       * @param ex the ex
-       */
-      @Override
-      public void onFailure(final Throwable ex) {
-        LOG_ERROR.error("Unable to send message=[ {} ] due to: {} ", event, ex.getMessage());
+      try {
+        SendResult<String, EEAEventVO> result = future.get();
+        LOG.info("Sent message=[ {} ] to topic=[ {} ] with offset=[ {} ] and partition [ {} ]",
+            event, event.getEventType().getTopic(),
+            result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
+      } catch (InterruptedException | ExecutionException e) {
+        LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
+            event.getEventType().getTopic(), e.getMessage());
+        sendResult = false;
       }
+      return sendResult;
     });
+
+
   }
 
 

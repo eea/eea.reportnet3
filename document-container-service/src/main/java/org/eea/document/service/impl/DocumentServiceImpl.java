@@ -155,6 +155,11 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
       dataflowController.updateDocument(documentVO);
+      // Send message to the frontend to notify about the updated document
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPDATED_DOCUMENT_COMPLETED_EVENT,
+          null,
+          NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+              .dataflowId(documentVO.getDataflowId()).fileName(documentVO.getName()).build());
     } catch (EEAException e) {
       LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);

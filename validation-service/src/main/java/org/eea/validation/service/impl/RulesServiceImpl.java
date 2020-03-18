@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -36,9 +39,18 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
+
 
   /** The rule mapper. */
   @Autowired
@@ -116,11 +128,18 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Delete rule by id.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleId the rule id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteRuleById(String datasetSchemaId, String ruleId) {
+  public void deleteRuleById(long datasetId, String ruleId) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
     rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
   }
 
@@ -137,18 +156,65 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
+   * Validate rule.
+   *
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void validateRule(Rule rule) throws EEAException {
+
+    if (rule.getRuleId() == null) {
+      throw new EEAException(EEAErrorMessage.RULE_ID_REQUIRED);
+    }
+
+    if (rule.getReferenceId() == null) {
+      throw new EEAException(EEAErrorMessage.REFERENCE_ID_REQUIRED);
+    }
+
+    if (rule.getDescription() == null) {
+      throw new EEAException(EEAErrorMessage.DESCRIPTION_REQUIRED);
+    }
+
+    if (rule.getRuleName() == null) {
+      throw new EEAException(EEAErrorMessage.RULE_NAME_REQUIRED);
+    }
+
+    if (rule.getWhenCondition() == null) {
+      throw new EEAException(EEAErrorMessage.WHEN_CONDITION_REQUIRED);
+    }
+
+    if (rule.getThenCondition() == null || rule.getThenCondition().size() != 2) {
+      throw new EEAException(EEAErrorMessage.THEN_CONDITION_REQUIRED);
+    }
+  }
+
+  /**
    * Creates the new rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void createNewRule(String datasetSchemaId, RuleVO ruleVO) {
-    Rule rule = ruleMapper.classToEntity(ruleVO);
-    if (rule.getRuleId() == null) {
-      rule.setRuleId(new ObjectId());
+  public void createNewRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    rule.setRuleId(new ObjectId());
+    rule.setType(EntityTypeEnum.FIELD);
+    rule.setEnabled(true);
+    rule.setAutomatic(false);
+    rule.setShortCode(null);
+    rule.setActivationGroup(null);
+
+    validateRule(rule);
+    if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    }
   }
 
   /**
@@ -175,19 +241,20 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Creates the automatic rules. That method create all automatic rules, and this check if that
    * rules are about diferent types
-   * 
+   *
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param required the required
    * @throws EEAException the EEA exception
    */
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, boolean required) throws EEAException {
+      EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
-    List<Rule> ruleList = new ArrayList();
+    List<Rule> ruleList = new ArrayList<>();
     // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
     // number etc)
     String shortcode = "01";
@@ -218,6 +285,16 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case LINK:
+          // we call this method to find the tableschemaid because we want to create that validation
+          // at TABLE level
+          // that is for evite do many calls to database and colapse it
+          String tableSchemaId =
+              tableRepository.findTableValueByFieldSchemaId(datasetId, referenceId);
+          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, tableSchemaId,
+              datasetId));
+          break;
         case CODELIST:
           // we find values avaliable to create this validation for a codelist, same value with
           // capital letter and without capital letters
@@ -240,6 +317,16 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  // @Override
+  // public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
+  // Long datasetId) {
+  // ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
+  // FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+  // Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
+  // FT_DESCRIPTION, datasetId);
+  // rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+  //
+  // }
   /**
    * Delete rule required.
    *
@@ -267,14 +354,28 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Update rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
-   * @return true, if successful
+   * @throws EEAException the EEA exception
    */
   @Override
-  public boolean updateRule(String datasetSchemaId, RuleVO ruleVO) {
-    return rulesRepository.updateRule(new ObjectId(datasetSchemaId),
-        ruleMapper.classToEntity(ruleVO));
+  public void updateRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    rule.setType(EntityTypeEnum.FIELD);
+    rule.setAutomatic(false);
+    rule.setShortCode(null);
+    rule.setActivationGroup(null);
+
+    validateRule(rule);
+    if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
+    }
   }
 
   /**
@@ -304,4 +405,6 @@ public class RulesServiceImpl implements RulesService {
     LOG_ERROR.error("Rule {} not found", ruleId);
     return false;
   }
+
+
 }

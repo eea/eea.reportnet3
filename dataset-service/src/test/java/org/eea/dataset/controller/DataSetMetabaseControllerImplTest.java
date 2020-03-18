@@ -190,4 +190,11 @@ public class DataSetMetabaseControllerImplTest {
     Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
   }
 
+  @Test
+  public void findDatasetSchemaIdByIdTest() {
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Assert.assertEquals("5ce524fad31fc52540abae73",
+        dataSetMetabaseControllerImpl.findDatasetSchemaIdById(1L));
+  }
 }

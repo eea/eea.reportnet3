@@ -4,7 +4,6 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
@@ -21,6 +20,11 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaReceiver.class);
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /**
    * Listen message.
@@ -31,10 +35,16 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   @Override
   @KafkaListener(topics = "DATA_REPORTING_TOPIC")
-  public void listenMessage(final Message<EEAEventVO> message) throws EEAException {
+  public void listenMessage(final Message<EEAEventVO> message) {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
-      handler.processMessage(message.getPayload());
+      try {
+        handler.processMessage(message.getPayload());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error processing event {} due to reason {}", message.getPayload(), e);
+      } catch (Exception e) {
+        LOG_ERROR.error("Undetermined  processing message {} due to reason {}", message, e);
+      }
     }
 
   }

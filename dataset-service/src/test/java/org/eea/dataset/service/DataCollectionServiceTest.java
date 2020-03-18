@@ -133,12 +133,12 @@ public class DataCollectionServiceTest {
     Mockito.doNothing().when(resourceManagementControllerZuul)
         .deleteResourceByDatasetId(Mockito.any());
     Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
-    Mockito.doNothing().when(dataCollectionRepository).updateDataflowStatus(Mockito.any(),
-        Mockito.any());
+    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataCollectionService.undoDataCollectionCreation(
         new ArrayList<>(Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)), 1L);
-    Mockito.verify(dataCollectionRepository, times(1)).updateDataflowStatus(Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -147,11 +147,11 @@ public class DataCollectionServiceTest {
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
-    Mockito.doNothing().when(dataCollectionRepository).updateDataflowStatus(Mockito.any(),
-        Mockito.any());
+    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataCollectionService.undoDataCollectionCreation(new ArrayList<>(), 1L);
-    Mockito.verify(dataCollectionRepository, times(1)).updateDataflowStatus(Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test

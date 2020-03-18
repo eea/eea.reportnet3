@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +51,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/createEmptyRulesSchema")
+  @PostMapping("/private/createEmptyRulesSchema")
   public void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
       @RequestParam("idRulesSchema") String rulesSchemaId) {
     rulesService.createEmptyRulesSchema(datasetSchemaId, rulesSchemaId);
@@ -93,7 +94,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @DeleteMapping("/deleteRulesSchema")
+  @DeleteMapping("/private/deleteRulesSchema")
   public void deleteRulesSchema(String datasetSchemaId) {
     rulesService.deleteEmptyRulesSchema(datasetSchemaId);
   }
@@ -101,30 +102,36 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Delete rule by id.
    *
+   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping("{datasetSchemaId}/deleteRuleById/{ruleId}")
-  public void deleteRuleById(@PathVariable("datasetSchemaId") String datasetSchemaId,
-      @PathVariable("ruleId") String ruleId) {
-    rulesService.deleteRuleById(datasetSchemaId, ruleId);
-    LOG.info("Delete the rule with id {} in datasetSchema {} successfully", ruleId,
-        datasetSchemaId);
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @DeleteMapping("/deleteRule")
+  public void deleteRuleById(@RequestParam("datasetId") long datasetId,
+      @RequestParam("ruleId") String ruleId) {
+    try {
+      rulesService.deleteRuleById(datasetId, ruleId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting rule: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
    * Delete rule by reference id.
    *
+   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping("{datasetSchemaId}/deleteRuleByReferenceId/{referenceId}")
-  public void deleteRuleByReferenceId(@PathVariable("datasetSchemaId") String datasetSchemaId,
-      @PathVariable("referenceId") String referenceId) {
+  @DeleteMapping("/private/deleteRuleByReferenceId")
+  public void deleteRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleByReferenceId(datasetSchemaId, referenceId);
     LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
         datasetSchemaId);
@@ -133,15 +140,20 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Creates the new rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public void createNewRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
-      @RequestBody RuleVO ruleVO) {
-    rulesService.createNewRule(datasetSchemaId, ruleVO);
+  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
+    try {
+      rulesService.createNewRule(datasetId, ruleVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating rule: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
@@ -155,17 +167,19 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PutMapping("/createAutomaticRule")
+  @PutMapping("/private/createAutomaticRule")
   public void createAutomaticRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData,
       @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+      @RequestParam("datasetId") Long datasetId,
       @RequestParam("requiredRule") boolean requiredRule) {
 
     // we use the required value to differentiate if the rule to create is a required rule or if the
     // rules is a automatic rule for any type (boolean, number)
     if (requiredRule) {
       try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum, true);
+        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum,
+            datasetId, true);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the required rule for idDatasetSchema {} and field with id {} ",
@@ -176,7 +190,7 @@ public class RulesControllerImpl implements RulesController {
     } else {
       try {
         rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
-            false);
+            datasetId, false);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
@@ -192,17 +206,19 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Update rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/updateRule")
-  public void updateRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
-      @RequestBody RuleVO ruleVO) {
-    if (!rulesService.updateRule(datasetSchemaId, ruleVO)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_UPDATING_RULE);
+  public void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
+    try {
+      rulesService.updateRule(datasetId, ruleVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating rule: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 

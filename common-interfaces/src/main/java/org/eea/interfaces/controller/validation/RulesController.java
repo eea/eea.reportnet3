@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.interfaces.controller.validation;
 
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -33,7 +36,7 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    * @param rulesSchemaId the rules schema id
    */
-  @PostMapping("/createEmptyRulesSchema")
+  @PostMapping("/private/createEmptyRulesSchema")
   void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
       @RequestParam("idRulesSchema") String rulesSchemaId);
 
@@ -61,18 +64,18 @@ public interface RulesController {
    *
    * @param datasetSchemaId the dataset schema id
    */
-  @DeleteMapping("/deleteRulesSchema")
+  @DeleteMapping("/private/deleteRulesSchema")
   void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId);
 
   /**
    * Delete rule by id.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleId the rule id
    */
-  @DeleteMapping("{datasetSchemaId}/deleteRuleById/{ruleId}")
-  void deleteRuleById(@PathVariable("datasetSchemaId") String datasetSchemaId,
-      @PathVariable("ruleId") String ruleId);
+  @DeleteMapping("/deleteRule")
+  void deleteRuleById(@RequestParam("datasetId") long datasetId,
+      @RequestParam("ruleId") String ruleId);
 
   /**
    * Delete rule by reference id.
@@ -80,19 +83,19 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
-  @DeleteMapping("{datasetSchemaId}/deleteRuleByReferenceId/{referenceId}")
-  void deleteRuleByReferenceId(@PathVariable("datasetSchemaId") String datasetSchemaId,
-      @PathVariable("referenceId") String referenceId);
+  @DeleteMapping("/private/deleteRuleByReferenceId")
+  void deleteRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
 
   /**
    * Creates the new rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    */
   @PutMapping("/createNewRule")
-  void createNewRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
-      @RequestBody RuleVO ruleVO);
+  void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
+
 
   /**
    * Creates the automatic rule.
@@ -101,12 +104,14 @@ public interface RulesController {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param requiredRule the required rule
    */
-  @PutMapping("/createAutomaticRule")
+  @PutMapping("/private/createAutomaticRule")
   void createAutomaticRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData,
       @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+      @RequestParam("datasetId") Long datasetId,
       @RequestParam("requiredRule") boolean requiredRule);
 
   /**
@@ -133,12 +138,11 @@ public interface RulesController {
   /**
    * Update rule.
    *
-   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    * @param ruleVO the rule VO
    */
   @PutMapping("/updateRule")
-  void updateRule(@RequestParam("idDatasetSchema") String datasetSchemaId,
-      @RequestBody RuleVO ruleVO);
+  void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 
   /**
    * Insert rule in position.
@@ -151,4 +155,5 @@ public interface RulesController {
   public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
 }

@@ -505,4 +505,37 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @param searchValue the search value
+   * @return the field values referenced
+   */
+  @Override
+  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
+  public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema,
+      @RequestParam("searchValue") String searchValue) {
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
+  }
+
+
+  /**
+   * Gets the dataset id referenced.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @return the dataset id referenced
+   */
+  @Override
+  @GetMapping("private/getDatasetIdReferenced")
+  public Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema) {
+    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema);
+  }
+
 }

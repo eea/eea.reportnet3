@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * The Class DataSetMetabaseConfiguration.
  *
- * 
+ *
  */
 @Configuration
 @EnableTransactionManagement
@@ -121,7 +121,6 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  @Autowired
   public PlatformTransactionManager metabaseDataSetsTransactionManager() {
 
     JpaTransactionManager metabasetransactionManager = new JpaTransactionManager();
