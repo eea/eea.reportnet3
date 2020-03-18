@@ -379,18 +379,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
       // with that we create the rule automatic required
 
-      // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
-      // FOR TESTING THE REST OF THE CODE
-      if (!DataType.LINK.equals(fieldSchemaVO.getType())) {
-        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
-          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
-        }
-        // and with it we create the others automatic rules like number etc
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
       }
+      // and with it we create the others automatic rules like number etc
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
       dataschemaService.updatePkCatalogue(fieldSchemaVO);
@@ -431,12 +427,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
-        // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
-        // FOR TESTING THE REST OF THE CODE
-        if (!DataType.LINK.equals(type)) {
-          dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-              datasetId);
-        }
+        dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+            datasetId);
 
         // Add the Pk if needed to the catalogue
         dataschemaService.updatePkCatalogue(fieldSchemaVO);
