@@ -77,14 +77,11 @@ export const BigButtonList = ({
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, 'Receipt_Hardcoded_name');
+      DownloadFile(fileToDownload, 'namePd.pdf');
 
       const url = window.URL.createObjectURL(new Blob([fileToDownload]));
 
       const link = document.createElement('a');
-
-      link.href = fileToDownload;
-      link.setAttribute('download', 'TestName');
 
       document.body.appendChild(link);
 
@@ -206,7 +203,7 @@ export const BigButtonList = ({
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
 
       console.log('#'.repeat(50));
-      // console.log('response', response);
+      console.log('response', response);
 
       receiptDispatch({
         type: 'ON_DOWNLOAD',
@@ -215,6 +212,7 @@ export const BigButtonList = ({
 
       setFileToDownload(response);
     } catch (error) {
+      console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
