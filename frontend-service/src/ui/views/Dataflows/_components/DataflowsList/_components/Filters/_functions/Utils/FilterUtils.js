@@ -73,6 +73,12 @@ const getOptionTypes = (data, option) => {
 const getSelectedKeys = (state, select) =>
   Object.keys(state.filterBy).filter(key => key !== select && state.selectOptions.includes(key));
 
+const getYesterdayDate = () => {
+  var currentDate = new Date();
+  var yesterdayDate = currentDate.setDate(currentDate.getDate() - 1);
+  return new Date(yesterdayDate);
+};
+
 const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
   ...state.data.filter(data => {
     if (state.selectOptions.includes(filter)) {
@@ -106,5 +112,6 @@ export const FilterUtils = {
   getFilterKeys,
   getOptionTypes,
   getSelectedKeys,
+  getYesterdayDate,
   onApplyFilters
 };

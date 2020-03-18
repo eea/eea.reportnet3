@@ -62,32 +62,36 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, order, property, sortedData } });
   };
 
-  const renderCalendarFilter = property => (
-    <span className={`p-float-label ${styles.dataflowInput} `}>
-      <Calendar
-        className={styles.calendarFilter}
-        inputClassName={styles.inputFilter}
-        inputId={property}
-        minDate={new Date()}
-        monthNavigator={true}
-        onChange={event => onFilterData(property, event.value)}
-        placeholder={resources.messages[property]}
-        readOnlyInput={true}
-        selectionMode="range"
-        showWeek={true}
-        value={filterState.filterBy[property]}
-        yearNavigator={true}
-        yearRange="2020:2030"
-      />
-      {!isEmpty(filterState.filterBy[property]) && (
-        <Button
-          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-          icon="cancel"
-          onClick={() => onFilterData(property, [])}
+  const renderCalendarFilter = property => {
+    const minDate = FilterUtils.getYesterdayDate();
+    return (
+      <span className={`p-float-label ${styles.dataflowInput} `}>
+        <Calendar
+          className={styles.calendarFilter}
+          disabledDates={[minDate]}
+          inputClassName={styles.inputFilter}
+          inputId={property}
+          minDate={minDate}
+          monthNavigator={true}
+          onChange={event => onFilterData(property, event.value)}
+          placeholder={resources.messages[property]}
+          readOnlyInput={true}
+          selectionMode="range"
+          showWeek={true}
+          value={filterState.filterBy[property]}
+          yearNavigator={true}
+          yearRange="2020:2030"
         />
-      )}
-    </span>
-  );
+        {!isEmpty(filterState.filterBy[property]) && (
+          <Button
+            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+            icon="cancel"
+            onClick={() => onFilterData(property, [])}
+          />
+        )}
+      </span>
+    );
+  };
 
   const renderInputFilter = property => (
     <span className={`${styles.dataflowInput}  p-float-label`}>
