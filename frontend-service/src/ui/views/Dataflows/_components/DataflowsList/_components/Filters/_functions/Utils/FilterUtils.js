@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 const checkDates = (betweenDates, data) => {
@@ -22,12 +23,14 @@ const checkFilters = (filteredKeys, dataflow, state) => {
 
 const checkSelected = (state, data, selectedKeys) => {
   for (let index = 0; index < selectedKeys.length; index++) {
-    if (
-      ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
-        data[selectedKeys[index]].toLowerCase()
-      )
-    ) {
-      return false;
+    if (!isNil(data[selectedKeys[index]])) {
+      if (
+        ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
+          data[selectedKeys[index]].toLowerCase()
+        )
+      ) {
+        return false;
+      }
     }
   }
   return true;
@@ -39,9 +42,10 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
   if (select) {
     select.forEach(selectOption => {
       const selectItems = uniq(data.map(item => item[selectOption]));
-      for (let i = 0; i < selectItems.length; i++) {
+      const validSelectItems = selectItems.filter(option => option !== undefined);
+      for (let i = 0; i < validSelectItems.length; i++) {
         const data = [];
-        selectItems.forEach(item => {
+        validSelectItems.forEach(item => {
           data.push({ type: item, value: item });
         });
         filterBy[selectOption] = data;
@@ -61,9 +65,10 @@ const getFilterKeys = (state, filter) =>
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
-  for (let i = 0; i < optionItems.length; i++) {
+  const validOptionItems = optionItems.filter(option => option !== undefined);
+  for (let i = 0; i < validOptionItems.length; i++) {
     const template = [];
-    optionItems.forEach(item => {
+    validOptionItems.forEach(item => {
       template.push({ type: item, value: item });
     });
     return template;
