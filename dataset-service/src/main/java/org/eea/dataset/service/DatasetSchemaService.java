@@ -1,7 +1,9 @@
 package org.eea.dataset.service;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -246,7 +248,7 @@ public interface DatasetSchemaService {
    * @return the field schema
    */
   FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
-  
+
   /**
    * Delete from pk catalogue.
    *
@@ -254,7 +256,7 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
-  
+
   /**
    * Delete foreign relation.
    *
@@ -262,7 +264,7 @@ public interface DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    */
   void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
-  
+
   /**
    * Update foreign relation.
    *
@@ -270,6 +272,9 @@ public interface DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param datasetSchemaId the dataset schema id
    */
-  void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO, String datasetSchemaId);
+  void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO,
+      String datasetSchemaId);
+
+  List<ReferencedFieldSchema> getReferencedFieldsByShema(String datasetSchemaId);
 
 }

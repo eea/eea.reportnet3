@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
@@ -1012,6 +1013,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
   }
 
+  public List<ReferencedFieldSchema> getReferencedFieldsByShema(String datasetSchemaId) {
 
+    List<ReferencedFieldSchema> references = new ArrayList<>();
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(datasetSchemaId));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            references.add(field.getReferencedField());
+          }
+        }
+      }
+    }
+    return references;
+  }
 
 }
