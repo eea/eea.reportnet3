@@ -42,7 +42,7 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
   if (select) {
     select.forEach(selectOption => {
       const selectItems = uniq(data.map(item => item[selectOption]));
-      const validSelectItems = selectItems.filter(option => option !== undefined);
+      const validSelectItems = selectItems.filter(option => !isNil(option));
       for (let i = 0; i < validSelectItems.length; i++) {
         const data = [];
         validSelectItems.forEach(item => {
@@ -65,7 +65,7 @@ const getFilterKeys = (state, filter) =>
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
-  const validOptionItems = optionItems.filter(option => option !== undefined);
+  const validOptionItems = optionItems.filter(option => !isNil(option));
   for (let i = 0; i < validOptionItems.length; i++) {
     const template = [];
     validOptionItems.forEach(item => {
