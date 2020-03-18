@@ -1,5 +1,6 @@
 package org.eea.dataflow.service;
 
+import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -117,9 +118,8 @@ public interface DataflowService {
   /**
    * Delete data flow.
    *
-   * @param dataflowVO the dataflow VO
-   * @throws EEAException the EEA exception
-   * @throws Exception
+   * @param idDataflow the id dataflow
+   * @throws Exception the exception
    */
   void deleteDataFlow(Long idDataflow) throws Exception;
 
@@ -151,14 +151,16 @@ public interface DataflowService {
   DataFlowVO getMetabaseById(Long id) throws EEAException;
 
 
+
   /**
    * Update data flow status.
    *
    * @param id the id
    * @param status the status
+   * @param deadline the deadline
    * @throws EEAException the EEA exception
    */
-  void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException;
+  void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
 
 
 }

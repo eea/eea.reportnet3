@@ -4,6 +4,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -87,5 +88,11 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       value = "update field_value set type = :type where id_field_schema = :fieldSchemaId")
   void updateFieldValueType(@Param("fieldSchemaId") String fieldSchemaId,
       @Param("type") String type);
+
+
+
+  List<FieldValue> findByIdFieldSchemaAndValueContaining(
+      @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
+      Pageable pageable);
 
 }

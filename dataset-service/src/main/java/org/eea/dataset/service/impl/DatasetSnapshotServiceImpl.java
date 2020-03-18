@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -70,57 +72,39 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
-  /**
-   * The partition data set metabase repository.
-   */
+  /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The snapshot repository.
-   */
+  /** The snapshot repository. */
   @Autowired
   private SnapshotRepository snapshotRepository;
 
-  /**
-   * The snapshot mapper.
-   */
+  /** The snapshot mapper. */
   @Autowired
   private SnapshotMapper snapshotMapper;
 
-  /**
-   * The snapshot schema repository.
-   */
+  /** The snapshot schema repository. */
   @Autowired
   private SnapshotSchemaRepository snapshotSchemaRepository;
 
-  /**
-   * The snapshot schema mapper.
-   */
+  /** The snapshot schema mapper. */
   @Autowired
   private SnapshotSchemaMapper snapshotSchemaMapper;
 
-  /**
-   * The schema repository.
-   */
+  /** The schema repository. */
   @Autowired
   private SchemasRepository schemaRepository;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zull. */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /**
-   * The document controller zuul.
-   */
+  /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
@@ -132,22 +116,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ValidationRepository validationRepository;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The schema service.
-   */
+  /** The schema service. */
   @Autowired
   private DatasetSchemaService schemaService;
 
-  /**
-   * The metabase repository.
-   */
+  /** The metabase repository. */
   @Autowired
   private DataSetMetabaseRepository metabaseRepository;
 
@@ -163,13 +141,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The dataset snapshot controller. */
-  @Autowired
-  private DatasetSnapshotController datasetSnapshotController;
-
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The dataset snapshot controller. */
+  @Autowired
+  private DatasetSnapshotController datasetSnapshotController;
 
   /** The rules repository. */
   @Autowired
@@ -179,25 +157,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The receipt PDF generator. */
+  @Autowired
+  private ReceiptPDFGenerator receiptPDFGenerator;
 
-
-  /**
-   * The Constant FILE_PATTERN_NAME.
-   */
+  /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
   /** The Constant FILE_PATTERN_NAME_RULES. */
   private static final String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
@@ -217,7 +190,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId);
 
     return snapshotMapper.entityListToClass(snapshots);
-
   }
 
   /**
@@ -225,6 +197,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param description the description
+   * @param released the released
    */
   @Override
   @Async
@@ -272,7 +245,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (released) {
       datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
     }
-
   }
 
   /**
@@ -280,6 +252,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param eventType the event type
    * @param datasetId the dataset id
+   * @param error the error
    */
   private void releaseEvent(EventType eventType, Long datasetId, String error) {
     try {
@@ -320,7 +293,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   *
+   * @param deleteData the delete data
    * @throws EEAException the EEA exception
    */
   @Override
@@ -336,15 +309,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         deleteData);
   }
 
-
-
   /**
    * Release snapshot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Async
@@ -366,7 +335,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Get the provider
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
 
-
       // Get the dataCollection
       Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
       String datasetSchema =
@@ -374,8 +342,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Optional<DataCollection> dataCollection =
           dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
       Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
-
-
 
       // Delete data of the same provider
       if (provider != null && idDataCollection != null) {
@@ -392,7 +358,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
             snapshotRepository.save(snap.get());
           }
-
 
           // Mark the receipt button as outdated because a new release has been done, so it would be
           // necessary to generate a new receipt
@@ -440,8 +405,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
   }
 
-
-
   /**
    * Removes the lock.
    *
@@ -454,7 +417,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     criteria.add(idLock);
     lockService.removeLockByCriteria(criteria);
   }
-
 
   /**
    * Gets the schema snapshots by id dataset.
@@ -474,7 +436,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotSchemaMapper.entityListToClass(schemaSnapshots);
 
   }
-
 
   /**
    * Adds the schema snapshot.
@@ -605,7 +566,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Schema Snapshot {} removed", idSnapshot);
   }
 
-
   /**
    * Delete all schema snapshots.
    *
@@ -627,7 +587,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     });
   }
-
 
   /**
    * Delete all snapshots.
@@ -653,7 +612,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   }
 
-
   /**
    * Obtain partition.
    *
@@ -675,25 +633,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return partition;
   }
 
-
   /**
-   * Gets the released and updated status.
+   * Creates the receipt PDF.
    *
-   * @param idDataflow the id dataflow
-   * @param idDataProvider the id data provider
-   * @return the released and updated status
-   * @throws EEAException the EEA exception
+   * @param out the out
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
    */
   @Override
-  public ReleaseReceiptVO getReleasedAndUpdatedStatus(Long idDataflow, Long idDataProvider)
-      throws EEAException {
-
+  public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    DataFlowVO dataflow = dataflowControllerZuul.findById(idDataflow);
-    receipt.setIdDataflow(idDataflow);
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    receipt.setIdDataflow(dataflowId);
     receipt.setDataflowName(dataflow.getName());
     receipt.setDatasets(dataflow.getReportingDatasets().stream()
-        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(idDataProvider))
+        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
         .collect(Collectors.toList()));
 
     if (!receipt.getDatasets().isEmpty()) {
@@ -701,8 +655,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
 
     List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
@@ -711,8 +665,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)
-      if (!(true == representative.getReceiptDownloaded()
-          && false == representative.getReceiptOutdated())) {
+      if (!representative.getReceiptDownloaded() || representative.getReceiptOutdated()) {
         // update provider. Button downloaded = true && outdated = false
         representative.setReceiptDownloaded(true);
         representative.setReceiptOutdated(false);
@@ -721,7 +674,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
 
-    return receipt;
+    receiptPDFGenerator.generatePDF(receipt, out);
   }
-
 }

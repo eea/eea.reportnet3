@@ -23,7 +23,7 @@ template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
   when
-    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});
+    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && !(@{whencondition}));
   then
    ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
 
@@ -35,11 +35,12 @@ end template
 //////////////////////////////////////////DEFAULT VALIDATIONS////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
-function boolean isCodelist( String value , String codelistItems , boolean sensitive){
-	if(!isBlank(value)){
-		return true;
-	}
-	return CodelistUtils.codelistValidate(value,codelistItems,sensitive);
+function boolean isCodelist( String value , String codelistItems){
+	return CodelistUtils.codelistValidate(value,codelistItems,true);
+}
+
+function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	return CodelistUtils.codelistValidate(value,codelistItems,false);
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
@@ -124,3 +125,9 @@ function boolean isCordenateLong( String value ){
  }
 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
+ 
+ //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
+function boolean isfieldPK(String datasetId, String idFieldSchema ){	
+
+		return PKValidationUtils.isfieldPK(datasetId,idFieldSchema);
+ }

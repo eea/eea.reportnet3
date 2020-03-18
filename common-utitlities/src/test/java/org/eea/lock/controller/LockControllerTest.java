@@ -1,6 +1,7 @@
 package org.eea.lock.controller;
 
 import static org.mockito.Mockito.times;
+
 import java.util.ArrayList;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.service.LockService;

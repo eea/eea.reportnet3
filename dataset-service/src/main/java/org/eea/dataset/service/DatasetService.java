@@ -347,4 +347,9 @@ public interface DatasetService {
    * @param providerCode the provider code
    */
   void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
+
+  List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
+
+
+  Long getDatasetIdReferenced(Long datasetId, String idPk);
 }

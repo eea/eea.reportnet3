@@ -3,6 +3,7 @@ package org.eea.validation.kafka.command;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -25,22 +26,32 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ExecuteValidationCommandTest {
 
-  /** The execute validation command. */
+  /**
+   * The execute validation command.
+   */
   @InjectMocks
   private ExecuteValidationCommand executeValidationCommand;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The kie base. */
+  /**
+   * The kie base.
+   */
   @Mock
   private KieBase kieBase;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
   /**
@@ -50,7 +61,7 @@ public class ExecuteValidationCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     data.put("kieBase", kieBase);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_TABLE_COMPLETED);
