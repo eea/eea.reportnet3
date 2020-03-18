@@ -394,7 +394,7 @@ export const ThemeProvider = ({ children }) => {
         'inputtext-bg': 'var(--bg)',
         'inputtext-border': '1px solid var(--gray-25)',
         'inputtext-border-color-hover': 'var(--white)',
-        'inputtext-border-color-focus': 'var(--c-corporate-blue-lighter)',
+        'inputtext-border-color-focus': 'var(--c-corporate-yellow)',
         'inputtext-box-shadow-focus': '0 0 0 0.1em var(--c-corporate-blue-lighter)',
         'inputtext-placeholder': 'var(--white)',
         'treeview-expandable-color': 'var(--white)',
