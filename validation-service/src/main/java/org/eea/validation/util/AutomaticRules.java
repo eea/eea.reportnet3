@@ -159,9 +159,10 @@ public class AutomaticRules {
         "isfieldPK('" + datasetId + "','" + referenceId + "',",
         "The value must be based on criteria.", ErrorTypeEnum.ERROR.getValue(), shortCode,
         description);
-    String whenCondition = rule.getWhenCondition();
-    whenCondition = whenCondition + "'" + rule.getRuleId().toString() + "')";
-    rule.setWhenCondition(whenCondition);
+    // we add the rule data to take the message if the user edit the rule
+    StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
+    whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
+    rule.setWhenCondition(whenCondition.toString());
     return rule;
   }
 
