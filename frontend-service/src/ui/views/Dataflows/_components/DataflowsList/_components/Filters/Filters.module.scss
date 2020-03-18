@@ -33,6 +33,11 @@
       }
     }
 
+    .inputFilter::placeholder {
+      font-style: normal;
+      font-size: 10pt;
+    }
+
     .cancelIcon {
       font-size: 12pt !important;
       height: 2.1em !important;

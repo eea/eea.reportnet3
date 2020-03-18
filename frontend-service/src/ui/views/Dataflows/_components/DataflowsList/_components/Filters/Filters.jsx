@@ -70,7 +70,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         minDate={new Date()}
         monthNavigator={true}
         onChange={event => onFilterData(property, event.value)}
-        placeholder={property}
+        placeholder={resources.messages[property]}
         readOnlyInput={true}
         selectionMode="range"
         showWeek={true}
@@ -85,9 +85,6 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           onClick={() => onFilterData(property, [])}
         />
       )}
-      <label className={styles.datePlaceholder} htmlFor={property}>
-        {resources.messages[property]}
-      </label>
     </span>
   );
 
