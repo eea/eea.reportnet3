@@ -205,7 +205,7 @@ const Representative = withRouter(({ match, history }) => {
         if (isOutdated.length === 1 && isReleased.length === 1) {
           receiptDispatch({
             type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {}, isReleased }
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptPdf: {}, isReleased }
           });
         }
       }
