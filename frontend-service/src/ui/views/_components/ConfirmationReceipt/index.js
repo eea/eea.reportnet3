@@ -1,1 +1,0 @@
-export { ConfirmationReceipt } from './ConfirmationReceipt';

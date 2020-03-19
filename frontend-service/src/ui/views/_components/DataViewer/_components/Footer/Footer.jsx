@@ -11,7 +11,7 @@ const Footer = ({ hasWritePermissions, onAddClick, onPasteClick }) => {
         className="p-button-animated-blink"
         icon="add"
         disabled={!hasWritePermissions}
-        label={resources.messages['add']}
+        label={resources.messages['addRecord']}
         onClick={() => onAddClick()}
         style={{ float: 'left' }}
       />

@@ -25,6 +25,7 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
   },
   accepted: async () => {
@@ -115,6 +116,7 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
   },
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
