@@ -24,8 +24,10 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
   datasetId,
+  datasetSchemaId,
   datasetSchemas,
   onChangeFields,
+  onChangeReference,
   onChangeTableDescription,
   onLoadTableData,
   table
@@ -68,10 +70,8 @@ export const FieldsDesigner = ({
   }, [fields]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
-    console.log({ selectedField });
     setIsCodelistOrLink(
       fields.filter(field => {
-        console.log({ field });
         return (
           (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
         );
@@ -103,16 +103,27 @@ export const FieldsDesigner = ({
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = ({ codelistItems, description, id, pk, name, required, type }) => {
+  const onFieldUpdate = ({ codelistItems, description, id, pk, name, referencedField, required, type }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
+    //Buscar en los datasetSchemas si se está usando el id y actualizar el idx del field de la PK según el count
+    console.log('referencedField', referencedField, type);
+    // if (!isNull(referencedField) && referencedField.referencedField.datasetSchemaId === datasetSchemaId) {
+    if (type === 'LINK') {
+      onChangeReference(referencedField.referencedField.fieldSchemaId, referencedField.referencedField.datasetSchemaId);
+    }
+
     if (fieldIndex > -1) {
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].type = type;
       inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
+      inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      // inmFields[fieldIndex].pkReferenced =
+      //   FieldsDesignerUtils.getCountPKUseInAllSchemas(inmFields[fieldIndex].fieldId, datasetSchemas) > 0;
+      console.log('inmFields', { inmFields });
       setFields(inmFields);
     }
   };
@@ -167,6 +178,28 @@ export const FieldsDesigner = ({
       />
     </div>
   );
+
+  const getReferencedFieldName = referencedField => {
+    if (!isUndefined(referencedField.name)) {
+      return referencedField;
+    }
+    const link = {};
+    datasetSchemas.forEach(schema =>
+      schema.tables.forEach(table =>
+        table.records.forEach(record =>
+          record.fields.forEach(field => {
+            if (!isNil(field) && field.fieldId === referencedField.idPk) {
+              link.name = `${table.tableSchemaName} - ${field.name}`;
+              link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+              link.disabled = false;
+            }
+          })
+        )
+      )
+    );
+    link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
+    return link;
+  };
 
   const previewData = () => {
     const tableSchemaColumns =
@@ -257,7 +290,6 @@ export const FieldsDesigner = ({
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
-          datasetSchemas={datasetSchemas}
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
@@ -284,38 +316,40 @@ export const FieldsDesigner = ({
   const renderFields = () => {
     const renderedFields =
       !isNil(fields) && !isEmpty(fields) ? (
-        fields.map((field, index) => (
-          <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
-            <FieldDesigner
-              checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-              codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
-              datasetId={datasetId}
-              datasetSchemas={datasetSchemas}
-              fieldDescription={field.description}
-              fieldId={field.fieldId}
-              fieldPK={field.pk}
-              fieldPKReferenced={field.pkReferenced}
-              fieldName={field.name}
-              fieldLink={field.referencedField}
-              fieldRequired={Boolean(field.required)}
-              fieldType={field.type}
-              fieldValue={field.value}
-              hasPK={fields.filter(field => field.pk === true).length > 0}
-              index={index}
-              initialFieldIndexDragged={initialFieldIndexDragged}
-              isCodelistOrLink={isCodelistOrLink}
-              key={field.fieldId}
-              onCodelistAndLinkShow={onCodelistAndLinkShow}
-              onFieldDelete={onFieldDelete}
-              onFieldDragAndDrop={onFieldDragAndDrop}
-              onFieldDragAndDropStart={onFieldDragAndDropStart}
-              onFieldUpdate={onFieldUpdate}
-              onShowDialogError={onShowDialogError}
-              recordSchemaId={field.recordId}
-              totalFields={fields.length}
-            />
-          </div>
-        ))
+        fields.map((field, index) => {
+          console.log('field.pkReferenced', field.pkReferenced);
+          return (
+            <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
+              <FieldDesigner
+                checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+                codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
+                datasetId={datasetId}
+                fieldDescription={field.description}
+                fieldId={field.fieldId}
+                fieldPK={field.pk}
+                fieldPKReferenced={field.pkReferenced}
+                fieldName={field.name}
+                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldRequired={Boolean(field.required)}
+                fieldType={field.type}
+                fieldValue={field.value}
+                hasPK={fields.filter(field => field.pk === true).length > 0}
+                index={index}
+                initialFieldIndexDragged={initialFieldIndexDragged}
+                isCodelistOrLink={isCodelistOrLink}
+                key={field.fieldId}
+                onCodelistAndLinkShow={onCodelistAndLinkShow}
+                onFieldDelete={onFieldDelete}
+                onFieldDragAndDrop={onFieldDragAndDrop}
+                onFieldDragAndDropStart={onFieldDragAndDropStart}
+                onFieldUpdate={onFieldUpdate}
+                onShowDialogError={onShowDialogError}
+                recordSchemaId={field.recordId}
+                totalFields={fields.length}
+              />
+            </div>
+          );
+        })
       ) : (
         <div className={styles.fieldDesignerWrapper} key="-1"></div>
       );

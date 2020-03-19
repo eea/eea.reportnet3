@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -60,13 +60,34 @@ export const TabsDesigner = withRouter(({ datasetSchemas, editable = false, matc
   const onChangeFields = (fields, tableSchemaId) => {
     const inmTabs = [...tabs];
     const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
-    if (!isUndefined(inmTabs[tabIdx].records) && !isNull(inmTabs[tabIdx].records)) {
+    if (!isNil(inmTabs[tabIdx].records)) {
       inmTabs[tabIdx].records[0].fields = fields;
       setTabs(inmTabs);
     } else {
       inmTabs[tabIdx].records = [];
       inmTabs[tabIdx].records[0] = {};
       inmTabs[tabIdx].records[0].fields = fields;
+    }
+  };
+
+  const onChangeReference = (newReferencePkId, datasetSchemaId) => {
+    const inmDatasetSchema = { ...datasetSchema };
+    console.log({ newReferencePkId, datasetSchemaId, inmDatasetSchema });
+    if (!isNil(inmDatasetSchema.tables)) {
+      inmDatasetSchema.tables.forEach(table => {
+        if (!table.addTab) {
+          table.records.forEach(record =>
+            record.fields.forEach(field => {
+              if (!isNil(field) && field.fieldId === newReferencePkId) {
+                field.pkReferenced = true;
+                console.log('field.pkReferenced', field.pkReferenced);
+              }
+            })
+          );
+        }
+      });
+      console.log('inmDatasetSchema', { inmDatasetSchema });
+      setDatasetSchema(inmDatasetSchema);
     }
   };
 
@@ -95,6 +116,7 @@ export const TabsDesigner = withRouter(({ datasetSchemas, editable = false, matc
       });
       //Add tab Button/Tab
       inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
+      console.log({ inmDatasetSchema });
       setDatasetSchema(inmDatasetSchema);
     } catch (error) {
       console.error(`Error while loading schema ${error}`);
@@ -289,6 +311,14 @@ export const TabsDesigner = withRouter(({ datasetSchemas, editable = false, matc
     return Math.max(...tabsArray.map(tab => tab.index));
   };
 
+  const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
+    return datasetSchemasArray
+      .map(datasetSchema => {
+        return datasetSchema.datasetSchemaId;
+      })
+      .indexOf(datasetSchemaId);
+  };
+
   const renderErrors = (errorTitle, error) => {
     return (
       <Dialog
@@ -343,6 +373,7 @@ export const TabsDesigner = withRouter(({ datasetSchemas, editable = false, matc
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         key={tab.index}
                         onChangeFields={onChangeFields}
+                        onChangeReference={onChangeReference}
                         onChangeTableDescription={onChangeTableDescription}
                         table={tabs[i]}
                       />

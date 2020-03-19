@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import filter from 'lodash/filter';
 
 import styles from './FieldDesigner.module.scss';
 
@@ -30,7 +31,6 @@ export const FieldDesigner = ({
   datasetId,
   fieldId,
   fieldDescription,
-  datasetSchemas,
   fieldName,
   fieldPK,
   fieldPKReferenced,
@@ -51,6 +51,7 @@ export const FieldDesigner = ({
   recordSchemaId,
   totalFields
 }) => {
+  console.log('fieldPKReferenced', { fieldPKReferenced });
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
@@ -83,21 +84,21 @@ export const FieldDesigner = ({
     }
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
-
   const initialFieldDesignerState = {
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
-    fieldPKValue: fieldPK,
-    fieldPreviousTypeValue: '',
     fieldLinkValue: fieldLink || null,
+    fieldPKReferencedValue: fieldPKReferenced || false,
+    fieldPKValue: fieldPK,
+    fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
     initialDescriptionValue: undefined,
     initialFieldValue: undefined,
     isCodelistEditorVisible: false,
-    isEditing: false,
     isDragging: false,
+    isEditing: false,
     isLinkSelectorVisible: false,
     isQCManagerVisible: false
   };
@@ -107,6 +108,10 @@ export const FieldDesigner = ({
   const fieldRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
+
+  useEffect(() => {
+    dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
+  }, [fieldPKReferenced]);
 
   useEffect(() => {
     if (totalFields > 0) {
@@ -183,6 +188,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
+      dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -262,7 +268,6 @@ export const FieldDesigner = ({
   };
 
   const onCodelistDropdownSelected = fieldType => {
-    console.log({ fieldType });
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
@@ -270,7 +275,6 @@ export const FieldDesigner = ({
   };
 
   const onLinkDropdownSelected = fieldType => {
-    console.log({ fieldType });
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
@@ -294,7 +298,9 @@ export const FieldDesigner = ({
         pk,
         name,
         recordId,
-        referencedField,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
         required,
         type
       });
@@ -431,6 +437,7 @@ export const FieldDesigner = ({
   };
 
   const onSaveCodelist = codelistItems => {
+    console.log('codelistItems', codelistItems);
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -447,6 +454,7 @@ export const FieldDesigner = ({
   };
 
   const onSaveLink = link => {
+    console.log('link', link);
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
 
     if (!isUndefined(fieldId)) {
@@ -454,19 +462,13 @@ export const FieldDesigner = ({
         onFieldAdd({
           codelistItems,
           type: 'LINK',
-          referencedField: {
-            idDatasetSchema: link.referencedField.datasetSchemaId,
-            idPk: link.referencedField.fieldSchemaId
-          }
+          referencedField: link
         });
       } else {
         fieldUpdate({
           codelistItems,
           type: 'LINK',
-          referencedField: {
-            idDatasetSchema: link.referencedField.datasetSchemaId,
-            idPk: link.referencedField.fieldSchemaId
-          }
+          referencedField: link
         });
       }
     }
@@ -507,6 +509,7 @@ export const FieldDesigner = ({
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
   }) => {
+    console.log('referencedField', referencedField);
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
@@ -514,7 +517,9 @@ export const FieldDesigner = ({
         fieldSchemaId,
         pk,
         name,
-        referencedField,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
         required,
         type
       });
@@ -522,11 +527,28 @@ export const FieldDesigner = ({
         console.error('Error during field Update');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       } else {
-        onFieldUpdate({ codelistItems, description, id: fieldId, pk, name, required, type });
+        onFieldUpdate({
+          codelistItems,
+          description,
+          id: fieldId,
+          pk,
+          name,
+          referencedField,
+          required,
+          type
+        });
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
     }
+  };
+
+  const parseReferenceField = completeReferencedField => {
+    console.log('completeReferencedField', completeReferencedField);
+    return {
+      idPk: completeReferencedField.referencedField.fieldSchemaId,
+      idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId
+    };
   };
 
   const qcDialogFooter = (
@@ -558,21 +580,30 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
+      {console.log(
+        hasPK,
+        !fieldDesignerState.fieldPKValue,
+        fieldDesignerState.fieldPKReferencedValue,
+        hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)
+      )}
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
-        disabled={Boolean(hasPK && !fieldDesignerState.fieldPKValue)}
+        disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
         onChange={e => {
-          onPKChange(e.checked);
+          if (!(hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))) {
+            onPKChange(e.checked);
+          }
         }}
         style={{ width: '35px' }}
       />
     </div>
   );
 
-  const renderCodelistAndLinkButtons = () =>
-    !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
+  const renderCodelistAndLinkButtons = () => {
+    return !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
@@ -609,6 +640,7 @@ export const FieldDesigner = ({
     ) : isCodelistOrLink ? (
       <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
+  };
 
   const renderDeleteButton = () =>
     !addField ? (
@@ -735,7 +767,6 @@ export const FieldDesigner = ({
         ) : null}
         {renderDeleteButton()}
       </div>
-      {console.log(fieldDesignerState.isCodelistEditorVisible)}
       {fieldDesignerState.isCodelistEditorVisible ? (
         <CodelistEditor
           isCodelistEditorVisible={fieldDesignerState.isCodelistEditorVisible}
@@ -746,7 +777,6 @@ export const FieldDesigner = ({
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
-          datasetSchemas={datasetSchemas}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}

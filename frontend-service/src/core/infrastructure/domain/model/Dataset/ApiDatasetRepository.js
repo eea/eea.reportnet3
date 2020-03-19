@@ -293,6 +293,7 @@ const schemaById = async datasetId => {
                   pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                   name: DataTableFieldDTO.name,
                   recordId: DataTableFieldDTO.idRecord,
+                  referencedField: DataTableFieldDTO.referencedField,
                   required: DataTableFieldDTO.required,
                   type: DataTableFieldDTO.type
                 });

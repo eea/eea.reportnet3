@@ -8,6 +8,7 @@ export class DatasetTableField {
     pkReferenced,
     name,
     recordId,
+    referencedField,
     required,
     type,
     validations,
@@ -21,6 +22,7 @@ export class DatasetTableField {
     this.pkReferenced = pkReferenced;
     this.name = name;
     this.recordId = recordId;
+    this.referencedField = referencedField;
     this.required = required;
     this.type = type;
     this.validations = validations;

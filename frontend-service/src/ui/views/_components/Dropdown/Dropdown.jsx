@@ -377,7 +377,6 @@ export class Dropdown extends Component {
   }
 
   onFilterInputKeyDown(event) {
-    console.log(event.which);
     switch (event.which) {
       //down
       case 40:

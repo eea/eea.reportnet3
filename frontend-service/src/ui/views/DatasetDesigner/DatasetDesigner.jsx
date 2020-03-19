@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DatasetDesigner.module.scss';
 
@@ -147,12 +148,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onConfirmValidate = async () => {
-    //  QUE ES ESO??
-    /*     const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId }); */
-
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
@@ -200,6 +195,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(false);
     }
   };
+
+  // const onTableAdd = ()
 
   const onUpdateDescription = async description => {
     try {

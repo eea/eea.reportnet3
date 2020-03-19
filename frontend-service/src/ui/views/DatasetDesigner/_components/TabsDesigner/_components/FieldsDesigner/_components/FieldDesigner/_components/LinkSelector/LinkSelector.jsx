@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -9,14 +10,33 @@ import styles from './LinkSelector.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ListBox } from './_components/ListBox';
+import { Spinner } from 'ui/views/_components/Spinner';
+
+import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink, onSaveLink, selectedLink }) => {
+const LinkSelector = withRouter(({ isLinkSelectorVisible, match, onCancelSaveLink, onSaveLink, selectedLink }) => {
   const resources = useContext(ResourcesContext);
-  console.log({ selectedLink });
-  const [link, setLink] = useState(selectedLink);
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
+  const [link, setLink] = useState(selectedLink);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    params: { dataflowId }
+  } = match;
+
+  useEffect(() => {
+    const getDatasetSchemas = async () => {
+      setIsLoading(true);
+      const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+      setIsLoading(false);
+      setDatasetSchemas(datasetSchemasDTO);
+    };
+
+    getDatasetSchemas();
+  }, []);
 
   const linkSelectorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -104,9 +124,9 @@ const LinkSelector = ({ datasetSchemas, isLinkSelectorVisible, onCancelSaveLink,
       style={{ width: '80%' }}
       visible={isVisible}
       zIndex={3003}>
-      {renderLinkSelector()}
+      {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
     </Dialog>
   );
-};
+});
 
 export { LinkSelector };

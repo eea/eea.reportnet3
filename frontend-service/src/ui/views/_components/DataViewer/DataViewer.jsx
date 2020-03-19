@@ -207,7 +207,6 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      console.log('');
       if (isDatasetDeleted) {
         dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }

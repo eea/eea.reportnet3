@@ -5,7 +5,14 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'CANCEL_SELECT_CODELIST':
       return {
         ...state,
-        fieldPreviousTypeValue: payload,
+        fieldTypeValue: payload,
+        isCodelistEditorVisible: false,
+        isLinkSelectorVisible: false
+      };
+    case 'CANCEL_SELECT_LINK':
+      return {
+        ...state,
+        fieldTypeValue: payload,
         isCodelistEditorVisible: false,
         isLinkSelectorVisible: false
       };
@@ -33,6 +40,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, fieldLinkValue: payload };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
+    case 'SET_PK_REFERENCED':
+      return { ...state, fieldPKReferencedValue: payload };
     case 'SET_PREVIOUS_TYPE_VALUE':
       return { ...state, fieldPreviousTypeValue: payload };
     case 'SET_REQUIRED':

@@ -1,4 +1,4 @@
-import { isUndefined, isNull } from 'lodash';
+import isNil from 'lodash/isNil';
 
 const arrayShift = (arr, initialIdx, endIdx) => {
   const element = arr[initialIdx];
@@ -31,7 +31,7 @@ const arrayShift = (arr, initialIdx, endIdx) => {
 };
 
 const checkDuplicates = (fields, name, fieldId) => {
-  if (!isUndefined(fields) && !isNull(fields)) {
+  if (!isNil(fields)) {
     const inmFields = [...fields];
     const repeteadElements = inmFields.filter(field => name.toLowerCase() === field.name.toLowerCase());
     return repeteadElements.length > 0 && fieldId !== repeteadElements[0].fieldId;
@@ -56,9 +56,31 @@ const getIndexByFieldId = (fieldId, fieldsArray) => {
     .indexOf(fieldId);
 };
 
+const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
+  let referencedFields = 0;
+  console.log('fieldPkId', { fieldPkId });
+  datasetSchemas.forEach(schema =>
+    schema.tables.forEach(table =>
+      table.records.forEach(record =>
+        record.fields.forEach(field => {
+          if (!isNil(field) && !isNil(field.referencedField)) {
+            console.log('field', field.referencedField.idPk);
+          }
+          if (!isNil(field) && !isNil(field.referencedField) && field.referencedField.idPk === fieldPkId) {
+            referencedFields++;
+          }
+        })
+      )
+    )
+  );
+  console.log('referencedFields', referencedFields);
+  return referencedFields;
+};
+
 export const FieldsDesignerUtils = {
   arrayShift,
   checkDuplicates,
   getIndexByFieldName,
-  getIndexByFieldId
+  getIndexByFieldId,
+  getCountPKUseInAllSchemas
 };

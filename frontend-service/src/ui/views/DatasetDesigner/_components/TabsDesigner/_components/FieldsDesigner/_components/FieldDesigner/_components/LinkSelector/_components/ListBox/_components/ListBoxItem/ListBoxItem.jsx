@@ -14,7 +14,6 @@ const ListBoxItem = ({
   template = null
 }) => {
   const onClickListBoxItem = event => {
-    console.log({ onClick });
     if (onClick) {
       onClick({
         originalEvent: event,
@@ -84,9 +83,6 @@ const ListBoxItem = ({
   };
 
   const renderListBoxItem = () => {
-    if (selected) {
-      console.log({ selected });
-    }
     let className = classNames('p-listbox-item', { 'p-highlight': selected }, { 'p-disabled': disabled });
     let content = template ? template(option) : label;
     return (

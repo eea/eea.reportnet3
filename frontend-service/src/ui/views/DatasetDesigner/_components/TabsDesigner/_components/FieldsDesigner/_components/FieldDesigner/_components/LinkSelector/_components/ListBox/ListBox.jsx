@@ -35,7 +35,6 @@ const ListBox = ({
   value = null
 }) => {
   let myTooltip;
-  console.log({ value });
   const inputElement = useRef();
   const [filter, setFilter] = useState('');
   const [optionTouched, setOptionTouched] = useState(false);
@@ -89,12 +88,10 @@ const ListBox = ({
         }
       } else {
         value = getOptionValue(option);
-        console.log({ value });
         valueChanged = true;
       }
     } else {
       value = selected ? null : getOptionValue(option);
-      console.log({ value });
       valueChanged = true;
     }
 
@@ -171,7 +168,6 @@ const ListBox = ({
   const isSelected = option => {
     let selected = false;
     let optionValue = getOptionValue(option);
-    console.log({ optionValue });
     if (multiple) {
       if (value) {
         for (let val of value) {
@@ -182,7 +178,6 @@ const ListBox = ({
         }
       }
     } else {
-      //   console.log({ value, optionValue, dataKey });
       if (!option.disabled) {
         selected = ObjectUtils.equals(value, optionValue, dataKey);
       } else {
@@ -205,7 +200,6 @@ const ListBox = ({
   };
 
   const getOptionValue = option => {
-    console.log(option.value, optionLabel ? option : option.value);
     return optionLabel ? option : option.value;
   };
 
@@ -229,7 +223,6 @@ const ListBox = ({
 
       items = items.map((option, index) => {
         let optionLabel = getOptionLabel(option);
-        console.log({ option });
         return (
           <ListBoxItem
             disabled={option.disabled}
