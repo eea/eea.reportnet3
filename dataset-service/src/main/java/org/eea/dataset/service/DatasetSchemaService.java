@@ -283,4 +283,13 @@ public interface DatasetSchemaService {
    */
   List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId);
 
+
+  /**
+   * Allow delete schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the boolean
+   */
+  Boolean allowDeleteSchema(String idDatasetSchema);
+
 }

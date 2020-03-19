@@ -101,7 +101,7 @@ public class DataSetSchemaControllerImplTest {
 
   @Mock
   private RulesControllerZuul rulesControllerZuul;
-  
+
   @Mock
   private DesignDatasetService designDatasetService;
 
@@ -324,6 +324,7 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
+    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
@@ -339,7 +340,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-
+    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DRAFT);
@@ -366,12 +367,26 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
+    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
     try {
       dataSchemaControllerImpl.deleteDatasetSchema(1L);
     } catch (ResponseStatusException e) {
       assertEquals("Not the same status", HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+
+  }
+
+  @Test
+  public void deleteDatasetSchemaExceptionNotAllowedTest() throws EEAException {
+
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
+    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(false);
+    try {
+      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("Not the same status", HttpStatus.FORBIDDEN, e.getStatus());
     }
 
   }
@@ -531,7 +546,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
-    .thenReturn(true);
+        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
   }
 
@@ -544,7 +559,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
-    .thenReturn(true);
+        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -559,7 +574,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
-    .thenReturn(true);
+        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -574,7 +589,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
-    .thenReturn(true);
+        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(rulesControllerZuul, times(0)).createAutomaticRule(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
@@ -589,7 +604,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
-    .thenReturn(true);
+        .thenReturn(true);
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
     Mockito.verify(dataschemaService, times(1)).propagateRulesAfterUpdateSchema(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -789,13 +804,14 @@ public class DataSetSchemaControllerImplTest {
     Assert.assertFalse(dataSchemaControllerImpl.validateSchemas(1L));
 
   }
-  
-  
+
+
   @Test
   public void testFindDataSchemasByIdDataflow() {
     DesignDatasetVO design = new DesignDatasetVO();
     design.setId(1L);
-    when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any())).thenReturn(Arrays.asList(design));
+    when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(Arrays.asList(design));
     dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L);
   }
 

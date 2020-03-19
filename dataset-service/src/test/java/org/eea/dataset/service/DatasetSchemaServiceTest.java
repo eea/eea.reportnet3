@@ -1091,7 +1091,26 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
 
     dataSchemaServiceImpl.getFieldSchema("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
 
+
+  @Test
+  public void testAllowDeleteSchema() {
+    DataSetSchema schema = new DataSetSchema();
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    tableVO.setRecordSchema(recordVO);
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(dataSchemaMapper.entityToClass(schema)).thenReturn(schemaVO);
+    dataSchemaServiceImpl.allowDeleteSchema("5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
 }

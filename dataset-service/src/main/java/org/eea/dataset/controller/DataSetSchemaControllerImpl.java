@@ -221,6 +221,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
 
+    if (!dataschemaService.allowDeleteSchema(schemaId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.PK_REFERENCED);
+    }
+
     // Check if the dataflow its on the correct state to allow delete design datasets
     try {
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);

@@ -821,6 +821,30 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
+  /**
+   * Allow delete schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the boolean
+   */
+  @Override
+  public Boolean allowDeleteSchema(String idDatasetSchema) {
+    Boolean allow = true;
+    DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
+    for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+      if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
+        if (tableVO.getRecordSchema().getFieldSchema().stream()
+            .anyMatch(field -> field.getPkReferenced() != null && field.getPkReferenced())) {
+          allow = false;
+          break;
+        }
+      }
+    }
+    return allow;
+  }
+
+
   /**
    * Update pk catalogue.
    *
@@ -1019,6 +1043,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @return the referenced fields by schema
    */
+  @Override
   public List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId) {
 
     List<ReferencedFieldSchema> references = new ArrayList<>();
