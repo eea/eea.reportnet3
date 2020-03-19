@@ -19,8 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;

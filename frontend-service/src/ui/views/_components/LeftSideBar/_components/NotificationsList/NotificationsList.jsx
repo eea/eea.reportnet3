@@ -58,7 +58,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     <Dialog
       className="edit-table"
       blockScroll={false}
-      contentStyle={{ height: '90%', maxHeight: '80%', overflow: 'auto' }}
+      contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
       closeOnEscape={false}
       header={resources.messages['notifications']}
       modal={true}

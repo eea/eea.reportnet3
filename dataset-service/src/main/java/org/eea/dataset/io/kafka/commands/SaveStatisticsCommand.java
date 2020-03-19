@@ -24,7 +24,9 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
@@ -50,7 +52,7 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
 
     if (EventType.VALIDATION_FINISHED_EVENT.equals(eeaEventVO.getEventType())) {
 
-      Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+      final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       new Thread(new Runnable() {
 
         @Override
@@ -68,7 +70,6 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
     }
 
   }
-
 
 
 }

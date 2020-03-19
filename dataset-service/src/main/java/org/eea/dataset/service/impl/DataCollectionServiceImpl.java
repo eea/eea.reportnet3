@@ -108,7 +108,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant UPDATE_DATAFLOW_STATUS. */
   private static final String UPDATE_DATAFLOW_STATUS =
-      "update dataflow set status = '%s' where id = %d";
+      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
   /** The Constant INSERT_DC_INTO_DATASET. */
   private static final String INSERT_DC_INTO_DATASET =
@@ -189,7 +189,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
     }
     dataCollectionRepository.deleteDatasetById(datasetIds);
-    dataCollectionRepository.updateDataflowStatus(dataflowId, TypeStatusEnum.DESIGN.getValue());
+    dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
   }
 
   /**
@@ -239,7 +239,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         connection.setAutoCommit(false);
 
         // 5. Set dataflow to DRAFT
-        statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dataflowId));
+        statement.addBatch(
+            String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
 
         for (DesignDatasetVO design : designs) {
           // 6. Create DataCollection in metabase
@@ -320,7 +321,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
       Long dataflowId, Date dueDate) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
-        dataflowId, String.format(NAME_DC, design.getDataSetName()), design.getDatasetSchema()))) {
+        dataflowId, String.format(NAME_DC, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_DC_INTO_DATA_COLLECTION, datasetId, dueDate));

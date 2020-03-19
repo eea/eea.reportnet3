@@ -39,6 +39,7 @@ const Representative = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, representative }
   } = match;
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -205,7 +206,7 @@ const Representative = withRouter(({ match, history }) => {
         if (isOutdated.length === 1 && isReleased.length === 1) {
           receiptDispatch({
             type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0], receiptData: {}, isReleased }
+            payload: { isLoading: false, isOutdated: isOutdated[0], receiptPdf: {}, isReleased }
           });
         }
       }

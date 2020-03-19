@@ -7,7 +7,7 @@ export const apiConfirmationReceipt = {
   get: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
 
-    const response = await HTTPRequester.get({
+    const response = await HTTPRequester.download({
       url: getUrl(ConfirmationReceiptConfig.get, {
         dataflowId,
         dataProviderId
@@ -17,6 +17,7 @@ export const apiConfirmationReceipt = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
     /*  const response = {
       idDataflow: 5061,

@@ -1,8 +1,13 @@
-import { isNull, isUndefined } from 'lodash';
-
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
 
+import { config } from 'conf';
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
+
 import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
@@ -12,7 +17,7 @@ import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/Datas
 import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-import { CoreUtils } from 'core/infrastructure/CoreUtils';
+import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
 const accept = async dataflowId => {
   const status = await apiDataflow.accept(dataflowId);
@@ -24,13 +29,44 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
-const all = async () => {
-  const pendingDataflowsDTO = await apiDataflow.all();
-  return {
-    pending: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING')),
-    accepted: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED')),
-    completed: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'COMPLETED'))
-  };
+const all = async userData => {
+  const pendingDataflowsDTO = await apiDataflow.all(userData);
+  const dataflows = !userData ? pendingDataflowsDTO : [];
+  const userRoles = [];
+
+  if (userData) {
+    const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
+    dataflowsRoles.map((item, i) => {
+      const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: DataflowConf.dataflowRoles[role] });
+    });
+
+    for (let i = 0; i < pendingDataflowsDTO.length; i++) {
+      const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+      dataflows.push({
+        ...pendingDataflowsDTO[i],
+        ...(isDuplicated
+          ? userRoles.filter(item =>
+              item.duplicatedRoles
+                ? item.userRole === DataflowConf.dataflowRoles['DATA_CUSTODIAN'] && delete item.duplicatedRoles
+                : item
+            )
+          : userRoles
+        ).find(item => item.id === pendingDataflowsDTO[i].id)
+      });
+    }
+  }
+
+  const groupByUserRequesetStatus = CoreUtils.onGroupBy('userRequestStatus');
+
+  const dataflowsData = groupByUserRequesetStatus(dataflows);
+
+  const allDataflows = DataflowConf.userRequestStatus;
+  Object.keys(dataflowsData).forEach(key => {
+    allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
+  });
+
+  return allDataflows;
 };
 
 const create = async (name, description) => {
@@ -271,21 +307,34 @@ const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   return newEmptyDatasetSchemaResponse;
 };
 
+const parseDataflowDTOs = dataflowDTOs => {
+  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+  dataflows.sort((a, b) => {
+    const deadline_1 = a.expirationDate;
+    const deadline_2 = b.expirationDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+  return dataflows;
+};
+
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
-    deadlineDate: moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
+    expirationDate: !isNil(dataflowDTO.deadlineDate)
+      ? moment.unix(dataflowDTO.deadlineDate).format('MM/DD/YYYY')
+      : moment(dataflowDTO.deadlineDate).format('MM/DD/YYYY'),
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     status: dataflowDTO.status,
     userRequestStatus: dataflowDTO.userRequestStatus,
+    userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
@@ -388,20 +437,6 @@ const parseWebLinkListDTO = webLinksDTO => {
 };
 
 const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
-
-const parseDataflowDTOs = dataflowDTOs => {
-  let dataflows = dataflowDTOs.map(dataflowDTO => {
-    return parseDataflowDTO(dataflowDTO);
-  });
-
-  dataflows.sort((a, b) => {
-    let deadline_1 = a.deadlineDate;
-    let deadline_2 = b.deadlineDate;
-    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
-  });
-
-  return dataflows;
-};
 
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
