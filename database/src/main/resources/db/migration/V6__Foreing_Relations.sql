@@ -6,9 +6,10 @@ CREATE TABLE IF NOT EXISTS public.FOREIGN_RELATIONS (
 	ID_PK varchar(255), 
 	DATASET_ID_DESTINATION bigint, 
 	DATASET_ID_ORIGIN bigint, 
+	id_fk_origin varchar NULL,
 	CONSTRAINT foreign_relations_pkey PRIMARY KEY (id),
-	CONSTRAINT foreign_relations_origin_fkey FOREIGN KEY (DATASET_ID_ORIGIN) REFERENCES dataset(id),
-	CONSTRAINT foreign_relations_destination_fkey FOREIGN KEY (DATASET_ID_DESTINATION) REFERENCES dataset(id)
+	CONSTRAINT foreign_relations_destination_fkey FOREIGN KEY (dataset_id_destination) REFERENCES dataset(id) ON DELETE CASCADE,
+	CONSTRAINT foreign_relations_origin_fkey FOREIGN KEY (dataset_id_origin) REFERENCES dataset(id) ON DELETE CASCADE
 );
 
 
