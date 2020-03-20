@@ -324,7 +324,7 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
-    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
@@ -335,12 +335,12 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void deleteDatasetSchemaException4Test() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DRAFT);
@@ -350,6 +350,7 @@ public class DataSetSchemaControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals("The dataflow is not in the correct status", HttpStatus.FORBIDDEN,
           e.getStatus());
+      throw e;
     }
   }
 
@@ -367,7 +368,7 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
-    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
     try {
@@ -378,15 +379,16 @@ public class DataSetSchemaControllerImplTest {
 
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void deleteDatasetSchemaExceptionNotAllowedTest() throws EEAException {
 
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    when(dataschemaService.allowDeleteSchema(Mockito.any())).thenReturn(false);
+    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(false);
     try {
       dataSchemaControllerImpl.deleteDatasetSchema(1L);
     } catch (ResponseStatusException e) {
       assertEquals("Not the same status", HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
     }
 
   }

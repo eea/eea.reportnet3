@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.metabase.domain;
+package org.eea.dataset.service.model;
 
 import java.util.List;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;

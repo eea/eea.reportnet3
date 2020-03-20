@@ -823,13 +823,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
 
   /**
-   * Allow delete schema.
+   * Checks if is schema for deletion allowed.
    *
    * @param idDatasetSchema the id dataset schema
    * @return the boolean
    */
   @Override
-  public Boolean allowDeleteSchema(String idDatasetSchema) {
+  public Boolean isSchemaForDeletionAllowed(String idDatasetSchema) {
     Boolean allow = true;
     DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
     for (TableSchemaVO tableVO : schema.getTableSchemas()) {

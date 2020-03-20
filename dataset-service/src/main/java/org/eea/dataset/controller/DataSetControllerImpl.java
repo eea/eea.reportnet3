@@ -525,18 +525,19 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+
   /**
-   * Gets the dataset id referenced.
+   * Gets the referenced dataset id.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
-   * @return the dataset id referenced
+   * @return the referenced dataset id
    */
   @Override
-  @GetMapping("private/getDatasetIdReferenced")
-  public Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+  @GetMapping("private/getReferencedDatasetId")
+  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema) {
-    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema);
+    return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
   }
 
 }

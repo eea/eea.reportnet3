@@ -1129,7 +1129,7 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(dataSchemaMapper.entityToClass(schema)).thenReturn(schemaVO);
-    dataSchemaServiceImpl.allowDeleteSchema("5ce524fad31fc52540abae73");
+    dataSchemaServiceImpl.isSchemaForDeletionAllowed("5ce524fad31fc52540abae73");
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 

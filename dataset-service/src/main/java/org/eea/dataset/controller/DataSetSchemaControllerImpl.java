@@ -221,7 +221,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
     // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
-    if (!dataschemaService.allowDeleteSchema(schemaId)) {
+    if (!dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.PK_REFERENCED);
     }
 

@@ -123,7 +123,7 @@ public class PKValidationUtils {
 
     // Id Dataset contains PK list
     Long datasetIdRefered =
-        dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchemaPk);
+        dataSetControllerZuul.getReferencedDatasetId(datasetIdReference, idFieldSchemaPk);
 
     // Get PK Schema
     String pkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);

@@ -2,7 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.Date;
 import java.util.List;
-import org.eea.dataset.persistence.metabase.domain.FKDataCollection;
+import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 
 
