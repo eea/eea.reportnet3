@@ -9,30 +9,16 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
-    setIsChecked(getStateBySelectionAndByReporter(areAllSelectedOrDeselected()));
-    setSelectedAll(areAllSelectedOrDeselected);
+    setIsChecked(getStateBySelectionAndByReporter());
+    setSelectedAll(selectedAllFilterState);
   }, [selectedAllFilterState, selectedAll]);
 
   const getStateBySelectionAndByReporter = () => {
-    let state = areAllSelectedOrDeselected();
-    if (state === 'indeterminate') {
+    if (selectedAllFilterState === 'indeterminate') {
       return !reporterFilters.includes(reporter);
     } else {
-      return state;
+      return selectedAllFilterState;
     }
-  };
-
-  const areAllSelectedOrDeselected = () => {
-    if (!isUndefined(selectedAllFilterState)) {
-      if (selectedAllFilterState === 'checked') {
-        setIsChecked(true);
-      } else if (selectedAllFilterState === 'unchecked') {
-        setIsChecked(false);
-      } else if (selectedAllFilterState === 'indeterminate') {
-        setIsChecked('indeterminate');
-      }
-    }
-    return isChecked;
   };
 
   return (

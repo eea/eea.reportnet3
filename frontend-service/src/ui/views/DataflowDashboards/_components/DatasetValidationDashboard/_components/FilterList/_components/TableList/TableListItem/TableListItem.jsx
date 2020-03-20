@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { isUndefined } from 'lodash';
-
 import styles from './TableListItem.module.css';
 
 export const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters, selectedAllFilterState }) => {
@@ -9,41 +7,25 @@ export const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFil
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
-    setIsChecked(getStateBySelectionAndByReporter(areAllSelectedOrDeselected()));
-    setSelectedAll(areAllSelectedOrDeselected);
+    setIsChecked(getStateBySelectionAndByReporter());
+    setSelectedAll(selectedAllFilterState);
   }, [selectedAllFilterState, selectedAll]);
 
   const getStateBySelectionAndByReporter = () => {
-    let state = areAllSelectedOrDeselected();
-    if (state === 'indeterminate') {
-      return tableFilters.includes(table.tableId) ? false : true;
+    if (selectedAllFilterState === 'indeterminate') {
+      return !tableFilters.includes(table.tableId);
     } else {
-      return state;
+      return selectedAllFilterState;
     }
-  };
-
-  const areAllSelectedOrDeselected = () => {
-    let isChecked;
-    if (!isUndefined(selectedAllFilterState)) {
-      if (selectedAllFilterState === 'checked') {
-        isChecked = true;
-      } else if (selectedAllFilterState === 'unchecked') {
-        isChecked = false;
-      } else if (selectedAllFilterState === 'indeterminate') {
-        isChecked = 'indeterminate';
-      }
-    }
-    return isChecked;
   };
 
   return (
-    <li className={styles.listItem}>
+    <div className={styles.listItem}>
       <input
         id={`${table.tableId}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        checked={isChecked}
-        defaultChecked={true}
+        defaultChecked={isChecked}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
@@ -55,6 +37,6 @@ export const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFil
       <label htmlFor={`${table.tableId}_${datasetSchemaId}`} className={styles.labelItem}>
         {table.tableName}
       </label>
-    </li>
+    </div>
   );
 };

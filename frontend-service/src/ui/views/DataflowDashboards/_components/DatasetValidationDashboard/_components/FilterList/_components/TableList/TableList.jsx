@@ -11,7 +11,7 @@ const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) =>
   return (
     <ul className={styles.list}>
       {tables.map(table => (
-        <li className={styles.listItem}>
+        <li className={styles.listItem} key={datasetSchemaId}>
           <TableListItem
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}
