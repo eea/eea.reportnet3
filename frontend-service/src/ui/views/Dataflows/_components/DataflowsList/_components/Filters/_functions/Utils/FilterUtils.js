@@ -23,14 +23,18 @@ const checkFilters = (filteredKeys, dataflow, state) => {
 
 const checkSelected = (state, data, selectedKeys) => {
   for (let index = 0; index < selectedKeys.length; index++) {
-    if (!isNil(data[selectedKeys[index]])) {
-      if (
-        ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
-          data[selectedKeys[index]].toLowerCase()
-        )
-      ) {
-        return false;
+    if (!isEmpty(state.filterBy[selectedKeys[index]])) {
+      if (!isNil(data[selectedKeys[index]])) {
+        if (
+          ![...state.filterBy[selectedKeys[index]].map(option => option.value.toLowerCase())].includes(
+            data[selectedKeys[index]].toLowerCase()
+          )
+        ) {
+          return false;
+        }
       }
+    } else {
+      return true;
     }
   }
   return true;
@@ -44,11 +48,7 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
       const selectItems = uniq(data.map(item => item[selectOption]));
       const validSelectItems = selectItems.filter(option => !isNil(option));
       for (let i = 0; i < validSelectItems.length; i++) {
-        const data = [];
-        validSelectItems.forEach(item => {
-          data.push({ type: item, value: item });
-        });
-        filterBy[selectOption] = data;
+        filterBy[selectOption] = [];
       }
     });
   }
@@ -88,10 +88,10 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
   ...state.data.filter(data => {
     if (state.selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
-        [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()) &&
         checkDates(state.filterBy[state.dateOptions], data[state.dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
-        checkSelected(state, data, selectedKeys)
+        checkSelected(state, data, selectedKeys) &&
+        (isEmpty(value) ? true : [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()))
       );
     } else if (state.dateOptions.includes(filter)) {
       const dates = value.map(date => new Date(date).getTime() / 1000);
