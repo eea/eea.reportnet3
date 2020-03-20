@@ -287,6 +287,55 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRepresentationMapper.entityListToClass(arrayList);
   }
 
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  public void updateUserAttributes(@RequestBody Map<String, List<String>> attributes) {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      user.setAttributes(attributes);
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    keycloakConnectorService.updateUser(user);
+
+  }
+
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  public Map<String, List<String>> getUserAttributes() {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      return user.getAttributes();
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+
+  }
+
 
   /**
    * Adds the contributor to resource.

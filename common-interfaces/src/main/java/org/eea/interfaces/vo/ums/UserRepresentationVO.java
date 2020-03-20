@@ -1,5 +1,7 @@
 package org.eea.interfaces.vo.ums;
 
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,5 +25,7 @@ public class UserRepresentationVO {
 
   /** The last name. */
   private String lastName;
+
+  private Map<String, List<String>> attributes;
 
 }

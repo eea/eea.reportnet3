@@ -71,6 +71,9 @@ public final class EEAErrorMessage {
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
+  /** The Constant USER_NOTFOUND. */
+  public static final String USER_NOTFOUND = "User not found";
+
   /** The Constant SCHEMA_ID_NONFOUND. */
   public static final String SCHEMA_NOT_FOUND = "Schema not found";
 

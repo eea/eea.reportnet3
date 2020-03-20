@@ -104,6 +104,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   private static final String LIST_ROLE_BY_REALM = "/auth/admin/realms/{realm}/roles";
 
+  private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
+
   private static final String ADD_ROLE_TO_USER =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm";
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -356,6 +358,40 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .map(entity -> (GroupInfo) entity).orElse(null);
   }
 
+  @Override
+  public void updateUser(UserRepresentation user) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_USER_ID, user.getId());
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(user, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USER_URL)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.PUT, request, UserRepresentation.class);
+
+  }
+
+  @Override
+  public UserRepresentation getUser(String userId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(null, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    ResponseEntity<UserRepresentation> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USER_URL)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation.class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
+        .map(entity -> (UserRepresentation) entity).orElse(null);
+  }
+
   /**
    * Creates the group detail.
    * 
@@ -455,11 +491,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     uriParams.put(URI_PARAM_REALM, realmName);
     HttpEntity<Void> request = createHttpRequest(null, uriParams);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-
-    ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
-        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LIST_USERS_URL)
-            .buildAndExpand(uriParams).toString(),
-        HttpMethod.GET, request, UserRepresentation[].class);
+    String string = uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString();
+    System.out.println(string);
+    ResponseEntity<UserRepresentation[]> responseEntity =
+        this.restTemplate.exchange(string, HttpMethod.GET, request, UserRepresentation[].class);
 
     return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
         .map(entity -> (UserRepresentation[]) entity).orElse(null);
