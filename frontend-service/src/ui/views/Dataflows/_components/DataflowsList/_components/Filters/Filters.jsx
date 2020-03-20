@@ -62,6 +62,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, order, property, sortedData } });
   };
 
+  const changeLabelClass = () => {
+    document.getElementById('dateLabel').className = styles.dateLabelUp;
+  };
+
   const renderCalendarFilter = property => {
     const minDate = FilterUtils.getYesterdayDate();
     return (
@@ -74,7 +78,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           minDate={minDate}
           monthNavigator={true}
           onChange={event => onFilterData(property, event.value)}
-          placeholder={resources.messages[property]}
+          onFocus={() => changeLabelClass()}
           readOnlyInput={true}
           selectionMode="range"
           showWeek={true}
@@ -89,6 +93,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
             onClick={() => onFilterData(property, [])}
           />
         )}
+        <label id="dateLabel" className={styles.dateLabel} htmlFor={property}>
+          {resources.messages[property]}
+        </label>
       </span>
     );
   };
@@ -113,11 +120,18 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     </span>
   );
 
+  const getOrderIcon = order => {
+    if (order === 0) return 'sort';
+    else if (order === -1) return 'sortDown';
+    else if (order === 1) return 'sortUp';
+  };
+
   const renderOrderFilter = property => (
     <Button
       className={`p-button-secondary-transparent ${styles.icon}`}
       disabled={property.includes('ROD3')}
-      icon={filterState.orderBy[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
+      // icon={filterState.orderBy[property] === 1 ? 'sortDown' : 'sortUp'}
+      icon={getOrderIcon(filterState.orderBy[property])}
       id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
       style={{ fontSize: '12pt' }}

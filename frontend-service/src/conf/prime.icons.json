@@ -50,6 +50,8 @@
     "share": "pi pi-share-alt",
     "shoppingCart": "pi pi-shopping-cart",
     "sort": "pi pi-sort",
+    "sortDown": "pi pi-sort-down",
+    "sortUp": "pi pi-sort-up",
     "spinnerAnimate": "pi pi-spin pi-spinner",
     "stepBackward": "pi pi-step-backward",
     "stepForward": "pi pi-step-forward",
