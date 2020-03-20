@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { isUndefined, isNull } from 'lodash';
 
 import { Button } from 'ui/views/_components/Button';
+import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -14,10 +15,14 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+
 export const TabsDesigner = withRouter(({ editable = false, match, history, onLoadTableData }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
+
+  const leftSideBarContext = useContext(LeftSideBarContext);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [datasetSchema, setDatasetSchema] = useState();
@@ -29,10 +34,25 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
   const [isLoading, setIsLoading] = useState(false);
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
+  const [isAddValidationVisible, setIsAddValidationVisible] = useState(false);
 
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
+    onLoadSchema(datasetId);
+  }, []);
+
+  useEffect(() => {
+    leftSideBarContext.addModels([
+      {
+        label: 'Add validation',
+        icon: 'plus',
+        onClick: e => {
+          setIsAddValidationVisible(!isAddValidationVisible);
+        },
+        title: 'settings'
+      }
+    ]);
     onLoadSchema(datasetId);
   }, []);
 
@@ -388,6 +408,14 @@ export const TabsDesigner = withRouter(({ editable = false, match, history, onLo
     <React.Fragment>
       {renderTabViews()}
       {renderErrors(errorMessageTitle, errorMessage)}
+      {datasetSchema && (
+        <CreateValidation
+          isVisible={isAddValidationVisible}
+          datasetSchema={datasetSchema}
+          datasetId={datasetId}
+          toggleVisibility={setIsAddValidationVisible}
+        />
+      )}
     </React.Fragment>
   );
 });
