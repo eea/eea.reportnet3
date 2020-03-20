@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 
 import styles from './ValidationExpressionGroup.module.scss';
 
 import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -63,7 +64,7 @@ const ValidationExpressionGroup = ({
         />
       ));
     }
-    return <></>;
+    return <Fragment></Fragment>;
   };
 
   // layouts
@@ -97,6 +98,16 @@ const ValidationExpressionGroup = ({
           <span>
             <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
             {expressionsVisibilityToggleBtn()}
+          </span>
+          <span>
+            <Button
+              disabled={isDisabled}
+              type="button"
+              icon="trash"
+              onClick={e => {
+                onExpressionDelete(expressionId);
+              }}
+            />
           </span>
           <span>{groupExpressionsVisible && getContainedExpressions()}</span>
         </li>
