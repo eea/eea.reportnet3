@@ -220,7 +220,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (schemaId.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
-
+    // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
     if (!dataschemaService.allowDeleteSchema(schemaId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.PK_REFERENCED);
     }
@@ -233,6 +233,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (TypeStatusEnum.DESIGN == dataflow.getStatus()) {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+
+        // delete from the CataloguePK the entries if the schema has FK
+        dataschemaService.updatePkCatalogueDeletingSchema(schemaId);
 
         // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(schemaId);
@@ -393,7 +396,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
-      dataschemaService.updatePkCatalogue(fieldSchemaVO);
+      dataschemaService.addToPkCatalogue(fieldSchemaVO);
 
       // Add the register into the metabase fieldRelations
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
@@ -435,7 +438,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
             datasetId);
 
         // Add the Pk if needed to the catalogue
-        dataschemaService.updatePkCatalogue(fieldSchemaVO);
+        dataschemaService.addToPkCatalogue(fieldSchemaVO);
       } else {
         if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

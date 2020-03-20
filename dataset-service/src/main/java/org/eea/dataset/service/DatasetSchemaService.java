@@ -217,12 +217,13 @@ public interface DatasetSchemaService {
    */
   Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
 
+
   /**
-   * Update pk catalogue.
+   * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
    */
-  void updatePkCatalogue(FieldSchemaVO fieldSchemaVO);
+  void addToPkCatalogue(FieldSchemaVO fieldSchemaVO);
 
   /**
    * Check existing pk referenced.
@@ -291,5 +292,13 @@ public interface DatasetSchemaService {
    * @return the boolean
    */
   Boolean allowDeleteSchema(String idDatasetSchema);
+
+  /**
+   * Update pk catalogue deleting schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException;
 
 }

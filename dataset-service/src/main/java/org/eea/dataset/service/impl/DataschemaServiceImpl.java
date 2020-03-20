@@ -845,13 +845,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
-   * Update pk catalogue.
+   * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
    */
   @Override
-  public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
+  public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO) {
 
     if (fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
@@ -1019,23 +1020,42 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return datasetIdDestination;
   }
 
-
   /**
-   * Update the property isPKreferenced of the class FieldSchema
-   * 
-   * @param referencedIdDatasetSchema
-   * @param referencedIdPk
-   * @param referenced
-   * @throws EEAException
+   * Update pk catalogue deleting schema. When deleting an schema, the PKCatalogue needs to be
+   * updated. Search for all the FK references in the schema that is going to be deleted and then
+   * update the catalogue one by one
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
    */
-  private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,
-      String referencedIdPk, Boolean referenced) throws EEAException {
+  @Override
+  public void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException {
 
-    Document fieldSchemaReferenced =
-        schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
-    fieldSchemaReferenced.put("pkReferenced", referenced);
-    schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+            if (catalogue != null) {
+              catalogue.getReferenced().remove(field.getIdFieldSchema());
+              pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+              pkCatalogueRepository.save(catalogue);
+              // We need to update the field isReferenced from the PK referenced if this was the
+              // only field that was FK
+              if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+                this.updateIsPkReferencedInFieldSchema(
+                    field.getReferencedField().getIdDatasetSchema().toString(),
+                    field.getReferencedField().getIdPk().toString(), false);
+              }
+            }
+          }
+        }
+      }
+    }
   }
+
 
   /**
    * Gets the referenced fields by schema.
@@ -1058,6 +1078,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     return references;
+  }
+
+
+  /**
+   * Update the property isPKreferenced of the class FieldSchema
+   * 
+   * @param referencedIdDatasetSchema
+   * @param referencedIdPk
+   * @param referenced
+   * @throws EEAException
+   */
+  private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,
+      String referencedIdPk, Boolean referenced) throws EEAException {
+
+    Document fieldSchemaReferenced =
+        schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
+    fieldSchemaReferenced.put("pkReferenced", referenced);
+    schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
   }
 
 }

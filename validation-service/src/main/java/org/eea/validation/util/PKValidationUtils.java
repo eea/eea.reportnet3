@@ -115,14 +115,15 @@ public class PKValidationUtils {
     // Id dataset to Validate
     long datasetIdReference = Long.parseLong(datasetId);
 
-    // Id Dataset contains PK list
-    Long datasetIdRefered =
-        dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchema);
-
     // Get FK Schema
     String fkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdReference);
     DataSetSchema datasetSchemaFK =
         schemasRepository.findByIdDataSetSchema(new ObjectId(fkSchemaId));
+    String idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+
+    // Id Dataset contains PK list
+    Long datasetIdRefered =
+        dataSetControllerZuul.getDatasetIdReferenced(datasetIdReference, idFieldSchemaPk);
 
     // Get PK Schema
     String pkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
@@ -150,6 +151,9 @@ public class PKValidationUtils {
         List<FieldValidation> fieldValidationList = new ArrayList<>();
         FieldValidation fieldValidation = new FieldValidation();
         fieldValidation.setValidation(pkValidation);
+        FieldValue fieldValue = new FieldValue();
+        fieldValue.setId(field.getId());
+        fieldValidation.setFieldValue(fieldValue);
         fieldValidationList.add(fieldValidation);
         field.setFieldValidations(fieldValidationList);
         errorFields.add(field);
@@ -227,7 +231,7 @@ public class PKValidationUtils {
    */
   private static Boolean checkPK(List<String> pkValues, FieldValue value) {
 
-    if (pkValues.contains(value.getValue())) {
+    if (!pkValues.contains(value.getValue())) {
       return true;
     } else {
       return false;
