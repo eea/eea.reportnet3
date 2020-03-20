@@ -32,10 +32,13 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
         inputOptions={DataflowConf.filterItems['input']}
         selectOptions={DataflowConf.filterItems['select']}
       />
-      {!isNil(filteredData) &&
+      {!isNil(filteredData) && !isEmpty(filteredData) ? (
         filteredData.map(dataflow => (
           <DataflowsItem dataFetch={dataFetch} itemContent={dataflow} key={dataflow.id} type={type} />
-        ))}
+        ))
+      ) : (
+        <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
+      )}
       {isEmpty(content) && <div className={styles.noDataflows}>{resources.messages['thereAreNoDatalows']}</div>}
     </div>
   );
