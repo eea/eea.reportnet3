@@ -15,7 +15,7 @@ export const groupExpressions = (expressions, groupExpressionsActive, groupCandi
 
     // deactivate grouping check
     expressionsToGroup.forEach(expressionToGroup => {
-      expressionToGroup.group = null;
+      expressionToGroup.group = false;
     });
 
     // compose group expression

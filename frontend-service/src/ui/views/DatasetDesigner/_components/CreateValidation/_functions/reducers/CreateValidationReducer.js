@@ -92,6 +92,7 @@ export const createValidationReducer = (state, { type, payload }) => {
       return {
         ...state,
         groupExpressionsActive: 0,
+        groupCandidate: [],
         candidateRule: {
           ...state.candidateRule,
           expressions: payload.expressions,
