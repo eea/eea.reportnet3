@@ -455,7 +455,7 @@ public class RuleExpressionVO implements Serializable {
     }
 
     LOG_ERROR.error("Error stringifying RuleExpressionVO: operator is null");
-    return "OPERATOR IS NULL";
+    throw new IllegalStateException("Operator cannot be null");
   }
 
   /**
