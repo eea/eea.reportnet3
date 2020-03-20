@@ -26,6 +26,7 @@ public class UserRepresentationVO {
   /** The last name. */
   private String lastName;
 
+  /** The attributes. */
   private Map<String, List<String>> attributes;
 
 }

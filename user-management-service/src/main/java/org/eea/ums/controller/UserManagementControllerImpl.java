@@ -287,10 +287,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRepresentationMapper.entityListToClass(arrayList);
   }
 
+
   /**
-   * Gets the users.
+   * Update user attributes.
    *
-   * @return the users
+   * @param attributes the attributes
    */
   @Override
   @HystrixCommand
@@ -312,10 +313,11 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   }
 
+
   /**
-   * Gets the users.
+   * Gets the user attributes.
    *
-   * @return the users
+   * @return the user attributes
    */
   @Override
   @HystrixCommand
