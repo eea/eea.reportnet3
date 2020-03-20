@@ -121,7 +121,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
       style={{ fontSize: '12pt' }}
-      tooltip={resources.messages['orderAlphabetically']}
+      tooltip={resources.messages['sort']}
       tooltipOptions={{ position: 'bottom' }}
     />
   );
@@ -152,30 +152,30 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       {inputOptions &&
         inputOptions.map(option => (
           <Fragment>
-            {renderInputFilter(option)}
             {renderOrderFilter(option)}
+            {renderInputFilter(option)}
           </Fragment>
         ))}
       {selectOptions &&
         selectOptions.map(option => (
           <Fragment>
-            {renderSelectFilter(option)}
             {renderOrderFilter(option)}
+            {renderSelectFilter(option)}
           </Fragment>
         ))}
       {dateOptions &&
         dateOptions.map(option => (
           <Fragment>
-            {renderCalendarFilter(option)}
             {renderOrderFilter(option)}
+            {renderCalendarFilter(option)}
           </Fragment>
         ))}
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
-          className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-          icon="undo"
+          className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.cancelFilters}`}
+          icon="cancel"
           onClick={() => onClearAllFilters()}
-          tooltip={resources.messages['clearAllFilters']}
+          tooltip={resources.messages['clearFilters']}
           tooltipOptions={{ position: 'left' }}
         />
       )}

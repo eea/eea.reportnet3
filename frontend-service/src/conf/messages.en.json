@@ -505,7 +505,7 @@
     "columnInfoType": "Type",
     "name": "Name",
     "expirationDate": "Expiration date",
-    "clearAllFilters": "Clear all filters",
+    "clearFilters": "Clear filters",
     "userRole": "Role",
     "thereAreNoDatalows": "There are no pending dataflows"
   }
