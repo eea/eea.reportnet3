@@ -564,7 +564,6 @@ export const FieldDesigner = ({
           onFieldDragDrop(e);
         }}
         ref={fieldRef}>
-        {console.log(fieldDesignerState.isDragging)}
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
