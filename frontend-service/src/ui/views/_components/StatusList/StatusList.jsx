@@ -7,15 +7,18 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes }) => {
   const resources = useContext(ResourcesContext);
-  let statusTypesFilters = statusTypes.map((label, i) => {
+
+  const statusTypesFilters = statusTypes.map((label, i) => {
+    const labelLowerCase = label.toString().toLowerCase();
+
     return (
       <li key={i} className={styles.listItem}>
         <input
-          id={`${label.toString().toLowerCase()}_${i}`}
+          id={`${labelLowerCase}_${i}`}
           className={styles.checkbox}
-          style={{ backgroundColor: colors[label.toString().toLowerCase()] }}
+          style={{ backgroundColor: colors[labelLowerCase] }}
           type="checkbox"
-          defaultChecked={filteredStatusTypes.includes(label.toString()) ? false : true}
+          defaultChecked={!filteredStatusTypes.includes(label.toString())}
           onChange={e => {
             filterDispatch({
               type: e.target.checked ? 'CHECKBOX_ON' : 'CHECKBOX_OFF',
@@ -23,8 +26,9 @@ export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes })
             });
           }}
         />
-        <label htmlFor={`${label.toString().toLowerCase()}_${i}`} className={styles.labelItem}>
-          {resources.messages[label.toString().toLowerCase()]}
+
+        <label htmlFor={`${labelLowerCase}_${i}`} className={styles.labelItem}>
+          {resources.messages[labelLowerCase]}
         </label>
       </li>
     );
