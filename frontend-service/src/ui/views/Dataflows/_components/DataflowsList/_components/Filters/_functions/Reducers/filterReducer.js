@@ -5,7 +5,7 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         data: payload.sortedData,
         filteredData: payload.filteredSortedData,
-        orderBy: { ...state.orderBy, [payload.property]: -payload.order }
+        orderBy: { ...state.orderBy, [payload.property]: -payload.orderBy }
       };
 
     case 'FILTER_DATA':
@@ -15,11 +15,12 @@ export const filterReducer = (state, { type, payload }) => {
         filteredData: payload.filteredData
       };
 
-    case 'CLEAR_ALL_FILTERS':
+    case 'CLEAR_ALL':
       return {
         ...state,
         filterBy: payload.filterBy,
-        filteredData: payload.filteredData
+        filteredData: payload.filteredData,
+        orderBy: payload.orderBy
       };
 
     default:

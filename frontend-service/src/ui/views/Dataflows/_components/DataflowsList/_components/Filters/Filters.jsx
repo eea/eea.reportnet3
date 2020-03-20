@@ -39,10 +39,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const onClearAllFilters = () => {
     filterDispatch({
-      type: 'CLEAR_ALL_FILTERS',
+      type: 'CLEAR_ALL',
       payload: {
         filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
-        filteredData: cloneDeep(data)
+        filteredData: cloneDeep(data),
+        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
       }
     });
   };
@@ -58,8 +59,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   const onOrderData = (order, property) => {
     const sortedData = SortUtils.onSortData([...filterState.data], order, property);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
+    const orderBy = order === 0 ? -1 : order;
 
-    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, order, property, sortedData } });
+    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, sortedData } });
   };
 
   const changeLabelClass = () => {
@@ -120,18 +122,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     </span>
   );
 
-  const getOrderIcon = order => {
-    if (order === 0) return 'sort';
-    else if (order === -1) return 'sortDown';
-    else if (order === 1) return 'sortUp';
-  };
-
   const renderOrderFilter = property => (
     <Button
       className={`p-button-secondary-transparent ${styles.icon}`}
       disabled={property.includes('ROD3')}
-      // icon={filterState.orderBy[property] === 1 ? 'sortDown' : 'sortUp'}
-      icon={getOrderIcon(filterState.orderBy[property])}
+      icon={SortUtils.getOrderIcon(filterState.orderBy[property])}
       id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
       style={{ fontSize: '12pt' }}
