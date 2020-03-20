@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
@@ -12,8 +11,6 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
-import { ValidationExpression } from './_components/ValidationExpression';
-import { ValidationExpressionGroup } from './_components/ValidationExpressionGroup';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -46,24 +43,12 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
-  const validationCreationCheckListener = [ruleAdditionCheckListener, creationFormState.candidateRule];
 
   const componentName = 'createValidation';
 
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
   }, []);
-
-  useEffect(() => {
-    if (isVisible) {
-      setTimeout(() => {
-        const body = document.querySelector(`.${styles.body}`);
-        const footer = document.querySelector(`.${styles.footer}`);
-        console.log('body', body);
-        console.log('footer', footer);
-      }, 500);
-    }
-  }, [isVisible]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
