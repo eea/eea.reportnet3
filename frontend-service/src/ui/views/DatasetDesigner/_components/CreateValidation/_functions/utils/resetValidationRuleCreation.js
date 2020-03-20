@@ -1,6 +1,7 @@
 import { getEmptyExpression } from './getEmptyExpression';
 
 export const resetValidationRuleCreation = () => {
+  const newExpression = getEmptyExpression();
   return {
     table: undefined,
     field: undefined,
@@ -9,6 +10,7 @@ export const resetValidationRuleCreation = () => {
     errorMessage: '',
     errorLevel: undefined,
     active: false,
-    expressions: [getEmptyExpression()]
+    expressions: [newExpression],
+    allExpressions: [newExpression]
   };
 };
