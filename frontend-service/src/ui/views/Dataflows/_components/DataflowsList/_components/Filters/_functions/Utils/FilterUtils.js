@@ -91,7 +91,7 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
         checkDates(state.filterBy[state.dateOptions], data[state.dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys) &&
-        (isEmpty(value) ? true : [...value.map(type => type.value.toLowerCase())].includes(data[filter].toLowerCase()))
+        (isEmpty(value) ? true : [...value.map(type => type.toLowerCase())].includes(data[filter].toLowerCase()))
       );
     } else if (state.dateOptions.includes(filter)) {
       const dates = value.map(date => new Date(date).getTime() / 1000);

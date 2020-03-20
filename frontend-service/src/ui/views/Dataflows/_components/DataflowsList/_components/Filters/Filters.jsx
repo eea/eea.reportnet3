@@ -9,7 +9,7 @@ import styles from './Filters.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { InputText } from 'ui/views/_components/InputText';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
