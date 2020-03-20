@@ -88,9 +88,9 @@ export const useSetColumns = (
     const maxWidths = [];
 
     const getTooltipMessage = column =>
-      !isNil(column) && !isNil(column.codelistItems)
+      !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
         ? `<span style="font-weight:bold">Description:</span> ${
-            column.description
+            !isNil(column.description) ? column.description : 'No description'
           }<br/><span style="font-weight:bold">Codelists: </span>
           ${column.codelistItems
             .map(codelistItem =>

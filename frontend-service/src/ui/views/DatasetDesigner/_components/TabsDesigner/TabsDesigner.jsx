@@ -65,9 +65,6 @@ export const TabsDesigner = withRouter(
 
     useEffect(() => {
       if (!isUndefined(datasetSchema)) {
-        //Add tab Button/Tab
-        const inmDatasetSchema = { ...datasetSchema };
-        inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
         setTabs(datasetSchema.tables);
       }
     }, [datasetSchema]);
@@ -79,6 +76,7 @@ export const TabsDesigner = withRouter(
     }, [isErrorDialogVisible]);
 
     const onChangeFields = (fields, isLinkChange, tableSchemaId) => {
+      console.log('CHANGE FIELDS');
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       if (!isNil(inmTabs[tabIdx].records)) {
@@ -106,6 +104,7 @@ export const TabsDesigner = withRouter(
         setIsLoading(true);
         const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
         const inmDatasetSchema = { ...datasetSchemaDTO };
+
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.editable = editable;
           table.description = table.tableSchemaDescription;
@@ -117,6 +116,8 @@ export const TabsDesigner = withRouter(
           table.hasErrors = true;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
         });
+        //Add tab Button/Tab
+        inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
         setDatasetSchema(inmDatasetSchema);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);

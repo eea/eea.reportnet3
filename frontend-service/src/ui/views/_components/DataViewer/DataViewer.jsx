@@ -895,7 +895,8 @@ const DataViewer = withRouter(
                 'header',
                 'description',
                 'type',
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
                   : [])
               ])}>
