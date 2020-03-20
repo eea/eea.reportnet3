@@ -9,7 +9,8 @@ export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes })
   const resources = useContext(ResourcesContext);
 
   const statusTypesFilters = statusTypes.map((label, i) => {
-    const labelLowerCase = label.toString().toLowerCase();
+    label = label.toString();
+    const labelLowerCase = label.toLowerCase();
 
     return (
       <li key={i} className={styles.listItem}>
@@ -18,11 +19,11 @@ export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes })
           className={styles.checkbox}
           style={{ backgroundColor: colors[labelLowerCase] }}
           type="checkbox"
-          defaultChecked={!filteredStatusTypes.includes(label.toString())}
+          defaultChecked={!filteredStatusTypes.includes(label)}
           onChange={e => {
             filterDispatch({
               type: e.target.checked ? 'CHECKBOX_ON' : 'CHECKBOX_OFF',
-              payload: { label: label.toString() }
+              payload: { label }
             });
           }}
         />
