@@ -51,7 +51,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
-  }, []);
+  }, [datasetSchema]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
