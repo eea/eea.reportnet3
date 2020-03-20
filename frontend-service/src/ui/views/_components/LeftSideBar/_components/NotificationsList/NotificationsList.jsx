@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
+import { isUndefined } from 'lodash';
+
 import sanitizeHtml from 'sanitize-html';
 
 import styles from './NotificationsList.module.scss';
@@ -42,9 +44,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         }
       });
 
+      const capitalizedMessageLevel = !isUndefined(notification.type)
+        ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
+        : notification.type;
+
+      console.log('capitalizedMessageLevel', notification.type.charAt(0).toUpperCase());
       return {
         message: message,
-        messageLevel: notification.type
+        messageLevel: capitalizedMessageLevel
       };
     });
     console.info('notifications: %o', notificationsArray);
