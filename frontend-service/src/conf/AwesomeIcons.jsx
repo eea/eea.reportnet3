@@ -68,7 +68,9 @@ import {
   faClipboardList,
   faClipboard,
   faCheck,
-  faTimes
+  faTimes,
+  faFolder,
+  faCaretRight
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -312,6 +314,12 @@ export const AwesomeIcons = icon => {
       return faFileDownload;
     case 'cross':
       return faTimes;
+    case 'folder':
+      return faFolder;
+    case 'expanded':
+      return faCaretDown;
+    case 'collapsed':
+      return faCaretRight;
     default:
       return faFileAlt;
   }

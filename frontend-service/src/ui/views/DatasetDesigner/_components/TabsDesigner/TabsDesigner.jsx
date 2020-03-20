@@ -6,6 +6,7 @@ import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import { Button } from 'ui/views/_components/Button';
+import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -17,17 +18,22 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+
 export const TabsDesigner = withRouter(
   ({ datasetSchemas, editable = false, match, history, onChangeReference, onLoadTableData }) => {
     const {
       params: { dataflowId, datasetId }
     } = match;
 
+    const leftSideBarContext = useContext(LeftSideBarContext);
+
     const [activeIndex, setActiveIndex] = useState(0);
     const [datasetSchema, setDatasetSchema] = useState();
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
     const [initialTabIndexDrag, setInitialTabIndexDrag] = useState();
+    const [isAddValidationVisible, setIsAddValidationVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +43,16 @@ export const TabsDesigner = withRouter(
     const resources = useContext(ResourcesContext);
 
     useEffect(() => {
+      leftSideBarContext.addModels([
+        {
+          label: 'Add validation',
+          icon: 'plus',
+          onClick: e => {
+            setIsAddValidationVisible(!isAddValidationVisible);
+          },
+          title: 'settings'
+        }
+      ]);
       onLoadSchema(datasetId);
     }, []);
 
@@ -408,6 +424,14 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
+        {datasetSchema && (
+          <CreateValidation
+            isVisible={isAddValidationVisible}
+            datasetSchema={datasetSchema}
+            datasetId={datasetId}
+            toggleVisibility={setIsAddValidationVisible}
+          />
+        )}
       </React.Fragment>
     );
   }

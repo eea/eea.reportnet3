@@ -1,33 +1,24 @@
 import React from 'react';
+import { Checkbox as PrimeCheckbox } from 'primereact/checkbox';
 
 import './Checkbox.scss';
 
 const Checkbox = ({
-  id,
   className,
-  style,
   defaultChecked,
-  onChange,
+  disabled,
   htmlFor,
-  labelMessage,
+  id,
   isChecked,
-  labelClassName
+  labelClassName,
+  labelMessage,
+  onChange,
+  style
 }) => {
   return (
-    <React.Fragment>
-      <input
-        className={className}
-        defaultChecked={defaultChecked}
-        id={id}
-        checked={isChecked}
-        onChange={onChange}
-        style={style}
-        type="checkbox"
-      />
-      <label htmlFor={htmlFor} className={labelClassName}>
-        {labelMessage}
-      </label>
-    </React.Fragment>
+    <>
+      <PrimeCheckbox onChange={onChange} checked={isChecked} disabled={disabled} />
+    </>
   );
 };
 
