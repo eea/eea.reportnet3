@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './DataflowsList.module.scss';
@@ -9,7 +10,11 @@ import DataflowConf from 'conf/dataflow.config.json';
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from './_components/Filters';
 
-const DataflowsList = ({ className, content, dataFetch, description, title, type }) => {
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+const DataflowsList = ({ className, content = [], dataFetch, description, title, type }) => {
+  const resources = useContext(ResourcesContext);
+
   const [filteredData, setFilteredData] = useState(content);
 
   const onLoadFiltredData = data => {
@@ -31,6 +36,7 @@ const DataflowsList = ({ className, content, dataFetch, description, title, type
         filteredData.map(dataflow => (
           <DataflowsItem dataFetch={dataFetch} itemContent={dataflow} key={dataflow.id} type={type} />
         ))}
+      {isEmpty(content) && <div className={styles.noDataflows}>{resources.messages['thereAreNoDatalows']}</div>}
     </div>
   );
 };

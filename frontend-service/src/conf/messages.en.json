@@ -506,6 +506,7 @@
     "name": "Name",
     "expirationDate": "Expiration date",
     "clearAllFilters": "Clear all filters",
-    "userRole": "Role"
+    "userRole": "Role",
+    "thereAreNoDatalows": "There are no pending dataflows"
   }
 }
