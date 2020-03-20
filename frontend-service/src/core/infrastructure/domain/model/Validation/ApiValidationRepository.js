@@ -19,7 +19,9 @@ const buildExpression = expression => {
   return {
     arg1: 'VALUE',
     operator: config.validations.operatorEquivalences[expression.operatorValue],
-    arg2: expression.expressionValue
+    arg2: !config.validations.nonNumericOperators.includes(expression.operatorType)
+      ? parseInt(expression.expressionValue)
+      : expression.expressionValue
   };
 };
 const buildNode = (expression, index, expressions) => {

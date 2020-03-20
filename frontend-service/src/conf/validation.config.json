@@ -29,6 +29,7 @@
       ]
     }
   },
+  "nonNumericOperators": ["string"],
   "operatorEquivalences": {
     ">": "GT",
     "<": "LT",
