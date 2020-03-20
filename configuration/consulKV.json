@@ -1048,18 +1048,6 @@
     "value": "ZmFsc2U="
   },
   {
-    "key": "config/apiGateway/zuul.routes.codelist.path",
-    "value": "L2NvZGVsaXN0Lyoq"
-  },
-  {
-    "key": "config/apiGateway/zuul.routes.codelist.serviceId",
-    "value": "ZGF0YXNldA=="
-  },
-  {
-    "key": "config/apiGateway/zuul.routes.codelist.stripPrefix",
-    "value": "ZmFsc2U="
-  },
-  {
     "key": "config/apiGateway/zuul.routes.weblink.path",
     "value": "L3dlYmxpbmsvKio="
   },
