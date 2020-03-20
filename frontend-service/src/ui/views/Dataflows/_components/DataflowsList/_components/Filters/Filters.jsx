@@ -113,11 +113,19 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     </span>
   );
 
+  const getOrderIcon = order => {
+    console.log('order', order);
+    if (order === 0) return 'sort';
+    else if (order === -1) return 'sortDown';
+    else if (order === 1) return 'sortUp';
+  };
+
   const renderOrderFilter = property => (
     <Button
       className={`p-button-secondary-transparent ${styles.icon}`}
       disabled={property.includes('ROD3')}
-      icon={filterState.orderBy[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
+      // icon={filterState.orderBy[property] === 1 ? 'sortDown' : 'sortUp'}
+      icon={getOrderIcon(filterState.orderBy[property])}
       id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
       style={{ fontSize: '12pt' }}
