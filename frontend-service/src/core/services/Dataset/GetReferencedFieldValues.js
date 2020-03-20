@@ -1,2 +1,6 @@
-export const GetReferencedFieldValues = ({ datasetRepository }) => async (datasetId, fieldSchemaId, searchToken) =>
-  datasetRepository.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+export const GetReferencedFieldValues = ({ datasetRepository }) => async (
+  datasetId,
+  fieldSchemaId,
+  idFk,
+  searchToken
+) => datasetRepository.getReferencedFieldValues(datasetId, fieldSchemaId, idFk, searchToken);

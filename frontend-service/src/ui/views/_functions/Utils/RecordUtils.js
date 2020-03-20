@@ -95,6 +95,24 @@ const getCodelistValue = (codelistItemsOptions, value) => {
   }
 };
 
+const getFieldReferencedPKId = (datasetSchemas, fieldSchemaId) => {
+  let fieldPKId = null;
+  datasetSchemas.forEach(schema =>
+    schema.tables.forEach(table => {
+      if (!table.addTab) {
+        table.records.forEach(record =>
+          record.fields.forEach(field => {
+            if (!isNil(field) && field.fieldId === fieldSchemaId && !isNil(field.referencedField)) {
+              fieldPKId = field.referencedField.idPk;
+            }
+          })
+        );
+      }
+    })
+  );
+  return fieldPKId;
+};
+
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -177,6 +195,7 @@ export const RecordUtils = {
   getCodelistItems,
   getCodelistValue,
   getClipboardData,
+  getFieldReferencedPKId,
   getInitialRecordValues,
   getNumCopiedRecords,
   getRecordId,

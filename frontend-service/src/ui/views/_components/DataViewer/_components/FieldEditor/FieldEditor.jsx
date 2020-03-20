@@ -16,6 +16,7 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
+  fieldPKId,
   fieldSchemaId,
   onEditorKeyChange,
   onEditorSubmitValue,
@@ -28,7 +29,7 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
 
-  const [testLinkValue, setTestLinkValue] = useState([]);
+  const [linkItemsValue, setLinkItemsValue] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
@@ -41,7 +42,13 @@ const FieldEditor = ({
   }
 
   const onFilter = async filter => {
-    const referencedFieldValues = await DatasetService.getReferencedFieldValues(datasetId, fieldSchemaId, filter);
+    console.log({ filter });
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+      datasetId,
+      fieldPKId,
+      fieldSchemaId,
+      filter
+    );
     setLinkItemsOptions(
       referencedFieldValues.map(referencedField => {
         return {
@@ -118,7 +125,7 @@ const FieldEditor = ({
           //     yearRange="2010:2030"
           //   />
         );
-      case 'POLYGON':
+      case 'LINK':
         return (
           <Dropdown
             // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
@@ -142,7 +149,7 @@ const FieldEditor = ({
             options={linkItemsOptions}
             // required={true}
             // placeholder={resources.messages['category']}
-            value={testLinkValue}
+            value={linkItemsValue}
           />
         );
       case 'CODELIST':

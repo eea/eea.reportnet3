@@ -50,6 +50,7 @@ import {
 
 const DataViewer = withRouter(
   ({
+    datasetSchemas,
     hasWritePermissions,
     isDatasetDeleted = false,
     isDataCollection,
@@ -134,6 +135,10 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           datasetId={datasetId}
           fieldSchemaId={RecordUtils.getCellFieldSchemaId(cells, cells.field)}
+          fieldPKId={RecordUtils.getFieldReferencedPKId(
+            datasetSchemas,
+            RecordUtils.getCellFieldSchemaId(cells, cells.field)
+          )}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
