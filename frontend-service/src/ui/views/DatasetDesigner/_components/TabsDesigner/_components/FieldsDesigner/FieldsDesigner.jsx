@@ -35,6 +35,7 @@ export const FieldsDesigner = ({
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
+  const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
@@ -94,12 +95,13 @@ export const FieldsDesigner = ({
       required,
       type
     });
-    onChangeFields(inmFields, table.tableSchemaId);
+    onChangeFields(inmFields, table.tableSchemaId, type === 'LINK' ? type : undefined);
     setFields(inmFields);
   };
 
-  const onFieldDelete = deletedFieldIndex => {
+  const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
     setIndexToDelete(deletedFieldIndex);
+    setFieldToDeleteType(deletedFieldType);
     setIsDeleteDialogVisible(true);
   };
 
@@ -107,11 +109,6 @@ export const FieldsDesigner = ({
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
     //Buscar en los datasetSchemas si se está usando el id y actualizar el idx del field de la PK según el count
-    console.log('referencedField', referencedField, type);
-    // if (!isNull(referencedField) && referencedField.referencedField.datasetSchemaId === datasetSchemaId) {
-    if (type === 'LINK') {
-      onChangeReference(referencedField.referencedField.fieldSchemaId, referencedField.referencedField.datasetSchemaId);
-    }
 
     if (fieldIndex > -1) {
       inmFields[fieldIndex].name = name;
@@ -123,7 +120,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].pk = pk;
       // inmFields[fieldIndex].pkReferenced =
       //   FieldsDesignerUtils.getCountPKUseInAllSchemas(inmFields[fieldIndex].fieldId, datasetSchemas) > 0;
-      console.log('inmFields', { inmFields });
+      onChangeFields(inmFields, table.tableSchemaId, type);
       setFields(inmFields);
     }
   };
@@ -150,13 +147,13 @@ export const FieldsDesigner = ({
     setIsErrorDialogVisible(true);
   };
 
-  const deleteField = async deletedFieldIndex => {
+  const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
       const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, table.tableSchemaId);
+        onChangeFields(inmFields, table.tableSchemaId, deletedFieldType);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -247,7 +244,7 @@ export const FieldsDesigner = ({
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => {
-          deleteField(indexToDelete);
+          deleteField(indexToDelete, fieldToDeleteType);
           setIsDeleteDialogVisible(false);
         }}
         onHide={() => setIsDeleteDialogVisible(false)}
@@ -317,7 +314,6 @@ export const FieldsDesigner = ({
     const renderedFields =
       !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => {
-          console.log('field.pkReferenced', field.pkReferenced);
           return (
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner

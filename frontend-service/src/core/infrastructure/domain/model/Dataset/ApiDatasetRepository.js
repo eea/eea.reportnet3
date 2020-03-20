@@ -12,7 +12,6 @@ import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/Datas
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
-  console.log({ datasetTableRecordField });
   const datasetTableFieldDesign = new DatasetTableField({});
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;

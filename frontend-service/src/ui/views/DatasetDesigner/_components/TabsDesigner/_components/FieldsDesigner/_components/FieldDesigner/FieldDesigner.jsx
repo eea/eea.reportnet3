@@ -51,7 +51,6 @@ export const FieldDesigner = ({
   recordSchemaId,
   totalFields
 }) => {
-  console.log('fieldPKReferenced', { fieldPKReferenced });
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
@@ -437,7 +436,6 @@ export const FieldDesigner = ({
   };
 
   const onSaveCodelist = codelistItems => {
-    console.log('codelistItems', codelistItems);
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -454,7 +452,6 @@ export const FieldDesigner = ({
   };
 
   const onSaveLink = link => {
-    console.log('link', link);
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
 
     if (!isUndefined(fieldId)) {
@@ -509,7 +506,6 @@ export const FieldDesigner = ({
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
   }) => {
-    console.log('referencedField', referencedField);
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
@@ -544,7 +540,6 @@ export const FieldDesigner = ({
   };
 
   const parseReferenceField = completeReferencedField => {
-    console.log('completeReferencedField', completeReferencedField);
     return {
       idPk: completeReferencedField.referencedField.fieldSchemaId,
       idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId
@@ -580,12 +575,6 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      {console.log(
-        hasPK,
-        !fieldDesignerState.fieldPKValue,
-        fieldDesignerState.fieldPKReferencedValue,
-        hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)
-      )}
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
@@ -652,7 +641,7 @@ export const FieldDesigner = ({
         href="#"
         onClick={e => {
           e.preventDefault();
-          onFieldDelete(index);
+          onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
         }}
         onDragStart={event => {
           event.preventDefault();

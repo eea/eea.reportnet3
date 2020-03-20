@@ -32,6 +32,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
+import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
+
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -145,6 +147,33 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (description !== initialDatasetDescription) {
       onUpdateDescription(description);
     }
+  };
+
+  const onChangeReference = (tabs, datasetSchemaId) => {
+    const inmDatasetSchemas = [...datasetSchemas];
+    const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
+    inmDatasetSchemas[datasetSchemaIndex].tables = tabs;
+    if (!isNil(inmDatasetSchemas)) {
+      inmDatasetSchemas.forEach(datasetSchema =>
+        datasetSchema.tables.forEach(table => {
+          if (!table.addTab) {
+            table.records.forEach(record =>
+              record.fields.forEach(field => {
+                if (!isNil(field) && field.pk) {
+                  if (DatasetDesignerUtils.getCountPKUseInAllSchemas(field.fieldId, inmDatasetSchemas) > 0) {
+                    field.pkReferenced = true;
+                  } else {
+                    field.pkReferenced = false;
+                  }
+                }
+              })
+            );
+          }
+        })
+      );
+    }
+
+    setDatasetSchemas(inmDatasetSchemas);
   };
 
   const onConfirmValidate = async () => {
@@ -341,7 +370,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner datasetSchemas={datasetSchemas} editable={true} onLoadTableData={onLoadTableData} />
+      <TabsDesigner
+        datasetSchemas={datasetSchemas}
+        editable={true}
+        onChangeReference={onChangeReference}
+        onLoadTableData={onLoadTableData}
+      />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
