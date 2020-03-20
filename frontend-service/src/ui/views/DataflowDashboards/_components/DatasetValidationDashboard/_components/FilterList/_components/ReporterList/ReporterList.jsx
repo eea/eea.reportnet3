@@ -11,7 +11,7 @@ const ReporterList = ({ datasetSchemaId, filterDispatch, reporterFilters, labels
   return (
     <ul className={styles.list}>
       {labels.map(label => (
-        <li className={styles.listItem}>
+        <li key={label} className={styles.listItem}>
           <ReporterListItem
             key={label}
             datasetSchemaId={datasetSchemaId}

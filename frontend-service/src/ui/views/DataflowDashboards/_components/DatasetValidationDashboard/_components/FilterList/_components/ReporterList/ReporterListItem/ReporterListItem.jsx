@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './ReporterListItem.module.scss';
 
@@ -16,21 +16,20 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
   const getStateBySelectionAndByReporter = () => {
     let state = areAllSelectedOrDeselected();
     if (state === 'indeterminate') {
-      return reporterFilters.includes(reporter) ? false : true;
+      return !reporterFilters.includes(reporter);
     } else {
       return state;
     }
   };
 
   const areAllSelectedOrDeselected = () => {
-    let isChecked;
     if (!isUndefined(selectedAllFilterState)) {
       if (selectedAllFilterState === 'checked') {
-        isChecked = true;
+        setIsChecked(true);
       } else if (selectedAllFilterState === 'unchecked') {
-        isChecked = false;
+        setIsChecked(false);
       } else if (selectedAllFilterState === 'indeterminate') {
-        isChecked = 'indeterminate';
+        setIsChecked('indeterminate');
       }
     }
     return isChecked;
@@ -42,8 +41,7 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
         id={`${reporter}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={true}
-        checked={isChecked}
+        defaultChecked={isChecked}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
