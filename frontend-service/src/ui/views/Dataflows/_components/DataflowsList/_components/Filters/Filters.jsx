@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -15,11 +15,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
+import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
+
 import { FilterUtils } from './_functions/Utils/FilterUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selectOptions }) => {
   const resources = useContext(ResourcesContext);
+
+  const [isLabelSeleced, setIsLabelSeleced] = useState(false);
+
+  const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: cloneDeep(data),
@@ -36,6 +42,14 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       getFiltredData(filterState.filteredData);
     }
   }, [filterState.filteredData]);
+
+  useOnClickOutside(dateRef, () => onBlurLabel());
+
+  const onBlurLabel = () => {
+    if (isEmpty(filterState.filterBy[dateOptions])) {
+      setIsLabelSeleced(false);
+    }
+  };
 
   const onClearAllFilters = () => {
     filterDispatch({
@@ -64,14 +78,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, sortedData } });
   };
 
-  const changeLabelClass = () => {
-    document.getElementById('dateLabel').className = styles.dateLabelUp;
-  };
-
   const renderCalendarFilter = property => {
     const minDate = FilterUtils.getYesterdayDate();
     return (
-      <span className={`p-float-label ${styles.dataflowInput} `}>
+      <span className={`p-float-label ${styles.dataflowInput} `} ref={dateRef}>
         <Calendar
           className={styles.calendarFilter}
           disabledDates={[minDate]}
@@ -80,7 +90,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           minDate={minDate}
           monthNavigator={true}
           onChange={event => onFilterData(property, event.value)}
-          onFocus={() => changeLabelClass()}
+          onFocus={() => setIsLabelSeleced(true)}
           readOnlyInput={true}
           selectionMode="range"
           showWeek={true}
@@ -92,10 +102,13 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           <Button
             className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
             icon="cancel"
-            onClick={() => onFilterData(property, [])}
+            onClick={() => {
+              onFilterData(property, []);
+              setIsLabelSeleced(false);
+            }}
           />
         )}
-        <label id="dateLabel" className={styles.dateLabel} htmlFor={property}>
+        <label className={isLabelSeleced ? styles.labeUp : styles.labelDown} htmlFor={property}>
           {resources.messages[property]}
         </label>
       </span>
@@ -183,7 +196,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         <Button
           className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.cancelFilters}`}
           icon="cancel"
-          onClick={() => onClearAllFilters()}
+          onClick={() => {
+            onClearAllFilters();
+            setIsLabelSeleced(false);
+          }}
           tooltip={resources.messages['clearFilters']}
           tooltipOptions={{ position: 'left' }}
         />

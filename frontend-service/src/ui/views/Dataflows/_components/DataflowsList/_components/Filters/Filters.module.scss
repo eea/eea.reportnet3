@@ -103,17 +103,37 @@
     }
   }
 
-  .dateLabel {
+  // .dateLabel {
+  // font-size: 10pt !important;
+  // padding-top: 1.9em !important;
+  // }
+
+  // .dateLabelUp {
+  //   font-size: 10pt !important;
+  // }
+
+  // .cancelFilters {
+  //   font-size: 12pt;
+  // }
+
+  .labelDown {
+    // font-weight: normal !important;
+    position: absolute !important;
+    pointer-events: none !important;
+    left: 0.25em !important;
+    top: 50% !important;
+    margin-top: -0.5em !important;
+    transition: 0.3s ease all !important;
+    -moz-transition: 0.3s ease all !important;
+    -webkit-transition: 0.3s ease all !important;
+    color: var(--floating-label-color) !important;
     font-size: 10pt !important;
-    padding-top: 1.9em !important;
+    // line-height: 1 !important;
   }
 
-  .dateLabelUp {
-    font-size: 10pt !important;
-  }
-
-  .cancelFilters {
-    font-size: 12pt;
+  .labelUp {
+    top: -0.75em;
+    font-size: 12px;
   }
 }
 
