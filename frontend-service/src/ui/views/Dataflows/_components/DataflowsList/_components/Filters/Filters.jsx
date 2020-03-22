@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -23,18 +23,14 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selectOptions }) => {
   const resources = useContext(ResourcesContext);
 
-  const [isLabelSeleced, setIsLabelSeleced] = useState(false);
-
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: cloneDeep(data),
-    dateOptions: dateOptions,
     filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
     filteredData: cloneDeep(data),
-    inputOptions: inputOptions,
-    orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions),
-    selectOptions: selectOptions
+    labelAnimations: FilterUtils.getLabelInitialState(inputOptions, selectOptions, dateOptions),
+    orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
   });
 
   useEffect(() => {
@@ -43,12 +39,16 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     }
   }, [filterState.filteredData]);
 
-  useOnClickOutside(dateRef, () => onBlurLabel());
+  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
-  const onBlurLabel = () => {
-    if (isEmpty(filterState.filterBy[dateOptions])) {
-      setIsLabelSeleced(false);
-    }
+  const onAnimateLabel = (property, value) => {
+    filterDispatch({
+      type: 'ANIMATE_LABEL',
+      payload: {
+        animatedProperty: property,
+        isAnimated: value
+      }
+    });
   };
 
   const onClearAllFilters = () => {
@@ -57,15 +57,24 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       payload: {
         filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
         filteredData: cloneDeep(data),
+        labelAnimations: FilterUtils.getLabelInitialState(inputOptions, selectOptions, dateOptions),
         orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
       }
     });
   };
 
   const onFilterData = (filter, value) => {
-    const filteredKeys = FilterUtils.getFilterKeys(filterState, filter);
-    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter);
-    const filteredData = FilterUtils.onApplyFilters(filter, filteredKeys, filterState, selectedKeys, value);
+    const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
+    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
+    const filteredData = FilterUtils.onApplyFilters(
+      filter,
+      inputKeys,
+      filterState,
+      selectedKeys,
+      value,
+      dateOptions,
+      selectOptions
+    );
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -80,8 +89,9 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const renderCalendarFilter = property => {
     const minDate = FilterUtils.getYesterdayDate();
+
     return (
-      <span className={`p-float-label ${styles.dataflowInput} `} ref={dateRef}>
+      <span className={`p-float-label ${styles.dataflowInput}`} ref={dateRef}>
         <Calendar
           className={styles.calendarFilter}
           disabledDates={[minDate]}
@@ -90,7 +100,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
           minDate={minDate}
           monthNavigator={true}
           onChange={event => onFilterData(property, event.value)}
-          onFocus={() => setIsLabelSeleced(true)}
+          onFocus={() => onAnimateLabel(property, true)}
           readOnlyInput={true}
           selectionMode="range"
           showWeek={true}
@@ -104,11 +114,11 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
             icon="cancel"
             onClick={() => {
               onFilterData(property, []);
-              setIsLabelSeleced(false);
+              onAnimateLabel(property, false);
             }}
           />
         )}
-        <label className={isLabelSeleced ? styles.labeUp : styles.labelDown} htmlFor={property}>
+        <label className={filterState.labelAnimations[property] ? styles.labeUp : styles.labelDown} htmlFor={property}>
           {resources.messages[property]}
         </label>
       </span>
@@ -196,10 +206,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
         <Button
           className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.cancelFilters}`}
           icon="cancel"
-          onClick={() => {
-            onClearAllFilters();
-            setIsLabelSeleced(false);
-          }}
+          onClick={() => onClearAllFilters()}
           tooltip={resources.messages['clearFilters']}
           tooltipOptions={{ position: 'left' }}
         />

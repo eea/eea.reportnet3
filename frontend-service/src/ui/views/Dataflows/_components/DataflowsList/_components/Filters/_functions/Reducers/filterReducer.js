@@ -20,7 +20,14 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         filterBy: payload.filterBy,
         filteredData: payload.filteredData,
+        labelAnimations: payload.labelAnimations,
         orderBy: payload.orderBy
+      };
+
+    case 'ANIMATE_LABEL':
+      return {
+        ...state,
+        labelAnimations: { ...state.labelAnimations, [payload.animatedProperty]: payload.isAnimated }
       };
 
     default:

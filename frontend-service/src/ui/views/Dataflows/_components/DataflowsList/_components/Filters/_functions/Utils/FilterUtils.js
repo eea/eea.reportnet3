@@ -60,8 +60,8 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
   return filterBy;
 };
 
-const getFilterKeys = (state, filter) =>
-  Object.keys(state.filterBy).filter(key => key !== filter && state.inputOptions.includes(key));
+const getFilterKeys = (state, filter, inputOptions) =>
+  Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
@@ -75,8 +75,13 @@ const getOptionTypes = (data, option) => {
   }
 };
 
-const getSelectedKeys = (state, select) =>
-  Object.keys(state.filterBy).filter(key => key !== select && state.selectOptions.includes(key));
+const getLabelInitialState = (input = [], select = [], date = []) => {
+  const labelByGroup = input.concat(select, date);
+  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
+};
+
+const getSelectedKeys = (state, select, selectOptions) =>
+  Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
 
 const getYesterdayDate = () => {
   var currentDate = new Date();
@@ -84,16 +89,16 @@ const getYesterdayDate = () => {
   return new Date(yesterdayDate);
 };
 
-const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
+const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOptions, selectOptions) => [
   ...state.data.filter(data => {
-    if (state.selectOptions.includes(filter) && !isNil(data[filter])) {
+    if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
-        checkDates(state.filterBy[state.dateOptions], data[state.dateOptions]) &&
+        checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys) &&
         (isEmpty(value) ? true : [...value.map(type => type.toLowerCase())].includes(data[filter].toLowerCase()))
       );
-    } else if (state.dateOptions.includes(filter)) {
+    } else if (dateOptions.includes(filter)) {
       const dates = value.map(date => new Date(date).getTime() / 1000);
       return !dates.includes(0) && !isEmpty(dates)
         ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
@@ -107,7 +112,7 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
         data[filter].toLowerCase().includes(value.toLowerCase()) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys) &&
-        checkDates(state.filterBy[state.dateOptions], data[state.dateOptions])
+        checkDates(state.filterBy[dateOptions], data[dateOptions])
       );
     }
   })
@@ -116,6 +121,7 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value) => [
 export const FilterUtils = {
   getFilterInitialState,
   getFilterKeys,
+  getLabelInitialState,
   getOptionTypes,
   getSelectedKeys,
   getYesterdayDate,
