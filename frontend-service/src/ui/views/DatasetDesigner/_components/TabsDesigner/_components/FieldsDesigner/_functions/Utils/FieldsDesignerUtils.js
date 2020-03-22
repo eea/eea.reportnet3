@@ -1,4 +1,4 @@
-import { isUndefined, isNull } from 'lodash';
+import isNil from 'lodash/isNil';
 
 const arrayShift = (arr, initialIdx, endIdx) => {
   const element = arr[initialIdx];
@@ -31,7 +31,7 @@ const arrayShift = (arr, initialIdx, endIdx) => {
 };
 
 const checkDuplicates = (fields, name, fieldId) => {
-  if (!isUndefined(fields) && !isNull(fields)) {
+  if (!isNil(fields)) {
     const inmFields = [...fields];
     const repeteadElements = inmFields.filter(field => name.toLowerCase() === field.name.toLowerCase());
     return repeteadElements.length > 0 && fieldId !== repeteadElements[0].fieldId;

@@ -26,7 +26,7 @@ export const Dialog = ({
   showHeader,
   style,
   visible,
-  zIndex = 3050
+  zIndex
 }) => {
   const maskStyle = {
     display: visible ? 'flex' : 'none',

@@ -7,6 +7,7 @@ import { GetPending } from './GetPending';
 import { GetAccepted } from './GetAccepted';
 import { GetAll } from './GetAll';
 import { GetCompleted } from './GetCompleted';
+import { GetAllSchemas } from './GetAllSchemas';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
 import { GetDetails } from './GetDetails';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
@@ -25,6 +26,7 @@ export const DataflowService = {
   datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
   datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
   deleteById: Delete({ dataflowRepository }),
+  getAllSchemas: GetAllSchemas({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),

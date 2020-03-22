@@ -132,6 +132,8 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
+          datasetId={datasetId}
+          fieldSchemaId={RecordUtils.getCellFieldSchemaId(cells, cells.field)}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -205,7 +207,6 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      console.log('');
       if (isDatasetDeleted) {
         dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }
@@ -899,7 +900,13 @@ const DataViewer = withRouter(
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
-                <Column body={column === 'value' ? requiredTemplate : null} field={column} header={''} key={i} />
+                <Column
+                  body={column === 'value' ? requiredTemplate : null}
+                  className={column === 'field' ? styles.fieldColumn : ''}
+                  field={column}
+                  headerStyle={{ display: 'none' }}
+                  key={i}
+                />
               ))}
             </DataTable>
           </Dialog>

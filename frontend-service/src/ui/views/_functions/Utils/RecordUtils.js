@@ -33,6 +33,11 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
   }
 };
 
+const getCellFieldSchemaId = (tableData, field) => {
+  const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+  return !isUndefined(completeField) ? completeField.fieldData.fieldSchemaId : undefined;
+};
+
 const getCellId = (tableData, field) => {
   const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
@@ -165,6 +170,7 @@ export const RecordUtils = {
   changeRecordInTable,
   changeRecordValue,
   createEmptyObject,
+  getCellFieldSchemaId,
   getCellId,
   getCellItems,
   getCellValue,
