@@ -5,17 +5,17 @@ import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const StatusList = ({ levelErrors, filterDispatch, statusFilters, datasetSchemaId }) => {
+const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilters }) => {
   const resources = useContext(ResourcesContext);
   let errorListFilters = levelErrors.map((errorLevel, i) => {
     return (
       <li key={i} className={styles.listItem}>
         <input
-          id={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`}
           className={styles.checkbox}
+          defaultChecked={statusFilters.includes(errorLevel.toString()) ? false : true}
+          id={`${errorLevel.toString().toLowerCase()}_${datasetSchemaId}`}
           style={{ backgroundColor: colors[errorLevel.toString().toLowerCase()] }}
           type="checkbox"
-          defaultChecked={statusFilters.includes(errorLevel.toString()) ? false : true}
           onChange={e => {
             filterDispatch({
               type: e.target.checked ? 'STATUS_FILTER_ON' : 'STATUS_FILTER_OFF',

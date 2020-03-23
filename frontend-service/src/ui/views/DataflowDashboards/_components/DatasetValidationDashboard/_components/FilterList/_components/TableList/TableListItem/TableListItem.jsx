@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import styles from './TableListItem.module.css';
 
-export const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters, selectedAllFilterState }) => {
+export const TableListItem = ({ datasetSchemaId, filterDispatch, selectedAllFilterState, table, tableFilters }) => {
   const [selectedAll, setSelectedAll] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
 

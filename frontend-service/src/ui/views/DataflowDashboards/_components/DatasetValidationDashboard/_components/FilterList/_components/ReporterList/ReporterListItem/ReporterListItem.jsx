@@ -5,22 +5,27 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './ReporterListItem.module.scss';
 
 const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
-  const [selectedAll, setSelectedAll] = useState(true);
+  // const [selectedAll, setSelectedAll] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
     setIsChecked(getStateBySelectionAndByReporter());
-    setSelectedAll(selectedAllFilterState);
-  }, [selectedAllFilterState, selectedAll]);
+    // setSelectedAll(selectedAllFilterState);
+  }, [selectedAllFilterState /* , selectedAll */]);
 
   const getStateBySelectionAndByReporter = () => {
     if (selectedAllFilterState === 'indeterminate') {
+      console.log('inside');
+
       return !reporterFilters.includes(reporter);
     } else {
+      console.log('not in');
+
       return selectedAllFilterState;
     }
   };
 
+  console.log('selectedAllFilterState', selectedAllFilterState);
   return (
     <>
       <input

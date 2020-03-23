@@ -6,7 +6,7 @@ import styles from './SelectAllFilters.module.css';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const SelectAllFilters = ({ id, datasetSchemaId, filterDispatch, filters, labels, selectedAllFilter }) => {
+const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels, selectedAllFilter }) => {
   const [checkboxState, setCheckboxState] = useState('checked');
   const [isClickedFilter, setIsClickedFilter] = useState('');
   const resources = useContext(ResourcesContext);

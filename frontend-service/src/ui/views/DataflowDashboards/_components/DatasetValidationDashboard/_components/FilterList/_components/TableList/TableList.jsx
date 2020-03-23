@@ -15,17 +15,17 @@ const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) =>
           <TableListItem
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}
+            selectedAllFilterState={selectedAllFilterState}
             table={table}
             tableFilters={tableFilters}
-            selectedAllFilterState={selectedAllFilterState}
           />
         </li>
       ))}
       <SelectAllFilters
-        id={'table'}
         datasetSchemaId={datasetSchemaId}
         filterDispatch={filterDispatch}
         filters={tableFilters}
+        id={'table'}
         labels={tables}
         selectedAllFilter={setSelectedAllFilterState}
       />
