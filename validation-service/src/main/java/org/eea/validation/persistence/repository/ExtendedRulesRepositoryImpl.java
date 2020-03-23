@@ -254,14 +254,14 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   }
 
   /**
-   * Delete rule byreference field schema PK id.
+   * Delete rule by reference field schema PK id.
    *
    * @param datasetSchemaId the dataset schema id
    * @param referenceFieldSchemaPKId the reference field schema PK id
    * @return true, if successful
    */
   @Override
-  public boolean deleteRuleByreferenceFieldSchemaPKId(ObjectId datasetSchemaId,
+  public boolean deleteRuleByReferenceFieldSchemaPKId(ObjectId datasetSchemaId,
       ObjectId referenceFieldSchemaPKId) {
     Document pullCriteria = new Document("referenceFieldSchemaPKId", referenceFieldSchemaPKId);
     Update update = new Update().pull("rules", pullCriteria);
