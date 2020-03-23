@@ -9,6 +9,12 @@
   flex-direction: row;
   justify-content: center;
 }
+.itemTable {
+  margin: 1rem;
+}
+.itemTable > div > table {
+  width: 99%;
+}
 .validationCol {
   width: 15px;
 }
@@ -32,4 +38,8 @@
 
 .codelistInfoButton:enabled:hover {
   background-color: var(--white) !important;
+}
+
+.fieldColumn {
+  width: 95px;
 }

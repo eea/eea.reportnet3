@@ -1,4 +1,6 @@
-import { isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
@@ -13,12 +15,14 @@ import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});
-  datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.name = datasetTableRecordField.name;
-  datasetTableFieldDesign.type = datasetTableRecordField.type;
-  datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
+  datasetTableFieldDesign.description = datasetTableRecordField.description;
+  datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
+  datasetTableFieldDesign.pk = datasetTableRecordField.pk;
+  datasetTableFieldDesign.name = datasetTableRecordField.name;
+  datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
+  datasetTableFieldDesign.type = datasetTableRecordField.type;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
@@ -210,6 +214,49 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
+const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken) => {
+  console.log({ datasetId, fieldSchemaId, searchToken });
+  const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+  console.log('referencedFieldValuesDTO', { referencedFieldValuesDTO });
+  // [
+  //   {
+  //     type: 'TEXT',
+  //     value: 'dsf',
+  //     id: 'DAE9DEAEE201134051F6629FDBD5787C',
+  //     idFieldSchema: '5e68dfe56db34537dc076eae'
+  //   },
+  //   {
+  //     type: 'TEXT',
+  //     value: '3dsf',
+  //     id: '8482FDE6AD5FC155A5E7B4A44EEF1E4D',
+  //     idFieldSchema: '5e68dfe56db34537dc076eae'
+  //   },
+  //   {
+  //     type: 'TEXT',
+  //     value: '4dsf',
+  //     id: 'DAE9DEAEE201134051F6629FDBD5787C',
+  //     idFieldSchema: '5e68dfe56db34537dc076eae'
+  //   },
+  //   {
+  //     type: 'TEXT',
+  //     value: 'ds3f',
+  //     id: '8482FDE6AD5FC155A5E7B4A44EEF1E4D',
+  //     idFieldSchema: '5e68dfe56db34537dc076eae'
+  //   }
+  // ];
+  //await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+
+  return referencedFieldValuesDTO.map(
+    referencedFieldDTO =>
+      new DatasetTableField({
+        fieldId: referencedFieldDTO.id,
+        fieldSchemaId: referencedFieldDTO.idFieldSchema,
+        type: referencedFieldDTO.type,
+        value: referencedFieldDTO.value
+      })
+  );
+};
+
 const getAllLevelErrorsFromRuleValidations = rulesDTO =>
   CoreUtils.orderLevelErrors([
     ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
@@ -245,8 +292,11 @@ const schemaById = async datasetId => {
                   codelistItems: DataTableFieldDTO.codelistItems,
                   description: DataTableFieldDTO.description,
                   fieldId: DataTableFieldDTO.id,
+                  pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                  pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                   name: DataTableFieldDTO.name,
                   recordId: DataTableFieldDTO.idRecord,
+                  referencedField: DataTableFieldDTO.referencedField,
                   required: DataTableFieldDTO.required,
                   type: DataTableFieldDTO.type
                 });
@@ -260,6 +310,9 @@ const schemaById = async datasetId => {
         })
       : null;
     return new DatasetTable({
+      hasPKReferenced: !isEmpty(
+        records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+      ),
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
@@ -442,7 +495,9 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
+  datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
+  datasetTableFieldDesign.pk = record.pk;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };
@@ -519,6 +574,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportTableDataById,
   getMetaData,
+  getReferencedFieldValues,
   orderFieldSchema,
   orderTableSchema,
   schemaById,
