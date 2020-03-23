@@ -169,6 +169,10 @@ public class RulesServiceImpl implements RulesService {
    */
   private void validateRule(Rule rule) throws EEAException {
 
+    if (rule.getShortCode() == null) {
+      throw new EEAException(EEAErrorMessage.SHORT_CODE_REQUIRED);
+    }
+
     if (rule.getRuleId() == null) {
       throw new EEAException(EEAErrorMessage.RULE_ID_REQUIRED);
     }
@@ -214,7 +218,6 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setEnabled(true);
     rule.setAutomatic(false);
-    rule.setShortCode(null);
     rule.setActivationGroup(null);
 
     validateRule(rule);
