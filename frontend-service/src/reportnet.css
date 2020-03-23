@@ -424,6 +424,11 @@
   --chips-input-color: var(--black);
   --chips-token-bg: var(--c-corporate-blue);
   --chips-token-color: var(--white);
+
+  /* ListBox */
+  --listbox-item-highlight-bg: var(--c-corporate-blue);
+  --listbox-item-highlight-bg-hover: var(--gray-10);
+  --listbox-item-highlight-color: var(--white);
 }
 body {
   margin: 0px;

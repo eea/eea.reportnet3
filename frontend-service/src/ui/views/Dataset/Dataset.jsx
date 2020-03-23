@@ -56,6 +56,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -92,7 +93,13 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
+    console.log('DATASET!');
     callSetMetaData();
+    const getDatasetSchemas = async () => {
+      const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+      setDatasetSchemas(datasetSchemasDTO);
+    };
+    getDatasetSchemas();
   }, []);
 
   useEffect(() => {
@@ -508,6 +515,7 @@ export const Dataset = withRouter(({ match, history }) => {
       return (
         <TabsSchema
           activeIndex={dataViewerOptions.activeIndex}
+          datasetSchemas={datasetSchemas}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isValidationSelected={isValidationSelected}

@@ -271,7 +271,10 @@ export const ThemeProvider = ({ children }) => {
         'chips-input-border-color-hover': 'var(--c-corporate-blue)',
         'chips-input-color': 'var(--black)',
         'chips-token-bg': 'var(--c-corporate-blue)',
-        'chips-token-color': 'var(--white)'
+        'chips-token-color': 'var(--white)',
+        'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
+        'listbox-item-highlight-bg-hover': 'var(--gray-10)',
+        'listbox-item-highlight-color': 'var(--white)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -523,7 +526,10 @@ export const ThemeProvider = ({ children }) => {
         'chips-input-border-color-hover': 'var(--c-corporate-blue-lighter)',
         'chips-input-color': 'var(--white)',
         'chips-token-bg': 'var(--c-corporate-blue-lighter)',
-        'chips-token-color': 'var(--white)'
+        'chips-token-color': 'var(--white)',
+        'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
+        'listbox-item-highlight-bg-hover': 'var(--gray-110)',
+        'listbox-item-highlight-color': 'var(--black)'
       }
     }
   });

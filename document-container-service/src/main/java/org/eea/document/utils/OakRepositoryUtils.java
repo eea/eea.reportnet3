@@ -53,11 +53,6 @@ public class OakRepositoryUtils {
    */
   private static final int NODE_CACHE_SIZE = 16;
 
-  /**
-   * The oak repository url.
-   */
-  @Value("${mongodb.primary.host}")
-  private String oakRepositoryUrl;
 
   /**
    * The name oak collection.
@@ -83,6 +78,11 @@ public class OakRepositoryUtils {
   @Value("${targetDirectory}")
   private String targetDirectory;
 
+  /**
+   * The mongo hosts
+   */
+  @Value("${mongodb.hosts}")
+  private String mongoHosts;
   /**
    * The Constant PATH_DELIMITER.
    */
@@ -144,9 +144,10 @@ public class OakRepositoryUtils {
    * @return the document node store
    */
   public DocumentNodeStore initializeNodeStore() {
-    final String uri = "mongodb://" + oakRepositoryUrl + ":" + oakPort;
     // creates a node with name oak
-    return new MongoDocumentNodeStoreBuilder().setMongoDB(uri, nameOakCollection, NODE_CACHE_SIZE)
+    return new MongoDocumentNodeStoreBuilder()
+        .setMongoDB(new StringBuilder("mongodb://").append(mongoHosts).toString(),
+            nameOakCollection, NODE_CACHE_SIZE)
         .build();
   }
 
