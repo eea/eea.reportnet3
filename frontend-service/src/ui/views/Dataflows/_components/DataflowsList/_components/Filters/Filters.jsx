@@ -100,8 +100,12 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     const sortedData = SortUtils.onSortData([...filterState.data], order, property);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
     const orderBy = order === 0 ? -1 : order;
+    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
 
-    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, sortedData } });
+    filterDispatch({
+      type: 'ORDER_DATA',
+      payload: { filteredSortedData, orderBy, property, resetOrder, sortedData }
+    });
   };
 
   const renderCalendarFilter = property => (
