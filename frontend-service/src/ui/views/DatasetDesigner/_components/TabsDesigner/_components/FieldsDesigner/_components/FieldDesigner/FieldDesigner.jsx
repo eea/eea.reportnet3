@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import filter from 'lodash/filter';
 
 import styles from './FieldDesigner.module.scss';
 
@@ -464,6 +463,7 @@ export const FieldDesigner = ({
       } else {
         fieldUpdate({
           codelistItems,
+          isLinkChange: true,
           type: 'LINK',
           referencedField: link
         });
@@ -500,6 +500,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     fieldSchemaId = fieldId,
+    isLinkChange = false,
     pk = fieldDesignerState.fieldPKValue,
     name = fieldDesignerState.fieldValue,
     referencedField = fieldDesignerState.fieldLinkValue,
@@ -527,6 +528,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           id: fieldId,
+          isLinkChange,
           pk,
           name,
           referencedField,
@@ -641,6 +643,7 @@ export const FieldDesigner = ({
         href="#"
         onClick={e => {
           e.preventDefault();
+          dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
           onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
         }}
         onDragStart={event => {

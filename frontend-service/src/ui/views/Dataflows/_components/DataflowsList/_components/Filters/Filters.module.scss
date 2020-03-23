@@ -4,20 +4,26 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
-  justify-content: space-around;
+  justify-content: space-between;
 
   > span {
     display: flex;
     flex-direction: row;
     font-size: 10pt;
-    justify-content: space-between;
-    width: 14%;
+    width: 100%;
   }
 
   .dataflowInput {
-    border-bottom: var(--inputtext-border) !important;
     height: 2.5em;
     color: var(--floating-label-color) !important;
+
+    > span {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 65%;
+      border-bottom: var(--inputtext-border) !important;
+    }
 
     .inputFilter {
       border-bottom: 0 !important;
@@ -53,7 +59,7 @@
       font-size: 9pt !important;
       height: 2.8em;
       padding-left: 0em;
-      width: 100% !important;
+      width: 65% !important;
 
       .statusBox {
         border-radius: 3px;
@@ -69,7 +75,7 @@
 
       .design {
         background-color: rgba(#c2c8cf, 0.8);
-        color: black;
+        color: var(--black);
       }
 
       .reporter {
@@ -78,8 +84,23 @@
 
       .requester {
         background-color: rgba(#c2c8cf, 0.8);
-        color: black;
+        color: var(--black);
       }
+    }
+
+    .selectHeader {
+      border-radius: 3px;
+      color: var(--black);
+      font-size: 10pt;
+      font-weight: 500;
+      padding: 4px;
+      background-color: var(--gray-15);
+      text-transform: uppercase;
+    }
+
+    .labelDown {
+      font-size: 10pt !important;
+      top: 50% !important;
     }
   }
 
@@ -106,4 +127,8 @@
 
 :global .p-datepicker {
   left: -5.5rem !important;
+}
+
+:global .p-calendar {
+  width: 100% !important;
 }

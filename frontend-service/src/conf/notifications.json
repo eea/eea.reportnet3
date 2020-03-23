@@ -358,6 +358,9 @@
           "key": "DELETE_RULE_ERROR",
           "lifeTime": 5000,
           "fixed": false
+        },
+        {
+          "key": "QC_RULE_CREATION_ERROR"
         }
       ]
     },

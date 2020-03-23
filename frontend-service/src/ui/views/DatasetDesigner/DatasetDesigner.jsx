@@ -150,6 +150,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
+    console.log('CHANGE REFERENCE');
     const inmDatasetSchemas = [...datasetSchemas];
     const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
     inmDatasetSchemas[datasetSchemaIndex].tables = tabs;
@@ -172,7 +173,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         })
       );
     }
-
     setDatasetSchemas(inmDatasetSchemas);
   };
 

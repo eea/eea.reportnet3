@@ -12,6 +12,8 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
 import { ValidationService } from 'core/services/Validation';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -34,6 +36,7 @@ import { resetValidationRuleCreation } from './_functions/utils/resetValidationR
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
 
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility, datasetId }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [creationFormState, creationFormDispatch] = useReducer(
@@ -48,7 +51,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   useEffect(() => {
     creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
-  }, []);
+  }, [datasetSchema]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
@@ -120,6 +123,9 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       await ValidationService.create(datasetId, candidateRule);
       onHide();
     } catch (error) {
+      notificationContext.add({
+        type: 'QC_RULE_CREATION_ERROR'
+      });
       console.log('createValidationRule error', error);
     }
   };

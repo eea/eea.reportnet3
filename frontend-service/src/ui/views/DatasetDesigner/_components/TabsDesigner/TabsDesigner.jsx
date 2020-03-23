@@ -53,6 +53,7 @@ export const TabsDesigner = withRouter(
           title: 'settings'
         }
       ]);
+
       onLoadSchema(datasetId);
     }, []);
 
@@ -64,6 +65,9 @@ export const TabsDesigner = withRouter(
 
     useEffect(() => {
       if (!isUndefined(datasetSchema)) {
+        //Add tab Button/Tab
+        const inmDatasetSchema = { ...datasetSchema };
+        inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
         setTabs(datasetSchema.tables);
       }
     }, [datasetSchema]);
@@ -74,16 +78,13 @@ export const TabsDesigner = withRouter(
       }
     }, [isErrorDialogVisible]);
 
-    const onChangeFields = (fields, tableSchemaId, type) => {
+    const onChangeFields = (fields, isLinkChange, tableSchemaId) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       if (!isNil(inmTabs[tabIdx].records)) {
         inmTabs[tabIdx].records[0].fields = fields;
-        if (!isUndefined(type) && type.toUpperCase() === 'LINK') {
-          onChangeReference(
-            inmTabs.filter(tab => !tab.addTab),
-            datasetSchema.datasetSchemaId
-          );
+        if (isLinkChange) {
+          onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
         }
         setTabs(inmTabs);
       } else {
@@ -116,8 +117,6 @@ export const TabsDesigner = withRouter(
           table.hasErrors = true;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
         });
-        //Add tab Button/Tab
-        inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
         setDatasetSchema(inmDatasetSchema);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
@@ -312,13 +311,13 @@ export const TabsDesigner = withRouter(
       return Math.max(...tabsArray.map(tab => tab.index));
     };
 
-    const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
-      return datasetSchemasArray
-        .map(datasetSchema => {
-          return datasetSchema.datasetSchemaId;
-        })
-        .indexOf(datasetSchemaId);
-    };
+    // const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
+    //   return datasetSchemasArray
+    //     .map(datasetSchema => {
+    //       return datasetSchema.datasetSchemaId;
+    //     })
+    //     .indexOf(datasetSchemaId);
+    // };
 
     const renderErrors = (errorTitle, error) => {
       return (

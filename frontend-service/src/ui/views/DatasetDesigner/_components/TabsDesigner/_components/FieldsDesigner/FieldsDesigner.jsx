@@ -95,7 +95,7 @@ export const FieldsDesigner = ({
       required,
       type
     });
-    onChangeFields(inmFields, table.tableSchemaId, type === 'LINK' ? type : undefined);
+    onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
   };
 
@@ -105,7 +105,17 @@ export const FieldsDesigner = ({
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = ({ codelistItems, description, id, pk, name, referencedField, required, type }) => {
+  const onFieldUpdate = ({
+    codelistItems,
+    description,
+    id,
+    isLinkChange,
+    pk,
+    name,
+    referencedField,
+    required,
+    type
+  }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
     //Buscar en los datasetSchemas si se está usando el id y actualizar el idx del field de la PK según el count
@@ -118,9 +128,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
-      // inmFields[fieldIndex].pkReferenced =
-      //   FieldsDesignerUtils.getCountPKUseInAllSchemas(inmFields[fieldIndex].fieldId, datasetSchemas) > 0;
-      onChangeFields(inmFields, table.tableSchemaId, type);
+      onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
   };
@@ -153,7 +161,7 @@ export const FieldsDesigner = ({
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, table.tableSchemaId, deletedFieldType);
+        onChangeFields(inmFields, deletedFieldType.toUpperCase() === 'LINK', table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -182,17 +190,19 @@ export const FieldsDesigner = ({
     }
     const link = {};
     datasetSchemas.forEach(schema =>
-      schema.tables.forEach(table =>
-        table.records.forEach(record =>
-          record.fields.forEach(field => {
-            if (!isNil(field) && field.fieldId === referencedField.idPk) {
-              link.name = `${table.tableSchemaName} - ${field.name}`;
-              link.value = `${table.tableSchemaName} - ${field.fieldId}`;
-              link.disabled = false;
-            }
-          })
-        )
-      )
+      schema.tables.forEach(table => {
+        if (!table.addTab) {
+          table.records.forEach(record =>
+            record.fields.forEach(field => {
+              if (!isNil(field) && field.fieldId === referencedField.idPk) {
+                link.name = `${table.tableSchemaName} - ${field.name}`;
+                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                link.disabled = false;
+              }
+            })
+          );
+        }
+      })
     );
     link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
     return link;
