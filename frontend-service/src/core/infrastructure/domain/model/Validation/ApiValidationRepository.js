@@ -56,7 +56,7 @@ const create = async (datasetSchemaId, validationRule) => {
     automatic: false,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
-    ruleName: '',
+    ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
@@ -102,18 +102,17 @@ const parseDataValidationRulesDTO = validations => {
         levelError:
           !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
             ? validationDTO.thenCondition[1]
-            : "",
+            : '',
         message:
           !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[0])
             ? validationDTO.thenCondition[0]
-            : "",
+            : '',
         name: validationDTO.ruleName,
-        referenceId: validationDTO.referenceId, 
+        referenceId: validationDTO.referenceId,
         shortCode: validationDTO.shortCode
       });
     });
-  }
-  catch (error) {
+  } catch (error) {
     throw new Error('VALIDATION_SERVICE_GET_ALL');
   }
   validationsData.entityTypes = [...new Set(entityTypes)];
