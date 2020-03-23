@@ -163,6 +163,7 @@ public class AutomaticRules {
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
     rule.setWhenCondition(whenCondition.toString());
+    rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
     return rule;
   }
 
