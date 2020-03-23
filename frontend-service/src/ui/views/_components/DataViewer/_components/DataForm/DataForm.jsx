@@ -1,15 +1,50 @@
-import React, { useContext } from 'react';
-import { isUndefined, isNull } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, onChangeForm, records }) => {
+const DataForm = ({
+  addDialogVisible,
+  colsSchema,
+  datasetId,
+  datasetSchemas,
+  editDialogVisible,
+  formType,
+  onChangeForm,
+  records
+}) => {
   const resources = useContext(ResourcesContext);
+  const [colsSchemaWithLinks, setColsSchemaWithLinks] = useState([]);
+
+  useEffect(() => {
+    onLoadColsSchema('');
+  }, []);
+
+  const onFilter = async filter => {
+    onLoadColsSchema(filter);
+  };
+
+  const onLoadColsSchema = async filter => {
+    const colsSchemasPromises = colsSchema.map(async colSchema => {
+      const linkItems = await getLinkItemsWithEmptyOption(colSchema.field, filter, colSchema.type);
+      colSchema.linkItems = linkItems;
+      return colSchema;
+    });
+
+    Promise.all(colsSchemasPromises).then(completedSchemasWithLinks => {
+      setColsSchemaWithLinks(completedSchemasWithLinks);
+    });
+  };
 
   const getCodelistItemsWithEmptyOption = (colsSchema, field) => {
     const column = colsSchema.filter(e => e.field === field)[0];
@@ -23,6 +58,35 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
     return codelistItems;
   };
 
+  const getLinkItems = field => {
+    if (!isEmpty(colsSchemaWithLinks)) {
+      const column = colsSchemaWithLinks.filter(e => e.field === field)[0];
+      return column.linkItems;
+    }
+  };
+
+  const getLinkItemsWithEmptyOption = async (field, filter, type) => {
+    if (isNil(type) || type.toUpperCase() !== 'LINK') {
+      return [];
+    }
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+      datasetId,
+      RecordUtils.getFieldReferencedPKId(datasetSchemas, field),
+      filter
+    );
+    const linkItems = referencedFieldValues.map(referencedField => {
+      return {
+        itemType: referencedField.value,
+        value: referencedField.value
+      };
+    });
+    linkItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    return linkItems;
+  };
+
   const renderDropdown = (field, fieldValue) => {
     return (
       <Dropdown
@@ -33,6 +97,24 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
         optionLabel="itemType"
         options={getCodelistItemsWithEmptyOption(colsSchema, field)}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItems(colsSchema, field), fieldValue)}
+      />
+    );
+  };
+
+  const renderLinkDropdown = (field, fieldValue) => {
+    return (
+      <Dropdown
+        appendTo={document.body}
+        filter={true}
+        filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+        filterBy="itemType,value"
+        onChange={e => {
+          onChangeForm(field, e.target.value.value);
+        }}
+        onFilterInputChangeBackend={onFilter}
+        optionLabel="itemType"
+        options={getLinkItems(field)}
+        value={RecordUtils.getLinkValue(getLinkItems(field), fieldValue)}
       />
     );
   };
@@ -52,19 +134,18 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
                 {column.type === 'CODELIST' ? (
                   renderDropdown(
                     column.field,
-                    isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                      ? ''
-                      : field.fieldData[column.field]
+                    isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]
+                  )
+                ) : column.type === 'LINK' ? (
+                  renderLinkDropdown(
+                    column.field,
+                    isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]
                   )
                 ) : (
                   <InputText
                     id={column.field}
-                    value={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
                     onChange={e => onChangeForm(column.field, e.target.value)}
+                    value={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                   />
                 )}
               </div>
@@ -92,6 +173,11 @@ const DataForm = ({ colsSchema, formType, editDialogVisible, addDialogVisible, o
                     isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
                       ? ''
                       : field.fieldData[column.field]
+                  )
+                ) : column.type === 'LINK' ? (
+                  renderLinkDropdown(
+                    column.field,
+                    isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]
                   )
                 ) : (
                   <InputText id={column.field} onChange={e => onChangeForm(column.field, e.target.value, field)} />

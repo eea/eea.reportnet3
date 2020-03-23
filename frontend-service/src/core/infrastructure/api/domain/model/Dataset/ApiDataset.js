@@ -290,6 +290,7 @@ export const apiDataset = {
     return response.data;
   },
   getReferencedFieldValues: async (datasetId, fieldSchemaId, searchToken) => {
+    console.log({ datasetId, fieldSchemaId, searchToken });
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.referencedFieldValues, {

@@ -156,8 +156,7 @@ export const TabView = ({
     });
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
-    if (!isUndefined(divTabsRef.current) && !isNull(divTabsRef.current)) {
-    }
+    console.log('tab', tab.props);
     return (
       <Tab
         addTab={tab.props.addTab}
@@ -169,6 +168,7 @@ export const TabView = ({
         editable={tab.props.editable}
         designMode={designMode}
         divScrollTabsRef={divTabsRef.current}
+        hasPKReferenced={tab.props.hasPKReferenced}
         header={tab.props.header}
         headerStyle={tab.props.headerStyle}
         id={id}
