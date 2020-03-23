@@ -1,10 +1,20 @@
+const getOrderIcon = order => {
+  if (order === 0) return 'sortAlt';
+  else if (order === 1) return 'alphabeticOrderDown';
+  else if (order === -1) return 'alphabeticOrderUp';
+};
+
 const getOrderInitialState = (input = [], select = [], date = []) => {
   const orderByGroup = input.concat(select, date);
-  return orderByGroup.reduce((obj, key) => Object.assign(obj, { [key]: 1 }), {});
+  const orderByState = orderByGroup.reduce((obj, key) => Object.assign(obj, { [key]: 0 }), {});
+  date.forEach(date => {
+    orderByState[date] = 1;
+  });
+  return orderByState;
 };
 
 const onSortData = (data, order, property) => {
-  if (order === 1) {
+  if (order !== 1) {
     return data.sort((a, b) => {
       const textA = a[property].toUpperCase();
       const textB = b[property].toUpperCase();
@@ -19,4 +29,4 @@ const onSortData = (data, order, property) => {
   }
 };
 
-export const SortUtils = { getOrderInitialState, onSortData };
+export const SortUtils = { getOrderIcon, getOrderInitialState, onSortData };
