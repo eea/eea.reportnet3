@@ -361,6 +361,9 @@
         },
         {
           "key": "QC_RULE_CREATION_ERROR"
+        },
+        {
+          "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
         }
       ]
     },
