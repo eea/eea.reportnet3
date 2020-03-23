@@ -175,6 +175,9 @@ public final class EEAErrorMessage {
   /** The Constant PK_ALREADY_EXISTS. */
   public static final String PK_ALREADY_EXISTS = "There is an existing PK";
 
+  /** The Constant SHORT_CODE_REQUIRED. */
+  public static final String SHORT_CODE_REQUIRED = "ShortCode is required";
+
   /**
    * Instantiates a new EEA error message.
    */
