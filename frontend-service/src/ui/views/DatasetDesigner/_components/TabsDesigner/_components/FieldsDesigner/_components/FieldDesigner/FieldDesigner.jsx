@@ -18,6 +18,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
@@ -106,6 +107,7 @@ export const FieldDesigner = ({
   const fieldRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   useEffect(() => {
     dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
@@ -751,7 +753,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            onClick={() => dispatchFieldDesigner({ type: 'TOGGLE_QC_MANAGER_VISIBLE', payload: true })}
+            onClick={() => validationContext.onOpenModalFromField(fieldId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}

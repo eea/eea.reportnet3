@@ -14,7 +14,7 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload.fieldId
+        fieldId: payload
       };
     case 'ON_OPENER_RESET':
       return {
