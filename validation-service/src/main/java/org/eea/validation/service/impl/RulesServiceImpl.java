@@ -216,7 +216,6 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setRuleId(new ObjectId());
     rule.setType(EntityTypeEnum.FIELD);
-    rule.setEnabled(true);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
 
