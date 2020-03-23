@@ -50,7 +50,6 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
   };
 
   const getLinkItems = field => {
-    console.log({ field, colsSchema });
     if (!isEmpty(colsSchemaWithLinks)) {
       const column = colsSchemaWithLinks.filter(e => e.field === field)[0];
       return column.linkItems;
