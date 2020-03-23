@@ -105,16 +105,20 @@
   }
 
   .icon {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
     font-size: 16pt !important;
-    opacity: 0.7;
     height: 1.6em !important;
+    opacity: 0.7;
 
     &:hover {
-      opacity: 1;
+      opacity: 1 !important;
     }
 
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--white) !important;
+      outline: none;
     }
 
     &:enabled:active,

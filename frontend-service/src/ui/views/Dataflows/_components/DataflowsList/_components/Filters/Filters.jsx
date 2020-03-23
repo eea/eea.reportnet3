@@ -104,46 +104,41 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, sortedData } });
   };
 
-  const renderCalendarFilter = property => {
-    const minDate = FilterUtils.getYesterdayDate();
-
-    return (
-      <span className={styles.dataflowInput} ref={dateRef}>
-        {renderOrderFilter(property)}
-        <span className="p-float-label">
-          <Calendar
-            className={styles.calendarFilter}
-            disabledDates={[minDate]}
-            inputClassName={styles.inputFilter}
-            inputId={property}
-            minDate={minDate}
-            monthNavigator={true}
-            onChange={event => onFilterData(property, event.value)}
-            onFocus={() => onAnimateLabel(property, true)}
-            readOnlyInput={true}
-            selectionMode="range"
-            showWeek={true}
-            value={filterState.filterBy[property]}
-            yearNavigator={true}
-            yearRange="2020:2030"
+  const renderCalendarFilter = property => (
+    <span className={styles.dataflowInput} ref={dateRef}>
+      {renderOrderFilter(property)}
+      <span className="p-float-label">
+        <Calendar
+          dateFormat="yy-mm-dd"
+          className={styles.calendarFilter}
+          inputClassName={styles.inputFilter}
+          inputId={property}
+          monthNavigator={true}
+          onChange={event => onFilterData(property, event.value)}
+          onFocus={() => onAnimateLabel(property, true)}
+          readOnlyInput={true}
+          selectionMode="range"
+          showWeek={true}
+          value={filterState.filterBy[property]}
+          yearNavigator={true}
+          yearRange="2015:2030"
+        />
+        {!isEmpty(filterState.filterBy[property]) && (
+          <Button
+            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+            icon="cancel"
+            onClick={() => {
+              onFilterData(property, []);
+              onAnimateLabel(property, false);
+            }}
           />
-          {!isEmpty(filterState.filterBy[property]) && (
-            <Button
-              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-              icon="cancel"
-              onClick={() => {
-                onFilterData(property, []);
-                onAnimateLabel(property, false);
-              }}
-            />
-          )}
-          <label className={!filterState.labelAnimations[property] ? styles.labelDown : ''} htmlFor={property}>
-            {resources.messages[property]}
-          </label>
-        </span>
+        )}
+        <label className={!filterState.labelAnimations[property] ? styles.labelDown : ''} htmlFor={property}>
+          {resources.messages[property]}
+        </label>
       </span>
-    );
-  };
+    </span>
+  );
 
   const renderInputFilter = property => (
     <span className={styles.dataflowInput}>
@@ -172,6 +167,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     <Button
       className={`p-button-secondary-transparent ${styles.icon}`}
       disabled={property.includes('ROD3')}
+      layout="simple"
       icon={SortUtils.getOrderIcon(filterState.orderBy[property])}
       id={`${property}_sort`}
       onClick={() => onOrderData(filterState.orderBy[property], property)}
