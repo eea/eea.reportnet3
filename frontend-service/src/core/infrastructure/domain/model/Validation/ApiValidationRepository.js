@@ -1,6 +1,10 @@
 import { config } from 'conf';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
+
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
@@ -92,21 +96,21 @@ const parseDataValidationRulesDTO = validations => {
       automatic: validationDTO.automatic,
       condition: validationDTO.whenCondition,
       date: validationDTO.activationGroup,
-      description: validationDTO.description,
-      enabled: validationDTO.enabled,
-      entityType: validationDTO.type,
-      id: validationDTO.ruleId,
+      description: isNil(validationDTO.description) ? validationDTO.description : "",
+      enabled: isNil(validationDTO.enabled) ? validationDTO.enabled : "",
+      entityType: isNil(validationDTO.type) ? validationDTO.type : "",
+      id: isNil(validationDTO.ruleId) ? validationDTO.ruleId : "",
       levelError:
-        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[1])
+        !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
           ? validationDTO.thenCondition[1]
-          : null,
+          : "",
       message:
-        !isUndefined(validationDTO.thenCondition) && !isNull(validationDTO.thenCondition[0])
+        !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[0])
           ? validationDTO.thenCondition[0]
-          : null,
-      name: validationDTO.ruleName,
-      referenceId: validationDTO.referenceId,
-      shortCode: validationDTO.shortCode
+          : "",
+      name: !isNil(validationDTO.ruleName) ? validationDTO.ruleName : "" ,
+      referenceId: !isNil(validationDTO.referenceId) ? validationDTO.referenceId : "", 
+      shortCode: !isNil(validationDTO.shortCode) ? validationDTO.shortCode : ""
     });
   });
 
