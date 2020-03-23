@@ -26,12 +26,16 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
-    data: cloneDeep(data),
-    filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
-    filteredData: cloneDeep(data),
-    labelAnimations: FilterUtils.getLabelInitialState(inputOptions, selectOptions, dateOptions),
-    orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
+    data: [],
+    filterBy: {},
+    filteredData: [],
+    labelAnimations: {},
+    orderBy: {}
   });
+
+  useEffect(() => {
+    getInitialState();
+  }, [data]);
 
   useEffect(() => {
     if (getFiltredData) {
@@ -40,6 +44,19 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
   }, [filterState.filteredData]);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
+
+  const getInitialState = () => {
+    const initialData = cloneDeep(data);
+    const initialFilterBy = FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions);
+    const initialFilteredData = cloneDeep(data);
+    const initialLabelAnimations = FilterUtils.getLabelInitialState(inputOptions, selectOptions, dateOptions);
+    const initialOrderBy = SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions);
+
+    filterDispatch({
+      type: 'INITIAL_STATE',
+      payload: { initialData, initialFilterBy, initialFilteredData, initialLabelAnimations, initialOrderBy }
+    });
+  };
 
   const onAnimateLabel = (property, value) => {
     filterDispatch({

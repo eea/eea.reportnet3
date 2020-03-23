@@ -1,5 +1,15 @@
 export const filterReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'INITIAL_STATE':
+      return {
+        ...state,
+        data: payload.initialData,
+        filterBy: payload.initialFilterBy,
+        filteredData: payload.initialFilteredData,
+        labelAnimations: payload.initialLabelAnimations,
+        orderBy: payload.initialOrderBy
+      };
+
     case 'ORDER_DATA':
       return {
         ...state,
