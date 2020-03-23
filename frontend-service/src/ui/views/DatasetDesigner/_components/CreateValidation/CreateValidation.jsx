@@ -126,7 +126,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.log('createValidationRule error', error);
+      console.error('createValidationRule error', error);
     }
   };
 

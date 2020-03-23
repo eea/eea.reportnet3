@@ -18,7 +18,6 @@ import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -47,7 +46,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataCollectionName, setDataCollectionName] = useState();
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
-  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
     selectedRecordErrorId: -1,
@@ -106,15 +104,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    console.log('DATACOLLECTION');
-    const getDatasetSchemas = async () => {
-      const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
-      setDatasetSchemas(datasetSchemasDTO);
-    };
-    getDatasetSchemas();
-  }, []);
-
-  useEffect(() => {
     onLoadDatasetSchema();
   }, []);
 
@@ -143,7 +132,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      console.log('METADATA error', error);
+      console.error('METADATA error', error);
       notificationContext.add({
         type: 'GET_METADATA_ERROR',
         content: {
@@ -211,6 +200,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               recordId: field['recordId'],
+              referencedField: field['referencedField'],
               table: table['tableSchemaName'],
               type: field['type']
             };
@@ -258,7 +248,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onRenderTabsSchema = (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
-      datasetSchemas={datasetSchemas}
       hasWritePermissions={hasWritePermissions}
       isDataCollection={true}
       isWebFormMMR={false}

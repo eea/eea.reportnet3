@@ -75,7 +75,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
-    console.log('DATASET DESIGNER');
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
@@ -171,7 +170,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
-    console.log('CHANGE REFERENCE');
     const inmDatasetSchemas = [...datasetSchemas];
     const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
     inmDatasetSchemas[datasetSchemaIndex].tables = tabs;

@@ -95,31 +95,6 @@ const getCodelistValue = (codelistItemsOptions, value) => {
   }
 };
 
-const getFieldReferencedPKId = (datasetSchemas, fieldSchemaId) => {
-  console.log({ datasetSchemas, fieldSchemaId });
-  let fieldPKId = null;
-  datasetSchemas.forEach(schema =>
-    schema.tables.forEach(table => {
-      if (!table.addTab) {
-        table.records.forEach(record =>
-          record.fields.forEach(field => {
-            if (!isNil(field) && field.fieldId === fieldSchemaId && !isNil(field.referencedField)) {
-              console.log('COINCIDEN!', field.fieldId, field.referencedField);
-              if (!isUndefined(field.referencedField.name)) {
-                fieldPKId = field.referencedField.referencedField.fieldSchemaId;
-              } else {
-                fieldPKId = field.referencedField.idPk;
-              }
-            }
-          })
-        );
-      }
-    })
-  );
-  console.log({ fieldPKId });
-  return fieldPKId;
-};
-
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -139,7 +114,6 @@ const getInitialRecordValues = (record, colsSchema) => {
 };
 
 const getLinkValue = (linkOptions, value) => {
-  console.log(linkOptions, value);
   if (!isUndefined(value) && !isUndefined(linkOptions)) {
     return linkOptions.filter(item => item.value === value)[0];
   }
@@ -209,7 +183,6 @@ export const RecordUtils = {
   getClipboardData,
   getCodelistItems,
   getCodelistValue,
-  getFieldReferencedPKId,
   getInitialRecordValues,
   getLinkValue,
   getNumCopiedRecords,
