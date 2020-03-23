@@ -169,10 +169,6 @@ public class RulesServiceImpl implements RulesService {
    */
   private void validateRule(Rule rule) throws EEAException {
 
-    if (rule.getShortCode() == null) {
-      throw new EEAException(EEAErrorMessage.SHORT_CODE_REQUIRED);
-    }
-
     if (rule.getRuleId() == null) {
       throw new EEAException(EEAErrorMessage.RULE_ID_REQUIRED);
     }
@@ -195,6 +191,10 @@ public class RulesServiceImpl implements RulesService {
 
     if (rule.getThenCondition() == null || rule.getThenCondition().size() != 2) {
       throw new EEAException(EEAErrorMessage.THEN_CONDITION_REQUIRED);
+    }
+
+    if (rule.getShortCode() == null) {
+      throw new EEAException(EEAErrorMessage.SHORT_CODE_REQUIRED);
     }
   }
 
@@ -396,7 +396,6 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
-    rule.setShortCode(null);
     rule.setActivationGroup(null);
 
     validateRule(rule);
