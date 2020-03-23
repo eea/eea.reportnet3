@@ -74,7 +74,7 @@ const getAll = async datasetSchemaId => {
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-
+  console.log('validationsListDTO', validationsListDTO);
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -96,10 +96,10 @@ const parseDataValidationRulesDTO = validations => {
       automatic: validationDTO.automatic,
       condition: validationDTO.whenCondition,
       date: validationDTO.activationGroup,
-      description: isNil(validationDTO.description) ? validationDTO.description : "",
-      enabled: isNil(validationDTO.enabled) ? validationDTO.enabled : "",
-      entityType: isNil(validationDTO.type) ? validationDTO.type : "",
-      id: isNil(validationDTO.ruleId) ? validationDTO.ruleId : "",
+      description: !isNil(validationDTO.description) ? validationDTO.description : "",
+      enabled: !isNil(validationDTO.enabled) ? validationDTO.enabled : "",
+      entityType: !isNil(validationDTO.type) ? validationDTO.type : "",
+      id: !isNil(validationDTO.ruleId) ? validationDTO.ruleId : "",
       levelError:
         !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
           ? validationDTO.thenCondition[1]
