@@ -6,16 +6,13 @@ import { TableListItem } from './TableListItem';
 import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
 
 const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) => {
-  const [selectedAllFilterState, setSelectedAllFilterState] = useState('');
-
   return (
     <ul className={styles.list}>
       {tables.map(table => (
-        <li className={styles.listItem} key={datasetSchemaId}>
+        <li key={datasetSchemaId} className={styles.listItem}>
           <TableListItem
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}
-            selectedAllFilterState={selectedAllFilterState}
             table={table}
             tableFilters={tableFilters}
           />
@@ -27,7 +24,6 @@ const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) =>
         filters={tableFilters}
         id={'table'}
         labels={tables}
-        selectedAllFilter={setSelectedAllFilterState}
       />
     </ul>
   );

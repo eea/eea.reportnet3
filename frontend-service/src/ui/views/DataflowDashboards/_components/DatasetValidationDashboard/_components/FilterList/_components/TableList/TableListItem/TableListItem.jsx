@@ -1,23 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import styles from './TableListItem.module.css';
+import styles from './TableListItem.module.scss';
 
-export const TableListItem = ({ datasetSchemaId, filterDispatch, selectedAllFilterState, table, tableFilters }) => {
-  const [selectedAll, setSelectedAll] = useState(true);
+const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters }) => {
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
-    setIsChecked(getStateBySelectionAndByReporter());
-    setSelectedAll(selectedAllFilterState);
-  }, [selectedAllFilterState, selectedAll]);
-
-  const getStateBySelectionAndByReporter = () => {
-    if (selectedAllFilterState === 'indeterminate') {
-      return !tableFilters.includes(table.tableId);
-    } else {
-      return selectedAllFilterState;
-    }
-  };
+    setIsChecked(!tableFilters.includes(table.tableId));
+  }, [tableFilters]);
 
   return (
     <div className={styles.listItem}>
@@ -25,7 +15,7 @@ export const TableListItem = ({ datasetSchemaId, filterDispatch, selectedAllFilt
         id={`${table.tableId}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={isChecked}
+        checked={isChecked}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
@@ -40,3 +30,5 @@ export const TableListItem = ({ datasetSchemaId, filterDispatch, selectedAllFilt
     </div>
   );
 };
+
+export { TableListItem };

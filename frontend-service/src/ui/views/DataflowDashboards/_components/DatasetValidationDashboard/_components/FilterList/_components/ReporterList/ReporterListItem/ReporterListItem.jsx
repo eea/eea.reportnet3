@@ -1,38 +1,21 @@
 import React, { useEffect, useState } from 'react';
 
-import isUndefined from 'lodash/isUndefined';
-
 import styles from './ReporterListItem.module.scss';
 
-const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
-  // const [selectedAll, setSelectedAll] = useState(true);
+const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters }) => {
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
-    setIsChecked(getStateBySelectionAndByReporter());
-    // setSelectedAll(selectedAllFilterState);
-  }, [selectedAllFilterState /* , selectedAll */]);
+    setIsChecked(!reporterFilters.includes(reporter));
+  }, [reporterFilters]);
 
-  const getStateBySelectionAndByReporter = () => {
-    if (selectedAllFilterState === 'indeterminate') {
-      console.log('inside');
-
-      return !reporterFilters.includes(reporter);
-    } else {
-      console.log('not in');
-
-      return selectedAllFilterState;
-    }
-  };
-
-  console.log('selectedAllFilterState', selectedAllFilterState);
   return (
     <>
       <input
         id={`${reporter}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={isChecked}
+        checked={isChecked}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
