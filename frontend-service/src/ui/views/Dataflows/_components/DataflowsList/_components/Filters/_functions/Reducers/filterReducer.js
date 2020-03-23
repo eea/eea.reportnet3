@@ -15,7 +15,7 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         data: payload.sortedData,
         filteredData: payload.filteredSortedData,
-        orderBy: { ...state.orderBy, [payload.property]: -payload.orderBy }
+        orderBy: { ...payload.resetOrder, [payload.property]: -payload.orderBy }
       };
 
     case 'FILTER_DATA':

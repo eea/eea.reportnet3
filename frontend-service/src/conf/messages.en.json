@@ -513,7 +513,7 @@
     "columnInfoName": "Name",
     "columnInfoType": "Type",
     "name": "Name",
-    "expirationDate": "Expiration date",
+    "expirationDate": "Expiration date range",
     "clearFilters": "Clear filters",
     "userRole": "Role",
     "qcRuleCreationError": "Error creation the rule, please check it",
@@ -524,6 +524,8 @@
     "linkSelector": "Select a Link",
     "selectedLink": "Selected Link",
     "linkSelection": "No link selected",
-    "linkFilterPlaceholder": "Search value"
+    "linkFilterPlaceholder": "Search value",
+    "ruleErrorMessage": "Error message",
+    "validationServiceGetAllError": "Error loading QC's"
   }
 }

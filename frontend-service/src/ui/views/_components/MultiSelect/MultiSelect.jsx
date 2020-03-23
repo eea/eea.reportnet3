@@ -491,7 +491,7 @@ export class MultiSelect extends Component {
     });
 
     return (
-      <div className="p-multiselect-label-container" style={{ position: 'absolute', top: '0' }}>
+      <div className="p-multiselect-label-container" style={{ position: 'absolute', top: '0', paddingTop: '0.1rem' }}>
         <label className={className}>{content || this.props.placeholder || 'empty'}</label>
       </div>
     );
