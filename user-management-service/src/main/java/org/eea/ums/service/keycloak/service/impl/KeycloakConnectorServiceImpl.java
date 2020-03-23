@@ -46,68 +46,121 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
+  /** The realm name. */
   @Value("${eea.keycloak.realmName}")
   private String realmName;
 
+  /** The secret. */
   @Value("${eea.keycloak.secret}")
   private String secret;
 
+  /** The client id. */
   @Value("${eea.keycloak.clientId}")
   private String clientId;
 
+  /** The keycloak host. */
   @Value("${eea.keycloak.host}")
   private String keycloakHost;
 
+  /** The keycloak scheme. */
   @Value("${eea.keycloak.scheme}")
   private String keycloakScheme;
 
+  /** The redirect uri. */
   @Value("${eea.keycloak.redirect_uri}")
   private String redirectUri;
 
 
+  /** The admin user. */
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
+
+  /** The admin pass. */
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
 
 
+  /** The internal client id. */
   private String internalClientId;
+
+  /** The resource types. */
   private Map<String, String> resourceTypes;
 
+  /** The rest template. */
   @Autowired
   private RestTemplate restTemplate;
 
+  /** The Constant GENERATE_TOKEN_URL. */
   private static final String GENERATE_TOKEN_URL =
       "/auth/realms/{realm}/protocol/openid-connect/token";
+
+  /** The Constant LOGOUT_URL. */
   private static final String LOGOUT_URL = "/auth/realms/{realm}/protocol/openid-connect/logout";
+
+  /** The Constant LIST_USERS_URL. */
   private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users?max=500";
+
+  /** The Constant LIST_USER_GROUPS_URL. */
   private static final String LIST_USER_GROUPS_URL = "";
+
+  /** The Constant LIST_GROUPS_URL. */
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
+
+  /** The Constant GROUP_DETAIL_URL. */
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
+
+  /** The Constant CREATE_USER_GROUP_URL. */
   private static final String CREATE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/";
+
+  /** The Constant DELETE_USER_GROUP_URL. */
   private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
+
+  /** The Constant ADD_USER_TO_USER_GROUP_URL. */
   private static final String ADD_USER_TO_USER_GROUP_URL =
       "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
+
+  /** The Constant CHECK_USER_PERMISSION. */
   private static final String CHECK_USER_PERMISSION =
       "/auth/admin/realms/{realm}/clients/{clientInterenalId}/authz/resource-server/policy/evaluate";
+
+  /** The Constant GET_CLIENT_ID. */
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
+
+  /** The Constant GET_RESOURCE_SET. */
   private static final String GET_RESOURCE_SET =
       "/auth/realms/{realm}/authz/protection/resource_set";
+
+  /** The Constant GET_RESOURCE_INFO. */
   private static final String GET_RESOURCE_INFO =
       "/auth/realms/{realm}/authz/protection/resource_set/{resourceId}";
+
+  /** The Constant GET_GROUPS_BY_USER. */
   private static final String GET_GROUPS_BY_USER =
       "/auth/admin/realms/{realm}/users/{userId}/groups";
+
+  /** The Constant URI_PARAM_REALM. */
   private static final String URI_PARAM_REALM = "realm";
+
+  /** The Constant URI_PARAM_RESOURCE_ID. */
   private static final String URI_PARAM_RESOURCE_ID = "resourceId";
+
+  /** The Constant URI_PARAM_USER_ID. */
   private static final String URI_PARAM_USER_ID = "userId";
+
+  /** The Constant URI_PARAM_GROUP_ID. */
   private static final String URI_PARAM_GROUP_ID = "groupId";
 
+  /** The Constant LIST_ROLE_BY_REALM. */
   private static final String LIST_ROLE_BY_REALM = "/auth/admin/realms/{realm}/roles";
 
+  /** The Constant USER_URL. */
   private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
 
+  /** The Constant ADD_ROLE_TO_USER. */
   private static final String ADD_ROLE_TO_USER =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm";
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -233,6 +286,14 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     return retrieveTokenFromKeycloak(map);
   }
 
+  /**
+   * Gets the token generation map.
+   *
+   * @param username the username
+   * @param password the password
+   * @param admin the admin
+   * @return the token generation map
+   */
   private MultiValueMap<String, String> getTokenGenerationMap(String username, String password,
       Boolean admin) {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -358,6 +419,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .map(entity -> (GroupInfo) entity).orElse(null);
   }
 
+  /**
+   * Update user.
+   *
+   * @param user the user
+   */
   @Override
   public void updateUser(UserRepresentation user) {
     Map<String, String> uriParams = new HashMap<>();
@@ -374,6 +440,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   }
 
+  /**
+   * Gets the user.
+   *
+   * @param userId the user id
+   * @return the user
+   */
   @Override
   public UserRepresentation getUser(String userId) {
     Map<String, String> uriParams = new HashMap<>();
@@ -394,9 +466,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   /**
    * Creates the group detail.
-   * 
+   *
    * @param groupInfo the group info
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createGroupDetail(GroupInfo groupInfo) throws EEAException {
@@ -442,7 +514,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param userId the user id
    * @param groupId the group id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void addUserToGroup(String userId, String groupId) throws EEAException {
