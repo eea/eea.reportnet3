@@ -14,6 +14,7 @@ export const Calendar = ({
   minDate,
   monthNavigator,
   onChange,
+  onFocus,
   placeholder,
   readOnlyInput,
   selectionMode,
@@ -35,6 +36,7 @@ export const Calendar = ({
       minDate={minDate}
       monthNavigator={monthNavigator}
       onChange={onChange}
+      onFocus={onFocus}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
       selectionMode={selectionMode}
