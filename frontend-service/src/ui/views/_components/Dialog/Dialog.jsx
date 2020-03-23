@@ -47,6 +47,10 @@ export const Dialog = ({
     } else {
       body.style.overflow = 'hidden auto';
     }
+
+    return () => {
+      body.style.overflow = 'hidden auto';
+    };
   }, [visible]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
