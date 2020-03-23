@@ -41,12 +41,17 @@ export const Dialog = ({
     zIndex
   };
   useEffect(() => {
+    console.log('Dialog visible: ', visible);
     const body = document.querySelector('body');
     if (visible) {
       body.style.overflow = 'hidden';
     } else {
       body.style.overflow = 'hidden auto';
     }
+
+    return () => {
+      body.style.overflow = 'hidden auto';
+    };
   }, [visible]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
