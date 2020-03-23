@@ -74,6 +74,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
+    console.log('DATASET DESIGNER');
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
@@ -162,8 +163,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               record.fields.forEach(field => {
                 if (!isNil(field) && field.pk) {
                   if (DatasetDesignerUtils.getCountPKUseInAllSchemas(field.fieldId, inmDatasetSchemas) > 0) {
+                    table.hasPKReferenced = true;
                     field.pkReferenced = true;
                   } else {
+                    table.hasPKReferenced = false;
                     field.pkReferenced = false;
                   }
                 }

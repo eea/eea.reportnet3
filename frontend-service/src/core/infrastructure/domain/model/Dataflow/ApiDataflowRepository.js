@@ -251,11 +251,16 @@ const getAllSchemas = async dataflowId => {
       // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
     });
 
+    let hasPKReferenced = false;
     const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
       const records = !isNull(datasetTableDTO.recordSchema)
         ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
             const fields = !isNull(dataTableRecordDTO.fieldSchema)
               ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+                  if (!isNull(DataTableFieldDTO.pkReferenced) && DataTableFieldDTO.pkReferenced === true) {
+                    console.log('HAS PK REFERENCEDDD', DataTableFieldDTO.pkReferenced);
+                    hasPKReferenced = true;
+                  }
                   return new DatasetTableField({
                     codelistItems: DataTableFieldDTO.codelistItems,
                     description: DataTableFieldDTO.description,
@@ -277,7 +282,9 @@ const getAllSchemas = async dataflowId => {
             });
           })
         : null;
+      console.log({ hasPKReferenced });
       return new DatasetTable({
+        hasPKReferenced,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,

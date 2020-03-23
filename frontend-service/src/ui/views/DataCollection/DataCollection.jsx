@@ -47,6 +47,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataCollectionName, setDataCollectionName] = useState();
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
     selectedRecordErrorId: -1,
@@ -102,6 +103,15 @@ export const DataCollection = withRouter(({ match, history }) => {
       { label: resources.messages['dataCollection'], icon: 'dataCollection' }
     ]);
     leftSideBarContext.removeModels();
+  }, []);
+
+  useEffect(() => {
+    console.log('DATACOLLECTION');
+    const getDatasetSchemas = async () => {
+      const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+      setDatasetSchemas(datasetSchemasDTO);
+    };
+    getDatasetSchemas();
   }, []);
 
   useEffect(() => {
@@ -248,6 +258,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onRenderTabsSchema = (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
+      datasetSchemas={datasetSchemas}
       hasWritePermissions={hasWritePermissions}
       isDataCollection={true}
       isWebFormMMR={false}

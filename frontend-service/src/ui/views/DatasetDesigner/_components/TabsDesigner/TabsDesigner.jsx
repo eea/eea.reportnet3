@@ -292,6 +292,11 @@ export const TabsDesigner = withRouter(
       </div>
     );
 
+    const getHasPKReferenced = tab => {
+      const schema = datasetSchemas.filter(schema => schema.datasetSchemaId === datasetSchema.datasetSchemaId)[0];
+      console.log({ schema, datasetSchemas });
+    };
+
     const getIndexByHeader = (header, tabsArray) => {
       return tabsArray
         .map(tab => {
@@ -360,6 +365,7 @@ export const TabsDesigner = withRouter(
                     <TabPanel
                       addTab={tab.addTab}
                       editable={tab.editable}
+                      hasPKReferenced={getHasPKReferenced(tab)}
                       header={tab.header}
                       index={tab.index}
                       key={tab.index}

@@ -134,11 +134,7 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
-          fieldSchemaId={RecordUtils.getCellFieldSchemaId(cells, cells.field)}
-          fieldPKId={RecordUtils.getFieldReferencedPKId(
-            datasetSchemas,
-            RecordUtils.getCellFieldSchemaId(cells, cells.field)
-          )}
+          datasetSchemas={datasetSchemas}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -955,9 +951,11 @@ const DataViewer = withRouter(
               zIndex={3003}>
               <div className="p-grid p-fluid">
                 <DataForm
-                  colsSchema={colsSchema}
-                  formType="NEW"
                   addDialogVisible={addDialogVisible}
+                  colsSchema={colsSchema}
+                  datasetId={datasetId}
+                  datasetSchemas={datasetSchemas}
+                  formType="NEW"
                   onChangeForm={onEditAddFormInput}
                   records={records}
                 />
@@ -981,6 +979,8 @@ const DataViewer = withRouter(
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
+                datasetId={datasetId}
+                datasetSchemas={datasetSchemas}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 onChangeForm={onEditAddFormInput}

@@ -18,7 +18,7 @@
   "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
   "orderFieldSchemaDesign": "/dataschema/{:datasetId}/fieldSchema/order",
   "orderTableSchemaDesign": "/dataschema/{:datasetId}/tableSchema/order",
-  "referencedFieldValues": "/dataschema/{:datasetId}/getFieldsValuesReferenced?idFieldSchema={:fieldSchemaId}&searchValue={:searchToken}&idFk={:idFk}",
+  "referencedFieldValues": "/dataset/{:datasetId}/getFieldsValuesReferenced?idFieldSchema={:fieldSchemaId}&searchValue={:searchToken}",
   "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
   "updateDatasetSchemaDescriptionDesign": "/dataschema/{:datasetId}/datasetSchema",
   "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",

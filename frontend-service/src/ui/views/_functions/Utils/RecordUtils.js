@@ -96,6 +96,7 @@ const getCodelistValue = (codelistItemsOptions, value) => {
 };
 
 const getFieldReferencedPKId = (datasetSchemas, fieldSchemaId) => {
+  console.log({ datasetSchemas, fieldSchemaId });
   let fieldPKId = null;
   datasetSchemas.forEach(schema =>
     schema.tables.forEach(table => {
@@ -103,13 +104,19 @@ const getFieldReferencedPKId = (datasetSchemas, fieldSchemaId) => {
         table.records.forEach(record =>
           record.fields.forEach(field => {
             if (!isNil(field) && field.fieldId === fieldSchemaId && !isNil(field.referencedField)) {
-              fieldPKId = field.referencedField.idPk;
+              console.log('COINCIDEN!', field.fieldId, field.referencedField);
+              if (!isUndefined(field.referencedField.name)) {
+                fieldPKId = field.referencedField.referencedField.fieldSchemaId;
+              } else {
+                fieldPKId = field.referencedField.idPk;
+              }
             }
           })
         );
       }
     })
   );
+  console.log({ fieldPKId });
   return fieldPKId;
 };
 
@@ -129,6 +136,13 @@ const getInitialRecordValues = (record, colsSchema) => {
     }
   });
   return initialValues;
+};
+
+const getLinkValue = (linkOptions, value) => {
+  console.log(linkOptions, value);
+  if (!isUndefined(value) && !isUndefined(linkOptions)) {
+    return linkOptions.filter(item => item.value === value)[0];
+  }
 };
 
 const getNumCopiedRecords = pastedData => {
@@ -192,11 +206,12 @@ export const RecordUtils = {
   getCellId,
   getCellItems,
   getCellValue,
+  getClipboardData,
   getCodelistItems,
   getCodelistValue,
-  getClipboardData,
   getFieldReferencedPKId,
   getInitialRecordValues,
+  getLinkValue,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth

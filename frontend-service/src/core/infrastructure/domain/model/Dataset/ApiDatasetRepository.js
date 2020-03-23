@@ -212,14 +212,9 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const getReferencedFieldValues = async (datasetId, fieldSchemaId, idFK, searchToken) => {
-  console.log({ datasetId, fieldSchemaId, idFK, searchToken });
-  const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(
-    datasetId,
-    fieldSchemaId,
-    idFK,
-    searchToken
-  );
+const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken) => {
+  console.log({ datasetId, fieldSchemaId, searchToken });
+  const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
   console.log('referencedFieldValuesDTO', { referencedFieldValuesDTO });
   // [
   //   {
