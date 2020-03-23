@@ -214,7 +214,6 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setEnabled(true);
     rule.setAutomatic(false);
-    rule.setShortCode(null);
     rule.setActivationGroup(null);
 
     validateRule(rule);
