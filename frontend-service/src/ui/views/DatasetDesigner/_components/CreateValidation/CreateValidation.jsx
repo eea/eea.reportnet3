@@ -257,6 +257,23 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </div>
               <div className={styles.field}>
+                <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
+                <InputText
+                  id={`${componentName}__name`}
+                  placeholder={resourcesContext.messages.ruleName}
+                  value={creationFormState.candidateRule.name}
+                  onChange={e =>
+                    creationFormDispatch({
+                      type: 'SET_FORM_FIELD',
+                      payload: {
+                        key: 'name',
+                        value: e.target.value
+                      }
+                    })
+                  }
+                />
+              </div>
+              <div className={styles.field}>
                 <label htmlFor="description">{resourcesContext.messages.description}</label>
                 <InputText
                   id={`${componentName}__description`}
@@ -274,10 +291,10 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
                 />
               </div>
               <div className={`${styles.field} ${styles.errorMessage}`}>
-                <label htmlFor="errorMessage">{resourcesContext.messages.errorMessage}</label>
+                <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
                 <InputText
                   id={`${componentName}__errorMessage`}
-                  placeholder={resourcesContext.messages.errorMessage}
+                  placeholder={resourcesContext.messages.ruleErrorMessage}
                   value={creationFormState.candidateRule.errorMessage}
                   onChange={e =>
                     creationFormDispatch({
