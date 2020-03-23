@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -251,16 +252,11 @@ const getAllSchemas = async dataflowId => {
       // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
     });
 
-    let hasPKReferenced = false;
     const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
       const records = !isNull(datasetTableDTO.recordSchema)
         ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
             const fields = !isNull(dataTableRecordDTO.fieldSchema)
               ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-                  if (!isNull(DataTableFieldDTO.pkReferenced) && DataTableFieldDTO.pkReferenced === true) {
-                    console.log('HAS PK REFERENCEDDD', DataTableFieldDTO.pkReferenced);
-                    hasPKReferenced = true;
-                  }
                   return new DatasetTableField({
                     codelistItems: DataTableFieldDTO.codelistItems,
                     description: DataTableFieldDTO.description,
@@ -282,9 +278,10 @@ const getAllSchemas = async dataflowId => {
             });
           })
         : null;
-      console.log({ hasPKReferenced });
       return new DatasetTable({
-        hasPKReferenced,
+        hasPKReferenced: !isEmpty(
+          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+        ),
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
