@@ -8,10 +8,10 @@ import javax.persistence.Query;
 /**
  * The Class DatasetExtendedRepositoryImpl.
  */
-public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
+public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
   /** The entity manager. */
-  @PersistenceContext
+  @PersistenceContext(name = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
 
@@ -24,8 +24,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @Override
   public List<String> queryExecution(String generatedQuery) {
 
-    Query query = entityManager.createQuery(generatedQuery);
-    return query.getResultList();
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    List<String> resultList = query.getResultList();
+    return resultList;
 
   }
 

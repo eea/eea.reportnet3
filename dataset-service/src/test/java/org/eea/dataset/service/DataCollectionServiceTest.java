@@ -10,9 +10,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.impl.DataCollectionServiceImpl;
+import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -91,6 +95,12 @@ public class DataCollectionServiceTest {
 
   @Mock
   private ResultSet resultSet;
+
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
+  @Mock
+  private ForeignRelationsRepository foreignRelationsRepository;
 
   @Before
   public void initMocks() {
@@ -189,6 +199,8 @@ public class DataCollectionServiceTest {
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());
     Mockito.doNothing().when(recordStoreControllerZull).createSchemas(Mockito.any(), Mockito.any());
+    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
     dataCollectionService.createEmptyDataCollection(1L, new Date());
     Mockito.verify(recordStoreControllerZull, times(1)).createSchemas(Mockito.any(), Mockito.any());
   }
@@ -247,7 +259,23 @@ public class DataCollectionServiceTest {
         .addContributorsToResources(Mockito.any());
     Mockito.doNothing().when(resourceManagementControllerZuul)
         .deleteResourceByDatasetId(Mockito.any());
+    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
     dataCollectionService.createEmptyDataCollection(1L, new Date());
     Mockito.verify(connection, times(1)).rollback();
+  }
+
+  @Test
+  public void testAddForeignRelationsFromNewReportings() {
+    FKDataCollection fkData = new FKDataCollection();
+    fkData.setIdDatasetOrigin(1L);
+    fkData.setIdDatasetSchemaOrigin("5ce524fad31fc52540abae73");
+    fkData.setRepresentative("France");
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    fkData.setFks(Arrays.asList(referenced));
+    dataCollectionService.addForeignRelationsFromNewReportings(Arrays.asList(fkData));
+    Mockito.verify(foreignRelationsRepository, times(1)).saveAll(Mockito.any());
   }
 }

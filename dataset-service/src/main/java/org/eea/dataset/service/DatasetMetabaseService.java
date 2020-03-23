@@ -132,24 +132,34 @@ public interface DatasetMetabaseService {
   String findDatasetSchemaIdById(long datasetId);
 
   /**
-   * @param datasetIdOrigin
-   * @param datasetIdDestination
-   * @param idPk
+   * Adds the foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
    */
-  void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
+  void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin);
 
   /**
-   * @param datasetIdOrigin
-   * @param idPk
-   * @return
+   * Gets the dataset destination foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idPk the id pk
+   * @return the dataset destination foreign relation
    */
   Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
-  
+
   /**
-   * @param datasetIdOrigin
-   * @param datasetIdDestination
-   * @param idPk
+   * Delete foreign relation.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
    */
-  void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk);
-  
- }
+  void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin);
+
+}

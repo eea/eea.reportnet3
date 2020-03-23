@@ -202,6 +202,7 @@ public interface DatasetController {
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
 
+
   /**
    * Gets the field values referenced.
    *
@@ -219,13 +220,13 @@ public interface DatasetController {
 
 
   /**
-   * Gets the dataset id referenced.
+   * Gets the referenced dataset id.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
-   * @return the dataset id referenced
+   * @return the referenced dataset id
    */
-  @GetMapping("private/getDatasetIdReferenced")
-  Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+  @GetMapping("private/getReferencedDatasetId")
+  Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema);
 }

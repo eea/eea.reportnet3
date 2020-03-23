@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
@@ -963,7 +964,7 @@ public class DatasetSchemaServiceTest {
   }
 
   @Test
-  public void testUpdatePkCatalogue() {
+  public void testUpdatePkCatalogueNonExistingPK() {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
@@ -973,7 +974,26 @@ public class DatasetSchemaServiceTest {
     referenced.setIdPk("5ce524fad31fc52540abae73");
     fieldSchemaVO.setReferencedField(referenced);
 
-    dataSchemaServiceImpl.updatePkCatalogue(fieldSchemaVO);
+    dataSchemaServiceImpl.addToPkCatalogue(fieldSchemaVO);
+    Mockito.verify(pkCatalogueRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void testUpdatePkCatalogueExistingPK() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(new ArrayList<>());
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+
+    dataSchemaServiceImpl.addToPkCatalogue(fieldSchemaVO);
     Mockito.verify(pkCatalogueRepository, times(1)).save(Mockito.any());
   }
 
@@ -1022,10 +1042,10 @@ public class DatasetSchemaServiceTest {
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
     Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
     Mockito.verify(datasetMetabaseService, times(1)).addForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
@@ -1046,10 +1066,10 @@ public class DatasetSchemaServiceTest {
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
     Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);
     Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
@@ -1091,7 +1111,73 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
 
     dataSchemaServiceImpl.getFieldSchema("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
 
+
+  @Test
+  public void testAllowDeleteSchema() {
+    DataSetSchema schema = new DataSetSchema();
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    tableVO.setRecordSchema(recordVO);
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(dataSchemaMapper.entityToClass(schema)).thenReturn(schemaVO);
+    dataSchemaServiceImpl.isSchemaForDeletionAllowed("5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
+  public void testUpdatePkCatalogueDeletingSchema() throws EEAException {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced);
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    schema.setTableSchemas(Arrays.asList(table));
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(new ArrayList<>());
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new Document());
+    dataSchemaServiceImpl.updatePkCatalogueDeletingSchema("5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
+  public void testGetReferencedFieldsBySchema() {
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced);
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    dataSchemaServiceImpl.getReferencedFieldsBySchema("5ce524fad31fc52540abae73");
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
 }

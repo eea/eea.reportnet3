@@ -1,4 +1,6 @@
-import { isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
@@ -213,7 +215,9 @@ const getMetaData = async datasetId => {
 };
 
 const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken) => {
+  console.log({ datasetId, fieldSchemaId, searchToken });
   const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+  console.log('referencedFieldValuesDTO', { referencedFieldValuesDTO });
   // [
   //   {
   //     type: 'TEXT',
@@ -306,6 +310,9 @@ const schemaById = async datasetId => {
         })
       : null;
     return new DatasetTable({
+      hasPKReferenced: !isEmpty(
+        records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+      ),
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,

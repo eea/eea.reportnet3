@@ -1477,15 +1477,16 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
-   * Gets the dataset id referenced.
+   * Gets the referenced dataset id.
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
-   * @return the dataset id referenced
+   * @return the referenced dataset id
    */
   @Override
-  public Long getDatasetIdReferenced(Long datasetId, String idPk) {
+  public Long getReferencedDatasetId(Long datasetId, String idPk) {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
 

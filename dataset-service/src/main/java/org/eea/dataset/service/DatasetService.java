@@ -348,8 +348,26 @@ public interface DatasetService {
    */
   void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @param searchValue the search value
+   * @param idFkOrigin the id fk origin
+   * @return the field values referenced
+   */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
 
 
-  Long getDatasetIdReferenced(Long datasetId, String idPk);
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @return the referenced dataset id
+   */
+  Long getReferencedDatasetId(Long datasetId, String idPk);
 }

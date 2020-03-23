@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 // import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -16,7 +18,7 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
-  fieldSchemaId,
+  datasetSchemas,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
@@ -28,11 +30,16 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
 
-  const [testLinkValue, setTestLinkValue] = useState([]);
-
+  const [linkItemsValue, setLinkItemsValue] = useState([]);
+  console.log('datasetSchemas', { datasetSchemas });
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
     setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
+    setLinkItemsValue(RecordUtils.getCellValue(cells, cells.field).toString());
+  }, []);
+
+  useEffect(() => {
+    onFilter('');
   }, []);
 
   let fieldType = {};
@@ -41,15 +48,30 @@ const FieldEditor = ({
   }
 
   const onFilter = async filter => {
-    const referencedFieldValues = await DatasetService.getReferencedFieldValues(datasetId, fieldSchemaId, filter);
-    setLinkItemsOptions(
-      referencedFieldValues.map(referencedField => {
-        return {
-          label: referencedField.value,
-          value: referencedField.value
-        };
-      })
+    console.log({ filter, cells });
+    const fieldSchemaId = RecordUtils.getFieldReferencedPKId(
+      datasetSchemas,
+      RecordUtils.getCellFieldSchemaId(cells, cells.field)
     );
+    if (isNil(fieldSchemaId)) {
+      return;
+    }
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+      datasetId,
+      RecordUtils.getFieldReferencedPKId(datasetSchemas, RecordUtils.getCellFieldSchemaId(cells, cells.field)),
+      filter
+    );
+    const linkItems = referencedFieldValues.map(referencedField => {
+      return {
+        itemType: referencedField.value,
+        value: referencedField.value
+      };
+    });
+    linkItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    setLinkItemsOptions(linkItems);
   };
 
   const getCodelistItemsWithEmptyOption = () => {
@@ -118,7 +140,7 @@ const FieldEditor = ({
           //     yearRange="2010:2030"
           //   />
         );
-      case 'POLYGON':
+      case 'LINK':
         return (
           <Dropdown
             // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
@@ -126,9 +148,10 @@ const FieldEditor = ({
             appendTo={document.body}
             filter={true}
             filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-            filterBy="label,value"
+            filterBy="itemType,value"
             onChange={e => {
-              setCodelistItemValue(e.target.value.value);
+              console.log(e.target.value, e.target);
+              setLinkItemsValue(e.target.value.value);
               onEditorValueChange(cells, e.target.value.value);
               onEditorSubmitValue(cells, e.target.value.value, record);
             }}
@@ -137,12 +160,12 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            // optionLabel="itemType"
+            optionLabel="itemType"
             // getCodelistItemsWithEmptyOption()
             options={linkItemsOptions}
             // required={true}
             // placeholder={resources.messages['category']}
-            value={testLinkValue}
+            value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
           />
         );
       case 'CODELIST':

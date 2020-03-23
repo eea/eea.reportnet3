@@ -59,8 +59,8 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const onLoadValidationsList = async datasetSchemaId => {
     try {
       setIsLoading(true);
-      const validationsList = await ValidationService.getAll(datasetSchemaId);
-      setValidationsList(validationsList);
+      const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
+      setValidationsList(validationsServiceList);
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
@@ -111,11 +111,10 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       { id: 'automatic', index: 6 },
       { id: 'referenceId', index: 7 },
       { id: 'activationGroup', index: 8 },
-      { id: 'condition', index: 9 },
-      { id: 'date', index: 10 },
-      { id: 'entityType', index: 11 },
-      { id: 'actionButtons', index: 12 }
-    ];
+      { id: 'date', index: 9 },
+      { id: 'entityType', index: 10 },
+      { id: 'actionButtons', index: 11 }
+    ];  
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
       .flat()
@@ -152,7 +151,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       return (
         <Column
-          body={field === 'automatic' || field === 'enabled' ? automaticTemplate : null}
+          body={field === 'automatic' || field === 'manual' || field === 'enabled' ? automaticTemplate : null}
           key={field}
           columnResizeMode="expand"
           field={field}
@@ -183,12 +182,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         </div>
       );
     }
-
-    return validationsList.entityTypes.map(entityType => {
-      const validationsFilteredByEntityType = validationsList.validations.filter(
-        validation => validation.entityType === entityType
-      );
-      const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
+      const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
       return (
         <div className={null}>
           <DataTable
@@ -200,9 +194,9 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={validationsFilteredByEntityType.length}
-            value={validationsFilteredByEntityType}>
-            {renderColumns(validationsFilteredByEntityType)}
+            totalRecords={validationsList.validations.length}
+            value={validationsList.validations}>
+            {renderColumns(validationsList.validations)}
           </DataTable>
         </div>
 
@@ -223,7 +217,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         //   </div>
         // </TabPanel>
       );
-    });
+    // });
   };
 
   if (isLoading) {

@@ -1,6 +1,6 @@
 package org.eea.validation.util;
 
-import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The Class CodelistUtils.
@@ -20,7 +20,7 @@ public class CodelistUtils {
       final boolean sensitive) {
     Boolean validationResult = false;
     // we delete the first character and the last one because we receive a string with [] values
-    if (!StringUtil.isNullOrEmpty(value)) {
+    if (!StringUtils.isBlank(value)) {
       final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
 
       if (Boolean.TRUE.equals(sensitive)) {
