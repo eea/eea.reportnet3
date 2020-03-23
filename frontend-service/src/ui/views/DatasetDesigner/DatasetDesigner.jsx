@@ -37,6 +37,7 @@ import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
@@ -51,14 +52,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [datasetHasData, setDatasetHasData] = useState(false);
-  const [validationId, setValidationId] = useState('');
+  const [metaData, setMetaData] = useState({});
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
@@ -137,11 +138,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     leftSideBarContext.removeModels();
     getDataflowName();
     onLoadDatasetSchemaName();
+    callSetMetaData();
   }, []);
+
+  const callSetMetaData = async () => {
+    setMetaData(await getMetadata({ datasetId, dataflowId }));
+  };
 
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(dataflowId);
     setDataflowName(dataflowData.name);
+  };
+
+  const getMetadata = async ids => {
+    try {
+      return await MetadataUtils.getMetadata(ids);
+    } catch (error) {
+      notificationContext.add({
+        type: 'GET_METADATA_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
+    }
   };
 
   const onBlurDescription = description => {
@@ -275,7 +295,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onHide={() => onHideValidationsDialog()}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
-          <TabsValidations datasetSchemaId={datasetSchemaId} />
+          <TabsValidations datasetSchemaId={datasetSchemaId} dataset={metaData.dataset} />
         </Dialog>
       );
     }

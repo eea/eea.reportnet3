@@ -6,6 +6,7 @@ export const resetValidationRuleCreation = () => {
     table: undefined,
     field: undefined,
     shortCode: '',
+    name: '',
     description: '',
     errorMessage: '',
     errorLevel: undefined,
