@@ -92,10 +92,10 @@ const parseDataValidationRulesDTO = validations => {
   validationsData.validations = validations.map(validationDTO => {
     entityTypes.push(validationDTO.type);
     return new Validation({
-      activationGroup: validationDTO.activationGroup,
-      automatic: validationDTO.automatic,
-      condition: validationDTO.whenCondition,
-      date: validationDTO.activationGroup,
+      activationGroup: !isNil(validationDTO.activationGroup) ? validationDTO.activationGroup : "",
+      automatic: !isNil(validationDTO.automatic) ? validationDTO.automatic : "",
+      condition: !isNil(validationDTO.whenCondition) ? validationDTO.whenCondition : null,
+      date: !isNil(validationDTO.activationGroup) ? validationDTO.activationGroup : "",
       description: !isNil(validationDTO.description) ? validationDTO.description : "",
       enabled: !isNil(validationDTO.enabled) ? validationDTO.enabled : "",
       entityType: !isNil(validationDTO.type) ? validationDTO.type : "",
