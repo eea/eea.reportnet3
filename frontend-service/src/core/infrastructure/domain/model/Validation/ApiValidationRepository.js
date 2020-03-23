@@ -74,7 +74,6 @@ const getAll = async datasetSchemaId => {
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
   }
-
   const validationsList = {};
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
@@ -88,32 +87,35 @@ const getAll = async datasetSchemaId => {
 const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
   const entityTypes = [];
-
-  validationsData.validations = validations.map(validationDTO => {
-    entityTypes.push(validationDTO.type);
-    return new Validation({
-      activationGroup: validationDTO.activationGroup,
-      automatic: validationDTO.automatic,
-      condition: validationDTO.whenCondition,
-      date: validationDTO.activationGroup,
-      description: isNil(validationDTO.description) ? validationDTO.description : "",
-      enabled: isNil(validationDTO.enabled) ? validationDTO.enabled : "",
-      entityType: isNil(validationDTO.type) ? validationDTO.type : "",
-      id: isNil(validationDTO.ruleId) ? validationDTO.ruleId : "",
-      levelError:
-        !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
-          ? validationDTO.thenCondition[1]
-          : "",
-      message:
-        !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[0])
-          ? validationDTO.thenCondition[0]
-          : "",
-      name: !isNil(validationDTO.ruleName) ? validationDTO.ruleName : "" ,
-      referenceId: !isNil(validationDTO.referenceId) ? validationDTO.referenceId : "", 
-      shortCode: !isNil(validationDTO.shortCode) ? validationDTO.shortCode : ""
+  try {
+    validationsData.validations = validations.map(validationDTO => {
+      entityTypes.push(validationDTO.type);
+      return new Validation({
+        activationGroup: validationDTO.activationGroup,
+        automatic: validationDTO.automatic,
+        condition: validationDTO.whenCondition,
+        date: validationDTO.activationGroup,
+        description: validationDTO.description,
+        enabled: validationDTO.enabled,
+        entityType: validationDTO.type,
+        id: validationDTO.ruleId,
+        levelError:
+          !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
+            ? validationDTO.thenCondition[1]
+            : "",
+        message:
+          !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[0])
+            ? validationDTO.thenCondition[0]
+            : "",
+        name: validationDTO.ruleName,
+        referenceId: validationDTO.referenceId, 
+        shortCode: validationDTO.shortCode
+      });
     });
-  });
-
+  }
+  catch (error) {
+    throw new Error('VALIDATION_SERVICE_GET_ALL');
+  }
   validationsData.entityTypes = [...new Set(entityTypes)];
   return validationsData;
 };
