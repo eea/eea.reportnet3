@@ -718,10 +718,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // if we change the type we need to delete all rules
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
       // Delete FK Rules
-      if (type.equals(DataType.LINK)) {
-        rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
-            fieldSchemaVO.getId());
-      }
+      rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
+          fieldSchemaVO.getId());
+
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
             EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
