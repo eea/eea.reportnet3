@@ -480,7 +480,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
 
         // Delete FK rules
-        if (fieldVO.getType().equals(DataType.LINK)) {
+        if (null != fieldVO && fieldVO.getType().equals(DataType.LINK)) {
           rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, fieldSchemaId);
         }
         // Delete the fieldSchema from the dataset
