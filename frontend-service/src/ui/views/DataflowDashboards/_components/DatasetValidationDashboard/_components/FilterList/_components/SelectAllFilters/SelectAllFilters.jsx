@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 
-import styles from './SelectAllFilters.module.css';
+import styles from './SelectAllFilters.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
