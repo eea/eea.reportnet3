@@ -17,16 +17,19 @@ const filterItem = (filter, item) => {
 };
 
 const onFilteringData = (originalData, tableIds, reporters, status) => {
+  let tablesData = [];
+
   if (isEmpty(originalData)) {
     return;
   }
-  let tablesData = [];
+
   if (isUndefined(tableIds)) {
     return tablesData;
   }
   tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
 
   const labels = originalData.labels.filter(label => filterItem(reporters, label));
+
   const labelsPositionsInFilteredLabels = reporters.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabels);
@@ -35,13 +38,16 @@ const onFilteringData = (originalData, tableIds, reporters, status) => {
 };
 
 const onFilteringReporters = (originalData, tableIds, reporters, status) => {
+  let tablesData = [];
+
   if (isEmpty(originalData)) {
     return;
   }
-  let tablesData = [];
+
   if (isUndefined(tableIds)) {
     return tablesData;
   }
+
   tablesData = originalData.datasets.filter(table => filterItem(tableIds, table.tableId));
 
   const labels = originalData.labels.filter(label => filterItem(reporters, label));
@@ -55,6 +61,7 @@ const onFilteringReporters = (originalData, tableIds, reporters, status) => {
 const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
   let tablesData = [];
   let labels = [];
+
   if (isEmpty(originalData) || reporterFilters.length == originalData.labels.length) {
     tablesData = [];
     labels = [];
@@ -63,6 +70,7 @@ const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
     tablesData = tablesData.filter(table => filterItem(status, table.label));
     labels = originalData.labels.filter(label => filterItem(reporterFilters, label));
   }
+
   return { labels: labels, datasets: tablesData };
 };
 
@@ -81,10 +89,10 @@ const onFilteringStatus = (originalData, status, reporters, tableIds) => {
 };
 
 export const filterReducer = (state, { type, payload }) => {
-  let reporters = [];
-  let tablesIds = [];
-  let status = [];
   let filteredTableData;
+  let reporters = [];
+  let status = [];
+  let tablesIds = [];
   switch (type) {
     case 'INIT_DATA':
       return {
@@ -136,7 +144,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'REPORTER_CHECKBOX_ON':
-      reporters = state.reporterFilter.filter(label => label !== payload.label);
+      reporters = state.reporterFilter.filter(reporter => reporter !== payload.label);
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
 
       return {
