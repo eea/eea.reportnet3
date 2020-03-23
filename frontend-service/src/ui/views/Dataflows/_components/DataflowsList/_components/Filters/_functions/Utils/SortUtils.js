@@ -13,6 +13,10 @@ const getOrderInitialState = (input = [], select = [], date = []) => {
   return orderByState;
 };
 
+const onResetOrderData = (input = [], select = [], date = []) => {
+  return input.concat(select, date).reduce((obj, key) => Object.assign(obj, { [key]: 0 }), {});
+};
+
 const onSortData = (data, order, property) => {
   if (order !== 1) {
     return data.sort((a, b) => {
@@ -29,4 +33,4 @@ const onSortData = (data, order, property) => {
   }
 };
 
-export const SortUtils = { getOrderIcon, getOrderInitialState, onSortData };
+export const SortUtils = { getOrderIcon, getOrderInitialState, onResetOrderData, onSortData };
