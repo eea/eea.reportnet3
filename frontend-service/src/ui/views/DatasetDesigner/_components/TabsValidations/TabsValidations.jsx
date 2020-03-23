@@ -80,7 +80,15 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   const automaticTemplate = rowData => (
     <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic || rowData.enabled ? (
+      {rowData.automatic ? (
+        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+      ) : null}
+    </div>
+  );
+
+  const enabledTemplate = rowData => (
+    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
+      {rowData.enabled ? (
         <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
       ) : null}
     </div>
@@ -147,12 +155,30 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     return style;
   };
 
+  const actionButtonsColumn = (
+    <Column
+        body={row => actionTemplate(row)}
+        className={styles.validationCol}
+        header={resources.messages['actions']}
+        key="actions"
+        sortable={false}
+        style={{ width: '100px' }}
+    />
+  );
+
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
+      let template = null;
+      if (field === 'automatic') {
+        template = automaticTemplate;
+      }
+      if (field === 'enabled') {
+        template = enabledTemplate;
+      }
       return (
         <Column
-          body={field === 'automatic' || field === 'manual' || field === 'enabled' ? automaticTemplate : null}
-          key={field}
+          body={template}
+          key={field} 
           columnResizeMode="expand"
           field={field}
           header={getHeader(field)}
@@ -161,16 +187,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         />
       );
     });
-    fieldColumns.push(
-      <Column
-        body={row => actionTemplate(row)}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
-      />
-    );
+    fieldColumns.push(actionButtonsColumn);
     return fieldColumns;
   };
 
