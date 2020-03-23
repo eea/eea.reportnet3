@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -138,29 +138,24 @@ export const DataflowDashboards = withRouter(
         })
       : null;
 
-    const onLoadCharts = !isUndefined(dataSchema)
-      ? dataSchema.map(schema => {
-          return (
-            <DatasetValidationDashboard
-              key={schema.datasetSchemaId}
-              datasetSchemaId={schema.datasetSchemaId}
-              isVisible={chartState[schema.datasetSchemaId]}
-              datasetSchemaName={schema.datasetSchemaName}
-            />
-          );
-        })
-      : null;
+    const onLoadCharts =
+      !isUndefined(dataSchema) &&
+      dataSchema.map(schema => (
+        <DatasetValidationDashboard
+          key={schema.datasetSchemaId}
+          datasetSchemaId={schema.datasetSchemaId}
+          isVisible={chartState[schema.datasetSchemaId]}
+          datasetSchemaName={schema.datasetSchemaName}
+        />
+      ));
 
-    const layout = children => {
-      return (
-        <MainLayout>
-          <div className="rep-container">{children}</div>
-        </MainLayout>
-      );
-    };
-
+    const layout = children => (
+      <MainLayout>
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
     return layout(
-      <>
+      <Fragment>
         <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
         <div className={styles.validationChartWrap}>
           <h2 className={styles.dashboardType}>{resources.messages['validationDashboards']}</h2>
@@ -180,7 +175,7 @@ export const DataflowDashboards = withRouter(
           <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
           <ReleasedDatasetsDashboard dataflowId={dataflowId} />
         </div>
-      </>
+      </Fragment>
     );
   }
 );

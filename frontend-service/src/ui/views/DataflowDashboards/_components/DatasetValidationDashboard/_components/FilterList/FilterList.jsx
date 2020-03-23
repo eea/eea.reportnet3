@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, Fragment } from 'react';
 
 import { uniqBy } from 'lodash';
 
@@ -62,7 +62,7 @@ const FilterList = ({
   };
 
   return (
-    <>
+    <Fragment>
       <Accordion multiple={true}>
         {filterByReporters()}
         {filterByTables()}
@@ -74,7 +74,7 @@ const FilterList = ({
         levelErrors={levelErrors}
         filterDispatch={filterDispatch}
       />
-    </>
+    </Fragment>
   );
 };
 
