@@ -506,6 +506,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Gets the field values referenced.
    *
@@ -518,24 +519,25 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/{id}/getFieldsValuesReferenced")
   @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema,
+      @RequestParam("idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue) {
     return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
   }
 
 
+
   /**
-   * Gets the dataset id referenced.
+   * Gets the referenced dataset id.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
-   * @return the dataset id referenced
+   * @return the referenced dataset id
    */
   @Override
-  @GetMapping("private/getDatasetIdReferenced")
-  public Long getDatasetIdReferenced(@RequestParam("id") Long datasetIdOrigin,
+  @GetMapping("private/getReferencedDatasetId")
+  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema) {
-    return datasetService.getDatasetIdReferenced(datasetIdOrigin, idFieldSchema);
+    return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
   }
 
 }

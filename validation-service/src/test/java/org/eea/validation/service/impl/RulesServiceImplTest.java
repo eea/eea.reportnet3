@@ -21,6 +21,10 @@ import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.RecordSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.junit.Assert;
@@ -205,10 +209,28 @@ public class RulesServiceImplTest {
    */
   @Test
   public void createAutomaticRulesPKTest() throws EEAException {
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemaList = new ArrayList();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema = new FieldSchema();
+    List<FieldSchema> fieldSchemaList = new ArrayList();
+    fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    fieldSchemaList.add(fieldSchema);
+    recordSchema.setFieldSchema(fieldSchemaList);
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchemaList.add(tableSchema);
+    datasetSchema.setTableSchemas(tableSchemaList);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+
+
+
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(tableRepository.findTableValueByFieldSchemaId(Mockito.any(), Mockito.any()))
-        .thenReturn("5e44110d6a9e3a270ce13fac");
+
+
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
         .thenReturn(ruleSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",

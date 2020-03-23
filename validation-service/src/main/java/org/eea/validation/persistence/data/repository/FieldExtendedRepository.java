@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * The Interface DatasetExtendedRepository.
  */
-public interface DatasetExtendedRepository {
+public interface FieldExtendedRepository {
 
 
 

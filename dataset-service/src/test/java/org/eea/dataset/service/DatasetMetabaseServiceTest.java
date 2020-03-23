@@ -101,7 +101,7 @@ public class DatasetMetabaseServiceTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
-  
+
   @Mock
   private ForeignRelationsRepository foreingRelationsRepository;
 
@@ -350,25 +350,31 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals("5ce524fad31fc52540abae73",
         datasetMetabaseService.findDatasetSchemaIdById(1L));
   }
-  
+
   @Test
   public void testAddForeignRelation() {
-    Mockito.when(foreingRelationsRepository.save(Mockito.any()))
-    .thenReturn(new ForeignRelations());
-    datasetMetabaseService.addForeignRelation(1L, 1L, "5ce524fad31fc52540abae73");
+    Mockito.when(foreingRelationsRepository.save(Mockito.any())).thenReturn(new ForeignRelations());
+    datasetMetabaseService.addForeignRelation(1L, 1L, "5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
     Mockito.verify(foreingRelationsRepository, times(1)).save(Mockito.any());
   }
-  
+
   @Test
   public void testDeleteForeignRelation() {
-    Mockito.doNothing().when(foreingRelationsRepository).deleteFKByOriginDestinationAndPk(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetMetabaseService.deleteForeignRelation(1L, 1L, "5ce524fad31fc52540abae73");
-    Mockito.verify(foreingRelationsRepository, times(1)).deleteFKByOriginDestinationAndPk(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(foreingRelationsRepository)
+        .deleteFKByOriginDestinationAndPkAndIdFkOrigin(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any());
+    datasetMetabaseService.deleteForeignRelation(1L, 1L, "5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
+    Mockito.verify(foreingRelationsRepository, times(1))
+        .deleteFKByOriginDestinationAndPkAndIdFkOrigin(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any());
   }
-  
+
   @Test
   public void testGetDatasetDestinationForeignRelation() {
     datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
-    Mockito.verify(foreingRelationsRepository, times(1)).findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
+    Mockito.verify(foreingRelationsRepository, times(1))
+        .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
   }
 }

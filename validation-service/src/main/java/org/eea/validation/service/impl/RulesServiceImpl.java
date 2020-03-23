@@ -16,6 +16,9 @@ import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
@@ -67,6 +70,9 @@ public class RulesServiceImpl implements RulesService {
 
   /** The Constant FT_DESCRIPTION. */
   private static final String FT_DESCRIPTION = "Checks if the field is a valid ";
+
+  /** The Constant TB_DESCRIPTION. */
+  private static final String TC_DESCRIPTION = "Checks if the record based on criteria is valid ";
 
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
@@ -289,10 +295,12 @@ public class RulesServiceImpl implements RulesService {
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
           // that is for evite do many calls to database and colapse it
-          String tableSchemaId =
-              tableRepository.findTableValueByFieldSchemaId(datasetId, referenceId);
+          DataSetSchema datasetSchema =
+              schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+          String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
+
           ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData, tableSchemaId,
+              FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
               datasetId));
           break;
         case CODELIST:
@@ -317,16 +325,32 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-  // @Override
-  // public void createAutomaticPKRule(String datasetSchemaId, String referenceIdRule,
-  // Long datasetId) {
-  // ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
-  // FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-  // Rule rule = AutomaticRules.createPKAutomaticRule(referenceIdRule, "nameRule", "shortCode",
-  // FT_DESCRIPTION, datasetId);
-  // rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
-  //
-  // }
+
+  /**
+   * Gets the table schema id from id field schema. We look for a
+   *
+   * @param schema the schema
+   * @param idFieldSchema the id field schema
+   * @return the table schema id from id field schema
+   */
+  private String getTableSchemaIdFromIdFieldSchema(DataSetSchema schema, String idFieldSchema) {
+    String tableSchemaId = "";
+    Boolean locatedTable = false;
+    for (TableSchema table : schema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().toString().equals(idFieldSchema)) {
+          tableSchemaId = table.getIdTableSchema().toString();
+          locatedTable = Boolean.TRUE;
+          break;
+        }
+      }
+      if (locatedTable.equals(Boolean.TRUE)) {
+        break;
+      }
+    }
+    return tableSchemaId;
+  }
+
   /**
    * Delete rule required.
    *

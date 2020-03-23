@@ -155,10 +155,15 @@ public class AutomaticRules {
    */
   public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description, String tableSchemaId, Long datasetId) {
-    return composeRule(tableSchemaId, typeEntityEnum, nameRule,
-        "isfieldPK(" + datasetId + "L,'" + referenceId + "')",
-        "The value does not follow the required syntax for valid values, check the pk colum in the other table",
-        ErrorTypeEnum.BLOCKER.getValue(), shortCode, description);
+    Rule rule = composeRule(tableSchemaId, typeEntityEnum, nameRule,
+        "isfieldPK('" + datasetId + "','" + referenceId + "',",
+        "The value must be based on criteria.", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
+    // we add the rule data to take the message if the user edit the rule
+    StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
+    whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
+    rule.setWhenCondition(whenCondition.toString());
+    return rule;
   }
 
   /**
