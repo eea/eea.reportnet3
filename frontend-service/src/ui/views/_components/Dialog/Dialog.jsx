@@ -41,7 +41,6 @@ export const Dialog = ({
     zIndex
   };
   useEffect(() => {
-    console.log('Dialog visible: ', visible);
     const body = document.querySelector('body');
     if (visible) {
       body.style.overflow = 'hidden';
