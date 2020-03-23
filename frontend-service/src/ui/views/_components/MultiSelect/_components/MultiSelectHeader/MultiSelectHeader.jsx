@@ -5,9 +5,12 @@ import { InputText } from 'ui/views/_components/InputText';
 
 export const MultiSelectHeader = ({
   allChecked,
+  checkAllHeader,
   filter,
   filterPlaceholder,
   filterValue,
+  headerClassName,
+  notCheckAllHeader,
   onClose,
   onFilter,
   onToggleAll
@@ -49,13 +52,16 @@ export const MultiSelectHeader = ({
   };
 
   return (
-    <div className="p-multiselect-header">
+    <div className="p-multiselect-header" style={{ padding: '0.5rem' }}>
       <Checkbox
         aria-checked={allChecked}
         checked={allChecked}
         onChange={event => onToggleAllEvent(event)}
         role="checkbox"
       />
+      <span className={headerClassName} onClick={event => onToggleAll(event)}>
+        {allChecked ? notCheckAllHeader : checkAllHeader}
+      </span>
       {renderFilterElement()}
       <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
         <span className="p-multiselect-close-icon pi pi-times" />

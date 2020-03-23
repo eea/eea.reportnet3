@@ -15,12 +15,15 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 export class MultiSelect extends Component {
   static defaultProps = {
     id: null,
+    inputId: null,
+    label: null,
     value: null,
     options: null,
     optionLabel: null,
     optionValue: null,
     style: null,
     className: null,
+    inputClassName: null,
     scrollHeight: '200px',
     placeholder: null,
     fixedPlaceholder: false,
@@ -39,6 +42,9 @@ export class MultiSelect extends Component {
     ariaLabelledBy: null,
     itemTemplate: null,
     selectedItemTemplate: null,
+    checkAllHeader: null,
+    notCheckAllHeader: null,
+    headerClassName: null,
     onChange: null,
     onFocus: null,
     onBlur: null
@@ -46,12 +52,15 @@ export class MultiSelect extends Component {
 
   static propTypes = {
     id: PropTypes.string,
+    inputId: PropTypes.string,
+    label: PropTypes.string,
     value: PropTypes.any,
     options: PropTypes.array,
     optionLabel: PropTypes.string,
     optionValue: PropTypes.string,
     style: PropTypes.object,
     className: PropTypes.string,
+    inputClassName: PropTypes.string,
     scrollHeight: PropTypes.string,
     placeholder: PropTypes.string,
     fixedPlaceholder: PropTypes.bool,
@@ -70,6 +79,9 @@ export class MultiSelect extends Component {
     ariaLabelledBy: PropTypes.string,
     itemTemplate: PropTypes.func,
     selectedItemTemplate: PropTypes.func,
+    checkAllHeader: PropTypes.string,
+    notCheckAllHeader: PropTypes.string,
+    headerClassName: PropTypes.string,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
     onBlur: PropTypes.func
@@ -456,13 +468,16 @@ export class MultiSelect extends Component {
   renderHeader(items) {
     return (
       <MultiSelectHeader
-        filter={this.props.filter}
-        filterValue={this.state.filter}
-        onFilter={this.onFilter}
-        filterPlaceholder={this.props.filterPlaceholder}
-        onClose={this.onCloseClick}
-        onToggleAll={this.onToggleAll}
         allChecked={this.isAllChecked(items)}
+        checkAllHeader={this.props.checkAllHeader}
+        filter={this.props.filter}
+        filterPlaceholder={this.props.filterPlaceholder}
+        filterValue={this.state.filter}
+        headerClassName={this.props.headerClassName}
+        notCheckAllHeader={this.props.notCheckAllHeader}
+        onClose={this.onCloseClick}
+        onFilter={this.onFilter}
+        onToggleAll={this.onToggleAll}
       />
     );
   }
@@ -476,7 +491,7 @@ export class MultiSelect extends Component {
     });
 
     return (
-      <div className="p-multiselect-label-container">
+      <div className="p-multiselect-label-container" style={{ position: 'absolute', top: '0' }}>
         <label className={className}>{content || this.props.placeholder || 'empty'}</label>
       </div>
     );
@@ -513,6 +528,7 @@ export class MultiSelect extends Component {
     }
 
     let header = this.renderHeader(items);
+    let labelContent = this.getLabelContent();
 
     return (
       <div
@@ -521,16 +537,20 @@ export class MultiSelect extends Component {
         onClick={this.onClick}
         ref={el => (this.container = el)}
         style={this.props.style}>
-        <div className="p-hidden-accessible">
+        <div
+          className={`p-hidden-accessible ${this.props.inputClassName}`}
+          style={{ overflow: 'visible', clip: 'auto', height: 'auto' }}>
           <input
-            readOnly
-            type="text"
-            onFocus={this.onFocus}
-            onBlur={this.onBlur}
-            ref={el => (this.focusInput = el)}
             aria-haspopup="listbox"
             aria-labelledby={this.props.ariaLabelledBy}
+            className={labelContent ? 'p-filled' : ''}
+            id={this.props.inputId}
+            onBlur={this.onBlur}
+            onFocus={this.onFocus}
+            ref={el => (this.focusInput = el)}
+            type="text"
           />
+          <label htmlFor={this.props.inputId}>{this.props.label}</label>
         </div>
         {label}
         <div className="p-multiselect-trigger">

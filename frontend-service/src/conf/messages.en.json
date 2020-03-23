@@ -508,6 +508,8 @@
     "clearFilters": "Clear filters",
     "userRole": "Role",
     "thereAreNoDatalows": "There are no pending dataflows",
-    "noDataflowsWithSelectedParameters": "There are no dataflows with the selected parameters"
+    "noDataflowsWithSelectedParameters": "There are no dataflows with the selected parameters",
+    "checkAllFilter": "Select all",
+    "uncheckAllFilter": "Unselect all"
   }
 }

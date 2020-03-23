@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -91,57 +91,63 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     const minDate = FilterUtils.getYesterdayDate();
 
     return (
-      <span className={`p-float-label ${styles.dataflowInput}`} ref={dateRef}>
-        <Calendar
-          className={styles.calendarFilter}
-          disabledDates={[minDate]}
-          inputClassName={styles.inputFilter}
-          inputId={property}
-          minDate={minDate}
-          monthNavigator={true}
-          onChange={event => onFilterData(property, event.value)}
-          onFocus={() => onAnimateLabel(property, true)}
-          readOnlyInput={true}
-          selectionMode="range"
-          showWeek={true}
-          value={filterState.filterBy[property]}
-          yearNavigator={true}
-          yearRange="2020:2030"
-        />
-        {!isEmpty(filterState.filterBy[property]) && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => {
-              onFilterData(property, []);
-              onAnimateLabel(property, false);
-            }}
+      <span className={styles.dataflowInput} ref={dateRef}>
+        {renderOrderFilter(property)}
+        <span className="p-float-label">
+          <Calendar
+            className={styles.calendarFilter}
+            disabledDates={[minDate]}
+            inputClassName={styles.inputFilter}
+            inputId={property}
+            minDate={minDate}
+            monthNavigator={true}
+            onChange={event => onFilterData(property, event.value)}
+            onFocus={() => onAnimateLabel(property, true)}
+            readOnlyInput={true}
+            selectionMode="range"
+            showWeek={true}
+            value={filterState.filterBy[property]}
+            yearNavigator={true}
+            yearRange="2020:2030"
           />
-        )}
-        <label className={filterState.labelAnimations[property] ? styles.labeUp : styles.labelDown} htmlFor={property}>
-          {resources.messages[property]}
-        </label>
+          {!isEmpty(filterState.filterBy[property]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onFilterData(property, []);
+                onAnimateLabel(property, false);
+              }}
+            />
+          )}
+          <label className={!filterState.labelAnimations[property] ? styles.labelDown : ''} htmlFor={property}>
+            {resources.messages[property]}
+          </label>
+        </span>
       </span>
     );
   };
 
   const renderInputFilter = property => (
-    <span className={`${styles.dataflowInput}  p-float-label`}>
-      <InputText
-        className={styles.inputFilter}
-        disabled={property.includes('ROD3')}
-        id={property}
-        onChange={event => onFilterData(property, event.target.value)}
-        value={filterState.filterBy[property]}
-      />
-      {filterState.filterBy[property] && (
-        <Button
-          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-          icon="cancel"
-          onClick={() => onFilterData(property, '')}
+    <span className={styles.dataflowInput}>
+      {renderOrderFilter(property)}
+      <span className="p-float-label">
+        <InputText
+          className={styles.inputFilter}
+          disabled={property.includes('ROD3')}
+          id={property}
+          onChange={event => onFilterData(property, event.target.value)}
+          value={filterState.filterBy[property]}
         />
-      )}
-      <label htmlFor={property}>{resources.messages[property]}</label>
+        {filterState.filterBy[property] && (
+          <Button
+            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+            icon="cancel"
+            onClick={() => onFilterData(property, '')}
+          />
+        )}
+        <label htmlFor={property}>{resources.messages[property]}</label>
+      </span>
     </span>
   );
 
@@ -160,14 +166,20 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   const renderSelectFilter = property => (
     <span className={`${styles.dataflowInput}`}>
+      {renderOrderFilter(property)}
       <MultiSelect
+        checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
+        headerClassName={styles.selectHeader}
         id={property}
+        inputClassName={`p-float-label`}
+        inputId={property}
         itemTemplate={selectTemplate}
+        label={resources.messages[property]}
+        notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property)}
-        placeholder={resources.messages[property]}
         value={filterState.filterBy[property]}
       />
     </span>
@@ -181,27 +193,10 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
   return (
     <div className={styles.header}>
-      {inputOptions &&
-        inputOptions.map(option => (
-          <Fragment>
-            {renderOrderFilter(option)}
-            {renderInputFilter(option)}
-          </Fragment>
-        ))}
-      {selectOptions &&
-        selectOptions.map(option => (
-          <Fragment>
-            {renderOrderFilter(option)}
-            {renderSelectFilter(option)}
-          </Fragment>
-        ))}
-      {dateOptions &&
-        dateOptions.map(option => (
-          <Fragment>
-            {renderOrderFilter(option)}
-            {renderCalendarFilter(option)}
-          </Fragment>
-        ))}
+      {inputOptions && inputOptions.map(option => renderInputFilter(option))}
+      {selectOptions && selectOptions.map(option => renderSelectFilter(option))}
+      {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}
+
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
           className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.cancelFilters}`}
