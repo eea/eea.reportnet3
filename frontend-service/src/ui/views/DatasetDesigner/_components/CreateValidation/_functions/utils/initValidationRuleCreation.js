@@ -18,6 +18,7 @@ export const initValidationRuleCreation = rawTables => {
       table: undefined,
       field: undefined,
       shortCode: '',
+      name: '',
       description: '',
       errorMessage: '',
       errorLevel: undefined,

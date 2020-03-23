@@ -524,6 +524,7 @@
     "linkSelector": "Select a Link",
     "selectedLink": "Selected Link",
     "linkSelection": "No link selected",
-    "linkFilterPlaceholder": "Search value"
+    "linkFilterPlaceholder": "Search value",
+    "ruleErrorMessage": "Error message"
   }
 }

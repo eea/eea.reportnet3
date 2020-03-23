@@ -56,7 +56,7 @@ const create = async (datasetSchemaId, validationRule) => {
     automatic: false,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
-    ruleName: '',
+    ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
@@ -96,21 +96,21 @@ const parseDataValidationRulesDTO = validations => {
       automatic: validationDTO.automatic,
       condition: validationDTO.whenCondition,
       date: validationDTO.activationGroup,
-      description: isNil(validationDTO.description) ? validationDTO.description : "",
-      enabled: isNil(validationDTO.enabled) ? validationDTO.enabled : "",
-      entityType: isNil(validationDTO.type) ? validationDTO.type : "",
-      id: isNil(validationDTO.ruleId) ? validationDTO.ruleId : "",
+      description: isNil(validationDTO.description) ? validationDTO.description : '',
+      enabled: isNil(validationDTO.enabled) ? validationDTO.enabled : '',
+      entityType: isNil(validationDTO.type) ? validationDTO.type : '',
+      id: isNil(validationDTO.ruleId) ? validationDTO.ruleId : '',
       levelError:
         !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
           ? validationDTO.thenCondition[1]
-          : "",
+          : '',
       message:
         !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[0])
           ? validationDTO.thenCondition[0]
-          : "",
-      name: !isNil(validationDTO.ruleName) ? validationDTO.ruleName : "" ,
-      referenceId: !isNil(validationDTO.referenceId) ? validationDTO.referenceId : "", 
-      shortCode: !isNil(validationDTO.shortCode) ? validationDTO.shortCode : ""
+          : '',
+      name: !isNil(validationDTO.ruleName) ? validationDTO.ruleName : '',
+      referenceId: !isNil(validationDTO.referenceId) ? validationDTO.referenceId : '',
+      shortCode: !isNil(validationDTO.shortCode) ? validationDTO.shortCode : ''
     });
   });
 

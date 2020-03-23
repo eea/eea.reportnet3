@@ -8,7 +8,7 @@ export const checkValidation = candidateRule => {
   const ruleKeys = Object.keys(candidateRule);
 
   ruleKeys.forEach(ruleKey => {
-    if (ruleKey != 'expressions' && ruleKey != 'active') {
+    if (ruleKey != 'expressions' && ruleKey != 'active' && ruleKey != 'description') {
       if (isNil(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
         isValidated = false;
       }
