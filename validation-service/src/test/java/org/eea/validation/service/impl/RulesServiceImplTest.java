@@ -385,6 +385,7 @@ public class RulesServiceImplTest {
 
     Rule rule = new Rule();
     rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
@@ -425,6 +426,7 @@ public class RulesServiceImplTest {
 
     Rule rule = new Rule();
     rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
@@ -611,6 +613,7 @@ public class RulesServiceImplTest {
     Rule rule = new Rule();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
@@ -653,6 +656,7 @@ public class RulesServiceImplTest {
     Rule rule = new Rule();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
