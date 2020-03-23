@@ -60,7 +60,6 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     try {
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
-      console.log('validationsServiceList', validationsServiceList);
       setValidationsList(validationsServiceList);
     } catch (error) {
       notificationContext.add({
@@ -170,15 +169,12 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
-      console.log('field', field);
-      console.log('template', template);
       if (field === 'automatic') {
         template = automaticTemplate;
       }
       if (field === 'enabled') {
         template = enabledTemplate;
       }
-      console.log('template', template);
       return (
         <Column
           body={template}
