@@ -137,6 +137,25 @@ public class RulesControllerImpl implements RulesController {
         datasetSchemaId);
   }
 
+
+  /**
+   * Delete rule by reference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/private/deleteRuleByReferenceFieldSchemaPKId")
+  public void deleteRuleByReferenceFieldSchemaPKId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId) {
+    rulesService.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, referenceFieldSchemaPKId);
+    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully",
+        referenceFieldSchemaPKId, datasetSchemaId);
+  }
+
+
   /**
    * Creates the new rule.
    *

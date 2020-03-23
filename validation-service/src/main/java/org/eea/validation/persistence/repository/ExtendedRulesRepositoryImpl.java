@@ -252,4 +252,20 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
 
     return result.isEmpty() ? null : result.get(0);
   }
+
+  /**
+   * Delete rule byreference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteRuleByreferenceFieldSchemaPKId(ObjectId datasetSchemaId,
+      ObjectId referenceFieldSchemaPKId) {
+    Document pullCriteria = new Document("referenceFieldSchemaPKId", referenceFieldSchemaPKId);
+    Update update = new Update().pull("rules", pullCriteria);
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
 }

@@ -162,6 +162,21 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
+   * Delete rule by reference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   */
+  @Override
+  public void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
+      String referenceFieldSchemaPKId) {
+    rulesRepository.deleteRuleByreferenceFieldSchemaPKId(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceFieldSchemaPKId));
+  }
+
+
+
+  /**
    * Validate rule.
    *
    * @param rule the rule
