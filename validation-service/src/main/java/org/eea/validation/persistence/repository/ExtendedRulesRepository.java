@@ -42,7 +42,7 @@ public interface ExtendedRulesRepository {
    * @param referenceFieldSchemaPKId the reference field schema PK id
    * @return true, if successful
    */
-  boolean deleteRuleByreferenceFieldSchemaPKId(ObjectId datasetSchemaId,
+  boolean deleteRuleByReferenceFieldSchemaPKId(ObjectId datasetSchemaId,
       ObjectId referenceFieldSchemaPKId);
 
   /**

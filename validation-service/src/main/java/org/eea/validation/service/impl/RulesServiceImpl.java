@@ -170,7 +170,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
       String referenceFieldSchemaPKId) {
-    rulesRepository.deleteRuleByreferenceFieldSchemaPKId(new ObjectId(datasetSchemaId),
+    rulesRepository.deleteRuleByReferenceFieldSchemaPKId(new ObjectId(datasetSchemaId),
         new ObjectId(referenceFieldSchemaPKId));
   }
 
