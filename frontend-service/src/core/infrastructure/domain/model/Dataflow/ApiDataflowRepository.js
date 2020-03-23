@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -278,6 +279,9 @@ const getAllSchemas = async dataflowId => {
           })
         : null;
       return new DatasetTable({
+        hasPKReferenced: !isEmpty(
+          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+        ),
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,

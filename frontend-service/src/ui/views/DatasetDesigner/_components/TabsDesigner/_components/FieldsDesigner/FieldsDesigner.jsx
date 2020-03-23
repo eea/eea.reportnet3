@@ -24,10 +24,8 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
   datasetId,
-  datasetSchemaId,
   datasetSchemas,
   onChangeFields,
-  onChangeReference,
   onChangeTableDescription,
   onLoadTableData,
   table
@@ -118,7 +116,6 @@ export const FieldsDesigner = ({
   }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
-    //Buscar en los datasetSchemas si se está usando el id y actualizar el idx del field de la PK según el count
 
     if (fieldIndex > -1) {
       inmFields[fieldIndex].name = name;
@@ -227,12 +224,13 @@ export const FieldsDesigner = ({
 
     return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
       <DataViewer
+        datasetSchemas={datasetSchemas}
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
-        onLoadTableData={onLoadTableData}
         isWebFormMMR={false}
         key={table.id}
         levelErrorTypes={table.levelErrorTypes}
+        onLoadTableData={onLoadTableData}
         recordPositionId={-1}
         tableHasErrors={table.hasErrors}
         tableId={table.tableSchemaId}

@@ -152,32 +152,8 @@ public final class EEAErrorMessage {
   /** The Constant RULE_ID_REQUIRED. */
   public static final String RULE_ID_REQUIRED = "RuleId is required";
 
-  /**
-   * The Constant CODELIST_NOT_FOUND.
-   *
-   * @deprecated (unused)
-   */
-  @Deprecated
-  public static final String CODELIST_NOT_FOUND = "Codelist not found";
-
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
-
-  /**
-   * The Constant CODELIST_CATEGORY_NOT_FOUND.
-   *
-   * @deprecated (unused)
-   */
-  @Deprecated
-  public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
-
-  /**
-   * The Constant CODELIST_VERSION_DUPLICATED.
-   *
-   * @deprecated (unused)
-   */
-  @Deprecated
-  public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
 
   /** The Constant ERROR_DELETING_RULE. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
@@ -198,6 +174,9 @@ public final class EEAErrorMessage {
 
   /** The Constant PK_ALREADY_EXISTS. */
   public static final String PK_ALREADY_EXISTS = "There is an existing PK";
+
+  /** The Constant SHORT_CODE_REQUIRED. */
+  public static final String SHORT_CODE_REQUIRED = "ShortCode is required";
 
   /**
    * Instantiates a new EEA error message.

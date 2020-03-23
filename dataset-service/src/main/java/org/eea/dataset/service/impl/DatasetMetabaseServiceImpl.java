@@ -597,9 +597,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
    * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
    */
   @Override
-  public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
+  public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin) {
     ForeignRelations foreign = new ForeignRelations();
     DataSetMetabase dsOrigin = new DataSetMetabase();
     DataSetMetabase dsDestination = new DataSetMetabase();
@@ -608,6 +610,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     foreign.setIdDatasetOrigin(dsOrigin);
     foreign.setIdDatasetDestination(dsDestination);
     foreign.setIdPk(idPk);
+    foreign.setIdFkOrigin(idFkOrigin);
 
     foreignRelationsRepository.save(foreign);
   }
@@ -619,25 +622,33 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
    * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
    */
   @Override
-  public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk) {
-    foreignRelationsRepository.deleteFKByOriginDestinationAndPk(datasetIdOrigin,
-        datasetIdDestination, idPk);
+  public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin) {
+    foreignRelationsRepository.deleteFKByOriginDestinationAndPkAndIdFkOrigin(datasetIdOrigin,
+        datasetIdDestination, idPk, idFkOrigin);
   }
 
 
   /**
    * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
    * FK
-   * 
+   *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
    * @return the dataset destination foreign relation
    */
   @Override
   public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
-    return foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
+    Long idDestination = 0L;
+    List<Long> datasetsId =
+        foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
+    if (datasetsId != null && !datasetsId.isEmpty()) {
+      idDestination = datasetsId.get(0);
+    }
+    return idDestination;
   }
 
 
