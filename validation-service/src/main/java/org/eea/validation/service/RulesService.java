@@ -118,4 +118,13 @@ public interface RulesService {
    * @return true, if successful
    */
   boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position);
+
+  /**
+   * Delete rule by reference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   */
+  void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
+      String referenceFieldSchemaPKId);
 }

@@ -1090,5 +1090,9 @@
   {
     "key": "config/apiGateway/zuul.routes.rules.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/application/mongodb.hosts",
+    "value": "JHtNT05HT19IT1NUUzpsb2NhbGhvc3Q6MjcwMTd9"
   }
 ]
