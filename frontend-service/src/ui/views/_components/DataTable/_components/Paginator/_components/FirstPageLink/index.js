@@ -1,0 +1,1 @@
+export { FirstPageLink } from './FirstPageLink';

@@ -496,6 +496,15 @@
     "deleteRuleError": "Error deleting rule",
     "deleteValidationConfirm": "Are you sure you want to delete the validation?",
     "deleteValidationHeader": "Delete validation",
+    "errorType": "Error type",
+    "active": "Active",
+    "group": "Group",
+    "andor": "AND / OR",
+    "operatorType": "Operator type",
+    "operator": "Operator",
+    "value": "Value",
+    "addNewRule": "Add new rule",
+    "union": "Union",
     "role": "Role",
     "documentsActionColumns": "Actions",
     "dataflowsListTab": "My dataflows",
@@ -510,6 +519,10 @@
     "thereAreNoDatalows": "There are no pending dataflows",
     "noDataflowsWithSelectedParameters": "There are no dataflows with the selected parameters",
     "checkAllFilter": "Select all",
-    "uncheckAllFilter": "Unselect all"
+    "uncheckAllFilter": "Unselect all",
+    "linkSelector": "Select a Link",
+    "selectedLink": "Selected Link",
+    "linkSelection": "No link selected",
+    "linkFilterPlaceholder": "Search value"
   }
 }

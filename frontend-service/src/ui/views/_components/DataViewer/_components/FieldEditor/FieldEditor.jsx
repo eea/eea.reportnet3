@@ -6,6 +6,8 @@ import { isEmpty, isUndefined } from 'lodash';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
+import { DatasetService } from 'core/services/Dataset';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
@@ -13,15 +15,20 @@ import { RecordUtils } from 'ui/views/_functions/Utils';
 const FieldEditor = ({
   cells,
   colsSchema,
-  record,
-  onEditorValueChange,
+  datasetId,
+  fieldSchemaId,
+  onEditorKeyChange,
   onEditorSubmitValue,
+  onEditorValueChange,
   onEditorValueFocus,
-  onEditorKeyChange
+  record
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+  const [linkItemsOptions, setLinkItemsOptions] = useState([]);
+
+  const [testLinkValue, setTestLinkValue] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
@@ -32,6 +39,18 @@ const FieldEditor = ({
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
+
+  const onFilter = async filter => {
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(datasetId, fieldSchemaId, filter);
+    setLinkItemsOptions(
+      referencedFieldValues.map(referencedField => {
+        return {
+          label: referencedField.value,
+          value: referencedField.value
+        };
+      })
+    );
+  };
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
@@ -98,6 +117,33 @@ const FieldEditor = ({
           //     yearNavigator={true}
           //     yearRange="2010:2030"
           //   />
+        );
+      case 'POLYGON':
+        return (
+          <Dropdown
+            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
+            // disabled={initialStatus !== 'design'}
+            appendTo={document.body}
+            filter={true}
+            filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+            filterBy="label,value"
+            onChange={e => {
+              setCodelistItemValue(e.target.value.value);
+              onEditorValueChange(cells, e.target.value.value);
+              onEditorSubmitValue(cells, e.target.value.value, record);
+            }}
+            onFilterInputChangeBackend={onFilter}
+            onMouseDown={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            // optionLabel="itemType"
+            // getCodelistItemsWithEmptyOption()
+            options={linkItemsOptions}
+            // required={true}
+            // placeholder={resources.messages['category']}
+            value={testLinkValue}
+          />
         );
       case 'CODELIST':
         return (

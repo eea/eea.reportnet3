@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DatasetDesigner.module.scss';
 
@@ -31,6 +32,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
+import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
+
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -50,6 +53,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +81,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
       };
+      const getDatasetSchemas = async () => {
+        const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        setDatasetSchemas(datasetSchemasDTO);
+      };
       getDatasetSchemaId();
+      getDatasetSchemas();
     } catch (error) {
       console.error(`Error while loading schema: ${error}`);
     } finally {
@@ -140,13 +149,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onConfirmValidate = async () => {
-    //  QUE ES ESO??
-    /*     const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId }); */
+  const onChangeReference = (tabs, datasetSchemaId) => {
+    console.log('CHANGE REFERENCE');
+    const inmDatasetSchemas = [...datasetSchemas];
+    const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
+    inmDatasetSchemas[datasetSchemaIndex].tables = tabs;
+    if (!isNil(inmDatasetSchemas)) {
+      inmDatasetSchemas.forEach(datasetSchema =>
+        datasetSchema.tables.forEach(table => {
+          if (!table.addTab) {
+            table.records.forEach(record =>
+              record.fields.forEach(field => {
+                if (!isNil(field) && field.pk) {
+                  if (DatasetDesignerUtils.getCountPKUseInAllSchemas(field.fieldId, inmDatasetSchemas) > 0) {
+                    field.pkReferenced = true;
+                  } else {
+                    field.pkReferenced = false;
+                  }
+                }
+              })
+            );
+          }
+        })
+      );
+    }
+    setDatasetSchemas(inmDatasetSchemas);
+  };
 
+  const onConfirmValidate = async () => {
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
@@ -194,6 +224,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(false);
     }
   };
+
+  // const onTableAdd = ()
 
   const onUpdateDescription = async description => {
     try {
@@ -338,7 +370,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner editable={true} onLoadTableData={onLoadTableData} />
+      <TabsDesigner
+        datasetSchemas={datasetSchemas}
+        editable={true}
+        onChangeReference={onChangeReference}
+        onLoadTableData={onLoadTableData}
+      />
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
