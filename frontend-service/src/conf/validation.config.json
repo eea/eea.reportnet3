@@ -47,6 +47,17 @@
     "GTEQ": "GTEQ",
     "LEN": "LEN"
   },
+  "reverseEquivalences": {
+    "GT": ">",
+    "LT": "<",
+    "GTEQ": ">=",
+    "LTEQ": "<=",
+    "EQ": "=",
+    "DIST": "!=",
+    "SEQ": "SEQ",
+    "SEQIC": "SEQIC",
+    "LEN": "LEN"
+  },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
     { "label": "WARNING", "value": "WARNING" },

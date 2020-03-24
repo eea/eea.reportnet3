@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
@@ -129,6 +130,22 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       payload: !checkValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
+
+  const getValidationRuleByRefererId = async () => {
+    try {
+      return await ValidationService.getQCRuleByReferedId(ValidationContext.fieldId);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    console.log('editing rule call populate');
+    if (!isNil(validationContext.ruleToEdit) && !isEmpty(validationContext.ruleToEdit)) {
+      creationFormDispatch({
+        type: 'POPULATE_CREATE_FORM',
+        payload: validationContext.ruleToEdit
+      });
+    }
+  }, [validationContext.ruleToEdit]);
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;

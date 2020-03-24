@@ -32,14 +32,17 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isVisible: false,
         fieldId: null,
-        reOpenOpener: !isNil(state.opener) ? true : false
+        reOpenOpener: !isNil(state.opener) ? true : false,
+        ruleEdit: false
       };
     case 'ON_OPEN_TO_EDIT':
       return {
         ...state,
         isVisible: true,
         fieldId: payload.fieldId,
-        opener: payload.opener
+        opener: payload.opener,
+        ruleEdit: true,
+        ruleToEdit: payload.ruleToEdit
       };
     case 'RESET_REOPENOPENER':
       return {
@@ -53,7 +56,10 @@ const validationReducer = (state, { type, payload }) => {
 
 const initialState = {
   isVisible: false,
-  fieldId: null
+  fieldId: null,
+  opener: null,
+  reOpenOpener: false,
+  ruleEdit: false
 };
 export const ValidationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(validationReducer, initialState);
@@ -90,11 +96,12 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPENER_RESET'
           });
         },
-        onOpenToEdit: (fieldId, opener) => {
+        onOpenToEdit: (rule, opener) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
-              fieldId,
+              ruleToEdit: { ...rule },
+              fieldId: rule.referenceId,
               opener
             }
           });

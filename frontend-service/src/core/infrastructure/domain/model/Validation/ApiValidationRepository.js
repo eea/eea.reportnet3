@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uuid from 'uuid';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 import { Validation } from 'core/domain/model/Validation/Validation';
@@ -83,6 +84,39 @@ const getAll = async datasetSchemaId => {
   validationsList.validations = validationsData.validations;
   return validationsList;
 };
+const getOperatorType = operator => {
+  if (!['SEQ', 'SEQIC'].includes(operator)) {
+    return config.validations.operatorTypes.number.option;
+  } else {
+    return config.validations.operatorTypes.string.option;
+  }
+};
+const parseExpressions = expressions => {
+  console.log('parseExpressions', expressions);
+
+  if (!isNil(expressions) && expressions.operator != 'AND' && expressions.operator != 'OR') {
+    const expression = {
+      expressionId: uuid.v4(),
+      group: false,
+      union: '',
+      operatorType: getOperatorType(expressions.operator),
+      operatorValue: {
+        label: config.validations.reverseEquivalences[expressions.operator],
+        value: config.validations.reverseEquivalences[expressions.operator]
+      },
+      expressionValue: expressions.arg2,
+      expressions: []
+    };
+    return {
+      expressions: [expression],
+      allExpressions: [expression]
+    };
+  }
+  return {
+    expressions: [],
+    allExpressions: []
+  };
+};
 
 const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
@@ -90,6 +124,7 @@ const parseDataValidationRulesDTO = validations => {
   try {
     validationsData.validations = validations.map(validationDTO => {
       entityTypes.push(validationDTO.type);
+      const { expressions, allExpressions } = parseExpressions(validationDTO.whenCondition);
       return new Validation({
         activationGroup: validationDTO.activationGroup,
         automatic: validationDTO.automatic,
@@ -109,7 +144,9 @@ const parseDataValidationRulesDTO = validations => {
             : '',
         name: validationDTO.ruleName,
         referenceId: validationDTO.referenceId,
-        shortCode: validationDTO.shortCode
+        shortCode: validationDTO.shortCode,
+        expressions,
+        allExpressions
       });
     });
   } catch (error) {
