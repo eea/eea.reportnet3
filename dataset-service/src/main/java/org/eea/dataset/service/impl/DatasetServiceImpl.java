@@ -2,8 +2,12 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1473,7 +1477,43 @@ public class DatasetServiceImpl implements DatasetService {
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
         searchValue, PageRequest.of(0, 15));
-    return fieldNoValidationMapper.entityListToClass(fields);
+
+    List<FieldValue> sortedList = new ArrayList<>();
+
+    if (!fields.isEmpty()) {
+      switch (fields.get(0).getType()) {
+        case COORDINATE_LAT:
+          sortedList = fields.stream()
+              .sorted((v1, v2) -> new Double(v1.getValue()).compareTo(new Double(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case COORDINATE_LONG:
+          sortedList = fields.stream()
+              .sorted((v1, v2) -> new Double(v1.getValue()).compareTo(new Double(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case NUMBER:
+          sortedList = fields.stream()
+              .sorted((v1, v2) -> new Integer(v1.getValue()).compareTo(new Integer(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case DATE:
+          ZoneId timeZone = ZoneId.of("UTC");
+          DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+          LocalDate.now(timeZone).format(fmt);
+
+          sortedList = fields.stream()
+              .sorted((v1, v2) -> LocalDate.from(fmt.parse(v1.getValue()))
+                  .compareTo(LocalDate.from(fmt.parse(v2.getValue()))))
+              .collect(Collectors.toList());
+          break;
+        default:
+          sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+              .collect(Collectors.toList());
+          break;
+      }
+    }
+    return fieldNoValidationMapper.entityListToClass(sortedList);
   }
 
 
