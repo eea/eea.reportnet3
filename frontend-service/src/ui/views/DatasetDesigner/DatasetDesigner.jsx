@@ -187,7 +187,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (!isNil(inmDatasetSchemas)) {
       inmDatasetSchemas.forEach(datasetSchema =>
         datasetSchema.tables.forEach(table => {
-          if (!table.addTab) {
+          if (!table.addTab && !isUndefined(table.records)) {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field) && field.pk) {
