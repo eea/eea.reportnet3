@@ -364,6 +364,9 @@
         },
         {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
+        },
+        {
+          "key": "DELETE_DATASET_SCHEMA_LINK_ERROR"
         }
       ]
     },
