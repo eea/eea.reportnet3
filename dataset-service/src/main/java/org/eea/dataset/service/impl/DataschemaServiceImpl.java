@@ -836,10 +836,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
     for (TableSchemaVO tableVO : schema.getTableSchemas()) {
       if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
-        if (tableVO.getRecordSchema().getFieldSchema().stream()
-            .anyMatch(field -> field.getPkReferenced() != null && field.getPkReferenced())) {
-          allow = false;
-          break;
+        for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
+          if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
+              && field.getPkReferenced()) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
+            if (catalogue != null && catalogue.getReferenced() != null
+                && !catalogue.getReferenced().isEmpty()) {
+              for (ObjectId referenced : catalogue.getReferenced()) {
+                Document fieldSchema =
+                    schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                if (fieldSchema == null) {
+                  allow = false;
+                }
+              }
+            }
+          }
         }
       }
     }
