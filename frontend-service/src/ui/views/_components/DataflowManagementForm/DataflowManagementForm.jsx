@@ -59,7 +59,9 @@ const DataflowManagementForm = ({
               return true;
             }
           }),
-    description: Yup.string().required()
+    description: Yup.string()
+      .required()
+      .max(255, resources.messages['dataflowDescriptionValidationMax'])
   });
 
   if (!isNull(form.current) && !isFormReset) {
@@ -142,6 +144,7 @@ const DataflowManagementForm = ({
                 placeholder={resources.messages['createDataflowDescription']}
                 value={values.description}
               />
+              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={styles.search}>
               <Field
