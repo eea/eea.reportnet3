@@ -22,7 +22,7 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -38,7 +38,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   const onDeleteValidation = async () => {
     try {
-      const response = await ValidationService.deleteById(datasetSchemaId, validationId);
+      const response = await ValidationService.deleteById(dataset.datasetId, validationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }

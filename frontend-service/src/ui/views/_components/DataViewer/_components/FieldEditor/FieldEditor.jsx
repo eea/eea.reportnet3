@@ -18,7 +18,6 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
-  datasetSchemas,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
@@ -31,7 +30,7 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
 
   const [linkItemsValue, setLinkItemsValue] = useState([]);
-  console.log('datasetSchemas', { datasetSchemas });
+
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
     setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
@@ -48,17 +47,15 @@ const FieldEditor = ({
   }
 
   const onFilter = async filter => {
-    console.log({ filter, cells });
-    const fieldSchemaId = RecordUtils.getFieldReferencedPKId(
-      datasetSchemas,
-      RecordUtils.getCellFieldSchemaId(cells, cells.field)
-    );
-    if (isNil(fieldSchemaId)) {
+    const colSchema = colsSchema.filter(colSchema => colSchema.field === cells.field)[0];
+    if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      RecordUtils.getFieldReferencedPKId(datasetSchemas, RecordUtils.getCellFieldSchemaId(cells, cells.field)),
+      isUndefined(colSchema.referencedField.name)
+        ? colSchema.referencedField.idPk
+        : colSchema.referencedField.referencedField.fieldSchemaId,
       filter
     );
     const linkItems = referencedFieldValues.map(referencedField => {
@@ -143,14 +140,11 @@ const FieldEditor = ({
       case 'LINK':
         return (
           <Dropdown
-            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-            // disabled={initialStatus !== 'design'}
             appendTo={document.body}
             filter={true}
             filterPlaceholder={resources.messages['linkFilterPlaceholder']}
             filterBy="itemType,value"
             onChange={e => {
-              console.log(e.target.value, e.target);
               setLinkItemsValue(e.target.value.value);
               onEditorValueChange(cells, e.target.value.value);
               onEditorSubmitValue(cells, e.target.value.value, record);
@@ -161,18 +155,13 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             optionLabel="itemType"
-            // getCodelistItemsWithEmptyOption()
             options={linkItemsOptions}
-            // required={true}
-            // placeholder={resources.messages['category']}
             value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
           />
         );
       case 'CODELIST':
         return (
           <Dropdown
-            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-            // disabled={initialStatus !== 'design'}
             appendTo={document.body}
             onChange={e => {
               setCodelistItemValue(e.target.value.value);
@@ -185,8 +174,6 @@ const FieldEditor = ({
             }}
             optionLabel="itemType"
             options={getCodelistItemsWithEmptyOption()}
-            // required={true}
-            // placeholder={resources.messages['category']}
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
           />
         );

@@ -13,7 +13,6 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
-  datasetSchemas,
   hasWritePermissions,
   isDataCollection,
   isDatasetDeleted,
@@ -40,7 +39,6 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
-                  datasetSchemas={datasetSchemas}
                   hasWritePermissions={hasWritePermissions}
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}

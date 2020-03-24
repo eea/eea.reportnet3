@@ -49,6 +49,7 @@ export const FieldDesigner = ({
   onNewFieldAdd,
   onShowDialogError,
   recordSchemaId,
+  tableSchemaId,
   totalFields
 }) => {
   const fieldTypes = [
@@ -775,6 +776,7 @@ export const FieldDesigner = ({
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}
           selectedLink={fieldDesignerState.fieldLinkValue}
+          tableSchemaId={tableSchemaId}
         />
       ) : null}
       {fieldDesignerState.isQCManagerVisible ? (

@@ -367,10 +367,7 @@ export class Dropdown extends Component {
   onFilterInputChange(event) {
     if (this.props.onFilterInputChangeBackend) {
       this.props.onFilterInputChangeBackend(event.target.value);
-      // .then(response => {
-      //   console.log({ response });
       this.setState({ filter: event.target.value });
-      // });
     } else {
       this.setState({ filter: event.target.value });
     }

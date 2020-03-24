@@ -1,11 +1,12 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+import moment from 'moment';
 
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
-    const dates = betweenDates.map(date => new Date(date).getTime() / 1000);
-    return new Date(data).getTime() / 1000 >= dates[0] && new Date(data).getTime() / 1000 <= dates[1];
+    const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
+    return new Date(data).getTime() / 1000 >= btwDates[0] && new Date(data).getTime() / 1000 <= btwDates[1];
   }
   return true;
 };
@@ -60,8 +61,20 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
   return filterBy;
 };
 
+const getEndOfDay = date =>
+  new Date(
+    moment(date)
+      .endOf('day')
+      .format()
+  ).getTime() / 1000;
+
 const getFilterKeys = (state, filter, inputOptions) =>
   Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
+
+const getLabelInitialState = (input = [], select = [], date = []) => {
+  const labelByGroup = input.concat(select, date);
+  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
+};
 
 const getOptionTypes = (data, option) => {
   const optionItems = uniq(data.map(item => item[option]));
@@ -75,13 +88,15 @@ const getOptionTypes = (data, option) => {
   }
 };
 
-const getLabelInitialState = (input = [], select = [], date = []) => {
-  const labelByGroup = input.concat(select, date);
-  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
-};
-
 const getSelectedKeys = (state, select, selectOptions) =>
   Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
+
+const getStartOfDay = date =>
+  new Date(
+    moment(date)
+      .startOf('day')
+      .format()
+  ).getTime() / 1000;
 
 const getYesterdayDate = () => {
   var currentDate = new Date();
@@ -99,8 +114,9 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOp
         (isEmpty(value) ? true : [...value.map(type => type.toLowerCase())].includes(data[filter].toLowerCase()))
       );
     } else if (dateOptions.includes(filter)) {
-      const dates = value.map(date => new Date(date).getTime() / 1000);
-      return !dates.includes(0) && !isEmpty(dates)
+      let dates;
+      isEmpty(value) ? (dates = []) : (dates = [getStartOfDay(value[0]), getEndOfDay(value[1])]);
+      return !dates.includes(NaN) && !isEmpty(dates)
         ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
             new Date(data[filter]).getTime() / 1000 <= dates[1] &&
             checkFilters(filteredKeys, data, state) &&

@@ -67,7 +67,6 @@ export const TabsDesigner = withRouter(
 
     useEffect(() => {
       if (!isUndefined(datasetSchema)) {
-        console.log('datasetSchema.tables', datasetSchema.tables);
         setTabs(datasetSchema.tables);
       }
     }, [datasetSchema]);
@@ -79,7 +78,6 @@ export const TabsDesigner = withRouter(
     }, [isErrorDialogVisible]);
 
     const onChangeFields = (fields, isLinkChange, tableSchemaId) => {
-      console.log('CHANGE FIELDS');
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       if (!isNil(inmTabs[tabIdx].records)) {
@@ -107,13 +105,12 @@ export const TabsDesigner = withRouter(
         setIsLoading(true);
         const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
         const inmDatasetSchema = { ...datasetSchemaDTO };
-        console.log(inmDatasetSchema.tables);
+
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
           table.hasErrors = true;
-          table.hasPKReferenced = table.hasPKReferenced;
           table.header = table.tableSchemaName;
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
@@ -360,7 +357,6 @@ export const TabsDesigner = withRouter(
             totalTabs={tabs.length}>
             {tabs.length > 0
               ? tabs.map((tab, i) => {
-                  console.log('tab', { tab });
                   return (
                     <TabPanel
                       addTab={tab.addTab}

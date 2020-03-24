@@ -526,6 +526,8 @@
     "linkSelection": "No link selected",
     "linkFilterPlaceholder": "Search value",
     "ruleErrorMessage": "Error message",
-    "validationServiceGetAllError": "Error loading QC's"
+    "validationServiceGetAllError": "Error loading QC's",
+    "noSelectablePK": "No selectable PK",
+    "noPK": "No PK"
   }
 }
