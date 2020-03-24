@@ -42,6 +42,7 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
     const codelistItems = column.codelistItems.map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
+
     codelistItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -65,12 +66,14 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
       isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       filter
     );
-    const linkItems = referencedFieldValues.map(referencedField => {
-      return {
-        itemType: referencedField.value,
-        value: referencedField.value
-      };
-    });
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: referencedField.value,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
     linkItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''

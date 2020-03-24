@@ -58,12 +58,14 @@ const FieldEditor = ({
         : colSchema.referencedField.referencedField.fieldSchemaId,
       filter
     );
-    const linkItems = referencedFieldValues.map(referencedField => {
-      return {
-        itemType: referencedField.value,
-        value: referencedField.value
-      };
-    });
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: referencedField.value,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
     linkItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -150,10 +152,6 @@ const FieldEditor = ({
               onEditorSubmitValue(cells, e.target.value.value, record);
             }}
             onFilterInputChangeBackend={onFilter}
-            onMouseDown={e => {
-              e.preventDefault();
-              onEditorValueFocus(cells, e.target.value);
-            }}
             optionLabel="itemType"
             options={linkItemsOptions}
             value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
