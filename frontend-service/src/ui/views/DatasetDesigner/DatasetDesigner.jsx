@@ -305,7 +305,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           className={styles.paginatorValidationViewer}
           dismissableMask={true}
           footer={actionButtonsValidationDialog}
-          header={resources.messages['titleValidations']}
+          header={resources.messages['qcRules']}
           maximizable
           onHide={() => {
             onHideValidationsDialog();
