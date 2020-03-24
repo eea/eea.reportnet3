@@ -26,6 +26,7 @@
     }
 
     .inputFilter {
+      background: transparent !important;
       border-bottom: 0 !important;
       border-left: 0 !important;
       border-radius: 0 !important;
@@ -107,11 +108,11 @@
   .icon {
     background-color: transparent;
     border: none;
+    color: var(--button-secondary-transparent-color-hover);
     cursor: pointer;
     font-size: 16pt !important;
     height: 1.6em !important;
     opacity: 0.7;
-    color: var(--button-secondary-transparent-color-hover);
 
     &:hover {
       opacity: 1 !important;
