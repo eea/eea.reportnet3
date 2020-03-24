@@ -387,7 +387,7 @@ public class DataSetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.deleteDatasetSchema(1L);
     } catch (ResponseStatusException e) {
-      assertEquals("Not the same status", HttpStatus.FORBIDDEN, e.getStatus());
+      assertEquals("Not the same status", HttpStatus.UNAUTHORIZED, e.getStatus());
       throw e;
     }
 

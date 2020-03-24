@@ -529,6 +529,7 @@
     "validationServiceGetAllError": "Error loading QC's",
     "noSelectablePK": "No selectable PK",
     "noPK": "No PK",
+    "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "deleteDatasetSchemaLinkError": "Failed deleting dataset schema. There is a link relation between schemas"
   }
 }
