@@ -31,6 +31,8 @@ import { deleteExpressionRecursivily } from './_functions/utils/deleteExpression
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
+import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTableByFieldId';
+import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
 import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
@@ -63,7 +65,28 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
         payload: getDatasetSchemaTableFields(table, datasetSchema.tables)
       });
     }
+    if (validationContext.fieldId) {
+      creationFormDispatch({
+        type: 'SET_FORM_FIELD',
+        payload: {
+          key: 'field',
+          value: getSelectedFieldById(validationContext.fieldId, datasetSchema.tables)
+        }
+      });
+    }
   }, [creationFormState.candidateRule.table]);
+
+  useEffect(() => {
+    if (validationContext.fieldId) {
+      creationFormDispatch({
+        type: 'SET_FORM_FIELD',
+        payload: {
+          key: 'table',
+          value: getSelectedTableByFieldId(validationContext.fieldId, datasetSchema.tables)
+        }
+      });
+    }
+  }, [validationContext.fieldId]);
 
   useEffect(() => {
     const {

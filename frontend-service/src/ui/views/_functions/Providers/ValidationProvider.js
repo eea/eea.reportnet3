@@ -7,6 +7,11 @@ const validationReducer = (state, { type, payload }) => {
     case 'ON_OPEN_QC_CREATION_MODAL':
       return {
         ...state,
+        isVisible: true
+      };
+    case 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER':
+      return {
+        ...state,
         isVisible: true,
         opener: payload.opener
       };
@@ -29,7 +34,18 @@ const validationReducer = (state, { type, payload }) => {
         fieldId: null,
         reOpenOpener: !isNil(state.opener) ? true : false
       };
-
+    case 'ON_OPEN_TO_EDIT':
+      return {
+        ...state,
+        isVisible: true,
+        fieldId: payload.fieldId,
+        opener: payload.opener
+      };
+    case 'RESET_REOPENOPENER':
+      return {
+        ...state,
+        reOpenOpener: false
+      };
     default:
       return state;
   }
@@ -45,9 +61,14 @@ export const ValidationProvider = ({ children }) => {
     <ValidationContext.Provider
       value={{
         ...state,
-        onOpenModal: (opener = null) => {
+        onOpenModal: () => {
           dispatch({
-            type: 'ON_OPEN_QC_CREATION_MODAL',
+            type: 'ON_OPEN_QC_CREATION_MODAL'
+          });
+        },
+        onOpenModalFronOpener: opener => {
+          dispatch({
+            type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
               opener
             }
@@ -67,6 +88,20 @@ export const ValidationProvider = ({ children }) => {
         onResetOpener: () => {
           dispatch({
             type: 'ON_OPENER_RESET'
+          });
+        },
+        onOpenToEdit: (fieldId, opener) => {
+          dispatch({
+            type: 'ON_OPEN_TO_EDIT',
+            payload: {
+              fieldId,
+              opener
+            }
+          });
+        },
+        resetReOpenOpener: () => {
+          dispatch({
+            type: 'RESET_REOPENOPENER'
           });
         }
       }}>
