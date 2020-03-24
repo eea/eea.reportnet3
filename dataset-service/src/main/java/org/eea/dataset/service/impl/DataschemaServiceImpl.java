@@ -1084,6 +1084,34 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
 
   /**
+   * Delete from pk catalogue.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId)
+      throws EEAException {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(tableSchemaId, datasetSchema);
+    if (table != null && table.getRecordSchema() != null
+        && table.getRecordSchema().getFieldSchema() != null) {
+      table.getRecordSchema().getFieldSchema().forEach(field -> {
+        try {
+          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
+              e);
+        }
+      });
+    }
+
+  }
+
+  /**
    * Update the property isPKreferenced of the class FieldSchema
    * 
    * @param referencedIdDatasetSchema

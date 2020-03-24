@@ -1180,4 +1180,34 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
+
+  @Test
+  public void testDeletePkCatalogueFromTableSchema() throws EEAException {
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced);
+    field.setPk(false);
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);
+
+    dataSchemaServiceImpl.deleteFromPkCatalogue("5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
+    Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
+  }
+
 }

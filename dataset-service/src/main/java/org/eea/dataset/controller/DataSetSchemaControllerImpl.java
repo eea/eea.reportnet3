@@ -322,12 +322,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+
+      // Delete the Pk if needed from the catalogue, for all the fields of the table
+      dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId);
+
       dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
 
       // we delete the rules associate to the table
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
 
       datasetService.deleteTableValue(datasetId, tableSchemaId);
+
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
