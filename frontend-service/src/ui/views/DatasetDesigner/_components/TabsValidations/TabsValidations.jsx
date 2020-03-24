@@ -130,12 +130,18 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionTemplate = () => (
+  const actionsTemplate = () => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
         '';
       }}
+    />
+  );
+
+  const deleteTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}      
     />
   );
 
@@ -157,7 +163,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
 
   const actionButtonsColumn = (
     <Column
-        body={row => actionTemplate(row)}
+        body={row => row.automatic ? deleteTemplate() : actionsTemplate()}
         className={styles.validationCol}
         header={resources.messages['actions']}
         key="actions"
