@@ -21,13 +21,11 @@ import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
-import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -125,6 +123,28 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           title: 'edit'
         },
+        {
+          className: 'dataflow-manage-roles-help-step',
+          icon: 'manageRoles',
+          label: 'manageRoles',
+          onClick: () => {
+            onShowManageRolesDialog();
+          },
+          title: 'manageRoles'
+        },
+        {
+          className: 'dataflow-settings-help-step',
+          icon: 'settings',
+          label: 'settings',
+          onClick: e => {
+            setIsActivePropertiesDialog(true);
+          },
+          show: true,
+          title: 'properties'
+        }
+      ]);
+    } else if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DRAFT']) {
+      leftSideBarContext.addModels([
         {
           className: 'dataflow-manage-roles-help-step',
           icon: 'manageRoles',

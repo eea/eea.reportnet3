@@ -36,14 +36,14 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
+    initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
+    refresher: false,
+    representativeHasError: [],
     representativeIdToDelete: '',
     representatives: [],
-    initialRepresentatives: [],
-    refresher: false,
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: [],
-    representativeHasError: []
+    unusedDataProvidersOptions: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
