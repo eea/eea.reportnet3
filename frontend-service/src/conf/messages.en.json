@@ -528,6 +528,7 @@
     "ruleErrorMessage": "Error message",
     "validationServiceGetAllError": "Error loading QC's",
     "noSelectablePK": "No selectable PK",
-    "noPK": "No PK"
+    "noPK": "No PK",
+    "dataflowDescriptionValidationMax": "Dataflow description is too long"
   }
 }
