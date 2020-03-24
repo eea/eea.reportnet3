@@ -216,7 +216,7 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
 
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
-          className={`p-button-rounded p-button-secondary p-button-animated-blink ${styles.cancelFilters}`}
+          className={`p-button-rounded p-button-secondary-icon-only p-button-animated-blink`}
           icon="cancel"
           onClick={() => onClearAllFilters()}
           tooltip={resources.messages['clearFilters']}
