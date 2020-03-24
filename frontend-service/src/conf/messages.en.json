@@ -528,6 +528,7 @@
     "ruleErrorMessage": "Error message",
     "validationServiceGetAllError": "Error loading QC's",
     "noSelectablePK": "No selectable PK",
-    "noPK": "No PK"
+    "noPK": "No PK",
+    "deleteDatasetSchemaLinkError": "Failed deleting dataset schema. There is a link relation between schemas"
   }
 }
