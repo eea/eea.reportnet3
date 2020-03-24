@@ -333,6 +333,18 @@
   --button-secondary-transparent-color-active: var(--gray-110);
   --button-secondary-transparent-box-shadow-focus: 0 0 0 0.2em var(--gray-25);
 
+  --button-secondary-icon-only-bg: var(--gray-10);
+  --button-secondary-icon-only-bg-hover: var(--gray-25);
+  --button-secondary-icon-only-bg-active: var(--gray-50);
+  --button-secondary-icon-only-border: 1px solid var(--gray-10);
+  --button-secondary-icon-only-border-color-hover: var(--gray-25);
+  --button-secondary-icon-only-border-color-active: var(--gray-25);
+  --button-secondary-icon-only-color: var(--gray-110);
+  --button-secondary-icon-only-color-hover: var(--gray-110);
+  --button-secondary-icon-only-color-icon: var(--gray-110);
+  --button-secondary-icon-only-color-active: var(--gray-110);
+  --button-secondary-icon-only-box-shadow-focus: 0 0 0 0.2em var(--gray-25);
+
   /* Toolbar */
   --toolbar-border: 1px solid var(--gray-10);
 

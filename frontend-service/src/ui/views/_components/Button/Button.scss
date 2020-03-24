@@ -115,6 +115,31 @@ body .p-buttonset.p-button-secondary-transparent > .p-button:enabled:active {
   border-color: var(--button-secondary-transparent-border-color-active);
 }
 
+body .p-button.p-button-secondary-icon-only,
+body .p-buttonset.p-button-secondary-icon-only > .p-button {
+  color: var(--button-secondary-icon-only-color);
+  background-color: var(--button-secondary-icon-only-bg);
+  border: var(--button-secondary-icon-only-border);
+}
+body .p-button.p-button-secondary-icon-only:enabled:hover,
+body .p-buttonset.p-button-secondary-icon-only > .p-button:enabled:hover {
+  background-color: var(--button-secondary-icon-only-bg-hover);
+  color: var(--button-secondary-icon-only-color-hover);
+  border-color: var(--button-secondary-icon-only-border-color-hover);
+}
+body .p-button.p-button-secondary-icon-only:enabled:focus,
+body .p-buttonset.p-button-secondary-icon-only > .p-button:enabled:focus {
+  -webkit-box-shadow: var(--button-secondary-icon-only-box-shadow-focus);
+  -moz-box-shadow: var(--button-secondary-icon-only-box-shadow-focus);
+  box-shadow: var(--button-secondary-icon-only-box-shadow-focus);
+}
+body .p-button.p-button-secondary-icon-only:enabled:active,
+body .p-buttonset.p-button-secondary-icon-only > .p-button:enabled:active {
+  background-color: var(--button-secondary-icon-only-bg-active);
+  color: var(--button-secondary-icon-only-color-active);
+  border-color: var(--button-secondary-icon-only-border-color-active);
+}
+
 body .p-button.p-button-info:enabled:hover,
 body .p-buttonset.p-button-info > .p-button:enabled:hover {
   background-color: #116fbf;
