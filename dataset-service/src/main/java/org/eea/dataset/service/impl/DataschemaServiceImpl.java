@@ -836,10 +836,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
     for (TableSchemaVO tableVO : schema.getTableSchemas()) {
       if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
-        if (tableVO.getRecordSchema().getFieldSchema().stream()
-            .anyMatch(field -> field.getPkReferenced() != null && field.getPkReferenced())) {
-          allow = false;
-          break;
+        for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
+          if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
+              && field.getPkReferenced()) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
+            if (catalogue != null && catalogue.getReferenced() != null
+                && !catalogue.getReferenced().isEmpty()) {
+              for (ObjectId referenced : catalogue.getReferenced()) {
+                Document fieldSchema =
+                    schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                if (fieldSchema == null) {
+                  allow = false;
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -1082,6 +1094,34 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return references;
   }
 
+
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId)
+      throws EEAException {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(tableSchemaId, datasetSchema);
+    if (table != null && table.getRecordSchema() != null
+        && table.getRecordSchema().getFieldSchema() != null) {
+      table.getRecordSchema().getFieldSchema().forEach(field -> {
+        try {
+          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
+              e);
+        }
+      });
+    }
+
+  }
 
   /**
    * Update the property isPKreferenced of the class FieldSchema
