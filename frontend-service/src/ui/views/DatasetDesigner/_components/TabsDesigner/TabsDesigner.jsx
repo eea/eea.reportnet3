@@ -19,6 +19,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const TabsDesigner = withRouter(
   ({ datasetSchemas, editable = false, match, history, onChangeReference, onLoadTableData }) => {
@@ -27,6 +28,7 @@ export const TabsDesigner = withRouter(
     } = match;
 
     const leftSideBarContext = useContext(LeftSideBarContext);
+    const validationContext = useContext(ValidationContext);
 
     const [activeIndex, setActiveIndex] = useState(0);
     const [datasetSchema, setDatasetSchema] = useState();
@@ -48,7 +50,7 @@ export const TabsDesigner = withRouter(
           label: 'Add validation',
           icon: 'plus',
           onClick: e => {
-            setIsAddValidationVisible(!isAddValidationVisible);
+            validationContext.onOpenModal();
           },
           title: 'settings'
         }
@@ -422,6 +424,7 @@ export const TabsDesigner = withRouter(
 
     return (
       <React.Fragment>
+        {console.log('TabsDesigner ValidationContext: ', validationContext)}
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && (

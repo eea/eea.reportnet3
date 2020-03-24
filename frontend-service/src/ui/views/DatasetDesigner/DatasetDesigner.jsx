@@ -31,6 +31,7 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
 
@@ -49,6 +50,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const validationContext = useContext(ValidationContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
@@ -139,6 +141,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
+  useEffect(() => {
+    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+      setValidationListDialogVisible(true);
+  }, [validationContext]);
 
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
@@ -266,11 +272,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const actionButtonsValidationDialog = (
     <>
+      {console.log('actionButtonsValidationDialog', validationContext)}
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
-        onClick={() => onHideValidationsDialog()}
+        onClick={() => {
+          validationContext.onOpenModal('validationsListDialog');
+          onHideValidationsDialog();
+        }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -290,7 +300,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           footer={actionButtonsValidationDialog}
           header={resources.messages['titleValidations']}
           maximizable
-          onHide={() => onHideValidationsDialog()}
+          onHide={() => {
+            if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+              validationContext.onResetOpener();
+            }
+            onHideValidationsDialog();
+          }}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
           <TabsValidations datasetSchemaId={datasetSchemaId} dataset={metaData.dataset} />
@@ -325,7 +340,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         subtitle={dataflowName}
         title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
       />
-
       <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
       <div className={styles.ButtonsBar}>
         <InputTextarea
