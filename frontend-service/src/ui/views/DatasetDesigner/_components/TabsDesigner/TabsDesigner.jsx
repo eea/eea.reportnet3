@@ -424,7 +424,6 @@ export const TabsDesigner = withRouter(
 
     return (
       <React.Fragment>
-        {console.log('TabsDesigner ValidationContext: ', validationContext)}
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && (
