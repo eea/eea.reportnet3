@@ -6,9 +6,11 @@
   display: flex;
   flex-direction: row;
   overflow-x: scroll;
+  padding: 1rem 3rem 0 3rem;
 }
-.schemaWrapper div {
-  min-width: 33%;
+.schemaWrapper > div {
+  min-width: 25%;
+  max-width: 50%;
 }
 .schemaWrapper > div {
   margin-right: 1rem;
