@@ -210,21 +210,21 @@ export const FieldsDesigner = ({
       !isUndefined(fields) && !isNull(fields)
         ? fields.map(field => {
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field.codelistItems,
+              description: field.description,
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistItems: field.codelistItems,
+              referencedField: field['referencedField'],
               required: field.required,
-              description: field.description
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           })
         : [];
 
     return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
       <DataViewer
-        datasetSchemas={datasetSchemas}
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
         isWebFormMMR={false}
@@ -312,6 +312,7 @@ export const FieldsDesigner = ({
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : 0}
         />
       </div>
@@ -349,6 +350,7 @@ export const FieldsDesigner = ({
                 onFieldUpdate={onFieldUpdate}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
+                tableSchemaId={table.tableSchemaId}
                 totalFields={fields.length}
               />
             </div>

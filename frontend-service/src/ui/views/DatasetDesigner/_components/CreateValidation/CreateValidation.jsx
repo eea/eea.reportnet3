@@ -17,6 +17,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ValidationService } from 'core/services/Validation';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import {
   createValidationReducerInitState,
@@ -38,6 +39,7 @@ import { setValidationExpression } from './_functions/utils/setValidationExpress
 const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility, datasetId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   const [creationFormState, creationFormDispatch] = useReducer(
     createValidationReducer,
@@ -126,7 +128,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.log('createValidationRule error', error);
+      console.error('createValidationRule error', error);
     }
   };
 
@@ -182,11 +184,16 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   const onHide = () => {
     creationFormDispatch({ type: 'RESET_CREATION_FORM', payload: resetValidationRuleCreation() });
+    validationContext.onCloseModal();
     toggleVisibility(false);
   };
 
   const dialogLayout = children => (
-    <Dialog header="Create Field Validation rule" visible={isVisible} style={{ width: '90%' }} onHide={e => onHide()}>
+    <Dialog
+      header="Create Field Validation rule"
+      visible={validationContext.isVisible}
+      style={{ width: '90%' }}
+      onHide={e => onHide()}>
       {children}
     </Dialog>
   );

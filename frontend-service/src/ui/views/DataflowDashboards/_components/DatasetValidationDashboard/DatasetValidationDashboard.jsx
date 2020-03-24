@@ -26,15 +26,15 @@ import { ErrorUtils } from 'ui/views/_functions/Utils';
   BLOCKER: colors.dashboardBlocker
 }; */
 
-export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, datasetSchemaName }) => {
+export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName, isVisible }) => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
   const initialFiltersState = {
-    reporterFilter: [],
-    tableFilter: [],
-    statusFilter: [],
+    data: {},
     originalData: {},
-    data: {}
+    reporterFilter: [],
+    statusFilter: [],
+    tableFilter: []
   };
   const [dashboardColors] = useState({
     CORRECT: colors.correct,
@@ -88,9 +88,12 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
+
       setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
+
       if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
         setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
+
         setValidationDashboardData(
           buildDatasetDashboardObject(datasetsValidationStatistics, datasetsValidationStatistics.levelErrors)
         );
@@ -117,10 +120,13 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
 
   const getDashboardBarsByDataset = (datasets, levelErrors) => {
     let allDatasets = [];
+
     datasets.tables.forEach((table, z) => {
       let allLevelErrorBars = [];
+
       levelErrors.forEach((levelError, i) => {
         let levelErrorIndex = getLevelErrorPriority(levelError);
+
         const errorBar = {
           label: levelError,
           tableName: table.tableName,
@@ -130,6 +136,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
           totalData: table.tableStatisticValues[levelErrorIndex],
           stack: table.tableName
         };
+
         allLevelErrorBars.push(errorBar);
       });
       allDatasets.push(allLevelErrorBars);
@@ -139,14 +146,18 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
 
   const buildDatasetDashboardObject = (datasets, levelErrors) => {
     let dashboards = [];
+
     if (!isUndefined(datasets)) {
       dashboards = getDatasetsByErrorAndStatistics(datasets, levelErrors);
     }
+
     const labels = datasets.datasetReporters.map(reporterData => reporterData.reporterName);
+
     const datasetDataObject = {
       labels: labels,
       datasets: dashboards
     };
+
     return datasetDataObject;
   };
 
@@ -214,8 +225,8 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
           {filterState.data ? (
             <>
               <FilterList
-                datasetSchemaId={datasetSchemaId}
                 color={dashboardColors}
+                datasetSchemaId={datasetSchemaId}
                 filterDispatch={filterDispatch}
                 levelErrors={levelErrorTypes}
                 originalData={filterState.originalData}
@@ -225,13 +236,13 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
               />
               {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
               <Chart
-                ref={chartRef}
-                type="bar"
                 data={filterState.data}
-                options={datasetOptionsObject}
-                width="100%"
                 height="30%"
+                options={datasetOptionsObject}
+                ref={chartRef}
                 style={{ marginTop: '3rem' }}
+                type="bar"
+                width="100%"
               />
             </>
           ) : (
@@ -263,10 +274,10 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, isVisible, dataset
               {onLoadStamp(resources.messages['empty'])}
               <Chart
                 className={styles.emptyChart}
-                type="bar"
-                options={datasetOptionsObject}
-                width="100%"
                 height="30%"
+                options={datasetOptionsObject}
+                type="bar"
+                width="100%"
               />
             </>
           )}

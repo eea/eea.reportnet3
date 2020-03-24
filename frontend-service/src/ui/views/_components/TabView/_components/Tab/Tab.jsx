@@ -346,7 +346,6 @@ export const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {console.log(hasPKReferenced)}
           {designMode && !hasPKReferenced ? (
             <div
               onClick={e => {

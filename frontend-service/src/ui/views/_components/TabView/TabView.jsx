@@ -156,7 +156,6 @@ export const TabView = ({
     });
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
-    console.log('tab', tab.props);
     return (
       <Tab
         addTab={tab.props.addTab}

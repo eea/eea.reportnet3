@@ -31,6 +31,7 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
 
@@ -49,6 +50,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const validationContext = useContext(ValidationContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
@@ -75,7 +77,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
-    console.log('DATASET DESIGNER');
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
@@ -140,6 +141,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
+  useEffect(() => {
+    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+      setValidationListDialogVisible(true);
+  }, [validationContext]);
 
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
@@ -171,7 +176,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
-    console.log('CHANGE REFERENCE');
     const inmDatasetSchemas = [...datasetSchemas];
     const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
     inmDatasetSchemas[datasetSchemaIndex].tables = tabs;
@@ -268,11 +272,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const actionButtonsValidationDialog = (
     <>
+      {console.log('actionButtonsValidationDialog', validationContext)}
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
-        onClick={() => onHideValidationsDialog()}
+        onClick={() => {
+          validationContext.onOpenModal('validationsListDialog');
+          onHideValidationsDialog();
+        }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -292,7 +300,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           footer={actionButtonsValidationDialog}
           header={resources.messages['titleValidations']}
           maximizable
-          onHide={() => onHideValidationsDialog()}
+          onHide={() => {
+            if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+              validationContext.onResetOpener();
+            }
+            onHideValidationsDialog();
+          }}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
           <TabsValidations datasetSchemaId={datasetSchemaId} dataset={metaData.dataset} />

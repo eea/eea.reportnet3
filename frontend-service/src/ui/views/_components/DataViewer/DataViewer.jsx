@@ -50,7 +50,6 @@ import {
 
 const DataViewer = withRouter(
   ({
-    datasetSchemas,
     hasWritePermissions,
     isDatasetDeleted = false,
     isDataCollection,
@@ -134,7 +133,6 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
-          datasetSchemas={datasetSchemas}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -954,7 +952,6 @@ const DataViewer = withRouter(
                   addDialogVisible={addDialogVisible}
                   colsSchema={colsSchema}
                   datasetId={datasetId}
-                  datasetSchemas={datasetSchemas}
                   formType="NEW"
                   onChangeForm={onEditAddFormInput}
                   records={records}
@@ -980,7 +977,6 @@ const DataViewer = withRouter(
               <DataForm
                 colsSchema={colsSchema}
                 datasetId={datasetId}
-                datasetSchemas={datasetSchemas}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 onChangeForm={onEditAddFormInput}

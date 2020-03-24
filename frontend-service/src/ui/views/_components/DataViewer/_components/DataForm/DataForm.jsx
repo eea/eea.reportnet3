@@ -13,16 +13,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataForm = ({
-  addDialogVisible,
-  colsSchema,
-  datasetId,
-  datasetSchemas,
-  editDialogVisible,
-  formType,
-  onChangeForm,
-  records
-}) => {
+const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, formType, onChangeForm, records }) => {
   const resources = useContext(ResourcesContext);
   const [colsSchemaWithLinks, setColsSchemaWithLinks] = useState([]);
 
@@ -36,7 +27,7 @@ const DataForm = ({
 
   const onLoadColsSchema = async filter => {
     const colsSchemasPromises = colsSchema.map(async colSchema => {
-      const linkItems = await getLinkItemsWithEmptyOption(colSchema.field, filter, colSchema.type);
+      const linkItems = await getLinkItemsWithEmptyOption(filter, colSchema.type, colSchema.referencedField);
       colSchema.linkItems = linkItems;
       return colSchema;
     });
@@ -65,13 +56,13 @@ const DataForm = ({
     }
   };
 
-  const getLinkItemsWithEmptyOption = async (field, filter, type) => {
-    if (isNil(type) || type.toUpperCase() !== 'LINK') {
+  const getLinkItemsWithEmptyOption = async (filter, type, referencedField) => {
+    if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
       return [];
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      RecordUtils.getFieldReferencedPKId(datasetSchemas, field),
+      isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       filter
     );
     const linkItems = referencedFieldValues.map(referencedField => {
