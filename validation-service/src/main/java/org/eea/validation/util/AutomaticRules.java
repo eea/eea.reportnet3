@@ -156,9 +156,8 @@ public class AutomaticRules {
   public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description, String tableSchemaId, Long datasetId) {
     Rule rule = composeRule(tableSchemaId, typeEntityEnum, nameRule,
-        "isfieldPK('" + datasetId + "','" + referenceId + "',",
-        "The value must be based on criteria.", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        description);
+        "isfieldPK(datasetId,'" + referenceId + "',", "The value must be based on criteria.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
     // we add the rule data to take the message if the user edit the rule
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
