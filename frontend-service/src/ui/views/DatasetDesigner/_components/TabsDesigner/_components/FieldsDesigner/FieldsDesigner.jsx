@@ -244,23 +244,21 @@ export const FieldsDesigner = ({
     );
   };
 
-  const renderConfirmDialog = () => {
-    return (
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteFieldTitle']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => {
-          deleteField(indexToDelete, fieldToDeleteType);
-          setIsDeleteDialogVisible(false);
-        }}
-        onHide={() => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteFieldConfirm']}
-      </ConfirmDialog>
-    );
-  };
+  const renderConfirmDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteFieldTitle']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => {
+        deleteField(indexToDelete, fieldToDeleteType);
+        setIsDeleteDialogVisible(false);
+      }}
+      onHide={() => setIsDeleteDialogVisible(false)}
+      visible={isDeleteDialogVisible}>
+      {resources.messages['deleteFieldConfirm']}
+    </ConfirmDialog>
+  );
 
   const renderAllFields = () => {
     if (isLoading) {
@@ -269,7 +267,7 @@ export const FieldsDesigner = ({
       return (
         <>
           {isPreviewModeOn ? previewData() : renderFields()}
-          {!isPreviewModeOn ? renderNewField() : null}
+          {!isPreviewModeOn && renderNewField()}
         </>
       );
     }
@@ -331,10 +329,10 @@ export const FieldsDesigner = ({
                 datasetId={datasetId}
                 fieldDescription={field.description}
                 fieldId={field.fieldId}
+                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldName={field.name}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
-                fieldName={field.name}
-                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
@@ -435,7 +433,7 @@ export const FieldsDesigner = ({
           <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
-      {!isPreviewModeOn ? (
+      {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
           <label></label>
           <label>{resources.messages['required']}</label>
@@ -444,10 +442,10 @@ export const FieldsDesigner = ({
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
         </div>
-      ) : null}
+      )}
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
-      {!isErrorDialogVisible ? renderConfirmDialog() : null}
+      {!isErrorDialogVisible && renderConfirmDialog()}
     </React.Fragment>
   );
 };

@@ -59,12 +59,14 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
+
     if (!isEmpty(table)) {
       creationFormDispatch({
         type: 'SET_FIELDS',
         payload: getDatasetSchemaTableFields(table, datasetSchema.tables)
       });
     }
+
     if (validationContext.fieldId) {
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
