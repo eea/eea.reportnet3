@@ -22,6 +22,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         codelistItems: [],
         fieldRequiredValue: false,
         fieldDesignerState: '',
+        fieldLinkValue: null,
         fieldTypeValue: '',
         fieldValue: '',
         fieldDescriptionValue: '',

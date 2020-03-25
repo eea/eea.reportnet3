@@ -12,7 +12,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const resources = useContext(ResourcesContext);
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
-  console.log('selectedCodelist', { selectedCodelist });
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button

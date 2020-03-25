@@ -38,7 +38,7 @@ const FieldEditor = ({
   }, []);
 
   useEffect(() => {
-    onFilter('');
+    onFilter(RecordUtils.getCellValue(cells, cells.field));
   }, []);
 
   let fieldType = {};
@@ -143,6 +143,7 @@ const FieldEditor = ({
         return (
           <Dropdown
             appendTo={document.body}
+            currentValue={RecordUtils.getCellValue(cells, cells.field)}
             filter={true}
             filterPlaceholder={resources.messages['linkFilterPlaceholder']}
             filterBy="itemType,value"
@@ -157,6 +158,7 @@ const FieldEditor = ({
             }}
             optionLabel="itemType"
             options={linkItemsOptions}
+            showFilterClear={true}
             value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
           />
         );
