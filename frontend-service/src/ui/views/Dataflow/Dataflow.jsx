@@ -7,10 +7,10 @@ import uniq from 'lodash/uniq';
 
 import styles from './Dataflow.module.scss';
 
-import colors from 'conf/colors.json';
 import { config } from 'conf';
-import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
+import colors from 'conf/colors.json';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { BigButtonList } from './_components/BigButtonList';
 import { Button } from 'ui/views/_components/Button';
@@ -21,13 +21,11 @@ import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
-import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { SnapshotService } from 'core/services/Snapshot';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -165,11 +163,11 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowData,
-    dataflowStatus,
     dataflowId,
+    dataflowStatus,
     designDatasetSchemas,
-    isCustodian,
     hasRepresentatives,
+    isCustodian,
     isDataSchemaCorrect
   ]);
 
@@ -261,12 +259,7 @@ const Dataflow = withRouter(({ history, match }) => {
     return loadedClassesSteps;
   };
 
-  const getElementByClass = (elements, classId) =>
-    elements
-      .map(e => {
-        return e.target;
-      })
-      .indexOf(classId);
+  const getElementByClass = (elements, classId) => elements.map(e => e.target).indexOf(classId);
 
   const handleRedirect = target => {
     history.push(target);
@@ -498,16 +491,16 @@ const Dataflow = withRouter(({ history, match }) => {
         />
         {isCustodian && (
           <Dialog
-            header={resources.messages['manageRolesDialogTitle']}
+            contentStyle={{ maxHeight: '60vh' }}
             footer={closeBtnManageRolesDialog}
-            visible={isActiveManageRolesDialog}
+            header={resources.messages['manageRolesDialogTitle']}
             onHide={() => onHideManageRolesDialog()}
-            contentStyle={{ maxHeight: '60vh' }}>
+            visible={isActiveManageRolesDialog}>
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowData.id}
-                setHasRepresentatives={setHasRepresentatives}
                 isActiveManageRolesDialog={isActiveManageRolesDialog}
+                setHasRepresentatives={setHasRepresentatives}
               />
             </div>
           </Dialog>
