@@ -6,7 +6,7 @@ export const initValidationRuleCreation = rawTables => {
   const tables = rawTables
     .filter(table => !table.addTab)
     .map(table => {
-      return { label: table.tableSchemaName, code: table.recordSchemaId };
+      return { label: table.header, code: table.recordSchemaId };
     });
   const errorLevels = config.validations.errorLevels;
   const newExpression = getEmptyExpression();
