@@ -77,6 +77,7 @@ export const ValidationProvider = ({ children }) => {
           });
         },
         onOpenModalFromField: fieldId => {
+          console.log('fieldId', { fieldId });
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD',
             payload: fieldId

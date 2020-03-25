@@ -152,6 +152,9 @@ const FieldEditor = ({
               onEditorSubmitValue(cells, e.target.value.value, record);
             }}
             onFilterInputChangeBackend={onFilter}
+            onMouseDown={e => {
+              onEditorValueFocus(cells, e.target.value);
+            }}
             optionLabel="itemType"
             options={linkItemsOptions}
             value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}

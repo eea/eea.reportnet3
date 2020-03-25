@@ -52,6 +52,7 @@ export const FieldDesigner = ({
   tableSchemaId,
   totalFields
 }) => {
+  console.log('codelistItems', { codelistItems });
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
@@ -315,6 +316,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           fieldId: response.data,
+          fieldLinkValue: null,
           pk,
           name,
           recordId,
@@ -440,6 +442,7 @@ export const FieldDesigner = ({
   };
 
   const onSaveCodelist = codelistItems => {
+    console.log('codelistItems onSaveCodelist', { codelistItems });
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -767,6 +770,7 @@ export const FieldDesigner = ({
         ) : null}
         {renderDeleteButton()}
       </div>
+      {console.log(fieldDesignerState.codelistItems)}
       {fieldDesignerState.isCodelistEditorVisible ? (
         <CodelistEditor
           isCodelistEditorVisible={fieldDesignerState.isCodelistEditorVisible}

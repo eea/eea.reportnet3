@@ -427,6 +427,7 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
+        {console.log({ datasetSchema })}
         {datasetSchema && (
           <CreateValidation
             isVisible={isAddValidationVisible}

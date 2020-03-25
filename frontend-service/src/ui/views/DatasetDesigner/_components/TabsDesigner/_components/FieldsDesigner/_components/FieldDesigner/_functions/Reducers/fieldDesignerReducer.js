@@ -19,6 +19,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'RESET_NEW_FIELD':
       return {
         ...state,
+        codelistItems: [],
         fieldRequiredValue: false,
         fieldDesignerState: '',
         fieldTypeValue: '',
