@@ -429,7 +429,7 @@ export const TabsDesigner = withRouter(
         {datasetSchema && (
           <CreateValidation
             isVisible={isAddValidationVisible}
-            datasetSchema={datasetSchema}
+            tabs={tabs}
             datasetId={datasetId}
             toggleVisibility={setIsAddValidationVisible}
           />
