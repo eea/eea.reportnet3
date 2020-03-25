@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -17,21 +17,19 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const DataflowManagementForm = ({
   dataflowId,
-  dataflowValues,
-  hasErrors,
   isDialogVisible,
   isEditForm,
   isFormReset,
-  isNameDuplicated,
-  onCreate,
   onCancel,
+  onCreate,
   onEdit,
-  selectedDataflow,
-  setHasErrors,
-  setIsNameDuplicated
+  selectedDataflow
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
+  const [hasErrors, setHasErrors] = useState(false);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef();
@@ -44,42 +42,26 @@ const DataflowManagementForm = ({
     }
   }, [isDialogVisible, hasErrors]);
 
+  useEffect(() => {
+    if (!isNull(form.current) && !isFormReset) {
+      form.current.resetForm();
+      setIsNameDuplicated(false);
+      setHasErrors(false);
+    }
+  }, [isFormReset, form.current]);
+
   const dataflowCrudValidation = Yup.object().shape({
-    name: isEditForm
-      ? Yup.string().required(' ')
-      : Yup.string()
-          .required(' ')
-          .test('isNewFormDuplicated', resources.messages['duplicatedDataflow'], value => {
-            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
-              const isRepeat = Object.keys(dataflowValues).some(
-                key => dataflowValues[key].name.toLowerCase() === value.toLowerCase()
-              );
-              return !isRepeat;
-            } else {
-              return true;
-            }
-          }),
+    name: Yup.string().required(' '),
     description: Yup.string()
       .required()
       .max(255, resources.messages['dataflowDescriptionValidationMax'])
   });
 
-  if (!isNull(form.current) && !isFormReset) {
-    form.current.resetForm();
-  }
-
-  const buildFormikValues = selectedValues => {
-    const formValues = isEditForm ? selectedValues : { name: '', description: '' };
-    return formValues;
-  };
-
-  const initialValues = buildFormikValues(selectedDataflow);
-
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initialValues}
+      initialValues={isEditForm ? selectedDataflow : { name: '', description: '' }}
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);

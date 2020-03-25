@@ -55,7 +55,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
 
   const [dataflowData, setDataflowData] = useState();
-  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [dataflowStatus, setDataflowStatus] = useState();
   const [dataflowTitle, setDataflowTitle] = useState();
   const [dataProviderId, setDataProviderId] = useState([]);
@@ -72,8 +71,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isEditForm, setIsEditForm] = useState(false);
-  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [onConfirmDelete, setOnConfirmDelete] = useState();
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
@@ -307,8 +304,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const onHideDialog = () => {
     setIsDataflowDialogVisible(false);
     setIsDataflowFormReset(false);
-    setDataflowHasErrors(false);
-    setIsNameDuplicated(false);
   };
 
   const onHideSnapshotDialog = () => {
@@ -377,7 +372,6 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onShowEditForm = () => {
-    setIsEditForm(true);
     setIsDataflowDialogVisible(true);
     setIsDataflowFormReset(true);
   };
@@ -529,22 +523,16 @@ const Dataflow = withRouter(({ history, match }) => {
         <Dialog
           className={styles.dialog}
           dismissableMask={false}
-          header={isEditForm ? resources.messages['updateDataflow'] : resources.messages['createNewDataflow']}
+          header={resources.messages['updateDataflow']}
           onHide={onHideDialog}
           visible={isDataflowDialogVisible}>
           <DataflowManagementForm
             dataflowId={dataflowId}
-            dataflowValues={dataflowData}
-            hasErrors={dataflowHasErrors}
-            isDialogVisible={isDataflowDialogVisible}
-            isEditForm={isEditForm}
+            isEditForm={true}
             isFormReset={isDataflowFormReset}
-            isNameDuplicated={isNameDuplicated}
             onCancel={onHideDialog}
             onEdit={onEditDataflow}
             selectedDataflow={dataflowData}
-            setHasErrors={setDataflowHasErrors}
-            setIsNameDuplicated={setIsNameDuplicated}
           />
         </Dialog>
 
