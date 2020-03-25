@@ -6,7 +6,7 @@ export const createValidationReducerInitState = {
     description: '',
     errorMessage: '',
     errorLevel: undefined,
-    active: false,
+    active: true,
     expressions: [],
     allExpressions: [],
     allGroups: []

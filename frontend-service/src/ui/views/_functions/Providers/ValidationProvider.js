@@ -7,7 +7,8 @@ const validationReducer = (state, { type, payload }) => {
     case 'ON_OPEN_QC_CREATION_MODAL':
       return {
         ...state,
-        isVisible: true
+        isVisible: true,
+        opener: null
       };
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER':
       return {
@@ -19,7 +20,8 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload
+        fieldId: payload,
+        opener: null
       };
     case 'ON_OPENER_RESET':
       return {

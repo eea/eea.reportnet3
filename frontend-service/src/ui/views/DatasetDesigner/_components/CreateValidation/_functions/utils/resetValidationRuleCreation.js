@@ -10,7 +10,7 @@ export const resetValidationRuleCreation = () => {
     description: '',
     errorMessage: '',
     errorLevel: undefined,
-    active: false,
+    active: true,
     expressions: [newExpression],
     allExpressions: [newExpression]
   };
