@@ -47,12 +47,12 @@ export const TabsDesigner = withRouter(
     useEffect(() => {
       leftSideBarContext.addModels([
         {
-          label: 'Add validation',
+          label: 'createQcRule',
           icon: 'plus',
           onClick: e => {
             validationContext.onOpenModal();
           },
-          title: 'settings'
+          title: 'createQcRule'
         }
       ]);
 
