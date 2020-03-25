@@ -76,7 +76,8 @@ export const Tab = ({
           if (!isUndefined(onTabDeleteClick) && !addTab) {
             onTabDeleteClick(index);
           }
-        }
+        },
+        disabled: hasPKReferenced
       }
     ]);
   }, []);
@@ -292,7 +293,7 @@ export const Tab = ({
               e.preventDefault();
               if (!isUndefined(checkEditingTabs)) {
                 if (!checkEditingTabs()) {
-                  if (!isUndefined(onTabDeleteClick) && !addTab) {
+                  if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
                     onTabDeleteClick(index);
                   }
                 }
