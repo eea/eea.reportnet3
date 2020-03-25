@@ -1477,6 +1477,9 @@ public class DatasetServiceImpl implements DatasetService {
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
         searchValue, PageRequest.of(0, 15));
+    // Remove the duplicate values
+    HashSet<String> seen = new HashSet<>();
+    fields.removeIf(e -> !seen.add(e.getValue()));
 
     List<FieldValue> sortedList = new ArrayList<>();
 
