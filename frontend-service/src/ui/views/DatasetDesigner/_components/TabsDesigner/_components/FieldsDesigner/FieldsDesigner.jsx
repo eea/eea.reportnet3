@@ -69,6 +69,13 @@ export const FieldsDesigner = ({
   }, [fields]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
+    console.log(
+      fields.filter(field => {
+        return (
+          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+        );
+      })
+    );
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
