@@ -39,7 +39,7 @@ import { initValidationRuleCreation } from './_functions/utils/initValidationRul
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
 
-const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibility, datasetId }) => {
+const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -55,15 +55,17 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   const componentName = 'createValidation';
 
   useEffect(() => {
-    creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(datasetSchema.tables) });
-  }, [datasetSchema]);
+    if (!isEmpty(tabs)) {
+      creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(tabs) });
+    }
+  }, [tabs]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
     if (!isEmpty(table)) {
       creationFormDispatch({
         type: 'SET_FIELDS',
-        payload: getDatasetSchemaTableFields(table, datasetSchema.tables)
+        payload: getDatasetSchemaTableFields(table, tabs)
       });
     }
     if (validationContext.fieldId) {
@@ -71,7 +73,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'field',
-          value: getSelectedFieldById(validationContext.fieldId, datasetSchema.tables)
+          value: getSelectedFieldById(validationContext.fieldId, tabs)
         }
       });
     }
@@ -83,7 +85,7 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'table',
-          value: getSelectedTableByFieldId(validationContext.fieldId, datasetSchema.tables)
+          value: getSelectedTableByFieldId(validationContext.fieldId, tabs)
         }
       });
     }
@@ -161,7 +163,6 @@ const CreateValidation = ({ isVisible, datasetSchema, table, field, toggleVisibi
   const createValidationRule = async () => {
     try {
       const { candidateRule } = creationFormState;
-      const { datasetSchemaId } = datasetSchema;
       await ValidationService.create(datasetId, candidateRule);
       onHide();
     } catch (error) {

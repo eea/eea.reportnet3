@@ -12,20 +12,21 @@
       ]
     },
     "LEN": {
-      "option": { "label": "String Length", "value": "LEN" },
+      "option": { "label": "LEN=", "value": "LEN" },
       "values": [
-        { "label": "GT", "value": "GT" },
-        { "label": "GTEQ", "value": "GTEQ" },
-        { "label": "LT", "value": "LT" },
-        { "label": "LTEQ", "value": "LTEQ" },
-        { "label": "DIST", "value": "DIST" }
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
       ]
     },
     "string": {
       "option": { "label": "String", "value": "string" },
       "values": [
-        { "label": "SEQ", "value": "SEQ" },
-        { "label": "SEQIC", "value": "SEQIC" }
+        { "label": "=", "value": "=" },
+        { "label": "LIKE", "value": "LIKE" }
       ]
     }
   },
@@ -43,9 +44,13 @@
     "EQ": "EQ",
     "DIST": "DIST",
     "SEQ": "SEQ",
-    "SEQIC": "SEQIC",
+    "LIKE": "SEQIC",
     "GTEQ": "GTEQ",
-    "LEN": "LEN"
+    "LEN=": "LEN="
+  },
+  "stringOperatorsEquivalences": {
+    "=": "SEQ",
+    "LIKE": "SEQIC"
   },
   "reverseEquivalences": {
     "GT": ">",
