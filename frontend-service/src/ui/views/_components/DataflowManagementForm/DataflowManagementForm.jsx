@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagementForm.module.css';
 
@@ -17,7 +18,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const DataflowManagementForm = ({
   dataflowId,
-  isDialogVisible,
   isEditForm,
   isFormReset,
   onCancel,
@@ -32,18 +32,16 @@ const DataflowManagementForm = ({
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
 
   const form = useRef(null);
-  const inputRef = useRef();
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    if (isDialogVisible) {
-      if (!isUndefined(inputRef)) {
-        inputRef.current.focus();
-      }
+    if (!isNil(inputRef)) {
+      inputRef.current.focus();
     }
-  }, [isDialogVisible, hasErrors]);
+  }, [hasErrors, inputRef.current]);
 
   useEffect(() => {
-    if (!isNull(form.current) && !isFormReset) {
+    if (!isNil(form.current) && !isFormReset) {
       form.current.resetForm();
       setIsNameDuplicated(false);
       setHasErrors(false);
