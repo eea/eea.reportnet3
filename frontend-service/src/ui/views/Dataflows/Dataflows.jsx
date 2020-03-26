@@ -36,7 +36,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const [completedContent, setCompletedContent] = useState([]);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -164,10 +163,7 @@ const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
-  const onHideDialog = () => {
-    setIsDataflowDialogVisible(false);
-    setIsFormReset(false);
-  };
+  const onHideDialog = () => setIsDataflowDialogVisible(false);
 
   const onRefreshToken = async () => {
     try {
@@ -179,10 +175,7 @@ const Dataflows = withRouter(({ match, history }) => {
     }
   };
 
-  const onShowAddForm = () => {
-    setIsDataflowDialogVisible(true);
-    setIsFormReset(true);
-  };
+  const onShowAddForm = () => setIsDataflowDialogVisible(true);
 
   const layout = children => {
     return (
@@ -240,7 +233,7 @@ const Dataflows = withRouter(({ match, history }) => {
         header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
-        <DataflowManagementForm isFormReset={isFormReset} onCancel={onHideDialog} onCreate={onCreateDataflow} />
+        <DataflowManagementForm onCancel={onHideDialog} onCreate={onCreateDataflow} refresh={isDataflowDialogVisible} />
       </Dialog>
     </div>
   );

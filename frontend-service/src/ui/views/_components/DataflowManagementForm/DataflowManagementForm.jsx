@@ -16,15 +16,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({
-  dataflowId,
-  isEditForm,
-  isFormReset,
-  onCancel,
-  onCreate,
-  onEdit,
-  selectedDataflow
-}) => {
+const DataflowManagementForm = React.memo(({ dataflowData, isEditForm, onCancel, onCreate, onEdit, refresh }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -35,18 +27,18 @@ const DataflowManagementForm = ({
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (!isNil(inputRef)) {
+    if (!isNil(inputRef) && refresh) {
       inputRef.current.focus();
     }
-  }, [hasErrors, inputRef.current]);
+  }, [hasErrors, inputRef.current, refresh]);
 
   useEffect(() => {
-    if (!isNil(form.current) && !isFormReset) {
+    if (!isNil(form.current) && refresh) {
       form.current.resetForm();
       setIsNameDuplicated(false);
       setHasErrors(false);
     }
-  }, [isFormReset, form.current]);
+  }, [refresh, form.current]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
@@ -59,14 +51,14 @@ const DataflowManagementForm = ({
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={isEditForm ? selectedDataflow : { name: '', description: '' }}
+      initialValues={isEditForm ? dataflowData : { name: '', description: '' }}
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(dataflowId, values.name, values.description);
-            onEdit(dataflowId, values.name, values.description);
+            await DataflowService.update(dataflowData.id, values.name, values.description);
+            onEdit(values.name, values.description);
           } else {
             await DataflowService.create(values.name, values.description);
             onCreate();
@@ -83,7 +75,7 @@ const DataflowManagementForm = ({
               ? {
                   type: 'DATAFLOW_UPDATING_ERROR',
                   content: {
-                    dataflowId,
+                    dataflowId: dataflowData.id,
                     dataflowName: values.name
                   }
                 }
@@ -173,6 +165,6 @@ const DataflowManagementForm = ({
       )}
     </Formik>
   );
-};
+});
 
 export { DataflowManagementForm };
