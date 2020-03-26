@@ -11,6 +11,7 @@ import { routes } from 'ui/routes';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -61,6 +62,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -141,10 +143,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
+
   useEffect(() => {
     if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
       setValidationListDialogVisible(true);
   }, [validationContext]);
+
   useEffect(() => {
     if (validationListDialogVisible) {
       validationContext.resetReOpenOpener();
@@ -173,6 +177,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     }
   };
+
+  const renderSwitchView = () => (
+    <div className={styles.switchDivInput}>
+      <div className={styles.switchDiv}>
+        <span className={styles.switchTextInput}>{resources.messages['design']}</span>
+        <InputSwitch
+          checked={isPreviewModeOn}
+          // disabled={true}
+          // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
+          onChange={e => {
+            setIsPreviewModeOn(e.value);
+          }}
+        />
+        <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+      </div>
+    </div>
+  );
 
   const onBlurDescription = description => {
     if (description !== initialDatasetDescription) {
@@ -364,6 +385,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
           value={datasetDescription || ''}
         />
+
         <Toolbar>
           <div className="p-toolbar-group-right">
             {/* <Button
@@ -375,7 +397,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             /> */}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !datasetHasData ? ' p-button-animated-blink' : null
+                datasetHasData ? ' p-button-animated-blink' : null
               }`}
               disabled={!datasetHasData}
               icon={'validate'}
@@ -414,9 +436,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
         </Toolbar>
       </div>
+      {renderSwitchView()}
       <TabsDesigner
         datasetSchemas={datasetSchemas}
         editable={true}
+        isPreviewModeOn={isPreviewModeOn}
         onChangeReference={onChangeReference}
         onLoadTableData={onLoadTableData}
       />

@@ -13,7 +13,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -28,6 +27,7 @@ export const FieldsDesigner = ({
   onChangeFields,
   onChangeTableDescription,
   onLoadTableData,
+  isPreviewModeOn,
   table
 }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
@@ -40,18 +40,12 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    if (
-      !isUndefined(table) &&
-      !isNull(table.records) &&
-      !isUndefined(table.records) &&
-      !isNull(table.records[0].fields)
-    ) {
+    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
       setFields(table.records[0].fields);
     }
     if (!isUndefined(table)) {
@@ -206,42 +200,39 @@ export const FieldsDesigner = ({
   };
 
   const previewData = () => {
-    const tableSchemaColumns =
-      !isUndefined(fields) && !isNull(fields)
-        ? fields.map(field => {
-            return {
-              codelistItems: field.codelistItems,
-              description: field.description,
-              field: field['fieldId'],
-              header: `${capitalize(field['name'])}`,
-              recordId: field['recordId'],
-              referencedField: field['referencedField'],
-              required: field.required,
-              table: table['tableSchemaName'],
-              type: field['type']
-            };
-          })
-        : [];
+    const tableSchemaColumns = !isNil(fields)
+      ? fields.map(field => {
+          return {
+            codelistItems: field.codelistItems,
+            description: field.description,
+            field: field['fieldId'],
+            header: `${capitalize(field['name'])}`,
+            recordId: field['recordId'],
+            referencedField: field['referencedField'],
+            required: field.required,
+            table: table['tableSchemaName'],
+            type: field['type']
+          };
+        })
+      : [];
 
-    return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
-      <DataViewer
-        hasWritePermissions={true}
-        isPreviewModeOn={isPreviewModeOn}
-        isWebFormMMR={false}
-        key={table.id}
-        levelErrorTypes={table.levelErrorTypes}
-        onLoadTableData={onLoadTableData}
-        recordPositionId={-1}
-        tableHasErrors={table.hasErrors}
-        tableId={table.tableSchemaId}
-        tableName={table.tableSchemaName}
-        tableSchemaColumns={tableSchemaColumns}
-      />
-    ) : (
-      <div>
-        <h3>{resources.messages['datasetDesignerNoFields']}</h3>
-      </div>
-    );
+    if (!isUndefined(table) && !isNil(table.records)) {
+      return (
+        <DataViewer
+          hasWritePermissions={true}
+          isPreviewModeOn={isPreviewModeOn}
+          isWebFormMMR={false}
+          key={table.id}
+          levelErrorTypes={table.levelErrorTypes}
+          onLoadTableData={onLoadTableData}
+          recordPositionId={-1}
+          tableHasErrors={table.hasErrors}
+          tableId={table.tableSchemaId}
+          tableName={table.tableSchemaName}
+          tableSchemaColumns={tableSchemaColumns}
+        />
+      );
+    }
   };
 
   const renderConfirmDialog = () => {
@@ -268,7 +259,7 @@ export const FieldsDesigner = ({
     } else {
       return (
         <>
-          {isPreviewModeOn ? previewData() : renderFields()}
+          {isPreviewModeOn ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
           {!isPreviewModeOn ? renderNewField() : null}
         </>
       );
@@ -383,6 +374,12 @@ export const FieldsDesigner = ({
     }
   };
 
+  const renderNoFields = () => (
+    <div>
+      <h3>{resources.messages['datasetDesignerNoFields']}</h3>
+    </div>
+  );
+
   const updateTableDescriptionDesign = async () => {
     if (isUndefined(tableDescriptionValue)) {
       return;
@@ -422,18 +419,6 @@ export const FieldsDesigner = ({
           // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
-        <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-          <InputSwitch
-            checked={isPreviewModeOn}
-            // disabled={true}
-            disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-            onChange={e => {
-              setIsPreviewModeOn(e.value);
-            }}
-          />
-          <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
-        </div>
       </div>
       {!isPreviewModeOn ? (
         <div className={styles.fieldsHeader}>
