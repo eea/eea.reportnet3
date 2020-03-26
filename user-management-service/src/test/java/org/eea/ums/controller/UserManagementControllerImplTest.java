@@ -10,6 +10,7 @@ import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -212,6 +213,42 @@ public class UserManagementControllerImplTest {
 
   }
 
+  /**
+   * Gets the user by email test.
+   *
+   * @return the user by email test
+   */
+  @Test
+  public void getUserByEmailTest() {
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentation[1]);
+    Mockito.when(userRepresentationMapper.entityToClass(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
+    Assert.assertNotNull(userManagementController.getUserByEmail("sample@email.net"));
+  }
+
+  /**
+   * Gets the user by email no users test.
+   *
+   * @return the user by email no users test
+   */
+  @Test
+  public void getUserByEmailNoUsersTest() {
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(null);
+    Assert.assertNull(userManagementController.getUserByEmail("sample@email.net"));
+  }
+
+  /**
+   * Gets the user by email to many users test.
+   *
+   * @return the user by email to many users test
+   */
+  @Test
+  public void getUserByEmailToManyUsersTest() {
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentation[2]);
+    Assert.assertNull(userManagementController.getUserByEmail("sample@email.net"));
+  }
 
   @Test
   public void addContributorsToResources() throws EEAException {

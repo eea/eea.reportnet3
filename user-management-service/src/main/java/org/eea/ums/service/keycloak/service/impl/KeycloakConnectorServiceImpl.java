@@ -762,6 +762,4 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     HttpEntity<T> request = new HttpEntity<>(body, headers);
     return request;
   }
-
-
 }

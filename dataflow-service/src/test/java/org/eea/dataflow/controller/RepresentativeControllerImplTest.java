@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RepresentativeControllerImplTest.
  */
@@ -250,5 +252,35 @@ public class RepresentativeControllerImplTest {
   public void deleteRepresentativeSuccessTest() throws EEAException {
     representativeControllerImpl.deleteRepresentative(1L);
     Mockito.verify(representativeService, times(1)).deleteDataflowRepresentative(Mockito.any());
+  }
+
+  /**
+   * Creates the representative test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createRepresentativeTest() throws EEAException {
+    Mockito.when(representativeService.createRepresentative(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals(1,
+        representativeControllerImpl.createRepresentative(1L, new RepresentativeVO()).longValue());
+  }
+
+  /**
+   * Creates the representative exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createRepresentativeExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(representativeService)
+        .createRepresentative(Mockito.any(), Mockito.any());
+    try {
+      representativeControllerImpl.createRepresentative(1L, new RepresentativeVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 }
