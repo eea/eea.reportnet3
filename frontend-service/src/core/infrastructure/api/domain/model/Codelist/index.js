@@ -1,1 +1,0 @@
-export { apiCodelist } from './ApiCodelist';
