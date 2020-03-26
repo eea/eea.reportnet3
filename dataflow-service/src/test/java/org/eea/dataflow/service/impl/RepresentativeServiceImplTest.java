@@ -59,9 +59,7 @@ public class RepresentativeServiceImplTest {
   /** The array id. */
   private List<Representative> arrayId;
 
-  /**
-   * Inits the mocks.
-   */
+  /** Inits the mocks. */
   @Before
   public void initMocks() {
     Dataflow dataflow = new Dataflow();
@@ -75,105 +73,6 @@ public class RepresentativeServiceImplTest {
     arrayId = new ArrayList<>();
     arrayId.add(new Representative());
     MockitoAnnotations.initMocks(this);
-  }
-
-  /**
-   * Insert representative exception 1 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException1Test() throws EEAException {
-    try {
-      representativeServiceImpl.insertRepresentative(null, representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
-    }
-  }
-
-  /**
-   * Insert representative exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException2Test() throws EEAException {
-    try {
-      representativeServiceImpl.insertRepresentative(1L, null);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
-    }
-  }
-
-  /**
-   * Insert representative exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException3Test() throws EEAException {
-    representativeVO.setDataProviderId(1L);
-    when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Optional.of(arrayId));
-    try {
-      representativeServiceImpl.insertRepresentative(1L, representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_DUPLICATED,
-          e.getMessage());
-    }
-  }
-
-  /**
-   * Insert representative exception 4 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException4Test() throws EEAException {
-    representativeVO.setDataProviderId(null);
-    when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Optional.of(arrayId));
-    try {
-      representativeServiceImpl.insertRepresentative(1L, representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_NOT_FOUND,
-          e.getMessage());
-    }
-  }
-
-  /**
-   * Insert representative exception 5 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException5Test() throws EEAException {
-    representativeVO.setDataProviderId(1L);
-    representativeVO.setProviderAccount("");
-    when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Optional.of(arrayId));
-    try {
-      representativeServiceImpl.insertRepresentative(1L, representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_NOT_FOUND,
-          e.getMessage());
-    }
-  }
-
-  /**
-   * Insert representative success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeSuccessTest() throws EEAException {
-    representativeVO.setDataProviderId(1L);
-    when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
-    when(representativeMapper.classToEntity(Mockito.any())).thenReturn(representative);
-    when(representativeRepository.save(Mockito.any())).thenReturn(representative);
-    assertEquals("error in the message", (Long) 1L,
-        representativeServiceImpl.insertRepresentative(1L, representativeVO));
   }
 
   /**
