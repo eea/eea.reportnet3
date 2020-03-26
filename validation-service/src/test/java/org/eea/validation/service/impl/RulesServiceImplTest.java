@@ -112,6 +112,20 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).deleteRuleByReferenceId(Mockito.any(), Mockito.any());
   }
 
+
+  /**
+   * Delete rule by reference field schema PK id.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteRuleByReferenceFieldSchemaPKId() throws EEAException {
+    rulesServiceImpl.deleteRuleByReferenceFieldSchemaPKId("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleByReferenceFieldSchemaPKId(Mockito.any(),
+        Mockito.any());
+  }
+
   /**
    * Gets the rules schema by dataset id not found test.
    *
