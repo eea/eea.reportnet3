@@ -87,6 +87,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
+          disabled={representative.hasDatasets}
           autoFocus={isNil(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
@@ -122,6 +123,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <>
         <select
+          disabled={representative.hasDatasets}
           className={styles.selectDataProvider}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
@@ -142,7 +144,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) ? (
+    return isNil(representative.representativeId) || representative.hasDatasets ? (
       <></>
     ) : (
       <ActionsColumn
