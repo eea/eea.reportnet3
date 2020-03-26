@@ -82,14 +82,14 @@ export const TabsDesigner = withRouter(
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       if (!isNil(inmTabs[tabIdx].records)) {
         inmTabs[tabIdx].records[0].fields = fields;
-        if (isLinkChange) {
-          onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
-        }
         setTabs(inmTabs);
       } else {
         inmTabs[tabIdx].records = [];
         inmTabs[tabIdx].records[0] = {};
         inmTabs[tabIdx].records[0].fields = fields;
+      }
+      if (isLinkChange) {
+        onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
       }
     };
 
@@ -275,6 +275,7 @@ export const TabsDesigner = withRouter(
             }
           }
         }
+        onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
         setTabs(inmTabs);
       } else {
         console.error('There has been an error while deleting the tab');
@@ -426,7 +427,7 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
-        {datasetSchema && (
+        {datasetSchema && tabs && (
           <CreateValidation
             isVisible={isAddValidationVisible}
             tabs={tabs}

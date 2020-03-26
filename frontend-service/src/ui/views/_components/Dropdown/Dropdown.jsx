@@ -19,84 +19,88 @@ import Tooltip from 'primereact/tooltip';
 
 export class Dropdown extends Component {
   static defaultProps = {
-    id: null,
-    name: null,
-    value: null,
-    options: null,
-    optionLabel: null,
-    itemTemplate: null,
-    style: null,
-    className: null,
-    scrollHeight: '200px',
-    filter: false,
-    filterPlaceholder: null,
-    editable: false,
-    placeholder: null,
-    required: false,
-    disabled: false,
     appendTo: null,
-    tabIndex: null,
-    autoFocus: false,
-    filterInputAutoFocus: true,
-    panelClassName: null,
-    panelStyle: null,
-    dataKey: null,
-    inputId: null,
-    showClear: false,
-    maxLength: null,
-    tooltip: null,
-    tooltipOptions: null,
     ariaLabel: null,
     ariaLabelledBy: null,
+    autoFocus: false,
+    className: null,
+    currentValue: undefined,
+    dataKey: null,
+    disabled: false,
+    editable: false,
+    filter: false,
+    filterInputAutoFocus: true,
+    filterPlaceholder: null,
+    id: null,
+    inputId: null,
+    itemTemplate: null,
+    maxLength: null,
+    name: null,
     onChange: null,
+    onContextMenu: null,
+    onEmptyList: null,
     onFilterInputChangeBackend: null,
     onMouseDown: null,
-    onContextMenu: null,
-    onEmptyList: null
+    optionLabel: null,
+    options: null,
+    panelClassName: null,
+    panelStyle: null,
+    placeholder: null,
+    required: false,
+    scrollHeight: '200px',
+    showClear: false,
+    showFilterClear: false,
+    style: null,
+    tabIndex: null,
+    tooltip: null,
+    tooltipOptions: null,
+    value: null
   };
 
   static propTypes = {
-    id: PropTypes.string,
-    name: PropTypes.string,
-    value: PropTypes.any,
-    options: PropTypes.array,
-    optionLabel: PropTypes.string,
-    itemTemplate: PropTypes.func,
-    style: PropTypes.object,
-    className: PropTypes.string,
-    scrollHeight: PropTypes.string,
-    filter: PropTypes.bool,
-    filterPlaceholder: PropTypes.string,
-    editable: PropTypes.bool,
-    placeholder: PropTypes.string,
-    required: PropTypes.bool,
-    disabled: PropTypes.bool,
     appendTo: PropTypes.any,
-    tabIndex: PropTypes.number,
-    autoFocus: PropTypes.bool,
-    filterInputAutoFocus: PropTypes.bool,
-    lazy: PropTypes.bool,
-    panelClassName: PropTypes.string,
-    panelstyle: PropTypes.object,
-    dataKey: PropTypes.string,
-    inputId: PropTypes.string,
-    showClear: PropTypes.bool,
-    maxLength: PropTypes.number,
-    tooltip: PropTypes.string,
-    tooltipOptions: PropTypes.object,
     ariaLabel: PropTypes.string,
     ariaLabelledBy: PropTypes.string,
+    autoFocus: PropTypes.bool,
+    className: PropTypes.string,
+    currentValue: PropTypes.string,
+    dataKey: PropTypes.string,
+    disabled: PropTypes.bool,
+    editable: PropTypes.bool,
+    filter: PropTypes.bool,
+    filterInputAutoFocus: PropTypes.bool,
+    filterPlaceholder: PropTypes.string,
+    id: PropTypes.string,
+    inputId: PropTypes.string,
+    itemTemplate: PropTypes.func,
+    lazy: PropTypes.bool,
+    maxLength: PropTypes.number,
+    name: PropTypes.string,
     onChange: PropTypes.func,
+    onContextMenu: PropTypes.func,
+    onEmptyList: PropTypes.func,
     onFilterInputChangeBackend: PropTypes.func,
     onMouseDown: PropTypes.func,
-    onContextMenu: PropTypes.func,
-    onEmptyList: PropTypes.func
+    optionLabel: PropTypes.string,
+    options: PropTypes.array,
+    panelClassName: PropTypes.string,
+    panelstyle: PropTypes.object,
+    placeholder: PropTypes.string,
+    required: PropTypes.bool,
+    scrollHeight: PropTypes.string,
+    showClear: PropTypes.bool,
+    showFilterClear: PropTypes.bool,
+    style: PropTypes.object,
+    tabIndex: PropTypes.number,
+    tooltip: PropTypes.string,
+    tooltipOptions: PropTypes.object,
+    value: PropTypes.any
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      filter: ''
+      filter: this.props.currentValue ? this.props.currentValue : ''
     };
 
     this.onClick = this.onClick.bind(this);
@@ -111,6 +115,7 @@ export class Dropdown extends Component {
     this.onFilterInputKeyDown = this.onFilterInputKeyDown.bind(this);
     this.panelClick = this.panelClick.bind(this);
     this.clear = this.clear.bind(this);
+    this.clearFilter = this.clearFilter.bind(this);
   }
 
   onClick(event) {
@@ -122,8 +127,9 @@ export class Dropdown extends Component {
       this.selfClick = true;
     }
 
-    let clearClick = DomHandler.hasClass(event.target, 'p-dropdown-clear-icon');
-
+    let clearClick =
+      DomHandler.hasClass(event.target, 'p-dropdown-clear-icon') ||
+      DomHandler.hasClass(event.target, 'p-dropdown-clear-filter-icon');
     if (!this.overlayClick && !this.editableInputClick && !clearClick) {
       this.focusInput.focus();
 
@@ -411,6 +417,16 @@ export class Dropdown extends Component {
     this.updateEditableLabel();
   }
 
+  clearFilter() {
+    if (this.props.onFilterInputChangeBackend) {
+      this.props.onFilterInputChangeBackend('');
+      this.setState({ filter: '' });
+      setTimeout(() => {
+        this.filterInput.focus();
+      }, 200);
+    }
+  }
+
   selectItem(event) {
     let currentSelectedOption = this.findOption(this.props.value);
 
@@ -540,11 +556,11 @@ export class Dropdown extends Component {
     return (
       <div className="p-hidden-accessible p-dropdown-hidden-select">
         <select
+          aria-hidden="true"
+          name={this.props.name}
           ref={el => (this.nativeSelect = el)}
           required={this.props.required}
-          name={this.props.name}
-          tabIndex="-1"
-          aria-hidden="true">
+          tabIndex="-1">
           {placeHolderOption}
           {option}
         </select>
@@ -556,18 +572,18 @@ export class Dropdown extends Component {
     return (
       <div className="p-hidden-accessible">
         <input
-          ref={el => (this.focusInput = el)}
-          id={this.props.inputId}
-          type="text"
-          role="listbox"
-          readOnly={true}
-          onFocus={this.onInputFocus}
-          onBlur={this.onInputBlur}
-          onKeyDown={this.onInputKeyDown}
-          disabled={this.props.disabled}
-          tabIndex={this.props.tabIndex}
           aria-label={this.props.ariaLabel}
           aria-labelledby={this.props.ariaLabelledBy}
+          disabled={this.props.disabled}
+          id={this.props.inputId}
+          onBlur={this.onInputBlur}
+          onFocus={this.onInputFocus}
+          onKeyDown={this.onInputKeyDown}
+          readOnly={true}
+          ref={el => (this.focusInput = el)}
+          role="listbox"
+          tabIndex={this.props.tabIndex}
+          type="text"
         />
       </div>
     );
@@ -579,19 +595,19 @@ export class Dropdown extends Component {
 
       return (
         <input
-          ref={el => (this.editableInput = el)}
-          type="text"
-          defaultValue={value}
-          className="p-dropdown-label p-inputtext"
-          disabled={this.props.disabled}
-          placeholder={this.props.placeholder}
-          maxLength={this.props.maxLength}
-          onClick={this.onEditableInputClick}
-          onInput={this.onEditableInputChange}
-          onFocus={this.onEditableInputFocus}
-          onBlur={this.onInputBlur}
           aria-label={this.props.ariaLabel}
           aria-labelledby={this.props.ariaLabelledBy}
+          className="p-dropdown-label p-inputtext"
+          defaultValue={value}
+          disabled={this.props.disabled}
+          maxLength={this.props.maxLength}
+          onBlur={this.onInputBlur}
+          onClick={this.onEditableInputClick}
+          onFocus={this.onEditableInputFocus}
+          onInput={this.onEditableInputChange}
+          placeholder={this.props.placeholder}
+          ref={el => (this.editableInput = el)}
+          type="text"
         />
       );
     } else {
@@ -627,6 +643,14 @@ export class Dropdown extends Component {
     }
   }
 
+  // renderFilterClearIcon() {
+  //   if (this.props.value != null && this.props.showFilterClear && !this.props.disabled) {
+  //     return <span className="p-dropdown-filter-icon pi pi-times" onClick={this.clearFilter}></span>;
+  //   } else {
+  //     return null;
+  //   }
+  // }
+
   renderDropdownIcon() {
     return (
       <div className="p-dropdown-trigger">
@@ -651,13 +675,13 @@ export class Dropdown extends Component {
         let optionLabel = this.getOptionLabel(option);
         return (
           <DropdownItem
+            disabled={option.disabled}
             key={this.getOptionKey(option)}
             label={optionLabel}
-            option={option}
-            template={this.props.itemTemplate}
-            selected={selectedOption === option}
-            disabled={option.disabled}
             onClick={this.onOptionClick}
+            option={option}
+            selected={selectedOption === option}
+            template={this.props.itemTemplate}
           />
         );
       });
@@ -674,14 +698,18 @@ export class Dropdown extends Component {
       return (
         <div className="p-dropdown-filter-container">
           <input
-            ref={el => (this.filterInput = el)}
-            type="text"
             autoComplete="off"
             className="p-dropdown-filter p-inputtext p-component"
-            placeholder={this.props.filterPlaceholder}
-            onKeyDown={this.onFilterInputKeyDown}
             onChange={this.onFilterInputChange}
+            onKeyDown={this.onFilterInputKeyDown}
+            placeholder={this.props.filterPlaceholder}
+            ref={el => (this.filterInput = el)}
+            type="text"
+            value={this.state.filter}
           />
+          {this.props.showFilterClear ? (
+            <span className="p-dropdown-filter-clear-icon pi pi-times" onClick={this.clearFilter}></span>
+          ) : null}
           <span className="p-dropdown-filter-icon pi pi-search"></span>
         </div>
       );
@@ -792,13 +820,13 @@ export class Dropdown extends Component {
         {clearIcon}
         {dropdownIcon}
         <DropdownPanel
-          ref={el => (this.panel = el)}
           appendTo={this.props.appendTo}
-          panelStyle={this.props.panelStyle}
-          panelClassName={this.props.panelClassName}
-          scrollHeight={this.props.scrollHeight}
+          filter={filterElement}
           onClick={this.panelClick}
-          filter={filterElement}>
+          panelClassName={this.props.panelClassName}
+          panelStyle={this.props.panelStyle}
+          ref={el => (this.panel = el)}
+          scrollHeight={this.props.scrollHeight}>
           {items}
         </DropdownPanel>
       </div>
