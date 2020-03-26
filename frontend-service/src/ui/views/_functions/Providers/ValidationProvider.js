@@ -1,7 +1,9 @@
 import React, { useReducer } from 'react';
 
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
+
 import isNil from 'lodash/isNil';
+
 const validationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_OPEN_QC_CREATION_MODAL':
