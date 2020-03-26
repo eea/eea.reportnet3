@@ -277,6 +277,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
   public List<UserRepresentationVO> getUsers() {
 
@@ -295,6 +296,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
   public void updateUserAttributes(@RequestBody Map<String, List<String>> attributes) {
 
@@ -321,6 +323,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
   public Map<String, List<String>> getUserAttributes() {
 
