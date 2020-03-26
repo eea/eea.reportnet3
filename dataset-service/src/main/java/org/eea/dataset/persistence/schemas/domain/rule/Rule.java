@@ -28,6 +28,10 @@ public class Rule {
   @Field(value = "referenceId")
   private ObjectId referenceId;
 
+  /** The reference field schema PK id. */
+  @Field(value = "referenceFieldSchemaPKId")
+  private ObjectId referenceFieldSchemaPKId;
+
   /** The rule name. */
   @Field(value = "ruleName")
   private String ruleName;
