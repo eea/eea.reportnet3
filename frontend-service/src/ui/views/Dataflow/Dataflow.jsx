@@ -303,7 +303,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
-      console.log('dataflow', dataflow);
       dataflowDataDispatch({
         type: 'INITIAL_LOAD',
         payload: { data: dataflow, name: dataflow.name, description: dataflow.description, status: dataflow.status }
@@ -500,7 +499,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <DataflowManagementForm
             dataflowData={dataflowDataState}
             isEditForm={true}
-            onCancel={onManageDialogs}
+            onCancel={() => onManageDialogs('isEditDialogVisible', false)}
             onEdit={onEditDataflow}
             refresh={dataflowDataState.isEditDialogVisible}
           />

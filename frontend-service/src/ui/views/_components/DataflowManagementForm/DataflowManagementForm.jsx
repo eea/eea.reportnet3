@@ -157,7 +157,7 @@ const DataflowManagementForm = React.memo(({ dataflowData, isEditForm, onCancel,
                 }  p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
-                onClick={() => onCancel('isEditDialogVisible', false)}
+                onClick={onCancel}
               />
             </div>
           </fieldset>
