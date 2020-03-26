@@ -141,10 +141,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
+
   useEffect(() => {
     if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
       setValidationListDialogVisible(true);
   }, [validationContext]);
+
   useEffect(() => {
     if (validationListDialogVisible) {
       validationContext.resetReOpenOpener();

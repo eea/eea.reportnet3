@@ -445,7 +445,7 @@ export const FieldsDesigner = ({
       )}
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
-      {!isErrorDialogVisible && renderConfirmDialog()}
+      {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
     </React.Fragment>
   );
 };

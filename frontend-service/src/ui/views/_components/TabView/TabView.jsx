@@ -257,23 +257,21 @@ export const TabView = ({
     return <div className="p-tabview-panels">{contents}</div>;
   };
 
-  const renderConfirmDialog = () => {
-    return (
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteTabHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => {
-          onTabConfirmDelete(idxToDelete);
-          setIsDeleteDialogVisible(false);
-        }}
-        onHide={() => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteTabConfirm']}
-      </ConfirmDialog>
-    );
-  };
+  const renderConfirmDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteTabHeader']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => {
+        onTabConfirmDelete(idxToDelete);
+        setIsDeleteDialogVisible(false);
+      }}
+      onHide={() => setIsDeleteDialogVisible(false)}
+      visible={isDeleteDialogVisible}>
+      {resources.messages['deleteTabConfirm']}
+    </ConfirmDialog>
+  );
 
   const scrollTo = (xCoordinate, yCoordinate) => {
     divTabsRef.current.scrollTo(xCoordinate, yCoordinate);
@@ -297,7 +295,7 @@ export const TabView = ({
     <div id={id} className={classNamed} style={style}>
       {renderNavigator()}
       {renderContent()}
-      {!isErrorDialogVisible ? renderConfirmDialog() : null}
+      {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
     </div>
   );
 };

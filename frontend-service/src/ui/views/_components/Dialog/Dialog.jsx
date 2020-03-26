@@ -14,7 +14,7 @@ export const Dialog = ({
   closeOnEscape,
   contentStyle,
   dismissableMask,
-  focusOnShow,
+  focusOnShow = true,
   footer,
   header,
   id,
