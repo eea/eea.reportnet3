@@ -251,7 +251,7 @@ pipeline {
                             app.push()
                         }
                          script {
-                            echo 'User Management Service'
+                            echo 'Rod Service'
                             def app
                             app = docker.build("k8s-swi001:5000/rod-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/rod-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9050 -f ./Dockerfile ./rod-service")
                             app.push()
