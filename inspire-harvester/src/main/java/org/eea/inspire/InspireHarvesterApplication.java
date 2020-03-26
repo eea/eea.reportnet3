@@ -16,9 +16,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 
 /**
- * The type Data set application.
+ * The type Inspire harvester application.
  */
-
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableCircuitBreaker

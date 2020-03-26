@@ -7,13 +7,9 @@ import isEmpty from 'lodash/isEmpty';
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
     if (expression.operatorType == 'LEN') {
-      return `${field}.length ${config.validations.operatorEquivalences[expression.operatorValue]} ${
-        expression.expressionValue
-      }`;
+      return `LEN( ${field} ) ${expression.operatorValue} ${expression.expressionValue}`;
     }
-    return `${field} ${config.validations.operatorEquivalences[expression.operatorValue]} ${
-      expression.expressionValue
-    }`;
+    return `${field} ${expression.operatorValue} ${expression.expressionValue}`;
   }
   return '';
 };

@@ -315,6 +315,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           fieldId: response.data,
+          fieldLinkValue: null,
           pk,
           name,
           recordId,
@@ -651,7 +652,6 @@ export const FieldDesigner = ({
         href="#"
         onClick={e => {
           e.preventDefault();
-          dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
           onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
         }}
         onDragStart={event => {
