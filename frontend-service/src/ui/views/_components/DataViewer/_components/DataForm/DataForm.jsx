@@ -99,6 +99,11 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
     return (
       <Dropdown
         appendTo={document.body}
+        // currentValue={
+        //   !isUndefined(RecordUtils.getLinkValue(getLinkItems(field), fieldValue))
+        //     ? RecordUtils.getLinkValue(getLinkItems(field), fieldValue).value
+        //     : ''
+        // }
         filter={true}
         filterPlaceholder={resources.messages['linkFilterPlaceholder']}
         filterBy="itemType,value"
@@ -108,6 +113,7 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
         onFilterInputChangeBackend={onFilter}
         optionLabel="itemType"
         options={getLinkItems(field)}
+        showFilterClear={true}
         value={RecordUtils.getLinkValue(getLinkItems(field), fieldValue)}
       />
     );

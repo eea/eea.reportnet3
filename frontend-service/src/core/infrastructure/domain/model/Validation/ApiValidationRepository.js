@@ -20,6 +20,13 @@ const buildExpression = expression => {
       }
     };
   }
+  if (expression.operatorType == 'string') {
+    return {
+      arg1: 'VALUE',
+      operator: config.validations.stringOperatorsEquivalences[expression.operatorValue],
+      arg2: expression.expressionValue
+    };
+  }
   return {
     arg1: 'VALUE',
     operator: config.validations.operatorEquivalences[expression.operatorValue],
@@ -62,6 +69,7 @@ const create = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     whenCondition: buildTransferDTO(expressions[0], 0, expressions)
   };
+
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
