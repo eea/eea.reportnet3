@@ -899,7 +899,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       PkCatalogueSchema catalogue =
           pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null) {
-        pkCatalogueRepository.delete(catalogue);
+        pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
       }
     }
     // For fieldSchemas that are FK
