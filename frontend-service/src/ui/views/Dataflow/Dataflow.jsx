@@ -267,7 +267,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
 
   const onConfirmDelete = event =>
-    dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value.toLowerCase() } });
+    dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
   const onDeleteDataflow = async () => {
     onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true);
@@ -511,7 +511,7 @@ const Dataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={dataflowDataState.deleteInput !== dataflowDataState.name.toLowerCase()}
+          disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
           onConfirm={() => onDeleteDataflow()}
           onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
           visible={dataflowDataState.isDeleteDialogVisible}>
