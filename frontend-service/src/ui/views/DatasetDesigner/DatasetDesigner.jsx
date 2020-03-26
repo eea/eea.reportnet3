@@ -145,6 +145,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
       setValidationListDialogVisible(true);
   }, [validationContext]);
+  useEffect(() => {
+    if (validationListDialogVisible) {
+      validationContext.resetReOpenOpener();
+    }
+  }, [validationListDialogVisible]);
 
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
@@ -182,7 +187,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (!isNil(inmDatasetSchemas)) {
       inmDatasetSchemas.forEach(datasetSchema =>
         datasetSchema.tables.forEach(table => {
-          if (!table.addTab) {
+          if (!table.addTab && !isUndefined(table.records)) {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field) && field.pk) {
@@ -267,18 +272,20 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onHideValidationsDialog = () => {
+    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+      validationContext.onResetOpener();
+    }
     setValidationListDialogVisible(false);
   };
 
   const actionButtonsValidationDialog = (
     <>
-      {console.log('actionButtonsValidationDialog', validationContext)}
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
         onClick={() => {
-          validationContext.onOpenModal('validationsListDialog');
+          validationContext.onOpenModalFronOpener('validationsListDialog');
           onHideValidationsDialog();
         }}
       />
@@ -301,14 +308,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           header={resources.messages['qcRules']}
           maximizable
           onHide={() => {
-            if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
-              validationContext.onResetOpener();
-            }
             onHideValidationsDialog();
           }}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
-          <TabsValidations datasetSchemaId={datasetSchemaId} dataset={metaData.dataset} />
+          <TabsValidations
+            datasetSchemaId={datasetSchemaId}
+            dataset={metaData.dataset}
+            onHideValidationsDialog={onHideValidationsDialog}
+          />
         </Dialog>
       );
     }

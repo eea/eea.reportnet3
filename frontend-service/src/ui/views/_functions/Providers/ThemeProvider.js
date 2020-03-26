@@ -372,7 +372,7 @@ export const ThemeProvider = ({ children }) => {
         'dropdown-panel-box-shadow': '0 3px 6px 0 rgba(0, 0, 0, 0.16)',
         'dropdown-panel-filter-border': '1px solid var(--gray-10)',
         'dropdown-panel-filter-color': 'var(--gray-110)',
-        'dropdown-panel-filter-bg': 'var(--white)',
+        'dropdown-panel-filter-bg': 'var(--bg)',
         'dropdown-panel-filter-icon-color': 'var(--c-corporate-blue)',
         'dropdown-panel-items-group-color': 'var(--white)',
         'dropdown-panel-items-group-highlight-color': 'var(--white)',

@@ -172,6 +172,11 @@ export const BigButtonList = ({
       }
     } catch (error) {
       console.error(error.response);
+      if (error.response.status === 401) {
+        notificationContext.add({
+          type: 'DELETE_DATASET_SCHEMA_LINK_ERROR'
+        });
+      }
     } finally {
       hideLoading();
     }

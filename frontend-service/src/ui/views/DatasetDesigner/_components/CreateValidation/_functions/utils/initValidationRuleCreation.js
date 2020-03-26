@@ -4,11 +4,10 @@ import { getEmptyExpression } from './getEmptyExpression';
 
 export const initValidationRuleCreation = rawTables => {
   const tables = rawTables
+    .filter(table => !table.addTab)
     .map(table => {
-      return { label: table.tableSchemaName, code: table.recordSchemaId };
-    })
-    .filter(table => !table.addTab);
-
+      return { label: table.header, code: table.recordSchemaId };
+    });
   const errorLevels = config.validations.errorLevels;
   const newExpression = getEmptyExpression();
   return {
@@ -22,7 +21,7 @@ export const initValidationRuleCreation = rawTables => {
       description: '',
       errorMessage: '',
       errorLevel: undefined,
-      active: false,
+      active: true,
       expressions: [newExpression],
       allExpressions: [newExpression]
     }

@@ -42,6 +42,7 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
     const codelistItems = column.codelistItems.map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
+
     codelistItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -65,12 +66,14 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
       isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       filter
     );
-    const linkItems = referencedFieldValues.map(referencedField => {
-      return {
-        itemType: referencedField.value,
-        value: referencedField.value
-      };
-    });
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: referencedField.value,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
     linkItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -96,6 +99,11 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
     return (
       <Dropdown
         appendTo={document.body}
+        // currentValue={
+        //   !isUndefined(RecordUtils.getLinkValue(getLinkItems(field), fieldValue))
+        //     ? RecordUtils.getLinkValue(getLinkItems(field), fieldValue).value
+        //     : ''
+        // }
         filter={true}
         filterPlaceholder={resources.messages['linkFilterPlaceholder']}
         filterBy="itemType,value"
@@ -105,6 +113,7 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
         onFilterInputChangeBackend={onFilter}
         optionLabel="itemType"
         options={getLinkItems(field)}
+        showFilterClear={true}
         value={RecordUtils.getLinkValue(getLinkItems(field), fieldValue)}
       />
     );

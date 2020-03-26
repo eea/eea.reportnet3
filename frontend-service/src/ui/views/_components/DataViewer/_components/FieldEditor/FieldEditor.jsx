@@ -38,7 +38,7 @@ const FieldEditor = ({
   }, []);
 
   useEffect(() => {
-    onFilter('');
+    onFilter(RecordUtils.getCellValue(cells, cells.field));
   }, []);
 
   let fieldType = {};
@@ -58,12 +58,14 @@ const FieldEditor = ({
         : colSchema.referencedField.referencedField.fieldSchemaId,
       filter
     );
-    const linkItems = referencedFieldValues.map(referencedField => {
-      return {
-        itemType: referencedField.value,
-        value: referencedField.value
-      };
-    });
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: referencedField.value,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
     linkItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -141,6 +143,7 @@ const FieldEditor = ({
         return (
           <Dropdown
             appendTo={document.body}
+            currentValue={RecordUtils.getCellValue(cells, cells.field)}
             filter={true}
             filterPlaceholder={resources.messages['linkFilterPlaceholder']}
             filterBy="itemType,value"
@@ -151,11 +154,11 @@ const FieldEditor = ({
             }}
             onFilterInputChangeBackend={onFilter}
             onMouseDown={e => {
-              e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
             optionLabel="itemType"
             options={linkItemsOptions}
+            showFilterClear={true}
             value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
           />
         );

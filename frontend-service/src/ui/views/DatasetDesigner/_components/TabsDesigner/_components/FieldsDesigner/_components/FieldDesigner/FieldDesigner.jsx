@@ -261,10 +261,12 @@ export const FieldDesigner = ({
   };
 
   const onCancelSaveLink = () => {
+    // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK', payload: fieldDesignerState.fieldPreviousTypeValue });
   };
 
   const onCancelSaveCodelist = () => {
+    // onCodelistAndLinkShow(fieldId, { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' });
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST', payload: fieldDesignerState.fieldPreviousTypeValue });
   };
 
@@ -313,6 +315,7 @@ export const FieldDesigner = ({
           codelistItems,
           description,
           fieldId: response.data,
+          fieldLinkValue: null,
           pk,
           name,
           recordId,
@@ -455,21 +458,24 @@ export const FieldDesigner = ({
 
   const onSaveLink = link => {
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
-
-    if (!isUndefined(fieldId)) {
-      if (fieldId.toString() === '-1') {
-        onFieldAdd({
-          codelistItems,
-          type: 'LINK',
-          referencedField: link
-        });
-      } else {
-        fieldUpdate({
-          codelistItems,
-          isLinkChange: true,
-          type: 'LINK',
-          referencedField: link
-        });
+    if (fieldDesignerState.fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+    } else {
+      if (!isUndefined(fieldId)) {
+        if (fieldId.toString() === '-1') {
+          onFieldAdd({
+            codelistItems,
+            type: 'LINK',
+            referencedField: link
+          });
+        } else {
+          fieldUpdate({
+            codelistItems,
+            isLinkChange: true,
+            type: 'LINK',
+            referencedField: link
+          });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
@@ -646,7 +652,6 @@ export const FieldDesigner = ({
         href="#"
         onClick={e => {
           e.preventDefault();
-          dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
           onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
         }}
         onDragStart={event => {

@@ -31,6 +31,7 @@ export const Button = ({
       <button
         className={className}
         disabled={disabled}
+        id={id}
         label={label}
         onClick={onClick}
         onMouseDown={onMouseDown}
