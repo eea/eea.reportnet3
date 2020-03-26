@@ -21,7 +21,6 @@ import {
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
-import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
