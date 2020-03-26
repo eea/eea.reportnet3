@@ -88,6 +88,16 @@ public interface RulesController {
       @RequestParam("referenceId") String referenceId);
 
   /**
+   * Delete rule by Reference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   */
+  @DeleteMapping("/private/deleteRuleByReferenceFieldSchemaPKId")
+  void deleteRuleByReferenceFieldSchemaPKId(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId);
+
+  /**
    * Creates the new rule.
    *
    * @param datasetId the dataset id
@@ -155,5 +165,7 @@ public interface RulesController {
   public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
 
 }

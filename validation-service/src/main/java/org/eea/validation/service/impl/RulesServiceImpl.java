@@ -162,6 +162,21 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
+   * Delete rule by reference field schema PK id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceFieldSchemaPKId the reference field schema PK id
+   */
+  @Override
+  public void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
+      String referenceFieldSchemaPKId) {
+    rulesRepository.deleteRuleByReferenceFieldSchemaPKId(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceFieldSchemaPKId));
+  }
+
+
+
+  /**
    * Validate rule.
    *
    * @param rule the rule
@@ -216,7 +231,6 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setRuleId(new ObjectId());
     rule.setType(EntityTypeEnum.FIELD);
-    rule.setEnabled(true);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
 
