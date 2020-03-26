@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>microservice-pom</artifactId>
+    <groupId>org.eea</groupId>
+    <version>3.0-SNAPSHOT</version>
+    <relativePath>../parent-poms/microservice</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.eea.rod</groupId>
+  <artifactId>rod-service</artifactId>
+  <version>3.0-SNAPSHOT</version>
+
+
+  <properties>
+    <sonar.moduleKey>org.eea:reportnet:rod-service:${sonar.jenkins.branch}</sonar.moduleKey>
+  </properties>
+
+</project>

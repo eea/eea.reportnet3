@@ -22,6 +22,7 @@
     <module>common-utitlities</module>
     <module>document-container-service</module>
     <module>user-management-service</module>
+    <module>rod-service</module>
   </modules>
 
 
