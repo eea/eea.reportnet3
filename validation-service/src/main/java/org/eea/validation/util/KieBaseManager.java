@@ -1,6 +1,9 @@
 package org.eea.validation.util;
 
 import java.io.FileNotFoundException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +15,12 @@ import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -20,6 +29,8 @@ import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
+import org.kie.api.builder.Message;
+import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
@@ -51,6 +62,10 @@ public class KieBaseManager {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The dataset repository. */
+  @Autowired
+  private DatasetRepository datasetRepository;
+
   /**
    * Reload rules.
    *
@@ -68,8 +83,21 @@ public class KieBaseManager {
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchema), true);
 
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
+    ObjectDataCompiler compiler = new ObjectDataCompiler();
+    KieServices kieServices = KieServices.Factory.get();
+    KieHelper kieHelper = new KieHelper();
+
+    ZoneId timeZone = ZoneId.of("UTC");
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+
+    DatasetValue ds = datasetRepository.findById(datasetId).orElse(null);
+
+
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
+
       schemaRules.getRules().stream().forEach(rule -> {
+
+
         String schemasDrools = "";
         StringBuilder expression = new StringBuilder("");
         TypeValidation typeValidation = null;
@@ -132,20 +160,53 @@ public class KieBaseManager {
                   expression.append(whenConditionWithParenthesis).append(")").toString());
             }
         }
-        ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+
+        // Check rules before add to Rules Knowledge DB
+        List<Map<String, String>> ruleAttributesHelper = new ArrayList<>();
+        ruleAttributesHelper.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
             rule.getThenCondition().get(0), rule.getThenCondition().get(1),
             null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
 
+        String generatedDRLTest = compiler.compile(ruleAttributesHelper,
+            getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
+        byte[] b1 = generatedDRLTest.getBytes();
+        Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
+        KieHelper kieHelperTest = new KieHelper();
+        kieHelperTest.addResource(resourceTest, ResourceType.DRL);
+        Results results = kieHelperTest.verify();
+
+        if (results.hasMessages(Message.Level.ERROR)) {
+
+          Validation ruleValidation = new Validation();
+          ruleValidation.setIdRule(rule.getRuleId().toString());
+          ruleValidation.setLevelError(ErrorTypeEnum.BLOCKER);
+          ruleValidation.setMessage("The rule: " + rule.getShortCode()
+              + ", does not meet the required format to validate the data, please review it.");
+          ruleValidation.setValidationDate(ZonedDateTime.now(timeZone).format(dateFormatter));
+          ruleValidation.setTypeEntity(EntityTypeEnum.DATASET);
+          ruleValidation.setOriginName(ds.getId().toString());
+
+          DatasetValidation ruleDSValidation = new DatasetValidation();
+          ruleDSValidation.setValidation(ruleValidation);
+          List<DatasetValidation> ruleDSValidations = new ArrayList<>();
+          ruleDSValidations.add(ruleDSValidation);
+          ds.setDatasetValidations(ruleDSValidations);
+
+          datasetRepository.save(ds);
+
+        } else {
+
+          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+              rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
+              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
+
+        }
       });
     }
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
     String generatedDRL =
         compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
-
-    KieServices kieServices = KieServices.Factory.get();
-
-    KieHelper kieHelper = new KieHelper();
     // multiple such resoures/rules can be added
     byte[] b1 = generatedDRL.getBytes();
     Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
