@@ -289,6 +289,22 @@ export const apiDataset = {
     });
     return response.data;
   },
+  getReferencedFieldValues: async (datasetId, fieldSchemaId, searchToken) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DatasetConfig.referencedFieldValues, {
+        datasetId,
+        fieldSchemaId,
+        searchToken
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
+      }
+    });
+    return response.data;
+  },
   orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({

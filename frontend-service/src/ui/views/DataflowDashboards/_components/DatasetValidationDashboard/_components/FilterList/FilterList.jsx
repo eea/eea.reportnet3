@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, Fragment } from 'react';
 
 import { uniqBy } from 'lodash';
 
@@ -11,8 +11,8 @@ import { StatusList } from './_components/StatusList';
 import { TableList } from './_components/TableList';
 
 const FilterList = ({
-  datasetSchemaId,
   color,
+  datasetSchemaId,
   filterDispatch,
   levelErrors,
   originalData: { datasets, labels },
@@ -62,7 +62,7 @@ const FilterList = ({
   };
 
   return (
-    <>
+    <Fragment>
       <Accordion multiple={true}>
         {filterByReporters()}
         {filterByTables()}
@@ -74,7 +74,7 @@ const FilterList = ({
         levelErrors={levelErrors}
         filterDispatch={filterDispatch}
       />
-    </>
+    </Fragment>
   );
 };
 

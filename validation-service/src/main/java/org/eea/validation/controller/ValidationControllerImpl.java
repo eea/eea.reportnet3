@@ -7,8 +7,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -105,9 +105,9 @@ public class ValidationControllerImpl implements ValidationController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc,
       @RequestParam(value = "levelErrorsFilter",
-          required = false) List<TypeErrorEnum> levelErrorsFilter,
+          required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
-          required = false) List<TypeEntityEnum> typeEntitiesFilter,
+          required = false) List<EntityTypeEnum> typeEntitiesFilter,
       @RequestParam(value = "originsFilter", required = false) String originsFilter) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

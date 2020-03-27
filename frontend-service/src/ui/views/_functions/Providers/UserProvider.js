@@ -1,7 +1,10 @@
+import React, { useContext, useReducer } from 'react';
+
 import React, { useReducer, useContext } from 'react';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const userSettingsDefaultState = {
   userProps: {
@@ -70,6 +73,9 @@ const userReducer = (state, { type, payload }) => {
 };
 
 export const UserProvider = ({ children }) => {
+  const notificationContext = useContext(NotificationContext);
+
+  const [state, dispatch] = useReducer(userReducer, {});
   const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
   const notificationContext = useContext(NotificationContext);
 

@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagementForm.module.css';
 
@@ -15,76 +16,49 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({
-  dataflowId,
-  dataflowValues,
-  hasErrors,
-  isDialogVisible,
-  isEditForm,
-  isFormReset,
-  isNameDuplicated,
-  onCreate,
-  onCancel,
-  onEdit,
-  selectedDataflow,
-  setHasErrors,
-  setIsNameDuplicated
-}) => {
+const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, refresh }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const [hasErrors, setHasErrors] = useState(false);
+  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
+
   const form = useRef(null);
-  const inputRef = useRef();
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    if (isDialogVisible) {
-      if (!isUndefined(inputRef)) {
-        inputRef.current.focus();
-      }
+    if (!isNil(inputRef) && refresh) {
+      inputRef.current.focus();
     }
-  }, [isDialogVisible, hasErrors]);
+  }, [hasErrors, inputRef.current, refresh]);
+
+  useEffect(() => {
+    if (!isNil(form.current) && refresh) {
+      form.current.resetForm();
+      setIsNameDuplicated(false);
+      setHasErrors(false);
+    }
+  }, [refresh, form.current]);
 
   const dataflowCrudValidation = Yup.object().shape({
-    name: isEditForm
-      ? Yup.string().required(' ')
-      : Yup.string()
-          .required(' ')
-          .test('isNewFormDuplicated', resources.messages['duplicatedDataflow'], value => {
-            if (!isUndefined(value) && !isEmpty(dataflowValues)) {
-              const isRepeat = Object.keys(dataflowValues).some(
-                key => dataflowValues[key].name.toLowerCase() === value.toLowerCase()
-              );
-              return !isRepeat;
-            } else {
-              return true;
-            }
-          }),
-    description: Yup.string().required()
+    name: Yup.string().required(' '),
+    description: Yup.string()
+      .required()
+      .max(255, resources.messages['dataflowDescriptionValidationMax'])
   });
-
-  if (!isNull(form.current) && !isFormReset) {
-    form.current.resetForm();
-  }
-
-  const buildFormikValues = selectedValues => {
-    const formValues = isEditForm ? selectedValues : { name: '', description: '' };
-    return formValues;
-  };
-
-  const initialValues = buildFormikValues(selectedDataflow);
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initialValues}
+      initialValues={isEditForm ? dataflowData : { name: '', description: '' }}
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(dataflowId, values.name, values.description);
-            onEdit(dataflowId, values.name, values.description);
+            await DataflowService.update(dataflowData.id, values.name, values.description);
+            onEdit(values.name, values.description);
           } else {
             await DataflowService.create(values.name, values.description);
             onCreate();
@@ -101,7 +75,7 @@ const DataflowManagementForm = ({
               ? {
                   type: 'DATAFLOW_UPDATING_ERROR',
                   content: {
-                    dataflowId,
+                    dataflowId: dataflowData.id,
                     dataflowName: values.name
                   }
                 }
@@ -142,6 +116,7 @@ const DataflowManagementForm = ({
                 placeholder={resources.messages['createDataflowDescription']}
                 value={values.description}
               />
+              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={styles.search}>
               <Field
@@ -170,7 +145,7 @@ const DataflowManagementForm = ({
                       ? styles.primaryButton
                       : styles.disabledButton
                     : styles.disabledButton
-                } p-button-success p-button-animated-blink`}
+                } p-button-primary p-button-animated-blink`}
                 label={isEditForm ? resources.messages['save'] : resources.messages['create']}
                 disabled={isSubmitting}
                 icon={isEditForm ? 'save' : 'add'}
@@ -182,7 +157,7 @@ const DataflowManagementForm = ({
                 }  p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
-                onClick={() => onCancel()}
+                onClick={onCancel}
               />
             </div>
           </fieldset>

@@ -11,25 +11,29 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
-import org.eea.dataflow.persistence.domain.Document;
+import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -47,6 +51,10 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
+
+  /** The representative repository. */
+  @Autowired
+  private RepresentativeRepository representativeRepository;
 
   /**
    * The dataflow repository.
@@ -85,11 +93,6 @@ public class DataflowServiceImpl implements DataflowService {
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /**
-   * The dataset controller.
-   */
-  @Autowired
-  private DataSetControllerZuul dataSetControllerZuul;
-  /**
    * The user management controller zull.
    */
   @Autowired
@@ -115,9 +118,14 @@ public class DataflowServiceImpl implements DataflowService {
   private DocumentControllerZuul documentControllerZuul;
 
 
+  /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
+
+  /** The representative service. */
+  @Autowired
+  private RepresentativeService representativeService;
 
 
   /**
@@ -166,6 +174,19 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setDataCollections(
         dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the representatives
+    List<RepresentativeVO> representatives =
+        representativeService.getRepresetativesByIdDataFlow(id);
+    List<Long> dataProviderIds = dataflowVO.getReportingDatasets().stream()
+        .map(ReportingDatasetVO::getDataProviderId).collect(Collectors.toList());
+
+    if (representatives != null && !representatives.isEmpty()) {
+      dataflowVO.setRepresentatives(representatives.stream()
+          .filter(representative -> dataProviderIds.contains(representative.getDataProviderId()))
+          .collect(Collectors.toList()));
+    }
+
 
     LOG.info("Get the dataflow information with id {}", id);
 
@@ -356,7 +377,7 @@ public class DataflowServiceImpl implements DataflowService {
   public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
     Dataflow dataFlowSaved;
     // we find if the name of this dataflow exist
-    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+    if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     } else {
@@ -388,7 +409,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
-    Optional<Dataflow> dataflow = dataflowRepository.findByName(dataflowVO.getName());
+    Optional<Dataflow> dataflow = dataflowRepository.findByNameIgnoreCase(dataflowVO.getName());
     // we find if the name of this dataflow exist
     if (dataflow.isPresent() && !dataflow.get().getId().equals(dataflowVO.getId())) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
@@ -478,16 +499,17 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
+  @Transactional
   public void deleteDataFlow(Long idDataflow) throws Exception {
     // take the jpa entity
     final DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
-    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
+
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
-    if (null != dataflow.getDocuments() && !dataflow.getDocuments().isEmpty()) {
-      for (Document document : dataflow.getDocuments()) {
+    if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
+      for (DocumentVO document : dataflowVO.getDocuments()) {
         try {
           // we pass bolean to say dont delete metabase because jpa entiti will be delete the
           // property document
@@ -517,8 +539,25 @@ public class DataflowServiceImpl implements DataflowService {
     }
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
 
+    // WE TAKE THE DATAFLOW OBJECT
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
+
+    // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
+    if (null != dataflow.getRepresentatives() && !dataflow.getRepresentatives().isEmpty()) {
+      for (Representative representative : dataflow.getRepresentatives()) {
+        try {
+          representativeRepository.deleteById(representative.getId());
+        } catch (Exception e) {
+          LOG.error("Error deleting representative with id {}", representative.getId());
+          throw new EEAException(new StringBuilder().append("Error Deleting representative")
+              .append(" with id ").append(representative.getId()).toString(), e);
+        }
+      }
+    }
     try {
-      dataflowRepository.deleteById(idDataflow);
+      // this is necessary since the deletion of documents requires dataflow to be updated in
+      // Hibernate Cache before removing the entity itself
+      dataflowRepository.delete(dataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow);
       throw new EEAException("Error Deleting dataflow ", e);
@@ -539,19 +578,23 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
 
+
   /**
    * Update data flow status.
    *
    * @param id the id
    * @param status the status
+   * @param deadlineDate the deadline date
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateDataFlowStatus(Long id, TypeStatusEnum status) throws EEAException {
+  public void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadlineDate)
+      throws EEAException {
     Optional<Dataflow> dataflow = dataflowRepository.findById(id);
     if (dataflow.isPresent()) {
       dataflow.get().setStatus(status);
+      dataflow.get().setDeadlineDate(deadlineDate);
       dataflowRepository.save(dataflow.get());
       LOG.info("The dataflow {} has been saved.", dataflow.get().getName());
     } else {

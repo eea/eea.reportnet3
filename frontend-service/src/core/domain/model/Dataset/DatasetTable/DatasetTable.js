@@ -1,6 +1,7 @@
 export class DatasetTable {
   constructor({
     hasErrors,
+    hasPKReferenced,
     recordSchemaId,
     records,
     recordsWithErrorsPercentage,
@@ -11,6 +12,7 @@ export class DatasetTable {
     totalRecords
   } = {}) {
     this.hasErrors = hasErrors;
+    this.hasPKReferenced = hasPKReferenced;
     this.records = records;
     this.recordSchemaId = recordSchemaId;
     this.recordsWithoutErrorsPercentage = recordsWithoutErrorsPercentage;

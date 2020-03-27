@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataflow;
 
 
+import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -133,9 +134,10 @@ public interface DataFlowController {
    * Update data flow.
    *
    * @param dataFlowVO the data flow VO
+   * @return the response entity
    */
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
   /**
    * Gets the metabase by id.
@@ -157,14 +159,17 @@ public interface DataFlowController {
   void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
 
 
+
   /**
    * Update data flow status.
    *
    * @param idDataflow the id dataflow
    * @param status the status
+   * @param deadLineDate the dead line date
    */
   @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
-      @RequestParam(value = "status", required = true) TypeStatusEnum status);
+      @RequestParam(value = "status") TypeStatusEnum status,
+      @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
 
 }

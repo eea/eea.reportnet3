@@ -70,6 +70,14 @@ body .p-dropdown-panel .p-dropdown-filter-container .p-dropdown-filter-icon {
   right: 1.357em;
   color: var(--dropdown-panel-filter-icon-color);
 }
+body .p-dropdown-panel .p-dropdown-filter-container .p-dropdown-filter-clear-icon {
+  top: 50%;
+  margin-top: -0.5em;
+  right: 2.557em;
+  color: var(--dropdown-panel-filter-icon-color);
+  position: absolute;
+  cursor: pointer;
+}
 body .p-dropdown-panel .p-dropdown-items {
   padding: 0;
 }

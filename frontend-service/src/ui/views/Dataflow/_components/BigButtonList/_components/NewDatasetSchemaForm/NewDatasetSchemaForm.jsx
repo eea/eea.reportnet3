@@ -106,7 +106,7 @@ const NewDatasetSchemaForm = ({
           <fieldset>
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
-                className="p-button-success"
+                className="p-button-primary"
                 disabled={isSubmitting}
                 label={resources.messages['create']}
                 icon="add"

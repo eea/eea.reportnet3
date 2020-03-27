@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
@@ -70,8 +70,8 @@ public class LoadValidationsHelper {
    * @throws EEAException the EEA exception
    */
   public FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
-      String headerField, Boolean asc, List<TypeErrorEnum> levelErrorsFilter,
-      List<TypeEntityEnum> typeEntitiesFilter, String originsFilter) throws EEAException {
+      String headerField, Boolean asc, List<ErrorTypeEnum> levelErrorsFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
     FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();

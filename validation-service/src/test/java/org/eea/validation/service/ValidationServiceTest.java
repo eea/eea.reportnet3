@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,8 +23,8 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -39,13 +38,11 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
-import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -146,12 +143,6 @@ public class ValidationServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
-
-  /**
-   * The table validation querys drools repository.
-   */
-  @Mock
-  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
    * /** The table validation repository.
    */
@@ -227,11 +218,6 @@ public class ValidationServiceTest {
 
   private Map<String, List<String>> attributes;
 
-  /**
-   * The dataset repository impl.
-   */
-  @Mock
-  private DatasetRepositoryImpl datasetRepositoryImpl;
   @Mock
   private FieldRepository fieldRepository;
   @Mock
@@ -256,7 +242,7 @@ public class ValidationServiceTest {
     recordValues = new ArrayList<>();
     recordValue = new RecordValue();
     recordValue.setIdRecordSchema("");
-    recordValue.setLevelError(TypeErrorEnum.ERROR);
+    recordValue.setLevelError(ErrorTypeEnum.ERROR);
     recordValue.setFields(new ArrayList<>());
     tableValue = new TableValue();
     tableValue.setId(1L);
@@ -283,7 +269,7 @@ public class ValidationServiceTest {
     DatasetValidation datasetValidation = new DatasetValidation();
     Validation validation = new Validation();
     validation.setId(1L);
-    validation.setLevelError(TypeErrorEnum.WARNING);
+    validation.setLevelError(ErrorTypeEnum.WARNING);
     datasetValidation.setValidation(validation);
     datasetValidation.setId(1L);
     datasetValidation.setDatasetValue(new DatasetValue());
@@ -447,7 +433,7 @@ public class ValidationServiceTest {
 
     Validation validation = new Validation();
     validation.setId(2L);
-    validation.setLevelError(TypeErrorEnum.WARNING);
+    validation.setLevelError(ErrorTypeEnum.WARNING);
     List<RecordValue> records = new ArrayList<>();
     RecordValue recordValue = new RecordValue();
     recordValue.setId("1L");
@@ -483,7 +469,7 @@ public class ValidationServiceTest {
     List<FieldValidation> fieldValidations = new ArrayList<>();
     FieldValidation fieldValidation = new FieldValidation();
     validation.setId(1L);
-    validation.setTypeEntity(TypeEntityEnum.DATASET);
+    validation.setTypeEntity(EntityTypeEnum.DATASET);
     fieldValidation.setValidation(validation);
     fieldValidation.setFieldValue(fieldValue);
     fieldValidation.setId(1L);
@@ -491,7 +477,7 @@ public class ValidationServiceTest {
     FieldValue fieldValue = new FieldValue();
     fieldValue.setFieldValidations(fieldValidations);
     fieldValue.setId("1L");
-    fieldValue.setLevelError(TypeErrorEnum.WARNING);
+    fieldValue.setLevelError(ErrorTypeEnum.WARNING);
     fields.add(fieldValue);
     fields.add(fieldValue);
     Page<FieldValue> page = new PageImpl<>(fields);
@@ -563,8 +549,8 @@ public class ValidationServiceTest {
     tableValidation.setId(1L);
     tableValidation.setTableValue(tableValue);
     validation.setId(1L);
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    validation.setLevelError(ErrorTypeEnum.ERROR);
+    validation.setTypeEntity(EntityTypeEnum.TABLE);
     tableValidation.setValidation(validation);
     List<TableValidation> tableValidations = new ArrayList<>();
     tableValidations.add(tableValidation);
@@ -607,8 +593,8 @@ public class ValidationServiceTest {
     tableValidation.setId(1L);
     tableValidation.setTableValue(tableValue);
     validation.setId(1L);
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    validation.setLevelError(ErrorTypeEnum.ERROR);
+    validation.setTypeEntity(EntityTypeEnum.TABLE);
     tableValidation.setValidation(validation);
     List<TableValidation> tableValidations = new ArrayList<>();
     tableValidations.add(tableValidation);
@@ -640,8 +626,8 @@ public class ValidationServiceTest {
     tableValidation.setId(1L);
     tableValidation.setTableValue(tableValue);
     validation.setId(1L);
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    validation.setLevelError(ErrorTypeEnum.ERROR);
+    validation.setTypeEntity(EntityTypeEnum.TABLE);
     tableValidation.setValidation(validation);
     List<TableValidation> tableValidations = new ArrayList<>();
     tableValidations.add(tableValidation);
@@ -685,8 +671,8 @@ public class ValidationServiceTest {
     tableValidation.setId(1L);
     tableValidation.setTableValue(tableValue);
     validation.setId(1L);
-    validation.setLevelError(TypeErrorEnum.ERROR);
-    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    validation.setLevelError(ErrorTypeEnum.ERROR);
+    validation.setTypeEntity(EntityTypeEnum.TABLE);
     tableValidation.setValidation(validation);
     List<TableValidation> tableValidations = new ArrayList<>();
     tableValidations.add(tableValidation);
@@ -797,10 +783,10 @@ public class ValidationServiceTest {
     Validation validationAux = new Validation();
     validationAux.setId(1L);
     validationAux.setIdRule("1");
-    validationAux.setLevelError(TypeErrorEnum.ERROR);
+    validationAux.setLevelError(ErrorTypeEnum.ERROR);
     validationAux.setMessage("ERROR");
     validationAux.setOriginName("DATASET");
-    validationAux.setTypeEntity(TypeEntityEnum.DATASET);
+    validationAux.setTypeEntity(EntityTypeEnum.DATASET);
     validationAux.setValidationDate(new Date().toString());
     datasetValidation.setValidation(validationAux);
     validations.add(datasetValidation);
@@ -829,7 +815,7 @@ public class ValidationServiceTest {
   @Test
   public void validateDataError() throws EEAException {
     datasetValue.getTableValues().get(0).getTableValidations().get(0).getValidation()
-        .setLevelError(TypeErrorEnum.ERROR);
+        .setLevelError(ErrorTypeEnum.ERROR);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateDataSet(1L, kieBase);
@@ -860,113 +846,6 @@ public class ValidationServiceTest {
     validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
   }
 
-
-  /**
-   * Table validation query period monitoring.
-   */
-  @Test
-  public void tableValidationQueryPeriodMonitoring() {
-    List<BigInteger> listRecords = new ArrayList<>();
-    listRecords.add(new BigInteger("1"));
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(listRecords);
-    when(recordRepository.findByIdValidation(Mockito.anyLong()))
-        .thenReturn(Optional.of(new RecordValue()));
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-  }
-
-
-  /**
-   * Table validation query period monitoring fail.
-   */
-  @Test
-  public void tableValidationQueryPeriodMonitoringFail() {
-    List<BigInteger> listRecords = new ArrayList<>();
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(listRecords);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
-        .thenReturn(null);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
-  }
-
-
-  /**
-   * Dataset validation DO 02 query test.
-   */
-  @Test
-  public void datasetValidationDO02QueryTest() {
-    validationServiceImpl.datasetValidationDO02Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DO 03 query test.
-   */
-  @Test
-  public void datasetValidationDO03QueryTest() {
-    validationServiceImpl.datasetValidationDO03Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 01 A query test.
-   */
-  @Test
-  public void datasetValidationDC01AQueryTest() {
-    validationServiceImpl.datasetValidationDC01AQuery(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 01 B query test.
-   */
-  @Test
-  public void datasetValidationDC01BQueryTest() {
-    validationServiceImpl.datasetValidationDC01BQuery(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 02 query test.
-   */
-  @Test
-  public void datasetValidationDC02QueryTest() {
-    validationServiceImpl.datasetValidationDC02Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Dataset validation DC 03 B query test.
-   */
-  @Test
-  public void datasetValidationDC03BQueryTest() {
-    validationServiceImpl.datasetValidationDC03Query(Mockito.any());
-    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
-  }
-
-  /**
-   * Table validation DR 01 AB query test.
-   */
-  @Test
-  public void tableValidationDR01ABQueryTest() {
-    validationServiceImpl.tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
-    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
-        .tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Table validation query non return result test.
-   */
-  @Test
-  public void tableValidationQueryNonReturnResultTest() {
-    validationServiceImpl.tableValidationQueryNonReturnResult(Mockito.any());
-    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
-        .tableValidationQueryNonReturnResult(Mockito.any());
-  }
 
   /**
    * Force validations test.

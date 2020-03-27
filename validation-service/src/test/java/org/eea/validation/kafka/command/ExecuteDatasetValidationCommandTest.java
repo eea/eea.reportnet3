@@ -81,7 +81,7 @@ public class ExecuteDatasetValidationCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     data.put("kieBase", kieBase);
     data.put("numPag", 1);
     eeaEventVO = new EEAEventVO();

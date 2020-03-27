@@ -34,7 +34,6 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     try {
       const releasedData = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);
       setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
-      setLoading(false);
     } catch (error) {
       onErrorLoadingDashboard(error);
     } finally {
@@ -126,7 +125,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     return <Spinner className={styles.positioning} />;
   }
 
-  if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
+  if (!isEmpty(releasedDashboardData.datasets) && !isEmpty(releasedDashboardData.labels)) {
     if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
       return (
         <div className={`${styles.chart_released}`}>
@@ -137,6 +136,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
                 filteredStatusTypes={updatedState.filterStatus}
                 statusTypes={['RELEASED', 'UNRELEASED']}
               />
+
               <Chart
                 type="bar"
                 data={updatedState.dashboardData}

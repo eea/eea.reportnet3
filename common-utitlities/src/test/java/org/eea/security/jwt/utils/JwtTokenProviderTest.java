@@ -8,7 +8,6 @@ import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.utils.TestUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.common.VerificationException;

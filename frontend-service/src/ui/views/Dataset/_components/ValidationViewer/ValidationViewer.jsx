@@ -459,7 +459,6 @@ const ValidationViewer = React.memo(
         <>
           <DataTable
             autoLayout={true}
-            className={styles.showValidationsData}
             first={firstRow}
             lazy={true}
             loading={isLoading}

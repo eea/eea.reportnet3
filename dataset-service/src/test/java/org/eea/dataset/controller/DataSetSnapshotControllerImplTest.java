@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -296,5 +297,20 @@ public class DataSetSnapshotControllerImplTest {
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
         Mockito.any());
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
+  }
+
+  /**
+   * Gets the released and updated status test.
+   *
+   * @return the released and updated status test
+   */
+  @Test
+  public void getReleasedAndUpdatedStatusTest() {
+    HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+    Mockito.doNothing().when(response).setContentType(Mockito.anyString());
+    Mockito.doNothing().when(response).setHeader(Mockito.anyString(), Mockito.anyString());
+
+    dataSetSnapshotControllerImpl.createReceiptPDF(response, 1L, 1L);
+    Mockito.verify(response, times(1)).setContentType(Mockito.anyString());
   }
 }

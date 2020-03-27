@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -46,14 +48,13 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 /**
- * The type Jdbc record store service.
+ * The Class JdbcRecordStoreServiceImpl.
  */
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
-
 
   /**
    * The Constant FILE_PATTERN_NAME.
@@ -61,17 +62,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
   /**
-   * The kafka sender helper.
+   * The kafka sender utils.
    */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /**
+   * The data collection controller zuul.
+   */
+  @Autowired
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
 
   /**
    * The user postgre db.
    */
   @Value("${spring.datasource.username}")
   private String userPostgreDb;
+
   /**
    * The pass postgre db.
    */
@@ -108,6 +115,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
+  /**
+   * The data source.
+   */
+  @Autowired
+  private DataSource dataSource;
+
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
@@ -121,15 +137,89 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
+  /**
+   * Release lock and notification.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void releaseLockAndNotification(Long dataflowId) {
+    // Release the lock
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
+
+    // Release the notification
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).build());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
+          e);
+    }
+  }
 
   /**
-   * Reset dataset database.
+   * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content.
    *
-   * @throws RecordStoreAccessException the record store access exception
+   * @param datasetIdAndSchemaId dataset ids matching schema ids
+   */
+  private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId) {
+    for (Map.Entry<Long, String> entry : datasetIdAndSchemaId.entrySet()) {
+      Map<String, Object> result = new HashMap<>();
+      String datasetName = "dataset_" + entry.getKey();
+      result.put("connectionDataVO", createConnectionDataVO(datasetName));
+      result.put("dataset_id", datasetName);
+      result.put("idDatasetSchema", entry.getValue());
+      kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
+    }
+  }
+
+  /**
+   * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
+   * <p>
+   * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
+   * </p>
+   *
+   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param dataflowId The DataCollection's dataflow.
    */
   @Override
-  public void resetDatasetDatabase() throws RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  @Async
+  public void createSchemas(Map<Long, String> datasetIdsAndSchemaIds, Long dataflowId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+
+      // Read file and create queries
+      String command;
+      while ((command = br.readLine()) != null) {
+        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+          statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
+              .replace("%user%", userPostgreDb));
+        }
+      }
+
+      // Execute queries and commit results
+      statement.executeBatch();
+      LOG.info("Schemas created as part of DataCollection creation");
+
+      // Release events to initialize databases content
+      releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
+
+      // Release the lock and the notification
+      releaseLockAndNotification(dataflowId);
+
+    } catch (SQLException | IOException e) {
+      LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
+      // This method will release the lock
+      dataCollectionControllerZuul
+          .undoDataCollectionCreation(new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId);
+    }
   }
 
   /**
@@ -172,18 +262,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     result.put("dataset_id", datasetName);
     result.put("idDatasetSchema", idDatasetSchema);
     kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
-
-  }
-
-  /**
-   * Creates the data set from other.
-   *
-   * @param sourceDatasetName the source dataset name
-   * @param destinationDataSetName the destination data set name
-   */
-  @Override
-  public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
   /**
@@ -231,7 +309,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
     final ConnectionDataVO result = new ConnectionDataVO();
-
     result.setConnectionString(connStringPostgre);
     result.setUser(userPostgreDb);
     result.setPassword(passPostgreDb);
@@ -266,7 +343,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     });
   }
-
 
   /**
    * Creates the data snapshot.
@@ -332,10 +408,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       if (null != con) {
         con.close();
       }
-
     }
-
-
   }
 
   /**
@@ -364,7 +437,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-
   /**
    * Restore data snapshot.
    *
@@ -374,29 +446,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      TypeDatasetEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
-
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
@@ -469,7 +541,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data. Rollback");
+        LOG_ERROR
+            .error("Error restoring the snapshot data due to error {}. Rollback", e.getMessage(),
+                e);
         con.rollback();
       }
       try {
@@ -478,7 +552,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 .datasetId(idSnapshot).error("Error restoring the snapshot data. Rollback")
                 .build());
       } catch (EEAException ex) {
-        LOG.error("Error realeasing event " + failEventType, ex);
+        LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
       }
     } finally {
       if (null != stmt) {
@@ -536,7 +610,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
     String nameFileDatasetValue =
@@ -564,10 +637,30 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetSchemaName the dataset schema name
    */
   @Override
-  @Transactional
   public void deleteDataset(String datasetSchemaName) {
     StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA ");
     stringBuilder.append(datasetSchemaName).append(" CASCADE");
     jdbcTemplate.execute(stringBuilder.toString());
+  }
+
+  /**
+   * Creates the data set from other.
+   *
+   * @param sourceDatasetName the source dataset name
+   * @param destinationDataSetName the destination data set name
+   */
+  @Override
+  public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  }
+
+  /**
+   * Reset dataset database.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void resetDatasetDatabase() throws RecordStoreAccessException {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 }

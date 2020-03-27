@@ -25,6 +25,18 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
+    return response.data;
+  },
+  allSchemas: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.allSchemas, { dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
     return response.data;
   },
   accepted: async () => {
@@ -115,6 +127,7 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
   },
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {

@@ -1,0 +1,1 @@
+export { LastPageLink } from './LastPageLink';

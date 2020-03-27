@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface DataSetMetabaseRepository.
  *
- * @author Mario Severa
+ * 
  */
 public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
 
@@ -31,6 +31,15 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    * @return the list
    */
   List<DataSetMetabase> findByDataflowId(Long dataflowId);
+
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Query("SELECT d.datasetSchema FROM DataSetMetabase d where d.id = ?1")
+  String findDatasetSchemaIdById(long datasetId);
 
   /**
    * Delete snapshot dataset by id snapshot.

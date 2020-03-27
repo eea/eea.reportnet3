@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 
-import { isEmpty, uniq } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
@@ -107,7 +108,11 @@ const useBigButtonList = ({
       handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
       infoStatus: receiptState.isOutdated,
       layout: 'defaultBigButton',
-      visibility: !isCustodian && !receiptState.isReleased.includes(false) && !receiptState.isReleased.includes(null)
+      visibility:
+        !isCustodian &&
+        !isUndefined(receiptState.isReleased) &&
+        !receiptState.isReleased.includes(false) &&
+        !receiptState.isReleased.includes(null)
     }
   ];
 

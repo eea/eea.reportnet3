@@ -113,9 +113,8 @@ public class DocumentControllerImpl implements DocumentController {
    * @return the document
    */
   @Override
-  @GetMapping(value = "/{documentId}")
+  @GetMapping(value = "/{documentId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @HystrixCommand
-  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public Resource getDocument(@PathVariable("documentId") final Long documentId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
@@ -139,6 +138,7 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param documentId the document id
    * @param deleteMetabase the delete metabase
+   *
    * @throws Exception the exception
    */
   @Override
@@ -262,6 +262,7 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param idDesignDataset the id design dataset
    * @param fileName the file name
+   *
    * @return the snapshot document
    */
   @Override
@@ -293,6 +294,7 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param idDesignDataset the id design dataset
    * @param fileName the file name
+   *
    * @throws Exception the exception
    */
   @Override

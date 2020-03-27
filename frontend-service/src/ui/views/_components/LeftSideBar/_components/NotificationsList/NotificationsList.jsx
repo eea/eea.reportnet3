@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
+import { isUndefined } from 'lodash';
+
 import sanitizeHtml from 'sanitize-html';
 
 import styles from './NotificationsList.module.scss';
@@ -42,9 +44,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         }
       });
 
+      const capitalizedMessageLevel = !isUndefined(notification.type)
+        ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
+        : notification.type;
+
+      console.log('capitalizedMessageLevel', notification.type.charAt(0).toUpperCase());
       return {
         message: message,
-        messageLevel: notification.type
+        messageLevel: capitalizedMessageLevel
       };
     });
     console.info('notifications: %o', notificationsArray);
@@ -58,7 +65,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     <Dialog
       className="edit-table"
       blockScroll={false}
-      contentStyle={{ height: '90%', maxHeight: '80%', overflow: 'auto' }}
+      contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
       closeOnEscape={false}
       header={resources.messages['notifications']}
       modal={true}
@@ -68,7 +75,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       zIndex={3100}>
       <DataTable
         autoLayout={true}
-        className={styles.showNotificationsData}
         loading={false}
         paginator={true}
         paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}

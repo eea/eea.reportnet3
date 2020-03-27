@@ -12,7 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestException1() throws Exception {
-    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, null, null, 1L);
+    dataSetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, null, null, 1L);
   }
 
 
@@ -101,7 +101,7 @@ public class DataSetMetabaseControllerImplTest {
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
-    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
+    dataSetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -190,4 +190,11 @@ public class DataSetMetabaseControllerImplTest {
     Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
   }
 
+  @Test
+  public void findDatasetSchemaIdByIdTest() {
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Assert.assertEquals("5ce524fad31fc52540abae73",
+        dataSetMetabaseControllerImpl.findDatasetSchemaIdById(1L));
+  }
 }

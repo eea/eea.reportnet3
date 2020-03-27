@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull, capitalize } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -10,7 +12,9 @@ import styles from './DataViewer.module.css';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
@@ -20,6 +24,7 @@ import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldEditor } from './_components/FieldEditor';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
@@ -47,6 +52,7 @@ import {
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
+    isDatasetDeleted = false,
     isDataCollection,
     isValidationSelected,
     isWebFormMMR,
@@ -66,7 +72,6 @@ const DataViewer = withRouter(
     const userContext = useContext(UserContext);
 
     const [addDialogVisible, setAddDialogVisible] = useState(false);
-    const [codelistInfo, setCodelistInfo] = useState({});
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -74,12 +79,14 @@ const DataViewer = withRouter(
     const [fetchedData, setFetchedData] = useState([]);
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
-    const [isCodelistInfoVisible, setIsCodelistInfoVisible] = useState(false);
+    const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isTableDeleted, setIsTableDeleted] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
       'INFO',
@@ -99,6 +106,8 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       recordsPerPage: DefaultRowsPage,
       initialRecordValue: undefined,
+      isAllDataDeleted: isDatasetDeleted,
+      isRecordAdded: false,
       isRecordDeleted: false,
       newRecord: {},
       numCopiedRecords: undefined,
@@ -129,6 +138,7 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
+          datasetId={datasetId}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -157,10 +167,9 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const { columns, setColumns, originalColumns } = useSetColumns(
+    const { columns, setColumns, originalColumns, selectedHeader } = useSetColumns(
       actionTemplate,
       cellDataEditor,
-      codelistInfo,
       colsSchema,
       columnOptions,
       hasWritePermissions,
@@ -169,8 +178,7 @@ const DataViewer = withRouter(
       isWebFormMMR,
       records,
       resources,
-      setCodelistInfo,
-      setIsCodelistInfoVisible,
+      setIsColumnInfoVisible,
       validationsTemplate
     );
 
@@ -204,11 +212,16 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
+      if (isDatasetDeleted) {
+        dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
+      }
+    }, [isDatasetDeleted]);
+
+    useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
-      console.log({ levelErrorValidations });
       const removeSelectAllFromList = levelErrorValidations => {
         levelErrorValidations = levelErrorValidations
           .map(error => error.toUpperCase())
@@ -226,7 +239,6 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
-
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
 
       setIsLoading(true);
@@ -353,6 +365,7 @@ const DataViewer = withRouter(
       try {
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
+        setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
@@ -504,6 +517,7 @@ const DataViewer = withRouter(
         } else {
           onRefresh();
           setIsPasting(false);
+          setIsTableDeleted(false);
         }
       } catch (error) {
         const {
@@ -522,6 +536,7 @@ const DataViewer = withRouter(
         });
       } finally {
         setConfirmPasteVisible(false);
+        setIsPasting(false);
       }
     };
 
@@ -552,8 +567,10 @@ const DataViewer = withRouter(
       );
       if (isNewRecord) {
         try {
+          setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
           const {
@@ -573,6 +590,7 @@ const DataViewer = withRouter(
         } finally {
           setAddDialogVisible(false);
           setIsLoading(false);
+          setIsSaving(false);
         }
       } else {
         try {
@@ -597,6 +615,7 @@ const DataViewer = withRouter(
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
+          setIsSaving(false);
         }
       }
     };
@@ -632,8 +651,9 @@ const DataViewer = withRouter(
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
+          disabled={isSaving}
           label={resources.messages['save']}
-          icon="save"
+          icon={!isSaving ? 'save' : 'spinnerAnimate'}
           onClick={() => {
             onSaveRecord(records.newRecord);
           }}
@@ -648,13 +668,13 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const codelistInfoDialogFooter = (
+    const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           label={resources.messages['ok']}
           icon="check"
           onClick={() => {
-            setIsCodelistInfoVisible(false);
+            setIsColumnInfoVisible(false);
           }}
         />
       </div>
@@ -664,7 +684,7 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           label={resources.messages['save']}
-          icon="save"
+          icon={isSaving === true ? 'spinnerAnimate' : 'save'}
           onClick={() => {
             try {
               onSaveRecord(records.editedRecord);
@@ -673,7 +693,7 @@ const DataViewer = withRouter(
             }
           }}
         />
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
+        <Button label={resources.messages['cancel']} icon={'cancel'} onClick={onCancelRowEdit} />
       </div>
     );
 
@@ -719,6 +739,23 @@ const DataViewer = withRouter(
       );
     };
 
+    const requiredTemplate = rowData => {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {rowData.field === 'Required' ? (
+            <FontAwesomeIcon
+              icon={AwesomeIcons('check')}
+              style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+            />
+          ) : rowData.field === 'Codelist items' ? (
+            <Chips disabled={true} value={rowData.value}></Chips>
+          ) : (
+            rowData.value
+          )}
+        </div>
+      );
+    };
+
     const filteredCount = () => {
       return (
         <span>
@@ -754,6 +791,12 @@ const DataViewer = withRouter(
         }
       }
     };
+    const onKeyPress = event => {
+      if (event.key === 'Enter' && !isSaving) {
+        event.preventDefault();
+        onSaveRecord(records.newRecord);
+      }
+    };
 
     return (
       <SnapshotContext.Provider>
@@ -763,6 +806,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
           isFilterValidationsActive={isFilterValidationsActive}
+          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
@@ -843,32 +887,33 @@ const DataViewer = withRouter(
           </DataTable>
         </div>
 
-        {isCodelistInfoVisible && (
+        {isColumnInfoVisible && (
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
-            footer={codelistInfoDialogFooter}
-            header={resources.messages['codelistInfo']}
-            onHide={() => setIsCodelistInfoVisible(false)}
-            visible={isCodelistInfoVisible}>
-            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1rem' }}>
-              <div>
-                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistName']}: `}</span>
-                <span>{codelistInfo.name}</span>
-              </div>
-              <div>
-                <span style={{ fontWeight: 'bold' }}>{`${resources.messages['codelistVersion']}: `}</span>
-                <span>{codelistInfo.version}</span>
-              </div>
-            </div>
-            <DataTable autoLayout={true} className={styles.itemTable} value={codelistInfo.items}>
-              {['id', 'shortCode', 'label', 'definition'].map((column, i) => (
+            footer={columnInfoDialogFooter}
+            header={resources.messages['columnInfo']}
+            onHide={() => setIsColumnInfoVisible(false)}
+            visible={isColumnInfoVisible}>
+            <DataTable
+              autoLayout={true}
+              className={styles.itemTable}
+              value={DataViewerUtils.getFieldValues(colsSchema, selectedHeader, [
+                'header',
+                'description',
+                'type',
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
+                  ? ['codelistItems']
+                  : [])
+              ])}>
+              {['field', 'value'].map((column, i) => (
                 <Column
+                  body={column === 'value' ? requiredTemplate : null}
+                  className={column === 'field' ? styles.fieldColumn : ''}
                   field={column}
-                  header={column === 'shortCode' ? resources.messages['categoryShortCode'] : capitalize(column)}
+                  headerStyle={{ display: 'none' }}
                   key={i}
-                  sortable={true}
-                  style={{ display: column === 'id' ? 'none' : 'auto' }}
                 />
               ))}
             </DataTable>
@@ -899,26 +944,29 @@ const DataViewer = withRouter(
         )}
 
         {addDialogVisible && (
-          <Dialog
-            className="edit-table"
-            blockScroll={false}
-            footer={addRowDialogFooter}
-            header={resources.messages['addNewRow']}
-            modal={true}
-            onHide={() => setAddDialogVisible(false)}
-            style={{ width: '50%' }}
-            visible={addDialogVisible}
-            zIndex={3003}>
-            <div className="p-grid p-fluid">
-              <DataForm
-                colsSchema={colsSchema}
-                formType="NEW"
-                addDialogVisible={addDialogVisible}
-                onChangeForm={onEditAddFormInput}
-                records={records}
-              />
-            </div>
-          </Dialog>
+          <div onKeyPress={onKeyPress}>
+            <Dialog
+              className="edit-table"
+              blockScroll={false}
+              footer={addRowDialogFooter}
+              header={resources.messages['addRecord']}
+              modal={true}
+              onHide={() => setAddDialogVisible(false)}
+              style={{ width: '50%' }}
+              visible={addDialogVisible}
+              zIndex={3003}>
+              <div className="p-grid p-fluid">
+                <DataForm
+                  addDialogVisible={addDialogVisible}
+                  colsSchema={colsSchema}
+                  datasetId={datasetId}
+                  formType="NEW"
+                  onChangeForm={onEditAddFormInput}
+                  records={records}
+                />
+              </div>
+            </Dialog>
+          </div>
         )}
 
         {editDialogVisible && (
@@ -936,6 +984,7 @@ const DataViewer = withRouter(
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
+                datasetId={datasetId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 onChangeForm={onEditAddFormInput}
@@ -947,6 +996,7 @@ const DataViewer = withRouter(
 
         {deleteDialogVisible && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
@@ -959,6 +1009,7 @@ const DataViewer = withRouter(
 
         {confirmDeleteVisible && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={resources.messages['deleteRow']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}

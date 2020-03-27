@@ -1,6 +1,6 @@
 .dialog_mask_wrapper {
   display: flex;
-  z-index: 1000;
+  z-index: 5000;
   position: fixed;
   top: 0;
   left: 0;
@@ -13,4 +13,8 @@
 }
 ul li {
   margin-bottom: 0.5rem;
+}
+
+body {
+  overflow: hidden;
 }

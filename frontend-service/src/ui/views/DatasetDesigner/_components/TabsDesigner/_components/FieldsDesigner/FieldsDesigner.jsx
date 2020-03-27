@@ -1,7 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { capitalize, isUndefined, isNull } from 'lodash';
 
-import styles from './FieldsDesigner.module.css';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+
+import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -13,18 +18,25 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DatasetService } from 'core/services/Dataset';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
-export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescription, onLoadTableData, table }) => {
+export const FieldsDesigner = ({
+  datasetId,
+  datasetSchemas,
+  onChangeFields,
+  onChangeTableDescription,
+  onLoadTableData,
+  table
+}) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
+  const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
-  const [isCodelistSelected, setIsCodelistSelected] = useState(false);
+  const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +52,7 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       !isUndefined(table.records) &&
       !isNull(table.records[0].fields)
     ) {
-      getCodelistInfo(table.records[0].fields);
+      setFields(table.records[0].fields);
     }
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description);
@@ -49,73 +61,71 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
 
   useEffect(() => {
     if (!isUndefined(fields)) {
-      setIsCodelistSelected(fields.filter(field => field.type.toUpperCase() === 'CODELIST').length > 0);
+      setIsCodelistOrLink(
+        fields.filter(field => field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK').length >
+          0
+      );
     }
   }, [fields]);
 
-  const onCodelistShow = (fieldId, selectedField) => {
-    setIsCodelistSelected(
-      fields.filter(field => field.type.toUpperCase() === 'CODELIST' && field.fieldId !== fieldId).length > 0 ||
-        selectedField.fieldType.toUpperCase() === 'CODELIST'
+  const onCodelistAndLinkShow = (fieldId, selectedField) => {
+    setIsCodelistOrLink(
+      fields.filter(field => {
+        return (
+          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+        );
+      }).length > 0 ||
+        selectedField.fieldType.toUpperCase() === 'CODELIST' ||
+        selectedField.fieldType.toUpperCase() === 'LINK'
     );
   };
 
-  const onFieldAdd = (
-    fieldId,
-    fieldName,
-    recordId,
-    fieldType,
-    fieldDescription,
-    codelistId,
-    codelistName,
-    codelistVersion,
-    codelistItems,
-    required
-  ) => {
+  const onFieldAdd = ({ codelistItems, description, fieldId, pk, name, recordId, referencedField, required, type }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
-      fieldId,
-      name: fieldName,
-      recordId,
-      type: fieldType,
-      description: fieldDescription,
-      codelistId,
-      codelistName,
-      codelistVersion,
       codelistItems,
-      required
+      description,
+      fieldId,
+      pk,
+      name,
+      recordId,
+      referencedField,
+      required,
+      type
     });
-    onChangeFields(inmFields, table.tableSchemaId);
+    onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
   };
 
-  const onFieldDelete = deletedFieldIndex => {
+  const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
     setIndexToDelete(deletedFieldIndex);
+    setFieldToDeleteType(deletedFieldType);
     setIsDeleteDialogVisible(true);
   };
 
-  const onFieldUpdate = (
-    fieldId,
-    fieldName,
-    fieldType,
-    fieldDescription,
-    codelistId,
-    codelistName,
-    codelistVersion,
+  const onFieldUpdate = ({
     codelistItems,
-    required
-  ) => {
+    description,
+    id,
+    isLinkChange,
+    pk,
+    name,
+    referencedField,
+    required,
+    type
+  }) => {
     const inmFields = [...fields];
-    const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(fieldId, inmFields);
+    const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
+
     if (fieldIndex > -1) {
-      inmFields[fieldIndex].name = fieldName;
-      inmFields[fieldIndex].type = fieldType;
-      inmFields[fieldIndex].description = fieldDescription;
-      inmFields[fieldIndex].codelistId = codelistId;
-      inmFields[fieldIndex].codelistName = codelistName;
-      inmFields[fieldIndex].codelistVersion = codelistVersion;
+      inmFields[fieldIndex].name = name;
+      inmFields[fieldIndex].type = type;
+      inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
+      inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].pk = pk;
+      onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
   };
@@ -142,13 +152,13 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     setIsErrorDialogVisible(true);
   };
 
-  const deleteField = async deletedFieldIndex => {
+  const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
       const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, table.tableSchemaId);
+        onChangeFields(inmFields, deletedFieldType.toUpperCase() === 'LINK', table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -171,34 +181,28 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
     </div>
   );
 
-  const getCodelistInfo = tableFields => {
-    const tableFieldsWithCodelistData = tableFields.map(async field => {
-      if (field.type.toUpperCase() === 'CODELIST' && !isNull(field.codelistId)) {
-        try {
-          const response = await CodelistService.getById(field.codelistId);
-          field.codelistId = response.id;
-          field.codelistName = response.name;
-          field.codelistVersion = response.version;
-          field.codelistItems = response.items;
-
-          return field;
-        } catch (error) {
-          console.error(error);
-          // notificationContext.add({
-          //   type: 'CLONE_CODELIST_ERROR',
-          //   content: {
-          //     // dataflowId,
-          //     // datasetId
-          //   }
-          // });
+  const getReferencedFieldName = referencedField => {
+    if (!isUndefined(referencedField.name)) {
+      return referencedField;
+    }
+    const link = {};
+    datasetSchemas.forEach(schema =>
+      schema.tables.forEach(table => {
+        if (!table.addTab) {
+          table.records.forEach(record =>
+            record.fields.forEach(field => {
+              if (!isNil(field) && field.fieldId === referencedField.idPk) {
+                link.name = `${table.tableSchemaName} - ${field.name}`;
+                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                link.disabled = false;
+              }
+            })
+          );
         }
-      } else {
-        return field;
-      }
-    });
-    Promise.all(tableFieldsWithCodelistData).then(completeFields => {
-      setFields(completeFields);
-    });
+      })
+    );
+    link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
+    return link;
   };
 
   const previewData = () => {
@@ -206,16 +210,15 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       !isUndefined(fields) && !isNull(fields)
         ? fields.map(field => {
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field.codelistItems,
+              description: field.description,
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: field.codelistName,
-              codelistVersion: field.codelistVersion,
-              codelistItems: field.codelistItems,
-              required: field.required
+              referencedField: field['referencedField'],
+              required: field.required,
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           })
         : [];
@@ -224,10 +227,10 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
       <DataViewer
         hasWritePermissions={true}
         isPreviewModeOn={isPreviewModeOn}
-        onLoadTableData={onLoadTableData}
         isWebFormMMR={false}
         key={table.id}
         levelErrorTypes={table.levelErrorTypes}
+        onLoadTableData={onLoadTableData}
         recordPositionId={-1}
         tableHasErrors={table.hasErrors}
         tableId={table.tableSchemaId}
@@ -244,11 +247,12 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   const renderConfirmDialog = () => {
     return (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteFieldTitle']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => {
-          deleteField(indexToDelete);
+          deleteField(indexToDelete, fieldToDeleteType);
           setIsDeleteDialogVisible(false);
         }}
         onHide={() => setIsDeleteDialogVisible(false)}
@@ -290,25 +294,26 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
         <FieldDesigner
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-          codelistId=""
           codelistItems={[]}
-          codelistName=""
-          codelistVersion=""
           datasetId={datasetId}
           fieldId="-1"
           fieldName=""
+          fieldLink={null}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
+          hasPK={!isNil(fields) && fields.filter(field => field.pk === true).length > 0}
+          // hasPK={true}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
-          isCodelistSelected={isCodelistSelected}
-          onCodelistShow={onCodelistShow}
+          isCodelistOrLink={isCodelistOrLink}
+          onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
-          recordId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
-          totalFields={!isUndefined(fields) && !isNull(fields) ? fields.length : 0}
+          recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          tableSchemaId={table.tableSchemaId}
+          totalFields={!isNil(fields) ? fields.length : 0}
         />
       </div>
     );
@@ -316,37 +321,41 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
 
   const renderFields = () => {
     const renderedFields =
-      !isUndefined(fields) && !isNull(fields) ? (
-        fields.map((field, index) => (
-          <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
-            <FieldDesigner
-              checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-              codelistId={field.codelistId}
-              codelistItems={field.codelistItems}
-              codelistName={field.codelistName}
-              codelistVersion={field.codelistVersion}
-              datasetId={datasetId}
-              fieldDescription={field.description}
-              fieldId={field.fieldId}
-              fieldName={field.name}
-              fieldRequired={field.required}
-              fieldType={field.type}
-              fieldValue={field.value}
-              index={index}
-              initialFieldIndexDragged={initialFieldIndexDragged}
-              isCodelistSelected={isCodelistSelected}
-              key={field.fieldId}
-              onCodelistShow={onCodelistShow}
-              onFieldDelete={onFieldDelete}
-              onFieldDragAndDrop={onFieldDragAndDrop}
-              onFieldDragAndDropStart={onFieldDragAndDropStart}
-              onFieldUpdate={onFieldUpdate}
-              onShowDialogError={onShowDialogError}
-              recordId={field.recordId}
-              totalFields={fields.length}
-            />
-          </div>
-        ))
+      !isNil(fields) && !isEmpty(fields) ? (
+        fields.map((field, index) => {
+          return (
+            <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
+              <FieldDesigner
+                checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+                codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
+                datasetId={datasetId}
+                fieldDescription={field.description}
+                fieldId={field.fieldId}
+                fieldPK={field.pk}
+                fieldPKReferenced={field.pkReferenced}
+                fieldName={field.name}
+                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldRequired={Boolean(field.required)}
+                fieldType={field.type}
+                fieldValue={field.value}
+                hasPK={fields.filter(field => field.pk === true).length > 0}
+                index={index}
+                initialFieldIndexDragged={initialFieldIndexDragged}
+                isCodelistOrLink={isCodelistOrLink}
+                key={field.fieldId}
+                onCodelistAndLinkShow={onCodelistAndLinkShow}
+                onFieldDelete={onFieldDelete}
+                onFieldDragAndDrop={onFieldDragAndDrop}
+                onFieldDragAndDropStart={onFieldDragAndDropStart}
+                onFieldUpdate={onFieldUpdate}
+                onShowDialogError={onShowDialogError}
+                recordSchemaId={field.recordId}
+                tableSchemaId={table.tableSchemaId}
+                totalFields={fields.length}
+              />
+            </div>
+          );
+        })
       ) : (
         <div className={styles.fieldDesignerWrapper} key="-1"></div>
       );
@@ -375,6 +384,9 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
   };
 
   const updateTableDescriptionDesign = async () => {
+    if (isUndefined(tableDescriptionValue)) {
+      return;
+    }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         table.tableSchemaId,
@@ -423,7 +435,17 @@ export const FieldsDesigner = ({ datasetId, onChangeFields, onChangeTableDescrip
           <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
-      <div className={styles.fieldsWrapper}>{renderAllFields()}</div>
+      {!isPreviewModeOn ? (
+        <div className={styles.fieldsHeader}>
+          <label></label>
+          <label>{resources.messages['required']}</label>
+          <label>{resources.messages['pk']}</label>
+          <label>{resources.messages['newFieldPlaceHolder']}</label>
+          <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
+          <label>{resources.messages['newFieldTypePlaceHolder']}</label>
+        </div>
+      ) : null}
+      {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible ? renderConfirmDialog() : null}
     </React.Fragment>

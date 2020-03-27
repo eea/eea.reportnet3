@@ -2,12 +2,13 @@ package org.eea.interfaces.vo.dataset.schemas.rule;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Rule.
+ * The Class Rule VO.
  */
 @Getter
 @Setter
@@ -17,17 +18,38 @@ public class RuleVO {
   /** The rule id. */
   private String ruleId;
 
-  /** The data flow id. */
-  private Long dataFlowId;
+  /** The reference id. */
+  private String referenceId;
 
   /** The rule name. */
   private String ruleName;
 
+  /** The automatic. */
+  private boolean automatic;
+
+  /** The enabled. */
+  private boolean enabled;
+
+  /** The salience. */
+  private Integer salience;
+
+  /** The activation group. */
+  private String activationGroup;
+
+  /** The type. */
+  private EntityTypeEnum type;
+
   /** The when condition. */
-  private String whenCondition;
+  private RuleExpressionVO whenCondition;
 
   /** The then condition. */
   private List<String> thenCondition;
+
+  /** The description. */
+  private String description;
+
+  /** The short code. */
+  private String shortCode;
 
   /**
    * Hash code.
@@ -36,7 +58,8 @@ public class RuleVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(dataFlowId, ruleId, ruleName, thenCondition, whenCondition);
+    return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
+        activationGroup, type, whenCondition, thenCondition, description, shortCode);
   }
 
   /**
@@ -54,11 +77,13 @@ public class RuleVO {
       return false;
     }
     RuleVO other = (RuleVO) obj;
-    return Objects.equals(dataFlowId, other.dataFlowId) && Objects.equals(ruleId, other.ruleId)
-        && Objects.equals(ruleName, other.ruleName)
-        && Objects.equals(thenCondition, other.thenCondition)
-        && Objects.equals(whenCondition, other.whenCondition);
+    return Objects.equals(ruleId, other.ruleId) && Objects.equals(referenceId, other.referenceId)
+        && Objects.equals(ruleName, other.ruleName) && Objects.equals(automatic, other.automatic)
+        && Objects.equals(enabled, other.enabled) && Objects.equals(salience, other.salience)
+        && Objects.equals(activationGroup, other.activationGroup)
+        && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
+        && Objects.equals(whenCondition, other.whenCondition)
+        && Objects.equals(description, other.description)
+        && Objects.equals(shortCode, other.shortCode);
   }
-
-
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.Document;
+import org.bson.json.JsonWriterSettings;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
@@ -13,21 +14,19 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
-import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleDataSet;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleField;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
-import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -35,8 +34,11 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -45,12 +47,16 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The type Dataschema service.
@@ -64,12 +70,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /**
-   * The data set metabase table collection.
-   */
-  @Autowired
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
-
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
@@ -81,6 +81,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The rules controller. */
+  @Autowired
+  private RulesController rulesController;
 
   /**
    * The dataschema mapper.
@@ -104,6 +108,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
@@ -113,63 +122,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private List<ValidationSchemaCommand> validationCommands;
 
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
+
+
+  /** The pk catalogue repository. */
+  @Autowired
+  private PkCatalogueRepository pkCatalogueRepository;
 
   /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-
   /**
-   * The Constant GENERAL_WARNING.
+   * The Constant LOG_ERROR.
    */
-  private static final String GENERAL_WARNING = "WARNING";
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant VALIDATION_WARNING.
-   */
-  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-
-  /**
-   * The Constant GENERAL_ERROR.
-   */
-  private static final String GENERAL_ERROR = "ERROR";
-
-  /**
-   * The Constant INTEGER_ERROR.
-   */
-  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-
-  /**
-   * The Constant BOOLEAN_ERROR.
-   */
-  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-
-  /**
-   * The Constant COORDINATE_LAT_ERROR.
-   */
-  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-
-  /**
-   * The Constant COORDINATE_LONG_ERROR.
-   */
-  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-
-  /**
-   * The Constant DATE_ERROR.
-   */
-  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
-
-  /**
-   * The Constant NULL.
-   */
-  private static final String NULL = "id == null";
 
   /**
    * The data set metabase repository.
    */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
 
   /**
    * Creates the empty data set schema.
@@ -184,16 +165,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
-
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
-
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
     dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
-
     schemasRepository.save(dataSetSchema);
+
+    // create the schema of its rules
+    rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
+        new ObjectId().toString());
 
     return idDataSetSchema;
   }
@@ -253,222 +234,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the data schema.
+   * Gets the data schema by id.
    *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  public void createDataSchema(Long datasetId, Long dataflowId) {
-
-    DataSetSchema dataSetSchema = new DataSetSchema();
-    Iterable<TableCollection> tables = dataSetMetabaseTableCollection.findAllByDataSetId(datasetId);
-    ArrayList<TableCollection> values = Lists.newArrayList(tables);
-
-    List<TableSchema> tableSchemas = new ArrayList<>();
-
-    ObjectId idDataSetSchema = new ObjectId();
-    dataSetSchema.setIdDataFlow(dataflowId);
-    dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    List<RuleDataSet> ruleDataSetList = new ArrayList<>();
-    RuleDataSet ruleDataset = new RuleDataSet();
-    List<String> listaStrinsDataset = new ArrayList<>();
-    listaStrinsDataset.add(GENERAL_ERROR);
-    listaStrinsDataset.add(GENERAL_WARNING);
-    ruleDataset.setThenCondition(listaStrinsDataset);
-
-    ruleDataset.setRuleId(new ObjectId());
-    ruleDataset.setDataFlowId(dataflowId);
-    ruleDataset.setIdDataSetSchema(idDataSetSchema);
-    ruleDataset.setScope(TypeEntityEnum.DATASET);
-    ruleDataset.setWhenCondition(NULL);
-    ruleDataset.setRuleName("dataset regla");
-    ruleDataSetList.add(ruleDataset);
-    dataSetSchema.setRuleDataSet(ruleDataSetList);
-
-    for (int i = 1; i <= values.size(); i++) {
-      ObjectId idTableSchema = new ObjectId();
-      TableCollection table = values.get(i - 1);
-      TableSchema tableSchema = new TableSchema();
-      tableSchema.setIdTableSchema(idTableSchema);
-
-      List<RuleTable> ruleTableList = new ArrayList<>();
-      RuleTable ruleTable = new RuleTable();
-      List<String> listaStrinsRuleTable = new ArrayList<>();
-      listaStrinsRuleTable.add(VALIDATION_WARNING);
-      listaStrinsRuleTable.add(GENERAL_ERROR);
-      ruleTable.setThenCondition(listaStrinsRuleTable);
-
-      ruleTable.setRuleId(new ObjectId());
-      ruleTable.setDataFlowId(dataflowId);
-      ruleTable.setIdTableSchema(idTableSchema);
-      ruleTable.setWhenCondition(NULL);
-      ruleTable.setRuleName("table regla" + i);
-      ruleTable.setScope(TypeEntityEnum.TABLE);
-      ruleTableList.add(ruleTable);
-
-      tableSchema.setNameTableSchema(table.getTableName());
-      ObjectId idRecordSchema = new ObjectId();
-      RecordSchema recordSchema = new RecordSchema();
-      recordSchema.setIdRecordSchema(idRecordSchema);
-      recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
-
-      // Create Records in the Schema
-      List<RuleRecord> ruleRecordList = new ArrayList<>();
-
-      // Create fields in the Schema
-      List<FieldSchema> fieldSchemas = new ArrayList<>();
-      int headersSize = table.getTableHeadersCollections().size();
-      createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
-
-      RuleRecord ruleRecord = new RuleRecord();
-      List<String> listaStrinsRuleRecord = new ArrayList<>();
-      ruleRecord.setRuleId(new ObjectId());
-      ruleRecord.setDataFlowId(dataflowId);
-      ruleRecord.setScope(TypeEntityEnum.RECORD);
-      ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
-      ruleRecord.setRuleName("RecordRule_" + i + "_");
-      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
-      listaStrinsRuleRecord.add(GENERAL_ERROR);
-      ruleRecord.setThenCondition(listaStrinsRuleRecord);
-      ruleRecordList.add(ruleRecord);
-
-      recordSchema.setRuleRecord(ruleRecordList);
-      recordSchema.setFieldSchema(fieldSchemas);
-      tableSchema.setRecordSchema(recordSchema);
-      tableSchema.setRuleTable(ruleTableList);
-      tableSchemas.add(tableSchema);
-    }
-    dataSetSchema.setTableSchemas(tableSchemas);
-    schemasRepository.save(dataSetSchema);
-
-  }
-
-
-  /**
-   * Creates the rule fields.
-   *
-   * @param i the i
-   * @param table the table
-   * @param recordSchema the record schema
-   * @param fieldSchemas the field schemas
-   * @param headersSize the headers size
-   * @param dataflowId the dataflow id
-   */
-  private void createRuleFields(int i, TableCollection table, RecordSchema recordSchema,
-      List<FieldSchema> fieldSchemas, int headersSize, Long dataflowId) {
-    for (int j = 1; j <= headersSize; j++) {
-      ObjectId idFieldSchema = new ObjectId();
-      TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
-
-      List<RuleField> ruleField = new ArrayList<>();
-      RuleField rule = new RuleField();
-      rule.setRuleId(new ObjectId());
-      rule.setDataFlowId(dataflowId);
-      rule.setIdFieldSchema(idFieldSchema);
-      rule.setWhenCondition("!isBlank(value)");
-      rule.setRuleName("FieldRule_" + i + "." + j);
-      List<String> listaMsgValidation = new ArrayList<>();
-      listaMsgValidation.add("that field must be filled");
-      listaMsgValidation.add(GENERAL_WARNING);
-      rule.setThenCondition(listaMsgValidation);
-      ruleField.add(rule);
-      rule.setScope(TypeEntityEnum.FIELD);
-
-      RuleField rule2 = new RuleField();
-      List<String> listaMsgTypeValidation = new ArrayList<>();
-      switch (header.getHeaderType().toString().toLowerCase().trim()) {
-        case "text":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isText(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add("that text have invalid caracteres");
-          listaMsgTypeValidation.add("ERROR");
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "number":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value,'') || value == null");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(INTEGER_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "boolean":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("value==true || value==false");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(BOOLEAN_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "coordinate_lat":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isCordenateLat(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_LAT_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "coordinate_long":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isCordenateLong(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_LONG_ERROR);
-          listaMsgTypeValidation.add("WARNING");
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-        case "date":
-          rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(dataflowId);
-          rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isDateYYYYMMDD(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(DATE_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
-          rule2.setThenCondition(listaMsgTypeValidation);
-          ruleField.add(rule2);
-          rule2.setScope(TypeEntityEnum.FIELD);
-          break;
-      }
-      ruleField.add(rule2);
-      FieldSchema fieldSchema = new FieldSchema();
-      fieldSchema.setIdFieldSchema(idFieldSchema);
-      fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-      fieldSchema.setHeaderName(header.getHeaderName());
-      fieldSchema.setType(header.getHeaderType());
-      fieldSchema.setRuleField(ruleField);
-
-      fieldSchemas.add(fieldSchema);
-    }
-  }
-
-  /**
-   * Find the dataschema per id.
-   *
-   * @param dataschemaId the idDataschema
-   *
+   * @param dataschemaId the dataschema id
    * @return the data schema by id
    */
   @Override
@@ -524,7 +292,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
-
   /**
    * Gets the dataset schema id.
    *
@@ -558,12 +325,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Delete dataset schema.
    *
-   * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   @Override
   @Transactional
-  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+  public void deleteDatasetSchema(String schemaId) {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
@@ -599,7 +365,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, TypeDatasetEnum.DESIGN,
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -685,6 +451,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
+    // when we delete a table we need to delete all rules of this table, we mean, rules of the
+    // records fields, etc
+    Document recordSchemadocument =
+        schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
+    // if the table havent got any record he hasnt any document too
+    if (null != recordSchemadocument) {
+      List<Document> fieldSchemasList = (List<Document>) recordSchemadocument.get("fieldSchemas");
+      fieldSchemasList.stream().forEach(document -> {
+        rulesController.deleteRuleByReferenceId(datasetSchemaId, document.get("_id").toString());
+      });
+      rulesController.deleteRuleByReferenceId(datasetSchemaId,
+          recordSchemadocument.get("_id").toString());
+    }
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
 
@@ -710,7 +489,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema in mongo.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
@@ -722,6 +501,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throws EEAException {
     try {
       fieldSchemaVO.setId(new ObjectId().toString());
+
+      if (fieldSchemaVO.getReferencedField() != null) {
+        // We need to update the fieldSchema is referenced, the property isPKreferenced to true
+        this.updateIsPkReferencedInFieldSchema(
+            fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+            fieldSchemaVO.getReferencedField().getIdPk(), true);
+      }
+
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
           .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
@@ -731,15 +518,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Update field schema.
+   * Update field schema in mongo and check if the field is a codelist or not.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @return the string
+   * @return the type data
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     boolean typeModified = false;
     try {
@@ -748,11 +535,39 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
 
       if (fieldSchema != null) {
+        // First of all, we update the previous data in the catalogue
+        if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+          // Proceed to the changes needed. Remove the previous reference
+          String previousId = fieldSchema.get("_id").toString();
+          Document previousReferenced = (Document) fieldSchema.get("referencedField");
+          String previousIdPk = previousReferenced.get("idPk").toString();
+          String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+          PkCatalogueSchema catalogue =
+              pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
+          if (catalogue != null) {
+            catalogue.getReferenced().remove(new ObjectId(previousId));
+            pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+            pkCatalogueRepository.save(catalogue);
+            // We need to update the field isReferenced to false from the PK referenced if this was
+            // the only field that was FK
+            if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+              this.updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk,
+                  false);
+            }
+
+          }
+        }
+
+
         // Modificarlo en función de lo que contiene el FieldSchemaVO recibido
         if (fieldSchemaVO.getType() != null
             && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
+          if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
+              && fieldSchema.containsKey("codelistItems")) {
+            fieldSchema.remove("codelistItems");
+          }
         }
         if (fieldSchemaVO.getDescription() != null) {
           fieldSchema.put("description", fieldSchemaVO.getDescription());
@@ -760,14 +575,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getName() != null) {
           fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
-        if (fieldSchemaVO.getIdCodeList() != null) {
-          fieldSchema.put("idCodeList", fieldSchemaVO.getIdCodeList());
+        if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
+            && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
+          fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
         }
+        if (fieldSchemaVO.getRequired() != null) {
+          fieldSchema.put("required", fieldSchemaVO.getRequired());
+        }
+        if (fieldSchemaVO.getPk() != null) {
+          fieldSchema.put("pk", fieldSchemaVO.getPk());
+        }
+        if (fieldSchemaVO.getReferencedField() != null) {
+          Document referenced = new Document();
+          referenced.put("idDatasetSchema",
+              new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
+          referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+          fieldSchema.put("referencedField", referenced);
+          // We need to update the fieldSchema that is referenced, the property isPKreferenced to
+          // true
+          this.updateIsPkReferencedInFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+              fieldSchemaVO.getReferencedField().getIdPk(), true);
+        }
+
         // Guardar el FieldSchema modificado en MongoDB
-        if (schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema)
-            .getModifiedCount() == 1) {
-          if (typeModified) {
-            return fieldSchemaVO.getType().getValue();
+        UpdateResult updateResult =
+            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        if (updateResult.getMatchedCount() == 1) {
+          if (updateResult.getModifiedCount() == 1 && typeModified) {
+            return fieldSchemaVO.getType();
           }
           return null;
         }
@@ -864,4 +700,444 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return isValid;
   }
+
+
+  /**
+   * Propagate rules after update schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param type the type
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      DataType type, Long datasetId) {
+
+    if (type != null) {
+      // if we change the type we need to delete all rules
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
+      // Delete FK Rules
+      rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
+          fieldSchemaVO.getId());
+
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
+            EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+      }
+
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+      // update the dataset field value
+      TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+      datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+    } else {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+        if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
+          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+        }
+      } else {
+        rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());
+      }
+    }
+
+
+  }
+
+  /**
+   * Check pk allow update. Checks two things: no more than 1 PK in the same table, and in the case
+   * we want to erase a PK, that PK is not being referenced
+   * 
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  @Override
+  public Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
+
+    Boolean allow = true;
+    if (fieldSchemaVO.getPk() != null) {
+      // Check existing PKs on the same table
+      if (fieldSchemaVO.getPk()) {
+        DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+        TableSchemaVO table = null;
+        for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+          if (tableVO.getRecordSchema() != null
+              && tableVO.getRecordSchema().getFieldSchema() != null) {
+            if (tableVO.getRecordSchema().getFieldSchema().stream()
+                .anyMatch(field -> field.getId().equals(fieldSchemaVO.getId()))) {
+              table = tableVO;
+              break;
+            }
+          }
+        }
+        if (table != null) {
+          for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+            if (field.getPk() != null && field.getPk()
+                && !field.getId().equals(fieldSchemaVO.getId())) {
+              allow = false;
+              LOG_ERROR.error("There is actually an existing PK on the table. Update denied");
+            }
+          }
+        }
+      }
+      // Check the PK is referenced or not in case we are trying to remove it
+      if (!fieldSchemaVO.getPk()) {
+        PkCatalogueSchema catalogue =
+            pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+        if (catalogue != null && catalogue.getReferenced() != null
+            && !catalogue.getReferenced().isEmpty()) {
+          allow = false;
+          LOG_ERROR.error(
+              "The PK the user is trying to delete is being referenced by a FK. Update denied");
+        }
+      }
+    }
+    return allow;
+
+  }
+
+
+  /**
+   * Check existing pk referenced. Check against the PKCatalogue the PK is being referenced
+   * 
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  @Override
+  public Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO) {
+    Boolean isReferenced = false;
+
+    if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
+      PkCatalogueSchema catalogue =
+          pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+      if (catalogue != null && catalogue.getReferenced() != null
+          && !catalogue.getReferenced().isEmpty()) {
+        isReferenced = true;
+      }
+
+    }
+
+    return isReferenced;
+  }
+
+
+
+  /**
+   * Checks if is schema for deletion allowed.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the boolean
+   */
+  @Override
+  public Boolean isSchemaForDeletionAllowed(String idDatasetSchema) {
+    Boolean allow = true;
+    DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
+    for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+      if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
+        for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
+          if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
+              && field.getPkReferenced()) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
+            if (catalogue != null && catalogue.getReferenced() != null
+                && !catalogue.getReferenced().isEmpty()) {
+              for (ObjectId referenced : catalogue.getReferenced()) {
+                Document fieldSchema =
+                    schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                if (fieldSchema == null) {
+                  allow = false;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return allow;
+  }
+
+
+
+  /**
+   * Adds the to pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   */
+  @Override
+  public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO) {
+
+    if (fieldSchemaVO.getReferencedField() != null) {
+      PkCatalogueSchema catalogue = pkCatalogueRepository
+          .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+
+      if (catalogue != null && catalogue.getIdPk() != null) {
+        catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+        pkCatalogueRepository
+            .deleteByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      } else {
+        catalogue = new PkCatalogueSchema();
+        catalogue.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+        catalogue.setReferenced(new ArrayList<>());
+        catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
+      }
+      pkCatalogueRepository.save(catalogue);
+    }
+  }
+
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException {
+    // For fielSchemas that are PK
+    if (fieldSchemaVO.getPk() != null && !fieldSchemaVO.getPk()) {
+      PkCatalogueSchema catalogue =
+          pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+      if (catalogue != null) {
+        pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+      }
+    }
+    // For fieldSchemas that are FK
+    if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+      PkCatalogueSchema catalogue = pkCatalogueRepository
+          .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      if (catalogue != null) {
+        catalogue.getReferenced().remove(new ObjectId(fieldSchemaVO.getId()));
+        pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+        pkCatalogueRepository.save(catalogue);
+        // We need to update the field isReferenced from the PK referenced if this was the only
+        // field that was FK
+        if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+          this.updateIsPkReferencedInFieldSchema(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+              fieldSchemaVO.getReferencedField().getIdPk(), false);
+        }
+      }
+    }
+  }
+
+  /**
+   * Adds the foreign relation into the metabase
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
+  @Override
+  public void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
+    if (fieldSchemaVO.getReferencedField() != null) {
+      datasetMetabaseService.addForeignRelation(idDatasetOrigin,
+          this.getDesignDatasetIdDestinationFromFk(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+    }
+  }
+
+  /**
+   * Delete foreign relation from the metabase
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   */
+  @Override
+  public void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
+    if (fieldSchemaVO.getReferencedField() != null) {
+      datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+          this.getDesignDatasetIdDestinationFromFk(
+              fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+    }
+  }
+
+  /**
+   * Update foreign relation in the metabase
+   *
+   * @param idDatasetOrigin the id dataset origin
+   * @param fieldSchemaVO the field schema VO
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  public void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO,
+      String datasetSchemaId) {
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+    if (fieldSchema != null) {
+      // First of all, we delete the previous relation on the Metabase, if applies
+      if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+        Document previousReferenced = (Document) fieldSchema.get("referencedField");
+        String previousIdPk = previousReferenced.get("idPk").toString();
+        String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+            fieldSchemaVO.getId());
+      }
+
+    }
+    // If the type is Link, then we add the relation on the Metabase
+    if (fieldSchemaVO.getType() != null
+        && DataType.LINK.getValue().equals(fieldSchemaVO.getType().getValue())) {
+      this.addForeignRelation(idDatasetOrigin, fieldSchemaVO);
+    }
+  }
+
+  /**
+   * Gets the field schema. Find the FieldSchema and converts into the VO
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param idFieldSchema the id field schema
+   * @return the field schema
+   */
+  @Override
+  public FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema) {
+
+    Document fieldSchemaDoc = schemasRepository.findFieldSchema(datasetSchemaId, idFieldSchema);
+    FieldSchemaVO fieldVO = new FieldSchemaVO();
+    if (fieldSchemaDoc != null) {
+
+      JsonWriterSettings settings = JsonWriterSettings.builder()
+          .objectIdConverter((value, writer) -> writer.writeString(value.toString())).build();
+
+      String json = fieldSchemaDoc.toJson(settings);
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+      try {
+        FieldSchema schema = objectMapper.readValue(json, FieldSchema.class);
+        fieldVO = fieldSchemaNoRulesMapper.entityToClass(schema);
+      } catch (JsonProcessingException e) {
+        LOG_ERROR.error("Error getting the fieldSchemaVO {}", idFieldSchema);
+      }
+    }
+    return fieldVO;
+  }
+
+
+  /**
+   * Gets the design dataset id destination from fk.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the design dataset id destination from fk
+   */
+  private Long getDesignDatasetIdDestinationFromFk(String idDatasetSchema) {
+    Long datasetIdDestination = null;
+
+    Optional<DesignDataset> designDataset =
+        designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
+    if (designDataset.isPresent()) {
+      datasetIdDestination = designDataset.get().getId();
+    }
+
+    return datasetIdDestination;
+  }
+
+  /**
+   * Update pk catalogue deleting schema. When deleting an schema, the PKCatalogue needs to be
+   * updated. Search for all the FK references in the schema that is going to be deleted and then
+   * update the catalogue one by one
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException {
+
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+            if (catalogue != null) {
+              catalogue.getReferenced().remove(field.getIdFieldSchema());
+              pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+              pkCatalogueRepository.save(catalogue);
+              // We need to update the field isReferenced from the PK referenced if this was the
+              // only field that was FK
+              if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+                this.updateIsPkReferencedInFieldSchema(
+                    field.getReferencedField().getIdDatasetSchema().toString(),
+                    field.getReferencedField().getIdPk().toString(), false);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Gets the referenced fields by schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the referenced fields by schema
+   */
+  @Override
+  public List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId) {
+
+    List<ReferencedFieldSchema> references = new ArrayList<>();
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(datasetSchemaId));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            references.add(field.getReferencedField());
+          }
+        }
+      }
+    }
+    return references;
+  }
+
+
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId)
+      throws EEAException {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(tableSchemaId, datasetSchema);
+    if (table != null && table.getRecordSchema() != null
+        && table.getRecordSchema().getFieldSchema() != null) {
+      table.getRecordSchema().getFieldSchema().forEach(field -> {
+        try {
+          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
+              e);
+        }
+      });
+    }
+
+  }
+
+  /**
+   * Update the property isPKreferenced of the class FieldSchema
+   * 
+   * @param referencedIdDatasetSchema
+   * @param referencedIdPk
+   * @param referenced
+   * @throws EEAException
+   */
+  private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,
+      String referencedIdPk, Boolean referenced) throws EEAException {
+
+    Document fieldSchemaReferenced =
+        schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
+    fieldSchemaReferenced.put("pkReferenced", referenced);
+    schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
+  }
+
 }

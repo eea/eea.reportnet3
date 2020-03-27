@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-import { isEmpty, isUndefined, cloneDeep } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from '../../DataViewer.module.css';
 
@@ -67,7 +69,6 @@ export const useContextMenu = (resources, records, setEditDialogVisible, setConf
 export const useSetColumns = (
   actionTemplate,
   cellDataEditor,
-  codelistInfo,
   colsSchema,
   columnOptions,
   hasWritePermissions,
@@ -76,22 +77,34 @@ export const useSetColumns = (
   isWebFormMMR,
   records,
   resources,
-  setCodelistInfo,
-  setIsCodelistInfoVisible,
+  setIsColumnInfoVisible,
   validationsTemplate
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
+  const [selectedHeader, setSelectedHeader] = useState();
 
   useEffect(() => {
     const maxWidths = [];
-    const providerCodeTemplate = rowData => {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {!isUndefined(rowData) ? rowData.providerCode : null}
-        </div>
-      );
-    };
+
+    const getTooltipMessage = column =>
+      !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
+        ? `<span style="font-weight:bold">Description:</span> ${
+            !isNil(column.description) ? column.description : 'No description'
+          }<br/><span style="font-weight:bold">Codelists: </span>
+          ${column.codelistItems
+            .map(codelistItem =>
+              !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
+            )
+            .join(', ')}`
+        : !isNil(column.description) && column.description !== '' && column.description.length > 35
+        ? column.description.substring(0, 35)
+        : column.description;
+
+    const providerCodeTemplate = rowData => (
+      <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
+    );
+
     // if (!isEditing) {
     //Calculate the max width of the shown data
     // colsSchema.forEach(col => {
@@ -118,30 +131,18 @@ export const useSetColumns = (
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-            {' '}
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}{' '}
+            {field ? field.fieldData[column.field] : null}
             <IconTooltip levelError={levelError} message={message} />
           </div>
         );
       } else {
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {field
-              ? field.fieldData.type === 'CODELIST'
-                ? DataViewerUtils.parseCodelistValue(field, colsSchema)
-                : field.fieldData[column.field]
-              : null}
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
         );
       }
     };
 
     //Calculate the max width of data column
-    console.log({ colsSchema });
     const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
     const maxWidth = Math.max(...textMaxWidth) + 30;
 
@@ -156,29 +157,19 @@ export const useSetColumns = (
           editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
           field={column.field}
           header={
-            column.type === 'CODELIST' ? (
-              <React.Fragment>
-                {column.header}
-                <Button
-                  className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary-transparent`}
-                  icon="infoCircle"
-                  onClick={() => {
-                    const inmCodeListInfo = cloneDeep(codelistInfo);
-                    console.log({ column });
-                    inmCodeListInfo.name = column.codelistName;
-                    inmCodeListInfo.version = column.codelistVersion;
-                    inmCodeListInfo.items = column.codelistItems;
-                    setCodelistInfo(inmCodeListInfo);
-                    setIsCodelistInfoVisible(true);
-                  }}
-                  tooltip={`${column.codelistName} (${column.codelistVersion})`}
-                  tooltipOptions={{ position: 'top' }}
-                />
-              </React.Fragment>
-            ) : (
-              // `${column.header}-${column.codelistName}(${column.codelistVersion})`
-              column.header
-            )
+            <React.Fragment>
+              {column.header}
+              <Button
+                className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+                onClick={() => {
+                  setSelectedHeader(column.header);
+                  setIsColumnInfoVisible(true);
+                }}
+                tooltip={getTooltipMessage(column)}
+                tooltipOptions={{ position: 'top' }}
+              />
+            </React.Fragment>
           }
           key={column.field}
           sortable={sort}
@@ -240,7 +231,8 @@ export const useSetColumns = (
   return {
     columns,
     setColumns,
-    originalColumns
+    originalColumns,
+    selectedHeader
   };
 };
 

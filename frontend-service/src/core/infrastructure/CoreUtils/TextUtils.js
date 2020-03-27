@@ -1,5 +1,12 @@
 import isObject from 'lodash/isObject';
 
+const ellipsis = (rawText = '', limit) => {
+  if (rawText.length > limit - 3) {
+    return `${rawText.substr(0, limit - 3)}...`;
+  }
+  return rawText;
+};
+
 const parseText = (rawText = '', param = {}) => {
   let text = rawText;
   if (isObject(param)) {
@@ -13,14 +20,27 @@ const parseText = (rawText = '', param = {}) => {
   }
   return text;
 };
-const ellipsis = (rawText = '', limit) => {
-  if (rawText.length > limit - 3) {
-    return `${rawText.substr(0, limit - 3)}...`;
+
+const reduceString = (text, prefix, suffix) => {
+  let index = text.indexOf(prefix);
+  if (index >= 0) {
+    text = text.substring(index + prefix.length);
+  } else {
+    return '';
   }
-  return rawText;
+  if (suffix) {
+    index = text.indexOf(suffix);
+    if (index < 0) {
+      return '';
+    } else {
+      text = text.substring(0, index);
+    }
+  }
+  return text;
 };
 
 export const TextUtils = {
+  ellipsis,
   parseText,
-  ellipsis
+  reduceString
 };

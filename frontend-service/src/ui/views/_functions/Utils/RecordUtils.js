@@ -1,4 +1,8 @@
-import { isUndefined, isNull, isString, isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isString from 'lodash/isString';
+import isUndefined from 'lodash/isUndefined';
 
 const changeCellValue = (tableData, rowIndex, field, value) => {
   tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
@@ -27,6 +31,11 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
     tableData[rowIndex] = record;
     return tableData;
   }
+};
+
+const getCellFieldSchemaId = (tableData, field) => {
+  const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+  return !isUndefined(completeField) ? completeField.fieldData.fieldSchemaId : undefined;
 };
 
 const getCellId = (tableData, field) => {
@@ -73,9 +82,9 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
-  return !isUndefined(codelistItems)
+  return !isNil(codelistItems)
     ? codelistItems.map(codelistItem => {
-        return { itemType: `${codelistItem.shortCode}-${codelistItem.label}`, value: codelistItem.shortCode };
+        return { itemType: codelistItem, value: codelistItem };
       })
     : [];
 };
@@ -102,6 +111,12 @@ const getInitialRecordValues = (record, colsSchema) => {
     }
   });
   return initialValues;
+};
+
+const getLinkValue = (linkOptions, value) => {
+  if (!isUndefined(value) && !isUndefined(linkOptions)) {
+    return linkOptions.filter(item => item.value === value)[0];
+  }
 };
 
 const getNumCopiedRecords = pastedData => {
@@ -161,13 +176,15 @@ export const RecordUtils = {
   changeRecordInTable,
   changeRecordValue,
   createEmptyObject,
+  getCellFieldSchemaId,
   getCellId,
   getCellItems,
   getCellValue,
+  getClipboardData,
   getCodelistItems,
   getCodelistValue,
-  getClipboardData,
   getInitialRecordValues,
+  getLinkValue,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth

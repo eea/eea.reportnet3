@@ -245,7 +245,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     if (document != null) {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           return (Document) tableSchema;
         }
@@ -273,7 +274,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     if (document != null) {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema = ((ArrayList<?>) tableSchemas).get(0);
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           Object recordSchema = ((Document) tableSchema).get("recordSchema");
           if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
@@ -304,5 +306,37 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     return mongoDatabase.getCollection("DataSetSchema").updateOne(
         new Document("_id", new ObjectId(datasetSchemaId)),
         new Document("$set", new Document("description", description)));
+  }
+
+  /**
+   * Find record schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the document
+   */
+  @Override
+  public Document findRecordSchema(String datasetSchemaId, String tableSchemaId) {
+
+    Document document = mongoDatabase.getCollection("DataSetSchema")
+        .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+            new ObjectId(tableSchemaId)))
+        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+
+    if (document != null) {
+      Object tableSchemas = document.get("tableSchemas");
+      if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
+        Object tableSchema =
+            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
+        if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
+          Object recordSchema = ((Document) tableSchema).get("recordSchema");
+          if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
+            return (Document) recordSchema;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

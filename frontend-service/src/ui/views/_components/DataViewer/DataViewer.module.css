@@ -9,6 +9,12 @@
   flex-direction: row;
   justify-content: center;
 }
+.itemTable {
+  margin: 1rem;
+}
+.itemTable > div > table {
+  width: 99%;
+}
 .validationCol {
   width: 15px;
 }
@@ -17,11 +23,12 @@
   width: 1em !important;
   height: 1em !important;
   font-size: 12pt !important;
-  color: var(--blue-75) !important;
+  color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
 }
 
 .codelistInfoButton span {
+  left: 46% !important;
   margin-top: -0.5em !important;
 }
 
@@ -31,4 +38,8 @@
 
 .codelistInfoButton:enabled:hover {
   background-color: var(--white) !important;
+}
+
+.fieldColumn {
+  width: 95px;
 }

@@ -1,0 +1,85 @@
+.descriptionLabel {
+  margin: 0.5vw 0 0.5vw 1vw;
+  color: var(--main-font-color);
+}
+.fieldDesignerWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap-reverse;
+  z-index: 3000;
+}
+
+.fieldDesignerWrapper:last-child {
+  margin-bottom: 1rem;
+}
+
+.fieldsHeader {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+  color: var(--main-font-color);
+  font-weight: bold;
+  label {
+    &:first-child {
+      width: 32px;
+    }
+    &:nth-child(2) {
+      width: 70px;
+    }
+    &:nth-child(3) {
+      width: 35px;
+    }
+    &:nth-child(4) {
+      width: 20%;
+      margin-right: 0.4rem;
+    }
+    &:nth-child(5) {
+      width: 25%;
+      margin-right: 0.4rem;
+    }
+    &:nth-child(6) {
+      width: 20%;
+      margin-right: 0.4rem;
+    }
+  }
+}
+
+.switchContainerInput {
+  width: 100vw;
+}
+
+.switchDivInput {
+  display: flex;
+  align-items: center;
+  margin: 0 0 2vw 1vw;
+}
+.switchDiv {
+  display: flex;
+  align-items: center;
+  margin-right: 0;
+  margin-left: 3vw;
+}
+
+.switchTextInput {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+  color: var(--main-font-color);
+}
+.tableDescriptionInput {
+  width: 68vw;
+  transition: 0.5s !important;
+}
+.positioning {
+  top: 0 !important;
+}
+
+:global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
+  box-shadow: 0 0 0 0em var(--blue-120) !important;
+}

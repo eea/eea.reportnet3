@@ -1,6 +1,5 @@
 package org.eea.transaction.action;
 
-import org.eea.exception.EEAException;
 import org.eea.transaction.action.model.UndoActionVO;
 
 /**

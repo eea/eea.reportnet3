@@ -76,7 +76,8 @@ const LeftSideBar = withRouter(({ history }) => {
       },
       title: leftSideBarContext.helpTitle,
       icon: 'questionCircle',
-      label: leftSideBarContext.helpTitle
+      // label: leftSideBarContext.helpTitle
+      label: 'help'
     };
     return <LeftSideBarButton {...userHelpProps} />;
   };

@@ -79,6 +79,7 @@ public class ValidationHelper {
   @Autowired
   private TableRepository tableRepository;
 
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -99,6 +100,7 @@ public class ValidationHelper {
    * @throws EEAException the eea exception
    */
   public KieBase getKieBase(String processId, Long datasetId) throws EEAException {
+
     KieBase kieBase = null;
     synchronized (droolsActiveSessions) {
       if (!droolsActiveSessions.containsKey(processId)) {
@@ -120,6 +122,7 @@ public class ValidationHelper {
       if (droolsActiveSessions.containsKey(processId)) {
         LOG.info("KieBase removed for process {}", processId);
         droolsActiveSessions.remove(processId);
+
       }
     }
   }

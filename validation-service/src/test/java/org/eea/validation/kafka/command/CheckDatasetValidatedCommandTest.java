@@ -68,7 +68,7 @@ public class CheckDatasetValidatedCommandTest {
   public void initMocks() {
     data = new HashMap<>();
     data.put("uuid", "uuid");
-    data.put("datasetId", "1L");
+    data.put("dataset_id", "1");
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
     eeaEventVO.setData(data);

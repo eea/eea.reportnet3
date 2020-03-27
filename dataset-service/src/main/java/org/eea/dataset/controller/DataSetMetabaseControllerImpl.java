@@ -1,24 +1,21 @@
 package org.eea.dataset.controller;
 
-
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,23 +32,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/**
- * The Class DataSetMetabaseControllerImpl.
- */
+/** The Class DataSetMetabaseControllerImpl. */
 @RestController
 @RequestMapping("/datasetmetabase")
 public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The reporting dataset service.
-   */
+  /** The reporting dataset service. */
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
@@ -59,29 +49,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The data collection service. */
-  @Autowired
-  private DataCollectionService dataCollectionService;
-
-  /** The representative controller zuul. */
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
 
   /**
    * Find data set id by dataflow id.
@@ -100,8 +69,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Find data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
-   *
+   * @param schemaId the schema id
    * @return the list
    */
   @Override
@@ -137,7 +105,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @PostMapping(value = "/create")
   public void createEmptyDataSet(
-      @RequestParam(value = "datasetType", required = true) final TypeDatasetEnum datasetType,
+      @RequestParam(value = "datasetType", required = true) final DatasetTypeEnum datasetType,
       @RequestParam(value = "datasetName", required = true) final String datasetname,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
@@ -241,6 +209,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return statistics;
   }
 
-
-
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Override
+  @CheckForNull
+  @GetMapping("/private/findDatasetSchemaIdById")
+  public String findDatasetSchemaIdById(@RequestParam("datasetId") long datasetId) {
+    return datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+  }
 }

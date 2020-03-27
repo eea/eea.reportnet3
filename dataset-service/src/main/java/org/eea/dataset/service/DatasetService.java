@@ -11,12 +11,11 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -71,20 +70,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String fields, TypeErrorEnum[] levelError) throws EEAException;
-
-  /**
-   * Sets the dataschema tables.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollections the table collections
-   *
-   * @throws EEAException the EEA exception
-   */
-  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollections) throws EEAException;
-
+      String fields, ErrorTypeEnum[] levelError) throws EEAException;
 
   /**
    * Gets the position from any object id.
@@ -98,7 +84,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
-      TypeEntityEnum type) throws EEAException;
+      EntityTypeEnum type) throws EEAException;
 
 
   /**
@@ -314,7 +300,7 @@ public interface DatasetService {
    * @param fieldSchemaId the field schema id
    * @param type the type
    */
-  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, String type);
+  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, DataType type);
 
   /**
    * Delete table values.
@@ -352,8 +338,7 @@ public interface DatasetService {
    * @param typeField the type field
    */
   void saveNewFieldPropagation(@DatasetId Long datasetId, String idTableSchema, Pageable pageable,
-      String idFieldSchema, TypeData typeField);
-
+      String idFieldSchema, DataType typeField);
 
   /**
    * Delete record values.
@@ -362,4 +347,27 @@ public interface DatasetService {
    * @param providerCode the provider code
    */
   void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
+
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @param searchValue the search value
+   * @param idFkOrigin the id fk origin
+   * @return the field values referenced
+   */
+  List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
+
+
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @return the referenced dataset id
+   */
+  Long getReferencedDatasetId(Long datasetId, String idPk);
 }

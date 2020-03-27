@@ -1,5 +1,6 @@
 package org.eea.ums.service.keycloak.service;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
@@ -97,8 +98,9 @@ public interface KeycloakConnectorService {
    * Create group detail.
    *
    * @param groupInfo the group info
+   * @throws EEAException
    */
-  void createGroupDetail(GroupInfo groupInfo);
+  void createGroupDetail(GroupInfo groupInfo) throws EEAException;
 
   /**
    * Delete group detail.
@@ -112,8 +114,9 @@ public interface KeycloakConnectorService {
    *
    * @param userId the user resourceId
    * @param groupId the group resourceId
+   * @throws EEAException
    */
-  void addUserToGroup(String userId, String groupId);
+  void addUserToGroup(String userId, String groupId) throws EEAException;
 
   /**
    * Adds the user.

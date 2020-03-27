@@ -5,7 +5,7 @@ package org.eea.interfaces.vo.metabase;
 
 import java.io.Serializable;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,7 +28,7 @@ public class TableHeadersCollectionVO implements Serializable {
   private String headerName;
 
   /** The header type. */
-  private TypeData headerType;
+  private DataType headerType;
 
   /**
    * Hash code.

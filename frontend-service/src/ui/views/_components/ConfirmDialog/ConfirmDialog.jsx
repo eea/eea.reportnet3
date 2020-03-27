@@ -1,5 +1,7 @@
 import React, { useContext, forwardRef } from 'react';
 
+import { isUndefined } from 'lodash';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -8,6 +10,8 @@ const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
     className,
+    classNameCancel,
+    classNameConfirm,
     dialogStyle,
     divRef,
     hasPasteOption = false,
@@ -23,7 +27,6 @@ const ConfirmDialog = forwardRef((props, _) => {
     onHide,
     onPaste,
     onPasteAsync,
-    styleConfirm,
     visible
   } = props;
   const resources = useContext(ResourcesContext);
@@ -55,6 +58,13 @@ const ConfirmDialog = forwardRef((props, _) => {
     return window.location.protocol === 'https:';
   };
 
+  const onKeyPress = event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onConfirm();
+    }
+  };
+
   const footer = (
     <div>
       {hasPasteOption && isHTTPS() ? (
@@ -71,25 +81,25 @@ const ConfirmDialog = forwardRef((props, _) => {
       ) : null}
       {hasPasteOption ? (
         <Button
-          className={`p-button-success ${disabledConfirm || isPasting ? null : 'p-button-animated-blink'}`}
+          className={`p-button-primary ${disabledConfirm || isPasting ? null : 'p-button-animated-blink'}`}
           disabled={disabledConfirm || isPasting}
           icon={!isPasting ? (iconConfirm ? iconConfirm : 'check') : 'spinnerAnimate'}
           label={labelConfirm}
           onClick={onConfirm}
-          style={styleConfirm}
         />
       ) : (
         <Button
-          className={`p-button-success ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
+          className={`${!isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary'} ${
+            !disabledConfirm ? 'p-button-animated-blink' : null
+          }`}
           disabled={disabledConfirm}
           icon={iconConfirm ? iconConfirm : 'check'}
           label={labelConfirm}
           onClick={onConfirm}
-          style={styleConfirm}
         />
       )}
       <Button
-        className="p-button-danger p-button-animated-blink"
+        className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary'}`}
         icon={iconCancel ? iconCancel : 'cancel'}
         label={labelCancel}
         onClick={onHide}
@@ -98,7 +108,7 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div onPaste={onPaste} ref={divRef}>
+    <div onPaste={onPaste} ref={divRef} onKeyPress={!disabledConfirm ? onKeyPress : null}>
       <Dialog
         className={className}
         focusOnShow={true}

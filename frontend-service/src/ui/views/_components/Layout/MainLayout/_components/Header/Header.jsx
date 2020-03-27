@@ -109,6 +109,7 @@ const Header = withRouter(({ history }) => {
           <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '}
           <span>{userContext.preferredUsername}</span>
         </a>
+        <FontAwesomeIcon icon={AwesomeIcons('user-profile')} /> <span>{userContext.preferredUsername}</span>
       </div>
 
       <div className={styles.logoutWrapper}>

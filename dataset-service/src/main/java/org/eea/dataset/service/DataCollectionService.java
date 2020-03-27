@@ -1,6 +1,8 @@
 package org.eea.dataset.service;
 
+import java.util.Date;
 import java.util.List;
+import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 
 
@@ -18,6 +20,35 @@ public interface DataCollectionService {
    */
   List<DataCollectionVO> getDataCollectionIdByDataflowId(Long idFlow);
 
+  /**
+   * Checks if is design dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is design dataflow
+   */
+  boolean isDesignDataflow(Long dataflowId);
+
+  /**
+   * Undo data collection creation.
+   *
+   * @param datasetIds the dataset ids
+   * @param dataflowId the dataflow id
+   */
+  void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId);
+
+  /**
+   * Creates the empty data collection.
+   *
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   */
+  void createEmptyDataCollection(Long dataflowId, Date dueDate);
 
 
+  /**
+   * Adds the foreign relations from new reportings.
+   *
+   * @param datasetsRegistry the datasets registry
+   */
+  void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry);
 }

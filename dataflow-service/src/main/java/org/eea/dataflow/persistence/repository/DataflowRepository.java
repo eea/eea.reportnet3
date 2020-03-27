@@ -53,13 +53,14 @@ public interface DataflowRepository
   List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,
       @Param("idRequester") String userIdRequester);
 
+
   /**
-   * Find by name.
+   * Find by name ignore case.
    *
    * @param name the name
    * @return the optional
    */
-  Optional<Dataflow> findByName(String name);
+  Optional<Dataflow> findByNameIgnoreCase(String name);
 
 
 
@@ -80,7 +81,5 @@ public interface DataflowRepository
   @Modifying
   @Query(nativeQuery = true, value = "delete from  dataflow  where id = :idDataflow ")
   void deleteNativeDataflow(@Param("idDataflow") Long idDataflow);
-
-
 
 }

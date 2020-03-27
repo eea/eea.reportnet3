@@ -72,7 +72,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -132,7 +132,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      console.log('METADATA error', error);
+      console.error('METADATA error', error);
       notificationContext.add({
         type: 'GET_METADATA_ERROR',
         content: {
@@ -195,11 +195,14 @@ export const DataCollection = withRouter(({ match, history }) => {
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              referencedField: field['referencedField'],
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })

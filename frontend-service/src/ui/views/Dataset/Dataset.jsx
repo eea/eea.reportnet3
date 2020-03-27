@@ -28,7 +28,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -57,6 +56,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -101,7 +101,7 @@ export const Dataset = withRouter(({ match, history }) => {
       console.info('dataset.Metadata: %o', metaData);
       const breadCrumbs = [
         {
-          label: resources.messages['dataflowList'],
+          label: resources.messages['dataflows'],
           icon: 'home',
           href: getUrl(routes.DATAFLOWS),
           command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -266,13 +266,22 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
+      notificationContext.add({
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DELETE_DATA_BY_ID_ERROR',
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -390,20 +399,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getCodelistsList = async datasetSchemas => {
-    try {
-      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
-      return codelistsList;
-    } catch (error) {
-      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await getCodelistsList([datasetSchema]);
-      console.log({ codelistsList });
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -412,7 +410,6 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetName(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
-      console.log({ datasetSchema });
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
@@ -429,20 +426,15 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
-            let codelist = {};
-            if (field.type === 'CODELIST') {
-              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
-            }
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: codelist.name,
-              codelistVersion: codelist.version,
-              codelistItems: codelist.items
+              referencedField: field['referencedField'],
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })
@@ -519,6 +511,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           activeIndex={dataViewerOptions.activeIndex}
           hasWritePermissions={hasWritePermissions}
+          isDatasetDeleted={isDataDeleted}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
           levelErrorTypes={levelErrorTypes}
@@ -594,7 +587,7 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-blink'
+                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
@@ -682,6 +675,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       </Dialog>
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

@@ -1,16 +1,16 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
-import { DataflowsList } from './DataflowsList';
+import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
-
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
@@ -19,11 +19,10 @@ import { DataflowService } from 'core/services/Dataflow';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -33,20 +32,16 @@ const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [acceptedContent, setacceptedContent] = useState([]);
-  const [completedContent, setcompletedContent] = useState([]);
-  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
+  const [acceptedContent, setAcceptedContent] = useState([]);
+  const [completedContent, setCompletedContent] = useState([]);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
-  const [isEditForm, setIsEditForm] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
-  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [pendingContent, setpendingContent] = useState([]);
-
+  const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
-      label: resources.messages['dataflowAcceptedPendingTab'],
+      // label: resources.messages['dataflowAcceptedPendingTab'],
+      label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
@@ -59,23 +54,13 @@ const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
-
   const dataFetch = async () => {
     setLoading(true);
     try {
-      const allDataflows = await DataflowService.all();
-      setpendingContent(allDataflows.pending);
-      setacceptedContent(allDataflows.accepted);
-      setcompletedContent(allDataflows.completed);
-      const dataflowInitialValues = {};
-      allDataflows.accepted.forEach(element => {
-        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-      });
-      dataflowDispatch({
-        type: 'ON_INIT_DATA',
-        payload: dataflowInitialValues
-      });
+      const allDataflows = await DataflowService.all(user.contextRoles);
+      setAcceptedContent(allDataflows.accepted);
+      setCompletedContent(allDataflows.completed);
+      setPendingContent(allDataflows.pending);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -83,13 +68,15 @@ const Dataflows = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    dataFetch();
+    if (!isNil(user.contextRoles)) {
+      dataFetch();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem]);
+  }, [resources.messages, tabMenuActiveItem, user.contextRoles]);
 
   //Bread Crumbs settings
   useEffect(() => {
-    breadCrumbContext.add([{ label: resources.messages['dataflowList'], icon: 'home' }]);
+    breadCrumbContext.add([{ label: resources.messages['dataflows'], icon: 'home' }]);
   }, []);
 
   useEffect(() => {
@@ -140,18 +127,19 @@ const Dataflows = withRouter(({ match, history }) => {
           label: 'createNewDataflow',
           onClick: () => onShowAddForm(),
           title: 'createNewDataflow'
-        },
-        {
-          className: 'dataflowList-manage-codelists-help-step',
-          href: getUrl(routes['CODELISTS']),
-          icon: 'clipboard',
-          label: 'manageCodelists',
-          onClick: e => {
-            e.preventDefault();
-            history.push(getUrl(routes['CODELISTS']));
-          },
-          title: 'manageCodelists'
         }
+        // {
+        //   className: 'dataflowList-manage-codelists-help-step',
+        //   href: getUrl(routes['CODELISTS']),
+        //   icon: 'clipboard',
+        //   label: 'manageCodelists',
+
+        //   onClick: e => {
+        //     e.preventDefault();
+        //     history.push(getUrl(routes['CODELISTS']));
+        //   },
+        //   title: 'manageCodelists'
+        // }
       ]);
       steps.push(
         {
@@ -175,12 +163,7 @@ const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
-  const onHideDialog = () => {
-    setIsDataflowDialogVisible(false);
-    setIsFormReset(false);
-    setDataflowHasErrors(false);
-    setIsNameDuplicated(false);
-  };
+  const onHideDialog = () => setIsDataflowDialogVisible(false);
 
   const onRefreshToken = async () => {
     try {
@@ -192,14 +175,7 @@ const Dataflows = withRouter(({ match, history }) => {
     }
   };
 
-  const onShowAddForm = () => {
-    setIsEditForm(false);
-    setIsDataflowDialogVisible(true);
-    setIsFormReset(true);
-    dataflowDispatch({
-      type: 'ON_RESET_DATAFLOW_DATA'
-    });
-  };
+  const onShowAddForm = () => setIsDataflowDialogVisible(true);
 
   const layout = children => {
     return (
@@ -219,23 +195,21 @@ const Dataflows = withRouter(({ match, history }) => {
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
-            <DataflowsList
+            {/* <DataflowsList
               className="dataflowList-pending-help-step"
               content={pendingContent}
               dataFetch={dataFetch}
-              description={resources.messages.pendingDataflowText}
-              isCustodian={isCustodian}
-              title={resources.messages.pendingDataflowTitle}
+              description={resources.messages['pendingDataflowText']}
+              title={resources.messages['pendingDataflowTitle']}
               type="pending"
-            />
+            /> */}
             <DataflowsList
               className="dataflowList-accepted-help-step"
               content={acceptedContent}
               dataFetch={dataFetch}
-              dataflowNewValues={dataflowState.selectedDataflow}
-              description={resources.messages.acceptedDataflowText}
-              selectedDataflowId={dataflowState.selectedDataflowId}
-              title={resources.messages.acceptedDataflowTitle}
+              onShowAddForm={onShowAddForm}
+              // description={resources.messages['acceptedDataflowText']}
+              // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
             />
           </>
@@ -259,16 +233,7 @@ const Dataflows = withRouter(({ match, history }) => {
         header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
-        <DataflowManagementForm
-          hasErrors={dataflowHasErrors}
-          isDialogVisible={isDataflowDialogVisible}
-          isFormReset={isFormReset}
-          isNameDuplicated={isNameDuplicated}
-          onCancel={onHideDialog}
-          onCreate={onCreateDataflow}
-          setHasErrors={setDataflowHasErrors}
-          setIsNameDuplicated={setIsNameDuplicated}
-        />
+        <DataflowManagementForm onCancel={onHideDialog} onCreate={onCreateDataflow} refresh={isDataflowDialogVisible} />
       </Dialog>
     </div>
   );

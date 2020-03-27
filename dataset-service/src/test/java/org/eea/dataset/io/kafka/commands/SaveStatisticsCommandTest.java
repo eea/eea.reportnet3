@@ -1,6 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
@@ -22,18 +23,26 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class SaveStatisticsCommandTest {
 
 
-  /** The save statistics command. */
+  /**
+   * The save statistics command.
+   */
   @InjectMocks
   private SaveStatisticsCommand saveStatisticsCommand;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Mock
   private DatasetService datasetService;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
   /**
@@ -55,7 +64,7 @@ public class SaveStatisticsCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.VALIDATION_FINISHED_EVENT);
     data = new HashMap<>();
-    data.put("dataset_id", 1L);
+    data.put("dataset_id", 1);
     eeaEventVO.setData(data);
 
     // doNothing().when(datasetService).saveStatistics(Mockito.any());
