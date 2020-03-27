@@ -363,104 +363,106 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         snapshotDispatch: snapshotDispatch,
         snapshotState: snapshotState
       }}>
-      <Title
-        icon="pencilRuler"
-        iconSize="3.4rem"
-        subtitle={dataflowName}
-        title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
-      />
-      <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
-      <div className={styles.ButtonsBar}>
-        <InputTextarea
-          className={styles.datasetDescription}
-          collapsedHeight={40}
-          expandableOnClick={true}
-          key="datasetDescription"
-          onBlur={e => onBlurDescription(e.target.value)}
-          onChange={e => setDatasetDescription(e.target.value)}
-          onFocus={e => {
-            setInitialDatasetDescription(e.target.value);
-          }}
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-          value={datasetDescription || ''}
+      <div className={styles.noScrollDatasetDesigner}>
+        <Title
+          icon="pencilRuler"
+          iconSize="3.4rem"
+          subtitle={dataflowName}
+          title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
         />
+        <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
+        <div className={styles.ButtonsBar}>
+          <InputTextarea
+            className={styles.datasetDescription}
+            collapsedHeight={40}
+            expandableOnClick={true}
+            key="datasetDescription"
+            onBlur={e => onBlurDescription(e.target.value)}
+            onChange={e => setDatasetDescription(e.target.value)}
+            onFocus={e => {
+              setInitialDatasetDescription(e.target.value);
+            }}
+            onKeyDown={e => onKeyChange(e)}
+            placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
+            value={datasetDescription || ''}
+          />
 
-        <Toolbar>
-          <div className="p-toolbar-group-right">
-            {/* <Button
+          <Toolbar>
+            <div className="p-toolbar-group-right">
+              {/* <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
             /> */}
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                datasetHasData ? ' p-button-animated-blink' : null
-              }`}
-              disabled={!datasetHasData}
-              icon={'validate'}
-              iconClasses={null}
-              label={resources.messages['validate']}
-              onClick={() => setValidateDialogVisible(true)}
-              ownButtonClasses={null}
-            />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  datasetHasData ? ' p-button-animated-blink' : null
+                }`}
+                disabled={!datasetHasData}
+                icon={'validate'}
+                iconClasses={null}
+                label={resources.messages['validate']}
+                onClick={() => setValidateDialogVisible(true)}
+                ownButtonClasses={null}
+              />
 
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              disabled={false}
-              icon={'list'}
-              iconClasses={null}
-              label={resources.messages['qcRules']}
-              onClick={() => setValidationListDialogVisible(true)}
-              ownButtonClasses={null}
-            />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
+                icon={'list'}
+                iconClasses={null}
+                label={resources.messages['qcRules']}
+                onClick={() => setValidationListDialogVisible(true)}
+                ownButtonClasses={null}
+              />
 
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'dashboard'}
-              label={resources.messages['dashboards']}
-              onClick={() => null}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? 'p-button-animated-blink' : null
-              }`}
-              disabled={hasWritePermissions}
-              icon={'camera'}
-              label={resources.messages['snapshots']}
-              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
-            />
-          </div>
-        </Toolbar>
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent`}
+                disabled={true}
+                icon={'dashboard'}
+                label={resources.messages['dashboards']}
+                onClick={() => null}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  !hasWritePermissions ? 'p-button-animated-blink' : null
+                }`}
+                disabled={hasWritePermissions}
+                icon={'camera'}
+                label={resources.messages['snapshots']}
+                onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+              />
+            </div>
+          </Toolbar>
+        </div>
+        {renderSwitchView()}
+        <TabsDesigner
+          datasetSchemas={datasetSchemas}
+          editable={true}
+          isPreviewModeOn={isPreviewModeOn}
+          onChangeReference={onChangeReference}
+          onLoadTableData={onLoadTableData}
+        />
+        <Snapshots
+          isLoadingSnapshotListData={isLoadingSnapshotListData}
+          isSnapshotDialogVisible={isSnapshotDialogVisible}
+          setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+          snapshotListData={snapshotListData}
+        />
+        {validationsListDialog()}
+        <ConfirmDialog
+          header={resources.messages['validateDataset']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={onConfirmValidate}
+          onHide={() => setValidateDialogVisible(false)}
+          visible={validateDialogVisible}>
+          {resources.messages['validateDatasetConfirm']}
+        </ConfirmDialog>
       </div>
-      {renderSwitchView()}
-      <TabsDesigner
-        datasetSchemas={datasetSchemas}
-        editable={true}
-        isPreviewModeOn={isPreviewModeOn}
-        onChangeReference={onChangeReference}
-        onLoadTableData={onLoadTableData}
-      />
-      <Snapshots
-        isLoadingSnapshotListData={isLoadingSnapshotListData}
-        isSnapshotDialogVisible={isSnapshotDialogVisible}
-        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
-        snapshotListData={snapshotListData}
-      />
-      {validationsListDialog()}
-      <ConfirmDialog
-        header={resources.messages['validateDataset']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmValidate}
-        onHide={() => setValidateDialogVisible(false)}
-        visible={validateDialogVisible}>
-        {resources.messages['validateDatasetConfirm']}
-      </ConfirmDialog>
     </SnapshotContext.Provider>
   );
 });
