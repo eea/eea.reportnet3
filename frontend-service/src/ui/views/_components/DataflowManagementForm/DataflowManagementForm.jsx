@@ -16,7 +16,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = React.memo(({ dataflowData, isEditForm, onCancel, onCreate, onEdit, refresh }) => {
+const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, refresh }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -165,6 +165,6 @@ const DataflowManagementForm = React.memo(({ dataflowData, isEditForm, onCancel,
       )}
     </Formik>
   );
-});
+};
 
 export { DataflowManagementForm };
