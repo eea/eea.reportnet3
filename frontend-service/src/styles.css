@@ -2506,9 +2506,10 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
 }
-.p-component-overlay.p-dialog-mask {
+/* .p-component-overlay.p-dialog-mask {
   display: none !important;
-}
+  background-color: rgba(0, 0, 0, 0);
+} */
 
 .p-dialog {
   -webkit-transform: none;

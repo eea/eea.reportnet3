@@ -29,7 +29,6 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { dataflowReducer } from 'ui/views/_components/DataflowManagementForm/_functions/Reducers';
 import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -58,7 +57,6 @@ const Representative = withRouter(({ match, history }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, {});
   const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
@@ -126,7 +124,6 @@ const Representative = withRouter(({ match, history }) => {
   useEffect(() => {
     setLoading(true);
     onLoadReportingDataflow();
-    onLoadDataflowsData();
   }, [dataflowId, isDataUpdated]);
 
   useEffect(() => {
@@ -157,22 +154,6 @@ const Representative = withRouter(({ match, history }) => {
 
   const onHideSnapshotDialog = () => {
     setIsActiveReleaseSnapshotDialog(false);
-  };
-
-  const onLoadDataflowsData = async () => {
-    try {
-      const allDataflows = await DataflowService.all();
-      const dataflowInitialValues = {};
-      allDataflows.accepted.forEach(element => {
-        dataflowInitialValues[element.id] = { name: element.name, description: element.description, id: element.id };
-      });
-      dataflowDispatch({
-        type: 'ON_INIT_DATA',
-        payload: dataflowInitialValues
-      });
-    } catch (error) {
-      console.error('dataFetch error: ', error);
-    }
   };
 
   const onLoadReportingDataflow = async () => {
@@ -249,8 +230,8 @@ const Representative = withRouter(({ match, history }) => {
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          title={!isUndefined(dataflowState[dataflowId]) ? `${representative}` : null}
-          subtitle={` ${TextUtils.ellipsis(dataflowState[dataflowId].name)}`}
+          title={!isUndefined(dataflowData) ? `${representative}` : null}
+          subtitle={` ${TextUtils.ellipsis(dataflowData.name)}`}
           icon="representative"
           iconSize="4rem"
         />
@@ -304,9 +285,7 @@ const Representative = withRouter(({ match, history }) => {
           visible={isActivePropertiesDialog}
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
-          <div className="description">
-            {!isUndefined(dataflowState[dataflowId]) && dataflowState[dataflowId].description}
-          </div>
+          <div className="description">{!isUndefined(dataflowData) && dataflowData.description}</div>
           <div className="features">
             <ul>
               <li>

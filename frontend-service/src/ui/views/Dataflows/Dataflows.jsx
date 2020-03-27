@@ -34,12 +34,8 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const [acceptedContent, setAcceptedContent] = useState([]);
   const [completedContent, setCompletedContent] = useState([]);
-  const [dataflowHasErrors, setDataflowHasErrors] = useState(false);
   const [isCustodian, setIsCustodian] = useState();
   const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
-  const [isEditForm, setIsEditForm] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
-  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
@@ -76,7 +72,7 @@ const Dataflows = withRouter(({ match, history }) => {
       dataFetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem, user]);
+  }, [resources.messages, tabMenuActiveItem, user.contextRoles]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -149,12 +145,7 @@ const Dataflows = withRouter(({ match, history }) => {
     onRefreshToken();
   };
 
-  const onHideDialog = () => {
-    setIsDataflowDialogVisible(false);
-    setIsFormReset(false);
-    setDataflowHasErrors(false);
-    setIsNameDuplicated(false);
-  };
+  const onHideDialog = () => setIsDataflowDialogVisible(false);
 
   const onRefreshToken = async () => {
     try {
@@ -166,11 +157,7 @@ const Dataflows = withRouter(({ match, history }) => {
     }
   };
 
-  const onShowAddForm = () => {
-    setIsEditForm(false);
-    setIsDataflowDialogVisible(true);
-    setIsFormReset(true);
-  };
+  const onShowAddForm = () => setIsDataflowDialogVisible(true);
 
   const layout = children => {
     return (
@@ -228,16 +215,7 @@ const Dataflows = withRouter(({ match, history }) => {
         header={resources.messages['createNewDataflow']}
         onHide={onHideDialog}
         visible={isDataflowDialogVisible}>
-        <DataflowManagementForm
-          hasErrors={dataflowHasErrors}
-          isDialogVisible={isDataflowDialogVisible}
-          isFormReset={isFormReset}
-          isNameDuplicated={isNameDuplicated}
-          onCancel={onHideDialog}
-          onCreate={onCreateDataflow}
-          setHasErrors={setDataflowHasErrors}
-          setIsNameDuplicated={setIsNameDuplicated}
-        />
+        <DataflowManagementForm onCancel={onHideDialog} onCreate={onCreateDataflow} refresh={isDataflowDialogVisible} />
       </Dialog>
     </div>
   );
