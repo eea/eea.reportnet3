@@ -64,7 +64,7 @@ const useBigButtonList = ({
           getUrl(
             routes.DOCUMENTS,
             {
-              dataflowId: dataflowId
+              dataflowId
             },
             true
           )
@@ -73,7 +73,7 @@ const useBigButtonList = ({
       onWheel: getUrl(
         routes.DOCUMENTS,
         {
-          dataflowId: dataflowId
+          dataflowId
         },
         true
       ),
@@ -92,7 +92,7 @@ const useBigButtonList = ({
         getUrl(
           routes.DATASET_SCHEMA,
           {
-            dataflowId: dataflowId,
+            dataflowId,
             datasetId: newDatasetSchema.datasetId
           },
           true
@@ -111,7 +111,7 @@ const useBigButtonList = ({
             getUrl(
               routes.DATASET_SCHEMA,
               {
-                dataflowId: dataflowId,
+                dataflowId,
                 datasetId: newDatasetSchema.datasetId
               },
               true
@@ -147,7 +147,7 @@ const useBigButtonList = ({
     onWheel: getUrl(
       routes.DATASET_SCHEMA,
       {
-        dataflowId: dataflowId,
+        dataflowId,
         datasetId: newDatasetSchema.datasetId
       },
       true
@@ -158,12 +158,16 @@ const useBigButtonList = ({
 
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
+
     const representatives = datasets.map(dataset => {
       return dataset.datasetSchemaName;
     });
+
     const uniqRepresentatives = uniq(representatives);
+
     if (uniqRepresentatives.length === 1 && !isCustodian) {
       const [representative] = uniqRepresentatives;
+
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
@@ -176,7 +180,7 @@ const useBigButtonList = ({
               getUrl(
                 routes.DATASET,
                 {
-                  dataflowId: dataflowId,
+                  dataflowId,
                   datasetId: dataset.datasetId
                 },
                 true
@@ -205,7 +209,7 @@ const useBigButtonList = ({
           onWheel: getUrl(
             routes.DATASET,
             {
-              dataflowId: dataflowId,
+              dataflowId,
               datasetId: dataset.datasetId
             },
             true
@@ -223,8 +227,8 @@ const useBigButtonList = ({
           getUrl(
             routes.REPRESENTATIVE,
             {
-              dataflowId: dataflowId,
-              representative: representative
+              dataflowId,
+              representative
             },
             true
           )
@@ -235,8 +239,8 @@ const useBigButtonList = ({
       onWheel: getUrl(
         routes.REPRESENTATIVE,
         {
-          dataflowId: dataflowId,
-          representative: representative
+          dataflowId,
+          representative
         },
         true
       ),
@@ -256,7 +260,7 @@ const useBigButtonList = ({
           getUrl(
             routes.DASHBOARDS,
             {
-              dataflowId: dataflowId
+              dataflowId
             },
             true
           )
@@ -266,7 +270,7 @@ const useBigButtonList = ({
       onWheel: getUrl(
         routes.DASHBOARDS,
         {
-          dataflowId: dataflowId
+          dataflowId
         },
         true
       ),
@@ -275,6 +279,18 @@ const useBigButtonList = ({
   ];
 
   const createDataCollection = [
+    {
+      buttonClass: 'newItem',
+      buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
+      buttonIconClass: isCreateButtonActive ? 'siteMap' : 'spinner',
+      caption: resources.messages['createDataCollection'],
+      helpClassName: 'dataflow-datacollection-help-step',
+      handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
+      layout: 'defaultBigButton',
+      visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
+    }
+  ];
+  const createDatasetsNewRepresentatives = [
     {
       buttonClass: 'newItem',
       buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
@@ -296,7 +312,7 @@ const useBigButtonList = ({
         getUrl(
           routes.DATA_COLLECTION,
           {
-            dataflowId: dataflowId,
+            dataflowId,
             datasetId: dataCollection.dataCollectionId
           },
           true
@@ -365,6 +381,7 @@ const useBigButtonList = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...createDataCollection,
+    ...createDatasetsNewRepresentatives,
     ...dataCollectionModels,
     ...dashboardModels
   ];

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isEmpty, isNull, isUndefined, remove } from 'lodash';
+import remove from 'lodash/remove';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './BigButtonList.module.css';
 
@@ -33,6 +34,7 @@ export const BigButtonList = ({
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
+  hasNewRepresentatives = true,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
@@ -134,11 +136,14 @@ export const BigButtonList = ({
 
   const onCreateDataCollection = async date => {
     setDataCollectionDialog(false);
+
     notificationContext.add({
       type: 'CREATE_DATA_COLLECTION_INIT',
       content: {}
     });
+
     setIsCreateButtonActive(false);
+
     try {
       return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
@@ -153,6 +158,7 @@ export const BigButtonList = ({
           dataflowName
         }
       });
+
       setIsCreateButtonActive(true);
     }
   };
@@ -163,6 +169,7 @@ export const BigButtonList = ({
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
+
     showLoading();
     try {
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
@@ -224,25 +231,25 @@ export const BigButtonList = ({
   };
 
   const bigButtonList = useBigButtonList({
-    dataflowData: dataflowData,
-    dataflowId: dataflowId,
-    dataflowStatus: dataflowStatus,
-    getDeleteSchemaIndex: getDeleteSchemaIndex,
-    handleRedirect: handleRedirect,
-    hasRepresentatives: hasRepresentatives,
-    hasWritePermissions: hasWritePermissions,
-    isCreateButtonActive: isCreateButtonActive,
-    isCustodian: isCustodian,
-    isDataSchemaCorrect: isDataSchemaCorrect,
-    onDatasetSchemaNameError: onDatasetSchemaNameError,
-    onDuplicateName: onDuplicateName,
-    onLoadReceiptData: onLoadReceiptData,
-    onSaveName: onSaveName,
-    onShowDataCollectionModal: onShowDataCollectionModal,
-    onShowNewSchemaDialog: onShowNewSchemaDialog,
-    receiptState: receiptState,
-    showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-    updatedDatasetSchema: updatedDatasetSchema
+    dataflowData,
+    dataflowId,
+    dataflowStatus,
+    getDeleteSchemaIndex,
+    handleRedirect,
+    hasRepresentatives,
+    hasWritePermissions,
+    isCreateButtonActive,
+    isCustodian,
+    isDataSchemaCorrect,
+    onDatasetSchemaNameError,
+    onDuplicateName,
+    onLoadReceiptData,
+    onSaveName,
+    onShowDataCollectionModal,
+    onShowNewSchemaDialog,
+    receiptState,
+    showReleaseSnapshotDialog,
+    updatedDatasetSchema
   })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
@@ -324,11 +331,6 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      {/* <PDFDownloadLink
-        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
-        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      </PDFDownloadLink> */}
     </>
   );
 };
