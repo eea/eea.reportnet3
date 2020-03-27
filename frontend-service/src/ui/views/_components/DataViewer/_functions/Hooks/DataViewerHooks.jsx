@@ -160,7 +160,7 @@ export const useSetColumns = (
             <React.Fragment>
               {column.header}
               <Button
-                className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon="infoCircle"
                 onClick={() => {
                   setSelectedHeader(column.header);

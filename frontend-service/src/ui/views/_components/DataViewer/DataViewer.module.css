@@ -18,7 +18,7 @@
 .validationCol {
   width: 15px;
 }
-.codelistInfoButton {
+.columnInfoButton {
   border-radius: 50% !important;
   width: 1em !important;
   height: 1em !important;
@@ -28,7 +28,7 @@
   background-color: var(--white) !important;
 }
 
-.codelistInfoButton > span {
+.columnInfoButton > span {
   left: 46% !important;
   margin-top: -0.5em !important;
   margin-left: -0.48em !important;
