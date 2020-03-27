@@ -125,6 +125,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
+  private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
+      "update representative set has_datasets = %b where id = %d;";
+
   /** The Constant INSERT_DC_INTO_DATASET. */
   private static final String INSERT_DC_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
@@ -184,6 +187,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
       boolean isCreation) {
 
+    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation);
+
+    int size = datasetIds.size();
+    for (int i = 0; i < size; i += 10) {
+      resourceManagementControllerZuul
+          .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
+    }
+    dataCollectionRepository.deleteDatasetById(datasetIds);
+    dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
+  }
+
+  private void releaseLockAndNotification(Long dataflowId, String errorMessage,
+      boolean isCreation) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
         : LockSignature.UPDATE_DATA_COLLECTION.getValue();
     EventType failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
@@ -199,18 +215,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).error("Error creating schemas").build());
+              .dataflowId(dataflowId).error(errorMessage).build());
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing {} event: ", failEvent, e);
     }
-
-    int size = datasetIds.size();
-    for (int i = 0; i < size; i += 10) {
-      resourceManagementControllerZuul
-          .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
-    }
-    dataCollectionRepository.deleteDatasetById(datasetIds);
-    dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
   }
 
   /**
@@ -254,6 +262,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         .findRepresentativesByIdDataFlow(dataflowId).stream()
         .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
 
+    if (representatives.isEmpty()) {
+      releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
+      return;
+    }
+
     // 3. Get the providers associated with representatives
     List<DataProviderVO> dataProviders =
         representativeControllerZuul.findDataProvidersByIds(representatives.stream()
@@ -285,6 +298,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           // 5. Set dataflow to DRAFT
           statement.addBatch(
               String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
+        }
+
+        for (RepresentativeVO representative : representatives) {
+          statement.addBatch(
+              String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
         }
 
         List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
@@ -352,28 +370,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
       throws SQLException {
 
-    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
-        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
-    EventType failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
-
-    // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).error("Error creating datasets on the metabase").build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", failEvent, e);
-    }
-
+    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation);
     connection.rollback();
   }
 

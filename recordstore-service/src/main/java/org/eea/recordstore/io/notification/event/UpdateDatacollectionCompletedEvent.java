@@ -8,14 +8,15 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /** The Class UpdateDatacollectionCompletedEvent. */
+@Component
 public class UpdateDatacollectionCompletedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
-
 
   /**
    * Gets the event type.

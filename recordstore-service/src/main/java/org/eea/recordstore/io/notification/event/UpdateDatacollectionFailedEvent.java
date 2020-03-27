@@ -8,8 +8,10 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /** The Class UpdateDatacollectionFailedEvent. */
+@Component
 public class UpdateDatacollectionFailedEvent implements NotificableEventHandler {
 
   /** The dataflow controller zuul. */

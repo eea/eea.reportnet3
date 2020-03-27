@@ -192,8 +192,8 @@ public class RepresentativeServiceImplTest {
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
     when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.of(representative));
-    when(representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Optional.of(arrayId));
+    when(representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(arrayId));
     when(representativeRepository.save(Mockito.any())).thenReturn(representative);
     try {
       representativeServiceImpl.updateDataflowRepresentative(representativeVO);
@@ -298,8 +298,8 @@ public class RepresentativeServiceImplTest {
     // Mockito.when(representativeRepository
     // .findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(), Mockito.any(), Mockito.any()))
     // .thenReturn(Optional.of(new ArrayList<Representative>()));
-    Mockito.when(representativeRepository
-        .findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(
+        representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
     Mockito.when(representativeMapper.classToEntity(Mockito.any())).thenReturn(representative);
     Mockito.when(representativeRepository.save(Mockito.any())).thenReturn(representative);
@@ -367,8 +367,8 @@ public class RepresentativeServiceImplTest {
         .thenReturn(Optional.of(new Dataflow()));
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
-    Mockito.when(representativeRepository
-        .findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(
+        representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new ArrayList<Representative>()));
 
     try {
