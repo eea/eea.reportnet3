@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import com.github.dockerjava.api.model.Container;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RecordStoreServiceImpl.
  */
@@ -335,6 +336,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
@@ -375,9 +377,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param data the data
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    */
   @Override
-  public void createSchemas(Map<Long, String> data, Long dataflowId) {
+  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 }

@@ -128,8 +128,9 @@ public interface RecordStoreController {
    *
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
+   * @param isCreation the is creation
    */
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
-      @PathVariable("dataflowId") Long dataflowId);
+      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation);
 }

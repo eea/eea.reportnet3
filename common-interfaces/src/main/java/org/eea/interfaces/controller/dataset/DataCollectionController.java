@@ -20,7 +20,7 @@ public interface DataCollectionController {
 
   @PutMapping("/private/rollback/dataflow/{dataflowId}")
   void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
-      @PathVariable("dataflowId") Long dataflowId);
+      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation);
 
   @PostMapping("/create")
   void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO);

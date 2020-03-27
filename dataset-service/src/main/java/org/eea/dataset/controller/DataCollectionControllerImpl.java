@@ -6,6 +6,7 @@ import java.util.List;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
@@ -60,14 +61,14 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Override
   @PutMapping("/private/rollback/dataflow/{dataflowId}")
   public void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
-      @PathVariable("dataflowId") Long dataflowId) {
+      @PathVariable("dataflowId") Long dataflowId, boolean isCreation) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId);
+    dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
   }
 
   /**
@@ -86,9 +87,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
+    TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
 
     // Continue if the dataflow exists and is DESIGN
-    if (date == null || dataflowId == null || !dataCollectionService.isDesignDataflow(dataflowId)) {
+    if (date == null || dataflowId == null || !TypeStatusEnum.DESIGN.equals(status)) {
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
       criteria.add(dataflowId);
@@ -105,6 +107,36 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
+  }
+
+  /**
+   * Update data collection.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/update/{dataflowId}")
+  @LockMethod(removeWhenFinish = false)
+  public void updateDataCollection(
+      @RequestParam("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
+
+    TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
+
+    if (!TypeStatusEnum.DRAFT.equals(status)) {
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(LockSignature.UPDATE_DATA_COLLECTION.getValue());
+      criteria.add(dataflowId);
+      lockService.removeLockByCriteria(criteria);
+      LOG_ERROR.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_DRAFT_DATAFLOW);
+    }
+
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    // This method will release the lock
+    dataCollectionService.updateDataCollection(dataflowId);
+    LOG.info("DataCollection update for Dataflow {} started", dataflowId);
   }
 
   /**

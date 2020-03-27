@@ -1,66 +1,45 @@
 package org.eea.interfaces.vo.lock.enums;
 
-/**
- * The Enum LockSignature.
- */
+/** The Enum LockSignature. */
 public enum LockSignature {
 
   /** The empty. */
   EMPTY(""),
 
-  /**
-   * DataSetSnapshotControllerImpl.createSnapshot(..)
-   */
+  /** DataSetSnapshotControllerImpl.createSnapshot(..) */
   CREATE_SNAPSHOT("DataSetSnapshotControllerImpl.createSnapshot(..)"),
 
-  /**
-   * DataSetSnapshotControllerImpl.restoreSnapshot(..)
-   */
+  /** DataSetSnapshotControllerImpl.restoreSnapshot(..) */
   RESTORE_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSnapshot(..)"),
 
-  /**
-   * DataSetControllerImpl.loadTableData(..)
-   */
+  /** DataSetControllerImpl.loadTableData(..) */
   LOAD_TABLE("DataSetControllerImpl.loadTableData(..)"),
 
-  /**
-   * ValidationHelper.executeValidation(..)
-   */
+  /** ValidationHelper.executeValidation(..) */
   EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
 
-  /**
-   * The force execute validation.
-   */
+  /** The force execute validation. */
   FORCE_EXECUTE_VALIDATION("ValidationControllerImpl.validateDataSetData(..)"),
 
-  /**
-   * The create schema snapshot.
-   */
+  /** The create schema snapshot. */
   CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
 
-  /**
-   * The restore schema snapshot.
-   */
+  /** The restore schema snapshot. */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
-  /**
-   * The release snapshot.
-   */
+  /** The release snapshot. */
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 
-  /**
-   * The create data collection.
-   */
+  /** The create data collection. */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 
-  /**
-   * The delete import table.
-   */
-  DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)");
+  /** The delete import table. */
+  DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
 
-  /**
-   * The value.
-   */
+  /** The update data collection. */
+  UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)");
+
+  /** The value. */
   private final String value;
 
   /**
