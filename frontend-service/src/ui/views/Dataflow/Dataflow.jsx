@@ -140,24 +140,20 @@ const Dataflow = withRouter(({ history, match }) => {
           title: 'properties'
         }
       ]);
-    } else if (isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DRAFT']) {
+    } else if (isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DRAFT']) {
       leftSideBarContext.addModels([
         {
           className: 'dataflow-manage-roles-help-step',
           icon: 'manageRoles',
           label: 'manageRoles',
-          onClick: () => {
-            onShowManageRolesDialog();
-          },
+          onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
           title: 'manageRoles'
         },
         {
           className: 'dataflow-settings-help-step',
           icon: 'settings',
           label: 'settings',
-          onClick: e => {
-            setIsActivePropertiesDialog(true);
-          },
+          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
           show: true,
           title: 'properties'
         }
