@@ -1,13 +1,14 @@
 {
-    "acceptDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
-    "createDataflow": "/dataflow",
-    "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
-    "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
-    "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
-    "deleteDataflow": "/dataflow/{:dataflowId}",
-    "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
-    "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
-    "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
-    "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
-    "rejectDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
+  "acceptDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
+  "allSchemas": "/dataschema/getSchemas/dataflow/{:dataflowId}",
+  "createDataflow": "/dataflow",
+  "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
+  "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
+  "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
+  "deleteDataflow": "/dataflow/{:dataflowId}",
+  "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
+  "loadDataflowTaskPendingAccepted": "/dataflow/pendingaccepted",
+  "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
+  "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
+  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
 }

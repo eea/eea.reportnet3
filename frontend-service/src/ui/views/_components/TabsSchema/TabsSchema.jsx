@@ -13,12 +13,12 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
-  levelErrorTypes,
   hasWritePermissions,
   isDataCollection,
   isDatasetDeleted,
   isValidationSelected,
   isWebFormMMR,
+  levelErrorTypes,
   onLoadTableData,
   onTabChange,
   recordPositionId,
@@ -39,13 +39,13 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
-                  levelErrorTypes={levelErrorTypes}
                   hasWritePermissions={hasWritePermissions}
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
+                  isValidationSelected={isValidationSelected}
                   isWebFormMMR={isWebFormMMR}
                   key={table.id}
-                  isValidationSelected={isValidationSelected}
+                  levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}

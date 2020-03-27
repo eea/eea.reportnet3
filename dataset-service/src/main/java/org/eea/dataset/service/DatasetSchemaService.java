@@ -1,7 +1,9 @@
 package org.eea.dataset.service;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -215,12 +217,13 @@ public interface DatasetSchemaService {
    */
   Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
 
+
   /**
-   * Update pk catalogue.
+   * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
    */
-  void updatePkCatalogue(FieldSchemaVO fieldSchemaVO);
+  void addToPkCatalogue(FieldSchemaVO fieldSchemaVO);
 
   /**
    * Check existing pk referenced.
@@ -246,7 +249,7 @@ public interface DatasetSchemaService {
    * @return the field schema
    */
   FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
-  
+
   /**
    * Delete from pk catalogue.
    *
@@ -254,7 +257,7 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
-  
+
   /**
    * Delete foreign relation.
    *
@@ -262,7 +265,7 @@ public interface DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    */
   void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO);
-  
+
   /**
    * Update foreign relation.
    *
@@ -270,6 +273,43 @@ public interface DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param datasetSchemaId the dataset schema id
    */
-  void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO, String datasetSchemaId);
+  void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO,
+      String datasetSchemaId);
+
+  /**
+   * Gets the referenced fields by schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the referenced fields by schema
+   */
+  List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId);
+
+
+
+  /**
+   * Checks if is schema for deletion allowed.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the boolean
+   */
+  Boolean isSchemaForDeletionAllowed(String idDatasetSchema);
+
+  /**
+   * Update pk catalogue deleting schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException;
+
+
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId) throws EEAException;
 
 }

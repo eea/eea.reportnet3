@@ -132,6 +132,7 @@ const DataViewer = withRouter(
         <FieldEditor
           cells={cells}
           colsSchema={colsSchema}
+          datasetId={datasetId}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -205,7 +206,6 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      console.log('');
       if (isDatasetDeleted) {
         dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }
@@ -894,12 +894,19 @@ const DataViewer = withRouter(
                 'header',
                 'description',
                 'type',
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
-                <Column body={column === 'value' ? requiredTemplate : null} field={column} header={''} key={i} />
+                <Column
+                  body={column === 'value' ? requiredTemplate : null}
+                  className={column === 'field' ? styles.fieldColumn : ''}
+                  field={column}
+                  headerStyle={{ display: 'none' }}
+                  key={i}
+                />
               ))}
             </DataTable>
           </Dialog>
@@ -942,9 +949,10 @@ const DataViewer = withRouter(
               zIndex={3003}>
               <div className="p-grid p-fluid">
                 <DataForm
-                  colsSchema={colsSchema}
-                  formType="NEW"
                   addDialogVisible={addDialogVisible}
+                  colsSchema={colsSchema}
+                  datasetId={datasetId}
+                  formType="NEW"
                   onChangeForm={onEditAddFormInput}
                   records={records}
                 />
@@ -968,6 +976,7 @@ const DataViewer = withRouter(
             <div className="p-grid p-fluid">
               <DataForm
                 colsSchema={colsSchema}
+                datasetId={datasetId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 onChangeForm={onEditAddFormInput}

@@ -11,13 +11,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DataCollectionService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -47,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
 
 /** The Class DataCollectionServiceImpl. */
 @Service("dataCollectionService")
@@ -96,6 +104,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
+
+  @Autowired
+  private ForeignRelationsRepository foreignRelationsRepository;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
@@ -242,6 +256,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         statement.addBatch(
             String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
 
+        List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
+
         for (DesignDatasetVO design : designs) {
           // 6. Create DataCollection in metabase
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
@@ -249,11 +265,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
 
           // 7. Create Reporting Dataset in metabase
+
           for (RepresentativeVO representative : representatives) {
             Long datasetId = persistRD(statement, design, representative, time, dataflowId,
                 map.get(representative.getDataProviderId()));
             datasetIdsEmails.put(datasetId, representative.getProviderAccount());
             datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
+
+            FKDataCollection newReporting = new FKDataCollection();
+            newReporting.setRepresentative(map.get(representative.getDataProviderId()));
+            newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+            newReporting.setIdDatasetOrigin(datasetId);
+            newReporting.setFks(
+                datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
+            newReportingDatasetsRegistry.add(newReporting);
           }
         }
 
@@ -261,6 +286,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // 8. Create permissions
         createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
         connection.commit();
+        // Add into the foreign_relations table from metabase the dataset origin-destination
+        // relation, if applies
+        addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
+
         LOG.info("Metabase changes completed on DataCollection creation");
 
         // 9. Create schemas for each dataset
@@ -472,4 +501,62 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     return resource;
   }
+
+
+
+  /**
+   * Find id dataset destination.
+   *
+   * @param idDatasetSchemaDestination the id dataset schema destination
+   * @param listFkData the list fk data
+   * @return the long
+   */
+  private Long findIdDatasetDestination(String idDatasetSchemaDestination,
+      List<FKDataCollection> listFkData) {
+    Long idDataset = 0L;
+    Optional<FKDataCollection> fk = listFkData.stream()
+        .filter(fkey -> fkey.getIdDatasetSchemaOrigin().equals(idDatasetSchemaDestination))
+        .findFirst();
+    if (fk.isPresent()) {
+      idDataset = fk.get().getIdDatasetOrigin();
+    }
+    return idDataset;
+  }
+
+
+  /**
+   * Adds the foreign relations from new reportings.
+   *
+   * @param datasetsRegistry the datasets registry
+   */
+  public void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry) {
+    List<ForeignRelations> foreignRelations = new ArrayList<>();
+    Map<String, List<FKDataCollection>> groupByRepresentative =
+        datasetsRegistry.stream().collect(Collectors.groupingBy(fk -> fk.getRepresentative()));
+
+    groupByRepresentative.forEach((representative, listFkData) -> {
+      for (FKDataCollection fkData : listFkData) {
+        if (fkData.getFks() != null && !fkData.getFks().isEmpty()) {
+          for (ReferencedFieldSchema referenced : fkData.getFks()) {
+            ForeignRelations foreign = new ForeignRelations();
+            foreign.setIdPk(referenced.getIdPk().toString());
+            DataSetMetabase dsOrigin = new DataSetMetabase();
+            dsOrigin.setId(fkData.getIdDatasetOrigin());
+            foreign.setIdDatasetOrigin(dsOrigin);
+            DataSetMetabase dsDestination = new DataSetMetabase();
+            dsDestination.setId(
+                findIdDatasetDestination(referenced.getIdDatasetSchema().toString(), listFkData));
+            foreign.setIdDatasetDestination(dsDestination);
+            foreignRelations.add(foreign);
+          }
+        }
+      }
+
+    });
+    // Save all the FK relations between datasets into the metabase
+    if (!foreignRelations.isEmpty()) {
+      foreignRelationsRepository.saveAll(foreignRelations);
+    }
+  }
+
 }

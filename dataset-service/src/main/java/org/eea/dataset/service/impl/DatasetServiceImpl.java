@@ -2,8 +2,12 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -223,22 +227,29 @@ public class DatasetServiceImpl implements DatasetService {
   private StatisticsRepository statisticsRepository;
 
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The field no validation mapper. */
+  /**
+   * The field no validation mapper.
+   */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
-
 
 
   /**
@@ -794,12 +805,9 @@ public class DatasetServiceImpl implements DatasetService {
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
 
-
     Set<Long> recordIdsFromFieldWithValidationInfo =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
-
-
 
     Set<Long> idsBlockers = new HashSet<>();
     idsBlockers.addAll(recordIdsFromRecordWithValidationBlocker);
@@ -816,7 +824,6 @@ public class DatasetServiceImpl implements DatasetService {
     Set<Long> idsInfos = new HashSet<>();
     idsInfos.addAll(recordIdsFromRecordWithValidationInfo);
     idsInfos.addAll(recordIdsFromFieldWithValidationInfo);
-
 
     idsErrors.removeAll(idsBlockers);
     idsWarnings.removeAll(idsBlockers);
@@ -908,6 +915,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param statName the stat name
    * @param value the value
+   *
    * @return the statistics
    */
   private Statistics fillStat(Long idDataset, String idTableSchema, String statName, String value) {
@@ -982,7 +990,6 @@ public class DatasetServiceImpl implements DatasetService {
       Statistics statsDatasetErrors =
           fillStat(datasetId, null, "datasetErrors", datasetErrors.toString());
       statsList.add(statsDatasetErrors);
-
 
       statisticsRepository.deleteStatsByIdDataset(datasetId);
       statisticsRepository.flush();
@@ -1343,6 +1350,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Checks if is reporting dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return true, if is reporting dataset
    */
   @Override
@@ -1356,6 +1364,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1401,7 +1410,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
   }
-
 
 
   /**
@@ -1462,6 +1470,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param idPk the id pk
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   @Override
@@ -1473,19 +1482,65 @@ public class DatasetServiceImpl implements DatasetService {
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
         searchValue, PageRequest.of(0, 15));
-    return fieldNoValidationMapper.entityListToClass(fields);
+    // Remove the duplicate values
+    HashSet<String> seen = new HashSet<>();
+    fields.removeIf(e -> !seen.add(e.getValue()));
+
+    List<FieldValue> sortedList = new ArrayList<>();
+
+    if (!fields.isEmpty()) {
+      switch (fields.get(0).getType()) {
+        case COORDINATE_LAT:
+          sortedList = fields.stream()
+              .sorted(
+                  (v1, v2) -> Double.valueOf(v1.getValue())
+                      .compareTo(Double.valueOf(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case COORDINATE_LONG:
+          sortedList = fields.stream()
+              .sorted(
+                  (v1, v2) -> Double.valueOf(v1.getValue())
+                      .compareTo(Double.valueOf(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case NUMBER:
+          sortedList = fields.stream()
+              .sorted(
+                  (v1, v2) -> Integer.valueOf(v1.getValue())
+                      .compareTo(Integer.valueOf(v2.getValue())))
+              .collect(Collectors.toList());
+          break;
+        case DATE:
+          ZoneId timeZone = ZoneId.of("UTC");
+          DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+          LocalDate.now(timeZone).format(fmt);
+
+          sortedList = fields.stream()
+              .sorted((v1, v2) -> LocalDate.from(fmt.parse(v1.getValue()))
+                  .compareTo(LocalDate.from(fmt.parse(v2.getValue()))))
+              .collect(Collectors.toList());
+          break;
+        default:
+          sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+              .collect(Collectors.toList());
+          break;
+      }
+    }
+    return fieldNoValidationMapper.entityListToClass(sortedList);
   }
 
 
   /**
-   * Gets the dataset id referenced.
+   * Gets the referenced dataset id.
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
-   * @return the dataset id referenced
+   *
+   * @return the referenced dataset id
    */
   @Override
-  public Long getDatasetIdReferenced(Long datasetId, String idPk) {
+  public Long getReferencedDatasetId(Long datasetId, String idPk) {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
 

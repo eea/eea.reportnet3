@@ -56,6 +56,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -431,6 +432,7 @@ export const Dataset = withRouter(({ match, history }) => {
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               recordId: field['recordId'],
+              referencedField: field['referencedField'],
               table: table['tableSchemaName'],
               type: field['type']
             };

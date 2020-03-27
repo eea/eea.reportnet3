@@ -358,6 +358,15 @@
           "key": "DELETE_RULE_ERROR",
           "lifeTime": 5000,
           "fixed": false
+        },
+        {
+          "key": "QC_RULE_CREATION_ERROR"
+        },
+        {
+          "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
+        },
+        {
+          "key": "DELETE_DATASET_SCHEMA_LINK_ERROR"
         }
       ]
     },

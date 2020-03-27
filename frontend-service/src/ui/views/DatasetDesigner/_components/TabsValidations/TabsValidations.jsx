@@ -22,7 +22,7 @@ import { ValidationService } from 'core/services/Validation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -38,7 +38,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   const onDeleteValidation = async () => {
     try {
-      const response = await ValidationService.deleteById(datasetSchemaId, validationId);
+      const response = await ValidationService.deleteById(dataset.datasetId, validationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
@@ -59,8 +59,8 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
   const onLoadValidationsList = async datasetSchemaId => {
     try {
       setIsLoading(true);
-      const validationsList = await ValidationService.getAll(datasetSchemaId);
-      setValidationsList(validationsList);
+      const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
+      setValidationsList(validationsServiceList);
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
@@ -80,7 +80,15 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
 
   const automaticTemplate = rowData => (
     <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic || rowData.enabled ? (
+      {rowData.automatic ? (
+        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+      ) : null}
+    </div>
+  );
+
+  const enabledTemplate = rowData => (
+    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
+      {rowData.enabled ? (
         <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
       ) : null}
     </div>
@@ -111,11 +119,10 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       { id: 'automatic', index: 6 },
       { id: 'referenceId', index: 7 },
       { id: 'activationGroup', index: 8 },
-      { id: 'condition', index: 9 },
-      { id: 'date', index: 10 },
-      { id: 'entityType', index: 11 },
-      { id: 'actionButtons', index: 12 }
-    ];
+      { id: 'date', index: 9 },
+      { id: 'entityType', index: 10 },
+      { id: 'actionButtons', index: 11 }
+    ];  
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
       .flat()
@@ -123,12 +130,18 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionTemplate = () => (
+  const actionsTemplate = () => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
         '';
       }}
+    />
+  );
+
+  const deleteTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}      
     />
   );
 
@@ -148,12 +161,30 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
     return style;
   };
 
+  const actionButtonsColumn = (
+    <Column
+        body={row => row.automatic ? deleteTemplate() : actionsTemplate()}
+        className={styles.validationCol}
+        header={resources.messages['actions']}
+        key="actions"
+        sortable={false}
+        style={{ width: '100px' }}
+    />
+  );
+
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
+      let template = null;
+      if (field === 'automatic') {
+        template = automaticTemplate;
+      }
+      if (field === 'enabled') {
+        template = enabledTemplate;
+      }
       return (
         <Column
-          body={field === 'automatic' || field === 'enabled' ? automaticTemplate : null}
-          key={field}
+          body={template}
+          key={field} 
           columnResizeMode="expand"
           field={field}
           header={getHeader(field)}
@@ -162,16 +193,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         />
       );
     });
-    fieldColumns.push(
-      <Column
-        body={row => actionTemplate(row)}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
-      />
-    );
+    fieldColumns.push(actionButtonsColumn);
     return fieldColumns;
   };
 
@@ -183,12 +205,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         </div>
       );
     }
-
-    return validationsList.entityTypes.map(entityType => {
-      const validationsFilteredByEntityType = validationsList.validations.filter(
-        validation => validation.entityType === entityType
-      );
-      const paginatorRightText = `${capitalize(entityType)} records: ${validationsFilteredByEntityType.length}`;
+      const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
       return (
         <div className={null}>
           <DataTable
@@ -200,9 +217,9 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={validationsFilteredByEntityType.length}
-            value={validationsFilteredByEntityType}>
-            {renderColumns(validationsFilteredByEntityType)}
+            totalRecords={validationsList.validations.length}
+            value={validationsList.validations}>
+            {renderColumns(validationsList.validations)}
           </DataTable>
         </div>
 
@@ -223,7 +240,7 @@ const TabsValidations = withRouter(({ datasetSchemaId }) => {
         //   </div>
         // </TabPanel>
       );
-    });
+    // });
   };
 
   if (isLoading) {

@@ -4,22 +4,29 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
-  justify-content: space-around;
+  justify-content: space-between;
 
   > span {
     display: flex;
     flex-direction: row;
     font-size: 10pt;
-    justify-content: space-between;
-    width: 14%;
+    width: 100%;
   }
 
   .dataflowInput {
-    border-bottom: var(--inputtext-border) !important;
     height: 2.5em;
     color: var(--floating-label-color) !important;
 
+    > span {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 65%;
+      border-bottom: var(--inputtext-border) !important;
+    }
+
     .inputFilter {
+      background: transparent !important;
       border-bottom: 0 !important;
       border-left: 0 !important;
       border-radius: 0 !important;
@@ -40,7 +47,7 @@
 
     .cancelIcon {
       font-size: 12pt !important;
-      height: 2.1em !important;
+      height: 2.1rem !important;
     }
 
     .multiselectFilter {
@@ -50,10 +57,10 @@
       border-right: 0 !important;
       border-top: 0 !important;
       color: var(--floating-label-color) !important;
-      font-size: 9pt !important;
-      height: 2.8em;
+      font-size: 10pt !important;
+      height: 2.1rem;
       padding-left: 0em;
-      width: 100% !important;
+      width: 65% !important;
 
       .statusBox {
         border-radius: 3px;
@@ -69,7 +76,7 @@
 
       .design {
         background-color: rgba(#c2c8cf, 0.8);
-        color: black;
+        color: var(--black);
       }
 
       .reporter {
@@ -78,22 +85,42 @@
 
       .requester {
         background-color: rgba(#c2c8cf, 0.8);
-        color: black;
+        color: var(--black);
       }
+    }
+
+    .selectHeader {
+      border-radius: 3px;
+      color: var(--black);
+      font-size: 10pt;
+      font-weight: 500;
+      padding: 4px;
+      background-color: var(--gray-15);
+      text-transform: uppercase;
+    }
+
+    .labelDown {
+      font-size: 10pt !important;
+      top: 50% !important;
     }
   }
 
   .icon {
+    background-color: transparent;
+    border: none;
+    color: var(--button-secondary-transparent-color-hover);
+    cursor: pointer;
     font-size: 16pt !important;
-    opacity: 0.7;
     height: 1.6em !important;
+    opacity: 0.7;
 
     &:hover {
-      opacity: 1;
+      opacity: 1 !important;
     }
 
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--white) !important;
+      outline: none;
     }
 
     &:enabled:active,
@@ -106,4 +133,8 @@
 
 :global .p-datepicker {
   left: -5.5rem !important;
+}
+
+:global .p-calendar {
+  width: 100% !important;
 }

@@ -185,7 +185,8 @@ const getFieldTypeValue = value => {
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' }
+    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
   ];
 
   if (value.toUpperCase() === 'COORDINATE_LONG') {

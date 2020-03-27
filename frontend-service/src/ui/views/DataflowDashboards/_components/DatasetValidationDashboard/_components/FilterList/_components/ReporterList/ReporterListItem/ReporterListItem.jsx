@@ -1,40 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import { isUndefined } from 'lodash';
-
 import styles from './ReporterListItem.module.scss';
 
-const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters, selectedAllFilterState }) => {
-  const [selectedAll, setSelectedAll] = useState(true);
+const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters }) => {
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
-    setIsChecked(getStateBySelectionAndByReporter(areAllSelectedOrDeselected()));
-    setSelectedAll(areAllSelectedOrDeselected);
-  }, [selectedAllFilterState, selectedAll]);
-
-  const getStateBySelectionAndByReporter = () => {
-    let state = areAllSelectedOrDeselected();
-    if (state === 'indeterminate') {
-      return reporterFilters.includes(reporter) ? false : true;
-    } else {
-      return state;
-    }
-  };
-
-  const areAllSelectedOrDeselected = () => {
-    let isChecked;
-    if (!isUndefined(selectedAllFilterState)) {
-      if (selectedAllFilterState === 'checked') {
-        isChecked = true;
-      } else if (selectedAllFilterState === 'unchecked') {
-        isChecked = false;
-      } else if (selectedAllFilterState === 'indeterminate') {
-        isChecked = 'indeterminate';
-      }
-    }
-    return isChecked;
-  };
+    setIsChecked(!reporterFilters.includes(reporter));
+  }, [reporterFilters]);
 
   return (
     <>
@@ -42,7 +15,6 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
         id={`${reporter}_${datasetSchemaId}`}
         className={styles.checkbox}
         type="checkbox"
-        defaultChecked={true}
         checked={isChecked}
         onChange={e => {
           setIsChecked(e.target.checked);

@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
@@ -716,7 +717,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (type != null) {
       // if we change the type we need to delete all rules
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
-
+      // Delete FK Rules
+      rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
+          fieldSchemaVO.getId());
 
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
@@ -820,13 +823,50 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
-   * Update pk catalogue.
+   * Checks if is schema for deletion allowed.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the boolean
+   */
+  @Override
+  public Boolean isSchemaForDeletionAllowed(String idDatasetSchema) {
+    Boolean allow = true;
+    DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
+    for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+      if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
+        for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
+          if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
+              && field.getPkReferenced()) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
+            if (catalogue != null && catalogue.getReferenced() != null
+                && !catalogue.getReferenced().isEmpty()) {
+              for (ObjectId referenced : catalogue.getReferenced()) {
+                Document fieldSchema =
+                    schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                if (fieldSchema == null) {
+                  allow = false;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return allow;
+  }
+
+
+
+  /**
+   * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
    */
   @Override
-  public void updatePkCatalogue(FieldSchemaVO fieldSchemaVO) {
+  public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO) {
 
     if (fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
@@ -859,7 +899,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       PkCatalogueSchema catalogue =
           pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null) {
-        pkCatalogueRepository.delete(catalogue);
+        pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
       }
     }
     // For fieldSchemas that are FK
@@ -893,7 +933,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       datasetMetabaseService.addForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(
               fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
     }
   }
 
@@ -909,7 +949,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(
               fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk());
+          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
     }
   }
 
@@ -932,7 +972,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         String previousIdPk = previousReferenced.get("idPk").toString();
         String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
         datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk);
+            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+            fieldSchemaVO.getId());
       }
 
     }
@@ -993,6 +1034,94 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return datasetIdDestination;
   }
 
+  /**
+   * Update pk catalogue deleting schema. When deleting an schema, the PKCatalogue needs to be
+   * updated. Search for all the FK references in the schema that is going to be deleted and then
+   * update the catalogue one by one
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException {
+
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+            if (catalogue != null) {
+              catalogue.getReferenced().remove(field.getIdFieldSchema());
+              pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+              pkCatalogueRepository.save(catalogue);
+              // We need to update the field isReferenced from the PK referenced if this was the
+              // only field that was FK
+              if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+                this.updateIsPkReferencedInFieldSchema(
+                    field.getReferencedField().getIdDatasetSchema().toString(),
+                    field.getReferencedField().getIdPk().toString(), false);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Gets the referenced fields by schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the referenced fields by schema
+   */
+  @Override
+  public List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId) {
+
+    List<ReferencedFieldSchema> references = new ArrayList<>();
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(datasetSchemaId));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+            references.add(field.getReferencedField());
+          }
+        }
+      }
+    }
+    return references;
+  }
+
+
+  /**
+   * Delete from pk catalogue.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId)
+      throws EEAException {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(tableSchemaId, datasetSchema);
+    if (table != null && table.getRecordSchema() != null
+        && table.getRecordSchema().getFieldSchema() != null) {
+      table.getRecordSchema().getFieldSchema().forEach(field -> {
+        try {
+          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
+              e);
+        }
+      });
+    }
+
+  }
 
   /**
    * Update the property isPKreferenced of the class FieldSchema
@@ -1010,7 +1139,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     fieldSchemaReferenced.put("pkReferenced", referenced);
     schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
   }
-
-
 
 }

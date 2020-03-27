@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
+import './DropdownPanel.scss';
 
 export class DropdownPanel extends Component {
   static defaultProps = {

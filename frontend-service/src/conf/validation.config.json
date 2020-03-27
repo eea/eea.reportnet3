@@ -1,0 +1,65 @@
+{
+  "operatorTypes": {
+    "number": {
+      "option": { "label": "Number", "value": "number" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "LEN": {
+      "option": { "label": "LEN=", "value": "LEN" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "string": {
+      "option": { "label": "String", "value": "string" },
+      "values": [
+        { "label": "=", "value": "=" },
+        { "label": "LIKE", "value": "LIKE" }
+      ]
+    }
+  },
+  "nonNumericOperators": ["string"],
+  "operatorEquivalences": {
+    ">": "GT",
+    "<": "LT",
+    ">=": "GTEQ",
+    "<=": "LTEQ",
+    "=": "EQ",
+    "!=": "DIST",
+    "GT": "GT",
+    "LT": "LT",
+    "LTEQ": "LTEQ",
+    "EQ": "EQ",
+    "DIST": "DIST",
+    "SEQ": "SEQ",
+    "LIKE": "SEQIC",
+    "GTEQ": "GTEQ",
+    "LEN=": "LEN="
+  },
+  "stringOperatorsEquivalences": {
+    "=": "SEQ",
+    "LIKE": "SEQIC"
+  },
+  "errorLevels": [
+    { "label": "INFO", "value": "INFO" },
+    { "label": "WARNING", "value": "WARNING" },
+    { "label": "ERROR", "value": "ERROR" },
+    { "label": "BLOCKER", "value": "BLOCKER" }
+  ],
+  "logicalOperators": [
+    { "label": "AND", "value": "AND" },
+    { "label": "OR", "value": "OR" }
+  ]
+}

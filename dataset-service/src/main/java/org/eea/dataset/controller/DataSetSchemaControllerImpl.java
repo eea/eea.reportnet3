@@ -220,6 +220,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (schemaId.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
+    // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
+    if (!dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.PK_REFERENCED);
+    }
 
     // Check if the dataflow its on the correct state to allow delete design datasets
     try {
@@ -229,6 +233,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       if (TypeStatusEnum.DESIGN == dataflow.getStatus()) {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
+
+        // delete from the CataloguePK the entries if the schema has FK
+        dataschemaService.updatePkCatalogueDeletingSchema(schemaId);
 
         // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(schemaId);
@@ -315,12 +322,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+
+      // Delete the Pk if needed from the catalogue, for all the fields of the table
+      dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId);
+
       dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
 
       // we delete the rules associate to the table
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
 
       datasetService.deleteTableValue(datasetId, tableSchemaId);
+
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
@@ -379,21 +391,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
       // with that we create the rule automatic required
 
-      // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
-      // FOR TESTING THE REST OF THE CODE
-      if (!DataType.LINK.equals(fieldSchemaVO.getType())) {
-        if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
-          rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
-        }
-        // and with it we create the others automatic rules like number etc
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
       }
+      // and with it we create the others automatic rules like number etc
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
-      dataschemaService.updatePkCatalogue(fieldSchemaVO);
+      dataschemaService.addToPkCatalogue(fieldSchemaVO);
 
       // Add the register into the metabase fieldRelations
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
@@ -431,15 +439,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
-        // DELETE THIS CONDITION WHEN THE AUTOMATIC RULE IS AVAILABLE TO THE TYPE LINK. THIS IS JUST
-        // FOR TESTING THE REST OF THE CODE
-        if (!DataType.LINK.equals(type)) {
-          dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-              datasetId);
-        }
+        dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+            datasetId);
 
         // Add the Pk if needed to the catalogue
-        dataschemaService.updatePkCatalogue(fieldSchemaVO);
+        dataschemaService.addToPkCatalogue(fieldSchemaVO);
       } else {
         if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -479,6 +483,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         }
         // Delete the rules from the fieldSchema
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
+
+        // Delete FK rules
+        if (null != fieldVO && fieldVO.getType().equals(DataType.LINK)) {
+          rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, fieldSchemaId);
+        }
         // Delete the fieldSchema from the dataset
         datasetService.deleteFieldValues(datasetId, fieldSchemaId);
 
@@ -599,7 +608,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     List<DataSetSchemaVO> schemas = new ArrayList<>();
 
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
-    designs.parallelStream().forEach(design -> {
+    designs.stream().forEach(design -> {
       try {
         schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
       } catch (EEAException e) {
@@ -607,8 +616,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
             e);
       }
     });
-
-
     return schemas;
   }
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-import { isEmpty, isUndefined, cloneDeep } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from '../../DataViewer.module.css';
 
@@ -84,13 +86,25 @@ export const useSetColumns = (
 
   useEffect(() => {
     const maxWidths = [];
-    const providerCodeTemplate = rowData => {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {!isUndefined(rowData) ? rowData.providerCode : null}
-        </div>
-      );
-    };
+
+    const getTooltipMessage = column =>
+      !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
+        ? `<span style="font-weight:bold">Description:</span> ${
+            !isNil(column.description) ? column.description : 'No description'
+          }<br/><span style="font-weight:bold">Codelists: </span>
+          ${column.codelistItems
+            .map(codelistItem =>
+              !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
+            )
+            .join(', ')}`
+        : !isNil(column.description) && column.description !== '' && column.description.length > 35
+        ? column.description.substring(0, 35)
+        : column.description;
+
+    const providerCodeTemplate = rowData => (
+      <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
+    );
+
     // if (!isEditing) {
     //Calculate the max width of the shown data
     // colsSchema.forEach(col => {
@@ -152,7 +166,7 @@ export const useSetColumns = (
                   setSelectedHeader(column.header);
                   setIsColumnInfoVisible(true);
                 }}
-                tooltip={column.description}
+                tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
               />
             </React.Fragment>

@@ -33,6 +33,11 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
   }
 };
 
+const getCellFieldSchemaId = (tableData, field) => {
+  const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+  return !isUndefined(completeField) ? completeField.fieldData.fieldSchemaId : undefined;
+};
+
 const getCellId = (tableData, field) => {
   const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
@@ -108,6 +113,12 @@ const getInitialRecordValues = (record, colsSchema) => {
   return initialValues;
 };
 
+const getLinkValue = (linkOptions, value) => {
+  if (!isUndefined(value) && !isUndefined(linkOptions)) {
+    return linkOptions.filter(item => item.value === value)[0];
+  }
+};
+
 const getNumCopiedRecords = pastedData => {
   if (!isUndefined(pastedData)) {
     const copiedClipboardRecords = pastedData
@@ -165,13 +176,15 @@ export const RecordUtils = {
   changeRecordInTable,
   changeRecordValue,
   createEmptyObject,
+  getCellFieldSchemaId,
   getCellId,
   getCellItems,
   getCellValue,
+  getClipboardData,
   getCodelistItems,
   getCodelistValue,
-  getClipboardData,
   getInitialRecordValues,
+  getLinkValue,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth

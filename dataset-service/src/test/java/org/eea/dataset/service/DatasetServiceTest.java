@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -227,6 +228,9 @@ public class DatasetServiceTest {
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  @Mock
+  private FieldNoValidationMapper fieldNoValidationMapper;
+
   /** The field value. */
   private FieldValue fieldValue;
 
@@ -253,6 +257,16 @@ public class DatasetServiceTest {
 
   /** The table VO. */
   private TableVO tableVO;
+
+
+  /** The field list. */
+  private List<FieldValue> fieldList;
+
+  /** The sorted list. */
+  private List<FieldValue> sortedList;
+
+  /** The field. */
+  private FieldValue field;
 
   /**
    * Inits the mocks.
@@ -286,6 +300,17 @@ public class DatasetServiceTest {
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     datasetValue.setId(1L);
+
+    fieldList = new ArrayList<>();
+    sortedList = new ArrayList<>();
+    field = new FieldValue();
+    field.setId("1");
+    field.setIdFieldSchema("123");
+    field.setValue("123");
+
+    sortedList.add(field);
+    fieldList.add(field);
+
     MockitoAnnotations.initMocks(this);
   }
 
@@ -1429,5 +1454,85 @@ public class DatasetServiceTest {
     datasetService.deleteRecordValuesByProvider(1L, "ES");
     Mockito.verify(recordRepository, times(1)).deleteByDataProviderCode(Mockito.any());
   }
+
+  @Test
+  public void getFieldValuesReferencedTestCordLat() {
+    field.setType(DataType.COORDINATE_LAT);
+
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(fieldList);
+
+    datasetService.getFieldValuesReferenced(1L, "", "");
+    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+  }
+
+  @Test
+  public void getFieldValuesReferencedTestCordLong() {
+    field.setType(DataType.COORDINATE_LONG);
+
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(fieldList);
+
+    datasetService.getFieldValuesReferenced(1L, "", "");
+    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+  }
+
+  @Test
+  public void getFieldValuesReferencedTestNumber() {
+    field.setType(DataType.NUMBER);
+
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(fieldList);
+
+    datasetService.getFieldValuesReferenced(1L, "", "");
+    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+  }
+
+  @Test
+  public void getFieldValuesReferencedTestDate() {
+    field.setType(DataType.DATE);
+
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(fieldList);
+
+    datasetService.getFieldValuesReferenced(1L, "", "");
+    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+  }
+
+
+  @Test
+  public void getFieldValuesReferencedTestString() {
+    field.setType(DataType.TEXT);
+
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(fieldList);
+
+    datasetService.getFieldValuesReferenced(1L, "", "");
+    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+  }
+
+  @Test
+  public void getReferencedDatasetIdTest() {
+
+    datasetService.getReferencedDatasetId(1L, "");
+    Mockito.verify(datasetMetabaseService, times(1))
+        .getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any());
+  }
+
 
 }

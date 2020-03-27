@@ -10,7 +10,6 @@
 .inputFieldDescription {
   margin-left: 0.4rem !important;
   width: 25%;
-  transition: 0.5s !important;
 }
 .draggableFieldDiv {
   display: flex;
@@ -81,6 +80,16 @@
 .deleteButton:hover {
   background-color: var(--c-custom-gray);
   color: var(--errors);
+}
+
+.disabledDeleteButton {
+  pointer-events: none !important;
+  text-decoration: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.disabledDeleteButton:hover {
+  background-color: transparent;
 }
 
 .fieldSeparator {

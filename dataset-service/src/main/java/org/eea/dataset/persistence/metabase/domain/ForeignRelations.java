@@ -16,6 +16,9 @@ import lombok.ToString;
 
 
 
+/**
+ * The Class ForeignRelations.
+ */
 @Entity
 @Getter
 @Setter
@@ -23,6 +26,7 @@ import lombok.ToString;
 @Table(name = "FOREIGN_RELATIONS")
 public class ForeignRelations {
 
+  /** The id. */
   @Id
   @Column(name = "ID", columnDefinition = "serial")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "foreign_relations_id_seq")
@@ -30,16 +34,23 @@ public class ForeignRelations {
       allocationSize = 1)
   private Long id;
 
+  /** The id dataset origin. */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID_ORIGIN")
   private DataSetMetabase idDatasetOrigin;
 
+  /** The id dataset destination. */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID_DESTINATION")
   private DataSetMetabase idDatasetDestination;
 
+  /** The id pk. */
   @Column(name = "ID_PK")
   private String idPk;
+
+  /** The id fk origin. */
+  @Column(name = "ID_FK_ORIGIN")
+  private String idFkOrigin;
 
   /**
    * Equals.
@@ -57,7 +68,8 @@ public class ForeignRelations {
     }
     final ForeignRelations relation = (ForeignRelations) o;
     return idDatasetDestination.equals(relation.idDatasetDestination) && idPk.equals(relation.idPk)
-        && idDatasetOrigin.equals(relation.idDatasetOrigin);
+        && idDatasetOrigin.equals(relation.idDatasetOrigin)
+        && idFkOrigin.equals(relation.idFkOrigin);
 
   }
 
@@ -68,7 +80,7 @@ public class ForeignRelations {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDatasetDestination, idDatasetOrigin, idPk);
+    return Objects.hash(idDatasetDestination, idDatasetOrigin, idPk, idFkOrigin);
   }
 
 }

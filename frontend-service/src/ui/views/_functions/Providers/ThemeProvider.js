@@ -271,7 +271,10 @@ export const ThemeProvider = ({ children }) => {
         'chips-input-border-color-hover': 'var(--c-corporate-blue)',
         'chips-input-color': 'var(--black)',
         'chips-token-bg': 'var(--c-corporate-blue)',
-        'chips-token-color': 'var(--white)'
+        'chips-token-color': 'var(--white)',
+        'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
+        'listbox-item-highlight-bg-hover': 'var(--gray-10)',
+        'listbox-item-highlight-color': 'var(--white)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -369,7 +372,7 @@ export const ThemeProvider = ({ children }) => {
         'dropdown-panel-box-shadow': '0 3px 6px 0 rgba(0, 0, 0, 0.16)',
         'dropdown-panel-filter-border': '1px solid var(--gray-10)',
         'dropdown-panel-filter-color': 'var(--gray-110)',
-        'dropdown-panel-filter-bg': 'var(--white)',
+        'dropdown-panel-filter-bg': 'var(--bg)',
         'dropdown-panel-filter-icon-color': 'var(--c-corporate-blue)',
         'dropdown-panel-items-group-color': 'var(--white)',
         'dropdown-panel-items-group-highlight-color': 'var(--white)',
@@ -523,7 +526,10 @@ export const ThemeProvider = ({ children }) => {
         'chips-input-border-color-hover': 'var(--c-corporate-blue-lighter)',
         'chips-input-color': 'var(--white)',
         'chips-token-bg': 'var(--c-corporate-blue-lighter)',
-        'chips-token-color': 'var(--white)'
+        'chips-token-color': 'var(--white)',
+        'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
+        'listbox-item-highlight-bg-hover': 'var(--gray-110)',
+        'listbox-item-highlight-color': 'var(--black)'
       }
     }
   });

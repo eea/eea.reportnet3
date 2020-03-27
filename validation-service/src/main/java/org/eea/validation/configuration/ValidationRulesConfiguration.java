@@ -4,6 +4,7 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMI
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,12 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    */
   @Value("${mongodb.primary.host}")
   private String host;
+
+  /**
+   * The mongo hosts
+   */
+  @Value("${mongodb.hosts}")
+  private String mongoHosts;
 
   /**
    * The port.
@@ -105,7 +112,8 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, port);
+    return new MongoClient(
+        new MongoClientURI(new StringBuilder("mongodb://").append(mongoHosts).toString()));
   }
 
   /**

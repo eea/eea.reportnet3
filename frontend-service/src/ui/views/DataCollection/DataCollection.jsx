@@ -18,7 +18,6 @@ import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -133,7 +132,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      console.log('METADATA error', error);
+      console.error('METADATA error', error);
       notificationContext.add({
         type: 'GET_METADATA_ERROR',
         content: {
@@ -201,6 +200,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
               recordId: field['recordId'],
+              referencedField: field['referencedField'],
               table: table['tableSchemaName'],
               type: field['type']
             };
