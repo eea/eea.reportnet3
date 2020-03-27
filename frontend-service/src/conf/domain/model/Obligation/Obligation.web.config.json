@@ -1,4 +1,4 @@
 {
-  "openedObligations": "/obligation",
-  "obligationById": "/obligation/{:obligationId}"
+  "obligationById": "/obligation/{:obligationId}",
+  "openedObligations": "/obligation/findOpenened"
 }

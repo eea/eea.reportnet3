@@ -1,21 +1,21 @@
 export class Obligation {
   constructor({
+    comment,
+    description,
+    legalInstruments,
+    nextDeadline,
     obligationId,
     oblTitle,
-    description,
     validSince,
-    validTo,
-    comment,
-    nextDeadline,
-    legalInstruments
+    validTo
   } = {}) {
+    this.comment = comment;
+    this.description = description;
+    this.legalInstruments = legalInstruments;
+    this.nextDeadline = nextDeadline;
     this.obligationId = obligationId;
     this.oblTitle = oblTitle;
-    this.description = description;
     this.validSince = validSince;
     this.validTo = validTo;
-    this.comment = comment;
-    this.nextDeadline = nextDeadline;
-    this.legalInstruments = legalInstruments;
   }
 }

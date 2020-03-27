@@ -1,2 +1,2 @@
-import ObligationConfig from './Dataflow.web.config';
+import ObligationConfig from './Obligation.web.config';
 export { ObligationConfig };
