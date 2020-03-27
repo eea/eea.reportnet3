@@ -8,7 +8,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ReportingObligationReducer } from './_functions/Reducers/ReportingObligationReducer';
 
-export const ReportingObligations = React.memo((dataflowId, refresh) => {
+export const ReportingObligations = (dataflowId, refresh) => {
   const [ReportingObligationState, ReportingObligationDispatch] = useReducer(ReportingObligationReducer, {});
 
   useEffect(() => {
@@ -37,4 +37,4 @@ export const ReportingObligations = React.memo((dataflowId, refresh) => {
       <DataTable />
     </Fragment>
   );
-});
+};
