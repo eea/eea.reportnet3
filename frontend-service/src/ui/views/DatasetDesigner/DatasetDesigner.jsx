@@ -306,7 +306,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dismissableMask={true}
           footer={actionButtonsValidationDialog}
           header={resources.messages['qcRules']}
-          maximizable
           onHide={() => {
             onHideValidationsDialog();
           }}

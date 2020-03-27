@@ -259,7 +259,8 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
-        visible={isDeleteDialogVisible}>
+        visible={isDeleteDialogVisible}
+        maximizable={false}>
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     </Fragment>
