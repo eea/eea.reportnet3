@@ -158,11 +158,10 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
+    dataflowDataState.hasRepresentatives,
     dataflowDataState.status,
     dataflowId,
-    dataflowStatus,
     designDatasetSchemas,
-    hasRepresentatives,
     isCustodian,
     isDataSchemaCorrect
   ]);
