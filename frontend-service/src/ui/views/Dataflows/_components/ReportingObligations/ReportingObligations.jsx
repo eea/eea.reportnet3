@@ -26,7 +26,6 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
     const openedObligations = await ObligationService.opened();
-    const obligationById = await ObligationService.getObligationById(1);
     try {
     } catch (error) {
     } finally {
