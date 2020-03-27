@@ -64,7 +64,7 @@ import {
   faPowerOff,
   faCog,
   faPen,
-  faUsersCog,
+  faUsersCog,faUserShield,
   faIgloo,
   faFileDownload,
   faDraftingCompass,
@@ -329,6 +329,8 @@ export const AwesomeIcons = icon => {
       return faCaretDown;
     case 'collapsed':
       return faCaretRight;
+      case 'userShield':
+      return faUserShield
     default:
       return faFileAlt;
   }

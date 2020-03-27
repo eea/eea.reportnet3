@@ -76,7 +76,7 @@ const App = () => {
                           component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
                         />
                         <Route exact path={routes.EULOGIN} component={EULogin} />
-                        <PrivateRoute exact path={routes.CODELISTS} component={Codelists} />
+                        {/* <PrivateRoute exact path={routes.CODELISTS} component={Codelists} >*/}
                         <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
                         <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
                         <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
