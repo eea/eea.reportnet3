@@ -157,7 +157,6 @@ const createEmptyObject = (columnsSchema, data) => {
       };
     });
   }
-
   const obj = {
     dataRow: fields,
     recordSchemaId: columnsSchema[0].recordId

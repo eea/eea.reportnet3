@@ -8,10 +8,10 @@ import uniq from 'lodash/uniq';
 
 import styles from './Dataflow.module.scss';
 
-import colors from 'conf/colors.json';
 import { config } from 'conf';
-import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
+import colors from 'conf/colors.json';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { BigButtonList } from './_components/BigButtonList';
 import { Button } from 'ui/views/_components/Button';
@@ -176,11 +176,11 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
+    dataflowDataState.hasRepresentatives,
     dataflowDataState.status,
     dataflowId,
     designDatasetSchemas,
     isCustodian,
-    dataflowDataState.hasRepresentatives,
     isDataSchemaCorrect
   ]);
 
@@ -258,13 +258,6 @@ const Dataflow = withRouter(({ history, match }) => {
     );
     return loadedClassesSteps;
   };
-
-  const getElementByClass = (elements, classId) =>
-    elements
-      .map(e => {
-        return e.target;
-      })
-      .indexOf(classId);
 
   const handleRedirect = target => {
     history.push(target);
@@ -408,10 +401,10 @@ const Dataflow = withRouter(({ history, match }) => {
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          title={TextUtils.ellipsis(dataflowDataState.name)}
-          subtitle={resources.messages['dataflow']}
           icon="archive"
           iconSize="4rem"
+          subtitle={resources.messages['dataflow']}
+          title={TextUtils.ellipsis(dataflowDataState.name)}
         />
 
         <BigButtonList
@@ -444,16 +437,16 @@ const Dataflow = withRouter(({ history, match }) => {
         />
         {isCustodian && (
           <Dialog
-            header={resources.messages['manageRolesDialogTitle']}
+            contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
-            visible={dataflowDataState.isManageRolesDialogVisible}
+            header={resources.messages['manageRolesDialogTitle']}
             onHide={() => onManageDialogs('isManageRolesDialogVisible', false)}
-            contentStyle={{ maxHeight: '60vh' }}>
+            visible={dataflowDataState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
-                setHasRepresentatives={onCheckRepresentatives}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
+                setHasRepresentatives={onCheckRepresentatives}
               />
             </div>
           </Dialog>
@@ -468,8 +461,8 @@ const Dataflow = withRouter(({ history, match }) => {
                   <Button
                     className="p-button-text-only"
                     label="Delete this dataflow"
-                    style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
                     onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
+                    style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
                   />
                 )}
               </div>

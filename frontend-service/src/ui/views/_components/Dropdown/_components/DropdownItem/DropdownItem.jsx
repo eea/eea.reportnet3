@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { isUndefined, isNull } from 'util';
+import uuid from 'uuid';
 
 export const DropdownItem = ({
   option = null,
@@ -28,7 +29,7 @@ export const DropdownItem = ({
   };
 
   return (
-    <li className={classNamed} onClick={onItemClick}>
+    <li className={classNamed} onClick={onItemClick} key={uuid.v4()}>
       {content}
     </li>
   );
