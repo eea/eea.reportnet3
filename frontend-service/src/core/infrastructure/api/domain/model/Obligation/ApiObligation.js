@@ -15,5 +15,19 @@ export const apiObligation = {
     });
 
     return response.data;
+  },
+
+  getObligationByID: async obligationId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(ObligationConfig.obligationById, {
+        obligationId
+      }),
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response;
   }
 };

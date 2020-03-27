@@ -13,6 +13,8 @@ import { ReportingObligationReducer } from './_functions/Reducers/ReportingOblig
 export const ReportingObligations = (dataflowId, refresh) => {
   const [ReportingObligationState, ReportingObligationDispatch] = useReducer(ReportingObligationReducer, {});
 
+  console.log('ReportingObligationState', ReportingObligationState);
+
   useEffect(() => {
     if (refresh) {
       onLoadReportingObligations();
@@ -24,6 +26,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
     const openedObligations = await ObligationService.opened();
+    const obligationById = await ObligationService.getObligationById(1);
     try {
     } catch (error) {
     } finally {
