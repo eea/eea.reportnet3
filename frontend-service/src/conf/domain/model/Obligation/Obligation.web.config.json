@@ -1,0 +1,4 @@
+{
+  "openedObligations": "/obligation",
+  "obligationById": "/obligation/{:obligationId}"
+}
