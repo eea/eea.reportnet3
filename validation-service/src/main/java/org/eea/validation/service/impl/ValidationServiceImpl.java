@@ -2,6 +2,9 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +16,13 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.domain.EventType;
@@ -30,6 +37,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
@@ -135,6 +143,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
+  @Autowired
+  private DatasetMetabaseController datasetMetabaseController;
+
   /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
@@ -151,7 +162,11 @@ public class ValidationServiceImpl implements ValidationService {
   public List<DatasetValidation> runDatasetValidations(DatasetValue dataset,
       KieSession kieSession) {
     kieSession.insert(dataset);
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      createRuleErrorException(dataset, e);
+    }
     return dataset.getDatasetValidations();
   }
 
@@ -166,7 +181,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public List<TableValidation> runTableValidations(TableValue table, KieSession kieSession) {
     kieSession.insert(table);
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      createRuleErrorException(table, e);
+    }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
   }
 
@@ -184,7 +203,11 @@ public class ValidationServiceImpl implements ValidationService {
     if (StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      createRuleErrorException(record, e);
+    }
 
     return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
         ? new ArrayList<>()
@@ -204,12 +227,87 @@ public class ValidationServiceImpl implements ValidationService {
     if (StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      createRuleErrorException(field, e);
+    }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
         ? new ArrayList<>()
         : field.getFieldValidations();
   }
 
+
+  private void createRuleErrorException(Object lvValue, RuntimeException e) {
+
+    Validation ruleValidation = new Validation();
+    ZoneId timeZone = ZoneId.of("UTC");
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    String idRuleException = e.getCause().getMessage();
+    String idRule = idRuleException.substring(idRuleException.indexOf("In [Rule \"") + 10,
+        idRuleException.indexOf("In [Rule \"") + 34);
+    ruleValidation.setIdRule(idRule);
+    ruleValidation.setLevelError(ErrorTypeEnum.BLOCKER);
+    // ruleValidation.setMessage("");
+    ruleValidation.setValidationDate(ZonedDateTime.now(timeZone).format(dateFormatter));
+
+    switch (lvValue.getClass().getName()) {
+      case "org.eea.validation.persistence.data.domain.FieldValue":
+
+        FieldValue fieldValue = (FieldValue) lvValue;
+        ruleValidation.setTypeEntity(EntityTypeEnum.FIELD);
+
+        DataSetMetabaseVO dataSetMetabaseVOField = datasetMetabaseController
+            .findDatasetMetabaseById(fieldValue.getRecord().getTableValue().getDatasetId().getId());
+        ruleValidation.setOriginName(
+            null == dataSetMetabaseVOField ? "" : dataSetMetabaseVOField.getDataSetName());
+
+        break;
+      case "org.eea.validation.persistence.data.domain.RecordValue":
+
+        RecordValue recordValue = (RecordValue) lvValue;
+        ruleValidation.setTypeEntity(EntityTypeEnum.RECORD);
+
+        DataSetMetabaseVO dataSetMetabaseVORecord = datasetMetabaseController
+            .findDatasetMetabaseById(recordValue.getTableValue().getDatasetId().getId());
+        ruleValidation.setOriginName(
+            null == dataSetMetabaseVORecord ? "" : dataSetMetabaseVORecord.getDataSetName());
+
+        break;
+      case "org.eea.validation.persistence.data.domain.TableValue":
+
+        TableValue tableValue = (TableValue) lvValue;
+        ruleValidation.setTypeEntity(EntityTypeEnum.TABLE);
+
+        DataSetMetabaseVO dataSetMetabaseVOTable =
+            datasetMetabaseController.findDatasetMetabaseById(tableValue.getDatasetId().getId());
+        ruleValidation.setOriginName(
+            null == dataSetMetabaseVOTable ? "" : dataSetMetabaseVOTable.getDataSetName());
+
+        break;
+      case "org.eea.validation.persistence.data.domain.DatasetValue":
+
+        DatasetValue datasetValue = (DatasetValue) lvValue;
+        ruleValidation.setTypeEntity(EntityTypeEnum.DATASET);
+
+        DataSetMetabaseVO dataSetMetabaseVO =
+            datasetMetabaseController.findDatasetMetabaseById(datasetValue.getId());
+        ruleValidation
+            .setOriginName(null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName());
+
+        DatasetValidation ruleDSValidation = new DatasetValidation();
+        ruleDSValidation.setValidation(ruleValidation);
+        List<DatasetValidation> ruleDSValidations = new ArrayList<>();
+        ruleDSValidations.add(ruleDSValidation);
+        datasetValue.setDatasetValidations(ruleDSValidations);
+        datasetRepository.save(datasetValue);
+
+        break;
+      default:
+        break;
+    }
+
+  }
 
   /**
    * Load rules knowledge base.

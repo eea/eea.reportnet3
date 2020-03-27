@@ -23,6 +23,10 @@ import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
@@ -48,6 +52,12 @@ public class KieBaseManager {
    */
   private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
 
+  /** The Constant timeZone. */
+  private static final ZoneId timeZone = ZoneId.of("UTC");
+
+  /** The Constant dateFormatter. */
+  private static final DateTimeFormatter dateFormatter =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
 
   /** The rules repository. */
   @Autowired
@@ -65,6 +75,7 @@ public class KieBaseManager {
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
+
 
   /**
    * Reload rules.
@@ -86,37 +97,56 @@ public class KieBaseManager {
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
     KieHelper kieHelper = new KieHelper();
+    // we take the dataset value for salve all fail validations
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
 
-    ZoneId timeZone = ZoneId.of("UTC");
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    // we bring the datasetschema
+    DataSetSchema dataSetSchema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchema));
 
-    DatasetValue ds = datasetRepository.findById(datasetId).orElse(null);
-
-
+    // here we have the mothod who compose the field in template
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
-
       schemaRules.getRules().stream().forEach(rule -> {
-
-
         String schemasDrools = "";
+        String originName = "";
         StringBuilder expression = new StringBuilder("");
         TypeValidation typeValidation = null;
         switch (rule.getType()) {
           case DATASET:
             schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
             typeValidation = TypeValidation.DATASET;
+            originName = dataSetMetabaseVO.getDataSetName();
             break;
           case TABLE:
             schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
             typeValidation = TypeValidation.TABLE;
+            for (TableSchema table : dataSetSchema.getTableSchemas()) {
+              if (table.getIdTableSchema().equals(rule.getReferenceId())) {
+                originName = table.getNameTableSchema();
+              }
+            }
+
             break;
           case RECORD:
             schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
             typeValidation = TypeValidation.RECORD;
+            for (TableSchema table : dataSetSchema.getTableSchemas()) {
+              if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
+                originName = table.getNameTableSchema();
+              }
+            }
             break;
           case FIELD:
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
+            for (TableSchema table : dataSetSchema.getTableSchemas()) {
+              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
+                  originName = table.getNameTableSchema();
+                }
+              }
+            }
+
             // if the type is field and isnt automatic we create the rules to validate check if
             // the
             // data are correct
@@ -124,10 +154,11 @@ public class KieBaseManager {
                 schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
             DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
 
+            // that switch clear the validations , and check if the datas in values are correct
             if (null != datatype && !rule.isAutomatic()) {
               switch (datatype) {
                 case NUMBER:
-                  expression.append("( !isBlank(value) ||  isNumber(value) && ");
+                  // expression.append("( !isBlank(value) || isNumber(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
@@ -160,51 +191,12 @@ public class KieBaseManager {
                   expression.append(whenConditionWithParenthesis).append(")").toString());
             }
         }
-
-        // Check rules before add to Rules Knowledge DB
-        List<Map<String, String>> ruleAttributesHelper = new ArrayList<>();
-        ruleAttributesHelper.add(passDataToMap(rule.getReferenceId().toString(),
-            rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
-            rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-            null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
-
-        String generatedDRLTest = compiler.compile(ruleAttributesHelper,
-            getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
-        byte[] b1 = generatedDRLTest.getBytes();
-        Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
-        KieHelper kieHelperTest = new KieHelper();
-        kieHelperTest.addResource(resourceTest, ResourceType.DRL);
-        Results results = kieHelperTest.verify();
-
-        if (results.hasMessages(Message.Level.ERROR)) {
-
-          Validation ruleValidation = new Validation();
-          ruleValidation.setIdRule(rule.getRuleId().toString());
-          ruleValidation.setLevelError(ErrorTypeEnum.BLOCKER);
-          ruleValidation.setMessage("The rule: " + rule.getShortCode()
-              + ", does not meet the required format to validate the data, please review it.");
-          ruleValidation.setValidationDate(ZonedDateTime.now(timeZone).format(dateFormatter));
-          ruleValidation.setTypeEntity(EntityTypeEnum.DATASET);
-          ruleValidation.setOriginName(ds.getId().toString());
-
-          DatasetValidation ruleDSValidation = new DatasetValidation();
-          ruleDSValidation.setValidation(ruleValidation);
-          List<DatasetValidation> ruleDSValidations = new ArrayList<>();
-          ruleDSValidations.add(ruleDSValidation);
-          ds.setDatasetValidations(ruleDSValidations);
-
-          datasetRepository.save(ds);
-
-        } else {
-
-          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-              rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
-              rule.getThenCondition().get(0), rule.getThenCondition().get(1),
-              null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
-
-        }
+        // that method clear the datas and delete rules who are bad compose(bad syntax)
+        cleanRules(originName, ruleAttributes, compiler, kieServices, datasetValue, rule,
+            schemasDrools, typeValidation);
       });
     }
+
     String generatedDRL =
         compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
     // multiple such resoures/rules can be added
@@ -213,6 +205,64 @@ public class KieBaseManager {
     kieHelper.addResource(resource1, ResourceType.DRL);
     // this is a shared variable in a single instanced object.
     return kieHelper.build();
+  }
+
+  /**
+   * Clean rules.
+   *
+   * @param originName the origin name
+   * @param ruleAttributes the rule attributes
+   * @param compiler the compiler
+   * @param kieServices the kie services
+   * @param datasetValue the dataset value
+   * @param rule the rule
+   * @param schemasDrools the schemas drools
+   * @param typeValidation the type validation
+   */
+  private void cleanRules(String originName, List<Map<String, String>> ruleAttributes,
+      ObjectDataCompiler compiler, KieServices kieServices, DatasetValue datasetValue, Rule rule,
+      String schemasDrools, TypeValidation typeValidation) {
+    // Check rules before add to Rules Knowledge DB
+    List<Map<String, String>> ruleAttributesHelper = new ArrayList<>();
+    ruleAttributesHelper.add(passDataToMap(rule.getReferenceId().toString(),
+        rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+        rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
+
+    // that method create another kiebase one by one and verify all rules are correct
+    String generatedDRLTest = compiler.compile(ruleAttributesHelper,
+        getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
+    byte[] b1 = generatedDRLTest.getBytes();
+    Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
+    KieHelper kieHelperTest = new KieHelper();
+    kieHelperTest.addResource(resourceTest, ResourceType.DRL);
+    Results results = kieHelperTest.verify();
+    // if one rule is not correct he delete it and create a dataset validation about that rule
+    if (results.hasMessages(Message.Level.ERROR)) {
+
+      Validation ruleValidation = new Validation();
+      ruleValidation.setIdRule(rule.getRuleId().toString());
+      ruleValidation.setLevelError(ErrorTypeEnum.BLOCKER);
+      ruleValidation.setMessage("The rule: " + rule.getShortCode()
+          + ", does not meet the required format to validate the data, please review it.");
+      ruleValidation.setValidationDate(ZonedDateTime.now(timeZone).format(dateFormatter));
+      ruleValidation.setTypeEntity(EntityTypeEnum.DATASET);
+      ruleValidation.setOriginName(originName);
+
+      DatasetValidation ruleDSValidation = new DatasetValidation();
+      ruleDSValidation.setValidation(ruleValidation);
+      List<DatasetValidation> ruleDSValidations = new ArrayList<>();
+      ruleDSValidations.add(ruleDSValidation);
+      datasetValue.setDatasetValidations(ruleDSValidations);
+
+      datasetRepository.save(datasetValue);
+
+    } else {
+
+      ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+          rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
+
+    }
   }
 
   /**
