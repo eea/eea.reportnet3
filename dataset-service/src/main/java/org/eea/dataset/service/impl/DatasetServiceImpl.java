@@ -2,9 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -1486,48 +1483,14 @@ public class DatasetServiceImpl implements DatasetService {
     HashSet<String> seen = new HashSet<>();
     fields.removeIf(e -> !seen.add(e.getValue()));
 
+    // Sort results
     List<FieldValue> sortedList = new ArrayList<>();
-
     if (!fields.isEmpty()) {
-      switch (fields.get(0).getType()) {
-        case COORDINATE_LAT:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Double.valueOf(v1.getValue())
-                      .compareTo(Double.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case COORDINATE_LONG:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Double.valueOf(v1.getValue())
-                      .compareTo(Double.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case NUMBER:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Integer.valueOf(v1.getValue())
-                      .compareTo(Integer.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case DATE:
-          ZoneId timeZone = ZoneId.of("UTC");
-          DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-          LocalDate.now(timeZone).format(fmt);
-
-          sortedList = fields.stream()
-              .sorted((v1, v2) -> LocalDate.from(fmt.parse(v1.getValue()))
-                  .compareTo(LocalDate.from(fmt.parse(v2.getValue()))))
-              .collect(Collectors.toList());
-          break;
-        default:
-          sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
-              .collect(Collectors.toList());
-          break;
-      }
+      sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+          .collect(Collectors.toList());
     }
     return fieldNoValidationMapper.entityListToClass(sortedList);
+
   }
 
 

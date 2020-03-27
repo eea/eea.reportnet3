@@ -1136,8 +1136,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     Document fieldSchemaReferenced =
         schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
-    fieldSchemaReferenced.put("pkReferenced", referenced);
-    schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
+    if (fieldSchemaReferenced != null) {
+      fieldSchemaReferenced.put("pkReferenced", referenced);
+      schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
+    }
   }
 
 }
