@@ -1,9 +1,9 @@
 package org.eea.interfaces.controller.rod;
 
 import java.util.List;
-import javax.ws.rs.QueryParam;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -37,5 +37,5 @@ public interface ObligationController {
    * @return the obligation vo
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-  ObligationVO findObligationById(@QueryParam(value = "id") Long id);
+  ObligationVO findObligationById(@PathVariable(value = "id") Integer id);
 }
