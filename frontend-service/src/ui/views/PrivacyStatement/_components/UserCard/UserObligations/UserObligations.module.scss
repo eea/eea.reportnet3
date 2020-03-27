@@ -1,0 +1,49 @@
+.userObligationsContainer {
+  width: 100%;
+  border-bottom: 1px solid var(--box-shadow);
+  padding: 1rem;
+
+  text-align: center;
+}
+
+.userObligationsTitle {
+  font-weight: bold;
+  margin-top: 0.5rem;
+  font-size: 1.3em;
+  color: var(--main-font-color);
+}
+
+.obligationsExpandable {
+  color: var(--main-font-color) !important;
+}
+
+.orderIcon {
+  text-align: center;
+  opacity: 0.7;
+  margin-right: 4.5% !important;
+  font-size: 10pt !important;
+}
+
+.orderIcon:hover {
+  opacity: 1;
+}
+
+.orderIcon:enabled:focus {
+  box-shadow: 0 0 0 0 var(--white) !important;
+}
+
+.orderIcon:enabled:active,
+.orderIcon:enabled:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.obligationsExpandable {
+  text-align: left;
+  margin-top: 0.7rem;
+}
+
+.children {
+  text-align: left;
+  color: var(--main-font-color);
+}

@@ -1,0 +1,11 @@
+.linksContainer {
+  height: 100px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.link {
+  font-size: 30px;
+  color: var(--main-font-color);
+}

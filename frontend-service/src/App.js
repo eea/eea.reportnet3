@@ -17,7 +17,7 @@ import { EULogin } from 'ui/views/Login/EULogin';
 import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
 import { LeftSideBarProvider } from 'ui/views/_functions/Providers/LeftSideBarProvider';
-import {Settings} from 'ui/views/Settings';
+import { Settings } from 'ui/views/Settings';
 import { NotificationProvider } from 'ui/views/_functions/Providers/NotificationProvider';
 import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
@@ -26,6 +26,7 @@ import { Representative } from 'ui/views/Representative/Representative';
 import { ResourcesProvider } from 'ui/views/_functions/Providers/ResourcesProvider';
 import { ThemeProvider } from 'ui/views/_functions/Providers/ThemeProvider';
 import { UserProvider } from 'ui/views/_functions/Providers/UserProvider';
+import { PrivacyStatement } from 'ui/views/PrivacyStatement';
 
 const App = () => {
   return (
@@ -53,6 +54,7 @@ const App = () => {
                         <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
                         <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
                         <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
+                        <PrivateRoute exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
                         <PrivateRoute exact path={routes.REPRESENTATIVE} component={Representative} />
                         <PrivateRoute exact path={routes.DATASET} component={Dataset} />
                         <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />

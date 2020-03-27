@@ -73,6 +73,12 @@ const Settings = withRouter(({ history }) => {
         icon: 'user-profile',
         href: getUrl(routes.SETTINGS),
         command: () => history.push(getUrl(routes.SETTINGS))
+      },
+      {
+        label: resources.messages['privacyStatement'],
+        icon: 'info',
+        href: getUrl(routes.PRIVACY_STATEMENT),
+        command: () => history.push(getUrl(routes.PRIVACY_STATEMENT))
       }
     ]);
   }, []);
@@ -92,6 +98,16 @@ const Settings = withRouter(({ history }) => {
       {
         icon: 'userConfig',
         label: 'userConfigurationOptions',
+        onClick: () => {
+          visibleUserSectionDispatch({
+            type: 'VISIBLE_USER_SETTINGS_OPTIONS'
+          });
+        },
+        title: 'User Configuration Options'
+      },
+      {
+        icon: '',
+        label: 'PRIVACY',
         onClick: () => {
           visibleUserSectionDispatch({
             type: 'VISIBLE_USER_SETTINGS_OPTIONS'
@@ -133,7 +149,7 @@ const Settings = withRouter(({ history }) => {
         <div className={` rep-col-12 rep-col-sm-12`}>
           <Title
             title={resources.messages['userSettingsTitle']}
-            icon="dataset"
+            icon="user-profile"
             iconSize="4rem"
             subtitle={resources.messages['userSettingsSubtitle']}
           />
