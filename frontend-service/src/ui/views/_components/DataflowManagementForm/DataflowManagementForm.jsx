@@ -16,7 +16,7 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, refresh }) => {
+const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, onSearch, refresh }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -121,17 +121,16 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
             <div className={styles.search}>
               <Field
                 className={styles.searchInput}
-                disabled={true}
                 name="associatedObligation"
                 placeholder={resources.messages['associatedObligation']}
                 type="text"
               />
               <Button
                 className={styles.searchButton}
-                disabled={true}
                 icon="search"
                 label={resources.messages['search']}
                 layout="simple"
+                onClick={onSearch}
               />
             </div>
           </fieldset>
