@@ -241,8 +241,6 @@ const Dataflow = withRouter(({ history, match }) => {
     return loadedClassesSteps;
   };
 
-  const getElementByClass = (elements, classId) => elements.map(e => e.target).indexOf(classId);
-
   const handleRedirect = target => {
     history.push(target);
   };
