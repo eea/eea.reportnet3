@@ -1,34 +1,24 @@
-import { config } from 'conf';
-
-import uuid from 'uuid';
-
 import isNil from 'lodash/isNil';
 
-import { getExpressionOperatorType } from './getExpressionOperatorType';
+import { getExpressionFromDTO } from './getExpressionFromDTO';
+import { getExpressionsGroupFromDTO } from './getExpressionsGroupFromDTO';
 
-export const parseExpressionFromDTO = expression => {
-  console.log('parseExpressions', expression);
+export const parseExpressionFromDTO = (expression, expressionOperator = null) => {
+  console.log('parseExpressionFromDTO', expression);
+
+  const expressions = [];
+  const allExpressions = [];
 
   if (!isNil(expression) && expression.operator != 'AND' && expression.operator != 'OR') {
-    const expression = {
-      expressionId: uuid.v4(),
-      group: false,
-      union: '',
-      operatorType: getExpressionOperatorType(expression.operator),
-      operatorValue: {
-        label: config.validations.reverseEquivalences[expression.operator],
-        value: config.validations.reverseEquivalences[expression.operator]
-      },
-      expressionValue: expression.arg2,
-      expressions: []
-    };
-    return {
-      expressions: [expression],
-      allExpressions: [expression]
-    };
+    const newExpression = getExpressionFromDTO(expression, expressionOperator);
+    allExpressions.push(getExpressionFromDTO(newExpression));
+    return newExpression;
+  } else {
+    expressions.push(parseExpressionFromDTO(expression.arg1));
+    expressions.push(parseExpressionFromDTO(expression.arg2, expression.operator));
   }
   return {
-    expressions: [],
-    allExpressions: []
+    expressions,
+    allExpressions
   };
 };

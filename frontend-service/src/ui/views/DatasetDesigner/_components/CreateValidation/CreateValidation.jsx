@@ -140,7 +140,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   useEffect(() => {
-    console.log('editing rule call populate');
+    console.log('editing rule call populate', validationContext.ruleToEdit);
     if (!isNil(validationContext.ruleToEdit) && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',

@@ -146,7 +146,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           shortCode: payload.shortCode,
           description: payload.description,
           errorMessage: payload.message,
-          errorLevel: payload.levelError,
+          errorLevel: { label: payload.levelError, value: payload.levelError },
           name: payload.name,
           active: payload.enabled,
           expressions: payload.expressions,
