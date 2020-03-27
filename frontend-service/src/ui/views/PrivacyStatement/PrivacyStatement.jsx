@@ -14,7 +14,6 @@ import { UserCard } from './_components/UserCard';
 
 const PrivacyStatement = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
-  const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
@@ -56,32 +55,25 @@ const PrivacyStatement = withRouter(({ history }) => {
   };
 
   return layout(
-    <div>
-      <div className="rep-row">
-        <div className={` rep-col-12 rep-col-sm-12`}>
-          <Title
-            title={resources.messages['PrivacyStatementTitle']}
-            icon="info"
-            iconSize="4rem"
-            subtitle={resources.messages['PrivacyStatementSubtitle']}
-          />
-          <p>
-            <p>
-              {' '}
-              <li>user ID(*):</li>
-              <li>First name (*):</li>
-              <li>Last name (*):</li>{' '}
-            </p>
-          </p>
-        </div>
-      </div>
+    <div className="rep-row">
+      <div className={` rep-col-12 rep-col-sm-12`}>
+        <Title
+          title={resources.messages['PrivacyStatementTitle']}
+          icon="info"
+          iconSize="4rem"
+          subtitle={resources.messages['PrivacyStatementSubtitle']}
+        />
 
-      <div className="rep-row">
+        <ul>
+          <li>user ID(*):</li>
+          <li>First name (*):</li>
+          <li>Last name (*):</li>
+        </ul>
+
         <div className={styles.sectionMainContent}>
-          <p>Example</p>
-          <div className={styles.paragraphTitle}> Introduction</div>
-          <p className={styles.paragraph}>
-            {' '}
+          <h2>Example</h2>
+          <h3> Introduction</h3>
+          <p>
             Any personal data you submit to the European Environment Agency (EEA) in the context of the Eionet website
             referred to above will be processed in accordance with Regulation (EU) 2018/1725 of the European Parliament
             and of the Council on the protection of natural persons with regard to the processing of personal data by
@@ -99,11 +91,9 @@ const PrivacyStatement = withRouter(({ history }) => {
             Self-registration is not possible. Registration only occur by invitation of an existing member of the
             network by contacting the Eionet Helpdesk or by the National Focal Points who maintain the formal Eionet
             components (NFPs and NRCs) in their countries.
-          </p>{' '}
-          <div></div>
-          <div className={styles.paragraphTitle}> What personal data do we collect and for what purpose</div>
-          <p className={styles.paragraph}>
-            {' '}
+          </p>
+          <h3> What personal data do we collect and for what purpose</h3>
+          <p>
             When you visit the website we do not collect any personal information and we do not link or correlate your
             authenticated session to the collected website usage statistics which are fully anonymized. See "site usage
             statistics" section for more details. We collect personal information when we create an account in the
@@ -132,9 +122,8 @@ const PrivacyStatement = withRouter(({ history }) => {
               (*) These are required fields.
             </ul>
           </p>
-          <div className={styles.paragraphTitle}> Who can see your personal data</div>
-          <p className={styles.paragraph}>
-            {' '}
+          <h3> Who can see your personal data</h3>
+          <p>
             The Eionet User Directory is only accessible to users of the Eionet User Directory. Following personal data
             is available for authenticated users:
             <li>user ID(*):</li>

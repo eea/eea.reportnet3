@@ -1,14 +1,12 @@
-.paragraphTitle {
-  display: table-cell;
-  font-size: 2rem;
-  color: var(--subtitle-color);
-  margin: 0px;
-  font-weight: bold;
-}
-
-.paragraph {
-  font-size: 1rem;
-  color: var(--title-color);
-  margin: 0px;
-  font-weight: 400;
+.sectionMainContent {
+  margin-bottom: 5rem;
+  h3 {
+    font-size: 2rem;
+    color: var(--subtitle-color);
+    margin-bottom: 1rem;
+    margin-top: 4rem;
+  }
+  p {
+    color: var(--title-color);
+  }
 }
