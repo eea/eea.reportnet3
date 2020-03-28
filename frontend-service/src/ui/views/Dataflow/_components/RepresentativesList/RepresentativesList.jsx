@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useReducer } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
@@ -28,7 +29,12 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManageRolesDialog }) => {
+const RepresentativesList = ({
+  dataflowId,
+  isActiveManageRolesDialog,
+  setHasRepresentativeWithoutDatasets,
+  setHasRepresentatives
+}) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -76,6 +82,16 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
       setHasRepresentatives(true);
     } else {
       setHasRepresentatives(false);
+    }
+  }, [formState.representatives]);
+
+  useEffect(() => {
+    if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
+      const result = formState.representatives.filter(
+        representative => !representative.hasDatasets && !isUndefined(representative.representativeId)
+      );
+
+      setHasRepresentativeWithoutDatasets(!isEmpty(result));
     }
   }, [formState.representatives]);
 

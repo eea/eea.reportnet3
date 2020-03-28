@@ -77,6 +77,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
+    hasRepresentativeWithoutDatasets: false,
     name: '',
     status: ''
   });
@@ -275,6 +276,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const onCheckRepresentatives = value =>
     dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
 
+  const onCheckRepresentativesWithoutDatasets = value =>
+    dataflowDataDispatch({
+      type: 'HAS_REPRESENTATIVES_WITHOUT_DATASETS',
+      payload: { hasRepresentativesWithoutDatasets: value }
+    });
+
   const onConfirmDelete = event =>
     dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
@@ -447,6 +454,7 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
                 setHasRepresentatives={onCheckRepresentatives}
+                setHasRepresentativeWithoutDatasets={onCheckRepresentativesWithoutDatasets}
               />
             </div>
           </Dialog>
