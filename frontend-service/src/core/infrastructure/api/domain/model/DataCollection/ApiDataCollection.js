@@ -3,7 +3,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-export const apiDataCollection = {
+const apiDataCollection = {
   create: async (dataflowId, endDate) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
@@ -18,5 +18,21 @@ export const apiDataCollection = {
       }
     });
     return response;
+  },
+
+  update: async dataflowId => {
+    const tokens = userStorage.get();
+
+    const response = await HTTPRequester.update({
+      url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, {}),
+      data: {
+        dataflowId
+      },
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   }
 };
+export { apiDataCollection };

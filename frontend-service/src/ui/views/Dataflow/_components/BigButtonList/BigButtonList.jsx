@@ -163,6 +163,36 @@ export const BigButtonList = ({
     }
   };
 
+  const onUpdateDataCollection = async () => {
+    setDataCollectionDialog(false); //Edit to be my confirm dialog. Use  same or create new one?
+
+    setIsCreateButtonActive(false); //Edit to be update button
+
+    try {
+      const result = await DataCollectionService.update(dataflowId);
+      notificationContext.add({
+        type: 'UPDATE_DATACOLLECTION_COMPLETED_EVENT',
+        content: {}
+      });
+      return result;
+    } catch (error) {
+      console.error(error);
+
+      const {
+        dataflow: { name: dataflowName }
+      } = await getMetadata({ dataflowId });
+      notificationContext.add({
+        type: 'CREATE_DATA_COLLECTION_ERROR',
+        content: {
+          dataflowId,
+          dataflowName
+        }
+      });
+
+      setIsCreateButtonActive(true);
+    }
+  };
+
   const onDatasetSchemaNameError = () => {
     setErrorDialogVisible(true);
   };
@@ -247,6 +277,7 @@ export const BigButtonList = ({
     onSaveName,
     onShowDataCollectionModal,
     onShowNewSchemaDialog,
+    onUpdateDataCollection,
     receiptState,
     showReleaseSnapshotDialog,
     updatedDatasetSchema
@@ -307,6 +338,8 @@ export const BigButtonList = ({
         visible={deleteDialogVisible}>
         {resources.messages['deleteDatasetSchema']}
       </ConfirmDialog>
+
+      {/*  {isAddNewDatasets}  here render dialog in condition */}
 
       <ConfirmDialog
         header={resources.messages['createDataCollection']}
