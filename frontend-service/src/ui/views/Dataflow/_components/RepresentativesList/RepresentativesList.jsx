@@ -85,29 +85,35 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     return (
-      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
-        <input
-          disabled={representative.hasDatasets}
-          autoFocus={isNil(representative.representativeId)}
-          id={isEmpty(inputData) ? 'emptyInput' : undefined}
-          onBlur={() => {
-            representative.providerAccount = representative.providerAccount.toLowerCase();
-            onAddProvider(formDispatcher, formState, representative, dataflowId);
-          }}
-          onChange={event => {
-            formDispatcher({
-              type: 'ON_ACCOUNT_CHANGE',
-              payload: {
-                providerAccount: event.target.value,
-                dataProviderId: representative.dataProviderId
-              }
-            });
-          }}
-          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-          placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-          value={inputData}
-        />
-      </div>
+      <>
+        {representative.hasDatasets ? (
+          <p style={{ margin: 0 }}>{inputData}</p>
+        ) : (
+          <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
+            <input
+              disabled={representative.hasDatasets}
+              autoFocus={isNil(representative.representativeId)}
+              id={isEmpty(inputData) ? 'emptyInput' : undefined}
+              onBlur={() => {
+                representative.providerAccount = representative.providerAccount.toLowerCase();
+                onAddProvider(formDispatcher, formState, representative, dataflowId);
+              }}
+              onChange={event => {
+                formDispatcher({
+                  type: 'ON_ACCOUNT_CHANGE',
+                  payload: {
+                    providerAccount: event.target.value,
+                    dataProviderId: representative.dataProviderId
+                  }
+                });
+              }}
+              onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+              placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+              value={inputData}
+            />
+          </div>
+        )}
+      </>
     );
   };
 
