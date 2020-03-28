@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.rod;
 
 
+import feign.Client;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
@@ -23,4 +24,7 @@ public class ObligationVO {
   private String comment;
   private Date nextDeadline;
   private List<LegalInstrumentVO> legalInstruments;
+  private ClientVO client;
+  private List<CountryVO> countries;
+  private List<IssueVO> issues;
 }
