@@ -1,6 +1,7 @@
 package org.eea.rod.persistence.domain;
 
 import com.google.common.base.Objects;
+import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,8 +11,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Client {
+public class Client implements Serializable {
 
+
+  private static final long serialVersionUID = 6559585358458505926L;
   private Integer clientId;
   private String name;
   private String acronym;

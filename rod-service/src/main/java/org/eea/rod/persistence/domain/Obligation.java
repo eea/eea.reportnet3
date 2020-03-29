@@ -1,6 +1,7 @@
 package org.eea.rod.persistence.domain;
 
 import com.google.common.base.Objects;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -12,8 +13,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Getter
 @Setter
 @ToString
-public class Obligation {
+public class Obligation implements Serializable {
 
+  private static final long serialVersionUID = 4187963258165306794L;
   private String oblTitle;
   private String description;
 

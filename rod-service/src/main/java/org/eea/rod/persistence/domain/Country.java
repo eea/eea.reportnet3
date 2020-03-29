@@ -1,6 +1,7 @@
 package org.eea.rod.persistence.domain;
 
 import com.google.common.base.Objects;
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,8 +9,9 @@ import lombok.ToString;
 @ToString
 @Getter
 @Setter
-public class Country {
+public class Country implements Serializable {
 
+  private static final long serialVersionUID = 530170819412036107L;
   private Integer spatialId;
   private String name;
   private String type;

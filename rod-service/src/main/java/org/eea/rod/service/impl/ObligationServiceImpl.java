@@ -56,63 +56,65 @@ public class ObligationServiceImpl implements ObligationService {
   public List<ObligationVO> findOpenedObligation() {
     List<Obligation> obligations = obligationFeignRepository.findOpenedObligations();
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
+    List<Client> clients = this.clientFeignRepository.findAll();
+    List<Country> countries = this.countryFeignRepository.findAll();
+    List<Issue> issues = this.issueFeignRepository.findAll();
+
     for (int i = 0; i < obligations.size(); i++) {
-      fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i));
+      fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i), clients, countries,
+          issues);
     }
     return obligationVOS;
   }
 
   @Override
   public ObligationVO findObligationById(Integer obligationId) {
+    List<Client> clients = this.clientFeignRepository.findAll();
+    List<Country> countries = this.countryFeignRepository.findAll();
+    List<Issue> issues = this.issueFeignRepository.findAll();
     Obligation obligation = obligationFeignRepository.findObligationById(obligationId);
-    ObligationVO obligationVO = obligationMapper
-        .entityToClass(obligationFeignRepository.findObligationById(obligationId));
-    fillObligationSubentityFields(obligationVO, obligation);
+    ObligationVO obligationVO = obligationMapper.entityToClass(obligation);
+    fillObligationSubentityFields(obligationVO, obligation, clients, countries, issues);
     return obligationVO;
   }
 
-  private void fillObligationSubentityFields(ObligationVO obligationVO, Obligation obligation) {
-    List<Client> clients = null;
-    List<Country> countries = null;
-    List<Issue> issues = null;
+  private void fillObligationSubentityFields(ObligationVO obligationVO, Obligation obligation,
+      final List<Client> clients, final List<Country> countries, final List<Issue> issues) {
 
     //Find clients from rod. Clients are unique since they are the ones registering the Obligation
-    if (StringUtils.isNotBlank(obligation.getClientId())) {
-      clients = this.clientFeignRepository.findAll();
-      if (!CollectionUtils.isEmpty(clients)) {
-        Client client = clients.stream()
-            .filter(clientValue -> clientValue.getClientId().toString()
-                .equals(obligation.getClientId())).findFirst()
-            .get();
-        obligationVO.setClient(clientMapper.entityToClass(client));
-      }
+    if (StringUtils.isNotBlank(obligation.getClientId()) && !CollectionUtils.isEmpty(clients)) {
+      Client client = clients.stream()
+          .filter(clientValue -> clientValue.getClientId().toString()
+              .equals(obligation.getClientId())).findFirst()
+          .get();
+      obligationVO.setClient(clientMapper.entityToClass(client));
     }
     //Find countries from rod. These are the countries bounded to the obligation. Might be several.
-    if (StringUtils.isNotBlank(obligation.getSpatialId())) {
+    if (StringUtils.isNotBlank(obligation.getSpatialId()) && !CollectionUtils.isEmpty(countries)) {
       //Countries in the obligation comes in comma separated values. Need to convert to a list before being treated.
       final List<String> spatialIds = obligation.getSpatialId().endsWith(",") ? Arrays.asList(
           obligation.getSpatialId().substring(0, obligation.getSpatialId().length() - 1).split(","))
           : Arrays.asList(obligation.getSpatialId().split(","));
       //Find in rod the countries bounded to the obligation and setting them to the final ObligationVO
-      countries = this.countryFeignRepository.findAll().stream()
+      List<Country> filteredCountries = countries.stream()
           .filter(countryValue -> spatialIds.contains(countryValue.getSpatialId().toString()))
           .collect(
               Collectors.toList());
-      obligationVO.setCountries(countryMapper.entityListToClass(countries));
+      obligationVO.setCountries(countryMapper.entityListToClass(filteredCountries));
 
       //Find issues from rod. These are the issues bounded to the obligation. Might be several.
-      if (StringUtils.isNotBlank(obligation.getSpatialId())) {
+      if (StringUtils.isNotBlank(obligation.getSpatialId()) && !CollectionUtils.isEmpty(issues)) {
         //Issues in the obligation comes in comma separated values. Need to convert to a list before being treated.
         final List<String> issuesIds = obligation.getIssueId().endsWith(",") ? Arrays.asList(
             obligation.getIssueId().substring(0, obligation.getIssueId().length() - 1)
                 .split(","))
             : Arrays.asList(obligation.getIssueId().split(","));
         //Find in rod the issues bounded to the obligation and setting them to the final ObligationVO
-        issues = this.issueFeignRepository.findAll().stream()
+        List<Issue> filteredIssues = issues.stream()
             .filter(issueValue -> issuesIds.contains(issueValue.getIssueId().toString()))
             .collect(
                 Collectors.toList());
-        obligationVO.setIssues(issueMapper.entityListToClass(issues));
+        obligationVO.setIssues(issueMapper.entityListToClass(filteredIssues));
       }
 
     }
