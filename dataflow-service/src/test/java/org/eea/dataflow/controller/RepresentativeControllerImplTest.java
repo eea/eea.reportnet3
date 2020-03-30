@@ -26,10 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class RepresentativeControllerImplTest.
- */
+/** The Class RepresentativeControllerImplTest. */
 @RunWith(MockitoJUnitRunner.class)
 public class RepresentativeControllerImplTest {
 
