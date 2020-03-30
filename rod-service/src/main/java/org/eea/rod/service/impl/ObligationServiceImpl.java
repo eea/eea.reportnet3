@@ -61,7 +61,8 @@ public class ObligationServiceImpl implements ObligationService {
       Date deadlineDateFrom,
       Date deadlineDateTo) {
     List<Obligation> obligations = obligationFeignRepository
-        .findOpenedObligations(clientId, issueId, spatialId, deadlineDateFrom, deadlineDateTo);
+        .findOpenedObligations(clientId, issueId, spatialId, deadlineDateFrom.getTime(),
+            deadlineDateTo.getTime());
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
     List<Client> clients = this.clientFeignRepository.findAll();
     List<Country> countries = this.countryFeignRepository.findAll();

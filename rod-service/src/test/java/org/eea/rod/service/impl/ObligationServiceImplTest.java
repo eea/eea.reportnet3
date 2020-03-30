@@ -105,7 +105,7 @@ public class ObligationServiceImplTest {
     obligations.add(obligation);
     Mockito.when(obligationFeignRepository
         .findOpenedObligations(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt(), Mockito.any(
-            Date.class), Mockito.any(Date.class))).thenReturn(obligations);
+            Long.class), Mockito.any(Long.class))).thenReturn(obligations);
     List<ObligationVO> obligationVOs = new ArrayList<>();
     ObligationVO obligationVO = new ObligationVO();
     obligationVO.setObligationId(1);

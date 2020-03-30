@@ -1,6 +1,5 @@
 package org.eea.rod.persistence.repository;
 
-import java.util.Date;
 import java.util.List;
 import org.eea.rod.persistence.domain.Obligation;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,8 +32,8 @@ public interface ObligationFeignRepository {
       @RequestParam(value = "clientId", required = false) Integer clientId,
       @RequestParam(value = "issueId", required = false) Integer issueId,
       @RequestParam(value = "spatialId", required = false) Integer spatialId,
-      @RequestParam(value = "dateFrom", required = false) Date dateFrom,
-      @RequestParam(value = "dateTo", required = false) Date dateTo);
+      @RequestParam(value = "dateFrom", required = false) Long dateFrom,
+      @RequestParam(value = "dateTo", required = false) Long dateTo);
 
   /**
    * Find obligation by obligation id
