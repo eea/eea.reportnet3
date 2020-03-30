@@ -1,5 +1,6 @@
 package org.eea.rod.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -65,8 +66,8 @@ public class ObligationServiceImpl implements ObligationService {
             deadlineDateTo.getTime());
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
     List<Client> clients = this.clientFeignRepository.findAll();
-    List<Country> countries = this.countryFeignRepository.findAll();
-    List<Issue> issues = this.issueFeignRepository.findAll();
+    List<Country> countries = new ArrayList<>();//this.countryFeignRepository.findAll(); this will not be necessary at the moment
+    List<Issue> issues = new ArrayList<>();//this.issueFeignRepository.findAll();this will not be necessary at the moment
 
     for (int i = 0; i < obligations.size(); i++) {
       fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i), clients, countries,
