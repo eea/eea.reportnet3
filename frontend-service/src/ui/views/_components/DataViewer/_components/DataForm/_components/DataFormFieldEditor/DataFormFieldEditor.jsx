@@ -33,6 +33,20 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     setColumnWithLinks(inmColumn);
   };
 
+  const getFilter = type => {
+    switch (type) {
+      case 'NUMBER':
+      case 'POINT':
+      case 'COORDINATE_LONG':
+      case 'COORDINATE_LAT':
+        return 'num';
+      case 'TEXT':
+        return 'alphanum';
+      default:
+        return 'alphanum';
+    }
+  };
+
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField) => {
     if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
       return [];
@@ -87,7 +101,12 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     ) : type === 'LINK' ? (
       renderLinkDropdown(field, fieldValue)
     ) : (
-      <InputText id={field} onChange={e => onChangeForm(field, e.target.value)} value={fieldValue} />
+      <InputText
+        id={field}
+        keyfilter={getFilter(type)}
+        onChange={e => onChangeForm(field, e.target.value)}
+        value={fieldValue}
+      />
     );
 
   const renderLinkDropdown = (field, fieldValue) => (
