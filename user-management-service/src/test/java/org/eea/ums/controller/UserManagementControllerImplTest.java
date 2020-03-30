@@ -272,7 +272,7 @@ public class UserManagementControllerImplTest {
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).updateUser(Mockito.any());
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void updateUserAttributesTestError() {
     Map<String, List<String>> attributes = new HashMap<String, List<String>>();
     List<String> atts = new ArrayList<String>();
@@ -289,6 +289,7 @@ public class UserManagementControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
     }
   }
 
@@ -307,7 +308,7 @@ public class UserManagementControllerImplTest {
     assertEquals("error", attributes, userManagementController.getUserAttributes());
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void getUserAttributesTestError() {
     Map<String, List<String>> attributes = new HashMap<String, List<String>>();
     UserRepresentation user = new UserRepresentation();
@@ -323,6 +324,7 @@ public class UserManagementControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
     }
   }
 
@@ -333,7 +335,7 @@ public class UserManagementControllerImplTest {
         .addContributorToUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void addContributorToResourceErrorTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
         .addContributorToUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
@@ -343,10 +345,11 @@ public class UserManagementControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
     }
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void addContributorsToResourceErrorTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
         .addContributorsToUserGroup(Mockito.any());
@@ -355,6 +358,7 @@ public class UserManagementControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
     }
   }
 
