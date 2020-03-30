@@ -59,8 +59,8 @@
     "LTEQ": "<=",
     "EQ": "=",
     "DIST": "!=",
-    "SEQ": "SEQ",
-    "SEQIC": "SEQIC",
+    "SEQ": "=",
+    "SEQIC": "LIKE",
     "LEN": "LEN"
   },
   "errorLevels": [

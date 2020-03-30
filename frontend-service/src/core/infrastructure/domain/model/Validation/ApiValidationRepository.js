@@ -44,6 +44,23 @@ const getAll = async datasetSchemaId => {
   return validationsList;
 };
 
+const update = async (datasetSchemaId, validationRule) => {
+  const { expressions } = validationRule;
+  const validation = {
+    description: validationRule.description,
+    automatic: false,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.field.code,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    type: 'FIELD',
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    whenCondition: getCreationDTO(expressions[0], 0, expressions)
+  };
+
+  return await apiValidation.update(datasetSchemaId, validation);
+};
+
 export const ApiValidationRepository = {
   create,
   deleteById,

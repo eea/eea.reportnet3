@@ -7,14 +7,18 @@ import isNil from 'lodash/isNil';
 
 export const getExpressionFromDTO = (expression, parentUnion) => {
   const union = !isNil(parentUnion) ? parentUnion : '';
-  const newExpression = {
-    expressionId: uuid.v4(),
-    group: false,
-    union,
-    operatorType: getExpressionOperatorType(expression.operator),
-    operatorValue: config.validations.reverseEquivalences[expression.operator],
-    expressionValue: expression.arg2,
-    expressions: []
-  };
+  const newExpression = {};
+  newExpression.expressionId = uuid.v4();
+  newExpression.group = false;
+  newExpression.union = union;
+  newExpression.operatorValue = config.validations.reverseEquivalences[expression.operator];
+  newExpression.expressionValue = expression.arg2;
+  newExpression.expressions = [];
+  if (!isNil(expression.arg2) && !isNil(expression.arg2.operator) && expression.arg2.operator == 'LEN') {
+    newExpression.operatorType = 'LEN';
+    newExpression.expressionValue = expression.arg1;
+  } else {
+    newExpression.operatorType = getExpressionOperatorType(expression.operator);
+  }
   return newExpression;
 };
