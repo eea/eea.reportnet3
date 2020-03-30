@@ -541,7 +541,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data. Rollback");
+        LOG_ERROR
+            .error("Error restoring the snapshot data due to error {}. Rollback", e.getMessage(),
+                e);
         con.rollback();
       }
       try {
@@ -550,7 +552,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 .datasetId(idSnapshot).error("Error restoring the snapshot data. Rollback")
                 .build());
       } catch (EEAException ex) {
-        LOG.error("Error realeasing event " + failEventType, ex);
+        LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
       }
     } finally {
       if (null != stmt) {

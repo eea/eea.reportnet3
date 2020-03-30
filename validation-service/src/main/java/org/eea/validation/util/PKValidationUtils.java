@@ -11,6 +11,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.Validation;
@@ -111,9 +112,9 @@ public class PKValidationUtils {
    * @param idRule the id rule
    * @return the boolean
    */
-  public static Boolean isfieldPK(String datasetId, String idFieldSchema, String idRule) {
+  public static Boolean isfieldPK(DatasetValue datasetId, String idFieldSchema, String idRule) {
     // Id dataset to Validate
-    long datasetIdReference = Long.parseLong(datasetId);
+    long datasetIdReference = datasetId.getId();
 
     // Get FK Schema
     String fkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdReference);
