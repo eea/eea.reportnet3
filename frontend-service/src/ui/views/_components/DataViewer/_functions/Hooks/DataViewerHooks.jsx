@@ -91,7 +91,7 @@ export const useSetColumns = (
       !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
         ? `<span style="font-weight:bold">Description:</span> ${
             !isNil(column.description) ? column.description : 'No description'
-          }<br/><span style="font-weight:bold">Codelists: </span>
+          }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
           ${column.codelistItems
             .map(codelistItem =>
               !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem

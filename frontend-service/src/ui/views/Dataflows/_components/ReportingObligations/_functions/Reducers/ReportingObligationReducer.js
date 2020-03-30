@@ -3,7 +3,7 @@ export const ReportingObligationReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
-    case 'LOADING_DATA':
+    case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
     default:
