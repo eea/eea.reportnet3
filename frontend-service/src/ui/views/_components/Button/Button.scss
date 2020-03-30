@@ -249,13 +249,13 @@ body .p-button.p-button-animated-blink span:first-child:hover {
   transition: 0.08s auto;
 }
 
-body .p-button.p-button-animated-success:hover span:first-child:not(:hover) {
-  color: var(--success-color-lighter);
-}
+// body .p-button.p-button-animated-success:hover span:first-child:not(:hover) {
+//   color: var(--success-color);
+// }
 
-body .p-button.p-button-animated-success span:first-child:hover {
-  color: var(--success-color-lighter);
-}
+// body .p-button.p-button-animated-success span:first-child:hover {
+//   color: var(--success-color);
+// }
 
 body .p-button.p-button-animated-upload:hover span:first-child:not(:hover) {
   animation: upload 1s linear infinite;
