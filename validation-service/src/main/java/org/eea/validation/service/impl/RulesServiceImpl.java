@@ -278,15 +278,14 @@ public class RulesServiceImpl implements RulesService {
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
     List<Rule> ruleList = new ArrayList<>();
-    // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
+    // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
     String shortcode = "01";
+    shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
     if (required) {
-      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
     } else {
-      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       switch (typeData) {
         case NUMBER:
           ruleList.add(AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
@@ -311,7 +310,7 @@ public class RulesServiceImpl implements RulesService {
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
-          // that is for evite do many calls to database and colapse it
+          // that is for avoid do many calls to database and collapse it
           DataSetSchema datasetSchema =
               schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
           String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
@@ -321,7 +320,7 @@ public class RulesServiceImpl implements RulesService {
               datasetId));
           break;
         case CODELIST:
-          // we find values avaliable to create this validation for a codelist, same value with
+          // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
@@ -335,9 +334,8 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (!ruleList.isEmpty()) {
-      ruleList.stream().forEach(rule -> {
-        rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
-      });
+      ruleList.stream()
+          .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
 
     }
   }
