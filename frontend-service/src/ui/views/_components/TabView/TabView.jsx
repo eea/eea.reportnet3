@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import { isUndefined, isNull } from 'lodash';
+
+import isUndefined from 'lodash/isUndefined';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
@@ -48,12 +52,7 @@ export const TabView = ({
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
   useEffect(() => {
     setTimeout(() => {
-      if (
-        !isUndefined(ulTabsRef.current) &&
-        !isNull(ulTabsRef.current) &&
-        !isUndefined(divTabsRef.current) &&
-        !isNull(divTabsRef.current)
-      ) {
+      if (!isNil(ulTabsRef.current) && !isNil(divTabsRef.current)) {
         if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
           setIsNavigationHidden(false);
         }
@@ -75,13 +74,10 @@ export const TabView = ({
         });
       } else {
         if (!tab.props.disabled) {
-          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
-            onTabClick({ originalEvent: event, index: index, header: tab.props.header });
-          }
-          if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+          if (!isNil(onTabChange)) {
             onTabChange({ originalEvent: event, index: index });
           } else {
-            if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+            if (!isNil(onTabClick)) {
               onTabClick({ originalEvent: event, index: index, header: tab.props.header });
             }
           }
@@ -89,13 +85,13 @@ export const TabView = ({
       }
     } else {
       if (!tab.props.disabled) {
-        if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
-          onTabClick({ originalEvent: event, index: index, header: tab.props.header });
-        }
-        if (!isUndefined(onTabChange) && !isNull(onTabChange)) {
+        // if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+        //   onTabClick({ originalEvent: event, index: index, header: tab.props.header });
+        // }
+        if (!isNil(onTabChange)) {
           onTabChange({ originalEvent: event, index: index });
         } else {
-          if (!isUndefined(onTabClick) && !isNull(onTabClick)) {
+          if (!isNil(onTabClick)) {
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
         }
@@ -257,23 +253,21 @@ export const TabView = ({
     return <div className="p-tabview-panels">{contents}</div>;
   };
 
-  const renderConfirmDialog = () => {
-    return (
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteTabHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => {
-          onTabConfirmDelete(idxToDelete);
-          setIsDeleteDialogVisible(false);
-        }}
-        onHide={() => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteTabConfirm']}
-      </ConfirmDialog>
-    );
-  };
+  const renderConfirmDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteTabHeader']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => {
+        onTabConfirmDelete(idxToDelete);
+        setIsDeleteDialogVisible(false);
+      }}
+      onHide={() => setIsDeleteDialogVisible(false)}
+      visible={isDeleteDialogVisible}>
+      {resources.messages['deleteTabConfirm']}
+    </ConfirmDialog>
+  );
 
   const scrollTo = (xCoordinate, yCoordinate) => {
     divTabsRef.current.scrollTo(xCoordinate, yCoordinate);
@@ -297,7 +291,7 @@ export const TabView = ({
     <div id={id} className={classNamed} style={style}>
       {renderNavigator()}
       {renderContent()}
-      {!isErrorDialogVisible ? renderConfirmDialog() : null}
+      {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
     </div>
   );
 };
