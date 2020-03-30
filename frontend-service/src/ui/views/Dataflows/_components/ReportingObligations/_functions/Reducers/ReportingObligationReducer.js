@@ -1,4 +1,4 @@
-export const ReportingObligationReducer = (state, { type, payload }) => {
+export const reportingObligationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
@@ -8,6 +8,9 @@ export const ReportingObligationReducer = (state, { type, payload }) => {
 
     case 'ON_SELECT_OBL':
       return { ...state, oblChoosed: payload.oblChoosed };
+
+    case 'ON_TOGGLE_VIEW':
+      return { ...state, isTableView: payload.view };
 
     default:
       return state;

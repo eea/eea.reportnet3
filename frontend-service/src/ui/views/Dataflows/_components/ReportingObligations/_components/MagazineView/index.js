@@ -1,0 +1,1 @@
+export { MagazineView } from './MagazineView';
