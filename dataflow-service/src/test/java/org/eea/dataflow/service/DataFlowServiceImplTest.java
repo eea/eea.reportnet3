@@ -846,7 +846,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(designDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     doThrow(MockitoException.class).when(resourceManagementControllerZull)
-        .deleteResourceByDatasetId(Mockito.any());
+        .deleteResource(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {
