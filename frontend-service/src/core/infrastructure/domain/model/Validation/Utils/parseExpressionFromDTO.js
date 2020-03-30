@@ -1,21 +1,20 @@
 import isNil from 'lodash/isNil';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
-import { getExpressionsGroupFromDTO } from './getExpressionsGroupFromDTO';
 
 export const parseExpressionFromDTO = (expression, expressionOperator = null) => {
-  console.log('parseExpressionFromDTO', expression);
-
   const expressions = [];
   const allExpressions = [];
 
-  if (!isNil(expression) && expression.operator != 'AND' && expression.operator != 'OR') {
-    const newExpression = getExpressionFromDTO(expression, expressionOperator);
-    allExpressions.push(getExpressionFromDTO(newExpression));
-    return newExpression;
-  } else {
-    expressions.push(parseExpressionFromDTO(expression.arg1));
-    expressions.push(parseExpressionFromDTO(expression.arg2, expression.operator));
+  if (!isNil(expression)) {
+    if (expression.operator != 'AND' && expression.operator != 'OR') {
+      const newExpression = getExpressionFromDTO(expression, expressionOperator);
+      allExpressions.push(getExpressionFromDTO(newExpression));
+      return newExpression;
+    } else {
+      expressions.push(parseExpressionFromDTO(expression.arg1));
+      expressions.push(parseExpressionFromDTO(expression.arg2, expression.operator));
+    }
   }
   return {
     expressions,
