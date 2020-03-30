@@ -130,7 +130,7 @@ public class DataCollectionControllerImplTest {
         Mockito.any());
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void updateDataCollectionTestException() {
     Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
         .thenReturn(TypeStatusEnum.DESIGN);
@@ -142,6 +142,7 @@ public class DataCollectionControllerImplTest {
       dataCollectionControllerImpl.updateDataCollection(1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.NOT_DRAFT_DATAFLOW, e.getReason());
+      throw e;
     }
   }
 
