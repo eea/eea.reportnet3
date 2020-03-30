@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import ObligationConf from 'conf/obligation.config.json';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -31,15 +32,14 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const [ReportingObligationState, ReportingObligationDispatch] = useReducer(ReportingObligationReducer, {
     data: [],
-    isLoading: false
+    isLoading: false,
+    oblChoosed: {}
   });
 
   console.log('ReportingObligationState', ReportingObligationState);
 
   useEffect(() => {
-    if (refresh) {
-      onLoadReportingObligations();
-    }
+    if (refresh) onLoadReportingObligations();
   }, [refresh]);
 
   const onLoadingData = value => ReportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -55,18 +55,34 @@ export const ReportingObligations = (dataflowId, refresh) => {
     }
   };
 
+  const onLoadCheckButton = row => <Checkbox checked={true} onChange={() => onSelectObl(row)} role="checkbox" />;
+
+  const onSelectObl = rowData => {
+    const oblChoosed = { id: rowData.obligationId, title: rowData.oblTitle };
+    ReportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
+  };
+
+  const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
+
   const renderColumns = data => {
-    return (
-      <Column
-        // body={template}
-        // key={field}
-        columnResizeMode="expand"
-        // field={field}
-        // header={getHeader(field)}
-        // sortable={true}
-        // style={columnStyles(field)}
-      />
+    const repOblCols = [];
+    const repOblKeys = !isEmpty(data) ? Object.keys(data[0]) : [];
+    repOblCols.push(
+      repOblKeys.map(obligation => (
+        <Column
+          key={obligation}
+          field={obligation}
+          // body={template}
+          // key={field}
+          columnResizeMode="expand"
+          // field={field}
+          header={obligation}
+          // sortable={true}
+          // style={columnStyles(field)}
+        />
+      ))
     );
+    return [renderCheckColum, ...repOblCols];
   };
 
   const renderData = data => (
