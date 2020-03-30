@@ -34,7 +34,7 @@ export const BigButtonList = ({
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
-  hasRepresentativesWithoutDatasets,
+  isUpdateDatasetsNewRepresentativesActive,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
@@ -272,7 +272,7 @@ export const BigButtonList = ({
     getDeleteSchemaIndex,
     handleRedirect,
     hasRepresentatives,
-    hasRepresentativesWithoutDatasets,
+    isUpdateDatasetsNewRepresentativesActive,
     hasWritePermissions,
     isCreateButtonActive,
     isCustodian,
@@ -299,51 +299,59 @@ export const BigButtonList = ({
         </div>
       </div>
 
-      <Dialog
-        header={resources.messages['newDatasetSchema']}
-        visible={newDatasetDialog}
-        className={styles.dialog}
-        dismissableMask={false}
-        onHide={() => {
-          setNewDatasetDialog(false);
-          setIsFormReset(false);
-        }}>
-        <NewDatasetSchemaForm
-          dataflowId={dataflowId}
-          datasetSchemaInfo={updatedDatasetSchema}
-          isFormReset={isFormReset}
-          onCreate={onCreateDatasetSchema}
-          onUpdateData={onUpdateData}
-          setNewDatasetDialog={setNewDatasetDialog}
-        />
-      </Dialog>
+      {newDatasetDialog && (
+        <Dialog
+          header={resources.messages['newDatasetSchema']}
+          visible={newDatasetDialog}
+          className={styles.dialog}
+          dismissableMask={false}
+          onHide={() => {
+            setNewDatasetDialog(false);
+            setIsFormReset(false);
+          }}>
+          <NewDatasetSchemaForm
+            dataflowId={dataflowId}
+            datasetSchemaInfo={updatedDatasetSchema}
+            isFormReset={isFormReset}
+            onCreate={onCreateDatasetSchema}
+            onUpdateData={onUpdateData}
+            setNewDatasetDialog={setNewDatasetDialog}
+          />
+        </Dialog>
+      )}
 
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={isDuplicated}>
-        <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
-      </Dialog>
+      {isDuplicated && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={onHideErrorDialog}
+          visible={isDuplicated}>
+          <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
+        </Dialog>
+      )}
 
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={errorDialogVisible}>
-        <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
-      </Dialog>
+      {errorDialogVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={onHideErrorDialog}
+          visible={errorDialogVisible}>
+          <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
+        </Dialog>
+      )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete'].toUpperCase()}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
-        onHide={() => setDeleteDialogVisible(false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetSchema']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
+          onHide={() => setDeleteDialogVisible(false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetSchema']}
+        </ConfirmDialog>
+      )}
 
       {isUpdateDatacollectionDialogVisible && (
         <ConfirmDialog
@@ -357,27 +365,29 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <ConfirmDialog
-        header={resources.messages['createDataCollection']}
-        disabledConfirm={isUndefined(dataCollectionDueDate)}
-        labelCancel={resources.messages['close']}
-        labelConfirm={resources.messages['create']}
-        onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
-        onHide={() => setDataCollectionDialog(false)}
-        visible={dataCollectionDialog}>
-        <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
-        <Calendar
-          className={styles.calendar}
-          inline={true}
-          monthNavigator={true}
-          minDate={new Date()}
-          onChange={event => setDataCollectionDueDate(event.target.value)}
-          showWeek={true}
-          value={dataCollectionDueDate}
-          yearNavigator={true}
-          yearRange="2020:2030"
-        />
-      </ConfirmDialog>
+      {dataCollectionDialog && (
+        <ConfirmDialog
+          header={resources.messages['createDataCollection']}
+          disabledConfirm={isUndefined(dataCollectionDueDate)}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
+          onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
+          onHide={() => setDataCollectionDialog(false)}
+          visible={dataCollectionDialog}>
+          <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+          <Calendar
+            className={styles.calendar}
+            inline={true}
+            monthNavigator={true}
+            minDate={new Date()}
+            onChange={event => setDataCollectionDueDate(event.target.value)}
+            showWeek={true}
+            value={dataCollectionDueDate}
+            yearNavigator={true}
+            yearRange="2020:2030"
+          />
+        </ConfirmDialog>
+      )}
 
       {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
     </>

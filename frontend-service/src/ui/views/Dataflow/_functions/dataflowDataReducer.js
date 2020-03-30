@@ -6,8 +6,8 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'HAS_REPRESENTATIVES':
       return { ...state, hasRepresentatives: payload.hasRepresentatives };
 
-    case 'HAS_REPRESENTATIVES_WITHOUT_DATASETS':
-      return { ...state, hasRepresentativeWithoutDatasets: payload.hasRepresentativeWithoutDatasets };
+    case 'MANAGE_UPDATE_DATASETS_NEW_REPRESENTATIVES':
+      return { ...state, isUpdateDatasetsNewRepresentativesActive: payload.isUpdateDatasetsNewRepresentativesActive };
 
     case 'MANAGE_DIALOGS':
       return {

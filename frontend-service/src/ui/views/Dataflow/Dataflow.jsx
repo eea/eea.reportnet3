@@ -77,7 +77,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
-    hasRepresentativeWithoutDatasets: false,
+    isUpdateDatasetsNewRepresentativesActive: false,
     name: '',
     status: ''
   });
@@ -276,10 +276,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const onCheckRepresentatives = value =>
     dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
 
-  const onCheckRepresentativesWithoutDatasets = value =>
+  const onCheckNewRepresentatives = value =>
     dataflowDataDispatch({
-      type: 'HAS_REPRESENTATIVES_WITHOUT_DATASETS',
-      payload: { hasRepresentativesWithoutDatasets: value }
+      type: 'MANAGE_UPDATE_DATASETS_NEW_REPRESENTATIVES',
+      payload: { isUpdateDatasetsNewRepresentativesActive: value }
     });
 
   const onConfirmDelete = event =>
@@ -422,7 +422,7 @@ const Dataflow = withRouter(({ history, match }) => {
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
           hasRepresentatives={dataflowDataState.hasRepresentatives}
-          hasRepresentativesWithoutDatasets={dataflowDataState.hasRepresentativesWithoutDatasets}
+          isUpdateDatasetsNewRepresentativesActive={dataflowDataState.isUpdateDatasetsNewRepresentativesActive}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}
@@ -435,14 +435,17 @@ const Dataflow = withRouter(({ history, match }) => {
           updatedDatasetSchema={updatedDatasetSchema}
         />
 
-        <SnapshotsDialog
-          dataflowData={dataflowDataState.data}
-          dataflowId={dataflowId}
-          datasetId={datasetIdToSnapshotProps}
-          hideSnapshotDialog={onHideSnapshotDialog}
-          isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
-          setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
-        />
+        {isActiveReleaseSnapshotDialog && (
+          <SnapshotsDialog
+            dataflowData={dataflowDataState.data}
+            dataflowId={dataflowId}
+            datasetId={datasetIdToSnapshotProps}
+            hideSnapshotDialog={onHideSnapshotDialog}
+            isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
+            setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
+          />
+        )}
+
         {isCustodian && (
           <Dialog
             contentStyle={{ maxHeight: '60vh' }}
@@ -455,100 +458,106 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
                 setHasRepresentatives={onCheckRepresentatives}
-                setHasRepresentativeWithoutDatasets={onCheckRepresentativesWithoutDatasets}
+                setIsVisibleUpdateDatasetsNewRepresentatives={onCheckNewRepresentatives}
               />
             </div>
           </Dialog>
         )}
 
-        <Dialog
-          header={resources.messages['properties']}
-          footer={
-            <>
-              <div className="p-toolbar-group-left">
-                {isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
-                  <Button
-                    className="p-button-text-only"
-                    label="Delete this dataflow"
-                    onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
-                    style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
-                  />
-                )}
-              </div>
-              <Button className="p-button-text-only" label="Generate new API-key" disabled />
-              <Button className="p-button-text-only" label="Open Metadata" disabled />
-              <Button
-                className="p-button-secondary p-button-animated-blink"
-                icon="cancel"
-                label={resources.messages['close']}
-                onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
-              />
-            </>
-          }
-          visible={dataflowDataState.isPropertiesDialogVisible}
-          onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
-          style={{ width: '50vw' }}>
-          <div className="description">{dataflowDataState.description}</div>
-          <div className="features">
-            <ul>
-              <li>
-                <strong>
-                  {UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} functionality:
-                </strong>
-                {hasWritePermissions ? 'read / write' : 'read'}
-              </li>
-              <li>
-                <strong>{UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} type:</strong>
-              </li>
-              <li>
-                <strong>REST API key:</strong> <a>Copy API-key</a> (API-key access for developers)
-              </li>
-            </ul>
-          </div>
-          <div className="actions"></div>
-        </Dialog>
+        {dataflowDataState.isPropertiesDialogVisible && (
+          <Dialog
+            header={resources.messages['properties']}
+            footer={
+              <>
+                <div className="p-toolbar-group-left">
+                  {isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
+                    <Button
+                      className="p-button-text-only"
+                      label="Delete this dataflow"
+                      onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
+                      style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
+                    />
+                  )}
+                </div>
+                <Button className="p-button-text-only" label="Generate new API-key" disabled />
+                <Button className="p-button-text-only" label="Open Metadata" disabled />
+                <Button
+                  className="p-button-secondary p-button-animated-blink"
+                  icon="cancel"
+                  label={resources.messages['close']}
+                  onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
+                />
+              </>
+            }
+            visible={dataflowDataState.isPropertiesDialogVisible}
+            onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
+            style={{ width: '50vw' }}>
+            <div className="description">{dataflowDataState.description}</div>
+            <div className="features">
+              <ul>
+                <li>
+                  <strong>
+                    {UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} functionality:
+                  </strong>
+                  {hasWritePermissions ? 'read / write' : 'read'}
+                </li>
+                <li>
+                  <strong>{UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} type:</strong>
+                </li>
+                <li>
+                  <strong>REST API key:</strong> <a>Copy API-key</a> (API-key access for developers)
+                </li>
+              </ul>
+            </div>
+            <div className="actions"></div>
+          </Dialog>
+        )}
 
-        <Dialog
-          className={styles.dialog}
-          dismissableMask={false}
-          header={resources.messages['updateDataflow']}
-          onHide={() => onManageDialogs('isEditDialogVisible', false)}
-          visible={dataflowDataState.isEditDialogVisible}>
-          <DataflowManagementForm
-            dataflowData={dataflowDataState}
-            isEditForm={true}
-            onCancel={() => onManageDialogs('isEditDialogVisible', false)}
-            onEdit={onEditDataflow}
-            refresh={dataflowDataState.isEditDialogVisible}
-          />
-        </Dialog>
-
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={resources.messages['delete'].toUpperCase()}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
-          onConfirm={() => onDeleteDataflow()}
-          onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
-          visible={dataflowDataState.isDeleteDialogVisible}>
-          <p>{resources.messages['deleteDataflow']}</p>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                dataflowName: dataflowDataState.name
-              })
-            }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              onChange={event => onConfirmDelete(event)}
-              ref={deleteInputRef}
-              value={dataflowDataState.deleteInput}
+        {dataflowDataState.isEditDialogVisible && (
+          <Dialog
+            className={styles.dialog}
+            dismissableMask={false}
+            header={resources.messages['updateDataflow']}
+            onHide={() => onManageDialogs('isEditDialogVisible', false)}
+            visible={dataflowDataState.isEditDialogVisible}>
+            <DataflowManagementForm
+              dataflowData={dataflowDataState}
+              isEditForm={true}
+              onCancel={() => onManageDialogs('isEditDialogVisible', false)}
+              onEdit={onEditDataflow}
+              refresh={dataflowDataState.isEditDialogVisible}
             />
-          </p>
-        </ConfirmDialog>
+          </Dialog>
+        )}
+
+        {dataflowDataState.isDeleteDialogVisible && (
+          <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
+            header={resources.messages['delete'].toUpperCase()}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
+            onConfirm={() => onDeleteDataflow()}
+            onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
+            visible={dataflowDataState.isDeleteDialogVisible}>
+            <p>{resources.messages['deleteDataflow']}</p>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+                  dataflowName: dataflowDataState.name
+                })
+              }}></p>
+            <p>
+              <InputText
+                autoFocus={true}
+                className={`${styles.inputText}`}
+                onChange={event => onConfirmDelete(event)}
+                ref={deleteInputRef}
+                value={dataflowDataState.deleteInput}
+              />
+            </p>
+          </ConfirmDialog>
+        )}
       </div>
     </div>
   );

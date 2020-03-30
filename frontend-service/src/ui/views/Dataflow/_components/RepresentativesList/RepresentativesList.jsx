@@ -32,7 +32,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const RepresentativesList = ({
   dataflowId,
   isActiveManageRolesDialog,
-  setHasRepresentativeWithoutDatasets,
+  setIsVisibleUpdateDatasetsNewRepresentatives,
   setHasRepresentatives
 }) => {
   const resources = useContext(ResourcesContext);
@@ -87,11 +87,17 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      const result = formState.representatives.filter(
+      const representativesNoDatasets = formState.representatives.filter(
         representative => !representative.hasDatasets && !isUndefined(representative.representativeId)
       );
 
-      setHasRepresentativeWithoutDatasets(!isEmpty(result));
+      const representativesHaveDatasets = formState.representatives.filter(
+        representative => representative.hasDatasets && !isUndefined(representative.representativeId)
+      );
+
+      setIsVisibleUpdateDatasetsNewRepresentatives(
+        !isEmpty(representativesNoDatasets) && !isEmpty(representativesHaveDatasets)
+      );
     }
   }, [formState.representatives]);
 
@@ -219,18 +225,20 @@ const RepresentativesList = ({
         <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        onConfirm={() => {
-          onDeleteConfirm(formDispatcher, formState);
-        }}
-        onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-        visible={formState.isVisibleConfirmDeleteDialog}
-        header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
-        labelConfirm={resources.messages['yes']}
-        labelCancel={resources.messages['no']}>
-        {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
-      </ConfirmDialog>
+      {formState.isVisibleConfirmDeleteDialog && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          onConfirm={() => {
+            onDeleteConfirm(formDispatcher, formState);
+          }}
+          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+          visible={formState.isVisibleConfirmDeleteDialog}
+          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
+          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+        </ConfirmDialog>
+      )}
     </div>
   );
 };

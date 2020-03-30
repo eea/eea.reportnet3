@@ -16,7 +16,7 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleRedirect,
   hasRepresentatives,
-  hasRepresentativesWithoutDatasets,
+  isUpdateDatasetsNewRepresentativesActive,
   onShowUpdateDataCollectionModal,
   hasWritePermissions,
   isCreateButtonActive,
@@ -296,13 +296,13 @@ const useBigButtonList = ({
   const updateDatasetsNewRepresentatives = [
     {
       buttonClass: 'newItem',
-      buttonIcon: !hasRepresentativesWithoutDatasets ? 'siteMap' : 'spinner',
-      buttonIconClass: !hasRepresentativesWithoutDatasets ? 'siteMap' : 'spinner',
+      buttonIcon: 'siteMap',
+      buttonIconClass: 'siteMap',
       caption: resources.messages['updateDataCollection'],
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isCreateButtonActive ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: !hasRepresentativesWithoutDatasets
+      visibility: isUpdateDatasetsNewRepresentativesActive
     }
   ];
 
