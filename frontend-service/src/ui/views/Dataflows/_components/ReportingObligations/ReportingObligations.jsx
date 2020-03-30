@@ -1,42 +1,40 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
-import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
-import { Checkbox } from 'ui/views/_components/Checkbox';
-import { Column } from 'primereact/column';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DataTable } from 'ui/views/_components/DataTable';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { MagazineView } from './_components/MagazineView';
+import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { TableView } from './_components/TableView';
 
 import { ObligationService } from 'core/services/Obligation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { ReportingObligationReducer } from './_functions/Reducers/ReportingObligationReducer';
+import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
 export const ReportingObligations = (dataflowId, refresh) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [ReportingObligationState, ReportingObligationDispatch] = useReducer(ReportingObligationReducer, {
+  const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     data: [],
     isLoading: false,
-    oblChoosed: {}
+    oblChoosed: {},
+    isTableView: true
   });
-
-  console.log('ReportingObligationState', ReportingObligationState);
 
   useEffect(() => {
     if (refresh) onLoadReportingObligations();
   }, [refresh]);
 
-  const onLoadingData = value => ReportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+  const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
-    ReportingObligationDispatch({ type: 'INITIAL_LOAD', payload: { data: await ObligationService.opened() } });
+    reportingObligationDispatch({ type: 'INITIAL_LOAD', payload: { data: await ObligationService.opened() } });
     try {
     } catch (error) {
     } finally {
@@ -44,50 +42,34 @@ export const ReportingObligations = (dataflowId, refresh) => {
     }
   };
 
-  const onLoadCheckButton = row => <Checkbox checked={true} onChange={() => onSelectObl(row)} role="checkbox" />;
-
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.obligationId, title: rowData.oblTitle };
-    ReportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
+    reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
   };
 
-  const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
+  const onToggleView = () =>
+    reportingObligationDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !reportingObligationState.isTableView } });
 
-  const renderColumns = data => {
-    const repOblCols = [];
-    const repOblKeys = !isEmpty(data) ? Object.keys(data[0]) : [];
-    repOblCols.push(
-      repOblKeys.map(obligation => (
-        <Column
-          key={obligation}
-          field={obligation}
-          // body={template}
-          // key={field}
-          columnResizeMode="expand"
-          // field={field}
-          header={obligation}
-          // sortable={true}
-          // style={columnStyles(field)}
-        />
-      ))
+  const renderData = () =>
+    reportingObligationState.isTableView ? (
+      <TableView data={reportingObligationState.data} onSelectObl={onSelectObl} />
+    ) : (
+      <MagazineView />
     );
-    return [renderCheckColum, ...repOblCols];
-  };
 
-  const renderData = () => (
-    <DataTable
-      autoLayout={true}
-      // onRowClick={event => setValidationId(event.data.id)}
-      paginator={true}
-      rows={10}
-      rowsPerPageOptions={[5, 10, 15]}
-      totalRecords={ReportingObligationState.data.length}
-      value={ReportingObligationState.data}>
-      {renderColumns(ReportingObligationState.data)}
-    </DataTable>
+  if (reportingObligationState.isLoading) return <Spinner />;
+
+  return (
+    <Fragment>
+      {/* <div style={{ display: 'flex' }}>
+        <SearchAll />
+        <InputSwitch
+          checked={reportingObligationState.isTableView}
+          onChange={() => onToggleView()}
+          style={{ marginRight: '1rem' }}
+        />
+      </div> */}
+      {isEmpty(reportingObligationState.data) ? <h3>{resources.messages['emptyValidations']}</h3> : renderData()}
+    </Fragment>
   );
-
-  if (ReportingObligationState.isLoading) return <Spinner />;
-
-  return isEmpty(ReportingObligationState.data) ? <h3>{resources.messages['emptyValidations']}</h3> : renderData();
 };
