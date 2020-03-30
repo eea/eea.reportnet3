@@ -37,7 +37,8 @@ public class ObligationControllerImpl implements ObligationController {
     Date deadlineFrom = Optional.ofNullable(deadlineDateFrom).map(date -> new Date(date))
         .orElse(null);
     Date deadlineTo = Optional.ofNullable(deadlineDateTo).map(date -> new Date(date)).orElse(null);
-    return obligationService.findOpenedObligation();
+    return obligationService
+        .findOpenedObligation(clientId, spatialId, issueId, deadlineFrom, deadlineTo);
   }
 
   @Override

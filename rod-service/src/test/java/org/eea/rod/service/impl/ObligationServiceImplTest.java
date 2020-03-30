@@ -1,6 +1,7 @@
 package org.eea.rod.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.rod.ClientVO;
 import org.eea.interfaces.vo.rod.CountryVO;
@@ -102,7 +103,9 @@ public class ObligationServiceImplTest {
     obligation.setIssueId("1,");
     obligation.setSpatialId("1,");
     obligations.add(obligation);
-    Mockito.when(obligationFeignRepository.findOpenedObligations()).thenReturn(obligations);
+    Mockito.when(obligationFeignRepository
+        .findOpenedObligations(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt(), Mockito.any(
+            Date.class), Mockito.any(Date.class))).thenReturn(obligations);
     List<ObligationVO> obligationVOs = new ArrayList<>();
     ObligationVO obligationVO = new ObligationVO();
     obligationVO.setObligationId(1);
@@ -127,7 +130,8 @@ public class ObligationServiceImplTest {
     obligationVOs.add(obligationVO);
     Mockito.when(obligationMapper.entityListToClass(Mockito.eq(obligations)))
         .thenReturn(obligationVOs);
-    List<ObligationVO> result = obligationService.findOpenedObligation();
+    List<ObligationVO> result = obligationService
+        .findOpenedObligation(1, 1, 1, new Date(), new Date());
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
     ObligationVO resultObligationVO = result.get(0);

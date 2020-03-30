@@ -1,7 +1,5 @@
 package org.eea.rod.controller;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +32,8 @@ public class ObligationControllerImplTest {
     List<ObligationVO> obligationVOs = new ArrayList<>();
     obligationVOs.add(obligationVO);
     Mockito.when(
-        obligationService.findOpenedObligation()).thenReturn(obligationVOs);
+        obligationService.findOpenedObligation(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt(),
+            Mockito.any(Date.class), Mockito.any(Date.class))).thenReturn(obligationVOs);
     List<ObligationVO> result = obligationController
         .findOpenedObligations(1, 1, 1, new Date().getTime(), new Date().getTime());
     Assert.assertNotNull(result);

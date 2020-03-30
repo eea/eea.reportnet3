@@ -1,6 +1,7 @@
 package org.eea.rod.service.impl;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -54,8 +55,13 @@ public class ObligationServiceImpl implements ObligationService {
   private IssueMapper issueMapper;
 
   @Override
-  public List<ObligationVO> findOpenedObligation() {
-    List<Obligation> obligations = obligationFeignRepository.findOpenedObligations();
+  public List<ObligationVO> findOpenedObligation(Integer clientId,
+      Integer spatialId,
+      Integer issueId,
+      Date deadlineDateFrom,
+      Date deadlineDateTo) {
+    List<Obligation> obligations = obligationFeignRepository
+        .findOpenedObligations(clientId, issueId, spatialId, deadlineDateFrom, deadlineDateTo);
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
     List<Client> clients = this.clientFeignRepository.findAll();
     List<Country> countries = this.countryFeignRepository.findAll();
