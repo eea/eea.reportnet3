@@ -1,0 +1,6 @@
+{
+  "filterItems": {
+    "input": ["comment", "description", "oblTitle"],
+    "date": ["expirationDate"]
+  }
+}

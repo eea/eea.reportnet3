@@ -490,6 +490,8 @@
     "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "deleteDatasetSchemaLinkError": "Failed deleting dataset schema. There is a link relation between schemas",
     "createQcRule": "Create QC rule",
-    "help": "Help"
+    "help": "Help",
+    "comment": "Comment",
+    "oblTitle": "Title"
   }
 }

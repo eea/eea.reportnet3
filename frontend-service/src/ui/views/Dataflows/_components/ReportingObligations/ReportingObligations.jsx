@@ -1,11 +1,14 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+
+import ObligationConf from 'conf/obligation.config.json';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Filters } from 'ui/views/Dataflows/_components/DataflowsList/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ObligationService } from 'core/services/Obligation';
@@ -14,10 +17,17 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { ReportingObligationReducer } from './_functions/Reducers/ReportingObligationReducer';
+import { on } from 'events';
 
 export const ReportingObligations = (dataflowId, refresh) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
+  const [filteredData, setFilteredData] = useState([]);
+
+  const onLoadFiltredData = data => {
+    setFilteredData(data);
+  };
 
   const [ReportingObligationState, ReportingObligationDispatch] = useReducer(ReportingObligationReducer, {
     data: [],
@@ -37,6 +47,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
     ReportingObligationDispatch({ type: 'INITIAL_LOAD', payload: { data: await ObligationService.opened() } });
+    onLoadFiltredData(ReportingObligationState.data);
     try {
     } catch (error) {
     } finally {
@@ -45,7 +56,6 @@ export const ReportingObligations = (dataflowId, refresh) => {
   };
 
   const renderColumns = data => {
-    console.log('data', data);
     return (
       <Column
         // body={template}
@@ -59,17 +69,26 @@ export const ReportingObligations = (dataflowId, refresh) => {
     );
   };
 
-  const renderData = () => (
-    <DataTable
-      autoLayout={true}
-      // onRowClick={event => setValidationId(event.data.id)}
-      paginator={true}
-      rows={10}
-      rowsPerPageOptions={[5, 10, 15]}
-      totalRecords={ReportingObligationState.data.length}
-      value={ReportingObligationState.data}>
-      {renderColumns(ReportingObligationState.data)}
-    </DataTable>
+  const renderData = data => (
+    <>
+      <Filters
+        data={ReportingObligationState.data}
+        dateOptions={ObligationConf.filterItems['date']}
+        getFiltredData={onLoadFiltredData}
+        inputOptions={ObligationConf.filterItems['input']}
+      />
+
+      <DataTable
+        autoLayout={true}
+        // onRowClick={event => setValidationId(event.data.id)}
+        paginator={true}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        totalRecords={ReportingObligationState.data.length}
+        value={ReportingObligationState.data}>
+        {renderColumns(ReportingObligationState.data)}
+      </DataTable>
+    </>
   );
 
   if (ReportingObligationState.isLoading) return <Spinner />;
