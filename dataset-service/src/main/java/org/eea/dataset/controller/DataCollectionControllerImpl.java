@@ -81,7 +81,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public void createEmptyDataCollection(@RequestBody @LockCriteria(name = "dataflowId",
       path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
@@ -114,8 +114,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    *
    * @param dataflowId the dataflow id
    */
+  @Override
+  @HystrixCommand
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public void updateDataCollection(
       @RequestParam("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
 
