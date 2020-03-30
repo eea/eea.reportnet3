@@ -18,25 +18,25 @@ public enum LockSignature {
   /** ValidationHelper.executeValidation(..) */
   EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
 
-  /** The force execute validation. */
+  /** ValidationControllerImpl.validateDataSetData(..) */
   FORCE_EXECUTE_VALIDATION("ValidationControllerImpl.validateDataSetData(..)"),
 
-  /** The create schema snapshot. */
+  /** DataSetSnapshotControllerImpl.createSchemaSnapshot(..) */
   CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
 
-  /** The restore schema snapshot. */
+  /** DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
-  /** The release snapshot. */
+  /** DataSetSnapshotControllerImpl.releaseSnapshot(..) */
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 
-  /** The create data collection. */
+  /** DataCollectionControllerImpl.createEmptyDataCollection(..) */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 
-  /** The delete import table. */
+  /** DataSetControllerImpl.deleteImportTable(..) */
   DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
 
-  /** The update data collection. */
+  /** DataCollectionControllerImpl.updateDataCollection(..) */
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)");
 
   /** The value. */
