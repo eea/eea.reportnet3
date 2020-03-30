@@ -53,7 +53,6 @@ public class RulesServiceImpl implements RulesService {
   /** The rules sequence repository. */
   @Autowired
   private RulesSequenceRepository rulesSequenceRepository;
-
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
@@ -234,6 +233,8 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
+
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }

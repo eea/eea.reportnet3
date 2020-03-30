@@ -50,7 +50,11 @@ public class KieBaseManager {
   /**
    * The Constant REGULATION_TEMPLATE_FILE.
    */
-  private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
+  private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
+
+
+  /** The Constant RULE_CHECK_TEMPLATE. */
+  private static final String RULE_CHECK_TEMPLATE = "/ruleCheckTemplate.drl";
 
   /** The Constant timeZone. */
   private static final ZoneId timeZone = ZoneId.of("UTC");
@@ -264,6 +268,59 @@ public class KieBaseManager {
 
     }
   }
+
+  /**
+   * Text rule correct.
+   *
+   * @param rule the rule
+   * @return true, if successful
+   */
+  public boolean textRuleCorrect(Rule rule) {
+
+    KieServices kieServices = KieServices.Factory.get();
+    ObjectDataCompiler compiler = new ObjectDataCompiler();
+    Boolean correctRules = Boolean.TRUE;
+    List<Map<String, String>> ruleAttribute = new ArrayList<>();
+    TypeValidation typeValidation = null;
+    String schemasDrools = "";
+    switch (rule.getType()) {
+      case DATASET:
+        schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
+        typeValidation = TypeValidation.DATASET;
+        break;
+      case TABLE:
+        schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
+        typeValidation = TypeValidation.TABLE;
+        break;
+      case RECORD:
+        schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
+        typeValidation = TypeValidation.RECORD;
+        break;
+      case FIELD:
+        schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
+        typeValidation = TypeValidation.FIELD;
+    }
+
+    ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
+        typeValidation, schemasDrools, rule.getWhenCondition(), rule.getThenCondition().get(0),
+        rule.getThenCondition().get(1), "orig"));
+
+
+    String generatedDRLTest =
+        compiler.compile(ruleAttribute, getClass().getResourceAsStream(RULE_CHECK_TEMPLATE));
+
+    byte[] b1 = generatedDRLTest.getBytes();
+    Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
+    KieHelper kieHelperTest = new KieHelper();
+    kieHelperTest.addResource(resourceTest, ResourceType.DRL);
+    Results results = kieHelperTest.verify();
+    // if one rule is not correct he delete it and create a dataset validation about that rule
+    if (results.hasMessages(Message.Level.ERROR)) {
+      correctRules = Boolean.FALSE;
+    }
+    return correctRules;
+  }
+
 
   /**
    * Pass data to map.
