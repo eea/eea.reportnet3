@@ -55,6 +55,8 @@ export const TabView = ({
       if (!isNil(ulTabsRef.current) && !isNil(divTabsRef.current)) {
         if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
           setIsNavigationHidden(false);
+        } else {
+          setIsNavigationHidden(true);
         }
       }
     }, 100);
@@ -169,6 +171,7 @@ export const TabView = ({
         id={id}
         index={index}
         initialTabIndexDrag={initialTabIndexDrag}
+        isNavigationHidden={isNavigationHidden}
         key={id}
         leftIcon={tab.props.leftIcon}
         newTab={tab.props.newTab}

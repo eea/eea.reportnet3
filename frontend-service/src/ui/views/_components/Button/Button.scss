@@ -241,12 +241,20 @@ body .p-button.p-button-animated-spin span:first-child:hover {
 
 body .p-button.p-button-animated-blink:hover span:first-child:not(:hover) {
   transform: scale(1.25);
-  transition: 0.08s linear;
+  transition: 0.08s auto;
 }
 
 body .p-button.p-button-animated-blink span:first-child:hover {
   transform: scale(1.25);
-  transition: 0.08s linear;
+  transition: 0.08s auto;
+}
+
+body .p-button.p-button-animated-success:hover span:first-child:not(:hover) {
+  color: var(--success-color-lighter);
+}
+
+body .p-button.p-button-animated-success span:first-child:hover {
+  color: var(--success-color-lighter);
 }
 
 body .p-button.p-button-animated-upload:hover span:first-child:not(:hover) {
