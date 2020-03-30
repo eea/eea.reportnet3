@@ -1123,6 +1123,52 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   }
 
+
+  /**
+   * Update PK catalogue and foreigns after snapshot.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataset the id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)
+      throws EEAException {
+
+    // After deleting the previous entries, we fill again the catalogue and references with the new
+    // schema that has been restored
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
+    if (dataschema.isPresent()) {
+      for (TableSchema table : dataschema.get().getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getReferencedField() != null) {
+
+            PkCatalogueSchema catalogue =
+                pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+
+            if (catalogue != null && catalogue.getIdPk() != null) {
+              catalogue.getReferenced().add(field.getIdFieldSchema());
+              pkCatalogueRepository.deleteByIdPk(field.getReferencedField().getIdPk());
+            } else {
+              catalogue = new PkCatalogueSchema();
+              catalogue.setIdPk(field.getReferencedField().getIdPk());
+              catalogue.setReferenced(new ArrayList<>());
+              catalogue.getReferenced().add(field.getIdFieldSchema());
+            }
+            pkCatalogueRepository.save(catalogue);
+            // Update the PK referenced in field schema, to mark it as referenced=true
+            this.updateIsPkReferencedInFieldSchema(
+                field.getReferencedField().getIdDatasetSchema().toString(),
+                field.getReferencedField().getIdPk().toString(), true);
+            // Add the relation into the metabase
+            addForeignRelation(idDataset, fieldSchemaNoRulesMapper.entityToClass(field));
+          }
+        }
+      }
+    }
+
+  }
+
   /**
    * Update the property isPKreferenced of the class FieldSchema
    * 
