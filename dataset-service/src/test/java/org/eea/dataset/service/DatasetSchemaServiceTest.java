@@ -1251,12 +1251,7 @@ public class DatasetSchemaServiceTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
-    PkCatalogueSchema catalogue = new PkCatalogueSchema();
-    catalogue.setIdPk(new ObjectId());
-    catalogue.setIdPk(new ObjectId());
-    catalogue.setReferenced(new ArrayList<>());
 
-    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);
 
@@ -1288,7 +1283,6 @@ public class DatasetSchemaServiceTest {
     PkCatalogueSchema catalogue = new PkCatalogueSchema();
     catalogue.setIdPk(new ObjectId());
     catalogue.setReferenced(new ArrayList<>());
-    catalogue.getReferenced().add(new ObjectId());
 
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);

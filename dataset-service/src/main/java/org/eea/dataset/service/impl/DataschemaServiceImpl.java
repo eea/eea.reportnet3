@@ -1156,11 +1156,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               catalogue.getReferenced().add(field.getIdFieldSchema());
             }
             pkCatalogueRepository.save(catalogue);
-            if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
-              this.updateIsPkReferencedInFieldSchema(
-                  field.getReferencedField().getIdDatasetSchema().toString(),
-                  field.getReferencedField().getIdPk().toString(), true);
-            }
+            // Update the PK referenced in field schema, to mark it as referenced=true
+            this.updateIsPkReferencedInFieldSchema(
+                field.getReferencedField().getIdDatasetSchema().toString(),
+                field.getReferencedField().getIdPk().toString(), true);
             // Add the relation into the metabase
             addForeignRelation(idDataset, fieldSchemaNoRulesMapper.entityToClass(field));
           }
