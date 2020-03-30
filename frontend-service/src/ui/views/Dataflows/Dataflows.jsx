@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -8,6 +8,7 @@ import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
+import { Button } from 'ui/views/_components/Button';
 import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -153,14 +154,30 @@ const Dataflows = withRouter(({ match, history }) => {
     leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
   }, [isCustodian]);
 
+  const dialogFooter = (
+    <Fragment>
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
+      />
+      <Button
+        icon="cancel"
+        className="p-button-secondary"
+        label={resources.messages['cancel']}
+        onClick={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
+      />
+    </Fragment>
+  );
+
   const onCreateDataflow = () => {
     onManageDialogs('isAddDialogVisible', false);
     dataFetch();
     // onRefreshToken();
   };
 
-  const onManageDialogs = (dialog, value, secondDialog, secondValue) =>
-    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
+  const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
+    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
 
   // const onRefreshToken = async () => {
   //   try {
@@ -218,8 +235,10 @@ const Dataflows = withRouter(({ match, history }) => {
       </div>
 
       <Dialog
+        footer={dialogFooter}
         header="reporting obligations"
         onHide={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
+        style={{ width: '90%' }}
         visible={dataflowsState.isRepObDialogVisible}>
         <ReportingObligations />
       </Dialog>

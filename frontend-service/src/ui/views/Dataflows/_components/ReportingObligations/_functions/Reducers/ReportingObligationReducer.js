@@ -6,6 +6,9 @@ export const ReportingObligationReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
+    case 'ON_SELECT_OBL':
+      return { ...state, oblChoosed: payload.oblChoosed };
+
     default:
       return state;
   }
