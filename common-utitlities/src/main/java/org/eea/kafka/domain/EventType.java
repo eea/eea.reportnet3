@@ -3,9 +3,6 @@ package org.eea.kafka.domain;
 /** The Enum EventType. */
 public enum EventType {
 
-  // DATAFLOW_CREATED("ReportingTopic"), DATASET_CREATED("ReportingTopic"),
-  // DATACOLLECTION_CREATED("ReportingTopic"),
-
   /** The connection created event. */
   CONNECTION_CREATED_EVENT("DATA_REPORTING_TOPIC", "connection_key", true),
 
