@@ -29,9 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-/**
- * The Class RepresentativeServiceImplTest.
- */
+/** The Class RepresentativeServiceImplTest. */
 public class RepresentativeServiceImplTest {
 
   /** The representative service impl. */
@@ -92,12 +90,13 @@ public class RepresentativeServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EEAException.class)
   public void deleteDataflowRepresentativeExceptionTest() throws EEAException {
     try {
       representativeServiceImpl.deleteDataflowRepresentative(null);
     } catch (EEAException e) {
       assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
     }
   }
 
