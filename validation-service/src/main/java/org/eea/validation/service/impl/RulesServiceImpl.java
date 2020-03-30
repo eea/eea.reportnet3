@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -42,9 +41,6 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table repository. */
-  @Autowired
-  private TableRepository tableRepository;
 
   /** The data set metabase controller zuul. */
   @Autowired
@@ -53,7 +49,6 @@ public class RulesServiceImpl implements RulesService {
   /** The rules schema mapper. */
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
-
 
   /** The rule mapper. */
   @Autowired
@@ -235,6 +230,8 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
+
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
