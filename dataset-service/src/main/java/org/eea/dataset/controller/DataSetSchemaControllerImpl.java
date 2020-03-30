@@ -87,6 +87,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * The record store controller zull.
    */
@@ -203,15 +206,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+
   /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   * @param forceDelete the force delete
    */
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
+  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -221,7 +227,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
     // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
-    if (!dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
+    // If forceDelete = true, skip this check. Made specially for deleting an entire dataflow
+    if ((forceDelete == null || !forceDelete)
+        && !dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.PK_REFERENCED);
     }
 
@@ -250,12 +258,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // delete the group in keycloak
         dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
             ResourceGroupEnum.DATASCHEMA_PROVIDER);
-
+        LOG.info("The Design Dataset {} has been deleted", datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             EEAErrorMessage.NOT_ENOUGH_PERMISSION);
       }
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
 
