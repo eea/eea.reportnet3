@@ -1230,4 +1230,65 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
   }
 
+
+  @Test
+  public void testUpdatePKCatalogueAndForeignsAfterSnapshotWithNoCatalogue() throws EEAException {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced);
+    field.setPk(false);
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);
+
+    dataSchemaServiceImpl.updatePKCatalogueAndForeignsAfterSnapshot("5ce524fad31fc52540abae73", 1L);
+    Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
+  }
+
+
+  @Test
+  public void testUpdatePKCatalogueAndForeignsAfterSnapshotWithCatalogue() throws EEAException {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+    referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced);
+    field.setPk(false);
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(new ArrayList<>());
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+    dataSchemaServiceImpl.updatePKCatalogueAndForeignsAfterSnapshot("5ce524fad31fc52540abae73", 1L);
+    Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
+  }
+
 }
