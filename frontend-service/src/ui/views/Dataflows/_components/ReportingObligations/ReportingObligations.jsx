@@ -36,8 +36,6 @@ export const ReportingObligations = (dataflowId, refresh) => {
     oblChoosed: {}
   });
 
-  console.log('ReportingObligationState', ReportingObligationState);
-
   useEffect(() => {
     if (refresh) onLoadReportingObligations();
   }, [refresh]);
@@ -85,6 +83,8 @@ export const ReportingObligations = (dataflowId, refresh) => {
     return [renderCheckColum, ...repOblCols];
   };
 
+  console.log('filteredData', filteredData);
+
   const renderData = data => (
     <>
       <Filters
@@ -92,6 +92,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
         dateOptions={ObligationConf.filterItems['date']}
         getFiltredData={onLoadFiltredData}
         inputOptions={ObligationConf.filterItems['input']}
+        selectOptions={ObligationConf.filterItems['select']}
       />
 
       <DataTable

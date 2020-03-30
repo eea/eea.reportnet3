@@ -93,6 +93,8 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
       selectOptions
     );
 
+    console.log('filteredData', filteredData);
+
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
 
@@ -101,6 +103,8 @@ export const Filters = ({ data, dateOptions, getFiltredData, inputOptions, selec
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
+
+    console.log('filteredSortedData', filteredSortedData);
 
     filterDispatch({
       type: 'ORDER_DATA',
