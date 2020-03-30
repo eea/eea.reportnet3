@@ -5,7 +5,6 @@ import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
 import { AccessPoint } from 'ui/views/Login/AccessPoint';
-//import { Codelists } from 'ui/views/Codelists';
 import { DataCollection } from 'ui/views/DataCollection';
 import { Dataflow } from 'ui/views/Dataflow';
 import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';

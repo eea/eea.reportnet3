@@ -259,7 +259,7 @@ const DataViewer = withRouter(
           onLoadTableData(true);
         }
 
-        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
+        if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
             if (tableData.records.length > 0) {
               dispatchRecords({

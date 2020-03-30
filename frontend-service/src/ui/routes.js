@@ -3,6 +3,8 @@ export const routes = {
   EULOGIN: '/eulogin',
   LOGIN: '/',
   CODELISTS: '/codelists',
+  DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
+  DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATA_COLLECTION: '/privacy-statement',
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
