@@ -62,6 +62,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
     try {
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
+
       setValidationsList(validationsServiceList);
     } catch (error) {
       notificationContext.add({
@@ -133,18 +134,30 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
   };
 
   const actionsTemplate = row => (
-    <>
-      <ActionsColumn
-        onDeleteClick={() => onShowDeleteDialog()}
-        onEditClick={() => {
-          validationContext.onOpenToEdit(row, 'validationsListDialog');
-          onHideValidationsDialog();
-        }}
-      />
-    </>
+    <ActionsColumn
+      onDeleteClick={() => onShowDeleteDialog()}
+      onEditClick={() => {
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
+      }}
+    />
   );
 
   const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+
+  const deleteValidationDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteValidationHeader']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => onDeleteValidation()}
+      onHide={() => onHideDeleteDialog()}
+      visible={isDeleteDialogVisible}
+      maximizable={false}>
+      {resources.messages['deleteValidationConfirm']}
+    </ConfirmDialog>
+  );
 
   const columnStyles = field => {
     const style = {};
@@ -185,10 +198,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
       return (
         <Column
           body={template}
-          key={field}
           columnResizeMode="expand"
           field={field}
           header={getHeader(field)}
+          key={field}
           sortable={true}
           style={columnStyles(field)}
         />
@@ -251,18 +264,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
   return (
     <Fragment>
       {validationList()}
-
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteValidationHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteValidation()}
-        onHide={() => onHideDeleteDialog()}
-        visible={isDeleteDialogVisible}
-        maximizable={false}>
-        {resources.messages['deleteValidationConfirm']}
-      </ConfirmDialog>
+      {isDeleteDialogVisible && deleteValidationDialog}
     </Fragment>
   );
 });

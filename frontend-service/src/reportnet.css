@@ -352,12 +352,6 @@
   --chart-bg: var(--bg);
   --chart-color: var(--main-font-color);
 
-  /* Category expandable Treeview*/
-  --category-expandable-treeview-color: var(--main-font-color);
-
-  /* Codelist expandable Treeview*/
-  --codelist-expandable-treeview-color: var(--main-font-color);
-
   /* Multiselect */
   --multiselect-bg: var(--white);
   --multiselect-border: 1px solid var(--gray-15);

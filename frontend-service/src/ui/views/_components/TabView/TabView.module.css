@@ -19,7 +19,15 @@
   display: flex;
   position: relative;
 }
-
+.navigationTabIcons {
+  color: var(--c-black-300);
+  cursor: pointer !important;
+  font-size: 1.75rem !important;
+  margin-top: 1.75px;
+}
+.navigationTabIcons:hover {
+  color: var(--black);
+}
 .scrollTab {
   scrollbar-color: var(--bg) var(--c-custom-gray);
   scrollbar-width: thin;
@@ -41,14 +49,4 @@
 
 .scrollTab::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
-}
-
-.navigationTabIcons {
-  color: var(--c-black-300);
-  cursor: pointer !important;
-  font-size: 1.75rem !important;
-  margin-top: 1.75px;
-}
-.navigationTabIcons:hover {
-  color: var(--black);
 }

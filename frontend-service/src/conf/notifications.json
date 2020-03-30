@@ -183,12 +183,6 @@
           }
         },
         {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_BY_IDS"
-        },
-        {
           "key": "ADD_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -283,46 +277,7 @@
           }
         },
         {
-          "key": "RELEASE_DATASET_SNAPSHOT_FAILED_EVENT"
-        },
-        {
-          "key": "SAVE_EDIT_CODELIST_ERROR"
-        },
-        {
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_ADD_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_CLONE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_ALL_IN_CATEGORY_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_LIST"
-        },
-        {
-          "key": "CODELIST_SERVICE_UPDATE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_ALL_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_DELETE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_GET_CATEGORY_INFO_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR"
         },
         {
           "key": "LOAD_SNAPSHOTS_LIST_ERROR"

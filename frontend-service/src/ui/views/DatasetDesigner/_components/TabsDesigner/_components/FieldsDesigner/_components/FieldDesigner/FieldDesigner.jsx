@@ -105,7 +105,6 @@ export const FieldDesigner = ({
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
 
-  const fieldRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -126,7 +125,8 @@ export const FieldDesigner = ({
 
   useEffect(() => {
     //Set pointerEvents to auto or none depending on isDragging.
-    const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
+    //because appendTo in Dropdown component we need to find the p-dropdown-panel class in the document, not in the Dropdown itself
+    const dropdownPanel = document.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
@@ -707,6 +707,7 @@ export const FieldDesigner = ({
         }
       />
       <Dropdown
+        appendTo={document.body}
         className={styles.dropdownFieldType}
         itemTemplate={fieldTypeTemplate}
         onChange={e => onChangeFieldType(e.target.value)}
@@ -719,7 +720,7 @@ export const FieldDesigner = ({
         required={true}
         placeholder={resources.messages['newFieldTypePlaceHolder']}
         scrollHeight="450px"
-        style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto' }}
+        style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto', display: 'block' }}
         value={
           fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
         }
@@ -745,8 +746,7 @@ export const FieldDesigner = ({
         }}
         onDrop={e => {
           onFieldDragDrop(e);
-        }}
-        ref={fieldRef}>
+        }}>
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
