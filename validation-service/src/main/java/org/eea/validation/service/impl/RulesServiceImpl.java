@@ -13,8 +13,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
@@ -42,10 +42,6 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table repository. */
-  @Autowired
-  private TableRepository tableRepository;
-
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
@@ -54,7 +50,10 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
 
-
+  /** The rules sequence repository. */
+  @Autowired
+  private RulesSequenceRepository rulesSequenceRepository;
+  
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
@@ -235,30 +234,11 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
+
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
-  }
-
-  /**
-   * Count rules in schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param required the required
-   * @param shortcode the shortcode
-   * @return the string
-   */
-  private String countRulesInSchema(String datasetSchemaId, boolean required, String shortcode) {
-    RulesSchema rules =
-        rulesRepository.getRulesWithTypeRuleCriteria(new ObjectId(datasetSchemaId), required);
-    List<Rule> rulesList = rules.getRules();
-    if (!rulesList.isEmpty()) {
-      String code = rulesList.get(rulesList.size() - 1).getShortCode();
-      String text = (code).substring(2, code.length());
-      int rulesSize = Integer.valueOf(text) + 1;
-      shortcode = String.format("%02d", rulesSize);
-    }
-    return shortcode;
   }
 
   /**
@@ -280,8 +260,7 @@ public class RulesServiceImpl implements RulesService {
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
-    String shortcode = "01";
-    shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
+    Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
     if (required) {
       ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
