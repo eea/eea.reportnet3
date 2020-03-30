@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Update;
 /**
  * The Class RulesSequenceRepositoryImpl.
  */
-public class RulesSequenceRepositoryImpl implements RulesSequenceRepository {
+public class ExtendedRulesSequenceRepositoryImpl implements ExtendedRulesSequenceRepository {
 
   /** The mongo template. */
   @Autowired
@@ -47,7 +47,7 @@ public class RulesSequenceRepositoryImpl implements RulesSequenceRepository {
    */
   @Override
   public long updateSequence(ObjectId datasetSchemaId) {
-    Query query = new Query(Criteria.where("ruleSchemaId").is(datasetSchemaId));
+    Query query = new Query(Criteria.where("datasetSchemaId").is(datasetSchemaId));
 
     /** Increase field sequence by 1 */
     Update update = new Update().inc("seq", 1);

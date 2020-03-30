@@ -6,7 +6,7 @@ import org.eea.validation.persistence.schemas.rule.RuleSequence;
 /**
  * The Interface RulesSequenceRepository.
  */
-public interface RulesSequenceRepository {
+public interface ExtendedRulesSequenceRepository {
 
   /**
    * Creates the sequence.
