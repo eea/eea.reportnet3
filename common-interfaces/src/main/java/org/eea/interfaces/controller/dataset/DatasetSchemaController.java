@@ -78,13 +78,16 @@ public interface DatasetSchemaController {
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(@PathVariable("datasetId") Long datasetId);
 
+
   /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   * @param forceDelete the force delete
    */
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);
+  void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "forceDelete", required = false) Boolean forceDelete);
 
   /**
    * Update dataset schema description.
