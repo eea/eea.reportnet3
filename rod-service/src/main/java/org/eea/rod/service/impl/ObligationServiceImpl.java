@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.interfaces.vo.rod.LegalInstrumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.rod.mapper.ClientMapper;
 import org.eea.rod.mapper.CountryMapper;
@@ -74,12 +75,20 @@ public class ObligationServiceImpl implements ObligationService {
     List<Issue> issues = this.issueFeignRepository.findAll();
     Obligation obligation = obligationFeignRepository.findObligationById(obligationId);
     ObligationVO obligationVO = obligationMapper.entityToClass(obligation);
+
     fillObligationSubentityFields(obligationVO, obligation, clients, countries, issues);
     return obligationVO;
   }
 
   private void fillObligationSubentityFields(ObligationVO obligationVO, Obligation obligation,
       final List<Client> clients, final List<Country> countries, final List<Issue> issues) {
+
+    //Map legal instrument information
+    LegalInstrumentVO legalInstrumentVO = new LegalInstrumentVO();
+    legalInstrumentVO.setSourceAlias(obligation.getSourceAlias());
+    legalInstrumentVO.setSourceId(obligation.getSourceId());
+    legalInstrumentVO.setSourceTitle(obligation.getSourceTitle());
+    obligationVO.setLegalInstrument(legalInstrumentVO);
 
     //Find clients from rod. Clients are unique since they are the ones registering the Obligation
     if (StringUtils.isNotBlank(obligation.getClientId()) && !CollectionUtils.isEmpty(clients)) {
