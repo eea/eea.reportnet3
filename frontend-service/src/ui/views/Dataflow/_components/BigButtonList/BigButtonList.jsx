@@ -165,7 +165,7 @@ export const BigButtonList = ({
   };
 
   const onUpdateDataCollection = async () => {
-    setDataCollectionDialog(false); //Edit to be my confirm dialog. Use  same or create new one?
+    setIsUpdateDatacollectionDialogVisible(false);
 
     setIsCreateButtonActive(false); //Edit to be update button
 
@@ -183,7 +183,7 @@ export const BigButtonList = ({
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
       notificationContext.add({
-        type: 'CREATE_DATA_COLLECTION_ERROR',
+        type: 'UPDATE_DATACOLLECTION_FAILED_EVENT',
         content: {
           dataflowId,
           dataflowName
@@ -347,13 +347,13 @@ export const BigButtonList = ({
 
       {isUpdateDatacollectionDialogVisible && (
         <ConfirmDialog
-          header="Update Data Collection Representatives"
+          header={resources.messages['updateDataCollectionHeader']}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}
           onConfirm={() => onUpdateDataCollection()}
           onHide={() => setIsUpdateDatacollectionDialogVisible(false)}
           visible={isUpdateDatacollectionDialogVisible}>
-          <p>You are about to add datasets for new Representatives</p>
+          <p>{resources.messages['updateDataCollectionMessage']}</p>
         </ConfirmDialog>
       )}
 
