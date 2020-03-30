@@ -422,6 +422,7 @@ const Dataflow = withRouter(({ history, match }) => {
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
           hasRepresentatives={dataflowDataState.hasRepresentatives}
+          hasRepresentativesWithoutDatasets={dataflowDataState.hasRepresentativesWithoutDatasets}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}

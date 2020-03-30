@@ -34,7 +34,7 @@ export const BigButtonList = ({
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
-  hasNewRepresentatives = true,
+  hasRepresentativesWithoutDatasets,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
@@ -51,6 +51,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
+  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -260,6 +261,10 @@ export const BigButtonList = ({
     setDataCollectionDialog(true);
   };
 
+  const onShowUpdateDataCollectionModal = () => {
+    setIsUpdateDatacollectionDialogVisible(true);
+  };
+
   const bigButtonList = useBigButtonList({
     dataflowData,
     dataflowId,
@@ -267,6 +272,7 @@ export const BigButtonList = ({
     getDeleteSchemaIndex,
     handleRedirect,
     hasRepresentatives,
+    hasRepresentativesWithoutDatasets,
     hasWritePermissions,
     isCreateButtonActive,
     isCustodian,
@@ -277,7 +283,7 @@ export const BigButtonList = ({
     onSaveName,
     onShowDataCollectionModal,
     onShowNewSchemaDialog,
-    onUpdateDataCollection,
+    onShowUpdateDataCollectionModal,
     receiptState,
     showReleaseSnapshotDialog,
     updatedDatasetSchema
@@ -339,7 +345,17 @@ export const BigButtonList = ({
         {resources.messages['deleteDatasetSchema']}
       </ConfirmDialog>
 
-      {/*  {isAddNewDatasets}  here render dialog in condition */}
+      {isUpdateDatacollectionDialogVisible && (
+        <ConfirmDialog
+          header="Update Data Collection Representatives"
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
+          onConfirm={() => onUpdateDataCollection()}
+          onHide={() => setIsUpdateDatacollectionDialogVisible(false)}
+          visible={isUpdateDatacollectionDialogVisible}>
+          <p>You are about to add datasets for new Representatives</p>
+        </ConfirmDialog>
+      )}
 
       <ConfirmDialog
         header={resources.messages['createDataCollection']}

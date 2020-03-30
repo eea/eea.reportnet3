@@ -16,6 +16,8 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleRedirect,
   hasRepresentatives,
+  hasRepresentativesWithoutDatasets,
+  onShowUpdateDataCollectionModal,
   hasWritePermissions,
   isCreateButtonActive,
   isCustodian,
@@ -290,16 +292,17 @@ const useBigButtonList = ({
       visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
     }
   ];
-  const createDatasetsNewRepresentatives = [
+
+  const updateDatasetsNewRepresentatives = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
-      buttonIconClass: isCreateButtonActive ? 'siteMap' : 'spinner',
-      caption: resources.messages['createDataCollection'],
+      buttonIcon: hasRepresentativesWithoutDatasets ? 'siteMap' : 'spinner',
+      buttonIconClass: hasRepresentativesWithoutDatasets ? 'siteMap' : 'spinner',
+      caption: resources.messages['updateDataCollection'],
       helpClassName: 'dataflow-datacollection-help-step',
-      handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
+      handleRedirect: isCreateButtonActive ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
+      visibility: !hasRepresentativesWithoutDatasets
     }
   ];
 
@@ -381,9 +384,9 @@ const useBigButtonList = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...createDataCollection,
-    ...createDatasetsNewRepresentatives,
     ...dataCollectionModels,
-    ...dashboardModels
+    ...dashboardModels,
+    ...updateDatasetsNewRepresentatives
   ];
 };
 
