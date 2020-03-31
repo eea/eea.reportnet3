@@ -18,26 +18,20 @@
 .validationCol {
   width: 15px;
 }
-.codelistInfoButton {
+.columnInfoButton {
   border-radius: 50% !important;
   width: 1em !important;
   height: 1em !important;
   font-size: 12pt !important;
   color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
+  background-color: var(--white) !important;
 }
 
-.codelistInfoButton span {
+.columnInfoButton > span {
   left: 46% !important;
   margin-top: -0.5em !important;
-}
-
-.codelistInfoButton:enabled:focus {
-  box-shadow: 0 0 0 0 var(--white) !important;
-}
-
-.codelistInfoButton:enabled:hover {
-  background-color: var(--white) !important;
+  margin-left: -0.48em !important;
 }
 
 .fieldColumn {
