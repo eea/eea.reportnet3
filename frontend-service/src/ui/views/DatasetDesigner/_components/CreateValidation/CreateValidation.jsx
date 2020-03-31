@@ -142,14 +142,13 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   useEffect(() => {
-    console.log('editing rule call populate', validationContext.ruleToEdit);
-    if (!isNil(validationContext.ruleToEdit) && !isEmpty(validationContext.ruleToEdit)) {
+    if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
         payload: validationContext.ruleToEdit
       });
     }
-  }, [validationContext.ruleToEdit]);
+  }, [validationContext.ruleEdit]);
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
@@ -162,7 +161,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     );
   };
 
-  const createValidationRule = async () => {
+  const onCreateValidationRule = async () => {
     try {
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
@@ -171,7 +170,20 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.error('createValidationRule error', error);
+      console.error('onCreateValidationRule error', error);
+    }
+  };
+
+  const onUpdateValidationRule = async () => {
+    try {
+      const { candidateRule } = creationFormState;
+      await ValidationService.update(datasetId, candidateRule);
+      onHide();
+    } catch (error) {
+      notificationContext.add({
+        type: 'QC_RULE_UPDATING_ERROR'
+      });
+      console.error('onUpdateValidationRule error', error);
     }
   };
 
@@ -445,7 +457,13 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
           )}
           <div className={styles.section}>
-            <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
+            <textarea
+              name=""
+              id=""
+              cols="30"
+              readOnly
+              rows="5"
+              value={creationFormState.validationRuleString}></textarea>
           </div>
         </div>
         <div className={styles.footer}>
@@ -467,15 +485,28 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               />
             </div>
             <div className={styles.subsection}>
-              <Button
-                id={`${componentName}__create`}
-                disabled={creationFormState.isValidationCreationDisabled}
-                className="p-button-primary p-button-text-icon-left"
-                type="button"
-                label={resourcesContext.messages.create}
-                icon="check"
-                onClick={e => createValidationRule()}
-              />
+              {validationContext.ruleEdit ? (
+                <Button
+                  id={`${componentName}__create`}
+                  disabled={creationFormState.isValidationCreationDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.update}
+                  icon="check"
+                  onClick={e => onUpdateValidationRule()}
+                />
+              ) : (
+                <Button
+                  id={`${componentName}__create`}
+                  disabled={creationFormState.isValidationCreationDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.create}
+                  icon="check"
+                  onClick={e => onCreateValidationRule()}
+                />
+              )}
+
               <Button
                 id={`${componentName}__cancel`}
                 className="p-button-secondary p-button-text-icon-left"

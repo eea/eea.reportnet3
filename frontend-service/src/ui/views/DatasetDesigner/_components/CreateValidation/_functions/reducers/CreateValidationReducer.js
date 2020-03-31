@@ -143,6 +143,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
+          id: payload.id,
           shortCode: payload.shortCode,
           description: payload.description,
           errorMessage: payload.message,

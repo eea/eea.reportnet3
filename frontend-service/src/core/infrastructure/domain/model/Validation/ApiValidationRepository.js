@@ -44,9 +44,10 @@ const getAll = async datasetSchemaId => {
   return validationsList;
 };
 
-const update = async (datasetSchemaId, validationRule) => {
+const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
+    ruleId: validationRule.id,
     description: validationRule.description,
     automatic: false,
     enabled: validationRule.active ? validationRule.active : false,
@@ -57,12 +58,12 @@ const update = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     whenCondition: getCreationDTO(expressions[0], 0, expressions)
   };
-
-  return await apiValidation.update(datasetSchemaId, validation);
+  return await apiValidation.update(datasetId, validation);
 };
 
 export const ApiValidationRepository = {
   create,
   deleteById,
-  getAll
+  getAll,
+  update
 };

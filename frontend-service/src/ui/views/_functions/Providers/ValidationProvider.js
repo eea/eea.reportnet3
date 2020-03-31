@@ -37,7 +37,8 @@ const validationReducer = (state, { type, payload }) => {
         isVisible: false,
         fieldId: null,
         reOpenOpener: !isNil(state.opener) ? true : false,
-        ruleEdit: false
+        ruleEdit: false,
+        ruleToEdit: {}
       };
     case 'ON_OPEN_TO_EDIT':
       return {
