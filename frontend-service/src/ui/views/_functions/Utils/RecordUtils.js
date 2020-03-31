@@ -89,6 +89,15 @@ const getCodelistItems = (colsSchema, field) => {
     : [];
 };
 
+const getCodelistItemsInSingleColumn = column => {
+  const codelistItems = column.codelistItems;
+  return !isNil(codelistItems)
+    ? codelistItems.map(codelistItem => {
+        return { itemType: codelistItem, value: codelistItem };
+      })
+    : [];
+};
+
 const getCodelistValue = (codelistItemsOptions, value) => {
   if (!isUndefined(value)) {
     return codelistItemsOptions.filter(item => item.value === value)[0];
@@ -181,6 +190,7 @@ export const RecordUtils = {
   getCellValue,
   getClipboardData,
   getCodelistItems,
+  getCodelistItemsInSingleColumn,
   getCodelistValue,
   getInitialRecordValues,
   getLinkValue,

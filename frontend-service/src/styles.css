@@ -2470,7 +2470,6 @@ body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon:hover {
   color: var(--dialog-header-icon-color-hover);
 }
 body .p-dialog .p-dialog-content {
-  /*display: inline-block;*/
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
@@ -3367,4 +3366,22 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
   position: relative;
   background-color: var(--chart-bg);
   color: var(--chart-color);
+}
+
+/* Change all scrollbar styles for webkit-based browsers */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
 }
