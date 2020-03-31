@@ -2,7 +2,11 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { capitalize, isEmpty, isNull, isUndefined } from 'lodash';
+
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebLinks.module.scss';
 
@@ -140,18 +144,18 @@ export const WebLinks = ({
     return (
       <div className={styles.webLinkEditButtons}>
         <Button
-          type="button"
-          icon="edit"
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          icon="edit"
           onClick={_ => {
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
+          type="button"
         />
         <Button
-          type="button"
-          icon="trash"
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          icon="trash"
           onClick={() => setIsConfirmDeleteVisible(true)}
+          type="button"
         />
       </div>
     );
@@ -167,13 +171,13 @@ export const WebLinks = ({
       .filter(key => key !== 'id')
       .map(key => (
         <Column
-          key={key}
+          body={key === 'url' ? linkTemplate : null}
           columnResizeMode="expand"
           field={key}
           filter={false}
           filterMatchMode="contains"
           header={key === 'url' ? key.toUpperCase() : capitalize(key)}
-          body={key === 'url' ? linkTemplate : null}
+          key={key}
           sortable={true}
         />
       ));
@@ -203,12 +207,12 @@ export const WebLinks = ({
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              style={{ float: 'left' }}
-              label={resources.messages['add']}
               icon="add"
+              label={resources.messages['add']}
               onClick={() => {
                 setIsAddOrEditWeblinkDialogVisible(true);
               }}
+              style={{ float: 'left' }}
             />
           </div>
           <div className="p-toolbar-group-right">
