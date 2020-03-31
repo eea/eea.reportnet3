@@ -79,6 +79,7 @@ public class ValidationHelper {
   @Autowired
   private TableRepository tableRepository;
 
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -120,6 +121,7 @@ public class ValidationHelper {
       if (droolsActiveSessions.containsKey(processId)) {
         LOG.info("KieBase removed for process {}", processId);
         droolsActiveSessions.remove(processId);
+
       }
     }
   }

@@ -39,11 +39,15 @@ const Category = ({
   onCodelistError,
   onCodelistSelected,
   onLoadCategories,
+  onRefreshCategory,
   // onLoadCategory,
   onToggleIncorrect,
   toggleExpandAll,
   updateEditingCodelists
 }) => {
+  const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
+
   const initialCategoryState = {
     categoryId: null,
     categoryDescription: '',
@@ -69,11 +73,10 @@ const Category = ({
     isEditingDialogVisible: false,
     isFiltered: true,
     isKeyFiltered: false,
+    isSaving: false,
     order: { name: 1, version: 1, status: 1, description: 1 }
   };
   const [categoryState, dispatchCategory] = useReducer(categoryReducer, initialCategoryState);
-  const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
 
   const statusTypes = [
     { statusType: 'Design', value: 'design' },
@@ -84,8 +87,35 @@ const Category = ({
   useEffect(() => {
     if (!isIncorrect) {
       onLoadCodelists();
+      // onRefreshCategory(category);
     }
   }, [category.codelists]);
+
+  // useEffect(() => {
+  //   onRefreshCategory(category);
+  // }, []);
+
+  useEffect(() => {
+    if (!isUndefined(isEditionModeOn)) {
+      if (isEditionModeOn) {
+        changeFilterValues(
+          'status',
+          [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+          category.codelists
+        );
+      } else {
+        if (isInDesign) {
+          changeFilterValues('status', [{ statusType: 'Ready', value: 'ready' }], category.codelists);
+        } else {
+          changeFilterValues(
+            'status',
+            [{ statusType: 'Design', value: 'design' }, { statusType: 'Ready', value: 'ready' }],
+            category.codelists
+          );
+        }
+      }
+    }
+  }, [isEditionModeOn]);
 
   useEffect(() => {
     setCategoryInputs(category.description, category.shortCode, category.id);
@@ -157,10 +187,12 @@ const Category = ({
       type: 'SET_CODELISTS_IN_CATEGORY',
       payload: { data: updatedCodelists }
     });
+    onRefreshCategory(category, updatedCodelists);
     changeFilterValues('status', categoryState.filter.status, updatedCodelists);
   };
 
   const onSaveCategory = async () => {
+    onToggleIncorrect(true);
     try {
       const response = await CodelistCategoryService.updateById(
         categoryState.categoryId,
@@ -173,11 +205,13 @@ const Category = ({
         type: 'CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR'
       });
     } finally {
+      onToggleIncorrect(false);
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
   };
 
   const onSaveCodelist = async () => {
+    dispatchCategory({ type: 'TOGGLE_IS_SAVING', payload: true });
     try {
       const response = await CodelistService.addById(
         categoryState.codelistDescription,
@@ -195,6 +229,7 @@ const Category = ({
         type: 'CODELIST_SERVICE_ADD_BY_ID_ERROR'
       });
     } finally {
+      dispatchCategory({ type: 'TOGGLE_IS_SAVING', payload: false });
       toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
     }
   };
@@ -202,13 +237,23 @@ const Category = ({
   // const onShowDeprecatedCodelists = () => {
   //   dispatchCategory({ type: 'TOGGLE_FILTER_DEPRECATED_CODELISTS' });
   // };
-
   const addCodelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button disabled={isIncorrect} icon="save" label={resources.messages['save']} onClick={onSaveCodelist} />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-primary"
+        disabled={
+          isIncorrect ||
+          categoryState.isSaving ||
+          (categoryState.codelistName.trim() === '' || categoryState.codelistVersion.trim() === '')
+        }
+        icon="save"
+        label={resources.messages['save']}
+        onClick={onSaveCodelist}
+      />
+      <Button
+        className="p-button-secondary-transparent"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_ADD_CODELIST_DIALOG_VISIBLE', false);
         }}
@@ -230,16 +275,18 @@ const Category = ({
   const categoryDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
+        className="p-button-primary"
         disabled={
           isIncorrect || !(!isEmpty(categoryState.categoryShortCode) && !isEmpty(categoryState.categoryDescription))
         }
-        label={resources.messages['save']}
         icon="save"
+        label={resources.messages['save']}
         onClick={() => onSaveCategory()}
       />
       <Button
-        label={resources.messages['cancel']}
+        className="p-button-danger"
         icon="cancel"
+        label={resources.messages['cancel']}
         onClick={() => {
           toggleDialog('TOGGLE_EDIT_DIALOG_VISIBLE', false);
           dispatchCategory({
@@ -265,7 +312,9 @@ const Category = ({
     <React.Fragment>
       <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
-          className={isIncorrect ? styles.categoryIncorrectInput : null}
+          className={
+            isIncorrect || categoryState.categoryShortCode.trim() === '' ? styles.categoryIncorrectInput : null
+          }
           id={'shortCodeInput'}
           onBlur={() =>
             onToggleIncorrect(checkCategoryDuplicates(categoryState.categoryShortCode, categoryState.categoryId))
@@ -277,6 +326,9 @@ const Category = ({
       </span>
       <span className={`${styles.categoryEditInput} p-float-label`}>
         <InputText
+          className={
+            isIncorrect || categoryState.categoryDescription.trim() === '' ? styles.categoryIncorrectInput : null
+          }
           id={'descriptionInput'}
           onChange={e => setCategoryInputs(e.target.value)}
           // required={true}
@@ -333,6 +385,7 @@ const Category = ({
   const renderDeleteDialog = () => {
     return categoryState.isDeleteConfirmDialogVisible ? (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={onConfirmDeleteCategory}
         onHide={() => toggleDialog('TOGGLE_DELETE_DIALOG_VISIBLE', false)}
         visible={categoryState.isDeleteConfirmDialogVisible}
@@ -395,7 +448,7 @@ const Category = ({
   const renderFilterOrder = property => {
     return (
       <Button
-        className={`p-button-secondary ${styles.orderIcon}`}
+        className={`p-button-secondary-transparent ${styles.orderIcon}`}
         icon={categoryState.order[property] === 1 ? 'alphabeticOrderUp' : 'alphabeticOrderDown'}
         onClick={() => onOrderCodelists(categoryState.order[property], property)}
         style={{ fontSize: '12pt' }}
@@ -437,7 +490,7 @@ const Category = ({
             optionLabel="statusType"
             options={statusTypes}
             placeholder={resources.messages['codelistStatus']}
-            style={{ fontSize: '10pt', color: 'var(--gray-65)' }}
+            style={{ fontSize: '10pt', color: 'var(--floating-label-color)' }}
             value={categoryState.filter.status}
           />
         </span>

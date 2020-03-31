@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
 
+import './TabView.scss';
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -21,15 +22,15 @@ export const TabView = ({
   initialTabIndexDrag,
   isErrorDialogVisible,
   onTabAdd,
+  onTabAddCancel,
   onTabBlur,
+  onTabChange = null,
+  onTabClick,
+  onTabConfirmDelete,
   onTabDragAndDrop,
   onTabDragAndDropStart,
-  onTabAddCancel,
-  onTabConfirmDelete,
-  onTabChange = null,
   onTabEditingHeader,
   onTabNameError,
-  onTabClick,
   renderActiveOnly = true,
   style = null,
   totalTabs
@@ -155,8 +156,6 @@ export const TabView = ({
     });
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
-    if (!isUndefined(divTabsRef.current) && !isNull(divTabsRef.current)) {
-    }
     return (
       <Tab
         addTab={tab.props.addTab}
@@ -168,6 +167,7 @@ export const TabView = ({
         editable={tab.props.editable}
         designMode={designMode}
         divScrollTabsRef={divTabsRef.current}
+        hasPKReferenced={tab.props.hasPKReferenced}
         header={tab.props.header}
         headerStyle={tab.props.headerStyle}
         id={id}
@@ -260,6 +260,7 @@ export const TabView = ({
   const renderConfirmDialog = () => {
     return (
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteTabHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

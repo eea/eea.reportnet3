@@ -2,7 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.util.UUID;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -23,7 +23,9 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The update record helper. */
+  /**
+   * The update record helper.
+   */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
@@ -46,12 +48,12 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     Integer sizeRecords = (Integer) eeaEventVO.getData().get("sizeRecords");
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
-    TypeData typeField = (TypeData) eeaEventVO.getData().get("typeField");
+    DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
 
     updateRecordHelper.propagateNewFieldDesign(datasetId, idTableSchema, sizeRecords, numPag,
         UUID.randomUUID().toString(), idFieldSchema, typeField);

@@ -1,10 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 // import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -13,25 +17,61 @@ import { RecordUtils } from 'ui/views/_functions/Utils';
 const FieldEditor = ({
   cells,
   colsSchema,
-  record,
-  onEditorValueChange,
+  datasetId,
+  onEditorKeyChange,
   onEditorSubmitValue,
+  onEditorValueChange,
   onEditorValueFocus,
-  onEditorKeyChange
+  record
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+  const [linkItemsOptions, setLinkItemsOptions] = useState([]);
+
+  const [linkItemsValue, setLinkItemsValue] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
     setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
+    setLinkItemsValue(RecordUtils.getCellValue(cells, cells.field).toString());
+  }, []);
+
+  useEffect(() => {
+    onFilter(RecordUtils.getCellValue(cells, cells.field));
   }, []);
 
   let fieldType = {};
   if (!isEmpty(record)) {
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
+
+  const onFilter = async filter => {
+    const colSchema = colsSchema.filter(colSchema => colSchema.field === cells.field)[0];
+    if (isNil(colSchema) || isNil(colSchema.referencedField)) {
+      return;
+    }
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+      datasetId,
+      isUndefined(colSchema.referencedField.name)
+        ? colSchema.referencedField.idPk
+        : colSchema.referencedField.referencedField.fieldSchemaId,
+      filter
+    );
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: referencedField.value,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
+    linkItems.unshift({
+      itemType: resources.messages['noneCodelist'],
+      value: ''
+    });
+    setLinkItemsOptions(linkItems);
+  };
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
@@ -99,11 +139,32 @@ const FieldEditor = ({
           //     yearRange="2010:2030"
           //   />
         );
+      case 'LINK':
+        return (
+          <Dropdown
+            appendTo={document.body}
+            currentValue={RecordUtils.getCellValue(cells, cells.field)}
+            filter={true}
+            filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+            filterBy="itemType,value"
+            onChange={e => {
+              setLinkItemsValue(e.target.value.value);
+              onEditorValueChange(cells, e.target.value.value);
+              onEditorSubmitValue(cells, e.target.value.value, record);
+            }}
+            onFilterInputChangeBackend={onFilter}
+            onMouseDown={e => {
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            optionLabel="itemType"
+            options={linkItemsOptions}
+            showFilterClear={true}
+            value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
+          />
+        );
       case 'CODELIST':
         return (
           <Dropdown
-            // className={!isEmbedded ? styles.dropdownFieldType : styles.dropdownFieldTypeDialog}
-            // disabled={initialStatus !== 'design'}
             appendTo={document.body}
             onChange={e => {
               setCodelistItemValue(e.target.value.value);
@@ -116,8 +177,6 @@ const FieldEditor = ({
             }}
             optionLabel="itemType"
             options={getCodelistItemsWithEmptyOption()}
-            // required={true}
-            // placeholder={resources.messages['category']}
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
           />
         );

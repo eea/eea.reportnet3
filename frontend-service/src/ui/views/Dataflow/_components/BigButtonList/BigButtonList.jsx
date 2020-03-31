@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isUndefined, remove } from 'lodash';
+import { isEmpty, isNull, isUndefined, remove } from 'lodash';
 
 import styles from './BigButtonList.module.css';
 
@@ -9,8 +9,10 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
+import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
 
@@ -19,6 +21,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
@@ -26,17 +29,20 @@ export const BigButtonList = ({
   dataflowData,
   dataflowId,
   dataflowStatus,
+  dataProviderId,
   designDatasetSchemas,
   handleRedirect,
   hasRepresentatives,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
-  onUpdateData,
   onSaveName,
+  onUpdateData,
+  receiptDispatch,
+  receiptState,
+  setUpdatedDatasetSchema,
   showReleaseSnapshotDialog,
-  updatedDatasetSchema,
-  setUpdatedDatasetSchema
+  updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -51,6 +57,45 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+
+  const receiptBtnRef = useRef(null);
+
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
+
+  useEffect(() => {
+    const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
+
+    if (response) {
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
+    }
+  }, [notificationContext]);
+
+  const downloadPdf = response => {
+    if (!isUndefined(response)) {
+      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+
+      const url = window.URL.createObjectURL(new Blob([response]));
+
+      const link = document.createElement('a');
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const removeNew = () => {
+    receiptDispatch({
+      type: 'ON_CLEAN_UP',
+      payload: { isLoading: false, isOutdated: false }
+    });
+  };
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -97,6 +142,7 @@ export const BigButtonList = ({
     try {
       return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
+      console.error(error);
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
@@ -126,6 +172,11 @@ export const BigButtonList = ({
       }
     } catch (error) {
       console.error(error.response);
+      if (error.response.status === 401) {
+        notificationContext.add({
+          type: 'DELETE_DATASET_SCHEMA_LINK_ERROR'
+        });
+      }
     } finally {
       hideLoading();
     }
@@ -140,6 +191,29 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onLoadReceiptData = async () => {
+    try {
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: true }
+      });
+      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+
+      downloadPdf(response);
+      removeNew();
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'LOAD_RECEIPT_DATA_ERROR'
+      });
+    } finally {
+      receiptDispatch({
+        type: 'ON_DOWNLOAD',
+        payload: { isLoading: false }
+      });
+    }
+  };
+
   const onShowNewSchemaDialog = () => {
     setNewDatasetDialog(true);
     setIsFormReset(true);
@@ -149,36 +223,35 @@ export const BigButtonList = ({
     setDataCollectionDialog(true);
   };
 
+  const bigButtonList = useBigButtonList({
+    dataflowData: dataflowData,
+    dataflowId: dataflowId,
+    dataflowStatus: dataflowStatus,
+    getDeleteSchemaIndex: getDeleteSchemaIndex,
+    handleRedirect: handleRedirect,
+    hasRepresentatives: hasRepresentatives,
+    hasWritePermissions: hasWritePermissions,
+    isCreateButtonActive: isCreateButtonActive,
+    isCustodian: isCustodian,
+    isDataSchemaCorrect: isDataSchemaCorrect,
+    onDatasetSchemaNameError: onDatasetSchemaNameError,
+    onDuplicateName: onDuplicateName,
+    onLoadReceiptData: onLoadReceiptData,
+    onSaveName: onSaveName,
+    onShowDataCollectionModal: onShowDataCollectionModal,
+    onShowNewSchemaDialog: onShowNewSchemaDialog,
+    receiptState: receiptState,
+    showReleaseSnapshotDialog: showReleaseSnapshotDialog,
+    updatedDatasetSchema: updatedDatasetSchema
+  })
+    .filter(button => button.visibility)
+    .map((button, i) => <BigButton key={i} {...button} />);
+
   return (
     <>
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
-          <div className={styles.datasetItem}>
-            {useBigButtonList({
-              hasWritePermissions,
-              dataflowData: dataflowData,
-              dataflowId: dataflowId,
-              dataflowStatus: dataflowStatus,
-              getDeleteSchemaIndex: getDeleteSchemaIndex,
-              handleRedirect: handleRedirect,
-              hasRepresentatives: hasRepresentatives,
-              hasWritePermissions: hasWritePermissions,
-              isCreateButtonActive: isCreateButtonActive,
-              isCustodian: isCustodian,
-              isDataSchemaCorrect: isDataSchemaCorrect,
-              onDatasetSchemaNameError: onDatasetSchemaNameError,
-              onDuplicateName: onDuplicateName,
-              onSaveName: onSaveName,
-              onShowDataCollectionModal: onShowDataCollectionModal,
-              onShowNewSchemaDialog: onShowNewSchemaDialog,
-              showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-              updatedDatasetSchema: updatedDatasetSchema
-            })
-              .filter(button => button.visibility)
-              .map((button, i) => (
-                <BigButton key={i} {...button} />
-              ))}
-          </div>
+          <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
 
@@ -218,6 +291,7 @@ export const BigButtonList = ({
       </Dialog>
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['delete'].toUpperCase()}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
@@ -248,6 +322,13 @@ export const BigButtonList = ({
           yearRange="2020:2030"
         />
       </ConfirmDialog>
+
+      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      {/* <PDFDownloadLink
+        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
+        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
+        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      </PDFDownloadLink> */}
     </>
   );
 };

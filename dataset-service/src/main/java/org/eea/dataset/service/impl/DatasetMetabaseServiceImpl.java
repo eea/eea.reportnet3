@@ -12,17 +12,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -37,7 +40,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -57,6 +60,8 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -108,6 +113,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The foreign relations repository. */
+  @Autowired
+  private ForeignRelationsRepository foreignRelationsRepository;
 
 
 
@@ -318,10 +327,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasetSchema(dataschemaId);
 
-    Map<ReportingDataset, List<Statistics>> statsMap =
+    Map<DataSetMetabase, List<Statistics>> statsMap =
         stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
 
-    statsMap.values().stream().forEach(s -> {
+    Map<DataSetMetabase, List<Statistics>> statsMapsFilteredByReportings = statsMap.entrySet()
+        .stream().filter(dsMetabase -> dsMetabase.getKey() instanceof ReportingDataset)
+        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+    statsMapsFilteredByReportings.values().stream().forEach(s -> {
       try {
         statistics.add(processStatistics(s));
       } catch (InstantiationException | IllegalAccessException e) {
@@ -338,12 +351,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Creates the group provider and add user.
    *
    * @param datasetIdsEmail the dataset ids email
-   * @param representatives the representatives
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail,
-      List<RepresentativeVO> representatives, Long dataflowId) {
+  public void createGroupProviderAndAddUser(Map<Long, String> datasetIdsEmail, Long dataflowId) {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     Set<Long> datasetIds = datasetIdsEmail.keySet();
@@ -449,7 +460,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Async
   @org.springframework.transaction.annotation.Transactional(
       value = "metabaseDataSetsTransactionManager")
-  public Future<Long> createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+  public Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
 
@@ -465,7 +476,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
               datasetIdsEmail
                   .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
             }
-            this.createGroupProviderAndAddUser(datasetIdsEmail, representatives, dataflowId);
+            this.createGroupProviderAndAddUser(datasetIdsEmail, dataflowId);
             if (iterationDC == 0) {
               // Notification
               kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -567,6 +578,78 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return datasetIdsEmail;
   }
 
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Override
+  @CheckForNull
+  public String findDatasetSchemaIdById(long datasetId) {
+    return dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+  }
+
+
+  /**
+   * Adds the foreign relation into the metabase.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
+   */
+  @Override
+  public void addForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin) {
+    ForeignRelations foreign = new ForeignRelations();
+    DataSetMetabase dsOrigin = new DataSetMetabase();
+    DataSetMetabase dsDestination = new DataSetMetabase();
+    dsOrigin.setId(datasetIdOrigin);
+    dsDestination.setId(datasetIdDestination);
+    foreign.setIdDatasetOrigin(dsOrigin);
+    foreign.setIdDatasetDestination(dsDestination);
+    foreign.setIdPk(idPk);
+    foreign.setIdFkOrigin(idFkOrigin);
+
+    foreignRelationsRepository.save(foreign);
+  }
+
+
+  /**
+   * Delete foreign relation from the metabase.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetIdDestination the dataset id destination
+   * @param idPk the id pk
+   * @param idFkOrigin the id fk origin
+   */
+  @Override
+  public void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
+      String idFkOrigin) {
+    foreignRelationsRepository.deleteFKByOriginDestinationAndPkAndIdFkOrigin(datasetIdOrigin,
+        datasetIdDestination, idPk, idFkOrigin);
+  }
+
+
+  /**
+   * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
+   * FK
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idPk the id pk
+   * @return the dataset destination foreign relation
+   */
+  @Override
+  public Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk) {
+    Long idDestination = 0L;
+    List<Long> datasetsId =
+        foreignRelationsRepository.findDatasetDestinationByOriginAndPk(datasetIdOrigin, idPk);
+    if (datasetsId != null && !datasetsId.isEmpty()) {
+      idDestination = datasetsId.get(0);
+    }
+    return idDestination;
+  }
 
 
 }

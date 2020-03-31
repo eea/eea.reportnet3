@@ -1,149 +1,73 @@
-import { isNull, isUndefined } from 'lodash';
-
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
 
+import { config } from 'conf';
+import DataflowConf from 'conf/dataflow.config.json';
+
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
+
 import { DataCollection } from 'core/domain/model/DataCollection/DataCollection';
 import { Dataflow } from 'core/domain/model/Dataflow/Dataflow';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
+import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
+import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
+import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-import { CoreUtils } from 'core/infrastructure/CoreUtils';
+import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
-const parseDataflowDTO = dataflowDTO => {
-  const dataflow = new Dataflow();
-  dataflow.creationDate = dataflowDTO.creationDate;
-  dataflow.dataCollections = parseDataCollectionListDTO(dataflowDTO.dataCollections);
-  dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
-  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
-  dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
-  dataflow.description = dataflowDTO.description;
-  dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
-  dataflow.id = dataflowDTO.id;
-  dataflow.name = dataflowDTO.name;
-  dataflow.status = dataflowDTO.status;
-  dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
-  dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
-  dataflow.requestId = dataflowDTO.requestId;
-  return dataflow;
-};
-
-const parseDataCollectionListDTO = dataCollectionsDTO => {
-  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
-    const dataCollections = [];
-    dataCollectionsDTO.forEach(dataCollectionDTO => {
-      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
-    });
-    return dataCollections;
-  }
-  return;
-};
-
-const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection(
-    dataCollectionDTO.id,
-    dataCollectionDTO.dataSetName,
-    dataCollectionDTO.idDataflow,
-    dataCollectionDTO.datasetSchema,
-    dataCollectionDTO.creationDate,
-    dataCollectionDTO.dueDate,
-    dataCollectionDTO.status
-  );
-};
-
-const parseDatasetListDTO = datasetsDTO => {
-  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
-    const datasets = [];
-    datasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
-    });
-    return datasets;
-  }
-  return;
-};
-
-const parseDatasetDTO = datasetDTO => {
-  return new Dataset(
-    null,
-    datasetDTO.id,
-    datasetDTO.datasetSchema,
-    datasetDTO.dataSetName,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    datasetDTO.isReleased,
-    null,
-    null,
-    datasetDTO.nameDatasetSchema
-  );
-};
-
-const parseDocumentListDTO = documentsDTO => {
-  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
-    const documents = [];
-    documentsDTO.forEach(documentDTO => {
-      documents.push(parseDocumentDTO(documentDTO));
-    });
-    return documents;
-  }
-  return;
-};
-
-const parseDocumentDTO = documentDTO => {
-  return new Document(
-    documentDTO.category,
-    documentDTO.dataflowId,
-    documentDTO.description,
-    documentDTO.id,
-    documentDTO.language,
-    documentDTO.name
-  );
-};
-
-const parseWebLinkListDTO = webLinksDTO => {
-  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
-    const webLinks = [];
-    webLinksDTO.forEach(webLinkDTO => {
-      webLinks.push(parseWebLinkDTO(webLinkDTO));
-    });
-    return webLinks;
-  }
-  return;
-};
-
-const parseWebLinkDTO = webLinkDTO => {
-  return new WebLink(webLinkDTO.description, webLinkDTO.url);
-};
-
-const parseDataflowDTOs = dataflowDTOs => {
-  let dataflows = dataflowDTOs.map(dataflowDTO => {
-    return parseDataflowDTO(dataflowDTO);
-  });
-
-  dataflows.sort((a, b) => {
-    let deadline_1 = a.deadlineDate;
-    let deadline_2 = b.deadlineDate;
-    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
-  });
-
-  return dataflows;
-};
-
-const all = async () => {
-  const pendingDataflowsDTO = await apiDataflow.all();
-  return {
-    pending: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING')),
-    accepted: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED')),
-    completed: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'COMPLETED'))
-  };
+const accept = async dataflowId => {
+  const status = await apiDataflow.accept(dataflowId);
+  return status;
 };
 
 const accepted = async () => {
   const acceptedDataflowsDTO = await apiDataflow.accepted();
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
+};
+
+const all = async userData => {
+  const pendingDataflowsDTO = await apiDataflow.all(userData);
+  const dataflows = !userData ? pendingDataflowsDTO : [];
+  const userRoles = [];
+
+  if (userData) {
+    const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
+    dataflowsRoles.map((item, i) => {
+      const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: DataflowConf.dataflowRoles[role] });
+    });
+
+    for (let i = 0; i < pendingDataflowsDTO.length; i++) {
+      const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+      dataflows.push({
+        ...pendingDataflowsDTO[i],
+        ...(isDuplicated
+          ? userRoles.filter(item =>
+              item.duplicatedRoles
+                ? item.userRole === DataflowConf.dataflowRoles['DATA_CUSTODIAN'] && delete item.duplicatedRoles
+                : item
+            )
+          : userRoles
+        ).find(item => item.id === pendingDataflowsDTO[i].id)
+      });
+    }
+  }
+
+  const groupByUserRequesetStatus = CoreUtils.onGroupBy('userRequestStatus');
+
+  const dataflowsData = groupByUserRequesetStatus(dataflows);
+
+  const allDataflows = DataflowConf.userRequestStatus;
+  Object.keys(dataflowsData).forEach(key => {
+    allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
+  });
+
+  return allDataflows;
 };
 
 const create = async (name, description) => {
@@ -318,14 +242,214 @@ const deleteById = async dataflowId => {
   return await apiDataflow.deleteById(dataflowId);
 };
 
+const getAllSchemas = async dataflowId => {
+  const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
+  const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
+    const dataset = new Dataset({
+      datasetSchemaDescription: datasetSchemaDTO.description,
+      datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
+      datasetSchemaName: datasetSchemaDTO.nameDatasetSchema
+      // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
+    });
+
+    const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
+      const records = !isNull(datasetTableDTO.recordSchema)
+        ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
+            const fields = !isNull(dataTableRecordDTO.fieldSchema)
+              ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+                  return new DatasetTableField({
+                    codelistItems: DataTableFieldDTO.codelistItems,
+                    description: DataTableFieldDTO.description,
+                    fieldId: DataTableFieldDTO.id,
+                    pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                    pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
+                    name: DataTableFieldDTO.name,
+                    recordId: DataTableFieldDTO.idRecord,
+                    referencedField: DataTableFieldDTO.referencedField,
+                    required: DataTableFieldDTO.required,
+                    type: DataTableFieldDTO.type
+                  });
+                })
+              : null;
+            return new DatasetTableRecord({
+              datasetPartitionId: dataTableRecordDTO.id,
+              fields,
+              recordSchemaId: dataTableRecordDTO.idRecordSchema
+            });
+          })
+        : null;
+      return new DatasetTable({
+        hasPKReferenced: !isEmpty(
+          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+        ),
+        tableSchemaId: datasetTableDTO.idTableSchema,
+        tableSchemaDescription: datasetTableDTO.description,
+        tableSchemaName: datasetTableDTO.nameTableSchema,
+        records: records,
+        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
+      });
+    });
+
+    dataset.tables = tables;
+    return dataset;
+  });
+
+  datasetSchemas.sort((a, b) => {
+    const textA = a.datasetSchemaName.toUpperCase();
+    const textB = b.datasetSchemaName.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
+  return datasetSchemas;
+};
+
+const getPercentageOfValue = (val, total) => {
+  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
+};
+
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
   return newEmptyDatasetSchemaResponse;
 };
 
+const parseDataflowDTOs = dataflowDTOs => {
+  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+  dataflows.sort((a, b) => {
+    const deadline_1 = a.expirationDate;
+    const deadline_2 = b.expirationDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+  return dataflows;
+};
+
+const parseDataflowDTO = dataflowDTO =>
+  new Dataflow({
+    creationDate: dataflowDTO.creationDate,
+    dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
+    description: dataflowDTO.description,
+    designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
+    documents: parseDocumentListDTO(dataflowDTO.documents),
+    expirationDate: !isNil(dataflowDTO.deadlineDate)
+      ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD')
+      : moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    id: dataflowDTO.id,
+    name: dataflowDTO.name,
+    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
+    requestId: dataflowDTO.requestId,
+    status: dataflowDTO.status,
+    userRequestStatus: dataflowDTO.userRequestStatus,
+    userRole: dataflowDTO.userRole,
+    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+  });
+
+const parseDataCollectionListDTO = dataCollectionsDTO => {
+  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
+    const dataCollections = [];
+    dataCollectionsDTO.forEach(dataCollectionDTO => {
+      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+    });
+    return dataCollections;
+  }
+  return;
+};
+
+const parseDataCollectionDTO = dataCollectionDTO => {
+  return new DataCollection({
+    creationDate: dataCollectionDTO.creationDate,
+    dataCollectionId: dataCollectionDTO.id,
+    dataCollectionName: dataCollectionDTO.dataSetName,
+    dataflowId: dataCollectionDTO.idDataflow,
+    datasetSchemaId: dataCollectionDTO.datasetSchema,
+    expirationDate: dataCollectionDTO.dueDate,
+    status: dataCollectionDTO.status
+  });
+};
+
+const parseDatasetListDTO = datasetsDTO => {
+  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
+    const datasets = [];
+    datasetsDTO.forEach(datasetDTO => {
+      datasets.push(parseDatasetDTO(datasetDTO));
+    });
+    return datasets;
+  }
+  return;
+};
+
+const parseDatasetDTO = datasetDTO =>
+  new Dataset({
+    datasetId: datasetDTO.id,
+    datasetSchemaId: datasetDTO.datasetSchema,
+    datasetSchemaName: datasetDTO.dataSetName,
+    isReleased: datasetDTO.isReleased,
+    name: datasetDTO.nameDatasetSchema,
+    dataProviderId: datasetDTO.dataProviderId
+  });
+
+const parseDocumentListDTO = documentsDTO => {
+  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
+    const documents = [];
+    documentsDTO.forEach(documentDTO => {
+      documents.push(parseDocumentDTO(documentDTO));
+    });
+    return documents;
+  }
+  return;
+};
+
+const parseDocumentDTO = documentDTO => {
+  return new Document({
+    category: documentDTO.category,
+    description: documentDTO.description,
+    id: documentDTO.id,
+    language: documentDTO.language,
+    title: documentDTO.name
+  });
+};
+
+const parseRepresentativeListDTO = representativesDTO => {
+  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
+    const representatives = [];
+    representativesDTO.forEach(representativeDTO => {
+      representatives.push(parseRepresentativeDTO(representativeDTO));
+    });
+    return representatives;
+  }
+  return;
+};
+
+const parseRepresentativeDTO = representativeDTO => {
+  return new Representative({
+    dataProviderGroupId: representativeDTO.dataProviderGroupId,
+    dataProviderId: representativeDTO.dataProviderId,
+    id: representativeDTO.id,
+    isReceiptDownloaded: representativeDTO.receiptDownloaded,
+    isReceiptOutdated: representativeDTO.receiptOutdated,
+    providerAccount: representativeDTO.provideraccount
+  });
+};
+
+const parseWebLinkListDTO = webLinksDTO => {
+  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
+    const webLinks = [];
+    webLinksDTO.forEach(webLinkDTO => {
+      webLinks.push(parseWebLinkDTO(webLinkDTO));
+    });
+    return webLinks;
+  }
+  return;
+};
+
+const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
+
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+};
+
+const reject = async dataflowId => {
+  const status = await apiDataflow.reject(dataflowId);
+  return status;
 };
 
 const reporting = async dataflowId => {
@@ -348,20 +472,6 @@ const update = async (dataflowId, name, description) => {
   return updatedDataflow;
 };
 
-const accept = async dataflowId => {
-  const status = await apiDataflow.accept(dataflowId);
-  return status;
-};
-
-const reject = async dataflowId => {
-  const status = await apiDataflow.reject(dataflowId);
-  return status;
-};
-
-const getPercentageOfValue = (val, total) => {
-  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
-};
-
 export const ApiDataflowRepository = {
   all,
   accept,
@@ -372,6 +482,7 @@ export const ApiDataflowRepository = {
   datasetsValidationStatistics,
   datasetsReleasedStatus,
   deleteById,
+  getAllSchemas,
   newEmptyDatasetSchema,
   pending,
   reject,

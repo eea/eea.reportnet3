@@ -3,7 +3,11 @@ package org.eea.dataset.persistence.metabase.repository;
 import java.util.List;
 import java.util.Optional;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -27,6 +31,11 @@ public interface DataCollectionRepository extends CrudRepository<DataCollection,
    * @return the optional
    */
   Optional<DataCollection> findFirstByDatasetSchema(String datasetSchema);
+
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from dataset where id in :datasetIds")
+  void deleteDatasetById(@Param("datasetIds") List<Long> datasetIds);
 
 
 }

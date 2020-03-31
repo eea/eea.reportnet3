@@ -70,6 +70,24 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    isDuplicatedInObject: (array, property) => {
+      let isDuplicated = false,
+        testObject = {};
+
+      array.map(item => {
+        const itemPropertyName = item[property];
+        if (itemPropertyName in testObject) {
+          testObject[itemPropertyName].duplicatedRoles = true;
+          item.duplicatedRoles = true;
+          isDuplicated = true;
+        } else {
+          testObject[itemPropertyName] = item;
+          delete item.duplicatedRoles;
+        }
+      });
+      return isDuplicated;
+    },
+
     onGroupBy: key => array =>
       array.reduce((objectsByKeyValue, obj) => {
         const value = obj[key];

@@ -287,10 +287,101 @@ public class ExtendedSchemaRepositoryImplTest {
   }
 
   /**
-   * Find table schema test 1.
+   * Find table schema null test.
    */
   @Test
-  public void findTableSchemaTest1() {
+  public void findTableSchemaNullTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(null);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema null document test.
+   */
+  @Test
+  public void findTableSchemaNullDocumentTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(null);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema null table schemas test.
+   */
+  @Test
+  public void findTableSchemaNullTableSchemasTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document());
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema null table schemas not array list test.
+   */
+  @Test
+  public void findTableSchemaNullTableSchemasNotArrayListTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document("tableSchemas", "string"));
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema null table schema test.
+   */
+  @Test
+  public void findTableSchemaNullTableSchemaTest() {
+    List<Document> list = new ArrayList<>();
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema null table schema not document test.
+   */
+  @Test
+  public void findTableSchemaNullTableSchemaNotDocumentTest() {
+    List<String> list = new ArrayList<>();
+    list.add("string");
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find table schema test.
+   */
+  @Test
+  public void findTableSchemaTest() {
     List<Document> list = new ArrayList<>();
     list.add(new Document("key", "value"));
     Document document = new Document("tableSchemas", list);
@@ -305,23 +396,156 @@ public class ExtendedSchemaRepositoryImplTest {
   }
 
   /**
-   * Find table schema test 2.
+   * Find field schema null document test.
    */
   @Test
-  public void findTableSchemaTest2() {
+  public void findFieldSchemaNullDocumentTest() {
     Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
     Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
     Mockito.when(find.projection(Mockito.any())).thenReturn(find);
     Mockito.when(find.first()).thenReturn(null);
-    Assert.assertNull(extendedSchemaRepositoryImpl.findTableSchema("5dd285cde8fd9d1ea8c42b1b",
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
         "5dd285cde8fd9d1ea8c42b1b"));
   }
 
   /**
-   * Find field schema test 1.
+   * Find field schema null table schemas test.
    */
   @Test
-  public void findFieldSchemaTest1() {
+  public void findFieldSchemaNullTableSchemasTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document());
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null table schemas not array list test.
+   */
+  @Test
+  public void findFieldSchemaNullTableSchemasNotArrayListTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document("tableSchemas", "string"));
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null table schema test.
+   */
+  @Test
+  public void findFieldSchemaNullTableSchemaTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document("tableSchemas", new ArrayList<>()));
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null table schema not document test.
+   */
+  @Test
+  public void findFieldSchemaNullTableSchemaNotDocumentTest() {
+    List<String> list = new ArrayList<>();
+    list.add("string");
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null record schema test.
+   */
+  @Test
+  public void findFieldSchemaNullRecordSchemaTest() {
+    List<Document> list = new ArrayList<>();
+    list.add(new Document());
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null record schema not document test.
+   */
+  @Test
+  public void findFieldSchemaNullRecordSchemaNotDocumentTest() {
+    List<Document> list = new ArrayList<>();
+    list.add(new Document("recordSchema", "string"));
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null field schema test.
+   */
+  @Test
+  public void findFieldSchemaNullFieldSchemaTest() {
+    List<Document> list = new ArrayList<>();
+    list.add(new Document("recordSchema", new Document()));
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema null field schema not array list test.
+   */
+  @Test
+  public void findFieldSchemaNullFieldSchemaNotArrayListTest() {
+    List<Document> list = new ArrayList<>();
+    list.add(new Document("recordSchema", new Document("fieldSchemas", "string")));
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find field schema test.
+   */
+  @Test
+  public void findFieldSchemaTest() {
     List<Document> list = new ArrayList<>();
     List<Document> list2 = new ArrayList<>();
     list2.add(new Document("_id", "5dd285cde8fd9d1ea8c42b1b"));
@@ -339,19 +563,6 @@ public class ExtendedSchemaRepositoryImplTest {
   }
 
   /**
-   * Find field schema test 2.
-   */
-  @Test
-  public void findFieldSchemaTest2() {
-    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
-    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
-    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
-    Mockito.when(find.first()).thenReturn(null);
-    Assert.assertNull(extendedSchemaRepositoryImpl.findFieldSchema("5dd285cde8fd9d1ea8c42b1b",
-        "5dd285cde8fd9d1ea8c42b1b"));
-  }
-
-  /**
    * Update dataset schema description test.
    */
   @Test
@@ -361,5 +572,136 @@ public class ExtendedSchemaRepositoryImplTest {
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
     Assert.assertEquals(UpdateResult.acknowledged(1L, 1L, null), extendedSchemaRepositoryImpl
         .updateDatasetSchemaDescription("5dd285cde8fd9d1ea8c42b1b", "description"));
+  }
+
+  /**
+   * Find record schema null document test.
+   */
+  @Test
+  public void findRecordSchemaNullDocumentTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(null);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null table schemas test.
+   */
+  @Test
+  public void findRecordSchemaNullTableSchemasTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document());
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null table schema test.
+   */
+  @Test
+  public void findRecordSchemaNullTableSchemaTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document("tableSchemas", new ArrayList<>()));
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null table schema not array list test.
+   */
+  @Test
+  public void findRecordSchemaNullTableSchemaNotArrayListTest() {
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(new Document("tableSchemas", "string"));
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null table schema not document test.
+   */
+  @Test
+  public void findRecordSchemaNullTableSchemaNotDocumentTest() {
+    List<String> list = new ArrayList<>();
+    list.add("string");
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null record schema test.
+   */
+  @Test
+  public void findRecordSchemaNullRecordSchemaTest() {
+    List<Document> list = new ArrayList<>();
+    list.add(new Document());
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema null record schema not document test.
+   */
+  @Test
+  public void findRecordSchemaNullRecordSchemaNotDocumentTest() {
+    Document recordSchema = new Document("recordSchema", "string");
+    List<Document> list = new ArrayList<>();
+    list.add(recordSchema);
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertNull(extendedSchemaRepositoryImpl.findRecordSchema("5dd285cde8fd9d1ea8c42b1b",
+        "5dd285cde8fd9d1ea8c42b1b"));
+  }
+
+  /**
+   * Find record schema test.
+   */
+  @Test
+  public void findRecordSchemaTest() {
+    Document response = new Document();
+    Document recordSchema = new Document("recordSchema", response);
+    List<Document> list = new ArrayList<>();
+    list.add(recordSchema);
+    Document document = new Document("tableSchemas", list);
+
+    Mockito.when(mongoDatabase.getCollection(Mockito.any())).thenReturn(mongoCollection);
+    Mockito.when(mongoCollection.find(Mockito.any(Document.class))).thenReturn(find);
+    Mockito.when(find.projection(Mockito.any())).thenReturn(find);
+    Mockito.when(find.first()).thenReturn(document);
+
+    Assert.assertEquals(response, extendedSchemaRepositoryImpl
+        .findRecordSchema("5dd285cde8fd9d1ea8c42b1b", "5dd285cde8fd9d1ea8c42b1b"));
   }
 }

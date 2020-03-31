@@ -9,11 +9,6 @@ const breadCrumbReducer = (state, { type, payload }) => {
         ...state,
         model: payload
       };
-    case 'SET_MENU_STATE':
-      return {
-        ...state,
-        isLeftSideBarOpened: payload.isLeftSideBarOpened
-      };
     default:
       return state;
   }
@@ -30,12 +25,6 @@ const BreadCrumbProvider = ({ children }) => {
           dispatch({
             type: 'ADD_MODEL',
             payload: model
-          });
-        },
-        setMenuState: () => {
-          dispatch({
-            type: 'SET_MENU_STATE',
-            payload: { isLeftSideBarOpened: !state.isLeftSideBarOpened }
           });
         }
       }}>

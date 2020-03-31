@@ -37,6 +37,7 @@
   font-size: 1.5rem;
   font-weight: 500;
   margin: 0.5rem !important;
+  color: var(--main-font-color);
 }
 
 .emptyChart {
@@ -63,4 +64,5 @@
   border: 0.5rem double var(--errors);
   opacity: 0.5;
   transform: translateX(-50%) rotate(15deg);
+  z-index: 1;
 }

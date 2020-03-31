@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -28,16 +29,6 @@ public interface DatasetSchemaController {
   interface DataSetSchemaControllerZuul extends DatasetSchemaController {
 
   }
-
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @PostMapping(value = "/createDataSchema/{id}")
-  void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId);
 
   /**
    * Creates the empty data schema.
@@ -87,13 +78,16 @@ public interface DatasetSchemaController {
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(@PathVariable("datasetId") Long datasetId);
 
+
   /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   * @param forceDelete the force delete
    */
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);
+  void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "forceDelete", required = false) Boolean forceDelete);
 
   /**
    * Update dataset schema description.
@@ -152,7 +146,7 @@ public interface DatasetSchemaController {
    * @param fieldSchemaVO the field schema VO
    * @return the string
    */
-  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{datasetId}/fieldSchema")
   String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 
@@ -193,7 +187,7 @@ public interface DatasetSchemaController {
    * @return the boolean
    */
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
+  Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId);
 
 
   /**
@@ -204,5 +198,17 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+  Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Find data schemas by id dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
+
 }

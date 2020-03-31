@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -37,20 +40,12 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/snapshot")
 public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Gets the snapshots by id dataset.
@@ -74,12 +69,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of snapshots. ", e.getMessage(), e);
     }
     return snapshots;
-
   }
-
 
   /**
    * Creates the snapshot.
@@ -124,12 +117,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
-
 
   /**
    * Restore snapshot.
@@ -158,12 +150,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
-
 
   /**
    * Release snapshot.
@@ -189,9 +180,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
-
   }
-
 
   /**
    * Gets the schema snapshots by id dataset.
@@ -215,7 +204,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSchemaSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting the list of schema snapshots. ", e.getMessage(), e);
     }
     return snapshots;
   }
@@ -272,12 +261,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error restoring a schema snapshot. ", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
   }
-
 
   /**
    * Delete schema snapshot.
@@ -303,9 +291,34 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting a schema snapshot", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
+  }
+
+  /**
+   * Creates the receipt PDF.
+   *
+   * @param response the response
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
+      @PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId) {
+    StreamingResponseBody stream =
+        out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
+
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
+
+    return new ResponseEntity<>(stream, HttpStatus.OK);
   }
 }

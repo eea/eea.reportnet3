@@ -9,6 +9,12 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 
 const leftSideBarReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ADD_HELP_STEPS':
+      return {
+        ...state,
+        helpTitle: payload.helpTitle,
+        steps: payload.steps
+      };
     case 'ADD_MODEL':
       return {
         ...state,
@@ -19,13 +25,18 @@ const leftSideBarReducer = (state, { type, payload }) => {
         ...state,
         models: []
       };
+    case 'SET_MENU_STATE':
+      return {
+        ...state,
+        isLeftSideBarOpened: payload.isLeftSideBarOpened
+      };
     default:
       return state;
   }
 };
 
 const LeftSideBarProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [] });
+  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
 
   return (
     <LeftSideBarContext.Provider
@@ -37,10 +48,22 @@ const LeftSideBarProvider = ({ children }) => {
             payload: models
           });
         },
+        addHelpSteps: (helpTitle, steps) => {
+          dispatch({
+            type: 'ADD_HELP_STEPS',
+            payload: { helpTitle, steps }
+          });
+        },
         removeModels: () => {
           dispatch({
             type: 'REMOVE_MODEL',
             payload: []
+          });
+        },
+        setMenuState: () => {
+          dispatch({
+            type: 'SET_MENU_STATE',
+            payload: { isLeftSideBarOpened: !state.isLeftSideBarOpened }
           });
         }
       }}>

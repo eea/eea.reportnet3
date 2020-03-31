@@ -1,29 +1,56 @@
 import React from 'react';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, codelistsList, index }) => {
+const DatasetSchema = ({ designDataset, index, validationList }) => {
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      const parsedDesignDataset = parseDesignDataset(designDataset, codelistsList);
-      const codelistNames = parseCodelistList(codelistsList, designDataset);
+      const parsedDesignDataset = parseDesignDataset(designDataset, validationList);
 
-      const codelistTitles = [];
-      if (!isUndefined(codelistNames)) {
-        codelistNames.forEach(name => {
-          codelistTitles.push(name);
-        });
-      }
-
-      const groupableProperties = ['fields'].concat(codelistTitles);
-
+      const columnOptions = {
+        fields: {
+          filtered: false,
+          groupable: true,
+          names: { shortCode: 'Shortcode', codelistItems: 'Codelist items' }
+        },
+        validations: {
+          filtered: true,
+          filterType: {
+            multiselect: {
+              entityType: [
+                { label: 'Field', value: 'FIELD' },
+                { label: 'Record', value: 'RECORD' },
+                { label: 'Table', value: 'TABLE' },
+                { label: 'Dataset', value: 'DATASET' }
+              ],
+              automatic: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
+              enabled: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
+              levelError: [
+                { label: 'Info', value: 'INFO' },
+                { label: 'Warning', value: 'WARNING' },
+                { label: 'Error', value: 'ERROR' },
+                { label: 'Blocker', value: 'BLOCKER' }
+              ]
+            }
+          },
+          groupable: true,
+          invisible: ['datasetSchemaId', 'id'],
+          names: {
+            entityType: 'Entity type',
+            levelError: 'Level error',
+            ruleName: 'Rule name'
+          }
+        }
+      };
       return (
         <div>
           <TreeView
+            columnOptions={columnOptions}
             excludeBottomBorder={false}
-            groupableProperties={groupableProperties}
             key={index}
             property={parsedDesignDataset}
             propertyName={''}
@@ -39,92 +66,37 @@ const DatasetSchema = ({ designDataset, codelistsList, index }) => {
   return renderDatasetSchema();
 };
 
-const parseCodelistList = (codelistsList, designDataset) => {
-  if (isUndefined(codelistsList)) {
-    return;
-  }
-  const codelistsSchema = codelistsList.filter(
-    codelistList => codelistList.schema.datasetSchemaName === designDataset.datasetSchemaName
-  );
-  if (isUndefined(codelistsSchema)) {
-    return;
-  }
-  const codelistNames = [];
-  codelistsSchema.forEach(codelistList => {
-    codelistList.codelists.forEach(codelist => {
-      let title = `${codelist.name} (${codelist.version})`;
-      codelistNames.push(title);
-    });
-  });
-  return codelistNames;
-};
+// const getMultiselectValues = (validations, field) => {
+//   if (!isUndefined(validations)) {
+//     console.log(
+//       [...new Set(validations.map(validation => validation[field]))].map(fieldValue => {
+//         return { label: fieldValue, value: fieldValue };
+//       })
+//     );
+//   }
+// };
 
-const parseDesignDataset = (design, codelistsListWithSchema) => {
+const parseDesignDataset = (design, validationList) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  const codelistItemsData = [];
-  let codelistsBySchema = [];
-  if (!isUndefined(codelistsListWithSchema)) {
-    codelistsBySchema = codelistsListWithSchema.find(
-      x => x.schema.datasetSchemaName.toString() === design.datasetSchemaName.toString()
-    );
-    if (!isUndefined(codelistsBySchema)) {
-      codelistsBySchema = codelistsBySchema.codelists;
-    }
-  }
+  parsedDataset.validations = validationList;
 
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
-      if (
-        !isNull(tableDTO.records) &&
-        !isUndefined(tableDTO.records[0].fields) &&
-        !isNull(tableDTO.records[0].fields) &&
-        tableDTO.records[0].fields.length > 0
-      ) {
-        const existACodelist = tableDTO.records[0].fields.filter(field => field.type === 'CODELIST');
+      if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
-          if (!isEmpty(existACodelist)) {
-            let fieldCodelist;
-            if (fieldDTO.type === 'CODELIST') {
-              if (!isUndefined(codelistsListWithSchema) && !isEmpty(codelistsBySchema)) {
-                let codelist = codelistsBySchema.find(codelist => codelist.id === fieldDTO.codelistId);
-                if (!isUndefined(codelist)) {
-                  let codelistView = [];
-                  fieldCodelist = `${codelist.name} (${codelist.version})`;
-                  if (!isEmpty(codelist) && !isEmpty(codelist.items)) {
-                    codelist.items.forEach(itemDTO => {
-                      let isRepeatedCodelistItem = codelistItemsData.filter(item => item.id === itemDTO.id);
-                      if (!isUndefined(isRepeatedCodelistItem) && isRepeatedCodelistItem.length > 0) {
-                        return;
-                      }
-                      let codelistItemView = {};
-                      codelistItemView.shortCode = itemDTO.shortCode;
-                      codelistItemView.label = itemDTO.definition;
-                      codelistItemView.definition = itemDTO.definition;
-                      codelistView.push(codelistItemView);
-                    });
-                  }
-                  parsedDataset[fieldCodelist] = codelistView;
-                }
-              }
-            }
-            return {
-              name: fieldDTO.name,
-              type: fieldDTO.type,
-              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-',
-              codelist: !isNull(fieldCodelist) ? fieldCodelist : ''
-            };
-          } else {
-            return {
-              name: fieldDTO.name,
-              type: fieldDTO.type,
-              description: !isNull(fieldDTO.description) ? fieldDTO.description : '-'
-            };
+          const field = {};
+          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
+          field.name = fieldDTO.name;
+          field.type = fieldDTO.type;
+          if (fieldDTO.type === 'CODELIST') {
+            field.codelistItems = fieldDTO.codelistItems;
           }
+          return field;
         });
         table.fields = fields;
       }

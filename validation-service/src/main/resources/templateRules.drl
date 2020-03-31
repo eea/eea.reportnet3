@@ -1,0 +1,133 @@
+template header
+ruleid
+dataSchemaId
+schemaName
+typevalidation
+whencondition
+messageFailValidation
+typeFailValidation
+originName
+package src.main.resources
+
+import org.eea.validation.persistence.data.domain.*;
+import org.eea.interfaces.vo.validation.*;
+import org.eea.interfaces.vo.dataset.*;
+import org.eea.validation.util.*;
+import java.util.regex.*;
+import java.util.*;
+import org.apache.commons.lang3.StringUtils;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+template "templateValidateRules"
+rule "@{ruleid}"
+dialect "java"
+  when
+    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && !(@{whencondition}));
+  then
+   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
+
+
+end
+
+end template
+
+//////////////////////////////////////////DEFAULT VALIDATIONS////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
+function boolean isCodelist( String value , String codelistItems){
+	return CodelistUtils.codelistValidate(value,codelistItems,true);
+}
+
+function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	return CodelistUtils.codelistValidate(value,codelistItems,false);
+}
+
+//////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
+function boolean isBlank(String value){
+	return !StringUtils.isBlank(value);
+} 
+
+
+//////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
+function boolean isBoolean(String value){
+	if(!isBlank(value)){
+		return true;
+	}	
+	if((!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
+		return false;
+	}
+		return true;
+} 
+
+//////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
+function boolean isDateYYYYMMDD( String value ){
+	if(!isBlank(value)){
+		return true;
+	}	
+	
+ SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+ 	if(!isBlank(value)){
+		return true;
+	}
+ 	Date dateDrools = null;
+    try {
+      sdf.setLenient(false);
+      dateDrools = sdf.parse(value);
+    } catch( Exception e ){
+        return false;
+    }
+    
+    return true;
+}
+
+//////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+function boolean isNumber(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+    try {
+    	String aux = value.replace(".","");
+    	aux = aux.replace(",",".");
+        Double.valueOf( aux );
+        return true;
+    } catch( Exception e ){
+        return false;        
+    }
+ }
+
+//////////////////////////////////////////VALIDATION LATITUDE///////////////////////////////////////////////////////////
+function boolean isCordenateLat( String value ){
+	if(!isBlank(value)){
+		return true;
+	}
+   if (value.contains(",")){
+   	value = value.replace(",",".");
+   }
+   if(isNumber(value)){
+    	return Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90;
+   }
+   return false;
+}  
+
+//////////////////////////////////////////VALIDATION LONGITUDE///////////////////////////////////////////////////////////
+function boolean isCordenateLong( String value ){	
+	if(!isBlank(value)){
+		return true;
+	}
+   if (value.contains(",")){
+   	value = value.replace(",",".");
+   }
+   if(isNumber(value)){
+    	return Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180;
+   }
+   return false;
+ }
+
+ //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
+ 
+ //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
+function boolean isfieldPK(DatasetValue datasetId, String idFieldSchema,String idRule){	
+
+		return PKValidationUtils.isfieldPK(datasetId,idFieldSchema,idRule);
+ }

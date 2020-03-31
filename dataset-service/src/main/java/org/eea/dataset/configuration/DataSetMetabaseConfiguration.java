@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * The Class DataSetMetabaseConfiguration.
  *
- * @author Mario Severa
+ *
  */
 @Configuration
 @EnableTransactionManagement
@@ -73,6 +73,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Primary
+  @Qualifier("metabaseDataSource")
   public DataSource metaBaseDataSource() {
     DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
     metaDataSource.setDriverClassName(driver);
@@ -120,7 +121,6 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  @Autowired
   public PlatformTransactionManager metabaseDataSetsTransactionManager() {
 
     JpaTransactionManager metabasetransactionManager = new JpaTransactionManager();

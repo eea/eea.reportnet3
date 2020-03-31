@@ -1,5 +1,8 @@
 package org.eea.dataset.controller;
 
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
@@ -7,15 +10,20 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
-import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -79,6 +87,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * The record store controller zull.
    */
@@ -91,19 +102,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/createDataSchema/{id}")
-  public void createDataSchema(@PathVariable("id") final Long datasetId,
-      @RequestParam("idDataflow") final Long dataflowId) {
-    dataschemaService.createDataSchema(datasetId, dataflowId);
-  }
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
+  /** The design dataset service. */
+  @Autowired
+  private DesignDatasetService designDatasetService;
 
   /**
    * Creates the empty dataset schema.
@@ -119,7 +124,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
+      Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
           datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
           dataflowId, null, null, 0);
       datasetId.get();
@@ -172,8 +177,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
-  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("/getDataSchema/{datasetId}")
   public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDatasetSchemaId(datasetId);
@@ -202,15 +206,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+
   /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
+   * @param forceDelete the force delete
    */
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
+  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -218,6 +225,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     String schemaId = getDatasetSchemaId(datasetId);
     if (schemaId.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
+    // If forceDelete = true, skip this check. Made specially for deleting an entire dataflow
+    if ((forceDelete == null || !forceDelete)
+        && !dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.PK_REFERENCED);
     }
 
     // Check if the dataflow its on the correct state to allow delete design datasets
@@ -229,21 +242,29 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
+        // delete from the CataloguePK the entries if the schema has FK
+        dataschemaService.updatePkCatalogueDeletingSchema(schemaId);
+
+        // delete the schema in Mongo
+        dataschemaService.deleteDatasetSchema(schemaId);
+
+        // delete the schema to dataset
+        rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
-        dataschemaService.deleteDatasetSchema(datasetId, schemaId);
         datasetMetabaseService.deleteDesignDataset(datasetId);
-        // delete the schema
+        // delete the schema in database
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
         dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
             ResourceGroupEnum.DATASCHEMA_PROVIDER);
-
+        LOG.info("The Design Dataset {} has been deleted", datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             EEAErrorMessage.NOT_ENOUGH_PERMISSION);
       }
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
 
@@ -309,9 +330,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
-      dataschemaService.deleteTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          tableSchemaId);
+      final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+
+      // Delete the Pk if needed from the catalogue, for all the fields of the table
+      dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId);
+
+      dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
+
+      // we delete the rules associate to the table
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
+
       datasetService.deleteTableValue(datasetId, tableSchemaId);
+
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
@@ -343,7 +373,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Creates the field schema.
+   * Creates the field schema and propagate the mew field to create it in the dataset for testing.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
@@ -353,7 +383,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  @PostMapping(value = "/{datasetId}/fieldSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{datasetId}/fieldSchema")
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
@@ -361,14 +391,31 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
     try {
-      String response;
-
-      if (StringUtils.isBlank(response = dataschemaService
-          .createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO))) {
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
+      if (StringUtils.isBlank(response)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
       // propagate the new field to the existing records in the dataset value
       datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+      // with that we create the rule automatic required
+
+      if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
+
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+      }
+      // and with it we create the others automatic rules like number etc
+      rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+
+      // Add the Pk if needed to the catalogue
+      dataschemaService.addToPkCatalogue(fieldSchemaVO);
+
+      // Add the register into the metabase fieldRelations
+      dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
+
+
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -378,7 +425,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Update field schema.
+   * Update field schema and propagate the rules to dataset.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
@@ -390,12 +437,30 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
+      final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService
-          .updateFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO);
-      // If the update operation succeded, scale to the dataset
-      if (type != null) {
-        datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+      if (dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO)) {
+
+        // Modify the register into the metabase fieldRelations
+        dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+
+        DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
+
+        // After the update, we create the rules needed and change the type of the field if
+        // neccessary
+        dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+            datasetId);
+
+        // Add the Pk if needed to the catalogue
+        dataschemaService.addToPkCatalogue(fieldSchemaVO);
+      } else {
+        if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.PK_ALREADY_EXISTS);
+        }
+        if (fieldSchemaVO.getPk() != null && !fieldSchemaVO.getPk()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
+        }
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -416,13 +481,33 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
-      // Delete the fieldSchema from the datasetSchema
-      if (!dataschemaService.deleteFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          fieldSchemaId)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      FieldSchemaVO fieldVO = dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
+      // Validate if the field we want to delete is a PK and it's being referenced by another field
+      if (!dataschemaService.checkExistingPkReferenced(fieldVO)) {
+        // Delete the fieldSchema from the datasetSchema
+        if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.INVALID_OBJECTID);
+        }
+        // Delete the rules from the fieldSchema
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
+
+        // Delete FK rules
+        if (null != fieldVO && fieldVO.getType().equals(DataType.LINK)) {
+          rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, fieldSchemaId);
+        }
+        // Delete the fieldSchema from the dataset
+        datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+
+        // Delete the Pk if needed from the catalogue
+        dataschemaService.deleteFromPkCatalogue(fieldVO);
+
+        // Delete the foreign relation between idDatasets in metabase, if needed
+        dataschemaService.deleteForeignRelation(datasetId, fieldVO);
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
-      // Delete the fieldSchema from the dataset
-      datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
           e);
@@ -507,10 +592,40 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      isValid = !dataflow.getDesignDatasets().parallelStream()
-          .anyMatch(ds -> dataschemaService.validateSchema(ds.getDatasetSchema()) == false);
+      isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(
+          ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
     }
     return isValid;
+  }
+
+
+
+  /**
+   * Find data schemas by id dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
+      @PathVariable("idDataflow") Long idDataflow) {
+
+    List<DataSetSchemaVO> schemas = new ArrayList<>();
+
+    List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+    designs.stream().forEach(design -> {
+      try {
+        schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
+      } catch (EEAException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
+            e);
+      }
+    });
+    return schemas;
   }
 
 }

@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -52,7 +53,6 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @throws EEAException the EEA exception
    */
   void releaseSnapshot(Long idDataset, Long idSnapshot);
 
@@ -99,7 +99,6 @@ public interface DatasetSnapshotService {
   void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException, Exception;
 
-
   /**
    * Delete all schema snapshots.
    *
@@ -116,5 +115,12 @@ public interface DatasetSnapshotService {
    */
   void deleteAllSnapshots(Long idDataset) throws EEAException;
 
-
+  /**
+   * Creates the receipt PDF.
+   *
+   * @param out the out
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId);
 }

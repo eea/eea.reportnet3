@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * The Interface DataSetMetabaseRepository.
  *
- * @author Mario Severa
+ *
  */
 public interface ReportingDatasetRepository extends CrudRepository<ReportingDataset, Long> {
 

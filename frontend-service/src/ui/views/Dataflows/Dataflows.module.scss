@@ -5,9 +5,18 @@
     padding-bottom: 4rem;
   }
 }
+
 .flow_tab {
   text-transform: capitalize;
 }
 .p-menuitem-link:focus {
   box-shadow: none !important;
+}
+
+.dataflowsActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
 }

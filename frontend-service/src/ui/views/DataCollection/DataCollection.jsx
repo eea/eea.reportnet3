@@ -72,7 +72,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -132,7 +132,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      console.log('METADATA error', error);
+      console.error('METADATA error', error);
       notificationContext.add({
         type: 'GET_METADATA_ERROR',
         content: {
@@ -195,11 +195,14 @@ export const DataCollection = withRouter(({ match, history }) => {
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
-              recordId: field['recordId']
+              recordId: field['recordId'],
+              referencedField: field['referencedField'],
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })
@@ -285,13 +288,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'import'}
               label={resources.messages['export']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
@@ -299,7 +302,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'validate'}
               iconClasses={null}
@@ -307,7 +310,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'warning'}
               iconClasses={''}
@@ -315,13 +318,13 @@ export const DataCollection = withRouter(({ match, history }) => {
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'camera'}
               label={resources.messages['snapshots']}

@@ -1,4 +1,6 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const userReducer = (state, { type, payload }) => {
@@ -27,6 +29,8 @@ const userReducer = (state, { type, payload }) => {
 };
 
 export const UserProvider = ({ children }) => {
+  const notificationContext = useContext(NotificationContext);
+
   const [state, dispatch] = useReducer(userReducer, {});
 
   return (
@@ -48,6 +52,7 @@ export const UserProvider = ({ children }) => {
           });
         },
         onLogout: () => {
+          notificationContext.deleteAll();
           dispatch({
             type: 'LOGOUT',
             payload: {

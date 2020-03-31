@@ -2,7 +2,9 @@ package org.eea.dataset.mapper;
 
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -23,8 +25,8 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
    */
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
-  @Mapping(source = "ruleField", target = "ruleField", ignore = true)
   @Mapping(source = "headerName", target = "name")
+  @Mapping(source = "referencedField", target = "referencedField", ignore = true)
   FieldSchemaVO entityToClass(FieldSchema entity);
 
   /**
@@ -35,8 +37,8 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
    */
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
-  @Mapping(source = "ruleField", target = "ruleField", ignore = true)
   @Mapping(source = "name", target = "headerName")
+  @Mapping(source = "referencedField", target = "referencedField", ignore = true)
   FieldSchema classToEntity(FieldSchemaVO entity);
 
   /**
@@ -49,6 +51,17 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   default void fillIds(FieldSchema fieldSchema, @MappingTarget FieldSchemaVO fieldSchemaVO) {
     fieldSchemaVO.setId(fieldSchema.getIdFieldSchema().toString());
     fieldSchemaVO.setIdRecord(fieldSchema.getIdRecord().toString());
+    if (fieldSchema.getReferencedField() != null) {
+      ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+      if (fieldSchema.getReferencedField().getIdDatasetSchema() != null) {
+        referenced
+            .setIdDatasetSchema(fieldSchema.getReferencedField().getIdDatasetSchema().toString());
+      }
+      if (fieldSchema.getReferencedField().getIdPk() != null) {
+        referenced.setIdPk(fieldSchema.getReferencedField().getIdPk().toString());
+      }
+      fieldSchemaVO.setReferencedField(referenced);
+    }
   }
 
   /**
@@ -61,5 +74,12 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   default void fillIds(FieldSchemaVO fieldSchemaVO, @MappingTarget FieldSchema fieldSchema) {
     fieldSchema.setIdFieldSchema(new ObjectId(fieldSchemaVO.getId()));
     fieldSchema.setIdRecord(new ObjectId(fieldSchemaVO.getIdRecord()));
+    if (fieldSchemaVO.getReferencedField() != null) {
+      ReferencedFieldSchema referenced = new ReferencedFieldSchema();
+      referenced.setIdDatasetSchema(
+          new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
+      referenced.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      fieldSchema.setReferencedField(referenced);
+    }
   }
 }

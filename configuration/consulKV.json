@@ -364,6 +364,10 @@
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
   {
+    "key": "config/apiGateway/zuul.ignoredPatterns",
+    "value": "LyoqL3ByaXZhdGUvKio="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.dataflow.path",
     "value": "L2RhdGFmbG93Lyoq"
   },
@@ -812,7 +816,7 @@
     "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
   },
   {
-  	"key": "config/communication/spring.sleuth.integration.websockets.enabled",
+    "key": "config/communication/spring.sleuth.integration.websockets.enabled",
     "value": "ZmFsc2U="
   },
   {
@@ -1013,9 +1017,9 @@
   },
   {
     "key": "config/application/spring.redis.port",
-    "value": "JHtSRURJU19QT1JUOjMyNTYyfQ=="
+    "value": "JHtSRURJU19QT1JUOjMyMDk2fQ=="
   },
-   {
+  {
     "key": "config/dataset/dataset.propagation.fieldBatchSize",
     "value": "JHtEQVRBU0NIRU1BX0ZJRUxEX0JBVENIX1NJWkU6MzAwMH0="
   },
@@ -1041,18 +1045,6 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.representative.stripPrefix",
-    "value": "ZmFsc2U="
-  },
-  {
-    "key": "config/apiGateway/zuul.routes.codelist.path",
-    "value": "L2NvZGVsaXN0Lyoq"
-  },
-  {
-    "key": "config/apiGateway/zuul.routes.codelist.serviceId",
-    "value": "ZGF0YXNldA=="
-  },
-  {
-    "key": "config/apiGateway/zuul.routes.codelist.stripPrefix",
     "value": "ZmFsc2U="
   },
   {
@@ -1086,5 +1078,33 @@
   {
     "key": "config/application/spring.redis.jedis.pool.min-idle",
     "value": "JHtSRURJU19QT09MX01JTl9JRExFOjV9"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.path",
+    "value": "L3J1bGVzLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.serviceId",
+    "value": "dmFsaWRhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.rules.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.path",
+    "value": "L29ibGlnYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/application/mongodb.hosts",
+    "value": "JHtNT05HT19IT1NUUzpsb2NhbGhvc3Q6MjcwMTd9"
   }
 ]

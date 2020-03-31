@@ -1,15 +1,10 @@
-/**
- * 
- */
 package org.eea.validation.persistence.schemas;
 
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.validation.persistence.schemas.rule.RuleField;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -22,12 +17,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchema {
 
@@ -36,6 +25,9 @@ public class FieldSchema {
   @Field(value = "_id")
   private ObjectId idFieldSchema;
 
+  /** The description. */
+  @Field(value = "description")
+  private String description;
 
   /** The idRecord. */
   @Field(value = "idRecord")
@@ -44,19 +36,32 @@ public class FieldSchema {
   /** The type. */
   @Field(value = "typeData")
   @Enumerated(EnumType.STRING)
-  private TypeData type;
+  private DataType type;
 
   /** The type. */
   @Field(value = "headerName")
   private String headerName;
 
+  /** The code list items. */
+  @Field(value = "codelistItems")
+  private String[] codelistItems;
 
-  /** The rule field. */
-  @Field(value = "rules")
-  private List<RuleField> ruleField;
-  /** The id code list. */
-  @Field(value = "idCodeList")
-  private Long idCodeList;
+  /** The required. */
+  @Field(value = "required")
+  private Boolean required;
+
+  /** The is PK. */
+  @Field(value = "isPK")
+  private Boolean isPK;
+
+
+  /** The is P kreferenced. */
+  @Field(value = "isPKreferenced")
+  private Boolean isPKreferenced;
+
+  /** The reference FK. */
+  @Field(value = "referencedField")
+  private ReferencedFieldSchema referencedField;
 
   /**
    * Hash code.
@@ -65,7 +70,8 @@ public class FieldSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, ruleField, type, idCodeList);
+    return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
+        description, isPK);
   }
 
 
@@ -86,8 +92,8 @@ public class FieldSchema {
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
-        && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
-        && Objects.equals(idCodeList, other.idCodeList);
+        && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
+        && Objects.equals(isPK, other.isPK) && Objects.equals(description, other.description);
   }
 
 

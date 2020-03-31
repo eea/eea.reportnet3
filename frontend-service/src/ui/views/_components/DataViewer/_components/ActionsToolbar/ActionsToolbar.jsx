@@ -25,14 +25,14 @@ const ActionsToolbar = ({
   datasetId,
   dataflowId,
   hasWritePermissions,
+  isTableDeleted,
   isFilterValidationsActive,
   isLoading,
   isValidationSelected,
   isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
-  onSetColumns,
-  onSetInvisibleColumns,
+  setColumns,
   onSetVisible,
   originalColumns,
   records,
@@ -73,6 +73,18 @@ const ActionsToolbar = ({
       dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
     }
   }, [isValidationSelected]);
+
+  useEffect(() => {
+    // const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
+    // const dropdownFilter = colsSchema
+    //   .map(colSchema => {
+    //     if (!mustShowColumns.includes(colSchema.field)) {
+    //       return { label: colSchema.header, key: colSchema.field };
+    //     }
+    //   })
+    //   .filter(colSchema => !isUndefined(colSchema));
+    // dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
+  }, [levelErrorTypesWithCorrects]);
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
@@ -121,40 +133,40 @@ const ActionsToolbar = ({
 
   const getLevelErrorFilters = () => {
     let filters = [];
-    levelErrorTypesWithCorrects.forEach(value => {
-      if (!isUndefined(value) && !isNull(value)) {
-        let filter = {
-          label: capitalize(value),
-          key: capitalize(value)
-        };
-        filters.push(filter);
-      }
-    });
+    if (!isUndefined(levelErrorTypesWithCorrects)) {
+      levelErrorTypesWithCorrects.forEach(value => {
+        if (!isUndefined(value) && !isNull(value)) {
+          let filter = {
+            label: capitalize(value),
+            key: capitalize(value)
+          };
+          filters.push(filter);
+        }
+      });
+    }
     return filters;
   };
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
-    const currentInvisibleColumns = originalColumns.filter(
+    const currentVisibleColumns = originalColumns.filter(
       column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
     );
 
-    if (!isUndefined(onSetColumns)) {
-      onSetColumns(currentInvisibleColumns);
+    if (!isUndefined(setColumns)) {
+      setColumns(currentVisibleColumns);
     }
 
-    if (!isUndefined(onSetColumns)) {
-      onSetInvisibleColumns(currentInvisibleColumns);
-    }
-
-    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentInvisibleColumns } });
+    dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
   };
 
   return (
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent ${
+            !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-download'
+          }`}
           disabled={!hasWritePermissions || isWebFormMMR}
           icon={'export'}
           label={resources.messages['import']}
@@ -162,9 +174,11 @@ const ActionsToolbar = ({
         />
 
         <Button
-          disabled={!hasWritePermissions}
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent ${
+            !hasWritePermissions ? null : 'p-button-animated-upload'
+          }`}
+          disabled={!hasWritePermissions}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
@@ -184,15 +198,19 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
-          disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords)}
+          className={`p-button-rounded p-button-secondary-transparent ${
+            !hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+              ? null
+              : 'p-button-animated-blink'
+          }`}
+          disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted}
           icon={'trash'}
           label={resources.messages['deleteTable']}
           onClick={() => onSetVisible(setDeleteDialogVisible, true)}
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
           disabled={false}
           icon={filter.visibilityColumnIcon}
           label={resources.messages['showHideColumns']}
@@ -201,6 +219,7 @@ const ActionsToolbar = ({
           }}
         />
         <DropdownFilter
+          className={`p-button-animated-blink`}
           filters={filter.visibilityDropdown}
           popup={true}
           ref={dropdownFilterRef}
@@ -212,7 +231,9 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={'p-button-rounded p-button-secondary'}
+          className={`p-button-rounded p-button-secondary-transparent ${
+            tableHasErrors ? 'p-button-animated-blink' : null
+          }`}
           disabled={!tableHasErrors}
           icon="filter"
           iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
@@ -222,6 +243,7 @@ const ActionsToolbar = ({
           }}
         />
         <DropdownFilter
+          className={!isLoading ? 'p-button-animated-blink' : null}
           disabled={isLoading}
           filters={filter.validationDropdown}
           popup={true}
@@ -233,21 +255,21 @@ const ActionsToolbar = ({
           }}
         />
         {/* <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon={'groupBy'}
           label={resources.messages['groupBy']}
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon={'sort'}
           label={resources.messages['sort']}
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary`}
+          className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}
           icon="filter"
           label={resources.messages['filters']}
@@ -255,13 +277,12 @@ const ActionsToolbar = ({
           /> */}
       </div>
       <div className="p-toolbar-group-right">
-        {/* <Button
-          className={`p-button-rounded p-button-secondary`}
-          disabled={true}
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-spin`}
           icon={'refresh'}
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
-        /> */}
+        />
       </div>
     </Toolbar>
   );

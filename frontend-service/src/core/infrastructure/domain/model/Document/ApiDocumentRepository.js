@@ -8,17 +8,17 @@ const all = async dataflowId => {
 
   return documentsDTO.map(
     documentDTO =>
-      new Document(
-        documentDTO.id,
-        documentDTO.name,
-        documentDTO.description,
-        documentDTO.category,
-        getCountryName(documentDTO.language),
-        documentDTO.url,
-        documentDTO.isPublic,
-        documentDTO.date,
-        documentDTO.size
-      )
+      new Document({
+        category: documentDTO.category,
+        date: documentDTO.date,
+        description: documentDTO.description,
+        id: documentDTO.id,
+        isPublic: documentDTO.isPublic,
+        language: getCountryName(documentDTO.language),
+        size: documentDTO.size,
+        title: documentDTO.name,
+        url: documentDTO.url
+      })
   );
 };
 

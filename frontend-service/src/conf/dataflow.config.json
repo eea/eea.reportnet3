@@ -1,9 +1,24 @@
 {
-    "dataflowStatus": {
-        "DESIGN": "DESIGN",
-        "DRAFT": "DRAFT"
-    },
-    "errorTypes": {
-        "dataflowExists": "Dataflow name already exists"
-    }
+  "dataflowRoles": {
+    "DATA_CUSTODIAN": "REQUESTER",
+    "DATA_PROVIDER": "REPORTER"
+  },
+  "dataflowStatus": {
+    "DESIGN": "DESIGN",
+    "DRAFT": "DRAFT"
+  },
+  "errorTypes": {
+    "dataflowExists": "Dataflow name already exists",
+    "copyWithErrors": "The snapshot contains blocker errors"
+  },
+  "userRequestStatus": {
+    "accepted": [],
+    "completed": [],
+    "pending": []
+  },
+  "filterItems": {
+    "input": ["name", "description"],
+    "select": ["status", "userRole"],
+    "date": ["expirationDate"]
+  }
 }

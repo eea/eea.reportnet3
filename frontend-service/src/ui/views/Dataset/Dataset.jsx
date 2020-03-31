@@ -28,7 +28,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
-import { CodelistService } from 'core/services/Codelist';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
@@ -57,6 +56,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState();
+  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -99,9 +99,9 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
       console.info('dataset.Metadata: %o', metaData);
-      const breadCrums = [
+      const breadCrumbs = [
         {
-          label: resources.messages['dataflowList'],
+          label: resources.messages['dataflows'],
           icon: 'home',
           href: getUrl(routes.DATAFLOWS),
           command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -129,7 +129,7 @@ export const Dataset = withRouter(({ match, history }) => {
         }
       ];
       if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
-        breadCrums.push({
+        breadCrumbs.push({
           label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
           icon: 'representative',
           href: getUrl(
@@ -139,11 +139,22 @@ export const Dataset = withRouter(({ match, history }) => {
               representative: metaData.dataset.name
             },
             true
-          )
+          ),
+          command: () =>
+            history.push(
+              getUrl(
+                routes.REPRESENTATIVE,
+                {
+                  dataflowId,
+                  representative: metaData.dataset.name
+                },
+                true
+              )
+            )
         });
       }
-      breadCrums.push({ label: resources.messages['dataset'], icon: 'dataset' });
-      breadCrumbContext.add(breadCrums);
+      breadCrumbs.push({ label: resources.messages['dataset'], icon: 'dataset' });
+      breadCrumbContext.add(breadCrumbs);
       leftSideBarContext.removeModels();
     }
   }, [metaData]);
@@ -255,13 +266,22 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
+      notificationContext.add({
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName
+        }
+      });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DELETE_DATA_BY_ID_ERROR',
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -273,10 +293,12 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
-    const {
+    //  QUE ES ESO??
+    /*     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId });
+    } = await getMetadata({ dataflowId, datasetId }); */
+
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
@@ -377,19 +399,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getCodelistsList = async datasetSchemas => {
-    try {
-      const codelistsList = await CodelistService.getCodelistsList(datasetSchemas);
-      return codelistsList;
-    } catch (error) {
-      throw new Error('CODELIST_SERVICE_GET_CODELISTS_LIST');
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await getDataSchema();
-      const codelistsList = await getCodelistsList([datasetSchema]);
       const datasetStatistics = await getStatisticsById(
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
@@ -414,20 +426,15 @@ export const Dataset = withRouter(({ match, history }) => {
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
-            let codelist = {};
-            if (field.type === 'CODELIST') {
-              codelist = codelistsList.find(codelist => codelist.id === field.codelistId);
-            }
             return {
-              table: table['tableSchemaName'],
+              codelistItems: field['codelistItems'],
+              description: field['description'],
               field: field['fieldId'],
               header: `${capitalize(field['name'])}`,
-              type: field['type'],
               recordId: field['recordId'],
-              codelistId: field.codelistId,
-              codelistName: codelist.name,
-              codelistVersion: codelist.version,
-              codelistItems: codelist.items
+              referencedField: field['referencedField'],
+              table: table['tableSchemaName'],
+              type: field['type']
             };
           });
         })
@@ -504,6 +511,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           activeIndex={dataViewerOptions.activeIndex}
           hasWritePermissions={hasWritePermissions}
+          isDatasetDeleted={isDataDeleted}
           isValidationSelected={isValidationSelected}
           isWebFormMMR={isWebFormMMR}
           levelErrorTypes={levelErrorTypes}
@@ -560,7 +568,9 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? null : 'p-button-animated-upload'
+              }`}
               disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
@@ -576,7 +586,9 @@ export const Dataset = withRouter(({ match, history }) => {
               }}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+              }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
               disabled={!hasWritePermissions || isWebFormMMR}
@@ -585,14 +597,16 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             {/* <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'clock'}
               label={resources.messages['events']}
               onClick={null}
             /> */}
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+              }`}
               disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
@@ -601,7 +615,9 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !datasetHasErrors || isWebFormMMR ? null : 'p-button-animated-blink'
+              }`}
               disabled={!datasetHasErrors || isWebFormMMR}
               icon={'warning'}
               label={resources.messages['showValidations']}
@@ -610,14 +626,18 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+              }`}
               disabled={isWebFormMMR || !datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !hasWritePermissions ? null : 'p-button-animated-blink'
+              }`}
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
@@ -655,6 +675,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       </Dialog>
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

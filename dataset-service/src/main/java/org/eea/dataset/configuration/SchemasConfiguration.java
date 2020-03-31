@@ -1,5 +1,6 @@
 package org.eea.dataset.configuration;
 
+import com.mongodb.MongoClientURI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +39,11 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
    */
   @Value("${mongodb.primary.host}")
   private String host;
-
+  /**
+   * The mongo hosts
+   */
+  @Value("${mongodb.hosts}")
+  private String mongoHosts;
   /**
    * The port.
    */
@@ -97,7 +102,8 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, port);
+    return new MongoClient(
+        new MongoClientURI(new StringBuilder("mongodb://").append(mongoHosts).toString()));
   }
 
 }

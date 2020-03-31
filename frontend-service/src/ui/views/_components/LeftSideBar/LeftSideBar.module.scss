@@ -20,24 +20,29 @@
   z-index: 3002;
   left: 0;
   top: var(--header-height);
-  background-color: var(--c-corporate-blue);
+  background-color: var(--leftSideBar-bg);
   transition: 0.5s;
   overflow-x: hidden;
   white-space: nowrap;
   overflow: hidden;
+  box-shadow: var(--leftSideBar-box-shadow);
+
   .barSection {
-    --top-height: 100px;
+    --top-height: 150px;
     --botton-height: 100px;
     --middle-height: calc(100% - var(--top-height) - var(--botton-height) - (1rem * 3));
     padding: 1rem 0;
     height: var(--middle-height);
+
     &:first-of-type {
       height: var(--top-height);
     }
+
     &:last-of-type {
       height: var(--botton-height);
       padding-top: 0;
     }
+
     a {
       padding: 8px;
       text-decoration: none;
@@ -45,31 +50,39 @@
       color: var(--white);
       cursor: pointer;
       display: block;
+
       &:first-of-type {
         top: 1rem;
         color: var(--white);
       }
+
       &:nth-of-type(2) {
         color: var(--white);
       }
+
       &:nth-of-type(3) {
         color: var(--white);
       }
+
       &:last-of-type {
         bottom: 2rem;
       }
+
       i {
         margin-right: 12px;
       }
+
       &:hover {
         color: var(--gray-15);
       }
     }
+
     img {
       &:first-child {
         margin-right: 12px;
       }
     }
+
     .notificationCounter {
       position: absolute;
       top: 8px;
@@ -79,6 +92,7 @@
       padding: 1px 3px;
       font: 8px Verdana;
     }
+
     .notificationIconWrapper {
       width: 2.5rem;
       height: 2.5rem;
@@ -149,7 +163,9 @@
   border: 2px solid var(--gray-50);
   z-index: 3003;
   max-height: 200px;
+  min-height: auto;
 }
+
 .notificationList li {
   font-size: 12pt;
   color: var(--black);
@@ -174,10 +190,12 @@
     -webkit-transform: scale(1);
     transform: scale(1);
   }
+
   50% {
     -webkit-transform: scale(1.25);
     transform: scale(1.25);
   }
+
   100% {
     -webkit-transform: scale(1);
     transform: scale(1);

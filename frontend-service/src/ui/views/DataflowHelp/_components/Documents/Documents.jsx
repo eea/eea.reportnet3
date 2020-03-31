@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined, isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -65,23 +67,13 @@ const Documents = ({
 
   const documentsEditButtons = rowData => {
     return (
-      <div className={styles.documentsEditButtons}>
-        <Button
-          type="button"
-          icon="edit"
-          className={`p-button-rounded p-button-secondary ${styles.editRowButton}`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={e => onEditDocument()}
-        />
-        <Button
-          type="button"
-          icon={isDeletingDocument && rowData.id === documentInitialValues.id ? 'spinnerAnimate' : 'trash'}
-          className={`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}
-          disabled={isDeletingDocument && rowData.id === documentInitialValues.id}
-          onClick={() => {
+      <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
+        <ActionsColumn
+          onDeleteClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
           }}
+          onEditClick={() => onEditDocument()}
         />
       </div>
     );
@@ -89,11 +81,15 @@ const Documents = ({
 
   const downloadColumnTemplate = rowData => {
     return (
-      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
+      <span
+        className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
+        onClick={() => onDownloadDocument(rowData)}>
         {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
-          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+          <div>
+            <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+          </div>
         )}
       </span>
     );
@@ -182,27 +178,15 @@ const Documents = ({
   return (
     <>
       {isCustodian ? (
-        <Toolbar>
+        <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
-              icon={'export'}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload dataflowHelp-document-upload-help-step`}
+              icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
                 setIsEditForm(false);
                 setIsUploadDialogVisible(true);
-              }}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDocuments();
-                setIsLoading(false);
               }}
             />
           </div>
@@ -226,12 +210,6 @@ const Documents = ({
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
         value={documents}>
-        {isCustodian && !isEmpty(documents) ? (
-          <Column className={styles.crudColumn} body={documentsEditButtons} style={{ width: '5em' }} />
-        ) : (
-          <Column className={styles.hideColumn} />
-        )}
-
         <Column
           body={titleColumnTemplate}
           columnResizeMode="expand"
@@ -294,6 +272,16 @@ const Documents = ({
           header={resources.messages['file']}
           style={{ textAlign: 'center', width: '8em' }}
         />
+        {isCustodian && !isEmpty(documents) ? (
+          <Column
+            className={styles.crudColumn}
+            body={documentsEditButtons}
+            header={resources.messages['documentsActionColumns']}
+            style={{ width: '5em' }}
+          />
+        ) : (
+          <Column className={styles.hideColumn} />
+        )}
       </DataTable>
 
       <Dialog
@@ -314,6 +302,7 @@ const Documents = ({
       </Dialog>
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}

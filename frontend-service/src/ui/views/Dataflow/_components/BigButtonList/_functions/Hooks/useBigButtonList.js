@@ -5,9 +5,9 @@ import { isEmpty, isUndefined, uniq } from 'lodash';
 import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowData,
@@ -16,27 +16,30 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleRedirect,
   hasRepresentatives,
+  hasWritePermissions,
   isCreateButtonActive,
   isCustodian,
   isDataSchemaCorrect,
   onDatasetSchemaNameError,
   onDuplicateName,
+  onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  updatedDatasetSchema,
-  hasWritePermissions,
-  showReleaseSnapshotDialog
+  receiptState,
+  showReleaseSnapshotDialog,
+  updatedDatasetSchema
 }) => {
   const resources = useContext(ResourcesContext);
 
   const buttonList = [
     {
-      layout: 'menuBigButton',
       buttonClass: 'newItem',
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
       caption: resources.messages['newItem'],
+      helpClassName: 'dataflow-new-item-help-step',
+      layout: 'menuBigButton',
       model: [
         {
           label: resources.messages['createNewEmptyDatasetSchema'],
@@ -52,10 +55,10 @@ const useBigButtonList = ({
       visibility: isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']
     },
     {
-      layout: 'defaultBigButton',
       buttonClass: 'dataflowHelp',
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
+      layout: 'defaultBigButton',
       handleRedirect: () =>
         handleRedirect(
           getUrl(
@@ -66,6 +69,7 @@ const useBigButtonList = ({
             true
           )
         ),
+      helpClassName: 'dataflow-documents-weblinks-help-step',
       onWheel: getUrl(
         routes.DOCUMENTS,
         {
@@ -78,7 +82,6 @@ const useBigButtonList = ({
   ];
 
   const designDatasetModels = dataflowData.designDatasets.map(newDatasetSchema => ({
-    layout: 'defaultBigButton',
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
@@ -96,19 +99,9 @@ const useBigButtonList = ({
         )
       );
     },
+    helpClassName: 'dataflow-schema-help-step',
     index: newDatasetSchema.index,
-    onDuplicateName: onDuplicateName,
-    onSaveError: onDatasetSchemaNameError,
-    onSaveName: onSaveName,
-    onWheel: getUrl(
-      routes.DATASET_SCHEMA,
-      {
-        dataflowId: dataflowId,
-        datasetId: newDatasetSchema.datasetId
-      },
-      true
-    ),
-    placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+    layout: 'defaultBigButton',
     model: [
       {
         label: resources.messages['openDataset'],
@@ -148,7 +141,19 @@ const useBigButtonList = ({
         disabled: true
       }
     ],
-    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections)
+    onDuplicateName: onDuplicateName,
+    onSaveError: onDatasetSchemaNameError,
+    onSaveName: onSaveName,
+    onWheel: getUrl(
+      routes.DATASET_SCHEMA,
+      {
+        dataflowId: dataflowId,
+        datasetId: newDatasetSchema.datasetId
+      },
+      true
+    ),
+    placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -157,16 +162,15 @@ const useBigButtonList = ({
       return dataset.datasetSchemaName;
     });
     const uniqRepresentatives = uniq(representatives);
-    if (uniqRepresentatives.length === 1) {
+    if (uniqRepresentatives.length === 1 && !isCustodian) {
       const [representative] = uniqRepresentatives;
       return datasets.map(dataset => {
-        const datasetName = isCustodian ? representative : dataset.name;
+        const datasetName = dataset.name;
         return {
-          layout: 'defaultBigButton',
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
           caption: datasetName,
-          isReleased: dataset.isReleased,
+          helpClassName: 'dataflow-dataset-help-step',
           handleRedirect: () => {
             handleRedirect(
               getUrl(
@@ -179,14 +183,9 @@ const useBigButtonList = ({
               )
             );
           },
-          onWheel: getUrl(
-            routes.DATASET,
-            {
-              dataflowId: dataflowId,
-              datasetId: dataset.datasetId
-            },
-            true
-          ),
+          infoStatus: dataset.isReleased,
+          infoStatusIcon: true,
+          layout: 'defaultBigButton',
           model: hasWritePermissions
             ? [
                 {
@@ -203,12 +202,19 @@ const useBigButtonList = ({
                   disabled: true
                 }
               ],
+          onWheel: getUrl(
+            routes.DATASET,
+            {
+              dataflowId: dataflowId,
+              datasetId: dataset.datasetId
+            },
+            true
+          ),
           visibility: !isEmpty(dataflowData.datasets)
         };
       });
     }
     return uniqRepresentatives.map(representative => ({
-      layout: 'defaultBigButton',
       buttonClass: 'dataset',
       buttonIcon: 'representative',
       caption: representative,
@@ -224,6 +230,8 @@ const useBigButtonList = ({
           )
         );
       },
+      helpClassName: 'dataflow-dataset-container-help-step',
+      layout: 'defaultBigButton',
       onWheel: getUrl(
         routes.REPRESENTATIVE,
         {
@@ -240,7 +248,6 @@ const useBigButtonList = ({
 
   const dashboardModels = [
     {
-      layout: 'defaultBigButton',
       buttonClass: 'dashboard',
       buttonIcon: 'barChart',
       caption: resources.messages['dashboards'],
@@ -254,6 +261,8 @@ const useBigButtonList = ({
             true
           )
         ),
+      helpClassName: 'dataflow-dashboards-help-step',
+      layout: 'defaultBigButton',
       onWheel: getUrl(
         routes.DASHBOARDS,
         {
@@ -267,18 +276,18 @@ const useBigButtonList = ({
 
   const createDataCollection = [
     {
-      layout: 'defaultBigButton',
       buttonClass: 'newItem',
       buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
       buttonIconClass: isCreateButtonActive ? 'siteMap' : 'spinner',
       caption: resources.messages['createDataCollection'],
+      helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
+      layout: 'defaultBigButton',
       visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
     }
   ];
 
   const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
-    layout: 'defaultBigButton',
     buttonClass: 'schemaDataset',
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
@@ -294,34 +303,67 @@ const useBigButtonList = ({
         )
       );
     },
-    model: [
-      {
-        label: resources.messages['rename'],
-        icon: 'pencil',
-        disabled: true
-      },
-      {
-        label: resources.messages['duplicate'],
-        icon: 'clone',
-        disabled: true
-      },
-      {
-        label: resources.messages['delete'],
-        icon: 'trash',
-        disabled: true
-      },
-      {
-        label: resources.messages['properties'],
-        icon: 'info',
-        disabled: true
-      }
-    ],
+    helpClassName: 'dataflow-datacollection-help-step',
+    layout: 'defaultBigButton',
+    // model: [
+    //   {
+    //     label: resources.messages['rename'],
+    //     icon: 'pencil',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['duplicate'],
+    //     icon: 'clone',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['delete'],
+    //     icon: 'trash',
+    //     disabled: true
+    //   },
+    //   {
+    //     label: resources.messages['properties'],
+    //     icon: 'info',
+    //     disabled: true
+    //   }
+    // ],
     visibility: !isEmpty(dataflowData.dataCollections)
   }));
+
+  const onBuildReceiptButton = () => {
+    const { datasets } = dataflowData;
+    const representativeNames = datasets.map(dataset => {
+      return dataset.datasetSchemaName;
+    });
+    const releasedStates = datasets.map(dataset => {
+      return dataset.isReleased;
+    });
+
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
+        buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+        caption: resources.messages['confirmationReceipt'],
+        handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
+        infoStatus: receiptState.isOutdated,
+        layout: 'defaultBigButton',
+        visibility:
+          !isCustodian &&
+          uniq(representativeNames).length === 1 &&
+          !releasedStates.includes(false) &&
+          !releasedStates.includes(null)
+      }
+    ];
+  };
+
+  const receiptBigButton = onBuildReceiptButton();
+
   return [
     ...buttonList,
     ...designDatasetModels,
     ...groupByRepresentativeModels,
+    ...receiptBigButton,
     ...createDataCollection,
     ...dataCollectionModels,
     ...dashboardModels

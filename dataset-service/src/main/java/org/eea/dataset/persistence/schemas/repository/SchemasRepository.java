@@ -9,11 +9,10 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * The Interface SchemasRepository.
- *
- * @author Mario Severa
  */
 public interface SchemasRepository
     extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
+
 
 
   /**

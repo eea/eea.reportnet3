@@ -10,7 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
-export function SnapshotItem({ itemData, isReleaseVisible }) {
+const SnapshotItem = ({ itemData, isReleaseVisible }) => {
   const snapshotContext = useContext(SnapshotContext);
 
   const resources = useContext(ResourcesContext);
@@ -18,14 +18,23 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
-        <h5>{moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}</h5>
-        {itemData.isReleased ? (
+        <h5>
+          {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+          {itemData.isBlocked && (
+            <Button
+              className={`${styles.btn} rp-btn ${styles.hasBlockers}`}
+              icon="warning"
+              onClick={() => {}}
+              tooltip={resources.messages['recordBlockers']}
+              tooltipOptions={{ position: 'right' }}
+            />
+          )}
+        </h5>
+        {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
             {resources.messages['snapshotIsReleased'].toLowerCase()}
             <FontAwesomeIcon icon={AwesomeIcons('released')} />
           </h5>
-        ) : (
-          ''
         )}
         <p className={itemData.isReleased ? `${styles.released_mt}` : null}>{itemData.description}</p>
       </div>
@@ -83,4 +92,5 @@ export function SnapshotItem({ itemData, isReleaseVisible }) {
       </div>
     </li>
   );
-}
+};
+export { SnapshotItem };

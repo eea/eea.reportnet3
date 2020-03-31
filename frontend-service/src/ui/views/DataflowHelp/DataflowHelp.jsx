@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isUndefined, sortBy } from 'lodash';
+import { isEmpty, isUndefined, sortBy, cloneDeep } from 'lodash';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -33,6 +33,10 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
+  const {
+    params: { dataflowId }
+  } = match;
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -50,16 +54,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
+  const [steps, setSteps] = useState([]);
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
-        UserService.hasPermission(
-          user,
-          [config.permissions.CUSTODIAN],
-          `${config.permissions.DATAFLOW}${match.params.dataflowId}`
-        )
+        UserService.hasPermission(user, [config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
       );
     }
   }, [user]);
@@ -68,7 +69,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflowList'],
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -79,7 +80,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         href: getUrl(
           routes.DATAFLOW,
           {
-            dataflowId: match.params.dataflowId
+            dataflowId
           },
           true
         ),
@@ -88,7 +89,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             getUrl(
               routes.DATAFLOW,
               {
-                dataflowId: match.params.dataflowId
+                dataflowId
               },
               true
             )
@@ -97,21 +98,50 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
     leftSideBarContext.removeModels();
+    filterHelpSteps('initial');
   }, []);
+
+  useEffect(() => {
+    if (!isEmpty(steps)) {
+      leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
+    }
+  }, [steps]);
+
+  useEffect(() => {
+    if (!isEmpty(documents)) {
+      const inmSteps = cloneDeep(steps);
+      inmSteps.push(
+        {
+          content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
+          target: '.dataflowHelp-document-edit-delete-help-step'
+        },
+        {
+          content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
+          target: '.dataflowHelp-document-icon-help-step'
+        }
+      );
+      setSteps(inmSteps);
+    }
+  }, [documents]);
 
   useEffect(() => {
     setIsLoading(true);
     fetchDocumentsData();
     setIsLoading(false);
-  }, [isCustodian, isDataUpdated]);
+  }, [isDataUpdated]);
+
+  useEffect(() => {
+    onLoadDatasetsSchemas();
+  }, [isCustodian]);
 
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
     setIsDeletingDocument,
     false
   );
+
   useCheckNotifications(
-    ['UPLOAD_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
+    ['UPLOAD_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
     setIsDataUpdated,
     !isDataUpdated
   );
@@ -120,12 +150,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     getDataflowName();
     onLoadDocuments();
     onLoadWebLinks();
-    onLoadDatasetsSchemas();
   };
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+      const dataflowData = await DataflowService.dataflowDetails(dataflowId);
       setDataflowName(dataflowData.name);
     } catch (error) {
       notificationContext.add({
@@ -163,7 +192,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      const dataflow = await DataflowService.reporting(dataflowId);
       if (!isCustodian) {
         if (!isEmpty(dataflow.datasets)) {
           const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {
@@ -201,7 +230,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDocuments = async () => {
     try {
-      let loadedDocuments = await DocumentService.all(`${match.params.dataflowId}`);
+      let loadedDocuments = await DocumentService.all(`${dataflowId}`);
       loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
       setDocuments(loadedDocuments);
     } catch (error) {
@@ -219,7 +248,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadWebLinks = async () => {
     try {
-      let loadedWebLinks = await WebLinkService.all(match.params.dataflowId);
+      let loadedWebLinks = await WebLinkService.all(dataflowId);
       loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
       setWebLinks(loadedWebLinks);
     } catch (error) {
@@ -231,6 +260,98 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         console.error('error', error.response);
       }
     }
+  };
+
+  const setHelpSteps = e => {
+    switch (e.index) {
+      case 0:
+        filterHelpSteps('documents');
+        break;
+      case 1:
+        filterHelpSteps('weblinks');
+        break;
+      case 2:
+        filterHelpSteps('schemas');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const filterHelpSteps = type => {
+    const dataflowSteps = [];
+
+    switch (type) {
+      case 'initial':
+        dataflowSteps.push(
+          {
+            content: <h2>{resources.messages['dataflowHelp']}</h2>,
+            locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
+            placement: 'center',
+            target: 'body'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep1']}</h3>,
+            target: '.dataflowHelp-documents-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep2']}</h3>,
+            target: '.dataflowHelp-weblinks-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep3']}</h3>,
+            target: '.dataflowHelp-schemas-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
+            target: '.dataflowHelp-document-upload-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
+            target: '.dataflowHelp-document-refresh-help-step'
+          }
+        );
+        break;
+      case 'documents':
+        dataflowSteps.push(
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
+            target: '.dataflowHelp-document-upload-help-step'
+          },
+          {
+            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
+            target: '.dataflowHelp-document-refresh-help-step'
+          }
+        );
+        if (!isEmpty(documents)) {
+          dataflowSteps.push(
+            {
+              content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
+              target: '.dataflowHelp-document-edit-delete-help-step'
+            },
+            {
+              content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
+              target: '.dataflowHelp-document-icon-help-step'
+            }
+          );
+        }
+        break;
+      case 'weblinks':
+        break;
+      case 'schemas':
+        break;
+
+      default:
+        break;
+    }
+
+    // const loadedClassesSteps = [...dataflowSteps].filter(
+    //   dataflowStep =>
+    //     !isUndefined(
+    //       document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]
+    //     ) || dataflowStep.target === 'body'
+    // );
+    setSteps(dataflowSteps);
   };
 
   const layout = children => {
@@ -247,12 +368,14 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <React.Fragment>
+      <>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView activeIndex={0}>
-          <TabPanel header={resources.messages['supportingDocuments']}>
+        <TabView activeIndex={0} onTabClick={e => setHelpSteps(e)}>
+          <TabPanel
+            headerClassName="dataflowHelp-documents-help-step"
+            header={resources.messages['supportingDocuments']}>
             <Documents
-              dataflowId={match.params.dataflowId}
+              dataflowId={dataflowId}
               documents={documents}
               isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
@@ -264,9 +387,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['webLinks']}>
+          <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
-              dataflowId={match.params.dataflowId}
+              dataflowId={dataflowId}
               isCustodian={isCustodian}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
@@ -276,7 +399,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               webLinks={webLinks}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['datasetSchemas']}>
+          <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
             <DatasetSchemas
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
@@ -284,7 +407,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             />
           </TabPanel>
         </TabView>
-      </React.Fragment>
+      </>
     );
   } else {
     return <></>;

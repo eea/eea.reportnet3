@@ -1,9 +1,7 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
-import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleFieldVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,12 +11,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchemaVO {
 
@@ -35,14 +27,22 @@ public class FieldSchemaVO {
   private String name;
 
   /** The type. */
-  private TypeData type;
+  private DataType type;
 
-  /** The rule field. */
-  private List<RuleFieldVO> ruleField;
+  /** The code list items. */
+  private String[] codelistItems;
 
-  /** The id code list. */
-  private Long idCodeList;
+  /** The required. */
+  private Boolean required;
 
+  /** The is PK. */
+  private Boolean pk;
+
+  /** The is P kreferenced. */
+  private Boolean pkReferenced;
+
+  /** The referenced field. */
+  private ReferencedFieldSchemaVO referencedField;
 
   /**
    * Hash code.
@@ -51,7 +51,9 @@ public class FieldSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, idRecord, name, ruleField, type, idCodeList);
+
+    return Objects.hash(id, description, idRecord, name, type, codelistItems, required, pk);
+
   }
 
   /**
@@ -71,7 +73,7 @@ public class FieldSchemaVO {
     FieldSchemaVO other = (FieldSchemaVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-        && Objects.equals(ruleField, other.ruleField) && Objects.equals(type, other.type)
-        && Objects.equals(idCodeList, other.idCodeList);
+        && Objects.equals(type, other.type) && Objects.equals(required, other.required)
+        && Objects.equals(pk, other.pk);
   }
 }

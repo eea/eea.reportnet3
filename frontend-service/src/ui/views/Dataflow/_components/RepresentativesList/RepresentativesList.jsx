@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import { isEmpty, isNull } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
 
@@ -17,6 +20,7 @@ import {
   onKeyDown
 } from './_functions/Utils/representativeUtils';
 
+import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -84,7 +88,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
-          autoFocus={isNull(representative.representativeId)}
+          autoFocus={isNil(representative.representativeId)}
           id={isEmpty(inputData) ? 'emptyInput' : undefined}
           onBlur={() => {
             representative.providerAccount = representative.providerAccount.toLowerCase();
@@ -119,8 +123,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <>
         <select
-          disabled={hasError}
-          className="p-dropdown-items p-dropdown-list p-component"
+          className={styles.selectDataProvider}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative);
@@ -140,22 +143,17 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return !isNull(representative.representativeId) ? (
-      <Button
-        tooltip={resources.messages['manageRolesDialogDeleteTooltip']}
-        tooltipOptions={{ position: 'right' }}
-        icon="trash"
-        disabled={false}
-        className={`p-button-rounded p-button-secondary ${styles.btnDelete}`}
-        onClick={() => {
+    return isNil(representative.representativeId) ? (
+      <></>
+    ) : (
+      <ActionsColumn
+        onDeleteClick={() => {
           formDispatcher({
             type: 'SHOW_CONFIRM_DIALOG',
             payload: { representativeId: representative.representativeId }
           });
         }}
       />
-    ) : (
-      <></>
     );
   };
 
@@ -180,7 +178,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
         </div>
       </div>
 
-      {!isNull(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
+      {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
         <DataTable
           value={
             formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
@@ -199,6 +197,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
       )}
 
       <ConfirmDialog
+        classNameConfirm={'p-button-danger'}
         onConfirm={() => {
           onDeleteConfirm(formDispatcher, formState);
         }}

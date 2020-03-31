@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.DataSetTablesMapper;
+import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -40,9 +41,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -69,16 +68,16 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,12 +112,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataSetMapper dataSetMapper;
-
-  /**
-   * The data set tables mapper.
-   */
-  @Autowired
-  private DataSetTablesMapper dataSetTablesMapper;
 
   /**
    * The record mapper.
@@ -167,12 +160,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DatasetRepository datasetRepository;
-
-  /**
-   * The data set metabase table collection.
-   */
-  @Autowired
-  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /**
    * The schemas repository.
@@ -237,18 +224,29 @@ public class DatasetServiceImpl implements DatasetService {
   private StatisticsRepository statisticsRepository;
 
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /**
+   * The field no validation mapper.
+   */
+  @Autowired
+  private FieldNoValidationMapper fieldNoValidationMapper;
 
 
   /**
@@ -469,7 +467,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      Pageable pageable, final String fields, TypeErrorEnum[] levelError) throws EEAException {
+      Pageable pageable, final String fields, ErrorTypeEnum[] levelError) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
@@ -511,7 +509,11 @@ public class DatasetServiceImpl implements DatasetService {
           SortField sortField = new SortField();
           sortField.setFieldName(nameField);
           sortField.setAsc((intToBoolean(mapFields.get(nameField))));
-          sortField.setTypefield(typefield.getType());
+          if (null == typefield) {
+            sortField.setTypefield(DataType.TEXT);
+          } else {
+            sortField.setTypefield(typefield.getType());
+          }
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
@@ -550,8 +552,8 @@ public class DatasetServiceImpl implements DatasetService {
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
                 validations.stream().map(validation -> validation.getValidation().getLevelError())
-                    .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
-                    .orElse(TypeErrorEnum.WARNING));
+                    .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                    .orElse(ErrorTypeEnum.WARNING));
           }
         });
 
@@ -561,8 +563,8 @@ public class DatasetServiceImpl implements DatasetService {
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
               validations.stream().map(validation -> validation.getValidation().getLevelError())
-                  .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
-                  .orElse(TypeErrorEnum.WARNING));
+                  .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                  .orElse(ErrorTypeEnum.WARNING));
         }
       });
 
@@ -629,26 +631,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return sanitizedRecords;
 
-  }
-
-  /**
-   * Sets the dataschema tables.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollectionVO the table collection VO
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void setDataschemaTables(final Long datasetId, final Long dataFlowId,
-      final TableCollectionVO tableCollectionVO) throws EEAException {
-    final TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
-    tableCollection.setDataSetId(datasetId);
-    tableCollection.setDataFlowId(dataFlowId);
-
-    dataSetMetabaseTableCollection.save(tableCollection);
   }
 
 
@@ -729,14 +711,14 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
-      final TypeEntityEnum type) throws EEAException {
+      final EntityTypeEnum type) throws EEAException {
 
     ValidationLinkVO validationLink = new ValidationLinkVO();
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
-    if (TypeEntityEnum.TABLE == type) {
+    if (EntityTypeEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
       records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
       if (records != null && !records.isEmpty()) {
@@ -745,14 +727,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // RECORD
-    if (TypeEntityEnum.RECORD == type) {
+    if (EntityTypeEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       records =
           recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
     }
 
     // FIELD
-    if (TypeEntityEnum.FIELD == type) {
+    if (EntityTypeEnum.FIELD == type) {
 
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
@@ -794,38 +776,35 @@ public class DatasetServiceImpl implements DatasetService {
 
     Set<Long> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.BLOCKER);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
 
     Set<Long> recordIdsFromFieldWithValidationBlocker =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.BLOCKER);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
 
     Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
 
     Set<Long> recordIdsFromFieldWithValidationError =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
 
     Set<Long> recordIdsFromRecordWithValidationWarning =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
 
     Set<Long> recordIdsFromFieldWithValidationWarning =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
 
     Set<Long> recordIdsFromRecordWithValidationInfo =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.INFO);
-
+            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
 
     Set<Long> recordIdsFromFieldWithValidationInfo =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.INFO);
-
-
+            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
 
     Set<Long> idsBlockers = new HashSet<>();
     idsBlockers.addAll(recordIdsFromRecordWithValidationBlocker);
@@ -842,7 +821,6 @@ public class DatasetServiceImpl implements DatasetService {
     Set<Long> idsInfos = new HashSet<>();
     idsInfos.addAll(recordIdsFromRecordWithValidationInfo);
     idsInfos.addAll(recordIdsFromFieldWithValidationInfo);
-
 
     idsErrors.removeAll(idsBlockers);
     idsWarnings.removeAll(idsBlockers);
@@ -934,6 +912,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param statName the stat name
    * @param value the value
+   *
    * @return the statistics
    */
   private Statistics fillStat(Long idDataset, String idTableSchema, String statName, String value) {
@@ -1008,7 +987,6 @@ public class DatasetServiceImpl implements DatasetService {
       Statistics statsDatasetErrors =
           fillStat(datasetId, null, "datasetErrors", datasetErrors.toString());
       statsList.add(statsDatasetErrors);
-
 
       statisticsRepository.deleteStatsByIdDataset(datasetId);
       statisticsRepository.flush();
@@ -1349,8 +1327,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateFieldValueType(Long datasetId, String fieldSchemaId, String type) {
-    fieldRepository.updateFieldValueType(fieldSchemaId, type);
+  public void updateFieldValueType(Long datasetId, String fieldSchemaId, DataType type) {
+    fieldRepository.updateFieldValueType(fieldSchemaId, type.getValue());
   }
 
   /**
@@ -1369,6 +1347,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Checks if is reporting dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return true, if is reporting dataset
    */
   @Override
@@ -1382,6 +1361,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1429,7 +1409,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Save new field propagation.
    *
@@ -1442,7 +1421,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveNewFieldPropagation(Long datasetId, String idTableSchema, Pageable pageable,
-      String idFieldSchema, TypeData typeField) {
+      String idFieldSchema, DataType typeField) {
 
     List<RecordValue> recordsPaginated =
         recordRepository.findByTableValue_IdTableSchema(idTableSchema, pageable);
@@ -1482,5 +1461,50 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   * @param searchValue the search value
+   *
+   * @return the field values referenced
+   */
+  @Override
+  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
+    Long idDatasetDestination =
+        datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+    TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
+    // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
+    // want to show on the screen
+    List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
+        searchValue, PageRequest.of(0, 15));
+    // Remove the duplicate values
+    HashSet<String> seen = new HashSet<>();
+    fields.removeIf(e -> !seen.add(e.getValue()));
+
+    // Sort results
+    List<FieldValue> sortedList = new ArrayList<>();
+    if (!fields.isEmpty()) {
+      sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+          .collect(Collectors.toList());
+    }
+    return fieldNoValidationMapper.entityListToClass(sortedList);
+
+  }
+
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @param datasetId the dataset id
+   * @param idPk the id pk
+   *
+   * @return the referenced dataset id
+   */
+  @Override
+  public Long getReferencedDatasetId(Long datasetId, String idPk) {
+    return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+  }
 
 }

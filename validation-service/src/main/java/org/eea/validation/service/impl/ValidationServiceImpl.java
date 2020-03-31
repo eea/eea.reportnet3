@@ -2,25 +2,21 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.domain.EventType;
@@ -35,17 +31,15 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
-import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
-import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
@@ -101,6 +95,10 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private FieldValidationRepository validationFieldRepository;
 
+
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
   /**
    * The dataset repository.
    */
@@ -132,12 +130,6 @@ public class ValidationServiceImpl implements ValidationService {
   private SchemasRepository schemasRepository;
 
   /**
-   * The table validation querys drools repository.
-   */
-  @Autowired
-  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
-
-  /**
    * The kafka sender utils.
    */
   @Autowired
@@ -148,6 +140,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
+
+  /** The dataset metabase controller. */
+  @Autowired
+  private DatasetMetabaseController datasetMetabaseController;
 
   /** The dataset schema controller. */
   @Autowired
@@ -165,7 +161,11 @@ public class ValidationServiceImpl implements ValidationService {
   public List<DatasetValidation> runDatasetValidations(DatasetValue dataset,
       KieSession kieSession) {
     kieSession.insert(dataset);
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      LOG_ERROR.info("Error with one rule");
+    }
     return dataset.getDatasetValidations();
   }
 
@@ -180,7 +180,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public List<TableValidation> runTableValidations(TableValue table, KieSession kieSession) {
     kieSession.insert(table);
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      LOG_ERROR.info("Error with one rule");
+    }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
   }
 
@@ -198,7 +202,11 @@ public class ValidationServiceImpl implements ValidationService {
     if (StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      LOG_ERROR.info("Error with one rule");
+    }
 
     return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
         ? new ArrayList<>()
@@ -218,12 +226,15 @@ public class ValidationServiceImpl implements ValidationService {
     if (StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
-    kieSession.fireAllRules();
+    try {
+      kieSession.fireAllRules();
+    } catch (RuntimeException e) {
+      LOG_ERROR.info("Error with one rule");
+    }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
         ? new ArrayList<>()
         : field.getFieldValidations();
   }
-
 
   /**
    * Load rules knowledge base.
@@ -632,166 +643,4 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-  /**
-   * The dataset repository.
-   */
-  @Autowired
-  private DatasetRepositoryImpl datasetRepositoryImpl;
-
-  /**
-   * Dataset validation DO 02 query.
-   *
-   * @param DO02 the do02
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDO02Query(String DO02) {
-    return datasetRepositoryImpl.datasetValidationQuery(DO02);
-  }
-
-  /**
-   * Dataset validation DO 03 query.
-   *
-   * @param DO03 the do03
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDO03Query(String DO03) {
-    return datasetRepositoryImpl.datasetValidationQuery(DO03);
-  }
-
-  /**
-   * Dataset validation DC 01 A query.
-   *
-   * @param DC01A the dc01a
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDC01AQuery(String DC01A) {
-    return datasetRepositoryImpl.datasetValidationQuery(DC01A);
-  }
-
-  /**
-   * Dataset validation DC 01 B query.
-   *
-   * @param DC01B the dc01b
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDC01BQuery(String DC01B) {
-    return datasetRepositoryImpl.datasetValidationQuery(DC01B);
-  }
-
-  /**
-   * Dataset validation DC 02 query.
-   *
-   * @param DC02 the dc02
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDC02Query(String DC02) {
-    return datasetRepositoryImpl.datasetValidationQuery(DC02);
-  }
-
-  /**
-   * Dataset validation DC 03 query.
-   *
-   * @param DC03 the dc03
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDC03Query(String DC03) {
-    return datasetRepositoryImpl.datasetValidationQuery(DC03);
-  }
-
-  /**
-   * Dataset validation DC 02 B query.
-   *
-   * @param DC03 the dc03
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean datasetValidationDC02BQuery(String DC03) {
-    return datasetRepositoryImpl.datasetValidationQuery(DC03);
-  }
-
-  /**
-   * Table validation DR 01 AB query.
-   *
-   * @param DR01A the dr01a
-   * @param previous the previous
-   *
-   * @return the boolean
-   */
-  // TABLE PART
-  @Override
-  public Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous) {
-    return tableValidationQuerysDroolsRepository.tableValidationDR01ABQuery(DR01A, previous);
-  }
-
-  /**
-   * Table validation query non return result.
-   *
-   * @param QUERY the query
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean tableValidationQueryNonReturnResult(String QUERY) {
-    return tableValidationQuerysDroolsRepository.tableValidationQueryNonReturnResult(QUERY);
-  }
-
-  /**
-   * Table validation query return result.
-   *
-   * @param QUERY the query
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean tableValidationQueryReturnResult(String QUERY) {
-    return tableValidationQuerysDroolsRepository.tableValidationQueryReturnResult(QUERY);
-  }
-
-
-  /**
-   * Table record R ids.
-   *
-   * @param queryValidate the query validate
-   * @param MessageError the message error
-   * @param typeError the type error
-   * @param originName the origin name
-   *
-   * @return the boolean
-   */
-  @Override
-  public Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
-      String originName) {
-    List<BigInteger> listRecords =
-        tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(queryValidate);
-    if (null != listRecords && !listRecords.isEmpty()) {
-      for (BigInteger recordId : listRecords) {
-        Optional<RecordValue> record = recordRepository.findByIdValidation(recordId.longValue());
-        RecordValidation recordVal = new RecordValidation();
-        Validation validation = new Validation();
-        recordVal.setValidation(validation);
-        recordVal.setRecordValue(record.get());
-        recordVal.getValidation().setLevelError(typeError);
-        recordVal.getValidation().setMessage(MessageError);
-        recordVal.getValidation().setIdRule(new ObjectId().toString());
-        recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
-        recordVal.getValidation().setValidationDate(new Date().toString());
-        recordVal.getValidation().setOriginName(originName);
-        recordValidationRepository.save(recordVal);
-      }
-    }
-    return true;
-  }
 }

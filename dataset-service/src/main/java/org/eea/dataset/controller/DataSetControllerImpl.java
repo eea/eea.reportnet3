@@ -17,9 +17,8 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -118,7 +117,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) TypeErrorEnum[] levelError) {
+      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -226,30 +225,6 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Load dataset schema.
-   *
-   * @param datasetId the dataset id
-   * @param dataFlowId the data flow id
-   * @param tableCollection the table collection
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping("{id}/loadDatasetSchema")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
-  public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollection) {
-    if (datasetId == null || dataFlowId == null || tableCollection == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      datasetService.setDataschemaTables(datasetId, dataFlowId, tableCollection);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-  }
-
-  /**
    * Gets the table from any object id.
    *
    * @param id the id
@@ -263,7 +238,7 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "type", required = true) TypeEntityEnum type) {
+      @RequestParam(value = "type", required = true) EntityTypeEnum type) {
 
     ValidationLinkVO result = null;
     if (id == null || idDataset == null) {
@@ -530,4 +505,39 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
+
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @param searchValue the search value
+   * @return the field values referenced
+   */
+  @Override
+  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
+  public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
+      @RequestParam("idFieldSchema") String idFieldSchema,
+      @RequestParam("searchValue") String searchValue) {
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
+  }
+
+
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @return the referenced dataset id
+   */
+  @Override
+  @GetMapping("private/getReferencedDatasetId")
+  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam(value = "idFieldSchema") String idFieldSchema) {
+    return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
+  }
+
 }

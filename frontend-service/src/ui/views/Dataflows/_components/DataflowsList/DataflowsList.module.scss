@@ -1,0 +1,21 @@
+.wrap {
+  &:last-child {
+    margin-bottom: 5rem;
+  }
+
+  > h2 {
+    margin-bottom: 5px;
+    color: var(--main-font-color);
+  }
+
+  > p {
+    font-weight: 300;
+    color: var(--main-font-color);
+  }
+
+  .noDataflows {
+    margin: 3rem 0.5rem;
+    font-weight: 350;
+    color: var(--button-secondary-transparent-color-hover);
+  }
+}

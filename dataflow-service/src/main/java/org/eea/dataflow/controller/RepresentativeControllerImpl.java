@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -62,6 +64,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/{dataflowId}")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public ResponseEntity<?> insertRepresentative(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
     List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
@@ -102,6 +105,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public List<DataProviderVO> findAllDataProviderByGroupId(@PathVariable("groupId") Long groupId) {
     if (null == groupId) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -118,9 +122,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
     return representativeService.getAllDataProviderTypes();
   }
+
 
 
   /**
@@ -132,6 +138,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -147,14 +154,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeVOs;
   }
 
+
   /**
    * Update representative.
    *
    * @param representativeVO the representative VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update")
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
@@ -194,6 +204,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{dataflowRepresentativeId}")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void deleteRepresentative(
       @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId) {
     try {
@@ -214,11 +225,26 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
     if (null == dataProviderId) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     return representativeService.getDataProviderById(dataProviderId);
+  }
+
+  /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @Override
+  @GetMapping("/private/dataProvider")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<DataProviderVO> findDataProvidersByIds(
+      @RequestParam("id") List<Long> dataProviderIds) {
+    return representativeService.findDataProvidersByIds(dataProviderIds);
   }
 }

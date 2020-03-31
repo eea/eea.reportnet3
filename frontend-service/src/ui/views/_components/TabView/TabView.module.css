@@ -21,25 +21,26 @@
 }
 
 .scrollTab {
-  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  scrollbar-color: var(--bg) var(--c-custom-gray);
   scrollbar-width: thin;
-  cursor: pointer;
 }
 .scrollTab::-webkit-scrollbar {
   width: 10px;
-  height: 10px;
+  height: 8px;
 }
 
 .scrollTab::-webkit-scrollbar-track {
-  background: var(--c-custom-gray);
+  background: var(--bg);
+  border-left: 1px solid var(--gray-25);
+  border-right: 1px solid var(--gray-25);
 }
 
 .scrollTab::-webkit-scrollbar-thumb {
-  background: var(--gray-50);
+  background: var(--gray-75);
 }
 
 .scrollTab::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-75);
+  background: var(--gray-50);
 }
 
 .navigationTabIcons {

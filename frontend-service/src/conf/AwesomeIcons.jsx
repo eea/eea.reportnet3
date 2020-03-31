@@ -61,7 +61,16 @@ import {
   faPowerOff,
   faCog,
   faPen,
-  faUsersCog
+  faUsersCog,
+  faIgloo,
+  faFileDownload,
+  faDraftingCompass,
+  faClipboardList,
+  faClipboard,
+  faCheck,
+  faTimes,
+  faFolder,
+  faCaretRight
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -183,6 +192,8 @@ export const AwesomeIcons = icon => {
       return faArrowUp;
     case 'boolean':
       return faToggleOff;
+    case 'check':
+      return faCheck;
     case 'delete':
       return faTrashAlt;
     case 'disk':
@@ -217,12 +228,16 @@ export const AwesomeIcons = icon => {
       return faUserCircle;
     case 'clip':
       return faPaperclip;
+    case 'clipboard':
+      return faClipboard;
     case 'email':
       return faAt;
     case 'calendar':
       return faCalendarAlt;
     case 'circle':
       return faCircle;
+    case 'compass':
+      return faDraftingCompass;
     case 'formula':
       return faSquareRootAlt;
     case 'italic':
@@ -233,6 +248,8 @@ export const AwesomeIcons = icon => {
       return faVectorSquare;
     case 'list':
       return faList;
+    case 'listClipboard':
+      return faClipboardList;
     case 'map':
       return faMapMarkedAlt;
     case 'move':
@@ -291,6 +308,18 @@ export const AwesomeIcons = icon => {
       return faPen;
     case 'manageRoles':
       return faUsersCog;
+    case 'localhostAlert':
+      return faIgloo;
+    case 'fileDownload':
+      return faFileDownload;
+    case 'cross':
+      return faTimes;
+    case 'folder':
+      return faFolder;
+    case 'expanded':
+      return faCaretDown;
+    case 'collapsed':
+      return faCaretRight;
     default:
       return faFileAlt;
   }

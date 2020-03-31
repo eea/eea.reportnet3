@@ -5,38 +5,41 @@ package org.eea.exception;
  */
 public final class EEAErrorMessage {
 
-  /**
-   * The Constant DB_FILEFORMAT.
-   */
+  /** The Constant FILE_FORMAT. */
   public static final String FILE_FORMAT = "Invalid file format";
 
-  /**
-   * The Constant FILE_EXTENSION.
-   */
+  /** The Constant NULL_DATE. */
+  public static final String INVALID_DATE = "Not a valid date";
+
+  /** The Constant NOT_DESIGN_DATAFLOW. */
+  public static final String NOT_DESIGN_DATAFLOW = "Not a DESIGN dataflow";
+
+  /** The Constant FILE_EXTENSION. */
   public static final String FILE_EXTENSION = "File without extension";
 
-  /**
-   * The Constant FILE_EXTENSION.
-   */
+  /** The Constant FILE_NAME. */
   public static final String FILE_NAME = "Error getting the file name";
 
-  /**
-   * The Constant DATASET_NOTFOUND.
-   */
+  /** The Constant DATASET_NOTFOUND. */
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
-  /**
-   * The Constant DATASET_UNKNOW_TYPE.
-   */
+  /** The Constant DATASET_UNKNOW_TYPE. */
   public static final String DATASET_UNKNOW_TYPE = "Unknown Dataset type";
 
-  /**
-   * The constant DATASET_INCORRECT_ID.
-   */
+  /** The Constant DATASET_INCORRECT_ID. */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
   /** The Constant IDTABLESCHEMA_INCORRECT. */
   public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
+
+  /** The Constant IDDATASETSCHEMA_INCORRECT. */
+  public static final String IDDATASETSCHEMA_INCORRECT = "DatasetSchemaId incorrect";
+
+  /** The Constant RULEID_INCORRECT. */
+  public static final String RULEID_INCORRECT = "ruleId incorrect";
+
+  /** The Constant REFERENCEID_INCORRECT. */
+  public static final String REFERENCEID_INCORRECT = "referenceId incorrect";
 
   /** The Constant EXECUTION_ERROR. */
   public static final String EXECUTION_ERROR = "Runtime error";
@@ -131,17 +134,53 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 
-  /** The Constant CODELIST_NOT_FOUND. */
-  public static final String CODELIST_NOT_FOUND = "Codelist not found";
+  /** The Constant REFERENCE_ID_REQUIRED. */
+  public static final String REFERENCE_ID_REQUIRED = "ReferenceId is required";
+
+  /** The Constant DESCRIPTION_REQUIRED. */
+  public static final String DESCRIPTION_REQUIRED = "Description is required";
+
+  /** The Constant RULE_NAME_REQUIRED. */
+  public static final String RULE_NAME_REQUIRED = "RuleName is required";
+
+  /** The Constant WHEN_CONDITION_REQUIRED. */
+  public static final String WHEN_CONDITION_REQUIRED = "WhenCondition is required";
+
+  /** The Constant THEN_CONDITION_REQUIRED. */
+  public static final String THEN_CONDITION_REQUIRED = "ThenCondition is required";
+
+  /** The Constant RULE_ID_REQUIRED. */
+  public static final String RULE_ID_REQUIRED = "RuleId is required";
 
   /** The Constant REPRESENTATIVE_DUPLICATED. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
 
-  /** The Constant CODELIST_CATEGORY_NOT_FOUND. */
-  public static final String CODELIST_CATEGORY_NOT_FOUND = "Codelist category not found";
+  /** The Constant ERROR_DELETING_RULE. */
+  public static final String ERROR_DELETING_RULE = "Error deleting rules";
+  /** The Constant PERMISSION_NOT_CREATED. */
+  public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
-  /** The Constant CODELIST_VERSION_DUPLICATED. */
-  public static final String CODELIST_VERSION_DUPLICATED = "Codelist version duplicated";
+  /** The Constant ERROR_CREATING_RULE. */
+  public static final String ERROR_CREATING_RULE = "Error creating rule";
+
+  /** The Constant ERROR_CREATING_RULE_INVADE. */
+  public static final String ERROR_CREATING_RULE_INVADE =
+      "Error creating rule, the expression rule is not correct";
+
+  /** The Constant ERROR_ORDERING_RULE. */
+  public static final String ERROR_ORDERING_RULE = "Error ordering rule";
+
+  /** The Constant ERROR_UPDATING_RULE. */
+  public static final String ERROR_UPDATING_RULE = "Error updating rule";
+
+  /** The Constant PK_REFERENCED. */
+  public static final String PK_REFERENCED = "PK with existing references";
+
+  /** The Constant PK_ALREADY_EXISTS. */
+  public static final String PK_ALREADY_EXISTS = "There is an existing PK";
+
+  /** The Constant SHORT_CODE_REQUIRED. */
+  public static final String SHORT_CODE_REQUIRED = "ShortCode is required";
 
   /**
    * Instantiates a new EEA error message.

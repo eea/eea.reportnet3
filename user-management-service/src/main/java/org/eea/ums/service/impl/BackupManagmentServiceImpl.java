@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.eea.exception.EEAException;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -107,8 +108,12 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
     newUsers.stream().forEach(user -> {
       user.getGroups().stream().forEach(group -> {
-        keycloakConnectorService.addUserToGroup(usersMap.get(user.getUsername()),
-            groupsMap.get(group));
+        try {
+          keycloakConnectorService.addUserToGroup(usersMap.get(user.getUsername()),
+              groupsMap.get(group));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error adding USER to resource. Message: {}", e.getMessage(), e);
+        }
         LOG.info("Finish save group: " + group);
       });
 

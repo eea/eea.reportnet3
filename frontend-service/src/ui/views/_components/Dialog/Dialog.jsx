@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import styles from './Dialog.module.scss';
 
@@ -7,7 +7,7 @@ import { Dialog as PrimeDialog } from 'primereact/dialog';
 export const Dialog = ({
   appendTo,
   baseZIndex,
-  blockScroll,
+  blockScroll = true,
   children,
   className,
   closable,
@@ -26,7 +26,7 @@ export const Dialog = ({
   showHeader,
   style,
   visible,
-  zIndex = 3050
+  zIndex
 }) => {
   const maskStyle = {
     display: visible ? 'flex' : 'none',
@@ -40,9 +40,22 @@ export const Dialog = ({
     left: 'auto',
     zIndex
   };
+  useEffect(() => {
+    const body = document.querySelector('body');
+    if (visible) {
+      body.style.overflow = 'hidden';
+    } else {
+      body.style.overflow = 'hidden auto';
+    }
+
+    return () => {
+      body.style.overflow = 'hidden auto';
+    };
+  }, [visible]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
       <PrimeDialog
+        blockScroll={blockScroll}
         className={className}
         closeOnEscape={closeOnEscape}
         contentStyle={contentStyle}

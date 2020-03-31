@@ -1,6 +1,8 @@
 import React from 'react';
 import { isNull } from 'lodash';
 
+import './Button.scss';
+
 import { config } from 'conf';
 
 import { Button as PrimeButton } from 'primereact/button';
@@ -29,6 +31,7 @@ export const Button = ({
       <button
         className={className}
         disabled={disabled}
+        id={id}
         label={label}
         onClick={onClick}
         onMouseDown={onMouseDown}
