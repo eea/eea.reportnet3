@@ -81,7 +81,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createEmptyDataCollection(@RequestBody @LockCriteria(name = "dataflowId",
       path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
