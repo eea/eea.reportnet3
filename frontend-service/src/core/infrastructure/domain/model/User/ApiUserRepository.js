@@ -43,6 +43,12 @@ const uploadImg = async (userId, imgData) => {
   return response;
 };
 
+const userData = async userId => {
+  const response = await apiUser.userConfig(userId);
+  //const response = new Promise((resolve, reject) => { dato: 'hola' });
+  return response;
+};
+
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -60,6 +66,7 @@ const oldLogin = async (userName, password) => {
   timeOut((remain - 10) * 1000);
   return user;
 };
+
 const refreshToken = async () => {
   try {
     const currentTokens = userStorage.get();
@@ -111,6 +118,7 @@ const getToken = () => {
 
 export const ApiUserRepository = {
   login,
+  userData,
   logout,
   oldLogin,
   refreshToken,

@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
+import { UserService } from 'core/services/User';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import styles from './Settings.module.scss';
 
@@ -37,11 +39,21 @@ const reducer = (state, { type, payload }) => {
       return state;
   }
 };
+const loadUserData = async userId => {
+  try {
+    const response = await UserService.userData(userId);
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const Settings = withRouter(({ history }) => {
+  console.log('LoadUserData', loadUserData());
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
 
@@ -73,12 +85,6 @@ const Settings = withRouter(({ history }) => {
         icon: 'user-profile',
         href: getUrl(routes.SETTINGS),
         command: () => history.push(getUrl(routes.SETTINGS))
-      },
-      {
-        label: resources.messages['privacyStatement'],
-        icon: 'info',
-        href: getUrl(routes.PRIVACY_STATEMENT),
-        command: () => history.push(getUrl(routes.PRIVACY_STATEMENT))
       }
     ]);
   }, []);
@@ -106,12 +112,11 @@ const Settings = withRouter(({ history }) => {
         title: 'User Configuration Options'
       },
       {
-        icon: '',
+        icon: 'info',
         label: 'PRIVACY',
-        onClick: () => {
-          visibleUserSectionDispatch({
-            type: 'VISIBLE_USER_SETTINGS_OPTIONS'
-          });
+        onClick: e => {
+          e.preventDefault();
+          history.push(getUrl(routes['PRIVACY_STATEMENT']));
         },
         title: 'User Configuration Options'
       }

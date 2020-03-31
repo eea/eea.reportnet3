@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import styles from './PrivacyStatement.module.scss';
@@ -7,10 +7,9 @@ import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from '../_components/Title/Title';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { UserCard } from './_components/UserCard';
 
 const PrivacyStatement = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -33,13 +32,13 @@ const PrivacyStatement = withRouter(({ history }) => {
     ]);
   }, []);
 
-  const toggleUserOptions = () => {
-    return (
-      <>
-        <UserCard />
-      </>
-    );
-  };
+  // const toggleUserOptions = () => {
+  //   return (
+  //     <>
+  //       <UserCard />
+  //     </>
+  //   );
+  // };
 
   const layout = children => {
     return (
@@ -64,11 +63,11 @@ const PrivacyStatement = withRouter(({ history }) => {
           subtitle={resources.messages['PrivacyStatementSubtitle']}
         />
 
-        <ul>
+        {/* <ul>
           <li>user ID(*):</li>
           <li>First name (*):</li>
           <li>Last name (*):</li>
-        </ul>
+        </ul> */}
 
         <div className={styles.sectionMainContent}>
           <h2>Example</h2>
@@ -126,22 +125,19 @@ const PrivacyStatement = withRouter(({ history }) => {
           <p>
             The Eionet User Directory is only accessible to users of the Eionet User Directory. Following personal data
             is available for authenticated users:
-            <li>user ID(*):</li>
-            <li>First name (*):</li>
-            <li>Last name (*):</li>
-            <li>Full name (native language):</li>
-            <li>Reason to create the account (*):</li>
-            <li>Job title</li>
-            <li>E-mail(*)</li>
-            <li>URL</li>
-            <li>user ID(*):</li>
-            <li>First name (*):</li>
-            <li>Last name (*):</li>
-            <li>Full name (native language):</li>
-            <li>Reason to create the account (*):</li>
-            <li>Job title</li>
-            <li>E-mail(*)</li>
-            <li>URL</li>
+            <ul>
+              <li>Job title (if available)</li>
+              <li>Given Name</li>
+              <li>Surname</li>
+              <li>Organisation</li>
+              <li>User profile picture (if user has uploaded one)</li>
+              <li>Email</li>
+              <li>Department (if available)</li>
+              <li>Telephone (if available)</li>
+              <li>Mobile phone (if available)</li>
+              <li>Fax (if available)</li>
+              <li>Postal address (if available)</li>
+            </ul>
           </p>
         </div>
       </div>

@@ -8,7 +8,8 @@ const userSettingsDefaultState = {
     defaultRowSelected: 10,
     defaultVisualTheme: 'light',
     showLogoutConfirmation: false,
-    userIconPatch: {}
+    userIconPatch: {},
+    dateFormat: 'DD/MM/YYYY'
   }
 };
 
@@ -45,6 +46,14 @@ const userReducer = (state, { type, payload }) => {
         userProps: {
           ...state.userProps,
           defaultRowSelected: payload
+        }
+      };
+    case 'DATE_FORMAT':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          dateFormat: payload
         }
       };
     case 'DEFAULT_VISUAL_THEME':
@@ -110,6 +119,9 @@ export const UserProvider = ({ children }) => {
             type: 'DEFAULT_ROW_SELECTED',
             payload: rowNumber
           });
+        },
+        dateFormat: dateFormat => {
+          dispatch({ type: 'DATE_FORMAT', payload: dateFormat });
         },
         onTokenRefresh: user => {
           dispatch({
