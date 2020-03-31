@@ -1,6 +1,8 @@
-import React, { useContext, useEffect, useReducer, Fragment } from 'react';
+import React, { useContext, useEffect, useReducer, useState, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+
+import ObligationConf from 'conf/obligation.config.json';
 
 import { Filters } from 'ui/views/Dataflows/_components/DataflowsList/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
@@ -14,11 +16,21 @@ import { ObligationService } from 'core/services/Obligation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
+import { reportingObligationReducer } from './_functions/Reducers/ReportingObligationReducer';
+
+import { on } from 'events';
+
+// import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
 export const ReportingObligations = (dataflowId, refresh) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
+  const [filteredData, setFilteredData] = useState([]);
+
+  const onLoadFiltredData = data => {
+    setFilteredData(data);
+  };
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     data: [],
@@ -36,6 +48,8 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
     reportingObligationDispatch({ type: 'INITIAL_LOAD', payload: { data: await ObligationService.opened() } });
+    onLoadFiltredData(reportingObligationState.data);
+
     try {
     } catch (error) {
     } finally {
@@ -53,7 +67,16 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const renderData = () =>
     reportingObligationState.isTableView ? (
-      <TableView data={reportingObligationState.data} onSelectObl={onSelectObl} />
+      <>
+        <Filters
+          data={reportingObligationState.data}
+          dateOptions={ObligationConf.filterItems['date']}
+          getFiltredData={onLoadFiltredData}
+          inputOptions={ObligationConf.filterItems['input']}
+          selectOptions={ObligationConf.filterItems['select']}
+        />
+        <TableView data={filteredData} onSelectObl={onSelectObl} />
+      </>
     ) : (
       <MagazineView />
     );
