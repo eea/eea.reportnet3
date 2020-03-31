@@ -13,7 +13,7 @@ import { ObligationService } from 'core/services/Obligation';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducers';
+import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 
