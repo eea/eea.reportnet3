@@ -494,6 +494,9 @@
     "comment": "Comment",
     "oblTitle": "Title",
     "legalInstrument": "Legal instrument",
-    "dueDate": "Expiration date"
+    "dueDate": "Expiration date",
+    "country": "Country",
+    "issue": "Issue",
+    "organization": "Organization"
   }
 }

@@ -1,6 +1,6 @@
 export class Issue {
-  constructor({ issueId, issueName } = {}) {
-    this.issueId = issueId;
-    this.issueName = issueName;
+  constructor({ id, name } = {}) {
+    this.id = id;
+    this.name = name;
   }
 }

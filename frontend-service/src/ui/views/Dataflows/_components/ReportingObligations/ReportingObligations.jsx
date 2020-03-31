@@ -55,16 +55,16 @@ export const ReportingObligations = (dataflowId, refresh) => {
     // llamadas para probar
 
     // clients
-    const dataClients = await ObligationService.getClients();
-    console.log('dataClients', dataClients);
+    // const dataClients = await ObligationService.getClients();
+    // console.log('dataClients', dataClients);
 
-    // countries
-    const dataCountries = await ObligationService.getCountries();
-    console.log('dataCountries', dataCountries);
+    // // countries
+    // const dataCountries = await ObligationService.getCountries();
+    // console.log('dataCountries', dataCountries);
 
-    // countries
-    const dataIssues = await ObligationService.getIssues();
-    console.log('dataIssues', dataIssues);
+    // // countries
+    // const dataIssues = await ObligationService.getIssues();
+    // console.log('dataIssues', dataIssues);
 
     // fin llamadas
 

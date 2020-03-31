@@ -40,11 +40,11 @@ const parseClientList = clientsDTO => {
 const parseCountry = countryDTO => {
   if (!isNil(countryDTO)) {
     new Country({
-      memberCommunity: countryDTO.memberCommunity,
+      countryCode: countryDTO.twoLetter,
+      countryMember: countryDTO.memberCommunity,
+      id: countryDTO.spatialId,
       name: countryDTO.name,
-      spatialId: countryDTO.spatialId,
-      type: countryDTO.type,
-      twoLetter: countryDTO.twoLetter
+      type: countryDTO.type
     });
   }
   return;
@@ -62,8 +62,8 @@ const parseCountryList = countriesDTO => {
 const parseIssue = issueDTO => {
   if (!isNil(issueDTO)) {
     new Issue({
-      issueId: issueDTO.issueId,
-      issueName: issueDTO.issueName
+      id: issueDTO.issueId,
+      name: issueDTO.issueName
     });
   }
   return;
