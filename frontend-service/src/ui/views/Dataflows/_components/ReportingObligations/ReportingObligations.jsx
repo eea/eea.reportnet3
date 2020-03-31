@@ -24,12 +24,6 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [filteredData, setFilteredData] = useState([]);
-
-  const onLoadFiltredData = data => {
-    setFilteredData(data);
-  };
-
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     data: [],
     filteredData: [],
@@ -43,6 +37,10 @@ export const ReportingObligations = (dataflowId, refresh) => {
   }, [refresh]);
 
   const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onLoadFiltredData = data => {
+    reportingObligationDispatch({ type: 'FILTER_DATA', payload: { filteredData: data } });
+  };
 
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
@@ -68,7 +66,6 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
     // fin llamadas
 
-    onLoadFiltredData(reportingObligationState.data);
     try {
     } catch (error) {
     } finally {
