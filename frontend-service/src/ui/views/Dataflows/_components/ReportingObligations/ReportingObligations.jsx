@@ -18,10 +18,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { reportingObligationReducer } from './_functions/Reducers/ReportingObligationReducer';
 
-import { on } from 'events';
-
-// import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
-
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 
 export const ReportingObligations = (dataflowId, refresh) => {

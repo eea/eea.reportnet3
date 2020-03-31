@@ -1,7 +1,7 @@
 {
-  "getClients": "/obligation_client",
-  "getountriess": "/obligation_country",
-  "getIssues": "/obligation_issue",
+  "clients": "/obligation_client",
+  "countries": "/obligation_country",
+  "issues": "/obligation_issue",
   "obligationById": "/obligation/{:obligationId}",
   "openedObligations": "/obligation/findOpenened"
 }

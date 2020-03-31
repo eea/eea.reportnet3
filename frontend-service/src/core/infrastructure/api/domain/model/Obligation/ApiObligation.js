@@ -7,11 +7,9 @@ export const apiObligation = {
   getClients: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.getClients),
+      url: getUrl(ObligationConfig.clients),
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
     return response;
@@ -20,11 +18,9 @@ export const apiObligation = {
   getCountries: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.getCountries),
+      url: getUrl(ObligationConfig.countries),
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
     return response;
@@ -33,11 +29,9 @@ export const apiObligation = {
   getIssues: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.getIssues),
+      url: getUrl(ObligationConfig.issues),
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
     return response;

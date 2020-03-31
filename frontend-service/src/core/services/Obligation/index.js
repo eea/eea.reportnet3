@@ -1,5 +1,5 @@
 import { GetById } from './GetById';
-import { GetClients } from './GetClient';
+import { GetClients } from './GetClients';
 import { GetCountries } from './GetCountries';
 import { GetIssues } from './GetIssues';
 import { GetOpened } from './GetOpened';
