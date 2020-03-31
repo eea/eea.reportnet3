@@ -69,6 +69,7 @@ const Documents = ({
     return (
       <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
         <ActionsColumn
+          isDeletingDocument={isDeletingDocument}
           onDeleteClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
@@ -129,6 +130,7 @@ const Documents = ({
     try {
       await DocumentService.deleteDocument(documentData.id);
     } catch (error) {
+      console.log({ error });
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
@@ -308,8 +310,8 @@ const Documents = ({
         labelConfirm={resources.messages['yes']}
         maximizable={false}
         onConfirm={() => {
-          onDeleteDocument(rowDataState);
           setIsDeletingDocument(true);
+          onDeleteDocument(rowDataState);
         }}
         onHide={onHideDeleteDialog}
         visible={deleteDialogVisible}>

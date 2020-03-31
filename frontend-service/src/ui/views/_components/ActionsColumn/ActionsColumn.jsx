@@ -6,23 +6,25 @@ import styles from './ActionsColumn.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-const ActionsColumn = ({ onDeleteClick, onEditClick }) => {
+const ActionsColumn = ({ isDeletingDocument, onDeleteClick, onEditClick }) => {
   return (
     <div className={styles.actionTemplate}>
       {!isNil(onEditClick) && (
         <Button
-          type="button"
-          icon="edit"
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          disabled={isDeletingDocument}
+          icon="edit"
           onClick={() => onEditClick()}
+          type="button"
         />
       )}
       {!isNil(onDeleteClick) && (
         <Button
-          type="button"
-          icon="trash"
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          disabled={isDeletingDocument}
+          icon={!isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={() => onDeleteClick()}
+          type="button"
         />
       )}
     </div>
