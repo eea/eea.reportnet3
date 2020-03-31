@@ -27,7 +27,7 @@ public class ObligationControllerImpl implements ObligationController {
 
 
   @Override
-  @RequestMapping(value = "/findOpenened", method = RequestMethod.GET)
+  @RequestMapping(value = "/findOpened", method = RequestMethod.GET)
   public List<ObligationVO> findOpenedObligations(
       @RequestParam(value = "clientId", required = false) Integer clientId,
       @RequestParam(value = "spatialId", required = false) Integer spatialId,
