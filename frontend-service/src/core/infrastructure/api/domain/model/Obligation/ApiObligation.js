@@ -4,17 +4,43 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiObligation = {
-  openedObligations: async () => {
+  getClients: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.openedObligations),
+      url: getUrl(ObligationConfig.getClients),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
 
-    return response.data;
+    return response;
+  },
+
+  getCountries: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(ObligationConfig.getCountries),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response;
+  },
+
+  getIssues: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(ObligationConfig.getIssues),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response;
   },
 
   getObligationByID: async obligationId => {
@@ -29,5 +55,18 @@ export const apiObligation = {
     });
 
     return response;
+  },
+
+  openedObligations: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(ObligationConfig.openedObligations),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data;
   }
 };

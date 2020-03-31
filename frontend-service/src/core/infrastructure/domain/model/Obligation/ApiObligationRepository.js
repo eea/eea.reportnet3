@@ -4,6 +4,8 @@ import moment from 'moment';
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
 import { Client } from 'core/domain/model/Obligation/Client/Client';
+import { Country } from 'core/domain/model/Obligation/Country/Country';
+import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 
@@ -22,6 +24,56 @@ const parseClient = clientDTO => {
       shortName: clientDTO.shortName,
       url: clientDTO.url
     });
+  }
+  return;
+};
+
+const parseClientList = clientsDTO => {
+  if (!isNil(clientsDTO)) {
+    const clients = [];
+    clientsDTO.forEach(clientDTO => clients.push(parseClient(clientDTO)));
+    return clients;
+  }
+  return;
+};
+
+const parseCountry = countryDTO => {
+  if (!isNil(countryDTO)) {
+    new Country({
+      memberCommunity: countryDTO.memberCommunity,
+      name: countryDTO.name,
+      spatialId: countryDTO.spatialId,
+      type: countryDTO.type,
+      twoLetter: countryDTO.twoLetter
+    });
+  }
+  return;
+};
+
+const parseCountryList = countriesDTO => {
+  if (!isNil(countriesDTO)) {
+    const countries = [];
+    countriesDTO.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
+    return countries;
+  }
+  return;
+};
+
+const parseIssue = issueDTO => {
+  if (!isNil(issueDTO)) {
+    new Issue({
+      issueId: issueDTO.issueId,
+      issueName: issueDTO.issueName
+    });
+  }
+  return;
+};
+
+const parseIssueList = issuesDTO => {
+  if (!isNil(issuesDTO)) {
+    const issues = [];
+    issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
+    return issues;
   }
   return;
 };
@@ -61,9 +113,19 @@ const parseObligationList = obligationsDTO => {
   return;
 };
 
-const opened = async () => {
-  const openedObligationsDTO = await apiObligation.openedObligations();
-  return parseObligationList(openedObligationsDTO);
+const getClients = async () => {
+  const clientsDTO = await apiObligation.getClients();
+  return parseClientList(clientsDTO);
+};
+
+const getCountries = async () => {
+  const countriesDTO = await apiObligation.getCountries();
+  return parseCountryList(countriesDTO);
+};
+
+const getIssues = async () => {
+  const issuesDTO = await apiObligation.getIssues();
+  return parseIssueList(issuesDTO);
 };
 
 const getObligationById = async obligationId => {
@@ -73,7 +135,15 @@ const getObligationById = async obligationId => {
   return obligationById;
 };
 
+const opened = async () => {
+  const openedObligationsDTO = await apiObligation.openedObligations();
+  return parseObligationList(openedObligationsDTO);
+};
+
 export const ApiObligationRepository = {
+  getClients,
+  getCountries,
+  getIssues,
   getObligationById,
   opened
 };
