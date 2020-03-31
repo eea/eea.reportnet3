@@ -281,7 +281,7 @@ public class KieBaseManager {
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     Boolean correctRules = Boolean.TRUE;
     List<Map<String, String>> ruleAttribute = new ArrayList<>();
-    TypeValidation typeValidation = null;
+    TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
     switch (rule.getType()) {
       case DATASET:
@@ -299,6 +299,7 @@ public class KieBaseManager {
       case FIELD:
         schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
         typeValidation = TypeValidation.FIELD;
+        break;
     }
 
     ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
