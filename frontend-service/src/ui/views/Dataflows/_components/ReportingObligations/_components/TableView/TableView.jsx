@@ -1,6 +1,11 @@
 import React, { useContext } from 'react';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
+
+import styles from './TableView.module.scss';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Column } from 'primereact/column';
@@ -12,12 +17,25 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
   const resources = useContext(ResourcesContext);
 
   const onLoadCheckButton = row => (
-    <Checkbox
-      id={`${row.id}_checkbox`}
-      isChecked={checkedRow.title === row.title}
-      onChange={() => onSelectObl(row)}
-      role="checkbox"
-    />
+    <div className={styles.checkColum}>
+      <Checkbox
+        id={`${row.id}_checkbox`}
+        isChecked={checkedRow.title === row.title}
+        onChange={() => onSelectObl(row)}
+        role="checkbox"
+      />
+    </div>
+  );
+
+  const onLoadTitleTemplate = row => (
+    <div className={styles.titleColum}>
+      {row.title}
+      <FontAwesomeIcon
+        icon={AwesomeIcons('externalLink')}
+        style={{ float: 'center', color: 'var(--main-color-font)' }}
+        onMouseDown={() => console.log('hi')}
+      />
+    </div>
   );
 
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
@@ -28,14 +46,19 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
     repOblCols.push(
       repOblKeys
         .filter(key => key !== 'id')
-        .map(obligation => (
-          <Column
-            columnResizeMode="expand"
-            field={obligation}
-            header={resources.messages[obligation]}
-            key={obligation}
-          />
-        ))
+        .map(obligation => {
+          let template = null;
+          if (obligation === 'title') template = onLoadTitleTemplate;
+          return (
+            <Column
+              columnResizeMode="expand"
+              field={obligation}
+              header={resources.messages[obligation]}
+              key={obligation}
+              body={template}
+            />
+          );
+        })
     );
     return [renderCheckColum, ...repOblCols];
   };
