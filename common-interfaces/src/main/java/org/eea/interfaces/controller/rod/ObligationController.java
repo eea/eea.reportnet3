@@ -35,7 +35,7 @@ public interface ObligationController {
    *
    * @return the list
    */
-  @RequestMapping(value = "/findOpenened", method = RequestMethod.GET)
+  @RequestMapping(value = "/findOpened", method = RequestMethod.GET)
   List<ObligationVO> findOpenedObligations(
       @RequestParam(value = "clientId", required = false) Integer clientId,
       @RequestParam(value = "spatialId", required = false) Integer spatialId,
