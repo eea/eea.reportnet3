@@ -492,6 +492,8 @@
     "createQcRule": "Create QC rule",
     "help": "Help",
     "comment": "Comment",
-    "oblTitle": "Title"
+    "oblTitle": "Title",
+    "legalInstrument": "Legal instrument",
+    "dueDate": "Expiration date"
   }
 }

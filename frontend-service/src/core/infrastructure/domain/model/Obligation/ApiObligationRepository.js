@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import moment from 'moment';
 
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
@@ -42,7 +43,7 @@ const parseObligation = obligationDTO =>
     comment: obligationDTO.comment,
     countries: obligationDTO.countries,
     description: obligationDTO.description,
-    expirationDate: obligationDTO.nextDeadline,
+    expirationDate: moment.unix(obligationDTO.nextDeadline).format('YYYY-MM-DD'),
     issues: obligationDTO.issues,
     legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,
