@@ -1,8 +1,9 @@
 import { GetOpened } from './GetOpened';
-import { GetById } from './GetById';
+import { ObligationById } from './ObligationById';
+
 import { obligationRepository } from 'core/domain/model/Obligation/ObligationRepository';
 
 export const ObligationService = {
-  opened: GetOpened({ obligationRepository }),
-  getObligationById: GetById({ obligationRepository })
+  obligationById: ObligationById({ obligationRepository }),
+  opened: GetOpened({ obligationRepository })
 };
