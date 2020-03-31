@@ -338,6 +338,8 @@ public class RuleExpressionVO implements Serializable {
       Long n = Long.parseLong(actual);
       if (n <= Integer.MAX_VALUE) {
         args.add(n.intValue());
+      } else {
+        args.add(n);
       }
       index++;
     }
