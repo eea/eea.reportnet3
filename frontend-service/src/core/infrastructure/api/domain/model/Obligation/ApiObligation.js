@@ -37,18 +37,14 @@ export const apiObligation = {
     return response;
   },
 
-  getObligationByID: async obligationId => {
+  obligationById: async obligationId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.obligationById, {
-        obligationId
-      }),
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      url: getUrl(ObligationConfig.obligationById, { obligationId }),
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
-    return response;
+    return response.data;
   },
 
   openedObligations: async () => {
@@ -56,9 +52,7 @@ export const apiObligation = {
     const response = await HTTPRequester.get({
       url: getUrl(ObligationConfig.openedObligations),
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
     return response.data;

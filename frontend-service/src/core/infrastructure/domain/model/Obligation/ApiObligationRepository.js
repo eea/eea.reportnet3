@@ -128,11 +128,9 @@ const getIssues = async () => {
   return parseIssueList(issuesDTO);
 };
 
-const getObligationById = async obligationId => {
-  const obligationByIdDTO = await apiObligation.getObligationByID(obligationId);
-  const obligationById = new Obligation(obligationByIdDTO);
-
-  return obligationById;
+const obligationById = async obligationId => {
+  const obligationByIdDTO = await apiObligation.obligationById(obligationId);
+  return parseObligation(obligationByIdDTO);
 };
 
 const opened = async () => {
@@ -144,6 +142,6 @@ export const ApiObligationRepository = {
   getClients,
   getCountries,
   getIssues,
-  getObligationById,
+  obligationById,
   opened
 };

@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 const getIndexById = (datasetSchemaId, datasetSchemasArray) => {
   return datasetSchemasArray
@@ -12,7 +13,7 @@ const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
   let referencedFields = 0;
   datasetSchemas.forEach(schema =>
     schema.tables.forEach(table => {
-      if (!table.addTab) {
+      if (!isUndefined(table.records) && !table.addTab) {
         table.records.forEach(record =>
           record.fields.forEach(field => {
             if (!isNil(field) && !isNil(field.referencedField) && !isNil(field.referencedField.name)) {
