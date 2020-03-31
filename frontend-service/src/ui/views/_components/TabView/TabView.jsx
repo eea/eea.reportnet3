@@ -55,6 +55,8 @@ export const TabView = ({
       if (!isNil(ulTabsRef.current) && !isNil(divTabsRef.current)) {
         if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
           setIsNavigationHidden(false);
+        } else {
+          setIsNavigationHidden(true);
         }
       }
     }, 100);
@@ -169,6 +171,7 @@ export const TabView = ({
         id={id}
         index={index}
         initialTabIndexDrag={initialTabIndexDrag}
+        isNavigationHidden={isNavigationHidden}
         key={id}
         leftIcon={tab.props.leftIcon}
         newTab={tab.props.newTab}
@@ -218,7 +221,7 @@ export const TabView = ({
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
-        <div className={styles.scrollTab} ref={divTabsRef}>
+        <div className={styles.scrollTab} ref={divTabsRef} style={{ marginBottom: totalTabs === 1 ? '-5px' : '-1px' }}>
           {/* <div className={styles.iconsWrapper}> */}
 
           {/* </div> */}
