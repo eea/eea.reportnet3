@@ -238,7 +238,6 @@ const Dataflows = withRouter(({ match, history }) => {
         footer={dialogFooter}
         header="reporting obligations"
         onHide={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
-        style={{ width: '90%' }}
         visible={dataflowsState.isRepObDialogVisible}>
         <ReportingObligations />
       </Dialog>

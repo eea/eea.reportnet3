@@ -15,15 +15,18 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
+import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
+
 export const ReportingObligations = (dataflowId, refresh) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     data: [],
+    filteredData: [],
     isLoading: false,
-    oblChoosed: {},
-    isTableView: true
+    isTableView: true,
+    oblChoosed: {}
   });
 
   useEffect(() => {
@@ -34,7 +37,11 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
-    reportingObligationDispatch({ type: 'INITIAL_LOAD', payload: { data: await ObligationService.opened() } });
+    const data = await ObligationService.opened();
+    reportingObligationDispatch({
+      type: 'INITIAL_LOAD',
+      payload: { data, filteredData: ReportingObligationUtils.filteredInitialValues(data) }
+    });
     try {
     } catch (error) {
     } finally {
@@ -43,7 +50,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
   };
 
   const onSelectObl = rowData => {
-    const oblChoosed = { id: rowData.obligationId, title: rowData.oblTitle };
+    const oblChoosed = { id: rowData.id, title: rowData.title };
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
   };
 
@@ -52,7 +59,11 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const renderData = () =>
     reportingObligationState.isTableView ? (
-      <TableView data={reportingObligationState.data} onSelectObl={onSelectObl} />
+      <TableView
+        checkedRow={reportingObligationState.oblChoosed}
+        data={reportingObligationState.filteredData}
+        onSelectObl={onSelectObl}
+      />
     ) : (
       <MagazineView />
     );

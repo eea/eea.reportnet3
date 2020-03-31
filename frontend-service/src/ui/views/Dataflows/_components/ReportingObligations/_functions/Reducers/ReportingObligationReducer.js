@@ -12,6 +12,9 @@ export const reportingObligationReducer = (state, { type, payload }) => {
     case 'ON_TOGGLE_VIEW':
       return { ...state, isTableView: payload.view };
 
+    case 'FILTER_DATA':
+      return { ...state, filteredData: payload.filteredData };
+
     default:
       return state;
   }
