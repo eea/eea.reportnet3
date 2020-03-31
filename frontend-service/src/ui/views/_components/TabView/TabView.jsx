@@ -221,7 +221,7 @@ export const TabView = ({
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
-        <div className={styles.scrollTab} ref={divTabsRef}>
+        <div className={styles.scrollTab} ref={divTabsRef} style={{ marginBottom: totalTabs === 1 ? '-5px' : '-1px' }}>
           {/* <div className={styles.iconsWrapper}> */}
 
           {/* </div> */}
