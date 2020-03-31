@@ -14,7 +14,7 @@ const ActionsColumn = ({ isDeletingDocument, onDeleteClick, onEditClick }) => {
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={isDeletingDocument}
           icon="edit"
-          onClick={() => onEditClick()}
+          onClick={!isDeletingDocument ? () => onEditClick() : null}
           type="button"
         />
       )}
