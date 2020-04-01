@@ -21,10 +21,12 @@ import { ValidationService } from 'core/services/Validation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -131,11 +133,12 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = () => (
+  const actionsTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
-        '';
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
       }}
     />
   );
@@ -150,7 +153,8 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       labelConfirm={resources.messages['yes']}
       onConfirm={() => onDeleteValidation()}
       onHide={() => onHideDeleteDialog()}
-      visible={isDeleteDialogVisible}>
+      visible={isDeleteDialogVisible}
+      maximizable={false}>
       {resources.messages['deleteValidationConfirm']}
     </ConfirmDialog>
   );
@@ -173,7 +177,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
 
   const actionButtonsColumn = (
     <Column
-      body={row => (row.automatic ? deleteTemplate() : actionsTemplate())}
+      body={row => (row.automatic ? deleteTemplate() : actionsTemplate(row))}
       className={styles.validationCol}
       header={resources.messages['actions']}
       key="actions"

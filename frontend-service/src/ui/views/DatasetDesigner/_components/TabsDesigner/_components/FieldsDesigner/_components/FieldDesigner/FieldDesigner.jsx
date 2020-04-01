@@ -759,7 +759,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            onClick={() => validationContext.onOpenModalFromField(fieldId)}
+            onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
