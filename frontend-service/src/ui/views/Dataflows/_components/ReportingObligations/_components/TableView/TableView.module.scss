@@ -5,4 +5,10 @@
 .titleColum {
   display: flex;
   justify-content: space-between;
+
+  .linkIcon {
+    color: var(--main-color-font);
+    cursor: pointer;
+    float: center;
+  }
 }

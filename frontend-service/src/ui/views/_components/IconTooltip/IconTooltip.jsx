@@ -4,35 +4,35 @@ import styles from './IconTooltip.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-export const IconTooltip = ({ levelError, message, style }) => {
+export const IconTooltip = ({ className = '', levelError, message, style }) => {
   const buttonProps = {
-    type: 'button',
+    className: className,
     icon: '',
+    style: style,
     tooltip: message,
-    className: '',
-    style: style
+    type: 'button'
   };
 
   switch (levelError) {
     case 'INFO':
       buttonProps.icon = 'warning';
-      buttonProps.className = `${styles.buttonCustom} ${styles.info}`;
+      buttonProps.className = `${styles.buttonCustom} ${styles.info} ${className}`;
       break;
     case 'WARNING':
       buttonProps.icon = 'warning';
-      buttonProps.className = `${styles.buttonCustom} ${styles.warning}`;
+      buttonProps.className = `${styles.buttonCustom} ${styles.warning} ${className}`;
       break;
     case 'ERROR':
       buttonProps.icon = 'warning';
-      buttonProps.className = `${styles.buttonCustom} ${styles.error}`;
+      buttonProps.className = `${styles.buttonCustom} ${styles.error} ${className}`;
       break;
     case 'BLOCKER':
       buttonProps.icon = 'blocker';
-      buttonProps.className = `${styles.buttonCustom} ${styles.blocker}`;
+      buttonProps.className = `${styles.buttonCustom} ${styles.blocker} ${className}`;
       break;
     case '':
       buttonProps.icon = '';
-      buttonProps.className = '';
+      buttonProps.className = ` ${className}`;
       break;
     default:
       break;

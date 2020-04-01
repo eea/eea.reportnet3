@@ -48,7 +48,7 @@ public class AddDatasetSnapshotCompletedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(5,
         addDatasetSnapshotCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
             .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName").build())
@@ -56,7 +56,7 @@ public class AddDatasetSnapshotCompletedEventTest {
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(datasetMetabaseVO);

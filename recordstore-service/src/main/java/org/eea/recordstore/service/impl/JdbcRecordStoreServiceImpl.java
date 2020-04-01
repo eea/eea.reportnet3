@@ -49,92 +49,61 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-
-/**
- * The Class JdbcRecordStoreServiceImpl.
- */
+/** The Class JdbcRecordStoreServiceImpl. */
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /**
-   * The Constant FILE_PATTERN_NAME.
-   */
+  /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The data collection controller zuul.
-   */
+  /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /**
-   * The user postgre db.
-   */
+  /** The user postgre db. */
   @Value("${spring.datasource.username}")
   private String userPostgreDb;
 
-  /**
-   * The pass postgre db.
-   */
+  /** The pass postgre db. */
   @Value("${spring.datasource.password}")
   private String passPostgreDb;
 
-  /**
-   * The conn string postgre.
-   */
+  /** The conn string postgre. */
   @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
-  /**
-   * The sql get datasets name.
-   */
+  /** The sql get datasets name. */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /**
-   * The jdbc template.
-   */
+  /** The jdbc template. */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  /**
-   * The resource file.
-   */
+  /** The resource file. */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
-  /**
-   * The path snapshot.
-   */
+  /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /**
-   * The data source.
-   */
+  /** The data source. */
   @Autowired
   private DataSource dataSource;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
   /**
@@ -142,21 +111,26 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param dataflowId the dataflow id
    */
-  private void releaseLockAndNotification(Long dataflowId) {
+  private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
+
+    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
+        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
+
     // Release the lock
     List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
+    criteria.add(methodSignature);
     criteria.add(dataflowId);
     lockService.removeLockByCriteria(criteria);
 
     // Release the notification
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+      kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataflowId).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_COMPLETED_EVENT,
-          e);
+      LOG_ERROR.error("Error releasing {} event: ", successEvent, e);
     }
   }
 
@@ -184,10 +158,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
+   * @param isCreation the is creation
    */
   @Override
   @Async
-  public void createSchemas(Map<Long, String> datasetIdsAndSchemaIds, Long dataflowId) {
+  public void createSchemas(Map<Long, String> datasetIdsAndSchemaIds, Long dataflowId,
+      boolean isCreation) {
 
     // Initialize resources
     try (Connection connection = dataSource.getConnection();
@@ -212,13 +188,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
 
       // Release the lock and the notification
-      releaseLockAndNotification(dataflowId);
+      releaseLockAndNotification(dataflowId, isCreation);
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
       // This method will release the lock
-      dataCollectionControllerZuul
-          .undoDataCollectionCreation(new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId);
+      dataCollectionControllerZuul.undoDataCollectionCreation(
+          new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
     }
   }
 
@@ -458,17 +434,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
@@ -541,9 +517,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR
-            .error("Error restoring the snapshot data due to error {}. Rollback", e.getMessage(),
-                e);
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
+            e.getMessage(), e);
         con.rollback();
       }
       try {

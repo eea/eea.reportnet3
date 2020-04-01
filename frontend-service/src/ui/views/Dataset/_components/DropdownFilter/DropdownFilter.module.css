@@ -33,9 +33,15 @@
 .dropdownFilter ul li a svg {
   margin-right: 0.5rem;
 }
+
+.dropdownFilterIcon {
+  margin-right: 0.5rem !important;
+}
+
 .isNotChecked {
   color: var(--c-black-300) !important;
 }
 .selectNone {
+  display: flex;
   user-select: none;
 }
