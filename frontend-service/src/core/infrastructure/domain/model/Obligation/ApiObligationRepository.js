@@ -115,7 +115,7 @@ const parseObligationList = obligationsDTO => {
     const obligations = [];
     console.log('obligationsDTO typo', typeof obligationsDTO);
     console.log('obligationsDTO.length', obligationsDTO.length);
-    console.log('obligationsDTO array', obligationsDTO.isArray);
+    console.log('obligationsDTO array', Array.isArray(obligationsDTO));
     obligationsDTO.forEach(obligationDTO => obligations.push(parseObligation(obligationDTO)));
     return obligations;
   }
