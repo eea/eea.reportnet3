@@ -81,8 +81,6 @@ const UserObligations = () => {
     setLoading(false);
   };
 
-  //const listDataFlows = () => initialvalues.map(e => e.name);
-
   const schemaById = async datasetId => {
     const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
     const dataset = new Dataset();
