@@ -80,7 +80,7 @@ const parseIssueList = issuesDTO => {
 
 const parseLegalInstrument = legalInstrumentDTO => {
   if (!isNil(legalInstrumentDTO)) {
-    new LegalInstrument({
+    return new LegalInstrument({
       alias: legalInstrumentDTO.sourceAlias,
       id: legalInstrumentDTO.sourceId,
       title: legalInstrumentDTO.sourceTitle
