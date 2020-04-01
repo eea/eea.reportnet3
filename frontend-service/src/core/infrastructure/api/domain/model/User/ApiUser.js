@@ -50,17 +50,17 @@ export const apiUser = {
   },
   userData: async userId => {
     const tokens = userStorage.get();
-    // const response = await HTTPRequester.get({
-    //   url: getUrl(UserConfig.userData),
-    //   data: { id: userId },
-    //   queryString: {},
-    //   headers: {
-    //     Authorization: `Bearer ${tokens.accessToken}`
-    //   }
-    // });
-    const response = new Promise((resolve, reject) => {
-      setTimeout(resolve({ hello: 'hola' }), 1000);
+    const response = await HTTPRequester.get({
+      url: getUrl(UserConfig.userData),
+      data: { id: userId },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
+    // const response = new Promise((resolve, reject) => {
+    //   setTimeout(resolve({ hello: 'hola' }), 1000);
+    // });
     return response;
   },
   logout: async refreshToken => {
