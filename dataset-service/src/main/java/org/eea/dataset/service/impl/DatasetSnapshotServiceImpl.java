@@ -530,10 +530,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
     rulesRepository.save(rules);
 
+    // First we delete all the entries in the catalogue of the previous schema, before replacing it
+    // by the one of the snapshot
+    schemaService.updatePkCatalogueDeletingSchema(schema.getIdDataSetSchema().toString());
     // Replace the schema: delete the older and save the new we have already recovered on step
     // Also in the service we call the recordstore to do the restore of the dataset_X data
     schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
         idSnapshot);
+    // fill the PK catalogue with the new schema
+    // also the table foreign_relations
+    schemaService.updatePKCatalogueAndForeignsAfterSnapshot(schema.getIdDataSetSchema().toString(),
+        idDataset);
 
     LOG.info("Schema Snapshot {} totally restored", idSnapshot);
   }

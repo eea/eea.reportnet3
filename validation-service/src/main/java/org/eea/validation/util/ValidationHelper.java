@@ -100,7 +100,6 @@ public class ValidationHelper {
    * @throws EEAException the eea exception
    */
   public KieBase getKieBase(String processId, Long datasetId) throws EEAException {
-
     KieBase kieBase = null;
     synchronized (droolsActiveSessions) {
       if (!droolsActiveSessions.containsKey(processId)) {

@@ -87,12 +87,6 @@ const Dashboard = withRouter(
         let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
         levelErrors.forEach(levelError => {
           let levelErrorIndex = getLevelErrorPriority(levelError);
-          console.log(
-            !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
-            levelError,
-            dashboardColors,
-            colors.levelError
-          );
           let bar = {
             label: capitalize(levelError),
             backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,

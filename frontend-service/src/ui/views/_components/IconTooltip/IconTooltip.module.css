@@ -66,13 +66,7 @@ td > .tooltip > span.tooltiptext {
 .buttonCustom.blocker:hover {
   color: var(--blockers) !important;
 }
-.buttonCustom.multi {
-  color: var(--c-lilac-400) !important;
-}
 
-.buttonCustom.multi:hover {
-  color: var(--c-lilac-400) !important;
-}
 :global .p-tooltip {
   max-width: 30rem !important;
 }

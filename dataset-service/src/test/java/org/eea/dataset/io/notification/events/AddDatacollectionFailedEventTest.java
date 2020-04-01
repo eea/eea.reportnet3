@@ -48,13 +48,13 @@ public class AddDatacollectionFailedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(4, addDatacollectionFailedEvent.getMap(NotificationVO.builder().user("user")
         .dataflowId(1L).dataflowName("dataflowName").error("error").build()).size());
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Assert.assertEquals(4,
         addDatacollectionFailedEvent

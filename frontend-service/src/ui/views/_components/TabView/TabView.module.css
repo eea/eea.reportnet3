@@ -6,7 +6,6 @@
 .scrollTab {
   overflow-x: auto;
   overflow-y: hidden;
-  margin-bottom: -1px;
   white-space: nowrap;
   text-overflow: unset;
   scroll-behavior: smooth;
