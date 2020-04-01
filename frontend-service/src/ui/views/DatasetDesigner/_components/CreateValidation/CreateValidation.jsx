@@ -1,6 +1,7 @@
-import React, { useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useReducer, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
@@ -12,10 +13,9 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-
 import { ValidationService } from 'core/services/Validation';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -31,7 +31,7 @@ import { deleteExpressionRecursivily } from './_functions/utils/deleteExpression
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
-import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTableByFieldId';
+import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
 import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
 import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
@@ -47,6 +47,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducer,
     createValidationReducerInitState
   );
+  const [fieldsDropdown, setfieldsDropdown] = useState();
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -61,7 +62,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
-
     if (!isEmpty(table)) {
       creationFormDispatch({
         type: 'SET_FIELDS',
@@ -86,7 +86,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'table',
-          value: getSelectedTableByFieldId(validationContext.fieldId, tabs)
+          value: getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs)
         }
       });
     }
@@ -134,6 +134,65 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     });
   }, [creationFormState.candidateRule]);
 
+  useEffect(() => {
+    if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
+      creationFormDispatch({
+        type: 'POPULATE_CREATE_FORM',
+        payload: validationContext.ruleToEdit
+      });
+    }
+  }, [validationContext.ruleEdit]);
+
+  useEffect(() => {
+    const { tableFields } = creationFormState;
+    const dropdownOptions = {
+      disabled: true,
+      placeholder: resourcesContext.messages.field,
+      options: [],
+      onChange: () => {},
+      value: null
+    };
+    if (isNil(tableFields)) {
+      dropdownOptions.value = null;
+    }
+    console.log('[getFieldDropdown]', tableFields);
+    if (!isNil(tableFields) && tableFields.length == 0) {
+      dropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
+      dropdownOptions.value = null;
+    }
+    if (!isNil(tableFields) && tableFields.length > 0) {
+      dropdownOptions.options = tableFields;
+      dropdownOptions.disabled = false;
+      dropdownOptions.onChange = e =>
+        creationFormDispatch({
+          type: 'SET_FORM_FIELD',
+          payload: {
+            key: 'field',
+            value: e.target.value
+          }
+        });
+      dropdownOptions.value = creationFormState.candidateRule.field;
+    }
+    setfieldsDropdown(
+      <Dropdown
+        id={`${componentName}__field`}
+        disabled={dropdownOptions.disabled}
+        appendTo={document.body}
+        filterPlaceholder={dropdownOptions.placeholder}
+        placeholder={dropdownOptions.placeholder}
+        optionLabel="label"
+        options={dropdownOptions.options}
+        onChange={dropdownOptions.onChange}
+        value={dropdownOptions.value}
+      />
+    );
+  }, [
+    creationFormState.tableFields,
+    validationContext.isVisible,
+    creationFormState.candidateRule.field,
+    creationFormState.candidateRule.table
+  ]);
+
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
   };
@@ -145,7 +204,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     );
   };
 
-  const createValidationRule = async () => {
+  const onCreateValidationRule = async () => {
     try {
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
@@ -154,7 +213,20 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.error('createValidationRule error', error);
+      console.error('onCreateValidationRule error', error);
+    }
+  };
+
+  const onUpdateValidationRule = async () => {
+    try {
+      const { candidateRule } = creationFormState;
+      await ValidationService.update(datasetId, candidateRule);
+      onHide();
+    } catch (error) {
+      notificationContext.add({
+        type: 'QC_RULE_UPDATING_ERROR'
+      });
+      console.error('onUpdateValidationRule error', error);
     }
   };
 
@@ -253,24 +325,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               </div>
               <div className={styles.field}>
                 <label htmlFor="field">{resourcesContext.messages.field}</label>
-                <Dropdown
-                  id={`${componentName}__field`}
-                  appendTo={document.body}
-                  filterPlaceholder={resourcesContext.messages.field}
-                  placeholder={resourcesContext.messages.field}
-                  optionLabel="label"
-                  options={creationFormState.tableFields}
-                  onChange={e =>
-                    creationFormDispatch({
-                      type: 'SET_FORM_FIELD',
-                      payload: {
-                        key: 'field',
-                        value: e.target.value
-                      }
-                    })
-                  }
-                  value={creationFormState.candidateRule.field}
-                />
+                {fieldsDropdown}
               </div>
               <div className={styles.field}>
                 <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
@@ -428,7 +483,13 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
           )}
           <div className={styles.section}>
-            <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
+            <textarea
+              name=""
+              id=""
+              cols="30"
+              readOnly
+              rows="5"
+              value={creationFormState.validationRuleString}></textarea>
           </div>
         </div>
         <div className={styles.footer}>
@@ -450,15 +511,28 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               />
             </div>
             <div className={styles.subsection}>
-              <Button
-                id={`${componentName}__create`}
-                disabled={creationFormState.isValidationCreationDisabled}
-                className="p-button-primary p-button-text-icon-left"
-                type="button"
-                label={resourcesContext.messages.create}
-                icon="check"
-                onClick={e => createValidationRule()}
-              />
+              {validationContext.ruleEdit ? (
+                <Button
+                  id={`${componentName}__create`}
+                  disabled={creationFormState.isValidationCreationDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.update}
+                  icon="check"
+                  onClick={e => onUpdateValidationRule()}
+                />
+              ) : (
+                <Button
+                  id={`${componentName}__create`}
+                  disabled={creationFormState.isValidationCreationDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.create}
+                  icon="check"
+                  onClick={e => onCreateValidationRule()}
+                />
+              )}
+
               <Button
                 id={`${componentName}__cancel`}
                 className="p-button-secondary p-button-text-icon-left"

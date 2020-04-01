@@ -493,6 +493,8 @@
     "help": "Help",
     "legalInstrument": "Legal instrument",
     "dueDate": "Expiration date",
-    "searchAllLabel": "Search all"
+    "searchAllLabel": "Search all",
+    "update": "update",
+    "designSchemaTabNoFields": "No fields yet"
   }
 }

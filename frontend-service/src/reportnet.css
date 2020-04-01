@@ -2240,7 +2240,7 @@ body .p-dialog.edit-table .p-dialog-content {
 
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
-  z-index: 3100 !important;
+  z-index: 5100 !important;
 }
 
 .p-sidebar-right {
