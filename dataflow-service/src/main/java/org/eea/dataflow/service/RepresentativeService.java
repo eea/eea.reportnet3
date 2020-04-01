@@ -6,20 +6,18 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 
-/**
- * The Interface RepresentativeService.
- */
+/** The Interface RepresentativeService. */
 public interface RepresentativeService {
 
   /**
-   * Insert representative.
+   * Creates the representative.
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
    * @return the long
    * @throws EEAException the EEA exception
    */
-  Long insertRepresentative(final Long dataflowId, final RepresentativeVO representativeVO)
+  Long createRepresentative(final Long dataflowId, final RepresentativeVO representativeVO)
       throws EEAException;
 
   /**

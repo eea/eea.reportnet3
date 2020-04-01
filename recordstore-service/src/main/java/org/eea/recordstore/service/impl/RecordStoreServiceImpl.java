@@ -26,66 +26,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import com.github.dockerjava.api.model.Container;
 
-/**
- * The Class RecordStoreServiceImpl.
- */
-// @Service
+/** The Class RecordStoreServiceImpl. */
 public class RecordStoreServiceImpl implements RecordStoreService {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
 
-  /**
-   * The Constant DATASET_NAME_PATTERN.
-   */
+  /** The Constant DATASET_NAME_PATTERN. */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
-  /**
-   * The docker interface service.
-   */
+  /** The docker interface service. */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
-  /**
-   * The container name.
-   */
+  /** The container name. */
   @Value("${dockerContainerName}")
   private String containerName;
 
-  /**
-   * The ip postgre db.
-   */
+  /** The ip postgre db. */
   @Value("${ipPostgre}")
   private String ipPostgreDb;
 
-  /**
-   * The user postgre db.
-   */
+  /** The user postgre db. */
   @Value("${userPostgre}")
   private String userPostgreDb;
 
-  /**
-   * The pass postgre db.
-   */
+  /** The pass postgre db. */
   @Value("${passwordPostgre}")
   private String passPostgreDb;
 
-  /**
-   * The conn string postgre.
-   */
+  /** The conn string postgre. */
   @Value("${connStringPostgree}")
   private String connStringPostgre;
 
-  /**
-   * The sql get datasets name.
-   */
+  /** The sql get datasets name. */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
@@ -93,10 +70,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-
-  /**
-   * The kafka sender.
-   */
+  /** The kafka sender. */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -140,10 +114,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
           e);
-
     }
   }
-
 
   /**
    * Creates the empty data set.
@@ -188,7 +160,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
         throw new RecordStoreAccessException(String
             .format("Error executing docker command to create the dataset. %s", e.getMessage()), e);
-
       }
     }
 
@@ -214,7 +185,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void createDataSetFromOther(final String sourceDatasetName,
       final String destinationDataSetName) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
-
   }
 
   /**
@@ -257,7 +227,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       result.add(connection);
     }
     return result;
-
   }
 
   /**
@@ -288,7 +257,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
           e);
-
     }
     return datasets;
   }
@@ -310,7 +278,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     return result;
   }
 
-
   /**
    * Creates the data snapshot.
    *
@@ -327,7 +294,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
-
   /**
    * Restore data snapshot.
    *
@@ -335,6 +301,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
@@ -359,7 +326,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
-
   /**
    * Delete dataset.
    *
@@ -375,9 +341,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param data the data
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    */
   @Override
-  public void createSchemas(Map<Long, String> data, Long dataflowId) {
+  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 }

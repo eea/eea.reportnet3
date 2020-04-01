@@ -36,7 +36,7 @@ public class UploadDocumentFailedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert
         .assertEquals(5,
             uploadDocumentFailedEvent
@@ -46,7 +46,7 @@ public class UploadDocumentFailedEventTest {
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(5, uploadDocumentFailedEvent.getMap(NotificationVO.builder().user("user")
