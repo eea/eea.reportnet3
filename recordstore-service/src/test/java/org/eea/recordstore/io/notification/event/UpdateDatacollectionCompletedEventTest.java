@@ -54,7 +54,7 @@ public class UpdateDatacollectionCompletedEventTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(3, updateDatacollectionCompletedEvent.getMap(
         NotificationVO.builder().user("user").dataflowId(1L).dataflowName("dataflowName").build())
         .size());
@@ -67,7 +67,7 @@ public class UpdateDatacollectionCompletedEventTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(3, updateDatacollectionCompletedEvent
