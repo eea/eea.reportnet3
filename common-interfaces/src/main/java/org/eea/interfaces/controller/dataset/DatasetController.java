@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -179,7 +180,6 @@ public interface DatasetController {
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) throws Exception;
 
-
   /**
    * Insert id data schema.
    *
@@ -190,7 +190,6 @@ public interface DatasetController {
   void insertIdDataSchema(@PathVariable("id") Long datasetId,
       @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
 
-
   /**
    * Update field.
    *
@@ -200,8 +199,6 @@ public interface DatasetController {
   @RequestMapping(value = "/{id}/updateField", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
-
-
 
   /**
    * Gets the field values referenced.
@@ -217,8 +214,6 @@ public interface DatasetController {
       @RequestParam(value = "idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue);
 
-
-
   /**
    * Gets the referenced dataset id.
    *
@@ -226,7 +221,16 @@ public interface DatasetController {
    * @param idFieldSchema the id field schema
    * @return the referenced dataset id
    */
-  @GetMapping("private/getReferencedDatasetId")
+  @GetMapping("/private/getReferencedDatasetId")
   Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema);
+
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  @GetMapping("/private/datasetType/{datasetId}")
+  DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId);
 }
