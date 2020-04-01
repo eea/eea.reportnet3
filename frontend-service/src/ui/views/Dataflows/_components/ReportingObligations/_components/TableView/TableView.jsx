@@ -31,9 +31,9 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
     <div className={styles.titleColum}>
       {row.title}
       <FontAwesomeIcon
+        className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
-        style={{ float: 'center', color: 'var(--main-color-font)' }}
-        onMouseDown={() => console.log('hi')}
+        onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}
       />
     </div>
   );
