@@ -13,8 +13,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
@@ -42,10 +42,6 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table repository. */
-  @Autowired
-  private TableRepository tableRepository;
-
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
@@ -54,6 +50,9 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private RulesSchemaMapper rulesSchemaMapper;
 
+  /** The rules sequence repository. */
+  @Autowired
+  private RulesSequenceRepository rulesSequenceRepository;
 
   /** The rule mapper. */
   @Autowired
@@ -235,30 +234,11 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
+
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
-  }
-
-  /**
-   * Count rules in schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param required the required
-   * @param shortcode the shortcode
-   * @return the string
-   */
-  private String countRulesInSchema(String datasetSchemaId, boolean required, String shortcode) {
-    RulesSchema rules =
-        rulesRepository.getRulesWithTypeRuleCriteria(new ObjectId(datasetSchemaId), required);
-    List<Rule> rulesList = rules.getRules();
-    if (!rulesList.isEmpty()) {
-      String code = rulesList.get(rulesList.size() - 1).getShortCode();
-      String text = (code).substring(2, code.length());
-      int rulesSize = Integer.valueOf(text) + 1;
-      shortcode = String.format("%02d", rulesSize);
-    }
-    return shortcode;
   }
 
   /**
@@ -278,15 +258,13 @@ public class RulesServiceImpl implements RulesService {
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
     List<Rule> ruleList = new ArrayList<>();
-    // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
+    // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
-    String shortcode = "01";
+    Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
     if (required) {
-      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
     } else {
-      shortcode = countRulesInSchema(datasetSchemaId, required, shortcode);
       switch (typeData) {
         case NUMBER:
           ruleList.add(AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
@@ -311,7 +289,7 @@ public class RulesServiceImpl implements RulesService {
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
-          // that is for evite do many calls to database and colapse it
+          // that is for avoid do many calls to database and collapse it
           DataSetSchema datasetSchema =
               schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
           String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
@@ -321,7 +299,7 @@ public class RulesServiceImpl implements RulesService {
               datasetId));
           break;
         case CODELIST:
-          // we find values avaliable to create this validation for a codelist, same value with
+          // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
@@ -335,10 +313,8 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (!ruleList.isEmpty()) {
-      ruleList.stream().forEach(rule -> {
-        rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
-      });
-
+      ruleList.stream()
+          .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
   }
 

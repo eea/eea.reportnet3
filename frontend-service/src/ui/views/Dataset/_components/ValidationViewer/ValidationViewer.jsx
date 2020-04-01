@@ -407,6 +407,7 @@ const ValidationViewer = React.memo(
                 onShow={e => {
                   getExportButtonPosition(e);
                 }}
+                showLevelErrorIcons={true}
               />
 
               <Button

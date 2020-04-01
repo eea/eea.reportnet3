@@ -12,10 +12,12 @@ a.p_tabview_design_add {
   width: 3.6rem;
 }
 
-/* a.p_tabview_design_add:hover {
-  transform: scale(1.25);
-  transition: 0.08s linear;
-} */
+a.p_tabview_design_add:hover {
+  background-color: var(--tabview-highlight-bg-hover) !important;
+  border: var(--tabview-highlight-border-hover) !important;
+  color: var(--tabview-highlight-color-hover) !important;
+  cursor: pointer !important;
+}
 
 a.p_tabview_design_add:hover span:first-child:not(:hover) {
   transform: scale(1.25);

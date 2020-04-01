@@ -379,6 +379,8 @@ public class DataFlowControllerImpl implements DataFlowController {
     try {
       dataflowService.deleteDataFlow(idDataflow);
     } catch (Exception e) {
+      LOG_ERROR.error("Error deleting the dataflow {}. Error message: {}", idDataflow,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
