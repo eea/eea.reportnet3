@@ -6,6 +6,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.junit.Assert;
@@ -48,22 +49,24 @@ public class ValidationFinishedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
-    Assert.assertEquals(5,
+  public void getMapTest() throws EEAException {
+    Assert.assertEquals(6,
         validationFinishedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
-            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName").build())
-            .size());
+            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
+            .datasetType(DatasetTypeEnum.REPORTING).build()).size());
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(5, validationFinishedEvent
+    Mockito.when(dataSetControllerZuul.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
+    Assert.assertEquals(6, validationFinishedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }

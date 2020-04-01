@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -48,9 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/**
- * The type Data set controller.
- */
+/** The type Data set controller. */
 @RestController
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
@@ -506,7 +505,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Gets the field values referenced.
    *
@@ -524,8 +522,6 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
   }
 
-
-
   /**
    * Gets the referenced dataset id.
    *
@@ -534,10 +530,21 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the referenced dataset id
    */
   @Override
-  @GetMapping("private/getReferencedDatasetId")
+  @GetMapping("/private/getReferencedDatasetId")
   public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
       @RequestParam(value = "idFieldSchema") String idFieldSchema) {
     return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
   }
 
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  @Override
+  @GetMapping("/private/datasetType/{datasetId}")
+  public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
+    return datasetService.getDatasetType(datasetId);
+  }
 }

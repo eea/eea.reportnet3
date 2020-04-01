@@ -2,9 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -44,7 +41,9 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -72,6 +71,7 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -89,168 +89,118 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
-/**
- * The type Dataset service.
- */
+/** The type Dataset service. */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /**
-   * The Constant ROOT.
-   */
+  /** The Constant ROOT. */
   private static final String ROOT = "root";
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The data set mapper.
-   */
-  @Autowired
-  private DataSetMapper dataSetMapper;
-
-  /**
-   * The record mapper.
-   */
-  @Autowired
-  private RecordMapper recordMapper;
-
-  /**
-   * The record repository.
-   */
-  @Autowired
-  private RecordRepository recordRepository;
-
-  /**
-   * The table repository.
-   */
-  @Autowired
-  private TableRepository tableRepository;
-
-  /**
-   * The parse common.
-   */
-  @Autowired
-  private FileCommonUtils fileCommon;
-
-
-  /**
-   * The reporting dataset repository.
-   */
-  @Autowired
-  private ReportingDatasetRepository reportingDatasetRepository;
-
-  /**
-   * The partition data set metabase repository.
-   */
-  @Autowired
-  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
-
-  /**
-   * The data set metabase repository.
-   */
-  @Autowired
-  private DataSetMetabaseRepository dataSetMetabaseRepository;
-  /**
-   * The dataset repository.
-   */
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /**
-   * The schemas repository.
-   */
+  /** The data set metabase repository. */
   @Autowired
-  private SchemasRepository schemasRepository;
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /**
-   * The file parser factory.
-   */
+  /** The partition data set metabase repository. */
   @Autowired
-  private IFileParserFactory fileParserFactory;
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /**
-   * The file export factory.
-   */
+  /** The design dataset repository. */
   @Autowired
-  private IFileExportFactory fileExportFactory;
+  private DesignDatasetRepository designDatasetRepository;
 
-
-  /**
-   * The field repository.
-   */
+  /** The reporting dataset repository. */
   @Autowired
-  private FieldRepository fieldRepository;
+  private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The record no validation.
-   */
+  /** The data collection repository. */
   @Autowired
-  private RecordNoValidationMapper recordNoValidationMapper;
+  private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The field validation repository.
-   */
+  /** The table repository. */
   @Autowired
-  private FieldValidationRepository fieldValidationRepository;
+  private TableRepository tableRepository;
 
-  /**
-   * The record validation repository.
-   */
+  /** The record repository. */
+  @Autowired
+  private RecordRepository recordRepository;
+
+  /** The record validation repository. */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /**
-   * The field validation mapper.
-   */
+  /** The field repository. */
   @Autowired
-  private FieldValidationMapper fieldValidationMapper;
+  private FieldRepository fieldRepository;
 
-  /**
-   * The record validation mapper.
-   */
+  /** The field validation repository. */
   @Autowired
-  private RecordValidationMapper recordValidationMapper;
+  private FieldValidationRepository fieldValidationRepository;
 
-
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The data set mapper. */
+  @Autowired
+  private DataSetMapper dataSetMapper;
+
+  /** The record mapper. */
+  @Autowired
+  private RecordMapper recordMapper;
+
+  /** The parse common. */
+  @Autowired
+  private FileCommonUtils fileCommon;
+
+  /** The file parser factory. */
+  @Autowired
+  private IFileParserFactory fileParserFactory;
+
+  /** The file export factory. */
+  @Autowired
+  private IFileExportFactory fileExportFactory;
+
+  /** The record no validation. */
+  @Autowired
+  private RecordNoValidationMapper recordNoValidationMapper;
+
+  /** The field validation mapper. */
+  @Autowired
+  private FieldValidationMapper fieldValidationMapper;
+
+  /** The record validation mapper. */
+  @Autowired
+  private RecordValidationMapper recordValidationMapper;
+
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The field no validation mapper.
-   */
+  /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
-
 
   /**
    * Process file.
@@ -1358,7 +1308,6 @@ public class DatasetServiceImpl implements DatasetService {
     return reportingDatasetRepository.existsById(datasetId);
   }
 
-
   /**
    * Prepare new field propagation.
    *
@@ -1486,50 +1435,15 @@ public class DatasetServiceImpl implements DatasetService {
     HashSet<String> seen = new HashSet<>();
     fields.removeIf(e -> !seen.add(e.getValue()));
 
+    // Sort results
     List<FieldValue> sortedList = new ArrayList<>();
-
     if (!fields.isEmpty()) {
-      switch (fields.get(0).getType()) {
-        case COORDINATE_LAT:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Double.valueOf(v1.getValue())
-                      .compareTo(Double.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case COORDINATE_LONG:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Double.valueOf(v1.getValue())
-                      .compareTo(Double.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case NUMBER:
-          sortedList = fields.stream()
-              .sorted(
-                  (v1, v2) -> Integer.valueOf(v1.getValue())
-                      .compareTo(Integer.valueOf(v2.getValue())))
-              .collect(Collectors.toList());
-          break;
-        case DATE:
-          ZoneId timeZone = ZoneId.of("UTC");
-          DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-          LocalDate.now(timeZone).format(fmt);
-
-          sortedList = fields.stream()
-              .sorted((v1, v2) -> LocalDate.from(fmt.parse(v1.getValue()))
-                  .compareTo(LocalDate.from(fmt.parse(v2.getValue()))))
-              .collect(Collectors.toList());
-          break;
-        default:
-          sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
-              .collect(Collectors.toList());
-          break;
-      }
+      sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+          .collect(Collectors.toList());
     }
     return fieldNoValidationMapper.entityListToClass(sortedList);
-  }
 
+  }
 
   /**
    * Gets the referenced dataset id.
@@ -1544,4 +1458,24 @@ public class DatasetServiceImpl implements DatasetService {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
 
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  @Override
+  public DatasetTypeEnum getDatasetType(Long datasetId) {
+    DatasetTypeEnum type = null;
+
+    if (designDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.DESIGN;
+    } else if (reportingDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REPORTING;
+    } else if (dataCollectionRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.COLLECTION;
+    }
+
+    return type;
+  }
 }

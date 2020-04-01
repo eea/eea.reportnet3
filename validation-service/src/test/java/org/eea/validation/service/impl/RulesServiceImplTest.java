@@ -20,6 +20,7 @@ import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
@@ -68,6 +69,10 @@ public class RulesServiceImplTest {
   /** The data set metabase controller zuul. */
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The rules sequence repository. */
+  @Mock
+  private RulesSequenceRepository rulesSequenceRepository;
 
   /**
    * Delete rule by id.
@@ -182,45 +187,31 @@ public class RulesServiceImplTest {
         rulesServiceImpl.getActiveRulesSchemaByDatasetId("5e44110d6a9e3a270ce13fac"));
   }
 
-  /**
-   * Creates the automatic rules required test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesRequiredTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         null, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules boolean test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesBooleanTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules PK test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesPKTest() throws EEAException {
     DataSetSchema datasetSchema = new DataSetSchema();
@@ -245,91 +236,64 @@ public class RulesServiceImplTest {
 
 
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.LINK, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules codelist test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
     doc.put("codelistItems", "[2, 2]");
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.CODELIST, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules long test.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
   public void createAutomaticRulesLongTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.COORDINATE_LAT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules lat test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesLatTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.COORDINATE_LONG, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules date test.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
   public void createAutomaticRulesDateTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.DATE, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
 
-  /**
-   * Creates the automatic rules number test.
-   *
-   * @throws EEAException the EEA exception
-   */
+
   @Test
   public void createAutomaticRulesNumberTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -338,8 +302,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.NUMBER, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
@@ -354,8 +317,7 @@ public class RulesServiceImplTest {
   public void createAutomaticRulesTextTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesRepository.getRulesWithTypeRuleCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(ruleSchema);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.TEXT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
 
