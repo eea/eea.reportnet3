@@ -22,7 +22,8 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload,
+        fieldId: payload.fieldId,
+        tableSchemaId: payload.tableSchemaId,
         opener: null
       };
     case 'ON_OPENER_RESET':
@@ -36,6 +37,7 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isVisible: false,
         fieldId: null,
+        tableSchemaId: null,
         reOpenOpener: !isNil(state.opener) ? true : false,
         ruleEdit: false,
         ruleToEdit: {}
@@ -85,10 +87,10 @@ export const ValidationProvider = ({ children }) => {
             }
           });
         },
-        onOpenModalFromField: fieldId => {
+        onOpenModalFromField: (fieldId, tableSchemaId) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD',
-            payload: fieldId
+            payload: { fieldId, tableSchemaId }
           });
         },
         onCloseModal: () => {

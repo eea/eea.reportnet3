@@ -32,7 +32,7 @@ import { deleteExpressionRecursivily } from './_functions/utils/deleteExpression
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
-import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTableByFieldId';
+import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
 import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
 import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
@@ -87,7 +87,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'table',
-          value: getSelectedTableByFieldId(validationContext.fieldId, tabs)
+          value: getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs)
         }
       });
     }
