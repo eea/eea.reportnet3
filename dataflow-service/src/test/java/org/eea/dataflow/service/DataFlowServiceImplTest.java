@@ -585,7 +585,7 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
   /**
@@ -606,7 +606,7 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
   /**
@@ -750,7 +750,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(Arrays.asList(dcVO));
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
-    doThrow(MockitoException.class).when(dataflowRepository).delete(Mockito.any());
+    doThrow(MockitoException.class).when(dataflowRepository).deleteById(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {

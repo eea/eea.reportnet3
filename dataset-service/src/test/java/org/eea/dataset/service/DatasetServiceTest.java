@@ -37,6 +37,7 @@ import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -66,6 +67,7 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -121,6 +123,10 @@ public class DatasetServiceTest {
   /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The data collection repository. */
+  @Mock
+  private DataCollectionRepository dataCollectionRepository;
 
   /** The reporting dataset repository. */
   @Mock
@@ -222,12 +228,15 @@ public class DatasetServiceTest {
   @Mock
   private StatisticsRepository statisticsRepository;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The field no validation mapper. */
   @Mock
   private FieldNoValidationMapper fieldNoValidationMapper;
 
@@ -1389,12 +1398,18 @@ public class DatasetServiceTest {
     Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
   }
 
+  /**
+   * Test is reporting dataset.
+   */
   @Test
   public void testIsReportingDataset() {
     datasetService.isReportingDataset(1L);
     Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
   }
 
+  /**
+   * Test save new field propagation.
+   */
   @Test
   public void testSaveNewFieldPropagation() {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
@@ -1403,6 +1418,11 @@ public class DatasetServiceTest {
         "5cf0e9b3b793310e9ceca190", DataType.TEXT);
   }
 
+  /**
+   * Test prepare new field propagation.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testPrepareNewFieldPropagation() throws EEAException {
 
@@ -1425,6 +1445,11 @@ public class DatasetServiceTest {
     datasetService.prepareNewFieldPropagation(1L, fs);
   }
 
+  /**
+   * Test prepare new field propagation exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testPrepareNewFieldPropagationException() throws EEAException {
 
@@ -1449,12 +1474,20 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Delete record values by provider.
+   */
   @Test
   public void deleteRecordValuesByProvider() {
     datasetService.deleteRecordValuesByProvider(1L, "ES");
     Mockito.verify(recordRepository, times(1)).deleteByDataProviderCode(Mockito.any());
   }
 
+  /**
+   * Gets the field values referenced test cord lat.
+   *
+   * @return the field values referenced test cord lat
+   */
   @Test
   public void getFieldValuesReferencedTestCordLat() {
     field.setType(DataType.COORDINATE_LAT);
@@ -1469,6 +1502,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
 
+  /**
+   * Gets the field values referenced test cord long.
+   *
+   * @return the field values referenced test cord long
+   */
   @Test
   public void getFieldValuesReferencedTestCordLong() {
     field.setType(DataType.COORDINATE_LONG);
@@ -1483,6 +1521,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
 
+  /**
+   * Gets the field values referenced test number.
+   *
+   * @return the field values referenced test number
+   */
   @Test
   public void getFieldValuesReferencedTestNumber() {
     field.setType(DataType.NUMBER);
@@ -1497,6 +1540,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
 
+  /**
+   * Gets the field values referenced test date.
+   *
+   * @return the field values referenced test date
+   */
   @Test
   public void getFieldValuesReferencedTestDate() {
     field.setType(DataType.DATE);
@@ -1512,6 +1560,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Gets the field values referenced test string.
+   *
+   * @return the field values referenced test string
+   */
   @Test
   public void getFieldValuesReferencedTestString() {
     field.setType(DataType.TEXT);
@@ -1526,6 +1579,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
 
+  /**
+   * Gets the referenced dataset id test.
+   *
+   * @return the referenced dataset id test
+   */
   @Test
   public void getReferencedDatasetIdTest() {
 
@@ -1534,5 +1592,52 @@ public class DatasetServiceTest {
         .getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Gets the dataset type enum return design test.
+   *
+   * @return the dataset type enum return design test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnDesignTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.DESIGN, datasetService.getDatasetType(1L));
+  }
 
+  /**
+   * Gets the dataset type enum return reporting test.
+   *
+   * @return the dataset type enum return reporting test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnReportingTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.REPORTING, datasetService.getDatasetType(1L));
+  }
+
+  /**
+   * Gets the dataset type enum return collection test.
+   *
+   * @return the dataset type enum return collection test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnCollectionTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.COLLECTION, datasetService.getDatasetType(1L));
+  }
+
+  /**
+   * Gets the dataset type enum return null test.
+   *
+   * @return the dataset type enum return null test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnNullTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Assert.assertNull(datasetService.getDatasetType(1L));
+  }
 }
