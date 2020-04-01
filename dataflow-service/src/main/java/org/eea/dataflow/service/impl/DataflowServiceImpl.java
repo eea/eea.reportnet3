@@ -419,6 +419,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (dataflowSave.isPresent()) {
         dataflowSave.get().setName(dataflowVO.getName());
         dataflowSave.get().setDescription(dataflowVO.getDescription());
+        dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been saved.", dataflowSave.get().getName());
       }

@@ -62,6 +62,9 @@ public class Dataflow {
   @Enumerated(EnumType.STRING)
   private TypeStatusEnum status;
 
+  @Column(name = "OBLIGATION_ID")
+  private Integer obligationId;
+
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private SubmissionAgreement submissionAgreement;

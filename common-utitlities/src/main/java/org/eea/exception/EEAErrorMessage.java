@@ -68,6 +68,9 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_CRITERIA. */
   public static final String DATAFLOW_DESCRIPTION_NAME = "Dataflow Description or Name empty";
 
+  /** The Constant DATAFLOW_CRITERIA. */
+  public static final String DATAFLOW_OBLIGATION = "Dataflow Obligation empty";
+
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 

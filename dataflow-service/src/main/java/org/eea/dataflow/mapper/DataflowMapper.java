@@ -36,6 +36,7 @@ public interface DataflowMapper extends IMapper<Dataflow, DataFlowVO> {
    */
   @Override
   @Mapping(source = "deadlineDate", target = "deadlineDate", dateFormat = "dd/MM/yyyy")
+  @Mapping(source = "obligation.obligationId", target = "obligationId")
   Dataflow classToEntity(DataFlowVO entity);
 
   /**
