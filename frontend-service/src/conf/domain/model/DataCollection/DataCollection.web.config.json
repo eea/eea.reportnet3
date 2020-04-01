@@ -1,4 +1,4 @@
 {
   "createDataCollection": "/datacollection/create",
-  "updateDataCollectionNewRepresentatives": "/datacollection/update/{dataflowId}"
+  "updateDataCollectionNewRepresentatives": "/datacollection/update/{:dataflowId}"
 }

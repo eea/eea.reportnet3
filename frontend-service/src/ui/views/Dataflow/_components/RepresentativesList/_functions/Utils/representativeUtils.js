@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -35,7 +36,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
-      if (error.response.status === 404) {
+      if (error.response.status === 400 || error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
           payload: { representativeIdThatHasError: representatives[representatives.length - 1].representativeId }
@@ -54,6 +55,7 @@ export const createUnusedOptionsList = formDispatcher => {
 export const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
   try {
     const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
       payload: { responseAllDataProviders }
@@ -66,7 +68,9 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
     const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+
     formDispatcher({
       type: 'INITIAL_LOAD',
       payload: { response: responseAllRepresentatives, representativesByCopy }

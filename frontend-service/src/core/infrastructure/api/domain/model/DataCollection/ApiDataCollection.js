@@ -24,7 +24,7 @@ const apiDataCollection = {
     const tokens = userStorage.get();
 
     const response = await HTTPRequester.update({
-      url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, {}),
+      url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, { dataflowId }),
       data: {
         dataflowId
       },

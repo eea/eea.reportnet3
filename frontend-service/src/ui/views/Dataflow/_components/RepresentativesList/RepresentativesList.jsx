@@ -110,7 +110,7 @@ const RepresentativesList = ({
       <>
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
-            className={representative.hasDatasets && styles.disabled}
+            className={representative.hasDatasets ? styles.disabled : undefined}
             disabled={representative.hasDatasets}
             autoFocus={isNil(representative.representativeId)}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
