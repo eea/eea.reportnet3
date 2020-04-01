@@ -6,6 +6,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -57,6 +58,8 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
             : dataflowControllerZuul.findById(dataflowId).getName();
+    DatasetTypeEnum type = dataSetControllerZuul.getDatasetType(datasetId);
+
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
@@ -64,6 +67,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataflowId);
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
+    notification.put("type", type);
     return notification;
   }
 }
