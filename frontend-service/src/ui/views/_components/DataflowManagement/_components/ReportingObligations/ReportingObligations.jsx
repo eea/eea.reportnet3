@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useReducer, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import styles from './ReportingObligations.module.scss';
+
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { CardsView } from './_components/CardsView';
 import { SearchAll } from './_components/SearchAll';
@@ -26,7 +28,8 @@ export const ReportingObligations = (dataflowId, refresh) => {
     filteredData: [],
     isLoading: false,
     isTableView: true,
-    oblChoosed: {}
+    oblChoosed: {},
+    searchedData: []
   });
 
   useEffect(() => {
@@ -49,6 +52,8 @@ export const ReportingObligations = (dataflowId, refresh) => {
     }
   };
 
+  const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
+
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.id, title: rowData.title };
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
@@ -61,7 +66,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
     reportingObligationState.isTableView ? (
       <TableView
         checkedRow={reportingObligationState.oblChoosed}
-        data={reportingObligationState.filteredData}
+        data={reportingObligationState.searchedData}
         onSelectObl={onSelectObl}
       />
     ) : (
@@ -72,14 +77,14 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   return (
     <Fragment>
-      {/* <div style={{ display: 'flex' }}>
-        <SearchAll />
+      <div className={styles.repOblTools}>
+        <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
         <InputSwitch
           checked={reportingObligationState.isTableView}
           onChange={() => onToggleView()}
           style={{ marginRight: '1rem' }}
         />
-      </div> */}
+      </div>
       {isEmpty(reportingObligationState.data) ? <h3>{resources.messages['emptyValidations']}</h3> : renderData()}
     </Fragment>
   );

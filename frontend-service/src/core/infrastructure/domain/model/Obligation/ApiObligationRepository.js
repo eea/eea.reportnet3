@@ -3,13 +3,13 @@ import moment from 'moment';
 
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
-import { Client } from 'core/domain/model/Obligation/Client/Client';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
+import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
 
 const parseClient = clientDTO => {
   if (!isNil(clientDTO)) {
-    new Client({
+    return new Organization({
       acronym: clientDTO.acronym,
       address: clientDTO.address,
       city: clientDTO.city,

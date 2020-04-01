@@ -492,6 +492,7 @@
     "createQcRule": "Create QC rule",
     "help": "Help",
     "legalInstrument": "Legal instrument",
-    "dueDate": "Expiration date"
+    "dueDate": "Expiration date",
+    "searchAllLabel": "Search all"
   }
 }
