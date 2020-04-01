@@ -195,28 +195,21 @@ public class RulesControllerImpl implements RulesController {
 
     // we use the required value to differentiate if the rule to create is a required rule or if the
     // rules is a automatic rule for any type (boolean, number)
-    if (requiredRule) {
-      try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum,
-            datasetId, true);
-      } catch (EEAException e) {
+    try {
+      rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
+          datasetId, requiredRule);
+    } catch (EEAException e) {
+      if (requiredRule) {
         LOG_ERROR.error(
             "Error creating the required rule for idDatasetSchema {} and field with id {} ",
             datasetSchemaId, referenceId);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.ERROR_CREATING_RULE, e);
-      }
-    } else {
-      try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
-            datasetId, false);
-      } catch (EEAException e) {
+      } else {
         LOG_ERROR.error(
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
             datasetSchemaId, referenceId, typeData);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.ERROR_CREATING_RULE, e);
       }
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_CREATING_RULE,
+          e);
     }
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
         typeEntityEnum);

@@ -183,7 +183,7 @@ public class AutomaticRules {
       String nameRule, String whenCondition, String thenCondition0, String thenCondition1,
       String shortCode, String description) {
     final Rule rule = new Rule();
-    List<String> thenCondition = new ArrayList<String>();
+    List<String> thenCondition = new ArrayList<>();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId(referenceId));
     rule.setAutomatic(Boolean.TRUE);

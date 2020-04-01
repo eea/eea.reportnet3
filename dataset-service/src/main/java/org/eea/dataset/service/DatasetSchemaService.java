@@ -312,4 +312,15 @@ public interface DatasetSchemaService {
    */
   void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId) throws EEAException;
 
+
+  /**
+   * Update PK catalogue and foreigns after snapshot.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataset the id dataset
+   * @throws EEAException the EEA exception
+   */
+  void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)
+      throws EEAException;
+
 }
