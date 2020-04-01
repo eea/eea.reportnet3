@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +24,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * The Class RepresentativeControllerImplTest.
- */
+/** The Class RepresentativeControllerImplTest. */
 @RunWith(MockitoJUnitRunner.class)
 public class RepresentativeControllerImplTest {
 
@@ -70,70 +68,6 @@ public class RepresentativeControllerImplTest {
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
     MockitoAnnotations.initMocks(this);
-  }
-
-  /**
-   * Insert representative success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeSuccessTest() throws EEAException {
-    ResponseEntity<String> response = new ResponseEntity<>("1", HttpStatus.OK);
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.insertRepresentative(Mockito.any(), Mockito.any())).thenReturn(1L);
-    assertEquals(response, representativeControllerImpl.insertRepresentative(1L, representativeVO));
-  }
-
-  /**
-   * Insert representative exception 1 test.
-   */
-  @Test
-  public void insertRepresentativeException1Test() {
-    representativeVO.setProviderAccount("otro@host.com");
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    try {
-      representativeControllerImpl.insertRepresentative(1L, representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-    }
-  }
-
-  /**
-   * Insert representative exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException2Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.insertRepresentative(Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
-    try {
-      representativeControllerImpl.insertRepresentative(1L, representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
-    }
-  }
-
-  /**
-   * Insert representative exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void insertRepresentativeException3Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.insertRepresentative(Mockito.any(), Mockito.any()))
-        .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
-    try {
-      representativeControllerImpl.insertRepresentative(1L, representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.CONFLICT, e.getStatus());
-      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
-    }
   }
 
   /**
@@ -315,5 +249,35 @@ public class RepresentativeControllerImplTest {
   public void deleteRepresentativeSuccessTest() throws EEAException {
     representativeControllerImpl.deleteRepresentative(1L);
     Mockito.verify(representativeService, times(1)).deleteDataflowRepresentative(Mockito.any());
+  }
+
+  /**
+   * Creates the representative test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createRepresentativeTest() throws EEAException {
+    Mockito.when(representativeService.createRepresentative(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals(1,
+        representativeControllerImpl.createRepresentative(1L, new RepresentativeVO()).longValue());
+  }
+
+  /**
+   * Creates the representative exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createRepresentativeExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(representativeService)
+        .createRepresentative(Mockito.any(), Mockito.any());
+    try {
+      representativeControllerImpl.createRepresentative(1L, new RepresentativeVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 }

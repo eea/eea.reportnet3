@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -269,7 +270,6 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   }
 
-
   /**
    * Gets the users.
    *
@@ -287,6 +287,23 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRepresentationMapper.entityListToClass(arrayList);
   }
 
+  /**
+   * Gets the user by email.
+   *
+   * @param email the email
+   * @return the user by email
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getUserByEmail")
+  public UserRepresentationVO getUserByEmail(@RequestParam("email") String email) {
+    UserRepresentationVO user = null;
+    UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
+    if (users != null && users.length == 1) {
+      user = userRepresentationMapper.entityToClass(users[0]);
+    }
+    return user;
+  }
 
   /**
    * Adds the contributor to resource.
