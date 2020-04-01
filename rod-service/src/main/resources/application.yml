@@ -1,0 +1,5 @@
+server:
+  port: 9050
+spring:
+  application:
+    name: rod

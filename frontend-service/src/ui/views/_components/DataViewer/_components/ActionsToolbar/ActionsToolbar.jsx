@@ -253,6 +253,7 @@ const ActionsToolbar = ({
           onShow={e => {
             getExportButtonPosition(e);
           }}
+          showLevelErrorIcons={true}
         />
         {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}
