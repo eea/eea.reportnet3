@@ -44,7 +44,7 @@ const uploadImg = async (userId, imgData) => {
 };
 
 const userData = async userId => {
-  const response = await apiUser.userConfig(userId);
+  const response = await apiUser.userData(userId);
   //const response = new Promise((resolve, reject) => { dato: 'hola' });
   return response;
 };
