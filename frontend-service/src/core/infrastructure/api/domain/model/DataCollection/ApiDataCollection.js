@@ -25,9 +25,7 @@ const apiDataCollection = {
 
     const response = await HTTPRequester.update({
       url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, { dataflowId }),
-      data: {
-        dataflowId
-      },
+
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
       }
