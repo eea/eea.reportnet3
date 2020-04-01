@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useReducer, Fragment } from 'react';
 import isEmpty from 'lodash/isEmpty';
 
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
-import { MagazineView } from './_components/MagazineView';
+import { CardsView } from './_components/CardsView';
 import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TableView } from './_components/TableView';
@@ -65,7 +65,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
         onSelectObl={onSelectObl}
       />
     ) : (
-      <MagazineView />
+      <CardsView />
     );
 
   if (reportingObligationState.isLoading) return <Spinner />;

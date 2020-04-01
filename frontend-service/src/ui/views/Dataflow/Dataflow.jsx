@@ -16,7 +16,7 @@ import DataflowConf from 'conf/dataflow.config.json';
 import { BigButtonList } from './_components/BigButtonList';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
+import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -481,20 +481,12 @@ const Dataflow = withRouter(({ history, match }) => {
           <div className="actions"></div>
         </Dialog>
 
-        <Dialog
-          className={styles.dialog}
-          dismissableMask={false}
-          header={resources.messages['updateDataflow']}
-          onHide={() => onManageDialogs('isEditDialogVisible', false)}
-          visible={dataflowDataState.isEditDialogVisible}>
-          <DataflowManagementForm
-            dataflowData={dataflowDataState}
-            isEditForm={true}
-            onCancel={() => onManageDialogs('isEditDialogVisible', false)}
-            onEdit={onEditDataflow}
-            refresh={dataflowDataState.isEditDialogVisible}
-          />
-        </Dialog>
+        <DataflowManagement
+          isEditForm={true}
+          onEditDataflow={onEditDataflow}
+          onManageDialogs={onManageDialogs}
+          state={dataflowDataState}
+        />
 
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
