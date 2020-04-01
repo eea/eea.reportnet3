@@ -6,7 +6,7 @@ import ObligationConf from 'conf/obligation.config.json';
 
 import { Filters } from 'ui/views/Dataflows/_components/DataflowsList/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
-import { MagazineView } from './_components/MagazineView';
+import { CardsView } from './_components/CardsView';
 import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TableView } from './_components/TableView';
@@ -93,7 +93,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
         />
       </>
     ) : (
-      <MagazineView />
+      <CardsView />
     );
 
   if (reportingObligationState.isLoading) return <Spinner />;

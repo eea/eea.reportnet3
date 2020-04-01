@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -8,12 +8,9 @@ import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
-import { Button } from 'ui/views/_components/Button';
-import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
+import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
-import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ReportingObligations } from './_components/ReportingObligations';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
@@ -154,22 +151,6 @@ const Dataflows = withRouter(({ match, history }) => {
     leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
   }, [isCustodian]);
 
-  const dialogFooter = (
-    <Fragment>
-      <Button
-        icon="check"
-        label={resources.messages['ok']}
-        onClick={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
-      />
-      <Button
-        icon="cancel"
-        className="p-button-secondary"
-        label={resources.messages['cancel']}
-        onClick={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
-      />
-    </Fragment>
-  );
-
   const onCreateDataflow = () => {
     onManageDialogs('isAddDialogVisible', false);
     dataFetch();
@@ -234,28 +215,12 @@ const Dataflows = withRouter(({ match, history }) => {
         )}
       </div>
 
-      <Dialog
-        footer={dialogFooter}
-        header="reporting obligations"
-        onHide={() => onManageDialogs('isRepObDialogVisible', false, 'isAddDialogVisible', true)}
-        style={{ width: '80%' }}
-        visible={dataflowsState.isRepObDialogVisible}>
-        <ReportingObligations />
-      </Dialog>
-
-      <Dialog
-        className={styles.dialog}
-        dismissableMask={false}
-        header={resources.messages['createNewDataflow']}
-        onHide={() => onManageDialogs('isAddDialogVisible', false)}
-        visible={dataflowsState.isAddDialogVisible}>
-        <DataflowManagementForm
-          onCancel={() => onManageDialogs('isAddDialogVisible', false)}
-          onCreate={onCreateDataflow}
-          refresh={dataflowsState.isAddDialogVisible}
-          onSearch={() => onManageDialogs('isRepObDialogVisible', true, 'isAddDialogVisible', false)}
-        />
-      </Dialog>
+      <DataflowManagement
+        isEditForm={false}
+        onCreateDataflow={onCreateDataflow}
+        onManageDialogs={onManageDialogs}
+        state={dataflowsState}
+      />
     </div>
   );
 });

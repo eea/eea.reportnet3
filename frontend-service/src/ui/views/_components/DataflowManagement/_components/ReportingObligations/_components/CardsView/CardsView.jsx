@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Card } from './_components/Card';
 
-export const MagazineView = () => {
+export const CardsView = () => {
   return (
     <div>
       <Card />
