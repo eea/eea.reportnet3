@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.ums;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -192,4 +193,21 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
   void addUserToResources(@RequestBody List<ResourceAssignationVO> resources);
+
+  /**
+   * Update user attributes.
+   */
+  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  void updateUserAttributes(@RequestBody Map<String, List<String>> attributes);
+
+  /**
+   * Gets the user attributes.
+   *
+   * @return the user attributes
+   */
+  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  Map<String, List<String>> getUserAttributes();
+
+
+
 }

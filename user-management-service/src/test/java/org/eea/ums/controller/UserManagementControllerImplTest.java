@@ -1,5 +1,6 @@
 package org.eea.ums.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -288,6 +290,115 @@ public class UserManagementControllerImplTest {
     Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
         .addUserToUserGroup("userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
   }
+
+  @Test
+  public void updateUserAttributesTest() {
+    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    List<String> atts = new ArrayList<String>();
+    atts.add("attribute1");
+    attributes.put("AT1", atts);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    Mockito.when(keycloakConnectorService.getUser(Mockito.any()))
+        .thenReturn(new UserRepresentation());
+    userManagementController.updateUserAttributes(attributes);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).updateUser(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateUserAttributesTestError() {
+    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    List<String> atts = new ArrayList<String>();
+    atts.add("attribute1");
+    attributes.put("AT1", atts);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    try {
+      userManagementController.updateUserAttributes(attributes);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getUserAttributesTest() {
+    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    UserRepresentation user = new UserRepresentation();
+    user.setAttributes(attributes);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(user);
+    assertEquals("error", attributes, userManagementController.getUserAttributes());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getUserAttributesTestError() {
+    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    UserRepresentation user = new UserRepresentation();
+    user.setAttributes(attributes);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    try {
+      userManagementController.getUserAttributes();
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void addContributorToResorceTest() throws EEAException {
+    userManagementController.addContributorToResource(1L, ResourceGroupEnum.DATAFLOW_CUSTODIAN, "");
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .addContributorToUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void addContributorToResourceErrorTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .addContributorToUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      userManagementController.addContributorToResource(1L, ResourceGroupEnum.DATAFLOW_CUSTODIAN,
+          "");
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void addContributorsToResourceErrorTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .addContributorsToUserGroup(Mockito.any());
+    try {
+      userManagementController.addContributorsToResources(new ArrayList<ResourceAssignationVO>());
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
 
 
 }

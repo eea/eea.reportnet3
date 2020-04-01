@@ -277,6 +277,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
   public List<UserRepresentationVO> getUsers() {
 
@@ -304,6 +305,59 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
     return user;
   }
+
+  /**
+   * Update user attributes.
+   *
+   * @param attributes the attributes
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  public void updateUserAttributes(@RequestBody Map<String, List<String>> attributes) {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      user.setAttributes(attributes);
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    keycloakConnectorService.updateUser(user);
+
+  }
+
+
+  /**
+   * Gets the user attributes.
+   *
+   * @return the user attributes
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  public Map<String, List<String>> getUserAttributes() {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      return user.getAttributes();
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+
+  }
+
 
   /**
    * Adds the contributor to resource.
