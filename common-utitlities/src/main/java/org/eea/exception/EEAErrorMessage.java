@@ -14,6 +14,9 @@ public final class EEAErrorMessage {
   /** The Constant NOT_DESIGN_DATAFLOW. */
   public static final String NOT_DESIGN_DATAFLOW = "Not a DESIGN dataflow";
 
+  /** The Constant NOT_DRAFT_DATAFLOW. */
+  public static final String NOT_DRAFT_DATAFLOW = "Not a DRAFT dataflow";
+
   /** The Constant FILE_EXTENSION. */
   public static final String FILE_EXTENSION = "File without extension";
 

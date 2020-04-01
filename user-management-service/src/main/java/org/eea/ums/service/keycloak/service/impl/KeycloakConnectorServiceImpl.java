@@ -40,9 +40,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/**
- * The type Keycloak connector service.
- */
+/** The type Keycloak connector service. */
 @Service
 public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
@@ -100,8 +98,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /** The Constant LIST_USERS_URL. */
   private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users?max=500";
 
-  /** The Constant LIST_USER_GROUPS_URL. */
-  private static final String LIST_USER_GROUPS_URL = "";
+  /** The Constant GET_USER_BY_EMAIL_URL. */
+  private static final String GET_USER_BY_EMAIL_URL =
+      "/auth/admin/realms/{realm}/users?email={email}";
 
   /** The Constant LIST_GROUPS_URL. */
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
@@ -150,11 +149,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /** The Constant URI_PARAM_GROUP_ID. */
   private static final String URI_PARAM_GROUP_ID = "groupId";
 
+  /** The Constant URI_PARAM_EMAIL. */
+  private static final String URI_PARAM_EMAIL = "email";
+
   /** The Constant LIST_ROLE_BY_REALM. */
   private static final String LIST_ROLE_BY_REALM = "/auth/admin/realms/{realm}/roles";
-
-  /** The Constant USER_URL. */
-  private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
 
   /** The Constant ADD_ROLE_TO_USER. */
   private static final String ADD_ROLE_TO_USER =
@@ -253,8 +252,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GET_GROUPS_BY_USER).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
-        .map(entity -> (GroupInfo[]) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
   }
 
 
@@ -388,8 +387,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
-        .map(entity -> (GroupInfo[]) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
   }
 
   /**
@@ -415,8 +414,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
-        .map(entity -> (GroupInfo) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
   }
 
   /**
@@ -569,8 +568,33 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     ResponseEntity<UserRepresentation[]> responseEntity =
         this.restTemplate.exchange(string, HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
-        .map(entity -> (UserRepresentation[]) entity).orElse(null);
+    ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LIST_USERS_URL)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation[].class);
+
+    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody()).map(entity -> entity)
+        .orElse(null);
+  }
+
+  /**
+   * Gets the users by email.
+   *
+   * @param email the email
+   * @return the users by email
+   */
+  @Override
+  public UserRepresentation[] getUsersByEmail(String email) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_EMAIL, email);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+
+    return restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_USER_BY_EMAIL_URL)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation[].class).getBody();
   }
 
   /**
@@ -609,8 +633,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, RoleRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
-        .map(entity -> (RoleRepresentation[]) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
   }
 
   /**
@@ -788,6 +812,4 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     HttpEntity<T> request = new HttpEntity<>(body, headers);
     return request;
   }
-
-
 }

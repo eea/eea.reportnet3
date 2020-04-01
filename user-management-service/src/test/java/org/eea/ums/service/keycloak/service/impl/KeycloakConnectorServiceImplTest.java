@@ -416,6 +416,23 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
   }
 
+  /**
+   * Gets the users by email test.
+   *
+   * @return the users by email test
+   */
+  @Test
+  public void getUsersByEmailTest() {
+
+    ResponseEntity<UserRepresentation[]> responseEntity =
+        new ResponseEntity(new UserRepresentation[1], HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(),
+        Mockito.any(Class.class))).thenReturn(responseEntity);
+
+    Assert.assertEquals(1, keycloakConnectorService.getUsersByEmail("sample@email.net").length);
+  }
+
   @Test
   public void updateUserTest() {
     UserRepresentation user = new UserRepresentation();

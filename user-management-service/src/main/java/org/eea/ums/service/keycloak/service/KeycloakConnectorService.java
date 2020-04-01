@@ -133,6 +133,14 @@ public interface KeycloakConnectorService {
   UserRepresentation[] getUsers();
 
   /**
+   * Gets the users by email.
+   *
+   * @param email the email
+   * @return the users by email
+   */
+  UserRepresentation[] getUsersByEmail(String email);
+
+  /**
    * Gets the role.
    *
    * @return the role

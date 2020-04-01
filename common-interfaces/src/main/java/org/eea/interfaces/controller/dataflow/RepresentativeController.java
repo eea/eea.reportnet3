@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.dataflow;
 
-
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -16,28 +15,24 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * The Interface RepresentativeController.
- */
+/** The Interface RepresentativeController. */
 public interface RepresentativeController {
 
-  /**
-   * The Interface RepresentativeControllerZuul.
-   */
+  /** The Interface RepresentativeControllerZuul. */
   @FeignClient(value = "dataflow", contextId = "representative", path = "/representative")
   interface RepresentativeControllerZuul extends RepresentativeController {
 
   }
 
   /**
-   * Insert representative.
+   * Creates the representative.
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
    * @return the long
    */
-  @PostMapping(value = "/{dataflowId}")
-  ResponseEntity<?> insertRepresentative(@PathVariable("dataflowId") final Long dataflowId,
+  @PostMapping("/{dataflowId}")
+  Long createRepresentative(@PathVariable("dataflowId") final Long dataflowId,
       @RequestBody RepresentativeVO representativeVO);
 
   /**

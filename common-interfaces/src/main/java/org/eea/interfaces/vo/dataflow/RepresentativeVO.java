@@ -34,4 +34,6 @@ public class RepresentativeVO implements Serializable {
   /** The receipt outdated. */
   private Boolean receiptOutdated;
 
+  /** The has datasets. */
+  private Boolean hasDatasets;
 }

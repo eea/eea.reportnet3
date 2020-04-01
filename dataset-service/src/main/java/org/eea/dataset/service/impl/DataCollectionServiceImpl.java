@@ -55,7 +55,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-
 /** The Class DataCollectionServiceImpl. */
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -105,9 +104,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
@@ -123,6 +124,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant UPDATE_DATAFLOW_STATUS. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
+
+  private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
+      "update representative set has_datasets = %b where id = %d;";
 
   /** The Constant INSERT_DC_INTO_DATASET. */
   private static final String INSERT_DC_INTO_DATASET =
@@ -145,19 +149,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
 
   /**
-   * Checks if is design dataflow.
+   * Gets the dataflow status.
    *
    * @param dataflowId the dataflow id
-   * @return true, if is design dataflow
+   * @return the dataflow status
    */
   @Override
-  public boolean isDesignDataflow(Long dataflowId) {
+  public TypeStatusEnum getDataflowStatus(Long dataflowId) {
     try {
       DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-      return (dataflowVO != null && TypeStatusEnum.DESIGN.equals(dataflowVO.getStatus()));
+      return (dataflowVO != null) ? dataflowVO.getStatus() : null;
     } catch (Exception e) {
       LOG_ERROR.error("Error in isDesignDataflow", e);
-      return false;
+      return null;
     }
   }
 
@@ -180,22 +184,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId) {
+  public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
+      boolean isCreation) {
 
-    // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).error("Error creating schemas").build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_FAILED_EVENT, e);
-    }
+    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation);
 
     int size = datasetIds.size();
     for (int i = 0; i < size; i += 10) {
@@ -204,6 +196,40 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     dataCollectionRepository.deleteDatasetById(datasetIds);
     dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
+  }
+
+  private void releaseLockAndNotification(Long dataflowId, String errorMessage,
+      boolean isCreation) {
+    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+    EventType failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
+        : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+
+    // Release the lock
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(methodSignature);
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
+
+    // Release the notification
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).error(errorMessage).build());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing {} event: ", failEvent, e);
+    }
+  }
+
+  /**
+   * Update data collection.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @Async
+  public void updateDataCollection(Long dataflowId) {
+    manageDataCollection(dataflowId, null, false);
   }
 
   /**
@@ -215,15 +241,31 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate) {
+    manageDataCollection(dataflowId, dueDate, true);
+  }
 
+  /**
+   * Manage data collection.
+   *
+   * @param dataflowId the dataflow id
+   * @param dueDate the due date
+   * @param isCreation the is creation
+   */
+  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // 2. Get the representatives who are going to provide data
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+    List<RepresentativeVO> representatives = representativeControllerZuul
+        .findRepresentativesByIdDataFlow(dataflowId).stream()
+        .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
+
+    if (representatives.isEmpty()) {
+      releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
+      return;
+    }
 
     // 3. Get the providers associated with representatives
     List<DataProviderVO> dataProviders =
@@ -252,17 +294,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       try {
         connection.setAutoCommit(false);
 
-        // 5. Set dataflow to DRAFT
-        statement.addBatch(
-            String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
+        if (isCreation) {
+          // 5. Set dataflow to DRAFT
+          statement.addBatch(
+              String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
+        }
+
+        for (RepresentativeVO representative : representatives) {
+          statement.addBatch(
+              String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
+        }
 
         List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
 
         for (DesignDatasetVO design : designs) {
-          // 6. Create DataCollection in metabase
-          Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
-          dataCollectionIds.add(dataCollectionId);
-          datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
+          if (isCreation) {
+            // 6. Create DataCollection in metabase
+            Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
+            dataCollectionIds.add(dataCollectionId);
+            datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
+          }
 
           // 7. Create Reporting Dataset in metabase
 
@@ -294,13 +345,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         // 9. Create schemas for each dataset
         // This method will release the lock
-        recordStoreControllerZull.createSchemas(datasetIdsAndSchemaIds, dataflowId);
+        recordStoreControllerZull.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
       } catch (SQLException e) {
         LOG_ERROR.error("Error persisting changes. Rolling back...", e);
-        releaseLockAndRollback(connection, dataflowId);
+        releaseLockAndRollback(connection, dataflowId, isCreation);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating permissions. Rolling back...", e);
-        releaseLockAndRollback(connection, dataflowId);
+        releaseLockAndRollback(connection, dataflowId, isCreation);
       } finally {
         connection.setAutoCommit(true);
       }
@@ -316,23 +367,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @throws SQLException the SQL exception
    */
-  private void releaseLockAndRollback(Connection connection, Long dataflowId) throws SQLException {
+  private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
+      throws SQLException {
 
-    // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).error("Error creating datasets on the metabase").build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", EventType.ADD_DATACOLLECTION_FAILED_EVENT, e);
-    }
-
+    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation);
     connection.rollback();
   }
 
@@ -364,10 +402,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Persist RD.
    *
    * @param metabaseStatement the metabase statement
+   * @param design the design
    * @param representative the representative
    * @param time the time
    * @param dataflowId the dataflow id
-   * @param dataprovider the dataprovider
+   * @param dataProviderLabel the data provider label
    * @return the long
    * @throws SQLException the SQL exception
    */
@@ -395,10 +434,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
       Long dataflowId) throws EEAException {
-
-    if (datasetIdsEmails.isEmpty() || dataCollectionIds.isEmpty()) {
-      throw new EEAException("No design datasets in the dataflow");
-    }
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
@@ -523,12 +558,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     return idDataset;
   }
 
-
   /**
    * Adds the foreign relations from new reportings.
    *
    * @param datasetsRegistry the datasets registry
    */
+  @Override
   public void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry) {
     List<ForeignRelations> foreignRelations = new ArrayList<>();
     Map<String, List<FKDataCollection>> groupByRepresentative =
@@ -558,5 +593,4 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       foreignRelationsRepository.saveAll(foreignRelations);
     }
   }
-
 }
