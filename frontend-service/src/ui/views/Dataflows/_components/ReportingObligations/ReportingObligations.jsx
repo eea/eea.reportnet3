@@ -59,22 +59,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
     // línea que desaparece al hacer función por reducer
     onLoadFiltredData(reportingObligationState.data);
-
-    // llamadas para probar
-
-    // clients
-    // const dataClients = await ObligationService.getClients();
-    // console.log('dataClients', dataClients);
-
-    // // countries
-    // const dataCountries = await ObligationService.getCountries();
-    // console.log('dataCountries', dataCountries);
-
-    // // countries
-    // const dataIssues = await ObligationService.getIssues();
-    // console.log('dataIssues', dataIssues);
-
-    // fin llamadas
+    console.log('reportingObligationState.data', reportingObligationState.data);
 
     try {
     } catch (error) {

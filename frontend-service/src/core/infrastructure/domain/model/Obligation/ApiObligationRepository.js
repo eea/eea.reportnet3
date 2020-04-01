@@ -9,76 +9,58 @@ import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 
-const parseClient = clientDTO => {
-  if (!isNil(clientDTO)) {
-    new Client({
-      acronym: clientDTO.acronym,
-      address: clientDTO.address,
-      city: clientDTO.city,
-      country: clientDTO.country,
-      description: clientDTO.description,
-      email: clientDTO.email,
-      id: clientDTO.clientId,
-      name: clientDTO.name,
-      postalCode: clientDTO.postalCode,
-      shortName: clientDTO.shortName,
-      url: clientDTO.url
-    });
-  }
-  return;
-};
+const parseClient = clientDTO =>
+  new Client({
+    acronym: clientDTO.acronym,
+    address: clientDTO.address,
+    city: clientDTO.city,
+    country: clientDTO.country,
+    description: clientDTO.description,
+    email: clientDTO.email,
+    id: clientDTO.clientId,
+    name: clientDTO.name,
+    postalCode: clientDTO.postalCode,
+    shortName: clientDTO.shortName,
+    url: clientDTO.url
+  });
 
 const parseClientList = clientsDTO => {
   if (!isNil(clientsDTO)) {
     const clients = [];
-    console.log('clientsDTO typo', typeof clientsDTO);
-    console.log('clientsDTO.length', clientsDTO.length);
-    // clientsDTO.forEach(clientDTO => clients.push(parseClient(clientDTO)));
+    clientsDTO.data.forEach(clientDTO => clients.push(parseClient(clientDTO)));
     return clients;
   }
   return;
 };
 
-const parseCountry = countryDTO => {
-  if (!isNil(countryDTO)) {
-    new Country({
-      countryCode: countryDTO.twoLetter,
-      countryMember: countryDTO.memberCommunity,
-      id: countryDTO.spatialId,
-      name: countryDTO.name,
-      type: countryDTO.type
-    });
-  }
-  return;
-};
+const parseCountry = countryDTO =>
+  new Country({
+    countryCode: countryDTO.twoLetter,
+    countryMember: countryDTO.memberCommunity,
+    id: countryDTO.spatialId,
+    name: countryDTO.name,
+    type: countryDTO.type
+  });
 
 const parseCountryList = countriesDTO => {
   if (!isNil(countriesDTO)) {
     const countries = [];
-    console.log('countriesDTO typo', typeof countriesDTO);
-    console.log('countriesDTO.length', countriesDTO.length);
-    // countriesDTO.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
+    countriesDTO.data.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
     return countries;
   }
   return;
 };
 
-const parseIssue = issueDTO => {
-  if (!isNil(issueDTO)) {
-    new Issue({
-      id: issueDTO.issueId,
-      name: issueDTO.issueName
-    });
-  }
-  return;
-};
+const parseIssue = issueDTO =>
+  new Issue({
+    id: issueDTO.id,
+    name: issueDTO.name
+  });
 
 const parseIssueList = issuesDTO => {
   if (!isNil(issuesDTO)) {
     const issues = [];
-    console.log('issuesDTO typo', typeof issuesDTO);
-    console.log('issuesDTO.length', issuesDTO.length);
-    //issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
+    issuesDTO.data.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
     return issues;
   }
   return;
@@ -97,7 +79,7 @@ const parseLegalInstrument = legalInstrumentDTO => {
 
 const parseObligation = obligationDTO =>
   new Obligation({
-    client: parseClient(obligationDTO.client),
+    // client: parseClient(obligationDTO.client),
     comment: obligationDTO.comment,
     countries: obligationDTO.countries,
     description: obligationDTO.description,
@@ -113,9 +95,6 @@ const parseObligation = obligationDTO =>
 const parseObligationList = obligationsDTO => {
   if (!isNil(obligationsDTO)) {
     const obligations = [];
-    console.log('obligationsDTO typo', typeof obligationsDTO);
-    console.log('obligationsDTO.length', obligationsDTO.length);
-    console.log('obligationsDTO array', Array.isArray(obligationsDTO));
     obligationsDTO.forEach(obligationDTO => obligations.push(parseObligation(obligationDTO)));
     return obligations;
   }
@@ -124,9 +103,7 @@ const parseObligationList = obligationsDTO => {
 
 const getClients = async () => {
   const clientsDTO = await apiObligation.getClients();
-  console.log('clientsDTO', clientsDTO);
   return parseClientList(clientsDTO);
-  // return clientsDTO;
 };
 
 const getCountries = async () => {
