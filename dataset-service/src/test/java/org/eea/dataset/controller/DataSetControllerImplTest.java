@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.junit.Assert;
@@ -770,5 +771,16 @@ public class DataSetControllerImplTest {
     doThrow(EEAException.class).when(datasetService).insertSchema(Mockito.anyLong(), Mockito.any());
     dataSetControllerImpl.insertIdDataSchema(Mockito.anyLong(), Mockito.any());
     Mockito.verify(datasetService, times(1)).insertSchema(Mockito.anyLong(), Mockito.any());
+  }
+
+  /**
+   * Gets the dataset type.
+   *
+   * @return the dataset type
+   */
+  @Test
+  public void getDatasetTypeTest() {
+    Mockito.when(datasetService.getDatasetType(Mockito.any())).thenReturn(DatasetTypeEnum.DESIGN);
+    Assert.assertEquals(DatasetTypeEnum.DESIGN, dataSetControllerImpl.getDatasetType(1L));
   }
 }
