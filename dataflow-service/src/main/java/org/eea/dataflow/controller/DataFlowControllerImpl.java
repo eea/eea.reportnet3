@@ -286,13 +286,20 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (null != dataFlowVO.getObligation()
+        || null != dataFlowVO.getObligation().getObligationId()) {
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+      status = HttpStatus.BAD_REQUEST;
+    }
 
-    try {
-      dataflowService.createDataFlow(dataFlowVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed. ", e.getCause());
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (message.equals("") && status == HttpStatus.OK) {
+      try {
+        dataflowService.createDataFlow(dataFlowVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
 
     return new ResponseEntity<>(message, status);
