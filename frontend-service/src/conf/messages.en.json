@@ -491,6 +491,7 @@
     "deleteDatasetSchemaLinkError": "Failed deleting dataset schema. There is a link relation between schemas",
     "createQcRule": "Create QC rule",
     "help": "Help",
-    "update": "update"
+    "update": "update",
+    "designSchemaTabNoFields": "No fields yet"
   }
 }

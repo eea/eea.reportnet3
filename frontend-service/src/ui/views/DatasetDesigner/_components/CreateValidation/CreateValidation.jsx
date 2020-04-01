@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useReducer, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -13,10 +13,9 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-
 import { ValidationService } from 'core/services/Validation';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -48,6 +47,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducer,
     createValidationReducerInitState
   );
+  const [fieldsDropdown, setfieldsDropdown] = useState();
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -62,7 +62,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
-
     if (!isEmpty(table)) {
       creationFormDispatch({
         type: 'SET_FIELDS',
@@ -135,12 +134,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     });
   }, [creationFormState.candidateRule]);
 
-  const getValidationRuleByRefererId = async () => {
-    try {
-      return await ValidationService.getQCRuleByReferedId(ValidationContext.fieldId);
-    } catch (error) {}
-  };
-
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
@@ -149,6 +142,56 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       });
     }
   }, [validationContext.ruleEdit]);
+
+  useEffect(() => {
+    const { tableFields } = creationFormState;
+    const dropdownOptions = {
+      disabled: true,
+      placeholder: resourcesContext.messages.field,
+      options: [],
+      onChange: () => {},
+      value: null
+    };
+    if (isNil(tableFields)) {
+      dropdownOptions.value = null;
+    }
+    console.log('[getFieldDropdown]', tableFields);
+    if (!isNil(tableFields) && tableFields.length == 0) {
+      dropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
+      dropdownOptions.value = null;
+    }
+    if (!isNil(tableFields) && tableFields.length > 0) {
+      dropdownOptions.options = tableFields;
+      dropdownOptions.disabled = false;
+      dropdownOptions.onChange = e =>
+        creationFormDispatch({
+          type: 'SET_FORM_FIELD',
+          payload: {
+            key: 'field',
+            value: e.target.value
+          }
+        });
+      dropdownOptions.value = creationFormState.candidateRule.field;
+    }
+    setfieldsDropdown(
+      <Dropdown
+        id={`${componentName}__field`}
+        disabled={dropdownOptions.disabled}
+        appendTo={document.body}
+        filterPlaceholder={dropdownOptions.placeholder}
+        placeholder={dropdownOptions.placeholder}
+        optionLabel="label"
+        options={dropdownOptions.options}
+        onChange={dropdownOptions.onChange}
+        value={dropdownOptions.value}
+      />
+    );
+  }, [
+    creationFormState.tableFields,
+    validationContext.isVisible,
+    creationFormState.candidateRule.field,
+    creationFormState.candidateRule.table
+  ]);
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
@@ -282,24 +325,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               </div>
               <div className={styles.field}>
                 <label htmlFor="field">{resourcesContext.messages.field}</label>
-                <Dropdown
-                  id={`${componentName}__field`}
-                  appendTo={document.body}
-                  filterPlaceholder={resourcesContext.messages.field}
-                  placeholder={resourcesContext.messages.field}
-                  optionLabel="label"
-                  options={creationFormState.tableFields}
-                  onChange={e =>
-                    creationFormDispatch({
-                      type: 'SET_FORM_FIELD',
-                      payload: {
-                        key: 'field',
-                        value: e.target.value
-                      }
-                    })
-                  }
-                  value={creationFormState.candidateRule.field}
-                />
+                {fieldsDropdown}
               </div>
               <div className={styles.field}>
                 <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
