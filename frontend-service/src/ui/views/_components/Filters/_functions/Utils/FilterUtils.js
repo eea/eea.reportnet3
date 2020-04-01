@@ -97,7 +97,6 @@ const getYesterdayDate = () => {
 
 const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOptions, selectOptions) => [
   ...state.data.filter(data => {
-    console.log('value', value);
     if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
         checkDates(state.filterBy[dateOptions], data[dateOptions]) &&

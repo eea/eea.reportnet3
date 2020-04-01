@@ -4,17 +4,6 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiObligation = {
-  getClients: async () => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.clients),
-      queryString: {},
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
-    });
-
-    return response;
-  },
-
   getCountries: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
@@ -23,7 +12,7 @@ export const apiObligation = {
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
-    return response;
+    return response.data;
   },
 
   getIssues: async () => {
@@ -34,7 +23,18 @@ export const apiObligation = {
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
-    return response;
+    return response.data;
+  },
+
+  getOrganizations: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(ObligationConfig.organizations),
+      queryString: {},
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
+
+    return response.data;
   },
 
   obligationById: async obligationId => {

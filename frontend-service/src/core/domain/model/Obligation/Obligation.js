@@ -1,6 +1,5 @@
 export class Obligation {
   constructor({
-    client,
     comment,
     countries,
     description,
@@ -8,11 +7,11 @@ export class Obligation {
     issues,
     legalInstruments,
     obligationId,
+    organization,
     title,
     validSince,
     validTo
   } = {}) {
-    this.client = client;
     this.comment = comment;
     this.countries = countries;
     this.description = description;
@@ -20,6 +19,7 @@ export class Obligation {
     this.issues = issues;
     this.legalInstruments = legalInstruments;
     this.obligationId = obligationId;
+    this.organization = organization;
     this.title = title;
     this.validSince = validSince;
     this.validTo = validTo;

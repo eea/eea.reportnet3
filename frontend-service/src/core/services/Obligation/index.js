@@ -1,13 +1,13 @@
-import { GetClients } from './GetClients';
 import { GetCountries } from './GetCountries';
 import { GetIssues } from './GetIssues';
+import { GetOrganizations } from './GetOrganizations';
 import { GetOpened } from './GetOpened';
 import { ObligationById } from './ObligationById';
 
 import { obligationRepository } from 'core/domain/model/Obligation/ObligationRepository';
 
 export const ObligationService = {
-  getClients: GetClients({ obligationRepository }),
+  getOrganizations: GetOrganizations({ obligationRepository }),
   getCountries: GetCountries({ obligationRepository }),
   getIssues: GetIssues({ obligationRepository }),
   obligationById: ObligationById({ obligationRepository }),
