@@ -117,6 +117,12 @@
           "key": "MANAGE_ROLES_ACCOUNT_ERROR"
         },
         {
+          "key": "UPDATE_DATACOLLECTION_COMPLETED_EVENT"
+        },
+        {
+          "key": "UPDATE_DATACOLLECTION_FAILED_EVENT"
+        },
+        {
           "key": "DELETE_TABLE_DATA_BY_ID_ERROR",
           "navigateTo": {
             "section": "DATASET",

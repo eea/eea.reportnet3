@@ -171,24 +171,24 @@ export const BigButtonList = ({
 
     try {
       const result = await DataCollectionService.update(dataflowId);
-      notificationContext.add({
-        type: 'UPDATE_DATACOLLECTION_COMPLETED_EVENT',
-        content: {}
-      });
+      // notificationContext.add({
+      //   type: 'UPDATE_DATACOLLECTION_COMPLETED_EVENT',
+      //   content: {}
+      // });
       return result;
     } catch (error) {
       console.error(error);
 
-      const {
-        dataflow: { name: dataflowName }
-      } = await getMetadata({ dataflowId });
-      notificationContext.add({
-        type: 'UPDATE_DATACOLLECTION_FAILED_EVENT',
-        content: {
-          dataflowId,
-          dataflowName
-        }
-      });
+      // const {
+      //   dataflow: { name: dataflowName }
+      // } = await getMetadata({ dataflowId });
+      // notificationContext.add({
+      //   type: 'UPDATE_DATACOLLECTION_FAILED_EVENT',
+      //   content: {
+      //     dataflowId,
+      //     dataflowName
+      //   }
+      //});
 
       setIsCreateButtonActive(true);
     }
