@@ -159,8 +159,13 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String ADD_ROLE_TO_USER =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm";
 
+  /** The Constant USER_URL. */
+  private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
 
   /**
    * Inits the keycloak context.
@@ -553,7 +558,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   /**
    * Gets the users.
-   *
+   * 
    * @return the users
    */
   @Override
@@ -562,11 +567,6 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     uriParams.put(URI_PARAM_REALM, realmName);
     HttpEntity<Void> request = createHttpRequest(null, uriParams);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    String string = uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString();
-    System.out.println(string);
-    ResponseEntity<UserRepresentation[]> responseEntity =
-        this.restTemplate.exchange(string, HttpMethod.GET, request, UserRepresentation[].class);
 
     ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
         uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LIST_USERS_URL)
