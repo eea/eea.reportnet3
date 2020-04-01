@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.ums;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -11,6 +12,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -156,6 +158,15 @@ public interface UserManagementController {
   List<UserRepresentationVO> getUsers();
 
   /**
+   * Gets the user by email.
+   *
+   * @param email the email
+   * @return the user by email
+   */
+  @GetMapping("/getUserByEmail")
+  UserRepresentationVO getUserByEmail(@RequestParam("email") String email);
+
+  /**
    * Add a contributor to resource.
    *
    * @param idResource the id resource
@@ -166,7 +177,6 @@ public interface UserManagementController {
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
       @RequestParam("userMail") String userMail);
-
 
   /**
    * Adds the contributors to resources.
@@ -183,6 +193,21 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
   void addUserToResources(@RequestBody List<ResourceAssignationVO> resources);
+
+  /**
+   * Update user attributes.
+   */
+  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  void updateUserAttributes(@RequestBody Map<String, List<String>> attributes);
+
+  /**
+   * Gets the user attributes.
+   *
+   * @return the user attributes
+   */
+  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  Map<String, List<String>> getUserAttributes();
+
 
 
 }

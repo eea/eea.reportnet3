@@ -292,7 +292,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDatasetSchemaExceptionTest() {
-    dataSchemaControllerImpl.deleteDatasetSchema(null);
+    dataSchemaControllerImpl.deleteDatasetSchema(null, false);
   }
 
   /**
@@ -303,7 +303,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteDatasetSchemaException2Test() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
   }
 
 
@@ -325,7 +325,7 @@ public class DataSetSchemaControllerImplTest {
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
-    dataSchemaControllerImpl.deleteDatasetSchema(1L);
+    dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
@@ -346,7 +346,7 @@ public class DataSetSchemaControllerImplTest {
     df.setStatus(TypeStatusEnum.DRAFT);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
     try {
-      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+      dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
     } catch (ResponseStatusException e) {
       assertEquals("The dataflow is not in the correct status", HttpStatus.FORBIDDEN,
           e.getStatus());
@@ -372,7 +372,7 @@ public class DataSetSchemaControllerImplTest {
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
     try {
-      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+      dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
     } catch (ResponseStatusException e) {
       assertEquals("Not the same status", HttpStatus.BAD_REQUEST, e.getStatus());
     }
@@ -385,7 +385,7 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(false);
     try {
-      dataSchemaControllerImpl.deleteDatasetSchema(1L);
+      dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
     } catch (ResponseStatusException e) {
       assertEquals("Not the same status", HttpStatus.UNAUTHORIZED, e.getStatus());
       throw e;

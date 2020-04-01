@@ -364,8 +364,8 @@
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
   {
-  	"key": "config/apiGateway/zuul.ignoredPatterns",
-  	"value": "LyoqL3ByaXZhdGUvKio="
+    "key": "config/apiGateway/zuul.ignoredPatterns",
+    "value": "LyoqL3ByaXZhdGUvKio="
   },
   {
     "key": "config/apiGateway/zuul.routes.dataflow.path",
@@ -533,6 +533,18 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.resource.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.path",
+    "value": "L29ibGlnYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.stripPrefix",
     "value": "ZmFsc2U="
   },
   {
@@ -816,7 +828,7 @@
     "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
   },
   {
-  	"key": "config/communication/spring.sleuth.integration.websockets.enabled",
+    "key": "config/communication/spring.sleuth.integration.websockets.enabled",
     "value": "ZmFsc2U="
   },
   {
@@ -1092,7 +1104,23 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.obligation.path",
+    "value": "L29ibGlnYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/application/mongodb.hosts",
     "value": "JHtNT05HT19IT1NUUzpsb2NhbGhvc3Q6MjcwMTd9"
+  },
+  {
+    "key": "config/rod/rod.url",
+    "value": "JHtST0RfVVJMOmh0dHA6Ly9yb2QzLmRldmVsMWR1Yi5laW9uZXQuZXVyb3BhLmV1fQ=="
   }
 ]

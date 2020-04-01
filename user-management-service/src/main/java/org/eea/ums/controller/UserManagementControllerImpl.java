@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -269,7 +270,6 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   }
 
-
   /**
    * Gets the users.
    *
@@ -277,6 +277,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
   public List<UserRepresentationVO> getUsers() {
 
@@ -285,6 +286,76 @@ public class UserManagementControllerImpl implements UserManagementController {
     ArrayList<UserRepresentation> arrayList = new ArrayList<>(Arrays.asList(a));
 
     return userRepresentationMapper.entityListToClass(arrayList);
+  }
+
+  /**
+   * Gets the user by email.
+   *
+   * @param email the email
+   * @return the user by email
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getUserByEmail")
+  public UserRepresentationVO getUserByEmail(@RequestParam("email") String email) {
+    UserRepresentationVO user = null;
+    UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
+    if (users != null && users.length == 1) {
+      user = userRepresentationMapper.entityToClass(users[0]);
+    }
+    return user;
+  }
+
+  /**
+   * Update user attributes.
+   *
+   * @param attributes the attributes
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  public void updateUserAttributes(@RequestBody Map<String, List<String>> attributes) {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      user.setAttributes(attributes);
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    keycloakConnectorService.updateUser(user);
+
+  }
+
+
+  /**
+   * Gets the user attributes.
+   *
+   * @return the user attributes
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  public Map<String, List<String>> getUserAttributes() {
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      return user.getAttributes();
+    } else {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+
   }
 
 

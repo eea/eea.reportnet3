@@ -117,8 +117,9 @@ public interface RecordStoreService {
    * <b>Note:</b> {@literal @}<i>Async</i> annotated method.
    * </p>
    *
-   * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
+   * @param datasetIdAndSchemaId the dataset id and schema id
    * @param dataflowId The DataCollection's dataflow.
+   * @param isCreation the is creation
    */
-  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId);
+  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
 }
