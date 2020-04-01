@@ -127,7 +127,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public void updateDataCollection(
-      @RequestParam("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
+      @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
 
     TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
 

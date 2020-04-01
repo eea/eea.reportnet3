@@ -56,5 +56,5 @@ public interface DataCollectionController {
    * @param dataflowId the dataflow id
    */
   @PutMapping("/update/{dataflowId}")
-  void updateDataCollection(@RequestParam("dataflowId") Long dataflowId);
+  void updateDataCollection(@PathVariable("dataflowId") Long dataflowId);
 }
