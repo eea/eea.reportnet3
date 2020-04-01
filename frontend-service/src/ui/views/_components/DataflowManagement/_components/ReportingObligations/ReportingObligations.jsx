@@ -4,9 +4,9 @@ import isEmpty from 'lodash/isEmpty';
 
 import ObligationConf from 'conf/obligation.config.json';
 
-import { Filters } from 'ui/views/Dataflows/_components/DataflowsList/_components/Filters';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { CardsView } from './_components/CardsView';
+import { Filters } from 'ui/views/_components/Filters';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TableView } from './_components/TableView';
@@ -78,20 +78,11 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const renderData = () =>
     reportingObligationState.isTableView ? (
-      <>
-        <Filters
-          data={reportingObligationState.data}
-          dateOptions={ObligationConf.filterItems['date']}
-          getFiltredData={onLoadFiltredData}
-          inputOptions={ObligationConf.filterItems['input']}
-          selectOptions={ObligationConf.filterItems['select']}
-        />
-        <TableView
-          checkedRow={reportingObligationState.oblChoosed}
-          data={reportingObligationState.filteredData}
-          onSelectObl={onSelectObl}
-        />
-      </>
+      <TableView
+        checkedRow={reportingObligationState.oblChoosed}
+        data={reportingObligationState.filteredData}
+        onSelectObl={onSelectObl}
+      />
     ) : (
       <CardsView />
     );
@@ -100,6 +91,13 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   return (
     <Fragment>
+      <Filters
+        data={reportingObligationState.data}
+        dateOptions={ObligationConf.filterItems['date']}
+        getFiltredData={onLoadFiltredData}
+        inputOptions={ObligationConf.filterItems['input']}
+        selectOptions={ObligationConf.filterItems['select']}
+      />
       {/* <div style={{ display: 'flex' }}>
         <SearchAll />
         <InputSwitch
