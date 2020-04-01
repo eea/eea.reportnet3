@@ -77,7 +77,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     DataFlowVO result = null;
     try {
       result = dataflowService.getById(id);
-
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

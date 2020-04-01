@@ -24,6 +24,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -126,6 +127,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private RepresentativeService representativeService;
 
+  @Autowired
+  private ObligationController obligationController;
+
 
   /**
    * The Constant LOG.
@@ -186,6 +190,7 @@ public class DataflowServiceImpl implements DataflowService {
           .collect(Collectors.toList()));
     }
 
+    getObligation(dataflowVO);
 
     LOG.info("Get the dataflow information with id {}", id);
 
@@ -250,7 +255,26 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVOs.add(dataflowVO);
         });
 
+    dataflowVOs.stream().forEach(dataflow -> getObligation(dataflow));
+
     return dataflowVOs;
+  }
+
+
+  /**
+   * Gets the obligation.
+   *
+   * @param dataflow the dataflow
+   * @return the obligation
+   */
+  private void getObligation(DataFlowVO dataflow) {
+    // Get the obligationVO from ROD and Set in dataflow VO
+    // We check that the field is not empty to avoid the call to rod due to maintain backward
+    // compatibility concerns
+    if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
+      dataflow.setObligation(
+          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+    }
   }
 
 
