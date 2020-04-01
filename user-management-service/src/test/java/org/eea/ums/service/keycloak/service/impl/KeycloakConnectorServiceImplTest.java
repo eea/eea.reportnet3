@@ -1,5 +1,6 @@
 package org.eea.ums.service.keycloak.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -431,4 +432,28 @@ public class KeycloakConnectorServiceImplTest {
 
     Assert.assertEquals(1, keycloakConnectorService.getUsersByEmail("sample@email.net").length);
   }
+
+  @Test
+  public void updateUserTest() {
+    UserRepresentation user = new UserRepresentation();
+    user.setId("");
+    keycloakConnectorService.updateUser(user);
+    Mockito.verify(restTemplate, Mockito.times(1)).exchange(Mockito.anyString(),
+        Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+  }
+
+  @Test
+  public void getUser() {
+    UserRepresentation user = new UserRepresentation();
+    ResponseEntity<UserRepresentation> responseUserRepresentation =
+        new ResponseEntity<>(user, HttpStatus.OK);
+    Mockito
+        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+        .thenReturn(responseUserRepresentation);
+    UserRepresentation userRepresentation = keycloakConnectorService.getUser("");
+    assertEquals(user, userRepresentation);
+  }
+
+
 }
