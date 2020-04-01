@@ -131,7 +131,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset");
+          "Error creating design dataset", e);
     }
   }
 
@@ -439,7 +439,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
-      if (dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO)) {
+      if (Boolean.TRUE.equals(dataschemaService.checkPkAllowUpdate(datasetSchema, fieldSchemaVO))) {
 
         // Modify the register into the metabase fieldRelations
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);

@@ -38,18 +38,26 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/datacollection")
 public class DataCollectionControllerImpl implements DataCollectionController {
 
-  /** The data collection service. */
+  /**
+   * The data collection service.
+   */
   @Autowired
   private DataCollectionService dataCollectionService;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -74,8 +82,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /**
    * Creates the empty data collection.
    *
-   * @param dataflowId the dataflow id
-   * @param dueDate the due date
+   * @param dataCollectionVO the dataflow collection vo
    */
   @Override
   @HystrixCommand
@@ -146,6 +153,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    * Find data collection id by dataflow id.
    *
    * @param idDataflow the id dataflow
+   *
    * @return the list
    */
   @Override
