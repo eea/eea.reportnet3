@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -19,11 +20,8 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
-/**
- * The interface Dataset service.
- */
+/** The interface Dataset service. */
 public interface DatasetService {
-
 
   /**
    * Process the file: read, parse and save in the db.
@@ -41,7 +39,6 @@ public interface DatasetService {
   DataSetVO processFile(@DatasetId Long datasetId, String fileName, InputStream is,
       String idTableSchema) throws EEAException, IOException;
 
-
   /**
    * Delete the dataSchema.
    *
@@ -49,14 +46,12 @@ public interface DatasetService {
    */
   void deleteDataSchema(@DatasetId String datasetId);
 
-
   /**
    * Delete import data.
    *
    * @param dataSetId the data set id
    */
   void deleteImportData(@DatasetId Long dataSetId);
-
 
   /**
    * Gets the table values by id.
@@ -86,7 +81,6 @@ public interface DatasetService {
   ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
       EntityTypeEnum type) throws EEAException;
 
-
   /**
    * Gets the dataset by id.
    *
@@ -100,7 +94,6 @@ public interface DatasetService {
   @Deprecated
   DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
 
-
   /**
    * Update dataset.
    *
@@ -110,7 +103,6 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void updateDataset(@DatasetId Long datasetId, DataSetVO dataset) throws EEAException;
-
 
   /**
    * Gets the data flow id by id.
@@ -123,7 +115,6 @@ public interface DatasetService {
    */
   Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
 
-
   /**
    * Update record.
    *
@@ -133,7 +124,6 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
-
 
   /**
    * Delete record.
@@ -153,7 +143,6 @@ public interface DatasetService {
    */
   void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
 
-
   /**
    * Export file.
    *
@@ -168,7 +157,6 @@ public interface DatasetService {
    */
   byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
       throws EEAException, IOException;
-
 
   /**
    * Gets the file name.
@@ -196,7 +184,6 @@ public interface DatasetService {
   void createRecords(@DatasetId Long datasetId, List<RecordVO> records, String idTableSchema)
       throws EEAException;
 
-
   /**
    * Insert schema.
    *
@@ -217,7 +204,6 @@ public interface DatasetService {
    */
   void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
 
-
   /**
    * Save all records.
    *
@@ -225,7 +211,6 @@ public interface DatasetService {
    * @param listaGeneral the lista general
    */
   void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral);
-
 
   /**
    * Save table.
@@ -235,7 +220,6 @@ public interface DatasetService {
    */
   void saveTable(@DatasetId Long datasetId, TableValue tableValue);
 
-
   /**
    * Find table id by table schema.
    *
@@ -244,7 +228,6 @@ public interface DatasetService {
    * @return the long
    */
   Long findTableIdByTableSchema(@DatasetId Long datasetId, String idSchema);
-
 
   /**
    * Delete record values to restore snapshot.
@@ -264,7 +247,6 @@ public interface DatasetService {
    */
   void saveStatistics(@DatasetId Long datasetId) throws EEAException;
 
-
   /**
    * Delete table value.
    *
@@ -272,7 +254,6 @@ public interface DatasetService {
    * @param idTableSchema the id table schema
    */
   void deleteTableValue(@DatasetId Long datasetId, String idTableSchema);
-
 
   /**
    * Save table propagation.
@@ -308,7 +289,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteAllTableValues(@DatasetId Long datasetId);
-
 
   /**
    * Checks if is reporting dataset.
@@ -348,19 +328,15 @@ public interface DatasetService {
    */
   void deleteRecordValuesByProvider(@DatasetId Long datasetId, String providerCode);
 
-
   /**
    * Gets the field values referenced.
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
    * @param searchValue the search value
-   * @param idFkOrigin the id fk origin
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
-
-
 
   /**
    * Gets the referenced dataset id.
@@ -370,4 +346,12 @@ public interface DatasetService {
    * @return the referenced dataset id
    */
   Long getReferencedDatasetId(Long datasetId, String idPk);
+
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  DatasetTypeEnum getDatasetType(Long datasetId);
 }
