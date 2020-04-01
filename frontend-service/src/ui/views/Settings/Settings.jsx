@@ -41,20 +41,22 @@ const reducer = (state, { type, payload }) => {
 };
 const loadUserData = async userId => {
   try {
-    const response = await UserService.userData(userId);
-    return response;
+    const response = await UserService.userData();
+    console.log('response', response);
+    console.log('hola', 'hola');
   } catch (error) {
     console.error(error);
   }
 };
 
 const Settings = withRouter(({ history }) => {
-  console.log('LoadUserData', loadUserData());
+  const respuesta = loadUserData();
+  console.log('resuesta', respuesta);
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-
+  debugger;
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
 
   const initUserSettingsSection = () => {
