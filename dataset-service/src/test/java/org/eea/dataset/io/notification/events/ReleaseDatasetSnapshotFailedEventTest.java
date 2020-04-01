@@ -39,7 +39,7 @@ public class ReleaseDatasetSnapshotFailedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(4,
         releaseDatasetSnapshotFailedEvent.getMap(
             NotificationVO.builder().user("user").datasetId(1L).datasetName("datasetName").build())
@@ -47,7 +47,7 @@ public class ReleaseDatasetSnapshotFailedEventTest {
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");

@@ -1,23 +1,16 @@
 package org.eea.interfaces.vo.dataflow.enums;
 
-/**
- * The Enum TypeStatusEnum.
- */
+/** The Enum TypeStatusEnum. */
 public enum TypeStatusEnum {
-
-
 
   /** The design. */
   DESIGN("DESIGN"),
 
-
   /** The draft. */
   DRAFT("DRAFT");
 
-
   /** The value. */
   private final String value;
-
 
   /**
    * Instantiates a new type status enum.
@@ -28,7 +21,6 @@ public enum TypeStatusEnum {
     this.value = value;
   }
 
-
   /**
    * Gets the value.
    *
@@ -37,6 +29,4 @@ public enum TypeStatusEnum {
   public String getValue() {
     return value;
   }
-
-
 }

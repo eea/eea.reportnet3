@@ -58,6 +58,10 @@ public class Representative {
   @Column(name = "receipt_outdated")
   private Boolean receiptOutdated;
 
+  /** The has datasets. */
+  @Column(name = "has_datasets")
+  private Boolean hasDatasets;
+
   /**
    * Equals.
    *

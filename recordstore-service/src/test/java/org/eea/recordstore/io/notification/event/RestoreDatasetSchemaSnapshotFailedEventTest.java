@@ -48,7 +48,7 @@ public class RestoreDatasetSchemaSnapshotFailedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(6,
         restoreDatasetSchemaSnapshotFailedEvent
             .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
@@ -57,7 +57,7 @@ public class RestoreDatasetSchemaSnapshotFailedEventTest {
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);

@@ -1,66 +1,45 @@
 package org.eea.interfaces.vo.lock.enums;
 
-/**
- * The Enum LockSignature.
- */
+/** The Enum LockSignature. */
 public enum LockSignature {
 
   /** The empty. */
   EMPTY(""),
 
-  /**
-   * DataSetSnapshotControllerImpl.createSnapshot(..)
-   */
+  /** DataSetSnapshotControllerImpl.createSnapshot(..) */
   CREATE_SNAPSHOT("DataSetSnapshotControllerImpl.createSnapshot(..)"),
 
-  /**
-   * DataSetSnapshotControllerImpl.restoreSnapshot(..)
-   */
+  /** DataSetSnapshotControllerImpl.restoreSnapshot(..) */
   RESTORE_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSnapshot(..)"),
 
-  /**
-   * DataSetControllerImpl.loadTableData(..)
-   */
+  /** DataSetControllerImpl.loadTableData(..) */
   LOAD_TABLE("DataSetControllerImpl.loadTableData(..)"),
 
-  /**
-   * ValidationHelper.executeValidation(..)
-   */
+  /** ValidationHelper.executeValidation(..) */
   EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
 
-  /**
-   * The force execute validation.
-   */
+  /** ValidationControllerImpl.validateDataSetData(..) */
   FORCE_EXECUTE_VALIDATION("ValidationControllerImpl.validateDataSetData(..)"),
 
-  /**
-   * The create schema snapshot.
-   */
+  /** DataSetSnapshotControllerImpl.createSchemaSnapshot(..) */
   CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
 
-  /**
-   * The restore schema snapshot.
-   */
+  /** DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
-  /**
-   * The release snapshot.
-   */
+  /** DataSetSnapshotControllerImpl.releaseSnapshot(..) */
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 
-  /**
-   * The create data collection.
-   */
+  /** DataCollectionControllerImpl.createEmptyDataCollection(..) */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 
-  /**
-   * The delete import table.
-   */
-  DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)");
+  /** DataSetControllerImpl.deleteImportTable(..) */
+  DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
 
-  /**
-   * The value.
-   */
+  /** DataCollectionControllerImpl.updateDataCollection(..) */
+  UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)");
+
+  /** The value. */
   private final String value;
 
   /**
