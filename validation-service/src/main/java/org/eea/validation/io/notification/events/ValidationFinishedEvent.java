@@ -58,7 +58,8 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
             : dataflowControllerZuul.findById(dataflowId).getName();
-    DatasetTypeEnum type = dataSetControllerZuul.getDatasetType(datasetId);
+    DatasetTypeEnum type = notificationVO.getDatasetType() != null ? notificationVO.getDatasetType()
+        : dataSetControllerZuul.getDatasetType(datasetId);
 
 
     Map<String, Object> notification = new HashMap<>();
