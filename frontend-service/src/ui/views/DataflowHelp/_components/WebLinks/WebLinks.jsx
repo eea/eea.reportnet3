@@ -183,7 +183,7 @@ export const WebLinks = ({
       ));
 
     if (isCustodian) {
-      webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
+      webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
     }
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
