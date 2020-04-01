@@ -38,8 +38,14 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
+  // const onLoadFiltredData = data => {
+  //   reportingObligationDispatch({ type: 'FILTER_DATA', payload: { filteredData: data } });
+  // };
+
+  const [filteredData, setFilteredData] = useState([]);
+
   const onLoadFiltredData = data => {
-    reportingObligationDispatch({ type: 'FILTER_DATA', payload: { filteredData: data } });
+    setFilteredData(data);
   };
 
   const onLoadReportingObligations = async () => {
@@ -50,19 +56,21 @@ export const ReportingObligations = (dataflowId, refresh) => {
       payload: { data, filteredData: ReportingObligationUtils.filteredInitialValues(data) }
     });
 
+    onLoadFiltredData(reportingObligationState.data);
+
     // llamadas para probar
 
     // clients
-    // const dataClients = await ObligationService.getClients();
-    // console.log('dataClients', dataClients);
+    const dataClients = await ObligationService.getClients();
+    console.log('dataClients', dataClients);
 
-    // // countries
-    // const dataCountries = await ObligationService.getCountries();
-    // console.log('dataCountries', dataCountries);
+    // countries
+    const dataCountries = await ObligationService.getCountries();
+    console.log('dataCountries', dataCountries);
 
-    // // countries
-    // const dataIssues = await ObligationService.getIssues();
-    // console.log('dataIssues', dataIssues);
+    // countries
+    const dataIssues = await ObligationService.getIssues();
+    console.log('dataIssues', dataIssues);
 
     // fin llamadas
 

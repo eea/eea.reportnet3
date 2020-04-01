@@ -1,1 +1,1 @@
-export const GetIssues = ({ obligationRepository }) => async () => obligationRepository.GetIssues();
+export const GetIssues = ({ obligationRepository }) => async () => obligationRepository.getIssues();

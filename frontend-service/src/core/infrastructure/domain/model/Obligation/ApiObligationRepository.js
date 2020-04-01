@@ -31,7 +31,9 @@ const parseClient = clientDTO => {
 const parseClientList = clientsDTO => {
   if (!isNil(clientsDTO)) {
     const clients = [];
-    clientsDTO.forEach(clientDTO => clients.push(parseClient(clientDTO)));
+    console.log('clientsDTO typo', typeof clientsDTO);
+    console.log('clientsDTO.length', clientsDTO.length);
+    // clientsDTO.forEach(clientDTO => clients.push(parseClient(clientDTO)));
     return clients;
   }
   return;
@@ -53,7 +55,9 @@ const parseCountry = countryDTO => {
 const parseCountryList = countriesDTO => {
   if (!isNil(countriesDTO)) {
     const countries = [];
-    countriesDTO.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
+    console.log('countriesDTO typo', typeof countriesDTO);
+    console.log('countriesDTO.length', countriesDTO.length);
+    // countriesDTO.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
     return countries;
   }
   return;
@@ -72,7 +76,9 @@ const parseIssue = issueDTO => {
 const parseIssueList = issuesDTO => {
   if (!isNil(issuesDTO)) {
     const issues = [];
-    issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
+    console.log('issuesDTO typo', typeof issuesDTO);
+    console.log('issuesDTO.length', issuesDTO.length);
+    //issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
     return issues;
   }
   return;
@@ -107,6 +113,9 @@ const parseObligation = obligationDTO =>
 const parseObligationList = obligationsDTO => {
   if (!isNil(obligationsDTO)) {
     const obligations = [];
+    console.log('obligationsDTO typo', typeof obligationsDTO);
+    console.log('obligationsDTO.length', obligationsDTO.length);
+    console.log('obligationsDTO array', obligationsDTO.isArray);
     obligationsDTO.forEach(obligationDTO => obligations.push(parseObligation(obligationDTO)));
     return obligations;
   }
@@ -115,7 +124,9 @@ const parseObligationList = obligationsDTO => {
 
 const getClients = async () => {
   const clientsDTO = await apiObligation.getClients();
+  console.log('clientsDTO', clientsDTO);
   return parseClientList(clientsDTO);
+  // return clientsDTO;
 };
 
 const getCountries = async () => {
