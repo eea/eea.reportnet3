@@ -34,7 +34,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
-        const section = (type.toString() !== "VALIDATION_FINISHED_EVENT") ? routes[navigateTo.section] : getSectionValidationRedirectionUrl(content.type);
+        const section = (type.toString() !== "VALIDATION_FINISHED_EVENT") ? routes[navigateTo.section] : routes[getSectionValidationRedirectionUrl(content.type)];
         notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
