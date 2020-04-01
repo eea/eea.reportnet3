@@ -98,7 +98,7 @@ public interface KeycloakConnectorService {
    * Create group detail.
    *
    * @param groupInfo the group info
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void createGroupDetail(GroupInfo groupInfo) throws EEAException;
 
@@ -114,7 +114,7 @@ public interface KeycloakConnectorService {
    *
    * @param userId the user resourceId
    * @param groupId the group resourceId
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void addUserToGroup(String userId, String groupId) throws EEAException;
 
@@ -133,9 +133,15 @@ public interface KeycloakConnectorService {
   UserRepresentation[] getUsers();
 
   /**
-   * Gets the role.
+   * Gets the users by email.
    *
-   * @param userId the user id
+   * @param email the email
+   * @return the users by email
+   */
+  UserRepresentation[] getUsersByEmail(String email);
+
+  /**
+   * Gets the role.
    *
    * @return the role
    */
@@ -148,4 +154,19 @@ public interface KeycloakConnectorService {
    * @param userId the user id
    */
   void addRole(String body, String userId);
+
+  /**
+   * Update user.
+   *
+   * @param user the user
+   */
+  void updateUser(UserRepresentation user);
+
+  /**
+   * Gets the user.
+   *
+   * @param userId the user id
+   * @return the user
+   */
+  UserRepresentation getUser(String userId);
 }

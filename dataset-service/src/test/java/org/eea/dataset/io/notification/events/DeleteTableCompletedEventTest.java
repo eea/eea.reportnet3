@@ -52,7 +52,7 @@ public class DeleteTableCompletedEventTest {
   }
 
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapTest() throws EEAException {
     Assert.assertEquals(7,
         deleteTableCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
             .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
@@ -60,7 +60,7 @@ public class DeleteTableCompletedEventTest {
   }
 
   @Test
-  public void getMapTest2() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(datasetMetabaseVO);

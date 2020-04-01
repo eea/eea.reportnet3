@@ -1,7 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -564,9 +563,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     // add resource to delete(DATAFLOW PART)
     try {
-      // Can be used the method deleteResourceByDatasetId for deleting the dataflow, just delete the
-      // dataflowId groups
-      resourceManagementControllerZull.deleteResourceByDatasetId(Arrays.asList(idDataflow));
+      List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+          .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+      resourceManagementControllerZull.deleteResource(resourceCustodian);
+
       LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting resources in keycloack, group with the id: {}", idDataflow, e);

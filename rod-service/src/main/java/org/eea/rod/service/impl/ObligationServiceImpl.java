@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
@@ -61,9 +62,13 @@ public class ObligationServiceImpl implements ObligationService {
       Integer issueId,
       Date deadlineDateFrom,
       Date deadlineDateTo) {
+    Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(date -> date.getTime())
+        .orElse(null);
+    Long dateTo = Optional.ofNullable(deadlineDateTo).map(date -> date.getTime())
+        .orElse(null);
     List<Obligation> obligations = obligationFeignRepository
-        .findOpenedObligations(clientId, issueId, spatialId, deadlineDateFrom.getTime(),
-            deadlineDateTo.getTime());
+        .findOpenedObligations(clientId, issueId, spatialId, dateFrom,
+            dateTo);
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
     List<Client> clients = this.clientFeignRepository.findAll();
     List<Country> countries = new ArrayList<>();//this.countryFeignRepository.findAll(); this will not be necessary at the moment
