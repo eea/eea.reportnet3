@@ -874,6 +874,4 @@ public class ValidationServiceTest {
     when(recordRepository.countFieldsDataset()).thenReturn(1);
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
-
-
 }
