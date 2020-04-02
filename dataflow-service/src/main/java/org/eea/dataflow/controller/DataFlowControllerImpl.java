@@ -282,12 +282,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-      message += EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
     if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
         || null == dataFlowVO.getObligation().getObligationId())) {
-      message += EEAErrorMessage.DATAFLOW_OBLIGATION;
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
 
@@ -330,12 +330,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-      message += EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
     if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
         || null == dataFlowVO.getObligation().getObligationId())) {
-      message += EEAErrorMessage.DATAFLOW_OBLIGATION;
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
 
