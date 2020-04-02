@@ -16,7 +16,17 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, onSearch, refresh }) => {
+const DataflowManagementForm = ({
+  data,
+  getData,
+  isEditForm,
+  onCancel,
+  onCreate,
+  onEdit,
+  onSearch,
+  refresh,
+  onResetData
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -27,9 +37,7 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (!isNil(inputRef) && refresh) {
-      inputRef.current.focus();
-    }
+    if (!isNil(inputRef) && refresh) inputRef.current.focus();
   }, [hasErrors, inputRef.current, refresh]);
 
   useEffect(() => {
@@ -42,22 +50,20 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
 
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
-    description: Yup.string()
-      .required()
-      .max(255, resources.messages['dataflowDescriptionValidationMax'])
+    description: Yup.string().required().max(255, resources.messages['dataflowDescriptionValidationMax'])
   });
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={isEditForm ? dataflowData : { name: '', description: '' }}
+      initialValues={data}
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(dataflowData.id, values.name, values.description);
+            await DataflowService.update(data.id, values.name, values.description);
             onEdit(values.name, values.description);
           } else {
             await DataflowService.create(values.name, values.description);
@@ -75,7 +81,7 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
               ? {
                   type: 'DATAFLOW_UPDATING_ERROR',
                   content: {
-                    dataflowId: dataflowData.id,
+                    dataflowId: data.id,
                     dataflowName: values.name
                   }
                 }
@@ -100,12 +106,13 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
                 onChange={event => {
+                  getData({ ...data, name: event.target.value });
                   handleChange(event);
                   setIsNameDuplicated(false);
                   setHasErrors(false);
                 }}
                 type="text"
-                value={values.name}
+                value={data.name}
               />
               <ErrorMessage className="error" name="name" component="div" />
             </div>
@@ -113,8 +120,9 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
               <Field
                 name="description"
                 component="textarea"
+                onChange={event => getData({ ...data, description: event.target.value })}
                 placeholder={resources.messages['createDataflowDescription']}
-                value={values.description}
+                value={data.description}
               />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
@@ -124,6 +132,8 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
                 name="associatedObligation"
                 placeholder={resources.messages['associatedObligation']}
                 type="text"
+                readOnly={true}
+                value={data.obligation.title}
               />
               <Button
                 className={styles.searchButton}
@@ -156,7 +166,10 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
                 }  p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
-                onClick={onCancel}
+                onClick={() => {
+                  onCancel();
+                  onResetData();
+                }}
               />
             </div>
           </fieldset>

@@ -19,7 +19,7 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 
-export const ReportingObligations = (dataflowId, refresh) => {
+export const ReportingObligations = ({ oblChecked, getObligation, refresh }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -33,8 +33,12 @@ export const ReportingObligations = (dataflowId, refresh) => {
   });
 
   useEffect(() => {
-    if (refresh) onLoadReportingObligations();
-  }, [refresh]);
+    onLoadReportingObligations();
+  }, []);
+
+  useEffect(() => {
+    if (getObligation) getObligation(reportingObligationState.oblChoosed);
+  }, [reportingObligationState.oblChoosed]);
 
   const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -43,7 +47,11 @@ export const ReportingObligations = (dataflowId, refresh) => {
     const data = await ObligationService.opened();
     reportingObligationDispatch({
       type: 'INITIAL_LOAD',
-      payload: { data, filteredData: ReportingObligationUtils.filteredInitialValues(data) }
+      payload: {
+        data,
+        filteredData: ReportingObligationUtils.filteredInitialValues(data, oblChecked.id),
+        oblChoosed: oblChecked
+      }
     });
     try {
     } catch (error) {
