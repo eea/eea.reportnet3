@@ -23,7 +23,11 @@ const getFieldValues = (columns, header, filterColumns) => {
 
   const filteredValues = pick(filteredColumn, ...filterColumns);
   return Object.keys(filteredValues).map(key => {
-    return { field: key === 'codelistItems' ? 'Codelist items' : capitalize(key), value: filteredValues[key] };
+    console.log(filteredValues[key], filteredValues, key);
+    return {
+      field: key === 'codelistItems' ? 'Single select items' : capitalize(key),
+      value: filteredValues[key] === 'CODELIST' ? 'SINGLE SELECT' : filteredValues[key]
+    };
   });
 };
 
@@ -34,39 +38,34 @@ const getLevelError = validations => {
   validations.forEach(validation => {
     errors.push(validation.levelError);
   });
-  let differentErrors = [...new Set(errors)];
 
-  if (differentErrors.length > 1) {
-    return 'MULTI';
-  } else {
-    validations.forEach(validation => {
-      if (validation.levelError === 'INFO') {
-        const iNum = 1;
-        if (iNum > lvlFlag) {
-          lvlFlag = iNum;
-          levelError = 'INFO';
-        }
-      } else if (validation.levelError === 'WARNING') {
-        const wNum = 2;
-        if (wNum > lvlFlag) {
-          lvlFlag = wNum;
-          levelError = 'WARNING';
-        }
-      } else if (validation.levelError === 'ERROR') {
-        const eNum = 3;
-        if (eNum > lvlFlag) {
-          lvlFlag = eNum;
-          levelError = 'ERROR';
-        }
-      } else if (validation.levelError === 'BLOCKER') {
-        const bNum = 4;
-        if (bNum > lvlFlag) {
-          lvlFlag = bNum;
-          levelError = 'BLOCKER';
-        }
+  validations.forEach(validation => {
+    if (validation.levelError === 'INFO') {
+      const iNum = 1;
+      if (iNum > lvlFlag) {
+        lvlFlag = iNum;
+        levelError = 'INFO';
       }
-    });
-  }
+    } else if (validation.levelError === 'WARNING') {
+      const wNum = 2;
+      if (wNum > lvlFlag) {
+        lvlFlag = wNum;
+        levelError = 'WARNING';
+      }
+    } else if (validation.levelError === 'ERROR') {
+      const eNum = 3;
+      if (eNum > lvlFlag) {
+        lvlFlag = eNum;
+        levelError = 'ERROR';
+      }
+    } else if (validation.levelError === 'BLOCKER') {
+      const bNum = 4;
+      if (bNum > lvlFlag) {
+        lvlFlag = bNum;
+        levelError = 'BLOCKER';
+      }
+    }
+  });
   return levelError;
 };
 

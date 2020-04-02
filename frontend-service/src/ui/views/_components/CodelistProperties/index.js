@@ -1,1 +1,0 @@
-export { CodelistProperties } from './CodelistProperties';

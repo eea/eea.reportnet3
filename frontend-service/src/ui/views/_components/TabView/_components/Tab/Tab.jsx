@@ -31,6 +31,7 @@ export const Tab = ({
   id,
   index,
   initialTabIndexDrag,
+  isNavigationHidden,
   leftIcon,
   newTab,
   onTabBlur,
@@ -321,7 +322,7 @@ export const Tab = ({
           onDrop={e => onTabDrop(e)}
           onDoubleClick={onTabDoubleClick}
           role="tab"
-          style={{ pointerEvents: 'fill', display: 'inline-block' }}
+          style={{ pointerEvents: 'fill', display: 'inline-block', height: isNavigationHidden ? '2.6rem' : '2.7rem' }}
           tabIndex={index}>
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
