@@ -11,7 +11,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const DataflowManagement = ({ isEditForm, onCreateDataflow, onEditDataflow, onManageDialogs, state }) => {
   const resources = useContext(ResourcesContext);
-  console.log('state', state);
 
   const formReducer = (state, { type, payload }) => {
     switch (type) {
@@ -35,12 +34,10 @@ export const DataflowManagement = ({ isEditForm, onCreateDataflow, onEditDataflo
   const formInitialState = {
     name: isEditForm ? state.name : '',
     description: isEditForm ? state.description : '',
-    obligation: { id: null, title: '' }
+    obligation: isEditForm ? state.obligation : { id: null, title: '' }
   };
 
   const [formState, formDispatch] = useReducer(formReducer, formInitialState);
-
-  console.log('formState', formState);
 
   const isDialogVisible = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
 

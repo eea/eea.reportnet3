@@ -78,7 +78,11 @@ export const ReportingObligations = ({ oblChecked, getObligation, refresh }) => 
         onSelectObl={onSelectObl}
       />
     ) : (
-      <CardsView data={reportingObligationState.searchedData} />
+      <CardsView
+        data={reportingObligationState.searchedData}
+        checkedObligation={reportingObligationState.oblChoosed}
+        onSelectObl={onSelectObl}
+      />
     );
 
   if (reportingObligationState.isLoading) return <Spinner style={{ top: 0 }} />;

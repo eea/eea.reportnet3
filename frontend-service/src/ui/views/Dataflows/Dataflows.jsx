@@ -64,6 +64,7 @@ const Dataflows = withRouter(({ match, history }) => {
     setLoading(true);
     try {
       const allDataflows = await DataflowService.all(user.contextRoles);
+      console.log('allDataflows', allDataflows);
       dataflowsDispatch({
         type: 'INITIAL_LOAD',
         payload: {

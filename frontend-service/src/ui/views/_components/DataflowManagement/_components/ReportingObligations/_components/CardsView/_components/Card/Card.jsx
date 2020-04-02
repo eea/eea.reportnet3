@@ -35,8 +35,8 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
       <div className={`${styles.toolbar}`}>
         <Checkbox
           id={`${id}_checkbox`}
-          // isChecked={checked.title === title}
-          // onChange={() => onCheck(obligation)}
+          isChecked={checked.title === title}
+          onChange={() => onCheck(obligation)}
           role="checkbox"
         />
       </div>

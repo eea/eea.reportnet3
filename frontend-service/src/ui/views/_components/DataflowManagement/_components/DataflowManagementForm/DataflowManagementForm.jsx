@@ -63,10 +63,10 @@ const DataflowManagementForm = ({
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(data.id, values.name, values.description);
-            onEdit(values.name, values.description);
+            await DataflowService.update(data.id, values.name, values.description, data.obligation.id);
+            onEdit(values.name, values.description, data.obligation.id);
           } else {
-            await DataflowService.create(values.name, values.description);
+            await DataflowService.create(values.name, values.description, data.obligation.id);
             onCreate();
           }
         } catch (error) {
@@ -161,9 +161,7 @@ const DataflowManagementForm = ({
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={`${styles.cancelButton} ${
-                  !isEditForm ? 'p-button-secondary' : 'p-button-danger'
-                }  p-button-animated-blink`}
+                className={`${styles.cancelButton} p-button-secondary p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
                 onClick={() => {

@@ -78,9 +78,12 @@ const Dataflow = withRouter(({ history, match }) => {
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
     name: '',
+    obligation: { id: null, title: '' },
     status: ''
   });
   const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
+
+  console.log('dataflowDataState', dataflowDataState);
 
   const deleteInputRef = useRef(null);
 
@@ -294,9 +297,16 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+      console.log('dataflow', dataflow);
       dataflowDataDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: dataflow, name: dataflow.name, description: dataflow.description, status: dataflow.status }
+        payload: {
+          data: dataflow,
+          description: dataflow.description,
+          name: dataflow.name,
+          obligation: { id: dataflow.obligation.obligationId, title: dataflow.obligation.title },
+          status: dataflow.status
+        }
       });
 
       if (!isEmpty(dataflow.datasets)) {
