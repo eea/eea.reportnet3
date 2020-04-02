@@ -422,12 +422,11 @@ public class RuleExpressionVO implements Serializable {
       case '&':
         return 2;
       case '.':
-        if (lastInputType == 1) {
-          return 1;
-        }
-        return 3;
+        return lastInputType == 1 ? 1 : 3;
       case ')':
         return 4;
+      case 'E':
+        return lastInputType == 1 ? 1 : 5;
       default:
         return 5;
     }

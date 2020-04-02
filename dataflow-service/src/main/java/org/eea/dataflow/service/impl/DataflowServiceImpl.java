@@ -575,10 +575,9 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     try {
-      // this is necessary since the deletion of documents requires dataflow to be updated in
-      // Hibernate Cache before removing the entity itself
-      Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
-      dataflowRepository.delete(dataflow);
+      // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
+      // weblinks are also deleted
+      dataflowRepository.deleteById(idDataflow);
       LOG.info("Delete full dataflow with id: {}", idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow, e);

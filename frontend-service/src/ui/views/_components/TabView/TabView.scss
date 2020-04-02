@@ -169,13 +169,14 @@ body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(:last-child
   margin-right: 2px;
 }
 
-.p-tabview .p-tabview-nav li {
+body .p-tabview .p-tabview-nav li {
   list-style: none;
   float: left;
   position: relative;
   margin: 0 0 1px 0;
   padding: 0;
   white-space: nowrap;
+  height: 2.6rem;
 }
 
 body .p-tabview.p-tabview-bottom .p-tabview-nav {
