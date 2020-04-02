@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import orderBy from 'lodash/orderBy';
 
 import { RepresentativeService } from 'core/services/Representative';
 
