@@ -182,6 +182,7 @@ public class KieBaseManager {
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
+                  expression.append("( !isBlank(value) || ");
                   break;
               }
             }
@@ -263,7 +264,7 @@ public class KieBaseManager {
    * @param rule the rule
    * @return true, if successful
    */
-  public boolean textRuleCorrect(String datasetSchemaId, Rule rule) {
+  public void textRuleCorrect(String datasetSchemaId, Rule rule) {
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
@@ -320,6 +321,7 @@ public class KieBaseManager {
           whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         default:
+          expression.append("( !isBlank(value) || ");
           break;
       }
     }
@@ -340,9 +342,8 @@ public class KieBaseManager {
     // if one rule is not correct we return a false and the rule
     // will not be created
     if (results.hasMessages(Message.Level.ERROR)) {
-      correctRules = Boolean.FALSE;
+      rule.setEnabled(Boolean.FALSE);
     }
-    return correctRules;
   }
 
   /**
