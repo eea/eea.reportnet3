@@ -279,19 +279,19 @@ public class DataFlowControllerImpl implements DataFlowController {
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      message += EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
-    if (null != dataFlowVO.getObligation()
-        || null != dataFlowVO.getObligation().getObligationId()) {
-      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message += EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (message.equals("") && status == HttpStatus.OK) {
+    if (status == HttpStatus.OK) {
       try {
         dataflowService.createDataFlow(dataFlowVO);
       } catch (EEAException e) {
@@ -327,20 +327,19 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
-      message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      message += EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
+      status = HttpStatus.BAD_REQUEST;
+    }
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message += EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (null != dataFlowVO.getObligation()
-        || null != dataFlowVO.getObligation().getObligationId()) {
-      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
-      status = HttpStatus.BAD_REQUEST;
-    }
-
-    if (message.equals("") && status == HttpStatus.OK) {
+    if (status == HttpStatus.OK) {
       try {
         dataflowService.updateDataFlow(dataFlowVO);
       } catch (EEAException e) {
