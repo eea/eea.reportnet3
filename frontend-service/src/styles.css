@@ -2562,16 +2562,16 @@ body .p-tooltip .p-tooltip-text {
   border: 1px solid var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
-  border-right-color: var(--tooltip-arrow-bg);
+  border-right-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
-  border-left-color: var(--tooltip-arrow-bg);
+  border-left-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-top .p-tooltip-arrow {
-  border-top-color: var(--tooltip-arrow-bg);
+  border-top-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
-  border-bottom-color: var(--tooltip-arrow-bg);
+  border-bottom-color: var(--tooltip-body-border-color);
 }
 body .p-lightbox {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);

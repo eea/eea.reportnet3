@@ -440,6 +440,7 @@
   --tooltip-body-bg: var(--gray-110);
   --tooltip-body-color: var(--white);
   --tooltip-body-border-color: var(--gray-110);
+  --tooltip-arrow-border-color: var(--gray-110);
   --tooltip-arrow-bg: var(--gray-110);
 }
 body {
