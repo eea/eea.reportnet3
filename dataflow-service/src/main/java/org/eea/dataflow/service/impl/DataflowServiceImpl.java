@@ -578,7 +578,7 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
       // weblinks are also deleted
-      dataflowRepository.deleteById(idDataflow);
+      dataflowRepository.deleteNativeDataflow(idDataflow);
       LOG.info("Delete full dataflow with id: {}", idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow, e);
