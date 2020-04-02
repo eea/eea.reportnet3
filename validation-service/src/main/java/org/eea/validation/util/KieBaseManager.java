@@ -53,9 +53,6 @@ public class KieBaseManager {
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
 
-  /** The Constant RULE_CHECK_TEMPLATE. */
-  private static final String RULE_CHECK_TEMPLATE = "/ruleCheckTemplate.drl";
-
   /** The Constant timeZone. */
   private static final ZoneId timeZone = ZoneId.of("UTC");
 
@@ -100,7 +97,7 @@ public class KieBaseManager {
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
-    KieHelper kieHelper = new KieHelper();
+
     // we take the dataset value for salve all fail validations
     DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
 
@@ -162,7 +159,7 @@ public class KieBaseManager {
             if (null != datatype && !rule.isAutomatic()) {
               switch (datatype) {
                 case NUMBER:
-                  // expression.append("( !isBlank(value) || isNumber(value) && ");
+                  expression.append("( !isBlank(value) || isNumber(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
@@ -185,6 +182,7 @@ public class KieBaseManager {
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
+                  expression.append("( !isBlank(value) || ");
                   break;
               }
             }
@@ -201,12 +199,7 @@ public class KieBaseManager {
       });
     }
 
-    String generatedDRL =
-        compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
-    // multiple such resoures/rules can be added
-    byte[] b1 = generatedDRL.getBytes();
-    Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
-    kieHelper.addResource(resource1, ResourceType.DRL);
+    KieHelper kieHelper = kiebaseAssemble(compiler, kieServices, ruleAttributes);
     // this is a shared variable in a single instanced object.
     return kieHelper.build();
   }
@@ -233,12 +226,7 @@ public class KieBaseManager {
         rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
 
     // that method create another kiebase one by one and verify all rules are correct
-    String generatedDRLTest = compiler.compile(ruleAttributesHelper,
-        getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
-    byte[] b1 = generatedDRLTest.getBytes();
-    Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
-    KieHelper kieHelperTest = new KieHelper();
-    kieHelperTest.addResource(resourceTest, ResourceType.DRL);
+    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttributesHelper);
     Results results = kieHelperTest.verify();
     // if one rule is not correct he delete it and create a dataset validation about that rule
     if (results.hasMessages(Message.Level.ERROR)) {
@@ -270,12 +258,13 @@ public class KieBaseManager {
   }
 
   /**
-   * Text rule correct.
+   * Text rule correct and if that rule is ok we can create it.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    * @return true, if successful
    */
-  public boolean textRuleCorrect(Rule rule) {
+  public void textRuleCorrect(String datasetSchemaId, Rule rule) {
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
@@ -283,6 +272,8 @@ public class KieBaseManager {
     List<Map<String, String>> ruleAttribute = new ArrayList<>();
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
+    String whenCondition = rule.getWhenCondition();
+    StringBuilder expression = new StringBuilder("");
     switch (rule.getType()) {
       case DATASET:
         schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
@@ -302,24 +293,77 @@ public class KieBaseManager {
         break;
     }
 
+    Document documentField =
+        schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
+    DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+
+    // we do the same thing like in kiebase validation part
+    if (null != datatype) {
+      switch (datatype) {
+        case NUMBER:
+          expression.append("( !isBlank(value) || isNumber(value) && ");
+          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+          break;
+        case DATE:
+          expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
+          whenCondition = whenCondition.replaceAll("EQUALS", "==");
+          break;
+        case BOOLEAN:
+          expression.append("( !isBlank(value) || isBoolean(value) && ");
+          whenCondition = whenCondition.replaceAll("EQUALS", "==");
+          break;
+        case COORDINATE_LAT:
+          expression.append("( !isBlank(value) || isCordenateLat(value) && ");
+          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+          break;
+        case COORDINATE_LONG:
+          expression.append("( !isBlank(value) || isCordenateLong(value) && ");
+          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+          break;
+        default:
+          expression.append("( !isBlank(value) || ");
+          break;
+      }
+    }
+    if (!StringUtils.isBlank(expression.toString())) {
+      String whenConditionWithParenthesis =
+          new StringBuilder("").append("(").append(whenCondition).append(")").toString();
+      expression.append(whenConditionWithParenthesis).append(")").toString();
+    }
     ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-        typeValidation, schemasDrools, rule.getWhenCondition(), rule.getThenCondition().get(0),
-        rule.getThenCondition().get(1), "orig"));
+        typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
+        rule.getThenCondition().get(1), ""));
 
 
-    String generatedDRLTest =
-        compiler.compile(ruleAttribute, getClass().getResourceAsStream(RULE_CHECK_TEMPLATE));
+    // We create the same text like in kiebase and with that part we check if the rule is correct
+    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
+    Results results = kieHelperTest.verify();
+    // if one rule is not correct we return a false and the rule
+    // will not be created
+    if (results.hasMessages(Message.Level.ERROR)) {
+      rule.setEnabled(Boolean.FALSE);
+    }
+  }
+
+  /**
+   * Kiebase assemble. In this method we create the kiebase
+   *
+   * @param compiler the compiler
+   * @param kieServices the kie services
+   * @param ruleAttributesHelper the rule attributes helper
+   * @return the kie helper
+   */
+  private KieHelper kiebaseAssemble(ObjectDataCompiler compiler, KieServices kieServices,
+      List<Map<String, String>> ruleAttributesHelper) {
+
+    String generatedDRLTest = compiler.compile(ruleAttributesHelper,
+        getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
     byte[] b1 = generatedDRLTest.getBytes();
     Resource resourceTest = kieServices.getResources().newByteArrayResource(b1);
     KieHelper kieHelperTest = new KieHelper();
     kieHelperTest.addResource(resourceTest, ResourceType.DRL);
-    Results results = kieHelperTest.verify();
-    // if one rule is not correct he delete it and create a dataset validation about that rule
-    if (results.hasMessages(Message.Level.ERROR)) {
-      correctRules = Boolean.FALSE;
-    }
-    return correctRules;
+    return kieHelperTest;
   }
 
 

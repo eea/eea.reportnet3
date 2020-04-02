@@ -32,6 +32,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -42,6 +43,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.junit.Before;
@@ -150,6 +152,9 @@ public class DataFlowServiceImplTest {
   @Mock
   private RepresentativeService representativeService;
 
+  @Mock
+  private ObligationController obligationController;
+
   /**
    * The dataflows.
    */
@@ -159,6 +164,7 @@ public class DataFlowServiceImplTest {
    * The pageable.
    */
   private Pageable pageable;
+
 
   /**
    * Inits the mocks.
@@ -218,6 +224,9 @@ public class DataFlowServiceImplTest {
         .thenReturn(Arrays.asList(representative));
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataFlowVO.setObligation(obligation);
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
@@ -476,8 +485,11 @@ public class DataFlowServiceImplTest {
   @Test
   public void updateDataflow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
     dataflowVO.setId(1L);
     dataflowVO.setName("test");
+    dataflowVO.setObligation(obligation);
     when(dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()))
         .thenReturn(Optional.empty());
     when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
@@ -585,7 +597,7 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
   /**
@@ -606,7 +618,7 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceImpl.deleteDataFlow(1L);
 
-    Mockito.verify(dataflowRepository, times(2)).findById(Mockito.any());
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
   }
 
   /**
@@ -750,7 +762,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(Arrays.asList(dcVO));
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
-    doThrow(MockitoException.class).when(dataflowRepository).delete(Mockito.any());
+    doThrow(MockitoException.class).when(dataflowRepository).deleteById(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {

@@ -29,28 +29,34 @@
   padding-bottom: 80px;
 }
 
-.InputSwitchContainer {
-  width: 100%;
+.switchDivInput {
+  display: flex;
+  align-items: center;
+  justify-items: flex-end;
+  flex-direction: row;
 }
-
-.InputSwitchDiv {
+.switchDiv {
   display: flex;
   align-items: center;
   margin-left: auto;
-  margin-right: 0;
-  width: fit-content;
+  /* flex-direction: row-reverse; */
 }
 
-.InputSwitchText {
-  font-size: 1rem;
+.switchTextInput {
+  font-size: 0.9em;
   font-weight: bold;
-  margin-block-start: 0.5rem;
-  margin-block-end: 0.5rem;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   padding: 5px;
+  color: var(--main-font-color);
 }
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   box-shadow: 0 0 0 0em var(--blue-120) !important;
+}
+
+.noScrollDatasetDesigner {
+  overflow: hidden !important;
 }

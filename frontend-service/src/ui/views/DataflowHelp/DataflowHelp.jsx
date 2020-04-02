@@ -2,7 +2,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isUndefined, sortBy, cloneDeep } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
+import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';

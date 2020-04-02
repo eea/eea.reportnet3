@@ -21,10 +21,12 @@ import { ValidationService } from 'core/services/Validation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
+const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -60,6 +62,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
     try {
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
+
       setValidationsList(validationsServiceList);
     } catch (error) {
       notificationContext.add({
@@ -122,7 +125,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       { id: 'date', index: 9 },
       { id: 'entityType', index: 10 },
       { id: 'actionButtons', index: 11 }
-    ];  
+    ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
       .flat()
@@ -130,19 +133,30 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = () => (
+  const actionsTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
-        '';
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
       }}
     />
   );
 
-  const deleteTemplate = () => (
-    <ActionsColumn
-      onDeleteClick={() => onShowDeleteDialog()}      
-    />
+  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+
+  const deleteValidationDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteValidationHeader']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => onDeleteValidation()}
+      onHide={() => onHideDeleteDialog()}
+      visible={isDeleteDialogVisible}
+      maximizable={false}>
+      {resources.messages['deleteValidationConfirm']}
+    </ConfirmDialog>
   );
 
   const columnStyles = field => {
@@ -163,12 +177,12 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
 
   const actionButtonsColumn = (
     <Column
-        body={row => row.automatic ? deleteTemplate() : actionsTemplate()}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
+      body={row => (row.automatic ? deleteTemplate() : actionsTemplate(row))}
+      className={styles.validationCol}
+      header={resources.messages['actions']}
+      key="actions"
+      sortable={false}
+      style={{ width: '100px' }}
     />
   );
 
@@ -184,10 +198,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       return (
         <Column
           body={template}
-          key={field} 
           columnResizeMode="expand"
           field={field}
           header={getHeader(field)}
+          key={field}
           sortable={true}
           style={columnStyles(field)}
         />
@@ -205,41 +219,41 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
         </div>
       );
     }
-      const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
-      return (
-        <div className={null}>
-          <DataTable
-            autoLayout={true}
-            className={styles.paginatorValidationViewer}
-            loading={false}
-            onRowClick={event => setValidationId(event.data.id)}
-            paginator={true}
-            paginatorRight={paginatorRightText}
-            rows={10}
-            rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={validationsList.validations.length}
-            value={validationsList.validations}>
-            {renderColumns(validationsList.validations)}
-          </DataTable>
-        </div>
+    const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
+    return (
+      <div className={null}>
+        <DataTable
+          autoLayout={true}
+          className={styles.paginatorValidationViewer}
+          loading={false}
+          onRowClick={event => setValidationId(event.data.id)}
+          paginator={true}
+          paginatorRight={paginatorRightText}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={validationsList.validations.length}
+          value={validationsList.validations}>
+          {renderColumns(validationsList.validations)}
+        </DataTable>
+      </div>
 
-        // <TabPanel header={entityType} key={entityType} rightIcon={null}>
-        //   <div className={null}>
-        //     <DataTable
-        //       autoLayout={true}
-        //       className={null}
-        //       loading={false}
-        //       paginator={true}
-        //       paginatorRight={paginatorRightText}
-        //       rows={10}
-        //       rowsPerPageOptions={[5, 10, 15]}
-        //       totalRecords={validationsFilteredByEntityType.length}
-        //       value={validationsFilteredByEntityType}>
-        //       {columns}
-        //     </DataTable>
-        //   </div>
-        // </TabPanel>
-      );
+      // <TabPanel header={entityType} key={entityType} rightIcon={null}>
+      //   <div className={null}>
+      //     <DataTable
+      //       autoLayout={true}
+      //       className={null}
+      //       loading={false}
+      //       paginator={true}
+      //       paginatorRight={paginatorRightText}
+      //       rows={10}
+      //       rowsPerPageOptions={[5, 10, 15]}
+      //       totalRecords={validationsFilteredByEntityType.length}
+      //       value={validationsFilteredByEntityType}>
+      //       {columns}
+      //     </DataTable>
+      //   </div>
+      // </TabPanel>
+    );
     // });
   };
 
@@ -250,17 +264,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
   return (
     <Fragment>
       {validationList()}
-
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteValidationHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteValidation()}
-        onHide={() => onHideDeleteDialog()}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteValidationConfirm']}
-      </ConfirmDialog>
+      {isDeleteDialogVisible && deleteValidationDialog}
     </Fragment>
   );
 });

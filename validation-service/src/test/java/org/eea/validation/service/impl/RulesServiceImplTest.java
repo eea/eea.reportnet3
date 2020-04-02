@@ -28,6 +28,7 @@ import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.util.KieBaseManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +74,11 @@ public class RulesServiceImplTest {
   /** The rules sequence repository. */
   @Mock
   private RulesSequenceRepository rulesSequenceRepository;
+
+
+  /** The kie base manager. */
+  @Mock
+  private KieBaseManager kieBaseManager;
 
   /**
    * Delete rule by id.
@@ -366,11 +372,11 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
-
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+
     rulesServiceImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
@@ -407,7 +413,6 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
-
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(false);
@@ -419,6 +424,7 @@ public class RulesServiceImplTest {
       throw e;
     }
   }
+
 
   /**
    * Creates the new rule then condition size exception test.
@@ -716,4 +722,5 @@ public class RulesServiceImplTest {
     Assert.assertEquals(false, rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac", 0));
   }
+
 }

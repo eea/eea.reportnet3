@@ -77,7 +77,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     DataFlowVO result = null;
     try {
       result = dataflowService.getById(id);
-
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -280,19 +279,26 @@ public class DataFlowControllerImpl implements DataFlowController {
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+      status = HttpStatus.BAD_REQUEST;
+    }
 
-    try {
-      dataflowService.createDataFlow(dataFlowVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed. ", e.getCause());
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (status == HttpStatus.OK) {
+      try {
+        dataflowService.createDataFlow(dataFlowVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
 
     return new ResponseEntity<>(message, status);
@@ -321,19 +327,26 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+      status = HttpStatus.BAD_REQUEST;
+    }
 
-    try {
-      dataflowService.updateDataFlow(dataFlowVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Update dataflow failed. ", e.getCause());
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (status == HttpStatus.OK) {
+      try {
+        dataflowService.updateDataFlow(dataFlowVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Update dataflow failed. ", e.getCause());
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
 
     return new ResponseEntity<>(message, status);
