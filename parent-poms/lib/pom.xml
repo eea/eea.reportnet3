@@ -22,6 +22,8 @@
     <java.version>1.8</java.version>
     <feign_version>10.1.0</feign_version>
     <projectlombok.version>1.18.0</projectlombok.version>
+
+
   </properties>
 
   <dependencies>
