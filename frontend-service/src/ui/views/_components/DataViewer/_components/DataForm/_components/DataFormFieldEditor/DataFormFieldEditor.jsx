@@ -106,6 +106,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         keyfilter={getFilter(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
+        type={type === 'DATE' ? 'date' : 'text'}
       />
     );
 

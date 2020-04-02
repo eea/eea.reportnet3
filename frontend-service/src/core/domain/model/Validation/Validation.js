@@ -2,11 +2,13 @@ export class Validation {
   constructor({
     activationGroup,
     automatic,
+    allExpressions,
     condition,
     date,
     description,
     enabled,
     entityType,
+    expressions,
     id,
     levelError,
     message,
@@ -27,5 +29,7 @@ export class Validation {
     this.name = name;
     this.referenceId = referenceId;
     this.shortCode = shortCode;
+    this.expressions = expressions;
+    this.allExpressions = allExpressions;
   }
 }

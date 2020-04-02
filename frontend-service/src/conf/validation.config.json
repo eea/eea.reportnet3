@@ -52,6 +52,17 @@
     "=": "SEQ",
     "LIKE": "SEQIC"
   },
+  "reverseEquivalences": {
+    "GT": ">",
+    "LT": "<",
+    "GTEQ": ">=",
+    "LTEQ": "<=",
+    "EQ": "=",
+    "DIST": "!=",
+    "SEQ": "=",
+    "SEQIC": "LIKE",
+    "LEN": "LEN"
+  },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
     { "label": "WARNING", "value": "WARNING" },
