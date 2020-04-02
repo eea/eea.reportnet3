@@ -44,6 +44,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.RulesErrorUtils;
 import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
@@ -149,6 +150,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
+  @Autowired
+  private RulesErrorUtils rulesErrorUtils;
+
   /**
    * Gets the element lenght.
    *
@@ -164,7 +168,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Dataset Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(dataset, e);
     }
     return dataset.getDatasetValidations();
   }
@@ -183,7 +188,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Table Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(table, e);
     }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
   }
@@ -205,7 +211,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Record Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(record, e);
     }
 
     return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
@@ -229,11 +236,13 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Field Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(field, e);
     }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
         ? new ArrayList<>()
         : field.getFieldValidations();
+
   }
 
   /**
