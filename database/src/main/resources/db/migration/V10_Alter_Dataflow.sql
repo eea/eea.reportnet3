@@ -1,3 +1,3 @@
 --ADD OBLIGATION_ID IN TABLE DATAFLOW
 
-ALTER TABLE public.dataflow ADD obligation_id int4 NULL;
+ALTER TABLE public.dataflow ADD COLUMN IF NOT EXISTS obligation_id int4 NULL;
