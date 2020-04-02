@@ -33,8 +33,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [isCustodian, setIsCustodian] = useState();
-  const [loading, setLoading] = useState(true);
   const [tabMenuItems] = useState([
     {
       // label: resources.messages['dataflowAcceptedPendingTab'],
@@ -56,29 +54,11 @@ const Dataflows = withRouter(({ match, history }) => {
     allDataflows: {},
     completed: [],
     isAddDialogVisible: false,
+    isCustodian: null,
     isRepObDialogVisible: false,
+    isLoading: true,
     pending: []
   });
-
-  const dataFetch = async () => {
-    setLoading(true);
-    try {
-      const allDataflows = await DataflowService.all(user.contextRoles);
-      console.log('allDataflows', allDataflows);
-      dataflowsDispatch({
-        type: 'INITIAL_LOAD',
-        payload: {
-          accepted: allDataflows.accepted,
-          allDataflows,
-          completed: allDataflows.completed,
-          pending: allDataflows.pending
-        }
-      });
-    } catch (error) {
-      console.error('dataFetch error: ', error);
-    }
-    setLoading(false);
-  };
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) {
@@ -93,9 +73,7 @@ const Dataflows = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
-    }
+    if (!isUndefined(user.contextRoles)) onLoadPermissions();
   }, [user]);
 
   useEffect(() => {
@@ -132,7 +110,7 @@ const Dataflows = withRouter(({ match, history }) => {
       }
     ];
 
-    if (isCustodian) {
+    if (dataflowsState.isCustodian) {
       leftSideBarContext.addModels([
         {
           className: 'dataflowList-create-dataflow-help-step',
@@ -150,12 +128,39 @@ const Dataflows = withRouter(({ match, history }) => {
       leftSideBarContext.removeModels();
     }
     leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
-  }, [isCustodian]);
+  }, [dataflowsState.isCustodian]);
+
+  const dataFetch = async () => {
+    isLoading(true);
+    try {
+      const allDataflows = await DataflowService.all(user.contextRoles);
+      console.log('allDataflows', allDataflows);
+      dataflowsDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          accepted: allDataflows.accepted,
+          allDataflows,
+          completed: allDataflows.completed,
+          pending: allDataflows.pending
+        }
+      });
+    } catch (error) {
+      console.error('dataFetch error: ', error);
+    }
+    isLoading(false);
+  };
+
+  const isLoading = value => dataflowsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onCreateDataflow = () => {
     onManageDialogs('isAddDialogVisible', false);
     dataFetch();
     // onRefreshToken();
+  };
+
+  const onLoadPermissions = () => {
+    const isCustodian = UserService.hasPermission(user, [config.permissions.CUSTODIAN]);
+    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian } });
   };
 
   const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
@@ -177,7 +182,7 @@ const Dataflows = withRouter(({ match, history }) => {
     </MainLayout>
   );
 
-  if (loading) return layout(<Spinner />);
+  if (dataflowsState.isLoading) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -208,7 +213,7 @@ const Dataflows = withRouter(({ match, history }) => {
               content={dataflowsState.completed}
               dataFetch={dataFetch}
               description={resources.messages.completedDataflowText}
-              isCustodian={isCustodian}
+              isCustodian={dataflowsState.isCustodian}
               title={resources.messages.completedDataflowTitle}
               type="completed"
             />

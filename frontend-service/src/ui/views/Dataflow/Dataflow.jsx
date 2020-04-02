@@ -492,6 +492,7 @@ const Dataflow = withRouter(({ history, match }) => {
         </Dialog>
 
         <DataflowManagement
+          dataflowId={dataflowId}
           isEditForm={true}
           onEditDataflow={onEditDataflow}
           onManageDialogs={onManageDialogs}

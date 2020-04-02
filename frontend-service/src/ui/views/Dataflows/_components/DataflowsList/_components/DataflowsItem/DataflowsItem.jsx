@@ -102,6 +102,16 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
         </p>
       </div>
 
+      <div className={`${styles.obligation} `}>
+        <p>
+          <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+        </p>
+        <p>
+          <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span>
+          {itemContent.legalInstrument}
+        </p>
+      </div>
+
       <div className={`${styles.toolbar}`}>
         {type === 'pending' ? (
           <>

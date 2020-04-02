@@ -18,6 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const DataflowManagementForm = ({
   data,
+  dataflowId,
   getData,
   isEditForm,
   onCancel,
@@ -63,7 +64,7 @@ const DataflowManagementForm = ({
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(data.id, values.name, values.description, data.obligation.id);
+            await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
             onEdit(values.name, values.description, data.obligation.id);
           } else {
             await DataflowService.create(values.name, values.description, data.obligation.id);

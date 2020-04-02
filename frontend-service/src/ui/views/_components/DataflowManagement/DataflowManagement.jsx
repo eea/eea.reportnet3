@@ -9,7 +9,14 @@ import { ReportingObligations } from './_components/ReportingObligations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const DataflowManagement = ({ isEditForm, onCreateDataflow, onEditDataflow, onManageDialogs, state }) => {
+export const DataflowManagement = ({
+  dataflowId,
+  isEditForm,
+  onCreateDataflow,
+  onEditDataflow,
+  onManageDialogs,
+  state
+}) => {
   const resources = useContext(ResourcesContext);
 
   const formReducer = (state, { type, payload }) => {
@@ -86,14 +93,15 @@ export const DataflowManagement = ({ isEditForm, onCreateDataflow, onEditDataflo
         visible={state.isAddDialogVisible || state.isEditDialogVisible}>
         <DataflowManagementForm
           data={formState}
+          dataflowId={dataflowId}
           getData={onLoadData}
           isEditForm={isEditForm}
           onCancel={() => onManageDialogs(isDialogVisible, false)}
           onCreate={onCreateDataflow}
           onEdit={onEditDataflow}
+          onResetData={onResetData}
           onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
           refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
-          onResetData={onResetData}
         />
       </Dialog>
     </Fragment>
