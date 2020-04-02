@@ -242,7 +242,7 @@ public class RulesServiceImpl implements RulesService {
 
     validateRule(rule);
 
-    // that if test if the rule has the correct format, if not we disable the rule
+    // test if the rule is well defined, otherwise it is created but disabled
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
 
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
