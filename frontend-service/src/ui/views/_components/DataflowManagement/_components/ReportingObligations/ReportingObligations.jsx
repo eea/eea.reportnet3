@@ -65,12 +65,12 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const renderData = () =>
     reportingObligationState.isTableView ? (
       <TableView
-        checkedRow={reportingObligationState.oblChoosed}
+        checkedObligation={reportingObligationState.oblChoosed}
         data={reportingObligationState.searchedData}
         onSelectObl={onSelectObl}
       />
     ) : (
-      <CardsView />
+      <CardsView data={reportingObligationState.searchedData} />
     );
 
   if (reportingObligationState.isLoading) return <Spinner />;
@@ -79,11 +79,11 @@ export const ReportingObligations = (dataflowId, refresh) => {
     <Fragment>
       <div className={styles.repOblTools}>
         <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
-        <InputSwitch
+        {/* <InputSwitch
           checked={reportingObligationState.isTableView}
           onChange={() => onToggleView()}
           style={{ marginRight: '1rem' }}
-        />
+        /> */}
       </div>
       {isEmpty(reportingObligationState.data) ? <h3>{resources.messages['emptyValidations']}</h3> : renderData()}
     </Fragment>

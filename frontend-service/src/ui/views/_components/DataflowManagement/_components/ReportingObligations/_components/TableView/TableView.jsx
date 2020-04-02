@@ -13,14 +13,14 @@ import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const TableView = ({ checkedRow, data, onSelectObl }) => {
+export const TableView = ({ checkedObligation, data, onSelectObl }) => {
   const resources = useContext(ResourcesContext);
 
   const onLoadCheckButton = row => (
     <div className={styles.checkColum}>
       <Checkbox
         id={`${row.id}_checkbox`}
-        isChecked={checkedRow.title === row.title}
+        isChecked={checkedObligation.title === row.title}
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
@@ -66,7 +66,7 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
   return (
     <DataTable
       autoLayout={true}
-      onRowClick={event => onSelectObl(event.data)}
+      // onRowClick={event => onSelectObl(event.data)}
       paginator={true}
       rows={10}
       rowsPerPageOptions={[5, 10, 15]}

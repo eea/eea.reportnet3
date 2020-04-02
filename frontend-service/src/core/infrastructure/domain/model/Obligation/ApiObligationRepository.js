@@ -7,20 +7,20 @@ import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/Le
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
 
-const parseClient = clientDTO => {
-  if (!isNil(clientDTO)) {
+const parseOrganization = organizationDTO => {
+  if (!isNil(organizationDTO)) {
     return new Organization({
-      acronym: clientDTO.acronym,
-      address: clientDTO.address,
-      city: clientDTO.city,
-      country: clientDTO.country,
-      description: clientDTO.description,
-      email: clientDTO.email,
-      id: clientDTO.clientId,
-      name: clientDTO.name,
-      postalCode: clientDTO.postalCode,
-      shortName: clientDTO.shortName,
-      url: clientDTO.url
+      acronym: organizationDTO.acronym,
+      address: organizationDTO.address,
+      city: organizationDTO.city,
+      country: organizationDTO.country,
+      description: organizationDTO.description,
+      email: organizationDTO.email,
+      id: organizationDTO.clientId,
+      name: organizationDTO.name,
+      postalCode: organizationDTO.postalCode,
+      shortName: organizationDTO.shortName,
+      url: organizationDTO.url
     });
   }
   return;
@@ -39,7 +39,6 @@ const parseLegalInstrument = legalInstrumentDTO => {
 
 const parseObligation = obligationDTO =>
   new Obligation({
-    client: parseClient(obligationDTO.client),
     comment: obligationDTO.comment,
     countries: obligationDTO.countries,
     description: obligationDTO.description,
@@ -47,6 +46,7 @@ const parseObligation = obligationDTO =>
     issues: obligationDTO.issues,
     legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,
+    organization: parseOrganization(obligationDTO.client),
     title: obligationDTO.oblTitle,
     validSince: obligationDTO.validSince,
     validTo: obligationDTO.validTo

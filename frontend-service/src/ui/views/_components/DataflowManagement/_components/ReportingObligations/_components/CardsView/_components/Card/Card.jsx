@@ -1,39 +1,45 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-export const Card = ({ ids, headers, footers, titles, subTitles, style, className, childrens }) => {
-  let header, body;
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-  const renderHeader = () => <div className="p-card-header">{headers}</div>;
+import styles from './Card.module.scss';
 
-  const renderBody = () => {
-    let title, subTitle, footer, children;
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-    if (titles) title = <div className="p-card-title">{titles}</div>;
+import { Checkbox } from 'ui/views/_components/Checkbox';
 
-    if (subTitles) subTitle = <div className="p-card-subtitle">{subTitles}</div>;
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-    if (footers) footer = <div className="p-card-footer"> {footers}</div>;
-
-    if (childrens) children = <div className="p-card-content"> {childrens} </div>;
-
-    return (
-      <div className="p-card-body">
-        {title}
-        {subTitle}
-        {children}
-        {footer}
-      </div>
-    );
-  };
-
-  if (header) header = renderHeader();
-
-  body = renderBody();
+export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, title }) => {
+  const resources = useContext(ResourcesContext);
 
   return (
-    <div className={`p-card p-component ${className}`} style={style}>
-      {header}
-      {body}
+    <div className={styles.card}>
+      <div className={styles.text}>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.subtitle}>{subtitle}</p>
+      </div>
+
+      <div className={`${styles.link}`}>
+        <FontAwesomeIcon
+          className={styles.linkIcon}
+          icon={AwesomeIcons(icon)}
+          onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`)}
+        />
+      </div>
+
+      <div className={`${styles.date}`}>
+        {resources.messages['dueDate']}: <span className={styles.dueDate}>{date}</span>
+      </div>
+
+      <div className={`${styles.toolbar}`}>
+        <Checkbox
+          id={`${id}_checkbox`}
+          // isChecked={checked.title === title}
+          // onChange={() => onCheck(obligation)}
+          role="checkbox"
+        />
+      </div>
     </div>
   );
 };
