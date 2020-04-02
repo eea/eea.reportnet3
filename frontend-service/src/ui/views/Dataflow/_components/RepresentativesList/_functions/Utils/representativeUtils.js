@@ -64,7 +64,29 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
   }
 };
 
-const getAllRepresentatives = async (dataflowId, formDispatcher) => {
+const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
+  /*  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
+    const representativesByCopy = cloneDeep(formState.representatives);
+
+    formDispatcher({
+      type: 'INITIAL_LOAD',
+      payload: { response: formState.dataflowRepresentatives, representativesByCopy }
+    });
+  } else {
+    console.log('called out', formState);
+    try {
+      const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
+      const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+
+      formDispatcher({
+        type: 'INITIAL_LOAD',
+        payload: { response: responseAllRepresentatives, representativesByCopy }
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.allRepresentatives', error);
+    }
+  } */
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
@@ -93,7 +115,7 @@ const getProviderTypes = async formDispatcher => {
 
 export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   await getProviderTypes(formDispatcher);
-  await getAllRepresentatives(dataflowId, formDispatcher);
+  await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
     await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     createUnusedOptionsList(formDispatcher);
@@ -186,7 +208,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     } catch (error) {
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
-      if (error.response.status === 404) {
+      if (error.response.status === 400 || error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
           payload: { representativeIdThatHasError: updatedRepresentative.representativeId }

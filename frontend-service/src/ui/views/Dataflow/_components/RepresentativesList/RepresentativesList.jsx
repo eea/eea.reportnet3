@@ -30,6 +30,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({
+  dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
   setIsVisibleUpdateDatasetsNewRepresentatives,
@@ -40,6 +41,7 @@ const RepresentativesList = ({
   const initialState = {
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
+    dataflowRepresentatives: dataflowRepresentatives,
     dataProvidersTypesList: [],
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
@@ -76,6 +78,8 @@ const RepresentativesList = ({
   useEffect(() => {
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
+
+  //Control this in Dataflow
 
   useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
