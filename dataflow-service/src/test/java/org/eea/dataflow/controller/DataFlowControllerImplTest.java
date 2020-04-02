@@ -88,7 +88,8 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindByIdEEAExcep() throws EEAException {
-    when(dataflowService.getById(Mockito.any())).thenThrow(EEAException.class);
+    when(dataflowService.getById(Mockito.any(), Mockito.anyBoolean()))
+        .thenThrow(EEAException.class);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", null, dataFlowControllerImpl.findById(1L));
   }
@@ -100,7 +101,7 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindById() throws EEAException {
-    when(dataflowService.getById(Mockito.any())).thenReturn(dataflowVO);
+    when(dataflowService.getById(Mockito.any(), Mockito.anyBoolean())).thenReturn(dataflowVO);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L));
   }

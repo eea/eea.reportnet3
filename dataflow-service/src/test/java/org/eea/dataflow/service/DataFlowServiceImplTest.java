@@ -187,7 +187,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void getByIdThrows() throws EEAException {
     try {
-      dataflowServiceImpl.getById(null);
+      dataflowServiceImpl.getById(null, false);
     } catch (EEAException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
       throw ex;
@@ -227,7 +227,7 @@ public class DataFlowServiceImplTest {
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dataFlowVO.setObligation(obligation);
-    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
+    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L, true));
   }
 
 
