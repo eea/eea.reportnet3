@@ -15,7 +15,7 @@ const useBigButtonList = ({
   dataflowStatus,
   getDeleteSchemaIndex,
   handleRedirect,
-  hasRepresentatives,
+  hasRepresentativesWithoutDatasets,
   isUpdateDatasetsNewRepresentativesActive,
   onShowUpdateDataCollectionModal,
   hasWritePermissions,
@@ -289,7 +289,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentatives
+      visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentativesWithoutDatasets
     }
   ];
 

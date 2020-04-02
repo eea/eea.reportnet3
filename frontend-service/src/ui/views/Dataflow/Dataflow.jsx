@@ -67,23 +67,29 @@ const Dataflow = withRouter(({ history, match }) => {
   const [loading, setLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
-  const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, {
+  const dataflowInitialState = {
     data: {},
     deleteInput: '',
     description: '',
-    hasRepresentatives: false,
+    hasRepresentativesWithoutDatasets: false, // change to be hasRepresentativesWithoutDatasets use in both buttons
     id: dataflowId,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
-    isUpdateDatasetsNewRepresentativesActive: false,
+    isUpdateDatasetsNewRepresentativesActive: false, // use the hasRepresentativesWithoutDatasets
     name: '',
     status: ''
-  });
+  };
+
+  const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
   const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   const deleteInputRef = useRef(null);
+
+  useEffect(() => {
+    console.log('dataflowDataState.data.representatives', dataflowDataState.data.representatives);
+  }, [dataflowDataState.data.representatives]);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -177,7 +183,7 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
-    dataflowDataState.hasRepresentatives,
+    dataflowDataState.hasRepresentativesWithoutDatasets,
     dataflowDataState.status,
     dataflowId,
     designDatasetSchemas,
@@ -273,8 +279,10 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
+  ////////////////////////// checkRepresentatives IGOR If hasDatasets or not and If state of dataflow is Draft or design
+
   const onCheckRepresentatives = value =>
-    dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
+    dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentativesWithoutDatasets: value } });
 
   const onCheckNewRepresentatives = value =>
     dataflowDataDispatch({
@@ -421,7 +429,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
-          hasRepresentatives={dataflowDataState.hasRepresentatives}
+          hasRepresentativesWithoutDatasets={dataflowDataState.hasRepresentativesWithoutDatasets}
           isUpdateDatasetsNewRepresentativesActive={dataflowDataState.isUpdateDatasetsNewRepresentativesActive}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
