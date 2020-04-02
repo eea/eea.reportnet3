@@ -48,7 +48,10 @@ const userData = async userId => {
   //const response = new Promise((resolve, reject) => { dato: 'hola' });
   return response;
 };
-
+const updateAttributes = async Attributes => {
+  const response = await apiUser.updateAttributes(Attributes);
+  return response;
+};
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -119,6 +122,7 @@ const getToken = () => {
 export const ApiUserRepository = {
   login,
   userData,
+  updateAttributes,
   logout,
   oldLogin,
   refreshToken,

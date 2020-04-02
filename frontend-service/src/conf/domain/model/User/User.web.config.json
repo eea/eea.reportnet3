@@ -1,6 +1,7 @@
 {
     "login": "/user/generateTokenByCode?code={:code}",
-    "userData": "user/upload/?userId={:userId}",
+    "userData": "/user/getAttributes",
+    "updateUserAttributes": "/user/updateAttributes",
     "uploadImg": "user/upload/?userId={:userId}",
     "logout": "/user/logout?refreshToken={:refreshToken}",
     "oldLogin": "/user/generateToken?password={:password}&username={:userName}",

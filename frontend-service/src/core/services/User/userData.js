@@ -1,1 +1,1 @@
-export const userData = ({ userRepository }) => async userId => userRepository.userData(userId);
+export const userData = ({ userRepository }) => async () => userRepository.userData();

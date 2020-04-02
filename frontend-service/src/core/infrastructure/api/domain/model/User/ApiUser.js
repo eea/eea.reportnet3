@@ -58,9 +58,19 @@ export const apiUser = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    // const response = new Promise((resolve, reject) => {
-    //   setTimeout(resolve({ hello: 'hola' }), 1000);
-    // });
+    return response;
+  },
+  updateAttributes: async Attributes => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(UserConfig.updateUserAttributes),
+      data: Attributes,
+      queryString: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
     return response;
   },
   logout: async refreshToken => {

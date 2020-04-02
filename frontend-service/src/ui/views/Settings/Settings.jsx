@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { UserService } from 'core/services/User';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -39,29 +39,44 @@ const reducer = (state, { type, payload }) => {
       return state;
   }
 };
-const loadUserData = async userId => {
+const loadUserData = async () => {
   try {
-    const response = await UserService.userData(userId);
-    console.log('response', response);
-    console.log('hola', 'hola');
+    const response = await UserService.userData();
+    console.log('response', response.data);
   } catch (error) {
     console.error(error);
   }
 };
-
+const updateUserAttributes = async properties => {
+  try {
+    const response = await UserService.updateAttributes(properties);
+    console.log('response', response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const Attributes = {
+  defaultRowSelected: ['10'],
+  defaultVisualTheme: ['light'],
+  showLogoutConfirmation: ['false'],
+  dateFormat: ['DD/MM/YYYY']
+};
 const Settings = withRouter(({ history }) => {
   const user = useContext(UserContext);
-  const respuesta = loadUserData(user.id);
+  const respuesta = loadUserData();
   console.log('resuesta', respuesta);
+  console.log('updateUserAttributes', updateUserAttributes(Attributes));
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
-  console.log('user.id', user.userProps.dateFormat);
-
   const initUserSettingsSection = () => {
     visibleUserSectionDispatch({ type: 'VISIBLE_USER_DESIGN_OPTIONS' });
   };
+
+  ////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////
 
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
@@ -162,7 +177,7 @@ const Settings = withRouter(({ history }) => {
           />
         </div>
       </div>
-
+      <button onClick={() => console.log('userContext', user)}>console</button>
       <div className="rep-row">
         <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
       </div>
