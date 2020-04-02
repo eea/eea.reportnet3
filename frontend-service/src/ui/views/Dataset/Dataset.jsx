@@ -98,7 +98,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
-      console.info('dataset.Metadata: %o', metaData);
       const breadCrumbs = [
         {
           label: resources.messages['dataflows'],
@@ -293,12 +292,6 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onConfirmValidate = async () => {
-    //  QUE ES ESO??
-    /*     const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId }); */
-
     try {
       setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);

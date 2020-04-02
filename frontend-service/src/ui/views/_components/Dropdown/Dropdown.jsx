@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { isNull } from 'lodash';
+import uuid from 'uuid';
 
 import './Dropdown.scss';
 
@@ -724,6 +725,7 @@ export class Dropdown extends Component {
 
   getOptionKey(option) {
     return this.props.dataKey ? ObjectUtils.resolveFieldData(option, this.props.dataKey) : this.getOptionLabel(option);
+    // return uuid.v4(); Unique Id Error, consult with Kiko
   }
 
   checkValidity() {

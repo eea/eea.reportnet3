@@ -1,23 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './DropdownFilter.module.css';
-
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
+
+import styles from './DropdownFilter.module.css';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 class DropdownFilter extends React.Component {
   static defaultProps = {
     showFilters: undefined,
+    showLevelErrorIcons: false,
     showNotCheckedFilters: undefined
   };
 
   static propTypes = {
     showFilters: PropTypes.func,
+    showLevelErrorIcons: PropTypes.bool,
     showNotCheckedFilters: PropTypes.func
   };
 
@@ -273,6 +276,27 @@ class DropdownFilter extends React.Component {
                   this.updateChecked(field.key);
                 }}>
                 <FontAwesomeIcon icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')} />
+                {this.props.showLevelErrorIcons ? (
+                  field.label.toUpperCase() !== 'SELECT ALL' && field.label.toUpperCase() !== 'CORRECT' ? (
+                    <IconTooltip
+                      className={styles.dropdownFilterIcon}
+                      key={field.label.toUpperCase()}
+                      levelError={field.label.toUpperCase()}
+                      message={''}
+                      style={{ width: '1.5em', height: '29px', verticalAlign: 'baseline', marginRight: '0.5em' }}
+                    />
+                  ) : (
+                    <span
+                      className={styles.dropdownFilterIcon}
+                      style={{
+                        display: 'inline-block',
+                        height: '29px',
+                        marginTop: '-0.4em',
+                        verticalAlign: 'baseline',
+                        width: '1.5em'
+                      }}></span>
+                  )
+                ) : null}
                 {field.label}
               </a>
             </li>

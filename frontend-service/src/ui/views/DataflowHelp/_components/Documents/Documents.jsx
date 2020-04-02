@@ -30,7 +30,6 @@ const Documents = ({
   isCustodian,
   isDeletingDocument,
   dataflowId,
-  onLoadDocuments,
   setIsDeletingDocument,
   setSortFieldDocuments,
   setSortOrderDocuments,
@@ -40,16 +39,21 @@ const Documents = ({
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documentInitialValues, setDocumentInitialValues] = useState({});
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [isDownloading, setIsDownloading] = useState('');
+  const [downloadingId, setDownloadingId] = useState('');
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
+
+  useEffect(() => {
+    setAllDocuments(documents);
+  }, [documents]);
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
@@ -69,6 +73,7 @@ const Documents = ({
     return (
       <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
         <ActionsColumn
+          isDeletingDocument={isDeletingDocument}
           onDeleteClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
@@ -84,7 +89,7 @@ const Documents = ({
       <span
         className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
         onClick={() => onDownloadDocument(rowData)}>
-        {isDownloading === rowData.id ? (
+        {downloadingId === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
           <div>
@@ -128,7 +133,11 @@ const Documents = ({
     });
     try {
       await DocumentService.deleteDocument(documentData.id);
+      const inmAllDocuments = [...allDocuments];
+      const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
+      setAllDocuments(filteredAllDocuments);
     } catch (error) {
+      console.log({ error });
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
@@ -139,13 +148,13 @@ const Documents = ({
 
   const onDownloadDocument = async rowData => {
     try {
-      setIsDownloading(rowData.id);
+      setDownloadingId(rowData.id);
       setFileName(createFileName(rowData.title));
       setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
     } catch (error) {
       console.error(error.response);
     } finally {
-      setIsDownloading('');
+      setDownloadingId('');
     }
   };
 
@@ -209,7 +218,7 @@ const Documents = ({
         selectionMode="single"
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
-        value={documents}>
+        value={allDocuments}>
         <Column
           body={titleColumnTemplate}
           columnResizeMode="expand"
@@ -308,8 +317,8 @@ const Documents = ({
         labelConfirm={resources.messages['yes']}
         maximizable={false}
         onConfirm={() => {
-          onDeleteDocument(rowDataState);
           setIsDeletingDocument(true);
+          onDeleteDocument(rowDataState);
         }}
         onHide={onHideDeleteDialog}
         visible={deleteDialogVisible}>

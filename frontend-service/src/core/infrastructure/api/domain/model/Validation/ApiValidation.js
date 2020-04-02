@@ -43,5 +43,17 @@ export const apiValidation = {
       }
     });
     return response.data;
+  },
+  update: async (datasetId, validation) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(ValidationConfig.update, { datasetId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      },
+      data: validation
+    });
+    return response;
   }
 };

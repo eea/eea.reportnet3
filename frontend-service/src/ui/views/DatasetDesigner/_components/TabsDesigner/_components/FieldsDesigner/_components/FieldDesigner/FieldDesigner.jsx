@@ -55,14 +55,14 @@ export const FieldDesigner = ({
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
-    { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Single line text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
+    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
+    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
+    // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
@@ -76,12 +76,12 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    if (value.toUpperCase() === 'COORDINATE_LONG') {
-      value = 'Longitude';
-    }
-    if (value.toUpperCase() === 'COORDINATE_LAT') {
-      value = 'Latitude';
-    }
+    // if (value.toUpperCase() === 'COORDINATE_LONG') {
+    //   value = 'Longitude';
+    // }
+    // if (value.toUpperCase() === 'COORDINATE_LAT') {
+    //   value = 'Latitude';
+    // }
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
   const initialFieldDesignerState = {
@@ -105,7 +105,6 @@ export const FieldDesigner = ({
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
 
-  const fieldRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -126,7 +125,8 @@ export const FieldDesigner = ({
 
   useEffect(() => {
     //Set pointerEvents to auto or none depending on isDragging.
-    const dropdownPanel = fieldRef.current.getElementsByClassName('p-dropdown-panel')[0];
+    //because appendTo in Dropdown component we need to find the p-dropdown-panel class in the document, not in the Dropdown itself
+    const dropdownPanel = document.getElementsByClassName('p-dropdown-panel')[0];
     const childs = document.getElementsByClassName('fieldRow');
     if (!isUndefined(childs)) {
       for (let i = 0; i < childs.length; i++) {
@@ -483,12 +483,12 @@ export const FieldDesigner = ({
   };
 
   const parseGeospatialTypes = value => {
-    if (value.toUpperCase() === 'LONGITUDE') {
-      return 'COORDINATE_LONG';
-    }
-    if (value.toUpperCase() === 'LATITUDE') {
-      return 'COORDINATE_LAT';
-    }
+    // if (value.toUpperCase() === 'LONGITUDE') {
+    //   return 'COORDINATE_LONG';
+    // }
+    // if (value.toUpperCase() === 'LATITUDE') {
+    //   return 'COORDINATE_LAT';
+    // }
     return value.toUpperCase();
   };
 
@@ -707,6 +707,7 @@ export const FieldDesigner = ({
         }
       />
       <Dropdown
+        appendTo={document.body}
         className={styles.dropdownFieldType}
         itemTemplate={fieldTypeTemplate}
         onChange={e => onChangeFieldType(e.target.value)}
@@ -719,7 +720,7 @@ export const FieldDesigner = ({
         required={true}
         placeholder={resources.messages['newFieldTypePlaceHolder']}
         scrollHeight="450px"
-        style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto' }}
+        style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto', display: 'block' }}
         value={
           fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
         }
@@ -745,8 +746,7 @@ export const FieldDesigner = ({
         }}
         onDrop={e => {
           onFieldDragDrop(e);
-        }}
-        ref={fieldRef}>
+        }}>
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
@@ -759,7 +759,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            onClick={() => validationContext.onOpenModalFromField(fieldId)}
+            onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}
