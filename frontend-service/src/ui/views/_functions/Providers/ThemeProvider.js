@@ -272,7 +272,11 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
         'listbox-item-highlight-bg-hover': 'var(--gray-10)',
-        'listbox-item-highlight-color': 'var(--white)'
+        'listbox-item-highlight-color': 'var(--white)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--gray-110)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -525,7 +529,11 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
         'listbox-item-highlight-bg-hover': 'var(--gray-110)',
-        'listbox-item-highlight-color': 'var(--black)'
+        'listbox-item-highlight-color': 'var(--black)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--white)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       }
     }
   });

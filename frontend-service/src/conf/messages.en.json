@@ -492,6 +492,7 @@
     "createQcRule": "Create QC rule",
     "help": "Help",
     "update": "update",
-    "designSchemaTabNoFields": "No fields yet"
+    "designSchemaTabNoFields": "No fields yet",
+    "readOnlyTable": "Read only table"
   }
 }

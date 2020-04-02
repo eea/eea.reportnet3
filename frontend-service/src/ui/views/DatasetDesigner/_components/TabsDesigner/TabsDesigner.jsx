@@ -115,6 +115,7 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
+          table.readOnly = table.tableSchemaReadOnly;
           table.showContextMenu = false;
         });
         //Add tab Button/Tab

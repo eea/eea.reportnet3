@@ -285,6 +285,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
       });

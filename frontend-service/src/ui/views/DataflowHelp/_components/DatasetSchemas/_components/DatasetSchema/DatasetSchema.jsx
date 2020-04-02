@@ -93,6 +93,7 @@ const parseDesignDataset = (design, validationList) => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
+      table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};

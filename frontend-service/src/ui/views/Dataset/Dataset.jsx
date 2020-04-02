@@ -418,7 +418,8 @@ export const Dataset = withRouter(({ match, history }) => {
             name: tableSchema['tableSchemaName'],
             hasErrors: {
               ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
-            }.hasErrors
+            }.hasErrors,
+            readOnly: tableSchema['tableSchemaReadOnly']
           };
         })
       );
