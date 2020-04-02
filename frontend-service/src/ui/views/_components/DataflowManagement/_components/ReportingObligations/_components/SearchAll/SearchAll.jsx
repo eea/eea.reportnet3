@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './SearchAll.module.scss';
 
@@ -20,7 +21,7 @@ export const SearchAll = ({ data, getValues }) => {
         return { ...state, ...payload };
 
       case 'ON_SEARCH_DATA':
-        return { ...state, searchBy: payload.value };
+        return { ...state, searchedData: payload.test, searchBy: payload.value };
 
       default:
         return state;
@@ -45,12 +46,40 @@ export const SearchAll = ({ data, getValues }) => {
 
   const onLoadInitialState = () => searchDispatch({ type: 'INITIAL_LOAD', payload: { data, searchedData: data } });
 
-  const onSearchData = (search, value) => {
-    // const searche = searchState.data.toLowerCase().includes(value.toLowerCase());
-    for (let index = 0; index < searchState.data.length; index++) {
-      const element = searchState.data[index];
+  const onLoadK = () => {
+    if (!isNil(searchState.data[0])) {
+      return Object.keys(searchState.data[0]).filter(item => item !== 'id');
     }
-    searchDispatch({ type: 'ON_SEARCH_DATA', payload: { value } });
+  };
+
+  const keis = onLoadK();
+
+  // console.log('searchState', searchState);
+
+  const onLoad = value => [
+    ...searchState.data.filter(data => {
+      // console.log('data', data);
+      // for (let index = 0; index < data.length; index++) {
+      if (keis) {
+        // keis.forEach(key => {
+        // console.log('hei!!');
+        // console.log('INCLUDES:', data[key].toLowerCase().includes(value.toLowerCase()));
+        return (
+          data['title'].toLowerCase().includes(value.toLowerCase()) ||
+          data['legalInstrument'].toLowerCase().includes(value.toLowerCase()) ||
+          data['dueDate'].toLowerCase().includes(value.toLowerCase())
+        );
+        // });
+      }
+      return true;
+      // }
+    })
+  ];
+
+  const onSearchData = (search, value) => {
+    const test = onLoad(value);
+
+    searchDispatch({ type: 'ON_SEARCH_DATA', payload: { test, value } });
   };
 
   return (

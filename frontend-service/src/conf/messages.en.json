@@ -496,6 +496,7 @@
     "searchAllLabel": "Search all",
     "update": "update",
     "designSchemaTabNoFields": "No fields yet",
-    "reportingObligations": "Reporting Obligations"
+    "reportingObligations": "Reporting Obligations",
+    "noObligationsWithSelectedParameters": "There are no obligations with the selected parameters"
   }
 }

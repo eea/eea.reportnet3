@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './TableView.module.scss';
@@ -38,6 +39,8 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
     </div>
   );
 
+  const paginatorRightText = `${capitalize('FIELD')} records: ${data.length}`;
+
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
   const renderColumns = data => {
@@ -63,11 +66,14 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
     return [renderCheckColum, ...repOblCols];
   };
 
-  return (
+  return isEmpty(data) ? (
+    resources.messages['noObligationsWithSelectedParameters']
+  ) : (
     <DataTable
       autoLayout={true}
       // onRowClick={event => onSelectObl(event.data)}
       paginator={true}
+      paginatorRight={paginatorRightText}
       rows={10}
       rowsPerPageOptions={[5, 10, 15]}
       totalRecords={data.length}

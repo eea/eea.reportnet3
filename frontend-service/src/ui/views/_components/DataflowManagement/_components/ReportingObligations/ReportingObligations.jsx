@@ -73,7 +73,7 @@ export const ReportingObligations = (dataflowId, refresh) => {
       <CardsView data={reportingObligationState.searchedData} />
     );
 
-  if (reportingObligationState.isLoading) return <Spinner />;
+  if (reportingObligationState.isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
     <Fragment>
