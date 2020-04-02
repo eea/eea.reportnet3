@@ -715,7 +715,7 @@ export const FieldDesigner = ({
           event.preventDefault();
           event.stopPropagation();
         }}
-        optionLabel="fieldType"
+        optionLabel="value"
         options={fieldTypes}
         required={true}
         placeholder={resources.messages['newFieldTypePlaceHolder']}
