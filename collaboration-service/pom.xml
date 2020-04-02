@@ -15,7 +15,8 @@
   <artifactId>collaboration-service</artifactId>
   <version>${collaboration.version}</version>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:collaboration-service:${sonar.jenkins.branch}</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:collaboration-service:${sonar.jenkins.branch}
+    </sonar.moduleKey>
   </properties>
   <dependencies>
     <!--<dependency>-->

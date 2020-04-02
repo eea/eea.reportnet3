@@ -8,6 +8,7 @@
   <artifactId>reportnet</artifactId>
   <packaging>pom</packaging>
   <version>3.0.0</version>
+
   <modules>
     <module>dataflow-service</module>
     <module>dataset-service</module>
