@@ -87,15 +87,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const deleteInputRef = useRef(null);
 
   useEffect(() => {
-    if (!isEmpty(dataflowDataState.data.representatives)) {
-      const representativesNoDatasets = dataflowDataState.data.representatives.filter(
-        representative => !representative.hasDatasets
-      );
-      setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
-    }
-  }, [dataflowDataState.data.representatives]);
-
-  useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
         UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATAFLOW}${dataflowId}`)
@@ -194,6 +185,15 @@ const Dataflow = withRouter(({ history, match }) => {
     isCustodian,
     isDataSchemaCorrect
   ]);
+
+  useEffect(() => {
+    if (!isEmpty(dataflowDataState.data.representatives)) {
+      const representativesNoDatasets = dataflowDataState.data.representatives.filter(
+        representative => !representative.hasDatasets
+      );
+      setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
+    }
+  }, [dataflowDataState.data.representatives]);
 
   useEffect(() => {
     setLoading(true);

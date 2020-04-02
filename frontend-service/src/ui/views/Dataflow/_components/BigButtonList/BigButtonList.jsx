@@ -62,6 +62,9 @@ export const BigButtonList = ({
   const receiptBtnRef = useRef(null);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -172,8 +175,6 @@ export const BigButtonList = ({
       return result;
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsActiveButton(true);
     }
   };
 
