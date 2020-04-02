@@ -27,8 +27,8 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
-  dataflowDataState,
   dataflowData,
+  dataflowDataState,
   dataflowId,
   dataProviderId,
   designDatasetSchemas,
@@ -49,7 +49,6 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -57,6 +56,7 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const receiptBtnRef = useRef(null);
@@ -249,8 +249,8 @@ export const BigButtonList = ({
   };
 
   const bigButtonList = useBigButtonList({
-    dataflowDataState,
     dataflowData,
+    dataflowDataState,
     dataflowId,
     getDeleteSchemaIndex,
     handleRedirect,

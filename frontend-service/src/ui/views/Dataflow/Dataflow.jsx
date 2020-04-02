@@ -421,8 +421,8 @@ const Dataflow = withRouter(({ history, match }) => {
         />
 
         <BigButtonList
-          dataflowDataState={dataflowDataState}
           dataflowData={dataflowDataState.data}
+          dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
