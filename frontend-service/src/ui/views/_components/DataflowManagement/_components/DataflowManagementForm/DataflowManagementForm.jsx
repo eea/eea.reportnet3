@@ -51,7 +51,8 @@ const DataflowManagementForm = ({
 
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
-    description: Yup.string().required().max(255, resources.messages['dataflowDescriptionValidationMax'])
+    description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax'])
+    // associatedObligation: Yup.string().required(' ')
   });
 
   return (

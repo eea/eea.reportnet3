@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
+import isNil from 'lodash/isNil';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './DataflowsItem.module.scss';
@@ -104,11 +105,21 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
 
       <div className={`${styles.obligation} `}>
         <p>
-          <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+          {/* <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle} */}
+          {!isNil(itemContent.obligation) ? (
+            <>
+              <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+            </>
+          ) : null}
         </p>
         <p>
-          <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span>
-          {itemContent.legalInstrument}
+          {/* <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span>
+          {itemContent.legalInstrument} */}
+          {!isNil(itemContent.legalInstrument) ? (
+            <>
+              <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+            </>
+          ) : null}
         </p>
       </div>
 

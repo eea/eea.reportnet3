@@ -471,7 +471,7 @@
     "columnInfoName": "Name",
     "columnInfoType": "Type",
     "name": "Name",
-    "expirationDate": "Expiration date range",
+    "expirationDate": "Date range",
     "clearFilters": "Clear filters",
     "userRole": "Role",
     "qcRuleCreationError": "Error creation the rule, please check it",
