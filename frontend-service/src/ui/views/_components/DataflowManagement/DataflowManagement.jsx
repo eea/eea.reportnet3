@@ -34,7 +34,7 @@ export const DataflowManagement = ({ isEditForm, onCreateDataflow, onEditDataflo
     <Fragment>
       <Dialog
         footer={dialogFooter}
-        header="reporting obligations"
+        header={resources.messages['reportingObligations']}
         onHide={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
         style={{ width: '80%' }}
         visible={state.isRepObDialogVisible}>
