@@ -1,8 +1,0 @@
-.codelistInput {
-  margin: 2rem;
-  width: 90%;
-}
-
-.codelistIncorrectItem {
-  border: 2px solid var(--errors) !important;
-}

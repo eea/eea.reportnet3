@@ -14,7 +14,7 @@ export const Dialog = ({
   closeOnEscape,
   contentStyle,
   dismissableMask,
-  focusOnShow,
+  focusOnShow = true,
   footer,
   header,
   id,
@@ -42,11 +42,7 @@ export const Dialog = ({
   };
   useEffect(() => {
     const body = document.querySelector('body');
-    if (visible) {
-      body.style.overflow = 'hidden';
-    } else {
-      body.style.overflow = 'hidden auto';
-    }
+    visible ? (body.style.overflow = 'hidden') : (body.style.overflow = 'hidden auto');
 
     return () => {
       body.style.overflow = 'hidden auto';

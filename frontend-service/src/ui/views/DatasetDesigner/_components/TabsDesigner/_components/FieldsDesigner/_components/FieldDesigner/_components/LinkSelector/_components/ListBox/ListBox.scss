@@ -8,7 +8,6 @@
   overflow-y: scroll;
   scrollbar-color: var(--bg) var(--c-custom-gray);
   scrollbar-width: thin;
-  // overflow: auto;
 }
 
 .p-listbox .p-listbox-list {
@@ -88,7 +87,24 @@
 .p-listbox-title-wrapper {
   height: 2rem;
   border-bottom: 1px solid var(--main-font-color);
+  overflow: scroll;
 }
+.p-listbox-title-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+.p-listbox-title-wrapper::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.p-listbox-title-wrapper::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+.p-listbox-title-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
+}
+
 .p-listbox-title {
   font-size: 0.9em;
   font-weight: bold;

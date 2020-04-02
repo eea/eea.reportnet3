@@ -22,7 +22,7 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const TabsDesigner = withRouter(
-  ({ datasetSchemas, editable = false, match, history, onChangeReference, onLoadTableData }) => {
+  ({ datasetSchemas, editable = false, match, history, isPreviewModeOn, onChangeReference, onLoadTableData }) => {
     const {
       params: { dataflowId, datasetId }
     } = match;
@@ -373,6 +373,7 @@ export const TabsDesigner = withRouter(
                           dataflowId={dataflowId}
                           datasetId={datasetId}
                           datasetSchemas={datasetSchemas}
+                          isPreviewModeOn={isPreviewModeOn}
                           onLoadTableData={onLoadTableData}
                           datasetSchemaId={datasetSchema.datasetSchemaId}
                           key={tab.index}
