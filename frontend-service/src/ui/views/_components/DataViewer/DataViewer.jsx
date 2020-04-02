@@ -740,6 +740,7 @@ const DataViewer = withRouter(
     };
 
     const requiredTemplate = rowData => {
+      console.log(rowData.value);
       return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           {rowData.field === 'Required' ? (
@@ -747,7 +748,7 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Codelist items' ? (
+          ) : rowData.field === 'Single select items' ? (
             <Chips disabled={true} value={rowData.value}></Chips>
           ) : (
             rowData.value

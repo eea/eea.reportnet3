@@ -23,6 +23,7 @@ import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.AutomaticRules;
+import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,10 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private RuleMapper ruleMapper;
 
+  /** The kie base manager. */
+  @Autowired
+  private KieBaseManager kieBaseManager;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
@@ -73,6 +78,7 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant TB_DESCRIPTION. */
   private static final String TC_DESCRIPTION = "Checks if the record based on criteria is valid ";
 
+
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
 
@@ -80,6 +86,7 @@ public class RulesServiceImpl implements RulesService {
    * Gets the rules schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * 
    * @return the rules schema by dataset id
    */
   @Override
@@ -235,7 +242,10 @@ public class RulesServiceImpl implements RulesService {
 
     validateRule(rule);
 
-
+    // that if test if the rule has the correct format, if not we throw a exception
+    if (!kieBaseManager.textRuleCorrect(datasetSchemaId, rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_NOT_CORRECT);
+    }
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }

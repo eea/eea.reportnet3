@@ -1,4 +1,8 @@
-import { camelCase, isNull, isUndefined, kebabCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+import kebabCase from 'lodash/kebabCase';
 
 import { config as generalConfig } from 'conf';
 
@@ -30,7 +34,8 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
-        notificationDTO.redirectionUrl = getUrl(routes[navigateTo.section], urlParameters, true);
+        const section = (type.toString() !== "VALIDATION_FINISHED_EVENT") ? routes[navigateTo.section] : routes[getSectionValidationRedirectionUrl(content.type)];
+        notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
         });
@@ -51,5 +56,20 @@ const parse = ({ type, content = {}, message, config, routes }) => {
   });
   return new Notification(notificationDTO);
 };
+
+const getSectionValidationRedirectionUrl = (sectionDTO) => {
+  if (!isNil(sectionDTO))
+  {
+    if (sectionDTO === "REPORTING") {
+      return "DATASET";
+    }
+    else if (sectionDTO === "DESIGN") { 
+      return "DATASET_SCHEMA"
+    }
+    else {
+      return "DATA_COLLECTION"
+    }
+  }
+}
 
 export const ApiNotificationRepository = { all, parse, removeAll, removeById, readAll, readById };
