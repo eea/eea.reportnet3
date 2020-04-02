@@ -62,6 +62,7 @@ public class Dataflow {
   @Enumerated(EnumType.STRING)
   private TypeStatusEnum status;
 
+  /** The obligation id. */
   @Column(name = "OBLIGATION_ID")
   private Integer obligationId;
 
