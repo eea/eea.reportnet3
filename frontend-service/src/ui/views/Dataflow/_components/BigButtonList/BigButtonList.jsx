@@ -165,14 +165,14 @@ export const BigButtonList = ({
   const onUpdateDataCollection = async () => {
     setIsUpdateDatacollectionDialogVisible(false);
 
-    setIsActiveButton(false); //Edit to be update button
+    setIsActiveButton(false);
 
     try {
       const result = await DataCollectionService.update(dataflowId);
       return result;
     } catch (error) {
       console.error(error);
-
+    } finally {
       setIsActiveButton(true);
     }
   };

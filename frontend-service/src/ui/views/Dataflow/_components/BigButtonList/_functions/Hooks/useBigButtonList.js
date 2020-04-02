@@ -298,8 +298,8 @@ const useBigButtonList = ({
   const updateDatasetsNewRepresentatives = [
     {
       buttonClass: 'newItem',
-      buttonIcon: 'siteMap',
-      buttonIconClass: 'siteMap',
+      buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
+      buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['updateDataCollection'],
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
