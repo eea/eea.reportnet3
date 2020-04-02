@@ -62,7 +62,6 @@ export const BigButtonList = ({
   const receiptBtnRef = useRef(null);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
-  useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
 

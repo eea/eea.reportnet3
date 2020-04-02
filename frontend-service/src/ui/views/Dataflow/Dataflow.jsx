@@ -284,7 +284,7 @@ const Dataflow = withRouter(({ history, match }) => {
   );
   const setHasRepresentativesWithoutDatasets = value =>
     dataflowDataDispatch({
-      type: 'HAS_REPRESENTATIVES_WITHOUT_DATASETS',
+      type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
       payload: { hasRepresentativesWithoutDatasets: value }
     });
 

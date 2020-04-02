@@ -3,7 +3,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
-    case 'HAS_REPRESENTATIVES_WITHOUT_DATASETS':
+    case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':
       return { ...state, hasRepresentativesWithoutDatasets: payload.hasRepresentativesWithoutDatasets };
 
     case 'MANAGE_DIALOGS':
