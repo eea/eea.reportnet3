@@ -22,6 +22,9 @@ public class TableSchemaVO {
   /** The table name schema. */
   private String nameTableSchema;
 
+  /** The read only. */
+  private Boolean readOnly;
+
   /** The record schema. */
   private RecordSchemaVO recordSchema;
 
