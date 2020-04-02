@@ -77,7 +77,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
-    isUpdateDatasetsNewRepresentativesActive: false, // use the hasRepresentativesWithoutDatasets
+    isUpdateDatasetsNewRepresentativesActive: false, // use the hasRepresentativesWithoutDatasets to control it
     name: '',
     status: ''
   };
