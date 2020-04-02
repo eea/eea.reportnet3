@@ -481,6 +481,7 @@ public class RuleExpressionVO implements Serializable {
           return "value." + operator.getLabel() + "()";
         case SEQ:
         case SEQIC:
+        case MATCH:
           return "value." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
