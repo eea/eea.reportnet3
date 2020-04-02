@@ -15,7 +15,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         fields: {
           filtered: false,
           groupable: true,
-          names: { shortCode: 'Shortcode', codelistItems: 'Codelist items' }
+          names: { shortCode: 'Shortcode', codelistItems: 'Single select items' }
         },
         validations: {
           filtered: true,
@@ -27,8 +27,14 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
                 { label: 'Table', value: 'TABLE' },
                 { label: 'Dataset', value: 'DATASET' }
               ],
-              automatic: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
-              enabled: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
+              automatic: [
+                { label: 'True', value: 'true' },
+                { label: 'False', value: 'false' }
+              ],
+              enabled: [
+                { label: 'True', value: 'true' },
+                { label: 'False', value: 'false' }
+              ],
               levelError: [
                 { label: 'Info', value: 'INFO' },
                 { label: 'Warning', value: 'WARNING' },
