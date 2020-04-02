@@ -27,14 +27,12 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
+  dataflowDataState,
   dataflowData,
   dataflowId,
-  dataflowStatus,
   dataProviderId,
   designDatasetSchemas,
   handleRedirect,
-  hasRepresentativesWithoutDatasets,
-  isUpdateDatasetsNewRepresentativesActive,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
@@ -56,14 +54,14 @@ export const BigButtonList = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
-  const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
+  const [isActiveButton, setIsActiveButton] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const receiptBtnRef = useRef(null);
 
-  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -143,7 +141,7 @@ export const BigButtonList = ({
       content: {}
     });
 
-    setIsCreateButtonActive(false);
+    setIsActiveButton(false);
 
     try {
       return await DataCollectionService.create(dataflowId, date);
@@ -160,14 +158,14 @@ export const BigButtonList = ({
         }
       });
 
-      setIsCreateButtonActive(true);
+      setIsActiveButton(true);
     }
   };
 
   const onUpdateDataCollection = async () => {
     setIsUpdateDatacollectionDialogVisible(false);
 
-    setIsCreateButtonActive(false); //Edit to be update button
+    setIsActiveButton(false); //Edit to be update button
 
     try {
       const result = await DataCollectionService.update(dataflowId);
@@ -175,7 +173,7 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error);
 
-      setIsCreateButtonActive(true);
+      setIsActiveButton(true);
     }
   };
 
@@ -251,15 +249,13 @@ export const BigButtonList = ({
   };
 
   const bigButtonList = useBigButtonList({
+    dataflowDataState,
     dataflowData,
     dataflowId,
-    dataflowStatus,
     getDeleteSchemaIndex,
     handleRedirect,
-    hasRepresentativesWithoutDatasets,
-    isUpdateDatasetsNewRepresentativesActive,
     hasWritePermissions,
-    isCreateButtonActive,
+    isActiveButton,
     isCustodian,
     isDataSchemaCorrect,
     onDatasetSchemaNameError,

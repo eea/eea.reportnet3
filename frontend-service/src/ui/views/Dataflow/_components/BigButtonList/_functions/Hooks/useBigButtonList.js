@@ -10,16 +10,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
+  dataflowDataState,
   dataflowData,
   dataflowId,
   dataflowStatus,
   getDeleteSchemaIndex,
   handleRedirect,
-  hasRepresentativesWithoutDatasets,
-  isUpdateDatasetsNewRepresentativesActive,
   onShowUpdateDataCollectionModal,
   hasWritePermissions,
-  isCreateButtonActive,
+  isActiveButton,
   isCustodian,
   isDataSchemaCorrect,
   onDatasetSchemaNameError,
@@ -283,13 +282,16 @@ const useBigButtonList = ({
   const createDataCollection = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCreateButtonActive ? 'siteMap' : 'spinner',
-      buttonIconClass: isCreateButtonActive ? 'siteMap' : 'spinner',
+      buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
+      buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['createDataCollection'],
       helpClassName: 'dataflow-datacollection-help-step',
-      handleRedirect: isCreateButtonActive ? () => onShowDataCollectionModal() : () => {},
+      handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && hasRepresentativesWithoutDatasets
+      visibility:
+        isEmpty(dataflowData.dataCollections) &&
+        isDataSchemaCorrect &&
+        dataflowDataState.hasRepresentativesWithoutDatasets
     }
   ];
 
@@ -300,9 +302,9 @@ const useBigButtonList = ({
       buttonIconClass: 'siteMap',
       caption: resources.messages['updateDataCollection'],
       helpClassName: 'dataflow-datacollection-help-step',
-      handleRedirect: isCreateButtonActive ? () => onShowUpdateDataCollectionModal() : () => {},
+      handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: isUpdateDatasetsNewRepresentativesActive
+      visibility: dataflowDataState.status === 'DRAFT' && dataflowDataState.hasRepresentativesWithoutDatasets
     }
   ];
 

@@ -33,8 +33,7 @@ const RepresentativesList = ({
   dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
-  setIsVisibleUpdateDatasetsNewRepresentatives,
-  setHasRepresentatives
+  setHasRepresentativesWithoutDatasets
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -79,13 +78,11 @@ const RepresentativesList = ({
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
 
-  //Control this in Dataflow
-
   useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      setHasRepresentatives(true);
+      setHasRepresentativesWithoutDatasets(true);
     } else {
-      setHasRepresentatives(false);
+      setHasRepresentativesWithoutDatasets(false);
     }
   }, [formState.representatives]);
 
@@ -99,7 +96,7 @@ const RepresentativesList = ({
         representative => representative.hasDatasets && !isUndefined(representative.representativeId)
       );
 
-      setIsVisibleUpdateDatasetsNewRepresentatives(
+      setHasRepresentativesWithoutDatasets(
         !isEmpty(representativesNoDatasets) && !isEmpty(representativesHaveDatasets)
       );
     }

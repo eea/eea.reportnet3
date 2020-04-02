@@ -71,13 +71,12 @@ const Dataflow = withRouter(({ history, match }) => {
     data: {},
     deleteInput: '',
     description: '',
-    hasRepresentativesWithoutDatasets: false, // change to be hasRepresentativesWithoutDatasets use in both buttons
+    hasRepresentativesWithoutDatasets: false,
     id: dataflowId,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
-    isUpdateDatasetsNewRepresentativesActive: false, // use the hasRepresentativesWithoutDatasets to control it
     name: '',
     status: ''
   };
@@ -88,7 +87,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const deleteInputRef = useRef(null);
 
   useEffect(() => {
-    console.log('dataflowDataState.data.representatives', dataflowDataState.data.representatives);
+    if (!isEmpty(dataflowDataState.data.representatives)) {
+      const representativesNoDatasets = dataflowDataState.data.representatives.filter(
+        representative => !representative.hasDatasets
+      );
+      setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
+    }
   }, [dataflowDataState.data.representatives]);
 
   useEffect(() => {
@@ -278,16 +282,10 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => onManageDialogs('isManageRolesDialogVisible', false)}
     />
   );
-
-  ////////////////////////// checkRepresentatives IGOR If hasDatasets or not and If state of dataflow is Draft or design
-
-  const onCheckRepresentatives = value =>
-    dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentativesWithoutDatasets: value } });
-
-  const onCheckNewRepresentatives = value =>
+  const setHasRepresentativesWithoutDatasets = value =>
     dataflowDataDispatch({
-      type: 'MANAGE_UPDATE_DATASETS_NEW_REPRESENTATIVES',
-      payload: { isUpdateDatasetsNewRepresentativesActive: value }
+      type: 'HAS_REPRESENTATIVES_WITHOUT_DATASETS',
+      payload: { hasRepresentativesWithoutDatasets: value }
     });
 
   const onConfirmDelete = event =>
@@ -423,14 +421,12 @@ const Dataflow = withRouter(({ history, match }) => {
         />
 
         <BigButtonList
+          dataflowDataState={dataflowDataState}
           dataflowData={dataflowDataState.data}
           dataflowId={dataflowId}
-          dataflowStatus={dataflowDataState.status}
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
-          hasRepresentativesWithoutDatasets={dataflowDataState.hasRepresentativesWithoutDatasets}
-          isUpdateDatasetsNewRepresentativesActive={dataflowDataState.isUpdateDatasetsNewRepresentativesActive}
           hasWritePermissions={hasWritePermissions}
           isCustodian={isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}
@@ -464,8 +460,7 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowRepresentatives={dataflowDataState.data.representatives}
                 dataflowId={dataflowId}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
-                setHasRepresentatives={onCheckRepresentatives}
-                setIsVisibleUpdateDatasetsNewRepresentatives={onCheckNewRepresentatives}
+                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
               />
             </div>
           </Dialog>
