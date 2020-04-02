@@ -169,8 +169,8 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_CREATING_RULE. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
 
-  /** The Constant ERROR_CREATING_RULE_INVADE. */
-  public static final String ERROR_CREATING_RULE_INVADE =
+  /** The Constant ERROR_CREATING_RULE_NOT_CORRECT. */
+  public static final String ERROR_CREATING_RULE_NOT_CORRECT =
       "Error creating rule, the expression rule is not correct";
 
   /** The Constant ERROR_ORDERING_RULE. */

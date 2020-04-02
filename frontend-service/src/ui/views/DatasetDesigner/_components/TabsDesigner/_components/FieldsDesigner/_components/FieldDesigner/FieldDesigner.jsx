@@ -55,14 +55,14 @@ export const FieldDesigner = ({
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
-    { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Single line text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
+    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
+    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
+    // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
@@ -76,12 +76,12 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    if (value.toUpperCase() === 'COORDINATE_LONG') {
-      value = 'Longitude';
-    }
-    if (value.toUpperCase() === 'COORDINATE_LAT') {
-      value = 'Latitude';
-    }
+    // if (value.toUpperCase() === 'COORDINATE_LONG') {
+    //   value = 'Longitude';
+    // }
+    // if (value.toUpperCase() === 'COORDINATE_LAT') {
+    //   value = 'Latitude';
+    // }
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
   const initialFieldDesignerState = {
@@ -483,12 +483,12 @@ export const FieldDesigner = ({
   };
 
   const parseGeospatialTypes = value => {
-    if (value.toUpperCase() === 'LONGITUDE') {
-      return 'COORDINATE_LONG';
-    }
-    if (value.toUpperCase() === 'LATITUDE') {
-      return 'COORDINATE_LAT';
-    }
+    // if (value.toUpperCase() === 'LONGITUDE') {
+    //   return 'COORDINATE_LONG';
+    // }
+    // if (value.toUpperCase() === 'LATITUDE') {
+    //   return 'COORDINATE_LAT';
+    // }
     return value.toUpperCase();
   };
 
@@ -759,7 +759,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            onClick={() => validationContext.onOpenModalFromField(fieldId)}
+            onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['createFieldQC']}
             tooltipOptions={{ position: 'bottom' }}

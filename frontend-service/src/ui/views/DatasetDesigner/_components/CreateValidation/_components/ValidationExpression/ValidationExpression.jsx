@@ -25,10 +25,26 @@ const ValidationExpression = ({
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
   const [operatorValues, setOperatorValues] = useState([]);
+  const [isNumber, setIsNumber] = useState(false);
   const operatorTypes = config.validations.operatorTypes;
   useEffect(() => {
     if (expressionValues.operatorType) {
       setOperatorValues(operatorTypes[expressionValues.operatorType].values);
+    }
+  }, [expressionValues.operatorType]);
+
+  useEffect(() => {
+    const { operatorType, expressionValue } = expressionValues;
+    if (operatorType == 'number') {
+      setIsNumber(true);
+      if (!Number(expressionValue)) {
+        onExpressionFieldUpdate(expressionId, {
+          key: 'expressionValue',
+          value: { value: '' }
+        });
+      }
+    } else {
+      setIsNumber(false);
     }
   }, [expressionValues.operatorType]);
 
@@ -107,6 +123,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
+          keyfilter={isNumber ? 'num' : 'alphanum'}
           onChange={e =>
             onExpressionFieldUpdate(expressionId, {
               key: 'expressionValue',
