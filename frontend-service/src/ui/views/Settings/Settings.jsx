@@ -50,41 +50,62 @@ const Settings = withRouter(({ history }) => {
   const initUserSettingsSection = () => {
     visibleUserSectionDispatch({ type: 'VISIBLE_USER_DESIGN_OPTIONS' });
   };
+  const [attributes, setAttributes] = useState({});
 
-  ////////////////////////////////////////////////
-  const Attributes = {
-    defaultRowSelected: [`${user.userProps.defaultRowSelected}`],
-    defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
-    showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
-    dateFormat: [`${user.userProps.dateFormat}`]
+  useEffect(() => {
+    setAttributes({
+      defaultRowSelected: [user.userProps.defaultRowSelected],
+      defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
+      showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
+      dateFormat: [`${user.userProps.dateFormat}`]
+    });
+  }, [user]);
+
+  // ////////////////////////////////////////////////
+  // const Attributes = {
+  //   defaultRowSelected: [`${user.userProps.defaultRowSelected}`],
+  //   defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
+  //   showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
+  //   dateFormat: [`${user.userProps.dateFormat}`]
+  // };
+
+  const updateUserAttributes = async atts => {
+    try {
+      const response = await UserService.updateAttributes(atts);
+      console.log('response', response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    updateUserAttributes(attributes);
+  }, [attributes]);
+
+  const getUserData = async () => {
+    try {
+      const response = await UserService.userData();
+      console.log('response', response);
+      user.dateFormat(response.data.dateFormat[0]);
+      user.defaultRowSelected(parseInt(response.data.defaultRowSelected[0]));
+      user.onToggleLogoutConfirm(response.data.showLogoutConfirmation[0]);
+      setUserAttr(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    const updateUserAttributes = async properties => {
-      try {
-        const response = await UserService.updateAttributes(properties);
-        console.log('response', response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    updateUserAttributes(Attributes);
-  }, [Attributes]);
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const response = await UserService.userData();
-        console.log('response', response);
-        setUserAttr(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     getUserData();
   }, []);
 
+  useEffect(() => {
+    console.log('object', parseInt(`${UserAttr.defaultRowSelected}`));
+    user.defaultRowSelected(parseInt(UserAttr.defaultRowSelected));
+  }, []);
   console.log('UserAttr', UserAttr);
+
+  const getRow = UserAttr.defaultRowSelected;
+  console.log('getRow', getRow);
 
   /////////////////////////////////////////////////
   useEffect(() => {
@@ -152,9 +173,9 @@ const Settings = withRouter(({ history }) => {
   const toggleUserOptions = () => {
     return (
       <>
-        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions Attributes={UserAttr} />}
+        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
 
-        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration Attributes={UserAttr} />}
+        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
 
         <UserCard />
       </>

@@ -26,13 +26,12 @@ const UserDesignOptions = props => {
             userContext.defaultVisualTheme(e.value);
           }}
           placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-          value={
-            !isUndefined(props.Attributes.defaultVisualTheme)
-              ? themeContext.currentTheme
-              : props.Attributes.defaultVisualTheme
-          }
+          value={userContext.userProps.defaultVisualTheme}
         />
 
+        {/* !isUndefined(props.Attributes.defaultVisualTheme)
+            ? themeContext.currentTheme
+            : props.Attributes.defaultVisualTheme */}
         <div className={styles.userUploadImg}>
           <h3 className={styles.userThemeTitle}>{resources.messages['userSelectImage']}</h3>
 

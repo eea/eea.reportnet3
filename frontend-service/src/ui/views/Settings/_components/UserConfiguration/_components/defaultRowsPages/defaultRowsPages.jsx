@@ -19,7 +19,7 @@ export const DefaultRowsPages = props => {
         placeholder="select"
         options={resources.userParameters['defaultRowsPage']}
         onChange={changeRowValue}
-        value={props.Attr.defaultRowSelected[0]}
+        value={userContext.userProps.defaultRowSelected}
       />
     </React.Fragment>
   );

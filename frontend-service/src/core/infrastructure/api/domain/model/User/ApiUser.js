@@ -48,11 +48,11 @@ export const apiUser = {
     });
     return tokens.data;
   },
-  userData: async userId => {
+  userData: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(UserConfig.userData),
-      data: { id: userId },
+      // data: { id: userId },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`

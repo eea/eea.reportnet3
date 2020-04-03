@@ -81,8 +81,8 @@ const userReducer = (state, { type, payload }) => {
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
 
-  //const [state, dispatch] = useReducer(userReducer, {});
-  const [state, dispatch] = useReducer(userReducer, userSettingsDefaultState);
+  //const [state, userDispatcher] = useReducer(userReducer, {});
+  const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
   // const notificationContext = useContext(NotificationContext);
 
   console.log('state', state);
@@ -92,7 +92,7 @@ export const UserProvider = ({ children }) => {
       value={{
         ...state,
         onLogin: user => {
-          dispatch({
+          userDispatcher({
             type: 'LOGIN',
             payload: {
               user
@@ -100,14 +100,14 @@ export const UserProvider = ({ children }) => {
           });
         },
         onAddSocket: socket => {
-          dispatch({
+          userDispatcher({
             type: 'ADD_SOCKET',
             payload: socket
           });
         },
         onLogout: () => {
           notificationContext.deleteAll();
-          dispatch({
+          userDispatcher({
             type: 'LOGOUT',
             payload: {
               user: {}
@@ -115,16 +115,16 @@ export const UserProvider = ({ children }) => {
           });
         },
         defaultRowSelected: rowNumber => {
-          dispatch({
+          userDispatcher({
             type: 'DEFAULT_ROW_SELECTED',
             payload: rowNumber
           });
         },
         dateFormat: dateFormat => {
-          dispatch({ type: 'DATE_FORMAT', payload: dateFormat });
+          userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat });
         },
         onTokenRefresh: user => {
-          dispatch({
+          userDispatcher({
             type: 'REFRESH_TOKEN',
             payload: {
               user
@@ -132,19 +132,19 @@ export const UserProvider = ({ children }) => {
           });
         },
         onToggleLogoutConfirm: () => {
-          dispatch({
+          userDispatcher({
             type: 'TOGGLE_LOGOUT_CONFIRM',
             payload: {}
           });
         },
         defaultVisualTheme: currentTheme => {
-          dispatch({
+          userDispatcher({
             type: 'DEFAULT_VISUAL_THEME',
             payload: currentTheme
           });
         },
         onClickUserIcon: path => {
-          dispatch({
+          userDispatcher({
             type: 'USER_ICON_PATH',
             payload: path
           });
