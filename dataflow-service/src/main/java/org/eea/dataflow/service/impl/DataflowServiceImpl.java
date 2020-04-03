@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -33,6 +34,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -246,9 +248,32 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVOs.add(dataflowVO);
         });
 
-    dataflowVOs.stream().forEach(dataflow -> getObligation(dataflow));
+    getObligationsOpened(dataflowVOs);
 
     return dataflowVOs;
+  }
+
+  /**
+   * Gets the obligations opened.
+   *
+   * @param dataflowVOs the dataflow V os
+   * @return the obligations opened
+   */
+  private void getObligationsOpened(List<DataFlowVO> dataflowVOs) {
+
+    // Get all opened obligations from ROD
+    List<ObligationVO> obligations =
+        obligationController.findOpenedObligations(null, null, null, null, null);
+
+    Map<Integer, ObligationVO> obligationMap = obligations.stream().collect(
+        Collectors.toMap(obligation -> obligation.getObligationId(), obligation -> obligation));
+
+    for (DataFlowVO dataFlowVO : dataflowVOs) {
+      if (dataFlowVO.getObligation() != null
+          && dataFlowVO.getObligation().getObligationId() != null) {
+        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+      }
+    }
   }
 
 

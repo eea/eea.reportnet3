@@ -283,6 +283,9 @@ public class DataFlowServiceImplTest {
 
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setId(1L);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dfVO.setObligation(obligation);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
     dataflowsVO.add(dfVO);
     when(dataflowNoContentMapper.entityListToClass(Mockito.any())).thenReturn(dataflowsVO);
@@ -871,4 +874,6 @@ public class DataFlowServiceImplTest {
       throw e;
     }
   }
+
+
 }
