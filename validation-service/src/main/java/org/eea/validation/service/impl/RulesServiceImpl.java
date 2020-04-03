@@ -398,6 +398,11 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+
+
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
