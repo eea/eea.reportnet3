@@ -311,8 +311,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(Collectors.toList());
     if (null != resourceNames && !resourceNames.isEmpty()) {
       deleteResourceInstancesByName(resourceNames);
+      LOG.info("Resources {} removed succesfully", resourceInfoVO);
     }
-    LOG.info("Resources {} removed succesfully", resourceInfoVO);
+
   }
 
   /**
@@ -337,6 +338,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         // Removing groups one by one
         resources.values().stream()
             .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+        LOG.info("Resources {} removed succesfully", resources);
       }
 
     }

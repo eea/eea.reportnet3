@@ -187,7 +187,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   @Transactional
   public void deleteDesignDataset(Long datasetId) {
-    dataSetMetabaseRepository.deleteById(datasetId);
+    dataSetMetabaseRepository.deleteNativeDataset(datasetId);
   }
 
   /**

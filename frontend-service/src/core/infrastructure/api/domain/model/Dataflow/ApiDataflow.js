@@ -61,11 +61,11 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  create: async (name, description) => {
+  create: async (name, description, obligationId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON ? '/dataflow' : getUrl(DataflowConfig.createDataflow),
-      data: { name, description, obligation: { obligationId: 693 } },
+      data: { name, description, obligation: { obligationId } },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -182,11 +182,11 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  update: async (dataflowId, name, description) => {
+  update: async (dataflowId, name, description, obligationId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { id: dataflowId, name, description },
+      data: { id: dataflowId, name, description, obligation: { obligationId } },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
