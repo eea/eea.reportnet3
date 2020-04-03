@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -8,9 +8,8 @@ import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
 
-import { DataflowManagementForm } from 'ui/views/_components/DataflowManagementForm';
+import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
-import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
@@ -23,6 +22,8 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -32,12 +33,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [acceptedContent, setAcceptedContent] = useState([]);
-  const [completedContent, setCompletedContent] = useState([]);
-  const [isCustodian, setIsCustodian] = useState();
-  const [isDataflowDialogVisible, setIsDataflowDialogVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [pendingContent, setPendingContent] = useState([]);
   const [tabMenuItems] = useState([
     {
       // label: resources.messages['dataflowAcceptedPendingTab'],
@@ -54,18 +49,16 @@ const Dataflows = withRouter(({ match, history }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
-  const dataFetch = async () => {
-    setLoading(true);
-    try {
-      const allDataflows = await DataflowService.all(user.contextRoles);
-      setAcceptedContent(allDataflows.accepted);
-      setCompletedContent(allDataflows.completed);
-      setPendingContent(allDataflows.pending);
-    } catch (error) {
-      console.error('dataFetch error: ', error);
-    }
-    setLoading(false);
-  };
+  const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
+    accepted: [],
+    allDataflows: {},
+    completed: [],
+    isAddDialogVisible: false,
+    isCustodian: null,
+    isRepObDialogVisible: false,
+    isLoading: true,
+    pending: []
+  });
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) {
@@ -80,9 +73,7 @@ const Dataflows = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
-    }
+    if (!isUndefined(user.contextRoles)) onLoadPermissions();
   }, [user]);
 
   useEffect(() => {
@@ -119,13 +110,13 @@ const Dataflows = withRouter(({ match, history }) => {
       }
     ];
 
-    if (isCustodian) {
+    if (dataflowsState.isCustodian) {
       leftSideBarContext.addModels([
         {
           className: 'dataflowList-create-dataflow-help-step',
           icon: 'plus',
           label: 'createNewDataflow',
-          onClick: () => onShowAddForm(),
+          onClick: () => onManageDialogs('isAddDialogVisible', true),
           title: 'createNewDataflow'
         }
       ]);
@@ -137,39 +128,49 @@ const Dataflows = withRouter(({ match, history }) => {
       leftSideBarContext.removeModels();
     }
     leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
-  }, [isCustodian]);
+  }, [dataflowsState.isCustodian]);
+
+  const dataFetch = async () => {
+    isLoading(true);
+    try {
+      const allDataflows = await DataflowService.all(user.contextRoles);
+      dataflowsDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          accepted: allDataflows.accepted,
+          allDataflows,
+          completed: allDataflows.completed,
+          pending: allDataflows.pending
+        }
+      });
+    } catch (error) {
+      console.error('dataFetch error: ', error);
+    }
+    isLoading(false);
+  };
+
+  const isLoading = value => dataflowsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onCreateDataflow = () => {
-    setIsDataflowDialogVisible(false);
+    onManageDialogs('isAddDialogVisible', false);
     dataFetch();
-    onRefreshToken();
   };
 
-  const onHideDialog = () => setIsDataflowDialogVisible(false);
-
-  const onRefreshToken = async () => {
-    try {
-      const userObject = await UserService.refreshToken();
-      user.onTokenRefresh(userObject);
-    } catch (error) {
-      await UserService.logout();
-      user.onLogout();
-    }
+  const onLoadPermissions = () => {
+    const isCustodian = UserService.hasPermission(user, [config.permissions.CUSTODIAN]);
+    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian } });
   };
 
-  const onShowAddForm = () => setIsDataflowDialogVisible(true);
+  const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
+    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
 
-  const layout = children => {
-    return (
-      <MainLayout>
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
+  const layout = children => (
+    <MainLayout>
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
 
-  if (loading) {
-    return layout(<Spinner />);
-  }
+  if (dataflowsState.isLoading) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -179,7 +180,7 @@ const Dataflows = withRouter(({ match, history }) => {
           <>
             {/* <DataflowsList
               className="dataflowList-pending-help-step"
-              content={pendingContent}
+              content={dataflowsState.pending}
               dataFetch={dataFetch}
               description={resources.messages['pendingDataflowText']}
               title={resources.messages['pendingDataflowTitle']}
@@ -187,9 +188,8 @@ const Dataflows = withRouter(({ match, history }) => {
             /> */}
             <DataflowsList
               className="dataflowList-accepted-help-step"
-              content={acceptedContent}
+              content={dataflowsState.accepted}
               dataFetch={dataFetch}
-              onShowAddForm={onShowAddForm}
               // description={resources.messages['acceptedDataflowText']}
               // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
@@ -198,10 +198,10 @@ const Dataflows = withRouter(({ match, history }) => {
         ) : (
           <>
             <DataflowsList
-              content={completedContent}
+              content={dataflowsState.completed}
               dataFetch={dataFetch}
               description={resources.messages.completedDataflowText}
-              isCustodian={isCustodian}
+              isCustodian={dataflowsState.isCustodian}
               title={resources.messages.completedDataflowTitle}
               type="completed"
             />
@@ -209,14 +209,12 @@ const Dataflows = withRouter(({ match, history }) => {
         )}
       </div>
 
-      <Dialog
-        className={styles.dialog}
-        dismissableMask={false}
-        header={resources.messages['createNewDataflow']}
-        onHide={onHideDialog}
-        visible={isDataflowDialogVisible}>
-        <DataflowManagementForm onCancel={onHideDialog} onCreate={onCreateDataflow} refresh={isDataflowDialogVisible} />
-      </Dialog>
+      <DataflowManagement
+        isEditForm={false}
+        onCreateDataflow={onCreateDataflow}
+        onManageDialogs={onManageDialogs}
+        state={dataflowsState}
+      />
     </div>
   );
 });
