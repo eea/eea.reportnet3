@@ -12,7 +12,7 @@
       ]
     },
     "LEN": {
-      "option": { "label": "LEN=", "value": "LEN" },
+      "option": { "label": "Length", "value": "LEN" },
       "values": [
         { "label": ">", "value": ">" },
         { "label": "<", "value": "<" },
@@ -28,17 +28,6 @@
         { "label": "=", "value": "=" },
         { "label": "=(Ignore case)", "value": "=(Ignore case)" },
         { "label": "MATCH", "value": "MATCH" }
-      ]
-    },
-    "date": {
-      "option": { "label": "Date", "value": "date" },
-      "values": [
-        { "label": ">", "value": ">" },
-        { "label": "<", "value": "<" },
-        { "label": ">=", "value": ">=" },
-        { "label": "<=", "value": "<=" },
-        { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
       ]
     }
   },
@@ -87,5 +76,18 @@
   "logicalOperators": [
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
-  ]
+  ],
+  "furthers": {
+    "date": {
+      "option": { "label": "Date", "value": "date" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    }
+  }
 }
