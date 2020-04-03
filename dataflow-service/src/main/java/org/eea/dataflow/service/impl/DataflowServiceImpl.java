@@ -32,7 +32,6 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -51,77 +50,53 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
-
   /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
-  /**
-   * The dataflow repository.
-   */
+  /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /**
-   * The user request repository.
-   */
+  /** The user request repository. */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /**
-   * The contributor repository.
-   */
+  /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /**
-   * The dataflow mapper.
-   */
+  /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /**
-   * The dataflow no content mapper.
-   */
+  /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /**
-   * The dataset metabase controller.
-   */
+  /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /**
-   * The user management controller zull.
-   */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-
-  /**
-   * The resource management controller zull.
-   */
+  /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /**
-   * The data set schema controller zuul.
-   */
+  /** The data set schema controller zuul. */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /**
-   * The document controller zuul.
-   */
+  /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
-
 
   /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
-
 
   /** The representative service. */
   @Autowired
@@ -131,25 +106,44 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ObligationController obligationController;
 
-
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
-
 
   /**
    * Gets the by id.
    *
    * @param id the id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
+    return getByIdWithCondition(id, true);
+  }
+
+  /**
+   * Gets the by id no representatives.
+   *
+   * @param id the id
+   * @return the by id no representatives
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException {
+    return getByIdWithCondition(id, false);
+  }
+
+  /**
+   * Gets the by id.
+   *
+   * @param id the id
+   * @param includeRepresentatives the include representatives
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeRepresentatives)
+      throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -180,15 +174,10 @@ public class DataflowServiceImpl implements DataflowService {
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
-    List<RepresentativeVO> representatives =
-        representativeService.getRepresetativesByIdDataFlow(id);
-    List<Long> dataProviderIds = dataflowVO.getReportingDatasets().stream()
-        .map(ReportingDatasetVO::getDataProviderId).collect(Collectors.toList());
-
-    if (representatives != null && !representatives.isEmpty()) {
-      dataflowVO.setRepresentatives(representatives.stream()
-          .filter(representative -> dataProviderIds.contains(representative.getDataProviderId()))
-          .collect(Collectors.toList()));
+    if (includeRepresentatives) {
+      dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+    } else {
+      dataflowVO.setRepresentatives(null);
     }
 
     getObligation(dataflowVO);
