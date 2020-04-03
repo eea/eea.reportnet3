@@ -155,6 +155,7 @@ export const TabsDesigner = withRouter(
     };
 
     const onTabClicked = event => {
+      console.log(event.index);
       setActiveIndex(event.index);
     };
 
@@ -345,8 +346,10 @@ export const TabsDesigner = withRouter(
             activeIndex={activeIndex}
             checkEditingTabs={checkEditingTabs}
             designMode={true}
+            history={history}
             initialTabIndexDrag={initialTabIndexDrag}
             isErrorDialogVisible={isErrorDialogVisible}
+            isPreviewModeOn={isPreviewModeOn}
             onTabAdd={onTabAdd}
             onTabAddCancel={onTabAddCancel}
             onTabBlur={onTableAdd}
