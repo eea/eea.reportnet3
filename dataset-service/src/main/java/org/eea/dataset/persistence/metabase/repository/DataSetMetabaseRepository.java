@@ -51,4 +51,15 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   @Query(nativeQuery = true, value = "delete from Dataset where id=:idSnapshot")
   void deleteSnapshotDatasetByIdSnapshot(@Param("idSnapshot") Long idSnapshot);
 
+
+  /**
+   * Delete native dataset.
+   *
+   * @param datasetId the dataset id
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from dataset where id = :datasetId ")
+  void deleteNativeDataset(@Param("datasetId") Long datasetId);
+
 }

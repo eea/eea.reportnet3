@@ -209,7 +209,7 @@ public class DatasetMetabaseServiceTest {
   @Test
   public void deleteDesignDatasetTest() {
     datasetMetabaseService.deleteDesignDataset(1L);
-    Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
+    Mockito.verify(dataSetMetabaseRepository, times(1)).deleteNativeDataset(Mockito.anyLong());
   }
 
   /**
