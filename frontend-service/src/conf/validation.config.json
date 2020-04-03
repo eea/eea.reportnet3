@@ -26,7 +26,19 @@
       "option": { "label": "String", "value": "string" },
       "values": [
         { "label": "=", "value": "=" },
-        { "label": "LIKE", "value": "LIKE" }
+        { "label": "=(Ignore case)", "value": "=(Ignore case)" },
+        { "label": "MATCH", "value": "MATCH" }
+      ]
+    },
+    "date": {
+      "option": { "label": "Date", "value": "date" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
       ]
     }
   },
@@ -44,13 +56,15 @@
     "EQ": "EQ",
     "DIST": "DIST",
     "SEQ": "SEQ",
-    "LIKE": "SEQIC",
+    "=(Ignore case)": "SEQIC",
     "GTEQ": "GTEQ",
-    "LEN=": "LEN="
+    "LEN=": "LEN=",
+    "MATCH": "MATCH"
   },
   "stringOperatorsEquivalences": {
     "=": "SEQ",
-    "LIKE": "SEQIC"
+    "=(Ignore case)": "SEQIC",
+    "MATCH": "MATCH"
   },
   "reverseEquivalences": {
     "GT": ">",
@@ -60,8 +74,9 @@
     "EQ": "=",
     "DIST": "!=",
     "SEQ": "=",
-    "SEQIC": "LIKE",
-    "LEN": "LEN"
+    "SEQIC": "=(Ignore case)",
+    "LEN": "LEN",
+    "MATCH": "MATCH"
   },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
