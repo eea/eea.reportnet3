@@ -105,21 +105,16 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
 
       <div className={`${styles.obligation} `}>
         <p>
-          {/* <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle} */}
-          {!isNil(itemContent.obligation) ? (
+          {!isNil(itemContent.legalInstrument) ? (
             <>
-              <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+              <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}
             </>
           ) : null}
         </p>
         <p>
-          {/* <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span>
-          {itemContent.legalInstrument} */}
-          {!isNil(itemContent.legalInstrument) ? (
-            <>
-              <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
-            </>
-          ) : null}
+          <>
+            <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+          </>
         </p>
       </div>
 

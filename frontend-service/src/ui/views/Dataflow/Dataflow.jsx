@@ -266,7 +266,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
-      console.log('dataflow', dataflow);
       dataflowDataDispatch({
         type: 'INITIAL_LOAD',
         payload: {

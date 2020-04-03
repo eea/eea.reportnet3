@@ -21,7 +21,7 @@ export const SearchAll = ({ data, getValues }) => {
         return { ...state, ...payload };
 
       case 'ON_SEARCH_DATA':
-        return { ...state, searchedData: payload.test, searchBy: payload.value };
+        return { ...state, searchedData: payload.searchedValues, searchBy: payload.value };
 
       default:
         return state;
@@ -42,44 +42,33 @@ export const SearchAll = ({ data, getValues }) => {
     if (getValues) getValues(searchState.searchedData);
   }, [searchState.searchedData]);
 
-  // const onLoadI = !isEmpty(searchState.data) ? Object.values(searchState.data) : null;
-
   const onLoadInitialState = () => searchDispatch({ type: 'INITIAL_LOAD', payload: { data, searchedData: data } });
 
-  const onLoadK = () => {
+  const getSearchKeys = () => {
     if (!isNil(searchState.data[0])) {
       return Object.keys(searchState.data[0]).filter(item => item !== 'id');
     }
   };
 
-  const keis = onLoadK();
+  const searchKeys = getSearchKeys();
 
-  // console.log('searchState', searchState);
-
-  const onLoad = value => [
+  const onApplySearch = value => [
     ...searchState.data.filter(data => {
-      // console.log('data', data);
-      // for (let index = 0; index < data.length; index++) {
-      if (keis) {
-        // keis.forEach(key => {
-        // console.log('hei!!');
-        // console.log('INCLUDES:', data[key].toLowerCase().includes(value.toLowerCase()));
+      if (searchKeys) {
         return (
           data['title'].toLowerCase().includes(value.toLowerCase()) ||
           data['legalInstrument'].toLowerCase().includes(value.toLowerCase()) ||
           data['dueDate'].toLowerCase().includes(value.toLowerCase())
         );
-        // });
       }
       return true;
-      // }
     })
   ];
 
-  const onSearchData = (search, value) => {
-    const test = onLoad(value);
+  const onSearchData = value => {
+    const searchedValues = onApplySearch(value);
 
-    searchDispatch({ type: 'ON_SEARCH_DATA', payload: { test, value } });
+    searchDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
   return (
@@ -87,14 +76,14 @@ export const SearchAll = ({ data, getValues }) => {
       <InputText
         className={styles.searchInput}
         id={'searchInput'}
-        onChange={event => onSearchData('test', event.target.value)}
+        onChange={event => onSearchData(event.target.value)}
         value={searchState.searchBy}
       />
       {searchState.searchBy && (
         <Button
           className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
           icon="cancel"
-          onClick={() => onSearchData('', '')}
+          onClick={() => onSearchData('')}
         />
       )}
       <label htmlFor={'searchInput'}>{resources.messages['searchAllLabel']}</label>

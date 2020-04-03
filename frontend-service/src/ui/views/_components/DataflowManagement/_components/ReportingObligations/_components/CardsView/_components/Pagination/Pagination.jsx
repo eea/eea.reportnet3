@@ -1,14 +1,14 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import styles from './Pagination.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-export const Pagination = ({ postsPerPage, totalPosts, paginate }) => {
+export const Pagination = ({ cardsPerPage, totalPosts, paginate }) => {
   const pageNumbers = [];
 
-  for (let i = 1; i <= Math.ceil(totalPosts / postsPerPage); i++) {
+  for (let i = 1; i <= Math.ceil(totalPosts / cardsPerPage); i++) {
     pageNumbers.push(i);
   }
 

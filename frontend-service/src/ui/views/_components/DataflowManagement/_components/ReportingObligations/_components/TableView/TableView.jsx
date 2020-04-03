@@ -71,7 +71,6 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
   ) : (
     <DataTable
       autoLayout={true}
-      // onRowClick={event => onSelectObl(event.data)}
       paginator={true}
       paginatorRight={paginatorRightText}
       rows={10}

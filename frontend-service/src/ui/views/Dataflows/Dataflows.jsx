@@ -134,7 +134,6 @@ const Dataflows = withRouter(({ match, history }) => {
     isLoading(true);
     try {
       const allDataflows = await DataflowService.all(user.contextRoles);
-      console.log('allDataflows', allDataflows);
       dataflowsDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -155,7 +154,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const onCreateDataflow = () => {
     onManageDialogs('isAddDialogVisible', false);
     dataFetch();
-    // onRefreshToken();
   };
 
   const onLoadPermissions = () => {
@@ -165,16 +163,6 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
-
-  // const onRefreshToken = async () => {
-  //   try {
-  //     const userObject = await UserService.refreshToken();
-  //     user.onTokenRefresh(userObject);
-  //   } catch (error) {
-  //     await UserService.logout();
-  //     user.onLogout();
-  //   }
-  // };
 
   const layout = children => (
     <MainLayout>
