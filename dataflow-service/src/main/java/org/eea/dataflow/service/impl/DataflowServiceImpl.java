@@ -248,7 +248,7 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVOs.add(dataflowVO);
         });
 
-    getObligationsOpened(dataflowVOs);
+    getOpenedObligations(dataflowVOs);
 
     return dataflowVOs;
   }
@@ -259,7 +259,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflowVOs the dataflow V os
    * @return the obligations opened
    */
-  private void getObligationsOpened(List<DataFlowVO> dataflowVOs) {
+  private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
 
     // Get all opened obligations from ROD
     List<ObligationVO> obligations =
