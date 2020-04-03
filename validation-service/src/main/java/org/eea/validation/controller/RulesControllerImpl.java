@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -166,13 +167,19 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
+  public ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
+      @RequestBody RuleVO ruleVO) {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
     try {
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating rule: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      message = e.getMessage();
+      status = HttpStatus.BAD_REQUEST;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
   /**
