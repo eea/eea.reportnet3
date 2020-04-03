@@ -29,55 +29,7 @@
         { "label": "=(Ignore case)", "value": "=(Ignore case)" },
         { "label": "MATCH", "value": "MATCH" }
       ]
-    }
-  },
-  "nonNumericOperators": ["string"],
-  "operatorEquivalences": {
-    ">": "GT",
-    "<": "LT",
-    ">=": "GTEQ",
-    "<=": "LTEQ",
-    "=": "EQ",
-    "!=": "DIST",
-    "GT": "GT",
-    "LT": "LT",
-    "LTEQ": "LTEQ",
-    "EQ": "EQ",
-    "DIST": "DIST",
-    "SEQ": "SEQ",
-    "=(Ignore case)": "SEQIC",
-    "GTEQ": "GTEQ",
-    "LEN=": "LEN=",
-    "MATCH": "MATCH"
-  },
-  "stringOperatorsEquivalences": {
-    "=": "SEQ",
-    "=(Ignore case)": "SEQIC",
-    "MATCH": "MATCH"
-  },
-  "reverseEquivalences": {
-    "GT": ">",
-    "LT": "<",
-    "GTEQ": ">=",
-    "LTEQ": "<=",
-    "EQ": "=",
-    "DIST": "!=",
-    "SEQ": "=",
-    "SEQIC": "=(Ignore case)",
-    "LEN": "LEN",
-    "MATCH": "MATCH"
-  },
-  "errorLevels": [
-    { "label": "INFO", "value": "INFO" },
-    { "label": "WARNING", "value": "WARNING" },
-    { "label": "ERROR", "value": "ERROR" },
-    { "label": "BLOCKER", "value": "BLOCKER" }
-  ],
-  "logicalOperators": [
-    { "label": "AND", "value": "AND" },
-    { "label": "OR", "value": "OR" }
-  ],
-  "furthers": {
+    },
     "date": {
       "option": { "label": "Date", "value": "date" },
       "values": [
@@ -89,5 +41,67 @@
         { "label": "!=", "value": "!=" }
       ]
     }
-  }
+  },
+  "nonNumericOperators": ["string", "date"],
+  "operatorEquivalences": {
+    "default": {
+      ">": "GT",
+      "<": "LT",
+      ">=": "GTEQ",
+      "<=": "LTEQ",
+      "=": "EQ",
+      "!=": "DIST",
+      "GT": "GT",
+      "LT": "LT",
+      "LTEQ": "LTEQ",
+      "EQ": "EQ",
+      "DIST": "DIST",
+      "SEQ": "SEQ",
+      "=(Ignore case)": "SEQIC",
+      "GTEQ": "GTEQ",
+      "LEN=": "LEN=",
+      "MATCH": "MATCH"
+    },
+    "string": {
+      "=": "SEQ",
+      "=(Ignore case)": "SEQIC",
+      "MATCH": "MATCH"
+    },
+    "date": {
+      ">": "GT_DATE",
+      "<": "LT_DATE",
+      ">=": "GTEQ_DATE",
+      "<=": "LTEQ_DATE",
+      "=": "EQ_DATE",
+      "!=": "DIST_DATE"
+    }
+  },
+  "reverseEquivalences": {
+    "GT": ">",
+    "LT": "<",
+    "GTEQ": ">=",
+    "LTEQ": "<=",
+    "EQ": "=",
+    "DIST": "!=",
+    "SEQ": "=",
+    "SEQIC": "=(Ignore case)",
+    "LEN": "LEN",
+    "MATCH": "MATCH",
+    "GT_DATE": ">",
+    "LT_DATE": "<",
+    "GTEQ_DATE": ">=",
+    "LTEQ_DATE": "<=",
+    "EQ_DATE": "=",
+    "DIST_DATE": "!="
+  },
+  "errorLevels": [
+    { "label": "INFO", "value": "INFO" },
+    { "label": "WARNING", "value": "WARNING" },
+    { "label": "ERROR", "value": "ERROR" },
+    { "label": "BLOCKER", "value": "BLOCKER" }
+  ],
+  "logicalOperators": [
+    { "label": "AND", "value": "AND" },
+    { "label": "OR", "value": "OR" }
+  ]
 }
