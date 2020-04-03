@@ -53,14 +53,20 @@ public class KieBaseManager {
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
 
-  /** The Constant timeZone. */
+  /**
+   * The Constant timeZone.
+   */
   private static final ZoneId timeZone = ZoneId.of("UTC");
 
-  /** The Constant dateFormatter. */
+  /**
+   * The Constant dateFormatter.
+   */
   private static final DateTimeFormatter dateFormatter =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
   /**
@@ -69,11 +75,15 @@ public class KieBaseManager {
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
@@ -83,7 +93,9 @@ public class KieBaseManager {
    *
    * @param datasetId the dataset id
    * @param datasetSchema the dataset schema
+   *
    * @return the kie base
+   *
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
@@ -262,13 +274,13 @@ public class KieBaseManager {
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
+   *
    * @return true, if successful
    */
   public void textRuleCorrect(String datasetSchemaId, Rule rule) {
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
-    Boolean correctRules = Boolean.TRUE;
     List<Map<String, String>> ruleAttribute = new ArrayList<>();
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
@@ -334,7 +346,6 @@ public class KieBaseManager {
         typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
         rule.getThenCondition().get(1), ""));
 
-
     // We create the same text like in kiebase and with that part we check if the rule is correct
     KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
@@ -352,6 +363,7 @@ public class KieBaseManager {
    * @param compiler the compiler
    * @param kieServices the kie services
    * @param ruleAttributesHelper the rule attributes helper
+   *
    * @return the kie helper
    */
   private KieHelper kiebaseAssemble(ObjectDataCompiler compiler, KieServices kieServices,
@@ -378,6 +390,7 @@ public class KieBaseManager {
    * @param message the message
    * @param error the error
    * @param tableSchemaName the table schema name
+   *
    * @return the map
    */
   private Map<String, String> passDataToMap(String idSchema, String idRule,
