@@ -16,6 +16,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.rod.ObligationVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -86,7 +88,7 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindByIdEEAExcep() throws EEAException {
-    when(dataflowService.getById(Mockito.any())).thenThrow(EEAException.class);
+    when(dataflowService.getByIdNoRepresentatives(Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", null, dataFlowControllerImpl.findById(1L));
   }
@@ -98,7 +100,7 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindById() throws EEAException {
-    when(dataflowService.getById(Mockito.any())).thenReturn(dataflowVO);
+    when(dataflowService.getByIdNoRepresentatives(Mockito.any())).thenReturn(dataflowVO);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L));
   }
@@ -335,11 +337,12 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createDataFlowThrow() throws EEAException {
+  public void createDataFlowDateThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setDeadlineDate(new Date(-1));
-    dataFlowControllerImpl.createDataFlow(dataflowVO);
-    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -348,14 +351,11 @@ public class DataFlowControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createDataFlowNullThrow() throws EEAException {
+  public void createDataFlowNameThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    try {
-      dataFlowControllerImpl.createDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-    }
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -369,36 +369,9 @@ public class DataFlowControllerImplTest {
     Date date = new Date();
     date.setTime(date.getTime() - 1000L);
     dataflowVO.setDeadlineDate(date);
-    try {
-      dataFlowControllerImpl.createDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-    }
-  }
-
-  /**
-   * Creates the data throw repeat name.
-   *
-   * @throws EEAException the EEA exception
-   * @throws ParseException the parse exception
-   */
-  @Test
-  public void createDataThrowRepeatName() throws EEAException, ParseException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    Date date = sdf.parse("2914-09-15");
-    dataflowVO.setDeadlineDate(date);
-    dataflowVO.setDescription("description");
-    dataflowVO.setName("name");
-    EEAException EEAException = new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
-    doThrow(EEAException).when(dataflowService).createDataFlow(dataflowVO);
-    try {
-      dataFlowControllerImpl.createDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
-    }
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -411,13 +384,72 @@ public class DataFlowControllerImplTest {
   public void createDataFlow() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
     Date date = sdf.parse("2914-09-15");
     dataflowVO.setDeadlineDate(date);
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
     doNothing().when(dataflowService).createDataFlow(dataflowVO);
-    dataFlowControllerImpl.createDataFlow(dataflowVO);
-    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals("", value.getBody());
+    assertEquals(HttpStatus.OK, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowThrow() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    doThrow(EEAException.class).when(dataflowService).createDataFlow(dataflowVO);
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
+  }
+
+  /**
+   * Creates the data flow obligation null.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void createDataFlowObligationNull() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+  /**
+   * Creates the data flow obligation id null.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void createDataFlowObligationIdNull() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(new ObligationVO());
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -431,9 +463,12 @@ public class DataFlowControllerImplTest {
     DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
     dataflowVO.setDeadlineDate(date);
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
     doNothing().when(dataflowService).updateDataFlow(dataflowVO);
     dataFlowControllerImpl.updateDataFlow(dataflowVO);
     Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
@@ -444,13 +479,62 @@ public class DataFlowControllerImplTest {
    * Update flow throw.
    *
    * @throws EEAException the EEA exception
+   * @throws ParseException
    */
   @Test
-  public void updateFlowThrow() throws EEAException {
+  public void updateFlowThrow() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setDeadlineDate(new Date(-1));
-    dataFlowControllerImpl.updateDataFlow(dataflowVO);
-    Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    doThrow(EEAException.class).when(dataflowService).updateDataFlow(dataflowVO);
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
+  }
+
+  /**
+   * Update flow throw.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void updateFlowObligationNull() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
+  }
+
+  /**
+   * Update flow obligation id null.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void updateFlowObligationIdNull() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
   }
 
   /**
@@ -461,12 +545,9 @@ public class DataFlowControllerImplTest {
   @Test
   public void updateDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    try {
-      dataFlowControllerImpl.updateDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-    }
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -480,38 +561,10 @@ public class DataFlowControllerImplTest {
     Date date = new Date();
     date.setTime(date.getTime() - 1000L);
     dataflowVO.setDeadlineDate(date);
-    try {
-      dataFlowControllerImpl.updateDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-    }
+    ResponseEntity<?> result = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, result.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
   }
-
-  /**
-   * Update data throw repeat name.
-   *
-   * @throws EEAException the EEA exception
-   * @throws ParseException the parse exception
-   */
-  @Test
-  public void updateDataThrowRepeatName() throws EEAException, ParseException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    Date date = sdf.parse("2914-09-15");
-    dataflowVO.setDeadlineDate(date);
-    dataflowVO.setDescription("description");
-    dataflowVO.setName("name");
-    EEAException EEAException = new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
-    doThrow(EEAException).when(dataflowService).updateDataFlow(dataflowVO);
-    try {
-      dataFlowControllerImpl.updateDataFlow(dataflowVO);
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATAFLOW_EXISTS_NAME, ex.getReason());
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
-    }
-  }
-
 
   /**
    * Test get metabase by id.

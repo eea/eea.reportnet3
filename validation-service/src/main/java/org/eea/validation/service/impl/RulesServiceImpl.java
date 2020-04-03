@@ -242,10 +242,9 @@ public class RulesServiceImpl implements RulesService {
 
     validateRule(rule);
 
-    // that if test if the rule has the correct format, if not we throw a exception
-    if (!kieBaseManager.textRuleCorrect(datasetSchemaId, rule)) {
-      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_NOT_CORRECT);
-    }
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
