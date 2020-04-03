@@ -70,7 +70,8 @@ import {
   faCheck,
   faTimes,
   faFolder,
-  faCaretRight
+  faCaretRight,
+  faExternalLinkAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -320,6 +321,8 @@ export const AwesomeIcons = icon => {
       return faCaretDown;
     case 'collapsed':
       return faCaretRight;
+    case 'externalLink':
+      return faExternalLinkAlt;
     default:
       return faFileAlt;
   }

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
+import isNil from 'lodash/isNil';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './DataflowsItem.module.scss';
@@ -99,6 +100,21 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
           <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole}
+        </p>
+      </div>
+
+      <div className={`${styles.obligation} `}>
+        <p>
+          {!isNil(itemContent.legalInstrument) ? (
+            <>
+              <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}
+            </>
+          ) : null}
+        </p>
+        <p>
+          <>
+            <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+          </>
         </p>
       </div>
 

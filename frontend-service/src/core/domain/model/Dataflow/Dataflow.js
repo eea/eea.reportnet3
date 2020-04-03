@@ -9,6 +9,7 @@ export class Dataflow {
     expirationDate,
     id,
     name,
+    obligation,
     representatives,
     requestId,
     status,
@@ -25,6 +26,7 @@ export class Dataflow {
     this.expirationDate = expirationDate;
     this.id = id;
     this.name = name;
+    this.obligation = obligation;
     this.representatives = representatives;
     this.requestId = requestId;
     this.status = status;
