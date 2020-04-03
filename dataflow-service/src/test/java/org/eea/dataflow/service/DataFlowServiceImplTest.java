@@ -46,6 +46,7 @@ import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -771,53 +772,37 @@ public class DataFlowServiceImplTest {
     }
   }
 
+  /**
+   * Delete data flow throws delete representative.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void deleteDataFlowThrowsDeleteRepresentative() throws Exception {
-    DataFlowVO dataFlowVO = new DataFlowVO();
-    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
-    reportingDatasetVO.setId(1L);
-    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
-    reportingDatasetVOs.add(reportingDatasetVO);
-    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
-    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
-    designDatasetVO.setId(1L);
-    designDatasetVOs.add(designDatasetVO);
-    DocumentVO document = new DocumentVO();
-    document.setId(1L);
-    List<DocumentVO> listDocument = new ArrayList<>();
-    listDocument.add(document);
-    dataFlowVO.setDocuments(listDocument);
-    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
-    dataFlowVO.setDesignDatasets(designDatasetVOs);
-    List<ResourceAccessVO> resourceList = new ArrayList<>();
-    ResourceAccessVO resource = new ResourceAccessVO();
-    resource.setId(1L);
-    resourceList.add(resource);
-    DataCollectionVO dcVO = new DataCollectionVO();
-    dcVO.setId(1L);
-    dataFlowVO.setDataCollections(Arrays.asList(dcVO));
+    DataFlowVO dataflowVO = new DataFlowVO();
     List<RepresentativeVO> representatives = new ArrayList<>();
     RepresentativeVO representative = new RepresentativeVO();
-    representative.setId(1L);
     representatives.add(representative);
-    dataFlowVO.setRepresentatives(representatives);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
-        .thenReturn(resourceList);
-    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
-        .thenReturn(reportingDatasetVOs);
-    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
-        .thenReturn(designDatasetVOs);
-    when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
-        .thenReturn(Arrays.asList(dcVO));
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    dataflowServiceImpl.deleteDataFlow(1L);
-    doThrow(MockitoException.class).when(representativeRepository).deleteById(Mockito.anyLong());
+    Mockito.when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Mockito
+        .when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<ResourceAccessVO>());
+    Mockito.when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList<ReportingDatasetVO>());
+    Mockito.when(datasetMetabaseController.findDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList<DesignDatasetVO>());
+    Mockito.when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList<DataCollectionVO>());
+    Mockito.when(representativeService.getRepresetativesByIdDataFlow(Mockito.any()))
+        .thenReturn(representatives);
+    Mockito.doThrow(IllegalArgumentException.class).when(representativeRepository)
+        .deleteById(Mockito.any());
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
-    } catch (EEAException ex) {
-      assertEquals("Error Deleting representative with id 1", ex.getMessage());
-      throw ex;
+    } catch (EEAException e) {
+      Assert.assertTrue(e.getMessage().startsWith("Error Deleting representative"));
+      throw e;
     }
   }
 
