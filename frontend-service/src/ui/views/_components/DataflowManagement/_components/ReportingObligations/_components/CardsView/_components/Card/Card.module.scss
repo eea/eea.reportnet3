@@ -16,7 +16,7 @@
   // box-shadow: 14px 14px 20px #22252d, -14px -14px 20px #2e333d;
 
   height: 150px;
-  width: 400px;
+  width: calc(100% / 4.5);
 
   column-gap: 1.5rem;
   display: grid;
@@ -29,7 +29,7 @@
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: 150% 50%;
-  margin: 1rem;
+  margin: 0.5rem;
 
   .text {
     display: flex;
@@ -37,10 +37,20 @@
     align-items: flex-start;
 
     .title {
+      display: -webkit-box;
       margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
     .subtitle {
       margin: 0.5rem 0;
+      display: -webkit-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
     }
   }
 

@@ -41,7 +41,7 @@ export const DataflowManagement = ({
   const formInitialState = {
     name: isEditForm ? state.name : '',
     description: isEditForm ? state.description : '',
-    obligation: isEditForm ? state.obligation : { id: null, title: '' }
+    obligation: isEditForm ? state.obligations : { id: null, title: '' }
   };
 
   const [formState, formDispatch] = useReducer(formReducer, formInitialState);
