@@ -193,7 +193,7 @@ const Dataflow = withRouter(({ history, match }) => {
       );
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
     }
-  }, [dataflowDataState.data.representatives]);
+  }, [dataflowDataState.data.representatives, dataflowDataState.hasRepresentativesWithoutDatasets]);
 
   useEffect(() => {
     setLoading(true);
