@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './DataflowsList.module.scss';
 
@@ -12,21 +11,26 @@ import { Filters } from './_components/Filters';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
+
 const DataflowsList = ({ className, content = [], dataFetch, description, title, type }) => {
   const resources = useContext(ResourcesContext);
 
-  const [filteredData, setFilteredData] = useState(content);
+  const [dataToFilter, setDataToFilter] = useState(content);
+  const [filteredData, setFilteredData] = useState(dataToFilter);
 
-  const onLoadFiltredData = data => {
-    setFilteredData(data);
-  };
+  useEffect(() => {
+    setDataToFilter(DataflowsListUtils.parseDataToFilter(content));
+  }, [content]);
+
+  const onLoadFiltredData = data => setFilteredData(data);
 
   return (
     <div className={`${styles.wrap} ${className}`}>
       <h2>{title}</h2>
       <p>{description}</p>
       <Filters
-        data={content}
+        data={dataToFilter}
         dateOptions={DataflowConf.filterItems['date']}
         getFiltredData={onLoadFiltredData}
         inputOptions={DataflowConf.filterItems['input']}
