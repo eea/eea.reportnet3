@@ -471,7 +471,7 @@
     "columnInfoName": "Name",
     "columnInfoType": "Type",
     "name": "Name",
-    "expirationDate": "Expiration date range",
+    "expirationDate": "Date range",
     "clearFilters": "Clear filters",
     "userRole": "Role",
     "qcRuleCreationError": "Error creation the rule, please check it",
@@ -491,7 +491,15 @@
     "deleteDatasetSchemaLinkError": "Failed deleting dataset schema. There is a link relation between schemas",
     "createQcRule": "Create QC rule",
     "help": "Help",
+    "legalInstrument": "Legal instrument",
+    "dueDate": "Expiration date",
+    "searchAllLabel": "Search all",
     "update": "update",
-    "designSchemaTabNoFields": "No fields yet"
+    "designSchemaTabNoFields": "No fields yet",
+    "reportingObligations": "Reporting Obligations",
+    "noObligationsWithSelectedParameters": "There are no obligations with the selected parameters",
+    "obligationDataflowItem": "Obligation",
+    "legalInstrumentDataflowItem": "Legal instrument",
+    "obligationTitle": "Obligation"
   }
 }
