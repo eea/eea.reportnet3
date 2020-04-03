@@ -4,11 +4,11 @@ export const getExpression = expression => {
   if (expression.operatorType == 'LEN') {
     return {
       operator: config.validations.operatorEquivalences[expression.operatorValue],
-      arg1: parseInt(expression.expressionValue),
-      arg2: {
+      arg1: {
         operator: 'LEN',
         arg1: 'VALUE'
-      }
+      },
+      arg2: parseInt(expression.expressionValue)
     };
   }
   if (expression.operatorType == 'string') {
