@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,12 +68,14 @@ public class DataFlowVO implements Serializable {
   /** The request id. */
   private Long requestId;
 
-
   /** The contributors. */
   private List<ContributorVO> contributors;
 
   /** The representatives. */
   private List<RepresentativeVO> representatives;
+
+  /** The obligation. */
+  private ObligationVO obligation;
 
   /**
    * Equals.
