@@ -39,14 +39,7 @@ const reducer = (state, { type, payload }) => {
       return state;
   }
 };
-const loadUserData = async () => {
-  try {
-    const response = await UserService.userData();
-    console.log('response', response.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
+
 const updateUserAttributes = async properties => {
   try {
     const response = await UserService.updateAttributes(properties);
@@ -62,10 +55,11 @@ const Attributes = {
   dateFormat: ['DD/MM/YYYY']
 };
 const Settings = withRouter(({ history }) => {
+  const [UserAttr, setUserAttr] = useState({});
   const user = useContext(UserContext);
-  const respuesta = loadUserData();
-  console.log('resuesta', respuesta);
-  console.log('updateUserAttributes', updateUserAttributes(Attributes));
+  // const respuesta = loadUserData();
+  // console.log('resuesta', respuesta);
+  //console.log('updateUserAttributes', updateUserAttributes(Attributes));
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
@@ -76,8 +70,19 @@ const Settings = withRouter(({ history }) => {
 
   ////////////////////////////////////////////////
 
-  /////////////////////////////////////////////////
+  const loadUserData = async () => {
+    try {
+      const response = await UserService.userData();
+      console.log('response', response.data);
+      setUserAttr(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  console.log('UserAttr', UserAttr);
+
+  /////////////////////////////////////////////////
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
       btn.addEventListener('click', initUserSettingsSection);
