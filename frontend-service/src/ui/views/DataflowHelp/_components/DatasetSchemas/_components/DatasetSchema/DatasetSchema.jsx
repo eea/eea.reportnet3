@@ -97,8 +97,8 @@ const parseDesignDataset = (design, validationList) => {
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};
-          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.name = fieldDTO.name;
+          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.type = fieldDTO.type;
           if (fieldDTO.type === 'CODELIST') {
             field.codelistItems = fieldDTO.codelistItems;
