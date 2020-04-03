@@ -13,7 +13,6 @@ const useBigButtonList = ({
   dataflowDataState,
   dataflowData,
   dataflowId,
-  dataflowStatus,
   getDeleteSchemaIndex,
   handleRedirect,
   onShowUpdateDataCollectionModal,
@@ -53,7 +52,7 @@ const useBigButtonList = ({
           disabled: true
         }
       ],
-      visibility: isCustodian && dataflowStatus === DataflowConf.dataflowStatus['DESIGN']
+      visibility: isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']
     },
     {
       buttonClass: 'dataflowHelp',
@@ -86,7 +85,7 @@ const useBigButtonList = ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
-    dataflowStatus: dataflowStatus,
+    dataflowStatus: dataflowDataState.status,
     datasetSchemaInfo: updatedDatasetSchema,
     handleRedirect: () => {
       handleRedirect(
@@ -123,7 +122,7 @@ const useBigButtonList = ({
       {
         label: resources.messages['rename'],
         icon: 'pencil',
-        disabled: dataflowStatus !== DataflowConf.dataflowStatus['DESIGN']
+        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN']
       },
       {
         label: resources.messages['duplicate'],
@@ -133,7 +132,7 @@ const useBigButtonList = ({
       {
         label: resources.messages['delete'],
         icon: 'trash',
-        disabled: dataflowStatus !== DataflowConf.dataflowStatus['DESIGN'],
+        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       },
       {
