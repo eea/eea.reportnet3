@@ -335,6 +335,10 @@
     "key": "config/apiGateway/dataset.ribbon.ReadTimeout",
     "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjIwMDAwfQ=="
   },
+   {
+    "key": "config/apiGateway/validation.ribbon.ReadTimeout",
+    "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjIwMDAwfQ=="
+  },
   {
     "key": "config/apiGateway/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
     "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
@@ -1121,6 +1125,10 @@
   },
   {
     "key": "config/rod/rod.url",
-    "value": "JHtST0RfVVJMOmh0dHA6Ly9yb2QzLmRldmVsMWR1Yi5laW9uZXQuZXVyb3BhLmV1fQ=="
+    "value": "JHtST0RfVVJMOnJvZDMuZGV2ZWwxZHViLmVpb25ldC5ldXJvcGEuZXV9"
+  },
+    {
+    "key": "config/rod/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   }
 ]
