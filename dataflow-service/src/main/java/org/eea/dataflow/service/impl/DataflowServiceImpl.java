@@ -254,10 +254,10 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the obligations opened.
+   * Gets the opened obligations.
    *
    * @param dataflowVOs the dataflow V os
-   * @return the obligations opened
+   * @return the opened obligations
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
 
