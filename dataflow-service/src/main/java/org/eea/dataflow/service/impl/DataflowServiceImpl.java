@@ -117,6 +117,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
     return getByIdWithCondition(id, true);
   }
@@ -129,6 +130,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException {
     return getByIdWithCondition(id, false);
   }
@@ -141,7 +143,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  @Transactional
   private DataFlowVO getByIdWithCondition(Long id, boolean includeRepresentatives)
       throws EEAException {
 
