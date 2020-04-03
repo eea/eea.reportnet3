@@ -17,11 +17,19 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
-   * @param includeRepresentatives the include representatives
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getById(Long id, boolean includeRepresentatives) throws EEAException;
+  DataFlowVO getById(Long id) throws EEAException;
+
+  /**
+   * Gets the by id no representatives.
+   *
+   * @param id the id
+   * @return the by id no representatives
+   * @throws EEAException the EEA exception
+   */
+  DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException;
 
   /**
    * Gets the by status.

@@ -113,13 +113,37 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by id.
    *
    * @param id the id
-   * @param includeRepresentatives the include representatives
    * @return the by id
    * @throws EEAException the EEA exception
    */
   @Override
+  public DataFlowVO getById(Long id) throws EEAException {
+    return getByIdWithCondition(id, true);
+  }
+
+  /**
+   * Gets the by id no representatives.
+   *
+   * @param id the id
+   * @return the by id no representatives
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException {
+    return getByIdWithCondition(id, false);
+  }
+
+  /**
+   * Gets the by id.
+   *
+   * @param id the id
+   * @param includeRepresentatives the include representatives
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
   @Transactional
-  public DataFlowVO getById(Long id, boolean includeRepresentatives) throws EEAException {
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeRepresentatives)
+      throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -492,7 +516,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Transactional
   public void deleteDataFlow(Long idDataflow) throws Exception {
     // take the jpa entity
-    DataFlowVO dataflowVO = getById(idDataflow, true);
+    DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
 
     LOG.info("Get the dataflow metabaser with id {}", idDataflow);

@@ -78,9 +78,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     DataFlowVO result = null;
     try {
       if (isDataCustodian()) {
-        result = dataflowService.getById(id, true);
+        result = dataflowService.getById(id);
       } else {
-        result = dataflowService.getById(id, false);
+        result = dataflowService.getByIdNoRepresentatives(id);
       }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
