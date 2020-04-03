@@ -3,18 +3,18 @@ import styles from './userConfiguration.module.scss';
 import { DefaultRowsPages } from './_components/defaultRowsPages';
 import { ToggleUserConfirmation } from './_components/UserConfirmation';
 import { DateFormat } from './_components/DateFormat';
-const UserConfiguration = () => {
+const UserConfiguration = props => {
   return (
     <div className={styles.userConfigurationContainer}>
       <div className={styles.userConfirmLogout}>
-        <ToggleUserConfirmation />
+        <ToggleUserConfirmation Attr={props.Attributes} />
       </div>
 
       <div className={styles.userConfirmLogout}>
-        <DefaultRowsPages />
+        <DefaultRowsPages Attr={props.Attributes} />
       </div>
       <div className={styles.userConfirmLogout}>
-        <DateFormat />
+        <DateFormat Attr={props.Attributes} />
       </div>
     </div>
   );

@@ -40,26 +40,9 @@ const reducer = (state, { type, payload }) => {
   }
 };
 
-const updateUserAttributes = async properties => {
-  try {
-    const response = await UserService.updateAttributes(properties);
-    console.log('response', response.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
-const Attributes = {
-  defaultRowSelected: ['10'],
-  defaultVisualTheme: ['light'],
-  showLogoutConfirmation: ['false'],
-  dateFormat: ['DD/MM/YYYY']
-};
 const Settings = withRouter(({ history }) => {
   const [UserAttr, setUserAttr] = useState({});
   const user = useContext(UserContext);
-  // const respuesta = loadUserData();
-  // console.log('resuesta', respuesta);
-  //console.log('updateUserAttributes', updateUserAttributes(Attributes));
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
@@ -69,16 +52,37 @@ const Settings = withRouter(({ history }) => {
   };
 
   ////////////////////////////////////////////////
-
-  const loadUserData = async () => {
-    try {
-      const response = await UserService.userData();
-      console.log('response', response.data);
-      setUserAttr(response.data);
-    } catch (error) {
-      console.error(error);
-    }
+  const Attributes = {
+    defaultRowSelected: [`${user.userProps.defaultRowSelected}`],
+    defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
+    showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
+    dateFormat: [`${user.userProps.dateFormat}`]
   };
+
+  useEffect(() => {
+    const updateUserAttributes = async properties => {
+      try {
+        const response = await UserService.updateAttributes(properties);
+        console.log('response', response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    updateUserAttributes(Attributes);
+  }, [Attributes]);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const response = await UserService.userData();
+        console.log('response', response);
+        setUserAttr(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getUserData();
+  }, []);
 
   console.log('UserAttr', UserAttr);
 
@@ -148,9 +152,9 @@ const Settings = withRouter(({ history }) => {
   const toggleUserOptions = () => {
     return (
       <>
-        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
+        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions Attributes={UserAttr} />}
 
-        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
+        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration Attributes={UserAttr} />}
 
         <UserCard />
       </>

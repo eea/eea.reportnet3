@@ -6,11 +6,13 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { UserImgUpload } from './_components/UserImg/_components/UserImgUpload';
-const UserDesignOptions = () => {
+import { isUndefined } from 'lodash';
+const UserDesignOptions = props => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
+  console.log('props', props);
   return (
     <React.Fragment>
       <div className={styles.userDesignContainer}>
@@ -24,7 +26,11 @@ const UserDesignOptions = () => {
             userContext.defaultVisualTheme(e.value);
           }}
           placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-          value={themeContext.currentTheme}
+          value={
+            !isUndefined(props.Attributes.defaultVisualTheme)
+              ? themeContext.currentTheme
+              : props.Attributes.defaultVisualTheme
+          }
         />
 
         <div className={styles.userUploadImg}>
