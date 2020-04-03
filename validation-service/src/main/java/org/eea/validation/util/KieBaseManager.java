@@ -1,8 +1,6 @@
 package org.eea.validation.util;
 
 import java.io.FileNotFoundException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +12,6 @@ import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.validation.persistence.data.domain.DatasetValue;
-import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -47,18 +43,6 @@ public class KieBaseManager {
    */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
-
-  /**
-   * The Constant timeZone.
-   */
-  private static final ZoneId timeZone = ZoneId.of("UTC");
-
-  /**
-   * The Constant dateFormatter.
-   */
-  private static final DateTimeFormatter dateFormatter =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-
   /**
    * The rules repository.
    */
@@ -75,12 +59,6 @@ public class KieBaseManager {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-
-  /**
-   * The dataset repository.
-   */
-  @Autowired
-  private DatasetRepository datasetRepository;
 
 
   /**
@@ -104,9 +82,6 @@ public class KieBaseManager {
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
-
-    // we take the dataset value for salve all fail validations
-    DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
 
     // we bring the datasetschema
     DataSetSchema dataSetSchema =
