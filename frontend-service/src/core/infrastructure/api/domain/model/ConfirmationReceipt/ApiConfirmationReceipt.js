@@ -6,7 +6,7 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 export const apiConfirmationReceipt = {
   get: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
-    k;
+
     const response = await HTTPRequester.download({
       url: getUrl(ConfirmationReceiptConfig.get, {
         dataflowId,

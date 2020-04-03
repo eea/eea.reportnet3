@@ -64,7 +64,8 @@ import {
   faPowerOff,
   faCog,
   faPen,
-  faUsersCog,faUserShield,
+  faUsersCog,
+  faUserShield,
   faIgloo,
   faFileDownload,
   faDraftingCompass,
@@ -330,13 +331,10 @@ export const AwesomeIcons = icon => {
       return faCaretDown;
     case 'collapsed':
       return faCaretRight;
-<<<<<<< HEAD
-      case 'userShield':
-      return faUserShield
-=======
+    case 'userShield':
+      return faUserShield;
     case 'externalLink':
       return faExternalLinkAlt;
->>>>>>> feature/SPRINT_14_FE_Integration
     default:
       return faFileAlt;
   }
