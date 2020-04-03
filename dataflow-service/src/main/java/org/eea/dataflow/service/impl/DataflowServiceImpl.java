@@ -152,6 +152,8 @@ public class DataflowServiceImpl implements DataflowService {
     // Add the representatives
     if (includeRepresentatives) {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+    } else {
+      dataflowVO.setRepresentatives(null);
     }
 
     getObligation(dataflowVO);
