@@ -65,7 +65,7 @@ export const apiDataflow = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON ? '/dataflow' : getUrl(DataflowConfig.createDataflow),
-      data: { name, description },
+      data: { name, description, obligation: { obligationId: 693 } },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
