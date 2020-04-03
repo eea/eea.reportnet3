@@ -11,7 +11,6 @@ import lombok.ToString;
 /**
  * The Class TableSchema.
  */
-
 @Getter
 @Setter
 @ToString
@@ -32,6 +31,11 @@ public class TableSchema {
   /** The Id data set. */
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
+
+
+  /** The read only. */
+  @Field(value = "readOnly")
+  private Boolean readOnly;
 
 
   /** The record schema. */

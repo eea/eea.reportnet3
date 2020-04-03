@@ -29,6 +29,9 @@ public class TableSchema {
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
 
+  /** The read only. */
+  @Field(value = "readOnly")
+  private Boolean readOnly;
 
   /** The record schema. */
   @Field(value = "recordSchema")
