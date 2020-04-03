@@ -263,7 +263,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             EEAErrorMessage.NOT_ENOUGH_PERMISSION);
       }
-    } catch (EEAException e) {
+    } catch (Exception e) {
       LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
