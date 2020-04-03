@@ -474,7 +474,7 @@
     "expirationDate": "Expiration date range",
     "clearFilters": "Clear filters",
     "userRole": "Role",
-    "qcRuleCreationError": "Error creation the rule, please check it",
+    "qcRuleCreationError": "Error creating the rule, please check it",
     "thereAreNoDatalows": "There are no pending dataflows",
     "noDataflowsWithSelectedParameters": "There are no dataflows with the selected parameters",
     "checkAllFilter": "Select all",
