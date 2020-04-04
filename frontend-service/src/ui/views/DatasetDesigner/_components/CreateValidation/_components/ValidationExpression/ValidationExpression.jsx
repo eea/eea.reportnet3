@@ -69,7 +69,6 @@ const ValidationExpression = ({
   // layouts
   const defaultLayout = (
     <li className={styles.expression}>
-      {console.log('expressionValues', expressionValues)}
       <span>
         <Checkbox
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}

@@ -14,6 +14,7 @@ export const createValidationReducerInitState = {
   datasetSchema: {},
   schemaTables: [],
   errorLevels: [],
+  validationRuleString: '',
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
   isValidationCreationDisabled: true,
@@ -142,7 +143,6 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
     case 'POPULATE_CREATE_FORM':
-      console.log('POPULATE_CREATE_FORM', payload);
       return {
         ...state,
         candidateRule: {

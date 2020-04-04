@@ -162,7 +162,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     if (isNil(tableFields)) {
       dropdownOptions.value = null;
     }
-    console.log('[getFieldDropdown]', tableFields);
     if (!isNil(tableFields) && tableFields.length == 0) {
       dropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
       dropdownOptions.value = null;
@@ -520,7 +519,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             <div className={styles.subsection}>
               {validationContext.ruleEdit ? (
                 <Button
-                  id={`${componentName}__create`}
+                  id={`${componentName}__update`}
                   disabled={creationFormState.isValidationCreationDisabled}
                   className="p-button-primary p-button-text-icon-left"
                   type="button"
