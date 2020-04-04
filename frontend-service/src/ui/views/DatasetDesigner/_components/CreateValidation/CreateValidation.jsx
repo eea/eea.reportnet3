@@ -31,8 +31,9 @@ import { deleteExpressionRecursivily } from './_functions/utils/deleteExpression
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
-import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
 import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
+import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTablebyFieldId';
+import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
 import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
@@ -81,12 +82,18 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
+    let table = null;
     if (validationContext.fieldId) {
+      if (!isNil(validationContext.tableSchemaId)) {
+        table = getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs);
+      } else {
+        table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
+      }
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'table',
-          value: getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs)
+          value: table
         }
       });
     }
