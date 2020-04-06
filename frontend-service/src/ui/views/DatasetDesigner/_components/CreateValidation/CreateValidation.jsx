@@ -49,6 +49,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducerInitState
   );
   const [fieldsDropdown, setfieldsDropdown] = useState();
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -212,6 +213,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const onCreateValidationRule = async () => {
     try {
+      setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
       onHide();
@@ -220,11 +222,14 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         type: 'QC_RULE_CREATION_ERROR'
       });
       console.error('onCreateValidationRule error', error);
+    } finally {
+      setIsSubmitDisabled(false);
     }
   };
 
   const onUpdateValidationRule = async () => {
     try {
+      setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.update(datasetId, candidateRule);
       onHide();
@@ -233,6 +238,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         type: 'QC_RULE_UPDATING_ERROR'
       });
       console.error('onUpdateValidationRule error', error);
+    } finally {
+      setIsSubmitDisabled(false);
     }
   };
 
@@ -520,21 +527,21 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               {validationContext.ruleEdit ? (
                 <Button
                   id={`${componentName}__update`}
-                  disabled={creationFormState.isValidationCreationDisabled}
+                  disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                   className="p-button-primary p-button-text-icon-left"
                   type="button"
                   label={resourcesContext.messages.update}
-                  icon="check"
+                  icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                   onClick={e => onUpdateValidationRule()}
                 />
               ) : (
                 <Button
                   id={`${componentName}__create`}
-                  disabled={creationFormState.isValidationCreationDisabled}
+                  disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                   className="p-button-primary p-button-text-icon-left"
                   type="button"
                   label={resourcesContext.messages.create}
-                  icon="check"
+                  icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                   onClick={e => onCreateValidationRule()}
                 />
               )}
