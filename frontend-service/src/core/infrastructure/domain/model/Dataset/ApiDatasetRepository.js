@@ -286,6 +286,7 @@ const schemaById = async datasetId => {
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
+      tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
       records: records,
       recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
     });
@@ -440,7 +441,7 @@ const webFormDataById = async (datasetId, tableSchemaId) => {
 
 const createDataColumns = (rowsData, letters) => {
   let columns = [];
-  letters.forEach(function(value, i) {
+  letters.forEach(function (value, i) {
     let columnLetter = rowsData.filter(row => row.columnPosition === value);
     columns.push(columnLetter);
   });
@@ -499,10 +500,16 @@ const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescriptio
 const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
   await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 
-const updateTableDescriptionDesign = async (tableSchemaId, tableSchemaDescription, datasetId) => {
+const updateTableDescriptionDesign = async (
+  tableSchemaId,
+  tableSchemaDescription,
+  tableSchemaIsReadOnly,
+  datasetId
+) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaId,
     tableSchemaDescription,
+    tableSchemaIsReadOnly,
     datasetId
   );
   return tableSchemaUpdated;

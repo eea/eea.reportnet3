@@ -46,21 +46,36 @@
   }
 }
 
+.positioning {
+  top: 0 !important;
+}
+
 .switchContainerInput {
   width: 100vw;
 }
-
+.switchDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  /* flex-direction: row-reverse; */
+}
 .switchDivInput {
   display: flex;
   align-items: center;
   margin: 0 0 2vw 1vw;
 }
+.switchTextInput {
+  font-weight: bold;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+  color: var(--main-font-color);
+}
 .tableDescriptionInput {
   width: 68vw;
   transition: 0.5s !important;
-}
-.positioning {
-  top: 0 !important;
 }
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
