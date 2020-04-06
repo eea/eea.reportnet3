@@ -1,5 +1,7 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+
 import styles from './CardsView.module.scss';
 
 import { Card } from './_components/Card';
@@ -36,9 +38,13 @@ export const CardsView = ({ checkedObligation, data, onChangePagination, onSelec
 
   const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
-  return (
+  return isEmpty(data) ? (
+    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+  ) : (
     <Fragment>
-      <div className={styles.cardWrap}>
+      <div
+        className={styles.cardWrap}
+        style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
         {currentPosts.map(obligation => {
           return (
             <Card

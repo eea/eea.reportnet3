@@ -69,7 +69,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
   };
 
   return isEmpty(data) ? (
-    resources.messages['noObligationsWithSelectedParameters']
+    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
   ) : (
     <DataTable
       autoLayout={true}
