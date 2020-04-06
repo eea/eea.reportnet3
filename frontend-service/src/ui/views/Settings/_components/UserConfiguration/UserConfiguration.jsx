@@ -7,14 +7,14 @@ const UserConfiguration = props => {
   return (
     <div className={styles.userConfigurationContainer}>
       <div className={styles.userConfirmLogout}>
-        <ToggleUserConfirmation Attr={props.Attributes} />
+        <ToggleUserConfirmation />
       </div>
 
       <div className={styles.userConfirmLogout}>
-        <DefaultRowsPages Attr={props.Attributes} />
+        <DefaultRowsPages />
       </div>
       <div className={styles.userConfirmLogout}>
-        <DateFormat Attr={props.Attributes} />
+        <DateFormat />
       </div>
     </div>
   );

@@ -12,7 +12,6 @@ export const DefaultRowsPages = props => {
 
   return (
     <React.Fragment>
-      {' '}
       <h3>{resources.messages['userDefaultRowsPage']}</h3>
       <Dropdown
         name="rowPerPage"

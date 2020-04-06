@@ -41,8 +41,8 @@ const reducer = (state, { type, payload }) => {
 };
 
 const Settings = withRouter(({ history }) => {
-  const [UserAttr, setUserAttr] = useState({});
-  const user = useContext(UserContext);
+  const [userConfiguration, setUserConfiguration] = useState({});
+  const userContext = useContext(UserContext);
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
@@ -54,58 +54,46 @@ const Settings = withRouter(({ history }) => {
 
   useEffect(() => {
     setAttributes({
-      defaultRowSelected: [user.userProps.defaultRowSelected],
-      defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
-      showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
-      dateFormat: [`${user.userProps.dateFormat}`]
+      defaultRowSelected: [userContext.userProps.defaultRowSelected],
+      defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
+      showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
+      dateFormat: [`${userContext.userProps.dateFormat}`]
     });
-  }, [user]);
+  }, [userContext]);
 
-  // ////////////////////////////////////////////////
-  // const Attributes = {
-  //   defaultRowSelected: [`${user.userProps.defaultRowSelected}`],
-  //   defaultVisualTheme: [`${user.userProps.defaultVisualTheme}`],
-  //   showLogoutConfirmation: [`${user.userProps.showLogoutConfirmation}`],
-  //   dateFormat: [`${user.userProps.dateFormat}`]
-  // };
-
-  const updateUserAttributes = async atts => {
+  const updateUserConfiguration = async userConfiguration => {
     try {
-      const response = await UserService.updateAttributes(atts);
-      console.log('response', response.data);
+      const updateUserConfiguration = await UserService.updateAttributes(userConfiguration);
+      console.log('updateUserConfiguration', updateUserConfiguration);
     } catch (error) {
       console.error(error);
     }
   };
+
+  const getUserConfiguration = async () => {
+    try {
+      console.log('awat');
+      const userConfiguration = await UserService.getConfiguration();
+      console.log(userConfiguration);
+      userContext.dateFormat(userConfiguration.dateFormat);
+      userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
+      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
+      setUserConfiguration(userConfiguration);
+      console.log('userC', userConfiguration);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    updateUserAttributes(attributes);
-  }, [attributes]);
-
-  const getUserData = async () => {
-    try {
-      const response = await UserService.userData();
-
-      setUserAttr(response.data);
-      UpdateAttr();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  const UpdateAttr = () => {
-    user.dateFormat(UserAttr.dateFormat[0]);
-    user.defaultRowSelected(parseInt(UserAttr.defaultRowSelected));
-    user.onToggleLogoutConfirm(UserAttr.showLogoutConfirmation[0]);
-    user.defaultVisualTheme(UserAttr.defaultVisualTheme[0]);
-  };
+    getUserConfiguration();
+  }, []);
 
   /////////////////////////////////////////////////
   useEffect(() => {
-    getUserData();
+    userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
   }, []);
 
-  /////////////////////////////////////////
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
       btn.addEventListener('click', initUserSettingsSection);
@@ -173,7 +161,7 @@ const Settings = withRouter(({ history }) => {
       <>
         {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
 
-        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
+        {visibleUserSectionState.isVisibleUserSettingsOptions &&  <UserConfiguration />}
 
         <UserCard />
       </>
@@ -208,7 +196,6 @@ const Settings = withRouter(({ history }) => {
           />
         </div>
       </div>
-
       <div className="rep-row">
         <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
       </div>

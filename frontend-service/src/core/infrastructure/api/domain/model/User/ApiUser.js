@@ -48,28 +48,29 @@ export const apiUser = {
     });
     return tokens.data;
   },
-  userData: async () => {
+
+  configuration: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(UserConfig.userData),
-      // data: { id: userId },
-      queryString: {},
+      url: getUrl(UserConfig.configuration),
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
-      }
+      },
+      queryString: {}
     });
-    return response;
+    return response.data;
   },
-  updateAttributes: async Attributes => {
+
+  updateConfiguration: async userConfiguration => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(UserConfig.updateUserAttributes),
-      data: Attributes,
+      url: getUrl(UserConfig.updateConfiguration),
       queryString: {},
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${tokens.accessToken}`
-      }
+      },
+      data: userConfiguration
     });
     return response;
   },

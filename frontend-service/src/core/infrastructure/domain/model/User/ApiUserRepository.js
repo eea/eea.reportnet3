@@ -43,15 +43,26 @@ const uploadImg = async (userId, imgData) => {
   return response;
 };
 
-const userData = async userId => {
-  const response = await apiUser.userData(userId);
-  //const response = new Promise((resolve, reject) => { dato: 'hola' });
-  return response;
+const getConfiguration = async () => {
+  const userConfigurationDTO = await apiUser.configuration();
+  const userConfiguration = parseConfigurationDTO(userConfigurationDTO);
+  return userConfiguration;
 };
+
+const parseConfigurationDTO = (userConfigurationDTO) => {
+  const userConfiguration = {};
+  userConfiguration.dateFormat = userConfigurationDTO.dateFormat[0];
+  userConfiguration.defaultRowsNumber = userConfigurationDTO.showLogoutConfirmation[0];
+  userConfiguration.defaultLogoutConfirmation = userConfigurationDTO.defaultRowSelected[0];
+  userConfiguration.theme = userConfigurationDTO.defdefaultVisualTheme[0];
+  return userConfiguration;
+}
+
 const updateAttributes = async Attributes => {
   const response = await apiUser.updateAttributes(Attributes);
   return response;
 };
+
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -121,7 +132,7 @@ const getToken = () => {
 
 export const ApiUserRepository = {
   login,
-  userData,
+  getConfiguration,
   updateAttributes,
   logout,
   oldLogin,
