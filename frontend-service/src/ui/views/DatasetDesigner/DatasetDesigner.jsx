@@ -167,7 +167,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [validationListDialogVisible]);
 
   useEffect(() => {
-    console.log(history.location, history.location.search, window.location.search);
     if (window.location.search !== '') {
       changeUrl();
     }

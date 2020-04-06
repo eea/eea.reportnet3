@@ -175,13 +175,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTableDelete = deletedTabIndx => {
-      deleteTable(deletedTabIndx);
-    };
+    const onTableDelete = deletedTabIndx => deleteTable(deletedTabIndx);
 
-    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => {
-      reorderTable(draggedTabHeader, droppedTabHeader);
-    };
+    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
     const onTableDragAndDropStart = draggedTabIdx => {
       if (!isUndefined(draggedTabIdx)) {
