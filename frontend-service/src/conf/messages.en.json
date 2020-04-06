@@ -512,6 +512,9 @@
     "loadOpenedObligationError": "Error loading obligations",
     "emptyObligationList": "There are no obligations.",
     "dataflowObligationEmpty": "Obligation is a required field",
-    "readOnlyTable": "Read only table"
+    "readOnlyTable": "Read only table",
+    "dataflowDetails": "Dataflow datails",
+    "restApiKey": "Rest API Key",
+    "viewMore": "View more"
   }
 }

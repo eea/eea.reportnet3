@@ -13,6 +13,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { TreeView } from 'ui/views/_components/TreeView';
+import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { UserService } from 'core/services/User';
@@ -62,7 +63,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     }
   };
 
-  const parsedData = PropertiesUtils.parseDataToShow(
+  const parsedDataflowData = PropertiesUtils.parseDataflowData(
     config,
     dataflowDataState,
     dataflowId,
@@ -70,6 +71,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     user,
     UserService
   );
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState);
 
   const dialogFooter = (
     <Fragment>
@@ -97,14 +99,34 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
   return (
     <Fragment>
       <Dialog
-        header={resources.messages['properties']}
         className={styles.propertiesDialog}
         footer={dialogFooter}
-        visible={dataflowDataState.isPropertiesDialogVisible}
-        onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}>
+        header={resources.messages['properties']}
+        onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
+        visible={dataflowDataState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap}>
           {dataflowDataState.description}
-          <TreeView property={parsedData} propertyName={''} />
+          <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+            <TreeViewExpandableItem
+              items={[{ label: resources.messages['reportingObligations'] }]}
+              buttons={[
+                {
+                  className: `p-button-secondary-transparent`,
+                  icon: 'externalLink',
+                  tooltip: resources.messages['viewMore'],
+                  onClick: () =>
+                    window.open(
+                      `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
+                    )
+                }
+              ]}>
+              <TreeView property={parsedObligationsData} propertyName={''} />
+            </TreeViewExpandableItem>
+          </div>
+
+          <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
+            <TreeView property={parsedDataflowData} propertyName={''} />
+          </TreeViewExpandableItem>
         </div>
       </Dialog>
 
