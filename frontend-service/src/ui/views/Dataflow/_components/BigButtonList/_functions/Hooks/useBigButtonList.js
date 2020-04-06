@@ -288,9 +288,7 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        isEmpty(dataflowData.dataCollections) &&
-        isDataSchemaCorrect &&
-        dataflowDataState.hasRepresentativesWithoutDatasets
+        isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && dataflowDataState.formHasRepresentatives
     }
   ];
 

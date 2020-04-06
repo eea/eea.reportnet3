@@ -65,6 +65,7 @@ const Dataflow = withRouter(({ history, match }) => {
     data: {},
     deleteInput: '',
     description: '',
+    formHasRepresentatives: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
@@ -163,7 +164,7 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
-    dataflowDataState.hasRepresentativesWithoutDatasets,
+    dataflowDataState.formHasRepresentatives,
     dataflowDataState.status,
     dataflowId,
     designDatasetSchemas,
@@ -176,7 +177,9 @@ const Dataflow = withRouter(({ history, match }) => {
       const representativesNoDatasets = dataflowDataState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
+      //set for the first load
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
+      setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
     }
   }, [dataflowDataState.data.representatives]);
 
@@ -270,8 +273,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmDelete = event =>
     dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
-  const onCheckRepresentatives = value =>
-    dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
+  const setFormHasRepresentatives = value =>
+    dataflowDataDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
 
   const onEditDataflow = (newName, newDescription) => {
     dataflowDataDispatch({
@@ -408,7 +411,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
-          hasRepresentatives={dataflowDataState.hasRepresentatives}
+          formHasRepresentatives={dataflowDataState.formHasRepresentatives}
           hasWritePermissions={dataflowDataState.hasWritePermissions}
           isCustodian={dataflowDataState.isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}
@@ -443,6 +446,7 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+                setFormHasRepresentatives={setFormHasRepresentatives}
               />
             </div>
           </Dialog>

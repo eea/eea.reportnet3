@@ -114,6 +114,7 @@ const getProviderTypes = async formDispatcher => {
 };
 
 export const getInitialData = async (formDispatcher, dataflowId, formState) => {
+  // await Promise.all([getProviderTypes(formDispatcher),getAllRepresentatives(dataflowId, formDispatcher, formState)])
   await getProviderTypes(formDispatcher);
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {

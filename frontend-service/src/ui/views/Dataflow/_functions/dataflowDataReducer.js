@@ -6,6 +6,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':
       return { ...state, hasRepresentativesWithoutDatasets: payload.hasRepresentativesWithoutDatasets };
 
+    case 'SET_FORM_HAS_REPRESENTATIVES':
+      return { ...state, formHasRepresentatives: payload.formHasRepresentatives };
+
     case 'LOAD_PERMISSIONS':
       return { ...state, hasWritePermissions: payload.hasWritePermissions, isCustodian: payload.isCustodian };
 

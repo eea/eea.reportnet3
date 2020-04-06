@@ -33,6 +33,7 @@ const RepresentativesList = ({
   dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
+  setFormHasRepresentatives,
   setHasRepresentativesWithoutDatasets
 }) => {
   const resources = useContext(ResourcesContext);
@@ -80,9 +81,9 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      setHasRepresentativesWithoutDatasets(true);
+      setFormHasRepresentatives(true);
     } else {
-      setHasRepresentativesWithoutDatasets(false);
+      setFormHasRepresentatives(false);
     }
   }, [formState.representatives]);
 
