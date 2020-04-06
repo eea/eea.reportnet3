@@ -420,6 +420,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getNameTableSchema() != null) {
           tableSchema.put("nameTableSchema", tableSchemaVO.getNameTableSchema());
         }
+        if (tableSchemaVO.getReadOnly() != null) {
+          tableSchema.put("readOnly", tableSchemaVO.getReadOnly());
+        }
 
         // Guardar el TableSchema modificado en MongoDB
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
