@@ -6,7 +6,7 @@ export class Representative {
     isReceiptDownloaded,
     isReceiptOutdated,
     providerAccount,
-    hasDatasets = false
+    hasDatasets
   } = {}) {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderId = dataProviderId;
