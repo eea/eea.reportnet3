@@ -99,20 +99,24 @@ const parseObligationList = obligationsDTO => {
   return;
 };
 
-const parseOrganization = organizationDTO =>
-  new Organization({
-    acronym: organizationDTO.acronym,
-    address: organizationDTO.address,
-    city: organizationDTO.city,
-    country: organizationDTO.country,
-    description: organizationDTO.description,
-    email: organizationDTO.email,
-    id: organizationDTO.clientId,
-    name: organizationDTO.name,
-    postalCode: organizationDTO.postalCode,
-    shortName: organizationDTO.shortName,
-    url: organizationDTO.url
-  });
+const parseOrganization = organizationDTO => {
+  if (!isNil(organizationDTO)) {
+    return new Organization({
+      acronym: organizationDTO.acronym,
+      address: organizationDTO.address,
+      city: organizationDTO.city,
+      country: organizationDTO.country,
+      description: organizationDTO.description,
+      email: organizationDTO.email,
+      id: organizationDTO.clientId,
+      name: organizationDTO.name,
+      postalCode: organizationDTO.postalCode,
+      shortName: organizationDTO.shortName,
+      url: organizationDTO.url
+    });
+  }
+  return;
+};
 
 const parseOrganizationList = organizationsDTO => {
   if (!isNil(organizationsDTO)) {
