@@ -85,8 +85,6 @@ export const UserProvider = ({ children }) => {
   const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
   // const notificationContext = useContext(NotificationContext);
 
-  console.log('state', state);
-
   return (
     <UserContext.Provider
       value={{

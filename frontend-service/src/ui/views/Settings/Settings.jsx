@@ -84,7 +84,6 @@ const Settings = withRouter(({ history }) => {
   const getUserData = async () => {
     try {
       const response = await UserService.userData();
-      console.log('response', response);
 
       setUserAttr(response.data);
       UpdateAttr();
@@ -100,22 +99,13 @@ const Settings = withRouter(({ history }) => {
     user.onToggleLogoutConfirm(UserAttr.showLogoutConfirmation[0]);
     user.defaultVisualTheme(UserAttr.defaultVisualTheme[0]);
   };
-  console.log('UserAttr.defaultRowSelected[0]', parseInt(UserAttr.defaultRowSelected));
+
   /////////////////////////////////////////////////
   useEffect(() => {
     getUserData();
   }, []);
 
-  useEffect(() => {
-    console.log('object', parseInt(`${UserAttr.defaultRowSelected}`));
-    user.defaultRowSelected(parseInt(UserAttr.defaultRowSelected));
-  }, []);
-  useEffect(() => {});
-
-  const getRow = UserAttr.defaultRowSelected;
-  console.log('getRow', getRow);
-
-  /////////////////////////////////////////////////
+  /////////////////////////////////////////
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
       btn.addEventListener('click', initUserSettingsSection);
@@ -191,7 +181,7 @@ const Settings = withRouter(({ history }) => {
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  console.log('UpdateAttr', UpdateAttr);
+
   //////////////////////////////////////////////////////////////////////////////////////////////////
   const layout = children => {
     return (
@@ -218,7 +208,7 @@ const Settings = withRouter(({ history }) => {
           />
         </div>
       </div>
-      <button onClick={() => console.log('userContext', user)}>console</button>
+
       <div className="rep-row">
         <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
       </div>
