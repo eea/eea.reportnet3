@@ -2,5 +2,18 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  margin: 2rem 0;
+  margin: 2rem 1rem;
+
+  .selectedObligation {
+    width: 40%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.noObligations {
+  color: var(--button-secondary-transparent-color-hover);
+  font-weight: 450;
+  margin: 3rem 1.5rem;
 }

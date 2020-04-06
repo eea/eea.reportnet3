@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './TableView.module.scss';
@@ -14,8 +13,10 @@ import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const TableView = ({ checkedObligation, data, onSelectObl }) => {
+export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
   const resources = useContext(ResourcesContext);
+
+  const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadCheckButton = row => (
     <div className={styles.checkColum}>
@@ -39,7 +40,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
     </div>
   );
 
-  const paginatorRightText = `${capitalize('FIELD')} records: ${data.length}`;
+  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
@@ -54,11 +55,12 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
           if (obligation === 'title') template = onLoadTitleTemplate;
           return (
             <Column
+              body={template}
               columnResizeMode="expand"
               field={obligation}
               header={resources.messages[obligation]}
               key={obligation}
-              body={template}
+              sortable={true}
             />
           );
         })
@@ -71,9 +73,11 @@ export const TableView = ({ checkedObligation, data, onSelectObl }) => {
   ) : (
     <DataTable
       autoLayout={true}
+      first={pagination.first}
+      getPageChange={onLoadPagination}
       paginator={true}
       paginatorRight={paginatorRightText}
-      rows={10}
+      rows={pagination.rows}
       rowsPerPageOptions={[5, 10, 15]}
       totalRecords={data.length}
       value={data}>
