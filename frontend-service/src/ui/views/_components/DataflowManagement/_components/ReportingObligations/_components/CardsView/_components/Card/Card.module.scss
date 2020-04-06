@@ -3,6 +3,7 @@
   border-radius: 15px;
   box-shadow: var(--card-item-box-shadow);
   column-gap: 1.5rem;
+  cursor: pointer;
   display: grid;
   grid-template-columns: 85% calc(15% - 1.5rem);
   grid-template-rows: 70% calc(30% - 1rem);
