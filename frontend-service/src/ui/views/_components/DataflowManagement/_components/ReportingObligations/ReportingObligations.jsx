@@ -108,7 +108,14 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         ) : (
           <Fragment />
         )}
-        <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+
+        <div className={styles.switchDivInput}>
+          <div className={styles.switchDiv}>
+            <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+            <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+            <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+          </div>
+        </div>
       </div>
       {isEmpty(reportingObligationState.data) ? (
         <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
