@@ -125,20 +125,10 @@ const useBigButtonList = ({
         disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN']
       },
       {
-        label: resources.messages['duplicate'],
-        icon: 'clone',
-        disabled: true
-      },
-      {
         label: resources.messages['delete'],
         icon: 'trash',
         disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-      },
-      {
-        label: resources.messages['properties'],
-        icon: 'info',
-        disabled: true
       }
     ],
     onDuplicateName: onDuplicateName,
