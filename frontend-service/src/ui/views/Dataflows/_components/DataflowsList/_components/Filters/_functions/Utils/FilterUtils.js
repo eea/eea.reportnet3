@@ -61,12 +61,7 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
   return filterBy;
 };
 
-const getEndOfDay = date =>
-  new Date(
-    moment(date)
-      .endOf('day')
-      .format()
-  ).getTime() / 1000;
+const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime() / 1000;
 
 const getFilterKeys = (state, filter, inputOptions) =>
   Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
@@ -91,12 +86,7 @@ const getOptionTypes = (data, option) => {
 const getSelectedKeys = (state, select, selectOptions) =>
   Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
 
-const getStartOfDay = date =>
-  new Date(
-    moment(date)
-      .startOf('day')
-      .format()
-  ).getTime() / 1000;
+const getStartOfDay = date => new Date(moment(date).startOf('day').format()).getTime() / 1000;
 
 const getYesterdayDate = () => {
   var currentDate = new Date();
