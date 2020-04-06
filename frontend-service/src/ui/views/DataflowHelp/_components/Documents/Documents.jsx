@@ -137,7 +137,6 @@ const Documents = ({
       const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
       setAllDocuments(filteredAllDocuments);
     } catch (error) {
-      console.log({ error });
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}

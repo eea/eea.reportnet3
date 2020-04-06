@@ -500,6 +500,7 @@
     "noObligationsWithSelectedParameters": "There are no obligations with the selected parameters",
     "obligationDataflowItem": "Obligation",
     "legalInstrumentDataflowItem": "Legal instrument",
-    "obligationTitle": "Obligation"
+    "obligationTitle": "Obligation",
+    "readOnlyTable": "Read only table"
   }
 }
